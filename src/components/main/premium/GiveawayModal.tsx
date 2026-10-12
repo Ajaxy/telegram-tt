@@ -1,5 +1,4 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -13,6 +12,7 @@ import type {
   ApiStarGiveawayOption,
   ApiTypePrepaidGiveaway,
 } from '../../../api/types';
+import type { IconBackdropColor } from '../../gili/primitives/IconBackdrop';
 
 import {
   GIVEAWAY_BOOST_PER_PREMIUM,
@@ -35,6 +35,7 @@ import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import BadgeButton from '../../common/BadgeButton';
 import CalendarModal from '../../common/CalendarModal';
 import CountryPickerModal from '../../common/CountryPickerModal.async';
 import GroupChatInfo from '../../common/GroupChatInfo';
@@ -56,10 +57,6 @@ import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
 import styles from './GiveawayModal.module.scss';
 
-import GiftBlueRound from '../../../assets/premium/GiftBlueRound.svg';
-import GiftGreenRound from '../../../assets/premium/GiftGreenRound.svg';
-import GiftRedRound from '../../../assets/premium/GiftRedRound.svg';
-import GiftStar from '../../../assets/premium/GiftStar.svg';
 import PremiumLogo from '../../../assets/premium/PremiumStar.svg';
 
 export type OwnProps = {
@@ -90,7 +87,6 @@ interface TypeOption {
   name: string;
   text: string;
   value: ApiGiveawayType;
-  img: string;
   actions?: GiveawayAction;
   isLink: boolean;
   onClickAction?: () => void;
@@ -100,13 +96,13 @@ const DEFAULT_CUSTOM_EXPIRE_DATE = 86400 * 3 * 1000; // 3 days
 const MAX_ADDITIONAL_CHANNELS = 9;
 const DEFAULT_BOOST_COUNT = 5;
 
-const GIVEAWAY_IMG_LIST: Partial<Record<number, string>> = {
-  3: GiftGreenRound,
-  6: GiftBlueRound,
-  12: GiftRedRound,
+const GIVEAWAY_COLOR_BY_MONTH: Partial<Record<number, IconBackdropColor>> = {
+  3: 'green',
+  6: 'blue',
+  12: 'red',
 };
 
-const GiveawayModal: FC<OwnProps & StateProps> = ({
+const GiveawayModal = ({
   chatId,
   gifts,
   isOpen,
@@ -120,14 +116,14 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   userSelectionLimit = GIVEAWAY_MAX_ADDITIONAL_USERS,
   isStarsGiftEnabled,
   starsGiftOptions,
-}) => {
-  const dialogRef = useRef<HTMLDivElement>();
+}: OwnProps & StateProps) => {
   const {
     closeGiveawayModal, openInvoice, openPremiumModal,
     launchPrepaidGiveaway, launchPrepaidStarsGiveaway, showNotification,
   } = getActions();
 
   const lang = useOldLang();
+  const dialogRef = useRef<HTMLDivElement>();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isCountryPickerModalOpen, openCountryPickerModal, closeCountryPickerModal] = useFlag();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
@@ -138,7 +134,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     name: 'Premium.Title',
     text: 'BoostingWinnersRandomly',
     value: 'premium_giveaway',
-    img: GiftBlueRound,
     actions: 'createPremiumGiveaway',
     isLink: true,
     onClickAction: () => {
@@ -151,7 +146,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
       name: 'TelegramStars',
       text: 'BoostingWinnersRandomly',
       value: 'stars_giveaway',
-      img: GiftStar,
       actions: 'createStarsGiveaway',
       isLink: false,
     });
@@ -446,7 +440,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
               name={option.name}
               text={option.text}
               option={option.value}
-              img={option.img}
               onChange={handleChangeTypeOption}
               checked={selectedGiveawayOption === option.value}
               isLink={option.isLink}
@@ -702,38 +695,31 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
           </h2>
         </div>
         {(dataPrepaidGiveaway || dataStarsPrepaidGiveaway) ? (
-          <div className={styles.status}>
-            <div>
-              {dataStarsPrepaidGiveaway ? (
-                <img className={styles.prepaidImg} src={GiftStar} alt="" />
-              ) : (
-                <img
-                  className={styles.prepaidImg}
-                  src={GIVEAWAY_IMG_LIST[dataPrepaidGiveaway!.months] || GIVEAWAY_IMG_LIST[3]}
-                  alt=""
-                />
-              )}
-            </div>
-            <div className={styles.info}>
-              <h3 className={styles.title}>
-                {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Title', dataStarsPrepaidGiveaway?.stars)
-                  : lang('BoostingTelegramPremiumCountPlural', dataPrepaidGiveaway!.quantity)}
-              </h3>
-              <p className={styles.month}>
-                {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', dataStarsPrepaidGiveaway?.quantity)
-                  : lang('PrepaidGiveawayMonths', dataPrepaidGiveaway?.months)}
-              </p>
-            </div>
-            <div className={styles.quantity}>
-              <div className={buildClassName(styles.floatingBadge, styles.floatingBadgeColor)}>
-                <Icon name="boost" className={styles.floatingBadgeIcon} />
-                <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
-                  {dataStarsPrepaidGiveaway ? dataStarsPrepaidGiveaway?.boosts
-                    : dataPrepaidGiveaway!.quantity * (giveawayBoostPerPremiumLimit ?? GIVEAWAY_BOOST_PER_PREMIUM)}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ListItem
+            className={styles.prepaidGiveaway}
+            icon={dataStarsPrepaidGiveaway ? 'star' : 'gift-filled'}
+            iconClassName={styles.prepaidIcon}
+            iconBg={dataStarsPrepaidGiveaway ? 'orange'
+              : GIVEAWAY_COLOR_BY_MONTH[dataPrepaidGiveaway!.months] || 'green'}
+            multiline
+            isStatic
+            rightElement={(
+              <BadgeButton className={styles.boostBadge}>
+                <Icon name="boost" className="in-text-icon" />
+                {dataStarsPrepaidGiveaway ? dataStarsPrepaidGiveaway.boosts
+                  : dataPrepaidGiveaway!.quantity * giveawayBoostPerPremiumLimit}
+              </BadgeButton>
+            )}
+          >
+            <span className="title list-item-ellipsis">
+              {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Title', dataStarsPrepaidGiveaway.stars)
+                : lang('BoostingTelegramPremiumCountPlural', dataPrepaidGiveaway!.quantity)}
+            </span>
+            <span className="subtitle">
+              {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', dataStarsPrepaidGiveaway.quantity)
+                : lang('PrepaidGiveawayMonths', dataPrepaidGiveaway!.months)}
+            </span>
+          </ListItem>
         ) : (
           <div className={buildClassName(styles.section, styles.types)}>
             {renderTypeOptions()}

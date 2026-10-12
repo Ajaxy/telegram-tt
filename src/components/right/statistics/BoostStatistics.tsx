@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiBoost, ApiBoostStatistics, ApiTypePrepaidGiveaway } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { AnimationLevel, CustomPeer } from '../../../types';
+import type { IconBackdropColor } from '../../gili/primitives/IconBackdrop';
 
 import { GIVEAWAY_BOOST_PER_PREMIUM } from '../../../config';
 import { isChatChannel } from '../../../global/helpers';
@@ -18,6 +19,7 @@ import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import BadgeButton from '../../common/BadgeButton';
 import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import PremiumProgress from '../../common/PremiumProgress';
@@ -32,11 +34,6 @@ import StatisticsOverview from './StatisticsOverview';
 
 import styles from './BoostStatistics.module.scss';
 
-import GiftBlueRound from '../../../assets/premium/GiftBlueRound.svg';
-import GiftGreenRound from '../../../assets/premium/GiftGreenRound.svg';
-import GiftRedRound from '../../../assets/premium/GiftRedRound.svg';
-import GiftStar from '../../../assets/premium/GiftStar.svg';
-
 type StateProps = {
   boostStatistics: TabState['boostStatistics'];
   isGiveawayAvailable?: boolean;
@@ -46,10 +43,10 @@ type StateProps = {
   animationLevel: AnimationLevel;
 };
 
-const GIVEAWAY_IMG_LIST: Partial<Record<number, string>> = {
-  3: GiftGreenRound,
-  6: GiftBlueRound,
-  12: GiftRedRound,
+const GIVEAWAY_COLOR_BY_MONTH: Partial<Record<number, IconBackdropColor>> = {
+  3: 'green',
+  6: 'blue',
+  12: 'red',
 };
 
 const CUSTOM_PEER_STAR_TEMPLATE: Omit<CustomPeer, 'title' | 'titleKey'> = {
@@ -321,53 +318,29 @@ const BoostStatistics = ({
                   return (
                     <ListItem
                       key={prepaidGiveaway.id}
-                      className="chat-item-clickable"
-
+                      icon={isStarsGiveaway ? 'star' : 'gift-filled'}
+                      iconClassName={styles.prepaidIcon}
+                      iconBg={isStarsGiveaway ? 'orange'
+                        : GIVEAWAY_COLOR_BY_MONTH[prepaidGiveaway.months] || 'green'}
+                      multiline
+                      rightElement={(
+                        <BadgeButton className={styles.boostBadge}>
+                          <Icon name="boost" className="in-text-icon" />
+                          {isStarsGiveaway ? prepaidGiveaway.boosts
+                            : prepaidGiveaway.quantity * (giveawayBoostsPerPremium ?? GIVEAWAY_BOOST_PER_PREMIUM)}
+                        </BadgeButton>
+                      )}
                       onClick={() => launchPrepaidGiveawayHandler(prepaidGiveaway)}
                     >
-                      <div className={buildClassName(styles.status, 'status-clickable')}>
-                        <div>
-                          {isStarsGiveaway
-                            ? (
-                              <img
-                                src={GiftStar}
-                                className={styles.giveawayIcon}
-                                alt={lang('GiftStar')}
-                              />
-                            ) : (
-                              <img
-                                src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months] || GIVEAWAY_IMG_LIST[3]}
-                                className={styles.giveawayIcon}
-                                alt={lang('Giveaway')}
-                              />
-                            )}
-                        </div>
-                        <div className={styles.info}>
-                          <h3>
-                            {isStarsGiveaway
-                              ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
-                              : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
-                          </h3>
-                          <p className={styles.month}>
-                            {
-                              isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
-                                : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)
-                            }
-                          </p>
-                        </div>
-                        <div className={styles.quantity}>
-                          <div className={buildClassName(styles.floatingBadge,
-                            styles.floatingBadgeButtonColor,
-                            styles.floatingBadgeButton)}
-                          >
-                            <Icon name="boost" className={styles.floatingBadgeIcon} />
-                            <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
-                              {isStarsGiveaway ? prepaidGiveaway.boosts
-                                : prepaidGiveaway.quantity * (giveawayBoostsPerPremium ?? GIVEAWAY_BOOST_PER_PREMIUM)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <span className="title list-item-ellipsis">
+                        {isStarsGiveaway
+                          ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
+                          : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
+                      </span>
+                      <span className="subtitle">
+                        {isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
+                          : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)}
+                      </span>
                     </ListItem>
                   );
                 })}

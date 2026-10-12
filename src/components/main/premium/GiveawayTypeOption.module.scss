@@ -96,9 +96,10 @@
   color: var(--color-links);
 }
 
-.optionImg {
-  width: 2.75rem;
-  height: 2.75rem;
+.optionIcon {
+  --icon-backdrop-size: 2.75rem;
+  --icon-backdrop-radius: 50%;
+  --icon-backdrop-icon-size: 1.75rem;
 }
 
 @media (max-width: 450px) {

@@ -42,22 +42,12 @@
   margin-inline-end: 1rem;
 }
 
-.status {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: space-between;
-
-  width: 100%;
+.prepaidIcon {
+  margin-inline-end: 1rem !important;
 }
 
-.info {
-  flex-grow: 1;
-}
-
-.month {
-  margin: 0;
-  color: var(--color-text-secondary);
+.boostBadge {
+  margin-inline-start: 0.5rem;
 }
 
 .quantity {
@@ -110,11 +100,6 @@
 .boostSection {
   display: flex;
   flex-direction: column-reverse;
-}
-
-.giveawayIcon {
-  width: 2.75rem;
-  height: 2.75rem;
 }
 
 .primaryLink {
