@@ -64,6 +64,19 @@
   }
 }
 
+.ghostAnimateName {
+  .name {
+    opacity: 0;
+    transition: var(--opacity-transition);
+  }
+}
+
+.ghostRevealName {
+  .name {
+    opacity: 1;
+  }
+}
+
 .hidden {
   display: none;
 }

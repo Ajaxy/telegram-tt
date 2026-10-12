@@ -95,7 +95,7 @@ export function animateOpening(isArchived?: boolean) {
         }
       } else {
         // Else we animate only name
-        ghost.classList.add(togglerStyles.ghostAnimateName);
+        ghost.classList.add(ribbonStyles.ghostAnimateName);
       }
 
       applyStyles(ghost, {
@@ -133,7 +133,7 @@ export function animateOpening(isArchived?: boolean) {
             transform: `translate3d(${toTranslateX}px, ${toTranslateY}px, 0) scale(${toScale})`,
           });
         } else {
-          ghost.classList.add(togglerStyles.ghostRevealName);
+          ghost.classList.add(ribbonStyles.ghostRevealName);
         }
 
         const cb = createDelayedCallback(() => {
@@ -236,7 +236,7 @@ export function animateClosing(isArchived?: boolean) {
           ghost2.classList.add(togglerStyles.ghostLast);
         }
       } else {
-        ghost.classList.add(togglerStyles.ghostAnimateName, togglerStyles.ghostRevealName);
+        ghost.classList.add(ribbonStyles.ghostAnimateName, ribbonStyles.ghostRevealName);
       }
 
       applyStyles(ghost, {
@@ -276,7 +276,7 @@ export function animateClosing(isArchived?: boolean) {
             transform: '',
           });
         } else {
-          ghost.classList.remove(togglerStyles.ghostRevealName);
+          ghost.classList.remove(ribbonStyles.ghostRevealName);
         }
 
         const cb = createDelayedCallback(() => {

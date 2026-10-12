@@ -1,6 +1,3 @@
-/* stylelint-disable-next-line */
-@value name from "./StoryRibbon.module.scss";
-
 .root {
   cursor: var(--custom-cursor, pointer);
 
@@ -59,19 +56,6 @@
   position: absolute;
   transform-origin: top left;
   transition: var(--transform-transition), var(--opacity-transition);
-}
-
-.ghostAnimateName {
-  :global(.name) {
-    opacity: 0;
-    transition: var(--opacity-transition);
-  }
-}
-
-.ghostRevealName {
-  :global(.name) {
-    opacity: 1;
-  }
 }
 
 .ghostLast:before {
