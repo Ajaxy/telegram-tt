@@ -2729,6 +2729,24 @@ export interface LangPair {
   'RichButtonCenter': undefined;
   'RichButtonRight': undefined;
   'RichEditorButtonCopyText': undefined;
+  'CatchUpTitle': undefined;
+  'CatchUpLoading': undefined;
+  'CatchUpPartial': undefined;
+  'CatchUpPhotos': undefined;
+  'CatchUpVideos': undefined;
+  'CatchUpVoices': undefined;
+  'CatchUpFiles': undefined;
+  'CatchUpStickers': undefined;
+  'CatchUpPolls': undefined;
+  'CatchUpMentions': undefined;
+  'CatchUpReplies': undefined;
+  'CatchUpQuestions': undefined;
+  'CatchUpPinned': undefined;
+  'CatchUpLinks': undefined;
+  'CatchUpMediaMessage': undefined;
+  'CatchUpJump': undefined;
+  'CatchUpMarkRead': undefined;
+  'CatchUpJumpToFirst': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -4625,6 +4643,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WalletConnectFee': {
     'amount': V;
   };
+  'CatchUpSince': {
+    'date': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -5188,6 +5209,16 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'RichMediaSkippedFiles': {
+    'count': V;
+  };
+  'CatchUpMessagesFrom': {
+    'count': V;
+    'people': V;
+  };
+  'CatchUpPeople': {
+    'count': V;
+  };
+  'CatchUpPill': {
     'count': V;
   };
 }

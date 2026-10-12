@@ -3112,6 +3112,14 @@ export interface ActionPayloads {
   } & WithTabId;
   closeAutoDeleteTimerModal: WithTabId | undefined;
 
+  openCatchUpModal: {
+    chatId: string;
+  } & WithTabId;
+  closeCatchUpModal: WithTabId | undefined;
+  loadCatchUp: {
+    chatId: string;
+  } & WithTabId;
+
   openTwoFaCheckModal: WithTabId | undefined;
   closeTwoFaCheckModal: WithTabId | undefined;
 
