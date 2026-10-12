@@ -621,6 +621,10 @@
 
   .buttonLabel {
     padding: 0;
+
+    :global(.emoji) {
+      vertical-align: middle;
+    }
   }
 }
 
