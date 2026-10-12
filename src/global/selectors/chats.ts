@@ -3,6 +3,7 @@ import type {
 } from '../../api/types';
 import type { ChatListType } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
@@ -15,6 +16,7 @@ import {
   getHasAdminRight,
   isChatAdmin,
   isChatChannel,
+  isChatCommunity,
   isChatPublic,
   isChatSuperGroup,
   isHistoryClearMessage,
@@ -22,7 +24,12 @@ import {
   isUserOnline,
   isUserRightBanned,
 } from '../helpers';
+import { selectChatMessage, selectOutgoingStatus, selectSender } from './messages';
+import { selectPeer } from './peers';
+import { selectPeerStory } from './stories';
 import { selectTabState } from './tabs';
+import { selectThreadIdFromMessage } from './threads';
+import { selectTopicFromMessage } from './topics';
 import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from './users';
@@ -351,6 +358,40 @@ export function selectChatLastMessage<T extends GlobalState>(
   return global.messages.byChatId[realChatId]?.byId[id];
 }
 
+export function selectChatLastMessageInfo<T extends GlobalState>(global: T, {
+  chatId, lastMessageChatId, isSavedDialog, previewMessageId,
+}: {
+  chatId: string;
+  lastMessageChatId: string;
+  isSavedDialog?: boolean;
+  previewMessageId?: number;
+}) {
+  const chat = selectChat(global, chatId);
+  const lastMessageId = previewMessageId
+    || selectChatLastMessageId(global, lastMessageChatId, isSavedDialog ? 'saved' : 'all');
+  const lastMessage = previewMessageId
+    ? selectChatMessage(global, chatId, previewMessageId)
+    : selectChatLastMessage(global, lastMessageChatId, isSavedDialog ? 'saved' : 'all');
+  const lastMessageThreadId = chat && isChatCommunity(chat) && lastMessage
+    && selectChat(global, lastMessageChatId)?.isForum
+    ? selectThreadIdFromMessage(global, lastMessage) : MAIN_THREAD_ID;
+  const { isOutgoing, forwardInfo } = lastMessage || {};
+  const savedDialogSender = isSavedDialog && forwardInfo?.fromId ? selectPeer(global, forwardInfo.fromId) : undefined;
+  const messageSender = lastMessage ? selectSender(global, lastMessage) : undefined;
+  const storyData = lastMessage?.content.storyData;
+
+  return {
+    lastMessage,
+    lastMessageId,
+    lastMessageSender: savedDialogSender || messageSender,
+    lastMessageOutgoingStatus: isOutgoing && lastMessage && !isSavedDialog
+      ? selectOutgoingStatus(global, lastMessageChatId, lastMessageThreadId, lastMessage.id, 'thread')
+      : undefined,
+    lastMessageTopic: lastMessage && selectTopicFromMessage(global, lastMessage),
+    lastMessageStory: storyData && selectPeerStory(global, storyData.peerId, storyData.id),
+  };
+}
+
 export function selectIsMonoforumAdmin<T extends GlobalState>(
   global: T, chatId: string,
 ) {
@@ -421,4 +462,13 @@ export function selectCanEditOwnRank<T extends GlobalState>(global: T, chatId: s
   const isCurrentUserAdmin = isChatAdmin(chat);
   if (!isCurrentUserAdmin) return !isUserRightBanned(chat, 'editRank'); // Users can edit only their own rank
   return getHasAdminRight(chat, 'manageRanks');
+}
+
+export function selectIsChatUnread<T extends GlobalState>(global: T, chatId: string) {
+  const threadsById = global.messages.byChatId[chatId]?.threadsById;
+  const threads = selectChat(global, chatId)?.isForum
+    ? Object.values(threadsById || {})
+    : [threadsById?.[MAIN_THREAD_ID]];
+
+  return threads.some((thread) => thread?.readState?.unreadCount || thread?.readState?.hasUnreadMark);
 }

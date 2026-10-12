@@ -311,6 +311,10 @@ function pruneExpiredEphemeralMessages(cached: GlobalState) {
 
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   const untypedCached = cached as any;
+  Object.values(cached.chats.fullInfoById).forEach((fullInfo) => {
+    fullInfo.isCache = true;
+  });
+
   Object.values(cached.messages.byChatId).forEach((messageStore) => {
     messageStore.ephemeralById ||= {};
     messageStore.anchoredById = {};

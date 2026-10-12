@@ -1,17 +1,13 @@
-import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import {
+  memo, useCallback, useEffect, useMemo,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
   ApiChatFolder,
+  ApiChatFullInfo,
   ApiDraft,
-  ApiMessage,
-  ApiMessageOutgoingStatus,
-  ApiNotifyPeerType,
-  ApiPeer,
-  ApiPeerNotifySettings,
-  ApiTopic,
-  ApiTypeStory,
   ApiTypingStatus,
   ApiUser,
   ApiUserStatus,
@@ -19,7 +15,6 @@ import type {
 import type { GlobalState } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
-import type { CommunityMember } from './hooks/useChatListEntry';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { StoryViewerOrigin, type TopicsInfo } from '../../../types';
 
@@ -34,9 +29,8 @@ import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectChat,
-  selectChatLastMessage,
-  selectChatLastMessageId,
-  selectChatMessage,
+  selectChatFullInfo,
+  selectChatLastMessageInfo,
   selectCurrentMessageList,
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
@@ -45,12 +39,7 @@ import {
   selectMonoforumChannel,
   selectNotifyDefaults,
   selectNotifyException,
-  selectOutgoingStatus,
-  selectPeer,
-  selectPeerStory,
-  selectSender,
   selectTabState,
-  selectTopicFromMessage,
   selectTopicsInfo,
   selectUser,
   selectUserStatus,
@@ -61,11 +50,9 @@ import buildClassName from '../../../util/buildClassName';
 import { formatCountdown } from '../../../util/dates/oldDateFormat';
 import { isUserId } from '../../../util/entities/ids';
 import { getChatFolderIds } from '../../../util/folderManager';
-import { mapValues } from '../../../util/iteratees';
-import memoized from '../../../util/memoized';
 import { createLocationHash } from '../../../util/routing';
 
-import { useSelectorSignal } from '../../../hooks/data/useSelector';
+import { useSelectorSignal, useShallowSelector } from '../../../hooks/data/useSelector';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
@@ -77,6 +64,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import { getPeerColorClass } from '../../../hooks/usePeerColor';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
+import useCommunityMembers from './hooks/useCommunityMembers';
 
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
@@ -117,26 +105,19 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   monoforumChannel?: ApiChat;
-  lastMessageStory?: ApiTypeStory;
   topicsInfo?: TopicsInfo;
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
-  lastMessageSender?: ApiPeer;
-  lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiDraft;
   isSelected?: boolean;
   isSelectedForum?: boolean;
   isForumPanelOpen?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
-  lastMessageTopic?: ApiTopic;
   typingStatusByPeerId?: Record<string, ApiTypingStatus>;
   withInterfaceAnimations?: boolean;
-  lastMessageId?: number;
-  lastMessage?: ApiMessage;
-  communityMembers?: CommunityMember[];
-  communityUnreadCount?: number;
+  communityFullInfo?: ApiChatFullInfo;
   currentUserId: string;
   isSynced?: boolean;
   isAccountFrozen?: boolean;
@@ -159,12 +140,9 @@ const Chat = ({
   observeIntersection,
   chat,
   monoforumChannel,
-  lastMessageStory,
   isMuted,
   user,
   userStatus,
-  lastMessageSender,
-  lastMessageOutgoingStatus,
   offsetTop,
   draft,
   withInterfaceAnimations,
@@ -173,12 +151,8 @@ const Chat = ({
   isForumPanelOpen,
   canScrollDown,
   canChangeFolder,
-  lastMessageTopic,
   typingStatusByPeerId,
-  lastMessageId,
-  lastMessage,
-  communityMembers,
-  communityUnreadCount,
+  communityFullInfo,
   isSavedDialog,
   currentUserId,
   isPreview,
@@ -211,6 +185,7 @@ const Chat = ({
     openQuickPreview,
     scrollMessageListToBottom,
     openCommunityPanel,
+    loadFullCommunity,
   } = getActions();
 
   const lang = useLang();
@@ -242,7 +217,18 @@ const Chat = ({
   const listedTopicIds = topicsInfo?.listedTopicIds;
   const shouldForceNonForumView = chat?.isBotForum && listedTopicIds && !listedTopicIds.length;
 
-  useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
+  const {
+    members: communityMembers, unreadCount: communityUnreadCount, lastMessageChatId = chatId,
+  } = useCommunityMembers(communityFullInfo?.linkedPeers) || {};
+
+  const lastMessageInfoSelector = useCallback((global: GlobalState) => selectChatLastMessageInfo(global, {
+    chatId, lastMessageChatId, isSavedDialog, previewMessageId,
+  }), [chatId, lastMessageChatId, isSavedDialog, previewMessageId]);
+  const {
+    lastMessage, lastMessageId, lastMessageSender, lastMessageOutgoingStatus, lastMessageTopic, lastMessageStory,
+  } = useShallowSelector(lastMessageInfoSelector);
+
+  useEnsureMessage(isSavedDialog ? currentUserId : lastMessageChatId, lastMessageId, lastMessage);
 
   const tagFolderIds = useMemo(() => {
     const chatFolderIdsSet = new Set(chatFolderIds);
@@ -424,6 +410,13 @@ const Chat = ({
       loadTopics({ chatId });
     }
   }, [chatId, topicsInfo, isSynced, isForum, isIntersecting]);
+
+  // Refresh visible community members, including details restored from cache
+  useEffect(() => {
+    if (isIntersecting && isCommunity && isSynced && (!communityFullInfo || communityFullInfo.isCache)) {
+      loadFullCommunity({ communityId: chatId });
+    }
+  }, [chatId, communityFullInfo, isSynced, isCommunity, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
@@ -613,64 +606,9 @@ const Chat = ({
   );
 };
 
-type CommunitySummary = {
-  members: CommunityMember[];
-  unreadChatsCount: number;
-};
-
-// A community row derives from its member chats: the subtitle lists their names
-// (freshest first, highlighting unmuted unread ones) and the badge counts all
-// unread ones, mirroring how forums count unread topics. The map is built for
-// all communities at once and memoized by store references, so the chat scan
-// reruns only when the stores actually change.
-const buildCommunitySummariesById = memoized((
-  chatsById: Record<string, ApiChat>,
-  lastMessageIds: Record<string, number> | undefined,
-  messagesByChatId: GlobalState['messages']['byChatId'],
-  notifyDefaults: Record<ApiNotifyPeerType, ApiPeerNotifySettings> | undefined,
-  notifyExceptions: Record<string, ApiPeerNotifySettings> | undefined,
-): Record<string, CommunitySummary> => {
-  const membersByCommunityId: Record<string, (CommunityMember & { date: number; hasUnread?: boolean })[]> = {};
-
-  Object.values(chatsById).forEach((memberChat) => {
-    const { linkedCommunityId } = memberChat;
-    if (!linkedCommunityId || memberChat.isNotJoined) return;
-
-    const lastMessageId = lastMessageIds?.[memberChat.id];
-    const lastMessageDate = (lastMessageId && messagesByChatId[memberChat.id]?.byId[lastMessageId]?.date) || 0;
-    // The last message may not be loaded yet, so fall back the same way the chat list order does
-    const date = Math.max(memberChat.creationDate || 0, lastMessageDate);
-    const threadsById = messagesByChatId[memberChat.id]?.threadsById;
-    const mainThreadReadState = threadsById?.[MAIN_THREAD_ID]?.readState;
-    const hasUnread = memberChat.isForum
-      ? Object.values(threadsById || {}).some((thread) => (
-        thread?.readState?.unreadCount || thread?.readState?.hasUnreadMark
-      ))
-      : Boolean(
-        mainThreadReadState?.unreadCount || mainThreadReadState?.hasUnreadMark,
-      );
-    const isMuted = getIsChatMuted(memberChat, notifyDefaults, notifyExceptions?.[memberChat.id]);
-
-    membersByCommunityId[linkedCommunityId] ??= [];
-    membersByCommunityId[linkedCommunityId].push({
-      id: memberChat.id,
-      title: memberChat.title,
-      date,
-      isUnread: hasUnread && !isMuted,
-      hasUnread,
-    });
-  });
-
-  return mapValues(membersByCommunityId, (members) => ({
-    members: members.sort((a, b) => b.date - a.date)
-      .map(({ id, title, isUnread }) => ({ id, title, isUnread })),
-    unreadChatsCount: members.filter(({ hasUnread }) => hasUnread).length,
-  }));
-});
-
 export default memo(withGlobal<OwnProps>(
   (global, {
-    chatId, isSavedDialog, isPreview, previewMessageId,
+    chatId, isSavedDialog, isPreview,
   }): Complete<StateProps> => {
     const chat = selectChat(global, chatId);
     const user = selectUser(global, chatId);
@@ -684,14 +622,7 @@ export default memo(withGlobal<OwnProps>(
     const { areTagsEnabled } = global.chatFolders;
     const isPremium = selectIsCurrentUserPremium(global);
 
-    const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const lastMessage = previewMessageId
-      ? selectChatMessage(global, chatId, previewMessageId)
-      : selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const { isOutgoing, forwardInfo } = lastMessage || {};
-    const savedDialogSender = isSavedDialog && forwardInfo?.fromId ? selectPeer(global, forwardInfo.fromId) : undefined;
-    const messageSender = lastMessage ? selectSender(global, lastMessage) : undefined;
-    const lastMessageSender = savedDialogSender || messageSender;
+    const isCommunity = isChatCommunity(chat);
 
     const {
       chatId: currentChatId,
@@ -704,54 +635,32 @@ export default memo(withGlobal<OwnProps>(
       || chatId === selectTabState(global).forumPanelChatId;
 
     const userStatus = selectUserStatus(global, chatId);
-    const lastMessageTopic = lastMessage && selectTopicFromMessage(global, lastMessage);
 
     const typingStatusByPeerId = selectThreadLocalStateParam(global, chatId, MAIN_THREAD_ID, 'typingStatusByPeerId');
 
     const topicsInfo = selectTopicsInfo(global, chatId);
 
-    const storyData = lastMessage?.content.storyData;
-    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     const monoforumChannel = selectMonoforumChannel(global, chatId);
 
-    const communitySummary = isChatCommunity(chat)
-      ? buildCommunitySummariesById(
-        global.chats.byId,
-        global.chats.lastMessageIds.all,
-        global.messages.byChatId,
-        selectNotifyDefaults(global),
-        global.chats.notifyExceptionById,
-      )[chatId]
-      : undefined;
-
     return {
       chat,
-      communityMembers: communitySummary?.members,
-      communityUnreadCount: communitySummary?.unreadChatsCount,
+      communityFullInfo: isCommunity ? selectChatFullInfo(global, chatId) : undefined,
       isMuted: getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id)),
-      lastMessageSender,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       isSelected,
       isSelectedForum,
       isForumPanelOpen: selectIsForumPanelOpen(global),
       canScrollDown: isSelected && currentMessageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
-      lastMessageOutgoingStatus: isOutgoing && lastMessage && !isSavedDialog
-        ? selectOutgoingStatus(global, chatId, MAIN_THREAD_ID, lastMessage.id, 'thread')
-        : undefined,
       user,
       userStatus,
-      lastMessageTopic,
       typingStatusByPeerId,
       withInterfaceAnimations: selectCanAnimateInterface(global),
-      lastMessage,
-      lastMessageId,
       currentUserId: global.currentUserId!,
       topicsInfo,
       isSynced: global.isSynced,
-      lastMessageStory,
       isAccountFrozen,
       monoforumChannel,
       chatFolderIds,

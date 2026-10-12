@@ -70,7 +70,6 @@
 }
 
 .other-column {
-  position: relative;
   display: inline;
   margin-right: 0.25rem;
   margin-left: 0.25rem;
@@ -105,20 +104,25 @@
 
 .title {
   overflow: hidden;
-
-  margin-left: 0.25rem;
-
   font-size: 0.9375rem;
   line-height: 1.25rem;
   text-overflow: ellipsis;
 }
 
-.otherColumnIcon {
-  position: absolute;
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+
+  height: 1.25rem;
+  margin-inline-end: 0.25rem;
+}
+
+.avatar {
+  margin-inline-end: 0 !important;
 }
 
 .other-column-title {
-  margin-inline-start: 1.5rem;
   font-size: 0.9375rem;
 }
 

@@ -8,6 +8,7 @@ import type { ApiChat, ApiChatFullInfo } from '../../../../api/types';
 import type { GlobalState } from '../../../../global/types';
 
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
+import { getCommunityPeerDate, getIsCommunityPeerJoined } from '../../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -121,9 +122,9 @@ const CommunityPanel = ({
       if (!peer) return;
 
       const lastMessage = linkedPeerLastMessages?.[index];
-      const date = Math.max(peer.creationDate || 0, lastMessage?.date || 0);
+      const date = getCommunityPeerDate(peer, lastMessage);
       const isUser = isUserId(peerId);
-      const isJoined = isUser ? Boolean(lastMessage) : !peer.isNotJoined;
+      const isJoined = getIsCommunityPeerJoined(peer, lastMessage);
 
       if (isJoined) {
         nextJoinedPeers.push({ id: peerId, title: peer.title, date });

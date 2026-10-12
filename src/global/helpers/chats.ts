@@ -459,3 +459,13 @@ export function getMockPreparedMessageFromResult(botId: string, preparedMessage:
     inlineButtons,
   } satisfies ApiMessage;
 }
+
+export function getIsCommunityPeerJoined(peer: ApiChat, lastMessage?: ApiMessage) {
+  // A private chat has no membership, so its history stands in for joining
+  return isUserId(peer.id) ? Boolean(lastMessage) : !peer.isNotJoined;
+}
+
+// The last message may not be loaded yet, so fall back the same way the chat list order does
+export function getCommunityPeerDate(peer: ApiChat, lastMessage?: ApiMessage) {
+  return Math.max(peer.creationDate || 0, lastMessage?.date || 0);
+}

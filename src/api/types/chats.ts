@@ -138,6 +138,7 @@ export interface ApiCommunityLinkedPeer {
 }
 
 export interface ApiChatFullInfo {
+  isCache?: boolean;
   about?: string;
   ttlPeriod?: number;
   onlineCount?: number;
