@@ -5,7 +5,7 @@
     --modal-header-height: 3.5rem;
     --modal-content-block-padding: 1rem;
     --modal-scroll-fade-size: 0rem;
-    --modal-border-radius: 2rem;
+    --modal-border-radius: var(--border-radius-modal);
     --modal-background-color: var(--color-background-secondary);
 
     user-select: none;
@@ -127,6 +127,8 @@
 
     background-color: var(--modal-background-color);
     box-shadow: 0 0.625rem 2rem rgb(0 0 0 / 18%);
+
+    corner-shape: squircle;
 
     &:has(.scrollMask) {
       --modal-scroll-fade-size: 1rem;

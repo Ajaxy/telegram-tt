@@ -45,10 +45,6 @@
     padding: 0.5rem;
 
     @include mixins.adapt-margin-to-scrollbar(var(--left-search-inset));
-
-    .ListItem-button {
-      border-radius: 1rem;
-    }
   }
 
   .island-recent-contacts {

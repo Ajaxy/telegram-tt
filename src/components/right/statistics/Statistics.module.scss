@@ -69,6 +69,8 @@
 
   transition: opacity 0.3s ease;
 
+  corner-shape: squircle;
+
   & + & {
     margin-top: 1rem;
   }

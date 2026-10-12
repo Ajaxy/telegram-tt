@@ -15,14 +15,20 @@
     border-top-left-radius: var(--border-radius-island);
     border-top-right-radius: var(--border-radius-island);
 
+    corner-shape: squircle;
+
     > :first-child .media-inner,
     > :first-child::after {
       border-top-left-radius: var(--border-radius-island);
+
+      corner-shape: squircle;
     }
 
     > :nth-child(3) .media-inner,
     > :nth-child(3)::after {
       border-top-right-radius: var(--border-radius-island);
+
+      corner-shape: squircle;
     }
   }
 

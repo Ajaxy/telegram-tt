@@ -97,6 +97,8 @@
 
     &.rounded-square {
       border-radius: var(--border-radius-forum-avatar);
+
+      corner-shape: squircle;
     }
   }
 }

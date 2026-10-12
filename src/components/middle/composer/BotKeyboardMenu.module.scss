@@ -4,7 +4,6 @@
   :global(.bubble) {
     width: calc(100vw - 4rem) !important;
     max-width: 27rem;
-    border-radius: var(--border-radius-default-small);
 
     @media (max-width: 600px) {
       width: calc(100vw - 3rem) !important;

@@ -36,6 +36,8 @@
 
   background-color: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(25px);
+
+  corner-shape: squircle;
 }
 
 .left {
@@ -49,6 +51,8 @@
 
   background: var(--color-background);
   box-shadow: var(--shadow-island);
+
+  corner-shape: squircle;
 
   @media (min-width: 926px) {
     max-width: 40vw;
@@ -107,6 +111,8 @@
 
   background: var(--color-background-secondary);
   box-shadow: var(--shadow-island);
+
+  corner-shape: squircle;
 }
 
 .blank {

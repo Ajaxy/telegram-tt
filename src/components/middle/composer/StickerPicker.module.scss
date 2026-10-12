@@ -64,10 +64,6 @@
 
     @include mixins.adapt-padding-to-scrollbar(0.75rem);
   }
-
-  :global(.bubble) {
-    border-radius: var(--border-radius-default) !important;
-  }
 }
 
 .header {

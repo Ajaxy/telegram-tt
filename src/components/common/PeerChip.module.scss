@@ -125,8 +125,10 @@
 
     border-radius: 0.625rem;
 
+    corner-shape: squircle;
+
     .remove {
-      border-radius: 0.625rem;
+      border-radius: inherit;
     }
   }
 

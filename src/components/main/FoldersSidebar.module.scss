@@ -11,6 +11,8 @@
   margin: 1rem 0 1rem 1rem;
   border-radius: var(--border-radius-island);
 
+  corner-shape: squircle;
+
   &::before {
     pointer-events: none;
     content: '';

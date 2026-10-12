@@ -84,6 +84,7 @@
     "lint-staged": "^17.5.1",
     "postcss": "^8.5.28",
     "postcss-load-config": "^6.0.1",
+    "postcss-smooth-corners": "^0.1.1",
     "react": "^19.3.0",
     "rollup-plugin-bundle-stats": "^4.22.3",
     "rollup-plugin-visualizer": "^7.1.1",

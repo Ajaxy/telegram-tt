@@ -110,6 +110,8 @@
         transform 0.2s ease,
         opacity 0.2s ease;
 
+      corner-shape: squircle;
+
       body.no-page-transitions & {
         transform: none !important;
         transition: none;

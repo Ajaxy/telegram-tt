@@ -126,7 +126,7 @@
 
     .ripple-container {
       overflow: hidden;
-      border-radius: var(--border-radius-default);
+      border-radius: inherit;
     }
   }
 

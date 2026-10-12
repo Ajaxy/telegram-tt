@@ -74,7 +74,7 @@
     min-height: 3rem;
     padding: 0 1rem;
     border: none !important;
-    border-radius: var(--border-radius-default);
+    border-radius: var(--border-radius-list-item);
 
     color: var(--color-text);
     text-decoration: none;
@@ -83,6 +83,8 @@
     background-color: var(--background-color);
     outline: none !important;
     box-shadow: none !important;
+
+    corner-shape: squircle;
 
     body.is-ios &,
     body.is-android & {

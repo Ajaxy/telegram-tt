@@ -16,6 +16,8 @@
 
   transition: transform var(--layer-transition);
 
+  corner-shape: squircle;
+
   body.no-page-transitions &,
   body.no-right-column-animations & {
     transition: none !important;

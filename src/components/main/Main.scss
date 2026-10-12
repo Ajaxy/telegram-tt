@@ -92,6 +92,8 @@
   background-color: var(--color-background);
   box-shadow: var(--shadow-island);
 
+  corner-shape: squircle;
+
   @media (min-width: 926px) {
     --left-column-max-width: 40vw;
 

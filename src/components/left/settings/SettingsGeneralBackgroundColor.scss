@@ -84,6 +84,8 @@
     margin-inline: calc(min(var(--scrollbar-width) - 1rem, 0px));
     border-top-left-radius: var(--border-radius-island);
     border-top-right-radius: var(--border-radius-island);
+
+    corner-shape: squircle;
   }
 
   .predefined-color {
@@ -93,10 +95,14 @@
 
     &:nth-child(1) {
       border-top-left-radius: var(--border-radius-island);
+
+      corner-shape: squircle;
     }
 
     &:nth-child(3) {
       border-top-right-radius: var(--border-radius-island);
+
+      corner-shape: squircle;
     }
 
     &.active {

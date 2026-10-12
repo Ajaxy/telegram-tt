@@ -61,6 +61,8 @@
     border-radius: var(--radius);
 
     background-image: linear-gradient(var(--color-white) -300%, var(--color-user));
+
+    corner-shape: inherit;
   }
 
   &__media {
@@ -154,6 +156,8 @@
 
   &.forum {
     --radius: var(--border-radius-forum-avatar);
+
+    corner-shape: squircle;
   }
 
   // A community is drawn as a stack of chats, with geometry taken from the design:
@@ -186,14 +190,19 @@
       border-radius: 22.7%;
 
       opacity: 0.45;
+
+      corner-shape: squircle;
     }
 
     // Nearest layer
     &::after {
       transform: translate(-50%, -50%) translate(-17.5%, -0.7%) rotate(-10deg);
+
       width: 86.4%;
       height: 86.4%;
       border-radius: 24.2%;
+
+      corner-shape: squircle;
     }
   }
 

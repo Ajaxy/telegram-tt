@@ -15,7 +15,10 @@
   position: absolute;
   z-index: 0;
   inset: 0;
+
   border-radius: var(--border-radius-modal);
+
+  corner-shape: squircle;
 }
 
 .patternSlide,

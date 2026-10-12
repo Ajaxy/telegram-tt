@@ -11,7 +11,6 @@
   :global {
     .modal-dialog {
       max-width: 26.25rem;
-      border-radius: 2.5rem;
       background-color: var(--color-background-secondary);
 
       @media (max-width: 600px) {

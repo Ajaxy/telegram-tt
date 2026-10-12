@@ -151,10 +151,6 @@
     padding: 0;
 
     @include mixins.adapt-margin-to-scrollbar(1rem);
-
-    :global(.ListItem-button) {
-      border-radius: 1rem;
-    }
   }
 
   .sharedMediaIslandContainer {

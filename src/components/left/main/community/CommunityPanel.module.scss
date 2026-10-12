@@ -106,10 +106,6 @@
   margin: 0 1rem 1rem;
 
   @include mixins.adapt-margin-to-scrollbar(1rem);
-
-  :global(.ListItem-button) {
-    border-radius: 1rem;
-  }
 }
 
 .loadingIsland {

@@ -58,16 +58,24 @@
 
 .roundTopStart {
   border-start-start-radius: var(--border-radius-island);
+
+  corner-shape: squircle;
 }
 
 .roundTopEnd {
   border-start-end-radius: var(--border-radius-island);
+
+  corner-shape: squircle;
 }
 
 .roundBottomStart {
   border-end-start-radius: var(--border-radius-island);
+
+  corner-shape: squircle;
 }
 
 .roundBottomEnd {
   border-end-end-radius: var(--border-radius-island);
+
+  corner-shape: squircle;
 }
