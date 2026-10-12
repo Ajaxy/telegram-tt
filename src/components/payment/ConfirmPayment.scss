@@ -1,10 +1,7 @@
 .ConfirmPayment {
   overflow: hidden;
   display: flex;
-
   height: 100%;
-  border-bottom-right-radius: var(--border-radius-default-small);
-  border-bottom-left-radius: var(--border-radius-default-small);
 
   &__content {
     width: 100%;

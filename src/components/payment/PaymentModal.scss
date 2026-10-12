@@ -1,11 +1,14 @@
 $modalHeaderAndFooterHeight: 8.375rem;
 
 .PaymentModal {
-  &.recurring {
-    .Transition {
-      height: 33rem;
-      max-height: calc(92vh - $modalHeaderAndFooterHeight);
-    }
+  &:not(.PaymentModal-receipt) .modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(min(27rem, 68vh) + $modalHeaderAndFooterHeight);
+  }
+
+  &.recurring .modal-content {
+    height: min(#{33rem + $modalHeaderAndFooterHeight}, 92vh);
   }
 
   .modal-backdrop {
@@ -21,6 +24,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
 
     display: flex;
     flex-direction: row;
+    flex-shrink: 0;
     align-items: center;
 
     width: 100%;
@@ -41,16 +45,17 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .Transition {
-    height: min(27rem, 68vh);
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .empty-content {
     display: flex;
+    flex: 1 1 auto;
     align-items: center;
     justify-content: center;
 
-    height: 25rem;
-    max-height: 90%;
+    min-height: 0;
   }
 
   .receipt-content {
@@ -71,6 +76,8 @@ $modalHeaderAndFooterHeight: 8.375rem;
   .footer {
     position: relative;
     bottom: 0;
+
+    flex-shrink: 0;
 
     width: 100%;
     padding: 0.75rem 1rem;
@@ -98,6 +105,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
   .modal-content {
     overflow: hidden;
     padding: 0;
+    border-radius: var(--border-radius-modal);
   }
 
   .ListItem-main-icon {
@@ -112,8 +120,8 @@ $modalHeaderAndFooterHeight: 8.375rem;
       max-height: 100%;
     }
 
-    .Transition {
-      height: 10rem;
+    &:not(.PaymentModal-receipt) .modal-content {
+      height: calc(10rem + $modalHeaderAndFooterHeight);
     }
   }
 }
