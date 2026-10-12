@@ -50,6 +50,7 @@ type OwnProps = {
   onSelectArchived: NoneToVoidFunction;
   onBotMenuOpened: NoneToVoidFunction;
   onBotMenuClosed: NoneToVoidFunction;
+  onSwitchAccount: (url: string) => void;
   footer?: string;
 };
 
@@ -78,6 +79,7 @@ const LeftSideMenuItems = ({
   onSelectSettings,
   onBotMenuOpened,
   onBotMenuClosed,
+  onSwitchAccount,
   footer,
 }: OwnProps & StateProps) => {
   const {
@@ -168,6 +170,7 @@ const LeftSideMenuItems = ({
             currentUser={currentUser}
             totalLimit={accountsTotalLimit}
             onSelectCurrent={onSelectSettings}
+            onSwitchAccount={onSwitchAccount}
           />
           <MenuSeparator />
         </>

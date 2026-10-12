@@ -226,6 +226,7 @@ const App = ({
 
   useLayoutEffect(() => {
     document.body.classList.add(styles.bg);
+    document.documentElement.classList.remove('initial');
   }, []);
 
   useLayoutEffect(() => {

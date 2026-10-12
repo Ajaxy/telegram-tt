@@ -1,7 +1,8 @@
-import { type FC, memo } from '@teact';
+import { type FC, memo, useRef } from '@teact';
 import { APP_REVISION } from 'virtual:git-info';
-import { getActions } from '../../global';
+import { getActions, getGlobal } from '../../global';
 
+import type { TabState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import {
@@ -9,6 +10,7 @@ import {
   DEBUG,
   IS_BETA,
 } from '../../config';
+import { selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
@@ -31,8 +33,9 @@ const LeftSideMenuDropdown = ({
   className,
 }: OwnProps) => {
   const {
-    openLeftColumnContent, closeForumPanel, closeCommunityPanel, openSettingsScreen,
+    openLeftColumnContent, closeForumPanel, closeCommunityPanel, openSettingsScreen, setIsUiReady,
   } = getActions();
+  const pendingAccountSwitchRef = useRef<{ url: string; uiReadyState: TabState['uiReadyState'] }>();
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
   const lang = useLang();
 
@@ -58,6 +61,32 @@ const LeftSideMenuDropdown = ({
     closeCommunityPanel();
   });
 
+  const handleSwitchAccount = useLastCallback((url: string) => {
+    // Only mask the UI when canceled navigation can restore it
+    if (!window.navigation) {
+      window.location.assign(url);
+      return;
+    }
+
+    const { uiReadyState } = selectTabState(getGlobal());
+    pendingAccountSwitchRef.current = { url, uiReadyState };
+    setIsUiReady({ uiReadyState: 0 });
+  });
+
+  const handleMenuHide = useLastCallback(async () => {
+    const pendingAccountSwitch = pendingAccountSwitchRef.current;
+    if (!pendingAccountSwitch) return;
+
+    pendingAccountSwitchRef.current = undefined;
+    const { url, uiReadyState } = pendingAccountSwitch;
+    try {
+      const { committed, finished } = window.navigation.navigate(url);
+      await Promise.all([committed, finished]);
+    } catch {
+      setIsUiReady({ uiReadyState });
+    }
+  });
+
   return (
     <DropdownMenu
       trigger={trigger}
@@ -73,6 +102,7 @@ const LeftSideMenuDropdown = ({
       transformOriginX={90}
       transformOriginY={100}
       withPortal
+      onHide={handleMenuHide}
       onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
     >
       <LeftSideMenuItems
@@ -81,6 +111,7 @@ const LeftSideMenuDropdown = ({
         onSelectSettings={handleSelectSettings}
         onBotMenuOpened={markBotMenuOpen}
         onBotMenuClosed={unmarkBotMenuOpen}
+        onSwitchAccount={handleSwitchAccount}
         footer={`${APP_NAME} ${versionString}`}
       />
     </DropdownMenu>

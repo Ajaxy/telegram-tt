@@ -1,0 +1,25 @@
+@view-transition {
+  navigation: auto;
+  types: page;
+}
+
+:root {
+  view-transition-name: none;
+
+  &:active-view-transition-type(page) {
+    view-transition-name: root;
+
+    &::view-transition-group(root) {
+      animation-duration: 400ms;
+    }
+
+    // Keep the outgoing snapshot visible until `UiLoader` mounts
+    &.initial {
+      &::view-transition-group(root),
+      &::view-transition-old(root),
+      &::view-transition-new(root) {
+        animation-play-state: paused;
+      }
+    }
+  }
+}

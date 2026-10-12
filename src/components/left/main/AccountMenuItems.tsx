@@ -23,6 +23,7 @@ type OwnProps = {
   currentUser: ApiUser;
   totalLimit: number;
   onSelectCurrent?: VoidFunction;
+  onSwitchAccount: (url: string) => void;
 };
 
 const NOTIFICATION_DURATION = 7000;
@@ -31,6 +32,7 @@ const AccountMenuItems = ({
   currentUser,
   totalLimit,
   onSelectCurrent,
+  onSwitchAccount,
 }: OwnProps) => {
   const { showNotification } = getActions();
   const lang = useLang();
@@ -45,17 +47,16 @@ const AccountMenuItems = ({
 
   const shouldShowLimit = currentCount >= maxCount;
 
-  const handleAccountClick = useLastCallback((account: AccountInfo) => {
+  const handleAccountClick = useLastCallback((account: AccountInfo, e: React.SyntheticEvent<HTMLElement>) => {
     if (account.userId === currentUser.id) {
       onSelectCurrent?.();
       return;
     }
 
-    // IDB locks up if we write large payload on navigation
-    if (IS_SAFARI) temporarilySuspendCacheUpdate();
+    handleAccountNavigation(e);
   });
 
-  const handleNewAccountClick = useLastCallback(() => {
+  const handleNewAccountClick = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     if (shouldShowLimit) {
       showNotification({
         title: lang('PremiumLimitAccountsTitle'),
@@ -65,8 +66,20 @@ const AccountMenuItems = ({
       return;
     }
 
-    if (IS_SAFARI) temporarilySuspendCacheUpdate();
+    handleAccountNavigation(e);
   });
+
+  function handleAccountNavigation(e: React.SyntheticEvent<HTMLElement>) {
+    if (!(e instanceof MouseEvent) || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey
+      || !(e.currentTarget instanceof HTMLAnchorElement)) {
+      return;
+    }
+
+    e.preventDefault();
+    // IDB locks up if we write large payload on navigation
+    if (IS_SAFARI) temporarilySuspendCacheUpdate();
+    onSwitchAccount(e.currentTarget.href);
+  }
 
   const newAccountUrl = useMemo(() => {
     if (!Object.values(accounts).length) {
@@ -113,7 +126,7 @@ const AccountMenuItems = ({
                     previewUrl={account.avatarUri}
                   />
                 )}
-                onClick={() => handleAccountClick(account)}
+                onClick={(e) => handleAccountClick(account, e)}
                 href={account.userId !== currentUser.id ? getAccountSlotUrl(Number(slot)) : undefined}
               >
                 {account.isTest && <span className="account-menu-item-test">T</span>}

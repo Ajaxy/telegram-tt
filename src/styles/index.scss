@@ -2,7 +2,6 @@
 /* stylelint-disable @stylistic/declaration-colon-newline-after */
 @use "reboot";
 @use "variables";
-@use "mixins";
 @use "spacing";
 @use "forms";
 @use "icons.css";
@@ -586,21 +585,4 @@ body:not(.is-ios) {
   --color-forum-unread-topic-hover: rgb(54, 54, 54);
   --color-forum-hover-unread-topic-hover: rgb(63, 63, 63);
   --color-chat-username: rgb(233, 238, 244);
-}
-
-@view-transition {
-  navigation: auto;
-  types: page;
-}
-
-:root {
-  view-transition-name: none;
-
-  @include mixins.with-vt-type('page');
-}
-
-@include mixins.on-active-vt('page') {
-  &::view-transition-group(root) {
-    animation-duration: 400ms;
-  }
 }
