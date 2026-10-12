@@ -129,8 +129,7 @@
 /* Persian, v33.001, https://github.com/rastikerdar/vazirmatn */
 @font-face {
   font-family: Vazirmatn;
-  src: url('Vazirmatn-NL-Regular.woff2') format('woff2'),
-  url('Vazirmatn-NL-Regular.woff') format('woff');
+  src: url('Vazirmatn-NL-Regular.woff2') format('woff2');
   font-weight: normal;
   font-display:swap;
   unicode-range:U+0627-06FF;
@@ -139,8 +138,7 @@
 /* Persian, v33.003, https://github.com/rastikerdar/vazirmatn */
 @font-face {
   font-family: Vazirmatn;
-  src: url('Vazirmatn-NL-Medium.woff2') format('woff2'),
-  url('Vazirmatn-NL-Medium.woff') format('woff');
+  src: url('Vazirmatn-NL-Medium.woff2') format('woff2');
   font-weight: 500;
   font-display:swap;
   unicode-range: U+0600-06FF;

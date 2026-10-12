@@ -3,8 +3,7 @@
   font-weight: normal;
   font-style: normal;
   font-display: block;
-  src: url("./{{ fontname }}.woff2?{{ fontHash }}") format("woff2"),
-url("./{{ fontname }}.woff?{{ fontHash }}") format("woff");
+  src: url("./{{ fontname }}.woff2?{{ fontHash }}") format("woff2");
 }
 
 .icon-char::before {

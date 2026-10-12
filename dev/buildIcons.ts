@@ -203,7 +203,7 @@ async function buildIcons() {
     },
     // SVG and TTF intermediates stay in the ignored build directory
     dist: TEMP_DIR,
-    excludeFormat: ['eot', 'svg', 'ttf', 'symbol.svg'],
+    excludeFormat: ['eot', 'woff', 'svg', 'ttf', 'symbol.svg'],
     fontName: FONT_NAME,
     getIconUnicode(name) {
       const iconDefinition = iconDefinitionsByName.get(name);
@@ -225,10 +225,8 @@ async function buildIcons() {
     },
   });
 
-  await Promise.all(['woff', 'woff2'].map((format) => {
-    const fileName = `${FONT_NAME}.${format}`;
-    return fs.copyFile(path.join(TEMP_DIR, fileName), path.join(STYLES_DIR, fileName));
-  }));
+  const fileName = `${FONT_NAME}.woff2`;
+  await fs.copyFile(path.join(TEMP_DIR, fileName), path.join(STYLES_DIR, fileName));
   await writeFontTypes(iconDefinitions);
 }
 
