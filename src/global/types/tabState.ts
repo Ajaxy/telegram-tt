@@ -1306,6 +1306,11 @@ export type TabState = {
     chatId: string;
   };
 
+  messageReminderModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   isTwoFaCheckModalOpen?: true;
 
   isWaitingForStarGiftUpgrade?: true;
