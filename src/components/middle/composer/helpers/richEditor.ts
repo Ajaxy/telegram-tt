@@ -41,7 +41,7 @@ import type { RichEditorTooltipsConfig } from '../../../common/tooltips/types';
 import type { RichEditorMediaEditHandler, RichEditorMediaFilesHandler } from '../richEditorTypes';
 
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
-import { lowlight } from '../../../../util/highlightCode';
+import { CODE_HIGHLIGHTING_CHANGED_META, lowlight } from '../../../../util/highlightCode';
 import { addLocalizationCallback, getTranslationFn } from '../../../../util/localization';
 import {
   CustomEmojiNode,
@@ -1018,6 +1018,31 @@ function wrapRichOnlyInputRules(
 }
 
 const RichEditorCodeBlock = CodeBlockLowlightExtension.extend({
+  addProseMirrorPlugins() {
+    const plugins = this.parent!();
+    // The last plugin owns the syntax decorations
+    const plugin = plugins.pop()!;
+    const stateField = plugin.spec.state!;
+    let currentConfig: Parameters<typeof stateField.init>[0];
+
+    plugins.push(new Plugin({
+      ...plugin.spec,
+      state: {
+        init(config, state) {
+          currentConfig = config;
+          return stateField.init.call(plugin, config, state);
+        },
+        apply(transaction, value, oldState, newState) {
+          if (transaction.getMeta(CODE_HIGHLIGHTING_CHANGED_META)) {
+            return stateField.init.call(plugin, currentConfig, newState);
+          }
+          return stateField.apply.call(plugin, transaction, value, oldState, newState);
+        },
+      },
+    }));
+    return plugins;
+  },
+
   addKeyboardShortcuts() {
     return {
       ...this.parent?.(),

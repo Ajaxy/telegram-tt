@@ -60,7 +60,12 @@ const EditableCodeBlock = ({
   useEffect(() => {
     if (language) {
       void ensureCodeLanguage(language);
+      return;
     }
+
+    SUPPORTED_CODE_LANGUAGES.forEach((langCode) => {
+      void ensureCodeLanguage(langCode);
+    });
   }, [language]);
 
   const handleTriggerMouseDown = useLastCallback((e: React.MouseEvent<HTMLButtonElement>) => {

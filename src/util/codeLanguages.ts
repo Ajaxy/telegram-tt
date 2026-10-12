@@ -2,7 +2,7 @@ const CODE_LANGUAGE_ALIASES: Record<string, string[]> = {
   '1c': ['1с'], // Allow cyrillic
   ada: [],
   arduino: ['ino'],
-  arm: [],
+  armasm: ['arm'],
   bash: ['sh'],
   basic: [],
   c: ['h'],
@@ -54,7 +54,7 @@ const PRETTY_LANGUAGE_NAMES: Record<string, string | undefined> = {
   '1c': '1C',
   ada: 'Ada',
   arduino: 'Arduino',
-  arm: 'ARM Assembly',
+  armasm: 'ARM Assembly',
   bash: 'Bash',
   basic: 'BASIC',
   c: 'C',

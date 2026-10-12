@@ -7,6 +7,7 @@ import { createCallbackManager } from './callbacks';
 import { getCodeLanguageName } from './codeLanguages';
 
 const THIRD_PARTY_LANGUAGES = ['typelanguage'];
+export const CODE_HIGHLIGHTING_CHANGED_META = 'codeHighlightingChanged';
 
 const LANGUAGE_MODULES = import.meta.glob('../../node_modules/highlight.js/es/languages/*.js') as Record<
   string,

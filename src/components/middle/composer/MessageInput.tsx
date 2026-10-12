@@ -1,4 +1,4 @@
-import { TextSelection } from '@tiptap/pm/state';
+import { findChildren } from '@tiptap/core';
 import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect, useMemo,
@@ -31,8 +31,8 @@ import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners, { hasActiveHandler } from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import focusEditableElement from '../../../util/focusEditableElement';
-import { subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
-import { debounce, fastRaf } from '../../../util/schedulers';
+import { CODE_HIGHLIGHTING_CHANGED_META, subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
+import { debounce, fastRaf, throttleWith } from '../../../util/schedulers';
 import { getUtf8Length } from '../../../util/textFormat';
 import tiptapStyles from '../../../util/tiptap/styling.module.scss';
 import renderText from '../../common/helpers/renderText';
@@ -474,43 +474,23 @@ const MessageInput = ({
     syncEditorElementAttributes]);
 
   const refreshCodeBlockHighlighting = useLastCallback(() => {
-    requestMutation(() => {
-      if (!editor || editor.isDestroyed) {
-        return;
-      }
+    if (!editor || editor.isDestroyed) {
+      return;
+    }
 
-      const transaction = editor.state.tr
-        .setMeta('addToHistory', false)
-        .setMeta('preventUpdate', true);
-      const { from, to } = editor.state.selection;
+    if (!findChildren(editor.state.doc, (node) => node.type.name === 'codeBlock').length) {
+      return;
+    }
 
-      editor.state.doc.descendants((node, position) => {
-        if (node.type.name !== 'codeBlock') {
-          return true;
-        }
-
-        transaction.replaceWith(position, position + node.nodeSize, node);
-        return false;
-      });
-
-      if (!transaction.docChanged) {
-        return;
-      }
-
-      const docSize = transaction.doc.content.size;
-      transaction.setSelection(TextSelection.create(
-        transaction.doc,
-        Math.min(from, docSize),
-        Math.min(to, docSize),
-      ));
-      editor.view.dispatch(transaction);
-      syncCloneWithSource(editor.view.dom);
-      updateInputHeight();
-    });
+    editor.view.dispatch(editor.state.tr
+      .setMeta(CODE_HIGHLIGHTING_CHANGED_META, true)
+      .setMeta('addToHistory', false));
+    syncCloneWithSource(editor.view.dom);
+    updateInputHeight();
   });
 
   useEffect(() => {
-    return subscribeToCodeLanguageLoad(refreshCodeBlockHighlighting);
+    return subscribeToCodeLanguageLoad(throttleWith(requestMutation, refreshCodeBlockHighlighting));
   }, [refreshCodeBlockHighlighting]);
 
   useLayoutEffect(() => {
