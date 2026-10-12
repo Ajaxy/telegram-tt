@@ -89,6 +89,7 @@ type OwnProps = {
   canEdit?: boolean;
   canAppendTodoList?: boolean;
   canForward?: boolean;
+  canShareAsCard?: boolean;
   canFaveSticker?: boolean;
   canUnfaveSticker?: boolean;
   canCopy?: boolean;
@@ -125,6 +126,7 @@ type OwnProps = {
   onPin?: NoneToVoidFunction;
   onUnpin?: NoneToVoidFunction;
   onForward?: NoneToVoidFunction;
+  onShareAsCard?: NoneToVoidFunction;
   onDelete?: NoneToVoidFunction;
   onFaveSticker?: NoneToVoidFunction;
   onReport?: NoneToVoidFunction;
@@ -195,6 +197,7 @@ const MessageContextMenu = ({
   canUnpin,
   canDelete,
   canForward,
+  canShareAsCard,
   canReport,
   canFaveSticker,
   canUnfaveSticker,
@@ -232,6 +235,7 @@ const MessageContextMenu = ({
   onPin,
   onUnpin,
   onForward,
+  onShareAsCard,
   onDelete,
   onFaveSticker,
   onReport,
@@ -592,6 +596,7 @@ const MessageContextMenu = ({
           </MenuItem>
         )}
         {canForward && <MenuItem icon="forward" onClick={onForward}>{oldLang('Forward')}</MenuItem>}
+        {canShareAsCard && <MenuItem icon="card" onClick={onShareAsCard}>{lang('ShareAsCard')}</MenuItem>}
         {canSelect && <MenuItem icon="select" onClick={onSelect}>{oldLang('Common.Select')}</MenuItem>}
         {canReport && <MenuItem icon="flag" onClick={onReport}>{oldLang('lng_context_report_msg')}</MenuItem>}
         {canDelete && (message.anchorMsgId ? (

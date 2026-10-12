@@ -61,6 +61,7 @@ import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
 import MapModal from './map/MapModal.async';
+import MessageCardModal from './messageCard/MessageCardModal.async';
 import MusicPickerModal from './musicPicker/MusicPickerModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
@@ -175,9 +176,11 @@ type ModalKey = keyof Pick<TabState,
   'editRankModal' |
   'rankModal' |
   'aiTonePreviewModal' |
-  'autoDeleteTimerModal'
+  'autoDeleteTimerModal' |
+  'messageCardModal'
 >;
-type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal';
+type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal'
+  | 'messageCardModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -208,6 +211,7 @@ const WRAPPED_MODAL_CLOSE_DURATIONS: Record<WrappedModalKey, number> = {
   mapModal: WRAPPED_MODAL_CLOSE_DURATION,
   safeLinkModalUrl: WRAPPED_MODAL_CLOSE_DURATION,
   autoDeleteTimerModal: WRAPPED_MODAL_CLOSE_DURATION,
+  messageCardModal: WRAPPED_MODAL_CLOSE_DURATION,
 };
 
 type WrappedModalBoundaryProps<T> = {
@@ -327,6 +331,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   mapModal: MapModal,
   safeLinkModalUrl: SafeLinkModal,
   autoDeleteTimerModal: AutoDeleteTimerModal,
+  messageCardModal: MessageCardModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];

@@ -3649,3 +3649,10 @@
 "RichButtonCenter" = "Center";
 "RichButtonRight" = "Right";
 "RichEditorButtonCopyText" = "Text to copy";
+"ShareAsCard" = "Share as Card";
+"MessageCardTitle" = "Share as Card";
+"MessageCardShowSender" = "Show sender";
+"MessageCardCopy" = "Copy";
+"MessageCardSave" = "Save Image";
+"MessageCardSend" = "Send to Chat";
+"MessageCardCopiedToast" = "Image copied to clipboard";

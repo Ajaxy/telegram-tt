@@ -139,7 +139,7 @@ function buildPlainTextClipboardBlob(content: string | Promise<string>): Blob | 
   return new Blob([content], { type: 'text/plain' });
 }
 
-async function copyBlobToClipboard(pngBlob: Blob | null) {
+export async function copyBlobToClipboard(pngBlob: Blob | null) {
   if (!pngBlob || !CLIPBOARD_ITEM_SUPPORTED) {
     return;
   }
