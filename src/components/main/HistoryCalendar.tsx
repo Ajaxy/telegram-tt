@@ -1,9 +1,11 @@
-import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback } from '../../lib/teact/teact';
+import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { selectTabState } from '../../global/selectors';
+import type { ChatCalendar } from '../../types/chatCalendar';
 
+import { selectCurrentMessageList, selectTabState } from '../../global/selectors';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
 import CalendarModal from '../common/CalendarModal';
@@ -14,19 +16,42 @@ export type OwnProps = {
 
 type StateProps = {
   selectedAt?: number;
+  chatId?: string;
+  chatCalendar?: ChatCalendar;
 };
 
-const HistoryCalendar: FC<OwnProps & StateProps> = ({
-  isOpen, selectedAt,
-}) => {
-  const { searchMessagesByDate, closeHistoryCalendar } = getActions();
-
-  const handleJumpToDate = useCallback((date: Date) => {
-    searchMessagesByDate({ timestamp: date.getTime() / 1000 });
-    closeHistoryCalendar();
-  }, [closeHistoryCalendar, searchMessagesByDate]);
+const HistoryCalendar = ({
+  isOpen, selectedAt, chatId, chatCalendar,
+}: OwnProps & StateProps) => {
+  const {
+    searchMessagesByDate, closeHistoryCalendar, loadChatCalendar, resetChatCalendar,
+  } = getActions();
 
   const lang = useOldLang();
+
+  useEffect(() => {
+    if (isOpen && chatId) {
+      loadChatCalendar({ chatId });
+    }
+  }, [isOpen, chatId]);
+
+  useEffect(() => {
+    if (chatCalendar && chatCalendar.chatId !== chatId) {
+      resetChatCalendar();
+    }
+  }, [chatId, chatCalendar]);
+
+  const handleJumpToDate = useLastCallback((date: Date) => {
+    searchMessagesByDate({ timestamp: date.getTime() / 1000 });
+    closeHistoryCalendar();
+  });
+
+  const handleMonthChange = useLastCallback((monthStart: Date) => {
+    if (!chatId) return;
+    loadChatCalendar({ chatId, untilDate: Math.floor(monthStart.getTime() / 1000) });
+  });
+
+  const markers = chatCalendar?.chatId === chatId ? chatCalendar : undefined;
 
   return (
     <CalendarModal
@@ -34,6 +59,10 @@ const HistoryCalendar: FC<OwnProps & StateProps> = ({
       selectedAt={selectedAt}
       isPastMode
       submitButtonLabel={lang('JumpToDate')}
+      dayMarkers={markers?.days}
+      maxDayCount={markers?.maxDayCount}
+      markersChatId={chatId}
+      onMonthChange={handleMonthChange}
       onClose={closeHistoryCalendar}
       onSubmit={handleJumpToDate}
     />
@@ -42,6 +71,11 @@ const HistoryCalendar: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
-    return { selectedAt: selectTabState(global).historyCalendarSelectedAt };
+    const tabState = selectTabState(global);
+    return {
+      selectedAt: tabState.historyCalendarSelectedAt,
+      chatId: selectCurrentMessageList(global)?.chatId,
+      chatCalendar: tabState.chatCalendar,
+    };
   },
 )(HistoryCalendar));

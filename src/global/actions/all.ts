@@ -21,6 +21,7 @@ import './api/wallet';
 import './api/tonConnect';
 import './api/reactions';
 import './api/statistics';
+import './api/chatCalendar';
 import './api/stories';
 import './ui/initial';
 import './ui/animations';

@@ -121,6 +121,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
+import type { ChatCalendar } from '../../types/chatCalendar';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -592,6 +593,7 @@ export type TabState = {
     zoom?: number;
   };
   historyCalendarSelectedAt?: number;
+  chatCalendar?: ChatCalendar;
   openedStickerSetShortName?: string;
   openedCustomEmojiSetIds?: string[];
 

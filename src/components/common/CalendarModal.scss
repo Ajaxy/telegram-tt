@@ -113,6 +113,21 @@
     &.selected {
       --button-text-color: revert-layer;
     }
+
+    &.with-activity:not(.selected) {
+      background-color: rgba(var(--color-primary), calc(0.08 + var(--day-heat, 0) * 0.5));
+    }
+
+    &.with-thumb {
+      --button-text-color: #fff;
+
+      overflow: hidden;
+      text-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.8);
+    }
+
+    .day-number {
+      position: relative;
+    }
   }
 
   .calendar-wrapper {

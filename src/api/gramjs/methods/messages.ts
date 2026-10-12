@@ -3458,3 +3458,43 @@ export function reportMusicListen({ audio, listenedDuration, isPageUnload }: {
     shouldIgnoreErrors: true,
   });
 }
+
+export type ChatCalendarFilter = 'all' | 'photos';
+
+export async function fetchSearchResultsCalendar({
+  chat, filter, offsetId, offsetDate,
+}: {
+  chat: ApiChat;
+  filter: ChatCalendarFilter;
+  offsetId?: number;
+  offsetDate?: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetSearchResultsCalendar({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    filter: filter === 'photos' ? new GramJs.InputMessagesFilterPhotoVideo() : new GramJs.InputMessagesFilterEmpty(),
+    offsetId: offsetId ?? DEFAULT_PRIMITIVES.INT,
+    offsetDate: offsetDate ?? DEFAULT_PRIMITIVES.INT,
+  }), {
+    abortControllerChatId: chat.id,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  const periods = result.periods.map((period) => ({
+    date: period.date,
+    minMsgId: period.minMsgId,
+    maxMsgId: period.maxMsgId,
+    count: period.count,
+  }));
+
+  return {
+    count: result.count,
+    minDate: result.minDate,
+    minMsgId: result.minMsgId,
+    periods,
+    messages,
+  };
+}
