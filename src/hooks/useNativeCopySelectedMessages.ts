@@ -14,7 +14,7 @@ const useNativeCopySelectedMessages = (
   copyMessagesByIds: (payload: { request: MessageCopyRequest }) => void,
 ) => {
   const handleCopy = useLastCallback((e: ClipboardEvent) => {
-    if (!window.ClipboardItem || !navigator.clipboard?.write) return;
+    if (e.defaultPrevented || !window.ClipboardItem || !navigator.clipboard?.write) return;
 
     const request = captureMessageCopyRequest(chatId, threadId, messageListType);
     if (!request) return;

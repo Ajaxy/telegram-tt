@@ -175,6 +175,7 @@ type StateProps = {
   noForwardsPeerEnabled?: boolean;
   savedMusicById?: Record<string, true>;
   isSavedMusicLoading?: boolean;
+  isMessageProtected: boolean;
 };
 
 const selection = window.getSelection();
@@ -252,6 +253,7 @@ const ContextMenuContainer = ({
   noForwardsPeerEnabled,
   savedMusicById,
   isSavedMusicLoading,
+  isMessageProtected,
   onClose,
   onCloseAnimationEnd,
 }: OwnProps & StateProps) => {
@@ -328,7 +330,7 @@ const ContextMenuContainer = ({
     && (customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length));
   const audio = getMessageAudio(message);
   const isLocalMessage = isMessageLocal(message);
-  const canManageMusicInProfile = Boolean(audio && !isLocalMessage);
+  const canManageMusicInProfile = Boolean(audio && !isLocalMessage && !isMessageProtected);
   const isMusicProfileStatusLoaded = Boolean(savedMusicById);
   const isMusicSaved = Boolean(audio && savedMusicById?.[audio.id]);
 
@@ -1046,6 +1048,7 @@ export default memo(withGlobal<OwnProps>(
       canFaveSticker: !message.isEphemeral && !isScheduled && canFaveSticker,
       canUnfaveSticker: !message.isEphemeral && !isScheduled && canUnfaveSticker,
       canCopy: (canCopyNumber || (!isProtected && canCopy)),
+      isMessageProtected: isProtected,
       canCopyLink: !message.isEphemeral && !isScheduled && canCopyLink,
       canSelect: !message.isEphemeral && canSelect,
       canDownload: !isProtected && canDownload,

@@ -106,7 +106,8 @@ const PlaylistControls = ({
   const coverBlobUrl = useMedia(audio && getMediaHash(audio, 'pictogram'), false, ApiMediaFormat.BlobUrl);
 
   const isMusicSaved = Boolean(audio && savedMusicById?.[audio.id]);
-  const canSaveToProfile = Boolean(audio && (!message || !isMessageLocal(message)) && savedMusicById);
+  const canSaveToProfile = Boolean(audio && !isMessageProtected
+    && (!message || !isMessageLocal(message)) && savedMusicById);
   const canShareTrack = Boolean(audio && canForwardMessage);
   const canDownload = Boolean(audio) && (!message || (!isMessageLocal(message) && !isMessageProtected));
   const canForward = canShareTrack || Boolean(savedMusicPeerId && audio);

@@ -18,6 +18,7 @@ import {
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectChat,
+  selectIsMessageProtected,
   selectSender, selectTabState,
 } from '../../../global/selectors';
 import {
@@ -111,6 +112,7 @@ type StateProps = {
   hasPlaybackModes: boolean;
   savedMusicById?: Record<string, true>;
   isSavedMusicLoading?: boolean;
+  isMessageProtected: boolean;
   hasPendingSavedMusicStep: boolean;
   isSavedMusicListLoading?: boolean;
   savedMusicListLength?: number;
@@ -161,6 +163,7 @@ const AudioPlayer = ({
   hasPlaybackModes,
   savedMusicById,
   isSavedMusicLoading,
+  isMessageProtected,
   hasPendingSavedMusicStep,
   isSavedMusicListLoading,
   savedMusicListLength,
@@ -197,8 +200,9 @@ const AudioPlayer = ({
     item: renderingItem,
     sender: renderingSender,
     chat: renderingChat,
+    isMessageProtected: isRenderingMessageProtected,
   } = useFrozenProps({
-    message, media, item, sender, chat,
+    message, media, item, sender, chat, isMessageProtected,
   }, !isOpen);
 
   const audio = renderingMedia?.mediaType === 'audio' ? renderingMedia : undefined;
@@ -613,8 +617,10 @@ const AudioPlayer = ({
       </div>
 
       <ShowTransition
-        isOpen={Boolean(audio && renderingItem?.type !== 'instantView' && !isLocalMessage && savedMusicById)}
+        isOpen={Boolean(audio && renderingItem?.type !== 'instantView'
+          && !isLocalMessage && !isRenderingMessageProtected && savedMusicById)}
         className={styles.profileMusicButtonWrapper}
+        noCloseTransition
         shouldAnimateFirstRender
       >
         <Button
@@ -846,6 +852,7 @@ export default withGlobal<OwnProps>(
       hasPlaybackModes: selectHasPlaybackModes(global),
       savedMusicById: global.users.savedMusicById,
       isSavedMusicLoading: global.users.isSavedMusicLoading,
+      isMessageProtected: selectIsMessageProtected(global, message),
       hasPendingSavedMusicStep: Boolean(audioPlayer.pendingStep) && audioPlayer.source?.type === 'savedMusic',
       isSavedMusicListLoading: savedMusicList?.isLoading,
       savedMusicListLength: savedMusicList?.ids.length,

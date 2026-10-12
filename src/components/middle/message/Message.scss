@@ -45,7 +45,11 @@
   }
 
   &.is-protected {
-    user-select: none;
+    &,
+    .emoji,
+    [data-rich-copy-root] {
+      user-select: none;
+    }
   }
 
   > .Avatar,

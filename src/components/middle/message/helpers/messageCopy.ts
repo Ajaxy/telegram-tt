@@ -14,6 +14,7 @@ import {
   selectChat,
   selectChatMessageOrEphemeral,
   selectChatScheduledMessages,
+  selectIsMessageProtected,
   selectMessageCopyContent,
   selectSender,
 } from '../../../../global/selectors';
@@ -119,6 +120,7 @@ function getMessagesForCopy(global: GlobalState, messageList: MessageList, messa
   return messageIds
     .map((id) => type === 'scheduled' ? scheduledMessages?.[id] : selectChatMessageOrEphemeral(global, chatId, id))
     .filter((message): message is ApiMessage => message !== undefined
+      && !selectIsMessageProtected(global, message)
       && Boolean(selectAllowedMessageActionsSlow(global, message, threadId).canCopy))
     .sort((left, right) => left.id - right.id);
 }
