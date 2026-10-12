@@ -164,7 +164,6 @@ const LockScreen = ({
 
         {hasPasskey && IS_WEBAUTHN_SUPPORTED && (
           <Button
-            color="translucent"
             isText
             className={styles.passkeyButton}
             disabled={isLoading}
