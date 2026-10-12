@@ -115,7 +115,9 @@
     }
 
     &.with-activity:not(.selected) {
-      background-color: rgba(var(--color-primary), calc(0.08 + var(--day-heat, 0) * 0.5));
+      --day-heat-opacity: calc((0.1 + var(--day-heat, 0) * 0.45) * 100%);
+
+      background-color: color-mix(in srgb, var(--color-primary) var(--day-heat-opacity), transparent);
     }
 
     &.with-thumb {
