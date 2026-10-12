@@ -58,6 +58,8 @@ export interface ApiPhoneCall {
   reason?: 'missed' | 'disconnect' | 'hangup' | 'busy';
   duration?: number;
   customParameters?: ApiPhoneCallCustomParameters;
+  // Set when this session requested or accepted the call and therefore drives its key exchange
+  isKeyExchangeOwner?: boolean;
 
   emojis?: string;
   gA?: number[];

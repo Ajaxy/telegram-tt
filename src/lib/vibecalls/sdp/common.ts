@@ -80,6 +80,11 @@ export function parseFingerprints(sections: SdpSection[]): Fingerprint[] {
   const values = new Map<string, Fingerprint>();
 
   sections.forEach((section) => {
+    // Resolve session-level fingerprints together with each media section's negotiated role
+    if (section.kind === 'session') {
+      return;
+    }
+
     const fingerprint = findSdpLineValue(sections, 'a=fingerprint:', section);
     if (!fingerprint) {
       return;

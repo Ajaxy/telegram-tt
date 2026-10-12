@@ -2,6 +2,7 @@ import type {
   ApiPhoneCall, ApiPhoneCallConfig, ApiPhoneCallCustomParameters,
 } from '../../../api/types';
 import type { ApiCallProtocol } from '../../../lib/vibecalls';
+import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType } from '../../types';
 
 import { CALL_PROTOCOL_LIBRARY_VERSIONS, DEBUG_CALLS } from '../../../config';
@@ -17,6 +18,7 @@ import { omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
 import { callApi } from '../../../api/gramjs';
+import { runForAllTabs } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
@@ -24,6 +26,8 @@ import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser 
 
 let phoneCallSignalingDataPromise = Promise.resolve();
 let groupCallNegotiationPromise = Promise.resolve();
+let confirmedPhoneCallId: string | undefined;
+let startedPhoneCallId: string | undefined;
 
 const DEFAULT_PHONE_CALL_CONFIG: ApiPhoneCallConfig = {
   shouldUseSctp: true,
@@ -116,12 +120,34 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
+      // Keys and media are set up once per call, so later updates may only end it
+      if (update.call.id === startedPhoneCallId && update.call.state !== 'discarded') {
+        return undefined;
+      }
+
+      const isCallSetupUpdate = update.call.state === 'accepted' || update.call.state === 'active';
+      if (isCallSetupUpdate && !phoneCall?.isKeyExchangeOwner) {
+        if (!phoneCall) return undefined;
+
+        global = {
+          ...global,
+          phoneCall: undefined,
+        };
+        setGlobal(global);
+        runForAllTabs(global, (tabId) => {
+          actions.toggleGroupCallPanel({ force: undefined, tabId });
+        });
+        actions.afterHangUp();
+        return undefined;
+      }
+
       const call: ApiPhoneCall = {
         ...phoneCall,
         ...update.call,
       };
 
       const isOutgoing = phoneCall?.adminId === currentUserId;
+      const isKeyExchangeOwner = Boolean(phoneCall?.isKeyExchangeOwner);
 
       global = {
         ...global,
@@ -154,20 +180,20 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           ...(call.needRating && { ratingPhoneCall: call }),
           isCallPanelVisible: undefined,
         }, getCurrentTabId());
-      } else if (state === 'accepted' && accessHash && gB) {
+      } else if (
+        state === 'accepted' && isOutgoing && isKeyExchangeOwner && accessHash && gB && confirmedPhoneCallId !== call.id
+      ) {
+        confirmedPhoneCallId = call.id;
+        const activeCallId = call.id;
         (async () => {
           try {
-            const activeCallId = call.id;
             const result = await callApi('confirmPhoneCall', {
               gAOrB: gB,
               emojiData: EMOJI_DATA,
               emojiOffsets: EMOJI_OFFSETS,
             });
             if (!result) {
-              logPhoneCallDebug('Failed to confirm accepted phone call', {
-                callId: activeCallId,
-              });
-              return;
+              throw new Error('Missing phone call confirmation result');
             }
             const { gA, keyFingerprint, emojis } = result;
 
@@ -176,9 +202,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
               return;
             }
 
-            await callApi('confirmCall', {
+            const isConfirmed = await callApi('confirmCall', {
               call, gA, keyFingerprint,
             });
+            if (!isConfirmed) {
+              throw new Error('Server rejected phone call confirmation');
+            }
 
             global = getGlobal();
             if (global.phoneCall?.id !== activeCallId) {
@@ -196,16 +225,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             };
             setGlobal(global);
           } catch (err) {
-            logPhoneCallDebug('Failed to confirm accepted phone call', {
-              callId: call.id,
-              error: err instanceof Error ? err.message : String(err),
-            });
+            hangUpFailedPhoneCall(actions, activeCallId, 'Failed to confirm accepted phone call', err);
           }
         })();
-      } else if (state === 'active' && connections && phoneCall?.state !== 'active') {
+      } else if (state === 'active' && connections && isKeyExchangeOwner) {
+        startedPhoneCallId = call.id;
+        const activeCallId = call.id;
         (async () => {
           try {
-            const activeCallId = call.id;
             let callConfig = DEFAULT_PHONE_CALL_CONFIG;
             try {
               callConfig = await callApi('fetchCallConfig') || DEFAULT_PHONE_CALL_CONFIG;
@@ -253,10 +280,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 return;
               }
 
-              if (!call.gAHash) {
-                throw new Error('Missing phone call gA hash');
-              }
-
               if (!call.keyFingerprint) {
                 throw new Error('Missing phone call key fingerprint');
               }
@@ -267,15 +290,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                   gAOrB: call.gAOrB!,
                   emojiData: EMOJI_DATA,
                   emojiOffsets: EMOJI_OFFSETS,
-                  gAHash: call.gAHash,
                   expectedKeyFingerprint: call.keyFingerprint,
                 },
               );
               if (!result) {
-                logPhoneCallDebug('Failed to confirm phone call', {
-                  callId: activeCallId,
-                });
-                return;
+                throw new Error('Missing phone call confirmation result');
               }
               const { emojis } = result;
 
@@ -310,10 +329,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
               actions.apiUpdate,
             );
           } catch (err) {
-            logPhoneCallDebug('Failed to start phone call', {
-              error: err instanceof Error ? err.message : String(err),
-              callId: call.id,
-            });
+            hangUpFailedPhoneCall(actions, activeCallId, 'Failed to start phone call', err);
           }
         })();
       }
@@ -325,7 +341,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (!global.phoneCall) return global;
 
-      if (connectionState === 'closed' || connectionState === 'disconnected' || connectionState === 'failed') {
+      if (connectionState === 'closed' || connectionState === 'failed') {
         if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
         return undefined;
       }
@@ -371,6 +387,18 @@ function verifyPhoneCallProtocol(protocol?: ApiCallProtocol) {
     protocol
     && CALL_PROTOCOL_LIBRARY_VERSIONS.some((version) => protocol.libraryVersions.includes(version)),
   );
+}
+
+function hangUpFailedPhoneCall(actions: RequiredGlobalActions, callId: string, message: string, err: unknown) {
+  logPhoneCallDebug(message, {
+    callId,
+    error: err instanceof Error ? err.message : String(err),
+  });
+
+  const global = getGlobal();
+  if (global.phoneCall?.id !== callId) return;
+
+  if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
 }
 
 async function processPhoneCallSignalingData(queued: QueuedPhoneCallSignalingData) {

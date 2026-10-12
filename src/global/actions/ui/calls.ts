@@ -386,6 +386,7 @@ addActionHandler('requestCall', (global, actions, payload): ActionReturnType => 
       participantId: userId,
       isVideo,
       adminId: global.currentUserId,
+      isKeyExchangeOwner: true,
     },
   };
   setGlobal(global);

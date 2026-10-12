@@ -14,11 +14,17 @@ import {
 } from '../../../lib/gramjs/Helpers';
 
 import {
-  bufferFromUtf8, bufferToUtf8, compareBuffersConstantTime, concat, readUint32BE, writeUint32BE,
+  bufferFromUtf8, bufferToUtf8, compareBuffersConstantTime, concat, readUint32BE, readUint32LE, writeUint32BE,
 } from '../../../util/encoding/buffer';
 import { isSctpPacket, SctpSignaling } from './sctpSignaling';
 
 const SHA256_HASH_BYTES = 32;
+const MAX_SIGNALING_INPUT_BYTES = 1024 * 1024;
+// Match tgcalls' encrypted-packet and inflated signaling limits
+const MAX_SIGNALING_BODY_BYTES = 128 * 1024;
+const MAX_SIGNALING_OUTPUT_BYTES = 2 * 1024 * 1024;
+const GZIP_FOOTER_BYTES = 8;
+const GZIP_SIZE_BYTES = 4;
 
 type DhConfig = {
   p: number[];
@@ -26,11 +32,14 @@ type DhConfig = {
   random: number[];
 };
 
+type AcceptCallParams = DhConfig & {
+  gAHash: number[];
+};
+
 type ConfirmCallParams = {
   gAOrB: number[];
   emojiData: Uint16Array;
   emojiOffsets: number[];
-  gAHash?: number[];
   expectedKeyFingerprint?: string;
 };
 
@@ -51,7 +60,7 @@ let currentPhoneCallState: PhoneCallState | undefined;
 class PhoneCallState {
   private authKey?: Uint8Array;
 
-  private sctp = new SctpSignaling();
+  private sctp: SctpSignaling;
 
   private seq = 0;
 
@@ -63,11 +72,15 @@ class PhoneCallState {
 
   private gB?: bigint;
 
+  private gAHash?: Uint8Array;
+
   private p?: bigint;
 
   private random?: bigint;
 
   private keyFingerprint?: string;
+
+  private isConfirmationStarted = false;
 
   private waitForState: Promise<void>;
 
@@ -79,6 +92,7 @@ class PhoneCallState {
     private isOutgoing: boolean,
     private shouldUseSctp = true,
   ) {
+    this.sctp = new SctpSignaling(isOutgoing);
     this.waitForState = new Promise<void>((resolve) => {
       this.resolveState = resolve;
     });
@@ -110,7 +124,16 @@ class PhoneCallState {
     return Array.from(gAHash);
   }
 
-  acceptCall({ p, g, random }: DhConfig) {
+  acceptCall({
+    p, g, random, gAHash,
+  }: AcceptCallParams) {
+    if (gAHash.length !== SHA256_HASH_BYTES) {
+      throw new SecurityError('Invalid phone call gA hash');
+    }
+
+    // The commitment is pinned before `g_b` is revealed, so later updates cannot replace it
+    this.gAHash = Uint8Array.from(gAHash);
+
     const primeBytes = Uint8Array.from(p);
     const pLast = validateDhParameters(primeBytes, g);
     const randomLast = generateDhPrivateExponent(pLast, random);
@@ -129,27 +152,28 @@ class PhoneCallState {
     gAOrB,
     emojiData,
     emojiOffsets,
-    gAHash,
     expectedKeyFingerprint,
   }: ConfirmCallParams) {
     if (!this.random || !this.p) {
       throw new Error('Values not set');
     }
 
+    // Each call derives exactly one key; re-keying after users compare emojis enables a MITM
+    if (this.isConfirmationStarted) {
+      throw new SecurityError('Phone call key exchange is already started');
+    }
+    this.isConfirmationStarted = true;
+
     const peerValueBytes = Uint8Array.from(gAOrB);
     if (this.isOutgoing) {
       this.gB = readBigIntFromBuffer(peerValueBytes, false);
       validateDhPublicValue(this.gB, this.p, 'g_b');
     } else {
-      if (!gAHash) {
-        throw new SecurityError('Missing phone call gA hash');
-      }
-
       if (expectedKeyFingerprint === undefined) {
         throw new SecurityError('Missing phone call key fingerprint');
       }
 
-      await validateGAHash(peerValueBytes, gAHash);
+      await validateGAHash(peerValueBytes, this.gAHash!);
       this.gA = readBigIntFromBuffer(peerValueBytes, false);
       validateDhPublicValue(this.gA, this.p, 'g_a');
     }
@@ -229,7 +253,7 @@ class PhoneCallState {
   }
 
   async decode(data: number[]): Promise<any> {
-    if (this.isDestroyed) {
+    if (this.isDestroyed || data.length > MAX_SIGNALING_INPUT_BYTES) {
       return undefined;
     }
 
@@ -260,7 +284,7 @@ class PhoneCallState {
   }
 
   private async decodeBody(body: Uint8Array): Promise<any> {
-    if (body.length < 21) {
+    if (body.length < 21 || body.length > MAX_SIGNALING_BODY_BYTES) {
       return undefined;
     }
     const authKey = this.authKey;
@@ -287,11 +311,21 @@ class PhoneCallState {
     if (!this.shouldAcceptInboundSeq(inboundSeq)) {
       return undefined;
     }
+    this.markInboundSeq(inboundSeq);
 
     const message = decrypted.slice(4);
     try {
-      const payload = message[0] === 0x1F && message[1] === 0x8B ? gunzipSync(message) : message;
-      this.markInboundSeq(inboundSeq);
+      let payload = message;
+      if (message[0] === 0x1F && message[1] === 0x8B) {
+        if (message.length < GZIP_FOOTER_BYTES) return undefined;
+
+        const outputLength = readUint32LE(message, message.length - GZIP_SIZE_BYTES);
+        if (!outputLength || outputLength > MAX_SIGNALING_OUTPUT_BYTES) return undefined;
+
+        // The extra byte detects output exceeding ISIZE even when the fixed buffer truncates it
+        payload = gunzipSync(message, { out: new Uint8Array(outputLength + 1) });
+        if (payload.length !== outputLength) return undefined;
+      }
       return JSON.parse(bufferToUtf8(payload));
     } catch {
       return undefined;
@@ -354,13 +388,9 @@ async function generateEmojiFingerprint(
   return result.join('');
 }
 
-async function validateGAHash(gA: Uint8Array, expectedHash: number[]) {
-  if (expectedHash.length !== SHA256_HASH_BYTES) {
-    throw new SecurityError('Invalid phone call gA hash');
-  }
-
+async function validateGAHash(gA: Uint8Array, expectedHash: Uint8Array) {
   const actualHash = await sha256(gA);
-  if (!compareBuffersConstantTime(actualHash, Uint8Array.from(expectedHash))) {
+  if (!compareBuffersConstantTime(actualHash, expectedHash)) {
     throw new SecurityError('Phone call gA hash mismatch');
   }
 }
@@ -418,7 +448,7 @@ export function verifyPhoneCallKeyFingerprint(
   return currentPhoneCallState!.verifyKeyFingerprint(params);
 }
 
-export function acceptPhoneCall(params: DhConfig): ReturnTypeOf<'acceptCall'> {
+export function acceptPhoneCall(params: AcceptCallParams): ReturnTypeOf<'acceptCall'> {
   return currentPhoneCallState!.acceptCall(params);
 }
 

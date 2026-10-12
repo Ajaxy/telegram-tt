@@ -24,6 +24,8 @@ import {
 
 const DEFAULT_MID = 3;
 const GROUP_CALL_VIDEO_MAX_HEIGHT = 720;
+const VIDEO_RTP_CLOCK_RATE = 90000;
+const VIDEO_CODECS_WITH_FIXED_CLOCK_RATE = new Set(['VP8', 'VP9', 'H264']);
 
 type GroupCallState = {
   connection?: RTCPeerConnection;
@@ -224,11 +226,11 @@ function buildPayloadTypeLines(payloadType: PayloadType) {
   } = payloadType;
 
   const lines = [
-    `a=rtpmap:${id} ${name}/${clockrate}${channels ? `/${channels}` : ''}`,
+    `a=rtpmap:${id} ${name}/${clockrate}${channels > 1 ? `/${channels}` : ''}`,
   ];
 
-  if (parameters) {
-    const parametersString = Object.keys(parameters).map((key) => `${key}=${parameters[key]};`).join(' ');
+  const parametersString = Object.entries(parameters || {}).map(([key, value]) => `${key}=${value}`).join('; ');
+  if (parametersString) {
     lines.push(`a=fmtp:${id} ${parametersString}`);
   }
 
@@ -974,7 +976,13 @@ export async function handleUpdateGroupCallConnection(data: GroupCallConnectionD
     audioExtensions: data.audio?.['rtp-hdrexts'] || conference.audioExtensions || [],
     audioPayloadTypes: data.audio?.['payload-types'] || conference.audioPayloadTypes || [],
     videoExtensions: data.video['rtp-hdrexts'],
-    videoPayloadTypes: data.video['payload-types'],
+    // These codecs require a 90 kHz RTP clock, even when the server advertises another rate
+    videoPayloadTypes: data.video['payload-types'].map((payloadType) => ({
+      ...payloadType,
+      clockrate: VIDEO_CODECS_WITH_FIXED_CLOCK_RATE.has(payloadType.name.toUpperCase())
+        ? VIDEO_RTP_CLOCK_RATE : payloadType.clockrate,
+      channels: 0,
+    })),
   };
 
   state = {
@@ -1011,20 +1019,24 @@ function handleTrack(e: RTCTrackEvent) {
     });
     return;
   }
-  const ssrc = state.conference?.ssrcs?.find((l) => l.endpoint === e.track.id);
-  if (!ssrc || !ssrc.userId) {
+  const ssrc = state.conference?.ssrcs?.find((l) => l.mid === e.transceiver.mid);
+  if (!ssrc) {
     logGroupCall('remote track skipped: no matching ssrc', {
       track: summarizeTrack(e.track),
+      mid: e.transceiver.mid,
       endpoint: e.track.id,
       conference: summarizeConference(state.conference),
     });
     return;
   }
+  if (!ssrc.userId) return;
 
   const { userId, isPresentation } = ssrc;
   const participant = state.participants?.find((p) => p.id === userId);
 
   const streamType = (e.track.kind === 'video' ? (isPresentation ? 'presentation' : 'video') : 'audio');
+  // Keep each participant isolated even when remote tracks share a default stream
+  const stream = new MediaStream([e.track]);
 
   e.track.onended = () => {
     logGroupCall('remote track ended', {
@@ -1032,7 +1044,9 @@ function handleTrack(e: RTCTrackEvent) {
       streamType,
       track: summarizeTrack(e.track),
     });
-    if (streamType === 'audio' && state?.streams?.[userId]?.audio === stream) {
+    if (state?.streams?.[userId]?.[streamType] !== stream) return;
+
+    if (streamType === 'audio') {
       state.participantFunctions?.[userId]?.dispose?.();
       delete state.participantFunctions?.[userId];
     }
@@ -1041,16 +1055,6 @@ function handleTrack(e: RTCTrackEvent) {
   };
   e.track.onmute = () => undefined;
   e.track.onunmute = () => undefined;
-
-  const stream = e.streams[0];
-  if (!stream) {
-    logGroupCall('remote track skipped: missing stream', {
-      userId,
-      streamType,
-      track: summarizeTrack(e.track),
-    });
-    return;
-  }
 
   if (e.track.kind === 'audio') {
     const { audioContext } = state;

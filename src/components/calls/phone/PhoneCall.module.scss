@@ -1,5 +1,6 @@
 .root {
   :global(.modal-dialog) {
+    isolation: isolate;
     overflow: hidden;
   }
   :global(.modal-content) {

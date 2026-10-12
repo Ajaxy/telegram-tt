@@ -55,8 +55,6 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   add('a=ice-options:trickle');
   add('a=msid-semantic:WMS *');
   add(`a=group:BUNDLE ${ssrcs.map((ssrc) => ssrc.mid).join(' ')}${isPresentation ? '' : ` ${isP2p ? '3' : '2'}`}`);
-  // ice-lite: is a minimal version of the ICE specification, intended only for servers running on a public IP address
-  if (!isP2p) add('a=ice-lite');
 
   const addCandidate = (c: Candidate) => {
     if (c.sdpString) {
@@ -91,14 +89,11 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
       channels, id, name, clockrate, parameters,
     } = payloadType;
 
-    const channelsString = channels ? `/${channels}` : '';
+    const channelsString = channels > 1 ? `/${channels}` : '';
     add(`a=rtpmap:${id} ${name}/${clockrate}${channelsString}`);
 
-    if (parameters) {
-      const parametersString = Object.keys(parameters).map((key) => {
-        return `${key}=${parameters[key]};`;
-      }).join(' ');
-
+    const parametersString = Object.entries(parameters || {}).map(([key, value]) => `${key}=${value}`).join('; ');
+    if (parametersString) {
       add(`a=fmtp:${id} ${parametersString}`);
     }
 
@@ -138,16 +133,13 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
       add('a=sendrecv');
       add('a=bundle-only');
     } else {
-      if (isAnswer) {
+      // This remote SDP uses the server's direction: `recvonly` receives the client's media
+      if (isAnswer || entry.isMain) {
         add('a=recvonly');
         return;
       }
-      if (entry.isMain) {
-        add('a=sendrecv');
-      } else {
-        add('a=sendonly');
-        add('a=bundle-only');
-      }
+      add('a=sendonly');
+      add('a=bundle-only');
     }
 
     entry.sourceGroups.forEach((sourceGroup) => {

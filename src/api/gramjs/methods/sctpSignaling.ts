@@ -69,12 +69,18 @@ export class SctpSignaling {
 
   private reassembly?: Uint8Array[];
 
+  constructor(private isInitiator: boolean) {}
+
   wrapPayload(payload: Uint8Array) {
     if (this.isEstablished && this.peerTag !== undefined) {
       return Array.from(this.createDataPacket(payload));
     }
 
     this.pendingPayloads.push(payload);
+    if (!this.isInitiator) {
+      return undefined;
+    }
+
     if (!this.initSent) {
       return this.createInitRetryPacket();
     }

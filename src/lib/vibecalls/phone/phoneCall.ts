@@ -2079,8 +2079,8 @@ async function tryAddCandidate(
     // eslint-disable-next-line no-null/no-null
     && (rtcCandidate.sdpMLineIndex === undefined || rtcCandidate.sdpMLineIndex === null)
   ) {
-    const fallbackMLineIndex = getLegacyCandidateMLineIndex(connection);
-    if (fallbackMLineIndex === undefined) {
+    const bundleMid = getRemoteBundleMid(connection);
+    if (bundleMid === undefined) {
       logP2p('drop ICE candidate without media id', {
         candidate: rtcCandidate,
         remoteSdpSummary: getRemoteSdpSummary(connection),
@@ -2088,7 +2088,7 @@ async function tryAddCandidate(
       return;
     }
 
-    rtcCandidate.sdpMLineIndex = fallbackMLineIndex;
+    rtcCandidate.sdpMid = bundleMid;
   }
 
   await addIceCandidate(connection, rtcCandidate);
@@ -2107,33 +2107,9 @@ async function addIceCandidate(connection: RTCPeerConnection, candidate: RTCIceC
   }
 }
 
-function getLegacyCandidateMLineIndex(connection: RTCPeerConnection) {
+function getRemoteBundleMid(connection: RTCPeerConnection) {
   const sdp = connection.remoteDescription?.sdp;
-  if (!sdp) {
-    return undefined;
-  }
-
-  const mediaSections = parseSdpSections(sdp).filter((section) => {
-    return section.kind !== 'session';
-  });
-  const activeMediaSections = mediaSections.filter((section) => {
-    return getSdpPort(section) !== 0;
-  });
-  const activeRtpMediaSections = activeMediaSections.filter((section) => {
-    return section.kind === 'audio' || section.kind === 'video';
-  });
-
-  if (activeMediaSections.length === 1) {
-    return mediaSections.indexOf(activeMediaSections[0]);
-  }
-
-  if (activeRtpMediaSections.length === 1 && activeMediaSections.every((section) => {
-    return section.kind === 'application' || section === activeRtpMediaSections[0];
-  })) {
-    return mediaSections.indexOf(activeRtpMediaSections[0]);
-  }
-
-  return undefined;
+  return sdp ? parseBundleMids(sdp)?.[0] : undefined;
 }
 
 function getCandidateUfrag(candidate: QueuedP2pCandidate) {
