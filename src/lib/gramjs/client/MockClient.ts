@@ -276,9 +276,15 @@ class TelegramClient {
 
       // Emulate server pagination: newest first, `offsetId` excludes itself, `addOffset` shifts the window
       const all = this.getMessagesFrom(peerId).sort((a, b) => b.id - a.id);
-      const { offsetId, addOffset = 0, limit } = request;
-      const start = Math.max(0, (offsetId ? all.findIndex((m) => m.id < offsetId) : 0) + addOffset);
-      const safeStart = offsetId && start === -1 + addOffset ? all.length : start;
+      const { offsetId, offsetDate, addOffset = 0, limit } = request;
+      let offsetIndex = 0;
+      if (offsetId) {
+        offsetIndex = all.findIndex((m) => m.id < offsetId);
+      } else if (offsetDate) {
+        offsetIndex = all.findIndex((m) => (m).date <= offsetDate);
+      }
+      const start = Math.max(0, offsetIndex + addOffset);
+      const safeStart = (offsetId || offsetDate) && offsetIndex === -1 ? all.length : start;
       const slice = limit ? all.slice(safeStart, safeStart + limit) : all;
 
       return new Api.messages.MessagesSlice({
