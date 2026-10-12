@@ -161,6 +161,7 @@ import {
   isValidInputRichMessage,
 } from '../ui/textInput/richText';
 import renderText from './helpers/renderText';
+import { hasActiveRichEditorTooltip } from './tooltips/helpers';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -224,7 +225,6 @@ import Icon from './icons/Icon';
 import PaymentMessageConfirmDialog from './PaymentMessageConfirmDialog';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 import RemoveFormattingModal from './RemoveFormattingModal';
-import { hasActiveRichEditorTooltip } from './tooltips/extensions/RichEditorTooltips';
 
 import './Composer.scss';
 

@@ -6,7 +6,7 @@ import { getRichTextPlainText } from '../../../global/helpers/richMessage';
 import { selectUser } from '../../../global/selectors';
 import { ensureProtocol } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
-import { buildButtonAction, buildButtonAttrs, getButtonColor } from '../../../util/tiptap/extensions/richButton';
+import { buildButtonAction, buildButtonAttrs, getButtonColor } from '../../../util/tiptap/richButton';
 import styles from '../../../util/tiptap/styling.module.scss';
 import renderText from '../../common/helpers/renderText';
 import { buildRichTextFromTiptapContent } from '../../ui/textInput/richText';

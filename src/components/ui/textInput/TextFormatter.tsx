@@ -8,7 +8,7 @@ import { normalizeButtonText } from '../../../global/helpers/buttons';
 import { formatLinkUrl } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import stopEvent from '../../../util/stopEvent';
-import { EMPTY_RICH_BUTTON } from '../../../util/tiptap/extensions/richButton';
+import { EMPTY_RICH_BUTTON } from '../../../util/tiptap/richButton';
 import { isRichEditorBlockquoteActive } from './richEditorFormatting';
 import { buildRichTextFromTiptapContent, buildTiptapInlineContentFromRichText } from './richText';
 

@@ -17,13 +17,6 @@ import { TME_LINK_PREFIX } from '../../config';
 import { getRichTextPlainText } from '../../global/helpers/richMessage';
 import { getFormattedDateFormatString } from '../dates/formattedDate';
 import {
-  buildButtonAttrs,
-  buildButtonHtmlAttrs,
-  BUTTON_ROW_NODE_NAME,
-  normalizeButtonHtml,
-  RICH_BUTTON_NODE_NAME,
-} from './extensions/richButton';
-import {
   BLOCKQUOTE_COLLAPSED_ATTR,
   CAPTION_NODE_NAME,
   FOOTER_NODE_NAME,
@@ -34,6 +27,13 @@ import {
   TABLE_TITLE_NODE_NAME,
   TABLE_WRAPPER_NODE_NAME,
 } from './constants';
+import {
+  buildButtonAttrs,
+  buildButtonHtmlAttrs,
+  BUTTON_ROW_NODE_NAME,
+  normalizeButtonHtml,
+  RICH_BUTTON_NODE_NAME,
+} from './richButton';
 import {
   EMPTY_RICH_MEDIA_CAPTION,
   getRichEditorMediaAttrs,

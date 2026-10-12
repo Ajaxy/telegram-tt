@@ -1,7 +1,7 @@
 import { type Editor, Extension } from '@tiptap/core';
 import type { Plugin } from '@tiptap/pm/state';
 
-import type { RichEditorFormatterControl, RichEditorTooltipsConfig } from '../types';
+import type { RichEditorFormatterControl, RichEditorTooltipsConfig, RichEditorTooltipsStorage } from '../types';
 
 import { buildCommandSuggestion } from './richEditorTooltips/command';
 import { RichEditorTooltipsController } from './richEditorTooltips/controller';
@@ -10,11 +10,6 @@ import { buildFormatterPlugin, refreshFormatter } from './richEditorTooltips/for
 import { buildInlineBotSuggestion } from './richEditorTooltips/inlineBot';
 import { buildMentionSuggestion } from './richEditorTooltips/mention';
 import { buildNativeEmojiSuggestion } from './richEditorTooltips/nativeEmoji';
-
-type RichEditorTooltipsStorage = {
-  config?: RichEditorTooltipsConfig;
-  controller?: RichEditorTooltipsController;
-};
 
 export const RichEditorTooltips = Extension.create<RichEditorTooltipsConfig, RichEditorTooltipsStorage>({
   name: 'richEditorTooltips',
@@ -92,13 +87,4 @@ export function openRichEditorFormatterControl(editor: Editor, control: RichEdit
 
   const storage = (editor.storage as AnyLiteral).richEditorTooltips as RichEditorTooltipsStorage | undefined;
   return storage?.controller?.openFormatterControl(control) || false;
-}
-
-export function hasActiveRichEditorTooltip(editor: Editor) {
-  if (editor.isDestroyed) {
-    return false;
-  }
-
-  const storage = (editor.storage as AnyLiteral).richEditorTooltips as RichEditorTooltipsStorage | undefined;
-  return Boolean(storage?.controller?.hasActiveTooltip());
 }

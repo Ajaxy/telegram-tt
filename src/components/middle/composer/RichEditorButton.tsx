@@ -4,7 +4,7 @@ import { useMemo } from '../../../lib/teact/teact';
 import type { TeactNodeViewComponentProps } from '../../../util/tiptap/TeactNodeViewRenderer';
 
 import buildClassName from '../../../util/buildClassName';
-import { buildButtonAction, BUTTON_ROW_NODE_NAME } from '../../../util/tiptap/extensions/richButton';
+import { buildButtonAction, BUTTON_ROW_NODE_NAME } from '../../../util/tiptap/richButton';
 import styles from '../../../util/tiptap/styling.module.scss';
 import { buildRichTextFromTiptapContent } from '../../ui/textInput/richText';
 

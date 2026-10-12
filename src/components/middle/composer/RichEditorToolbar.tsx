@@ -15,7 +15,7 @@ import {
   MATH_BLOCK_NODE_NAME,
   MATH_INLINE_NODE_NAME,
 } from '../../../util/tiptap/constants';
-import { BUTTON_ROW_NODE_NAME, EMPTY_BUTTON_ROW } from '../../../util/tiptap/extensions/richButton';
+import { BUTTON_ROW_NODE_NAME, EMPTY_BUTTON_ROW } from '../../../util/tiptap/richButton';
 import {
   checkCanInsertRichEditorList,
   getCurrentRichEditorList,

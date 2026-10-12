@@ -4,7 +4,7 @@ import type { TeactNodeViewComponentProps } from '../../../util/tiptap/TeactNode
 
 import { MAX_BUTTONS_PER_ROW } from '../../../global/helpers/buttons';
 import buildClassName from '../../../util/buildClassName';
-import { EMPTY_RICH_BUTTON, getButtonRowAlign } from '../../../util/tiptap/extensions/richButton';
+import { EMPTY_RICH_BUTTON, getButtonRowAlign } from '../../../util/tiptap/richButton';
 import styles from '../../../util/tiptap/styling.module.scss';
 
 import useLang from '../../../hooks/useLang';
