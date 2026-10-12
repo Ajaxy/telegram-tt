@@ -1,0 +1,59 @@
+@view-transition {
+  navigation: auto;
+  types: page;
+}
+
+:root {
+  view-transition-name: none;
+
+  &:active-view-transition-type(page) {
+    view-transition-name: root;
+
+    &::view-transition-group(root) {
+      animation-duration: 200ms;
+    }
+
+    &::view-transition-old(account-switch-menu) {
+      transform-origin: top left;
+      animation: close-account-menu 200ms ease-in forwards;
+    }
+
+    &:has(body.no-context-menu-animations)::view-transition-old(account-switch-menu) {
+      --animation-start-scale: 1;
+
+      animation-duration: 150ms;
+    }
+
+    &:has(body.no-page-transitions) {
+      &::view-transition-group(root),
+      &::view-transition-old(root),
+      &::view-transition-new(root) {
+        animation: none;
+      }
+    }
+
+    /* Keep the outgoing snapshot visible until `UiLoader` mounts */
+    &.initial {
+      &::view-transition-group(root),
+      &::view-transition-old(root),
+      &::view-transition-new(root) {
+        animation-play-state: paused;
+      }
+    }
+
+    /* Source animations and backdrop blur otherwise leak into the captured layers */
+    & .main-menu .bubble.shown {
+      background-color: var(--color-background);
+      backdrop-filter: none;
+      transition: none !important;
+      view-transition-name: account-switch-menu;
+    }
+  }
+}
+
+@keyframes close-account-menu {
+  to {
+    transform: scale(var(--animation-start-scale, 0.85));
+    opacity: 0;
+  }
+}

@@ -1,0 +1,2 @@
+import{p as e}from"./fasterdom-CI0oHoFk.js";import{S as t,_ as n,h as r,y as i}from"./teact-CXBxIhl2.js";function a(e,r,i){let[a,o]=t(!1),[s,c]=t(),[l,u]=t(i);return n(()=>{o(!0),c(void 0);let t=!1;return e().then(e=>{t||(o(!1),u(e))},e=>{t||(o(!1),c(e))}),()=>{t=!0}},r),{isLoading:a,error:s,result:l}}function o(t,n,a,o=!1,s=!1){let c=r(t,n);return i(()=>e(c,a,!o,!s),[c,a,o,s])}export{a as n,o as t};
+//# sourceMappingURL=useDebouncedCallback-BRpwbSJM.js.map

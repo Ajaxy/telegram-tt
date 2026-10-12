@@ -1,0 +1,2 @@
+import{i as e,t}from"./buffer-Bxh69E6y.js";var n=/^[A-Za-z0-9_-]+={0,2}$/;function r(e){return n.test(e)}function i(e){return e.replace(/-/g,`+`).replace(/_/g,`/`)+(e.length%4==0?``:`=`.repeat(4-e.length%4))}function a(e){let n=i(e);return t(n)}function o(t){return e(t).replace(/\+/g,`-`).replace(/\//g,`_`).replace(/=+$/,``)}export{o as n,r,a as t};
+//# sourceMappingURL=base64-_GGUqvD_.js.map
