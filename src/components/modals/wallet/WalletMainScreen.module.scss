@@ -1,0 +1,119 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  @include mixins.scrollable-padding(0);
+}
+
+.features,
+.transactions,
+.section,
+.tabContent,
+.protect,
+.walt {
+  align-self: stretch;
+}
+
+.waltChevron {
+  color: var(--color-text-secondary);
+}
+
+.buttons {
+  display: flex;
+  gap: 0.625rem;
+  align-self: stretch;
+}
+
+.section {
+  flex: 1;
+}
+
+.transactions {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.history {
+  flex: 1;
+}
+
+// `Transition` fills its parent, which here would add the tab row on top of the stretched island
+.tabContent {
+  height: auto;
+
+  // The incoming slide stays in the flow, so the auto height does not collapse during the fade
+  :global(.Transition_slide-to) {
+    position: relative;
+  }
+}
+
+.protectIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.625rem;
+
+  color: var(--color-white);
+
+  background: linear-gradient(180deg, #f45255, #df3955);
+}
+
+.protectGlyph {
+  font-size: 1.0625rem;
+}
+
+.protectLabel {
+  color: var(--color-error);
+}
+
+.provisioning {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+
+  padding: 1rem 0;
+
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.actionButton {
+  flex: 1;
+}
+
+// `TabList` sizes its indicator to the tabs alone, so the row has to hug them
+.historyTabs {
+  width: fit-content;
+  margin-bottom: 0.25rem;
+  margin-inline: auto;
+}
+
+.noCollectibles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+
+  padding: 1.5rem 1rem 0.5rem;
+}
+
+.noCollectiblesSticker {
+  font-size: 3rem;
+  line-height: 1.25;
+}
+
+.noCollectiblesText {
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+  text-align: center;
+}

@@ -18,12 +18,14 @@ import {
   getMessagePhoto,
   getMessageVideo, getMessageVoice,
 } from '../../../global/helpers';
+import { selectReplacedWalletBotId } from '../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getDebugLogs } from '../../../util/debugConsole';
 import { validateFiles } from '../../../util/files';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -54,6 +56,7 @@ export type OwnProps = {
   canSendAudios: boolean;
   isScheduled?: boolean;
   attachBots?: GlobalState['attachMenu']['bots'];
+  canSendMoney?: boolean;
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
   theme: ThemeKey;
@@ -86,6 +89,7 @@ const AttachMenu = ({
   canSendDocuments,
   canSendAudios,
   attachBots,
+  canSendMoney,
   peerType,
   isScheduled,
   theme,
@@ -109,7 +113,9 @@ const AttachMenu = ({
     openPollModal,
     openMusicPicker,
     updateAttachmentSettings,
+    openWalletTransferLink,
   } = getActions();
+  const replacedWalletBotId = useSelector(selectReplacedWalletBotId);
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
   const [isDateModalOpen, openDateModal, closeDateModal] = useFlag();
@@ -183,7 +189,8 @@ const AttachMenu = ({
   const bots = useMemo(() => {
     return attachBots
       ? Object.values(attachBots).filter((bot) => {
-        if (!peerType || !bot.isForAttachMenu) return false;
+        if (!peerType || !bot.isForAttachMenu || bot.id === replacedWalletBotId) return false;
+
         if (peerType === 'bots' && bot.id === chatId
           && bot.attachMenuPeerTypes && bot.attachMenuPeerTypes.includes('self')) {
           return true;
@@ -191,7 +198,7 @@ const AttachMenu = ({
         return bot.attachMenuPeerTypes!.includes(peerType);
       })
       : undefined;
-  }, [attachBots, chatId, peerType]);
+  }, [attachBots, chatId, peerType, replacedWalletBotId]);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -211,6 +218,11 @@ const AttachMenu = ({
   const handlePollCreate = useLastCallback(() => {
     closeAttachMenu();
     openPollModal({ chatId, threadId, messageListType });
+  });
+
+  const handleSendGram = useLastCallback(() => {
+    closeAttachMenu();
+    openWalletTransferLink({ userId: chatId, shouldCloseAfterSend: true });
   });
 
   if (!isButtonVisible && !isDateModalOpen) {
@@ -311,6 +323,9 @@ const AttachMenu = ({
             )}
             {canExpandRichInput && (
               <MenuItem icon="article" onClick={onRichInputExpand}>{lang('AttachmentMenuArticle')}</MenuItem>
+            )}
+            {canSendMoney && !editingMessage && (
+              <MenuItem icon="gram-outline" onClick={handleSendGram}>{lang('WalletSendMoney')}</MenuItem>
             )}
 
             {!editingMessage && !canEditMedia && !isScheduled && Boolean(bots?.length) && (

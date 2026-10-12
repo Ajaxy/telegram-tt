@@ -1,0 +1,63 @@
+@use '../../../styles/mixins';
+
+.root,
+.heroSlide {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.root {
+  @include mixins.scrollable-padding(0);
+}
+
+// `Transition` fills its parent, which here would take the whole screen
+.hero,
+.hero :global(.Transition_slide) {
+  height: auto;
+}
+
+// The incoming slide stays in the flow, so the auto height does not collapse during the fade
+.hero :global(.Transition_slide-to) {
+  position: relative;
+}
+
+.sticker {
+  margin-top: 1rem;
+  font-size: 5rem;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.text {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}

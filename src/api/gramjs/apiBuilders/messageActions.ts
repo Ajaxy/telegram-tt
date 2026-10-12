@@ -414,6 +414,39 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       transactionId,
     };
   }
+
+  if (action instanceof GramJs.MessageActionWalletTonConnectRequest) {
+    return {
+      mediaType: 'action',
+      type: 'walletTonConnectRequest',
+      sessionId: action.sessionId.toString(),
+      expires: action.expires,
+      topic: action.topic,
+      traceId: action.traceId,
+      dappName: action.dappName,
+      isAccepted: action.accepted,
+      isDeclined: action.declined,
+    };
+  }
+
+  if (action instanceof GramJs.MessageActionGramTransfer) {
+    const {
+      amount, peerAddress, transactionId, comment, commentEncrypted,
+    } = action;
+
+    // With the flag set, `comment` holds the base64 payload
+    return {
+      mediaType: 'action',
+      type: 'gramTransfer',
+      // The server signs the amount by direction, as in the wallet history
+      amount: Math.abs(toJSNumber(amount)),
+      peerAddress,
+      transactionId,
+      comment: commentEncrypted ? undefined : comment,
+      encryptedComment: commentEncrypted ? comment : undefined,
+    };
+  }
+
   if (action instanceof GramJs.MessageActionPrizeStars) {
     const {
       unclaimed, stars, transactionId, boostPeer, giveawayMsgId,

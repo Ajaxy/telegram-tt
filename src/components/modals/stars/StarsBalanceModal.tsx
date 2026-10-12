@@ -242,8 +242,8 @@ const StarsBalanceModal = ({
         <ParticlesHeader
           model="speeding-diamond"
           color="blue"
-          title={lang('CurrencyGram')}
-          description={lang('DescriptionAboutGram')}
+          title={lang('GramEarnings')}
+          description={lang('GramEarningsText')}
           isDisabled={!isOpen}
         />
         <div className={styles.tonBalanceContainer}>
@@ -271,7 +271,7 @@ const StarsBalanceModal = ({
 
         {currency === TON_CURRENCY_CODE && (
           <div className={styles.hint}>
-            {lang('GramModalHint')}
+            {lang('GramEarningsHint')}
           </div>
         )}
       </>

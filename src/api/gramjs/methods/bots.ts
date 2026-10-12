@@ -46,6 +46,7 @@ import {
 import { deserializeBytes } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
+import { takeTonConnectOauthSession } from './tonConnect';
 
 export async function answerCallbackButton({
   chatId, accessHash, messageId, data, isGame,
@@ -465,6 +466,7 @@ export async function acceptBotUrlAuth({
   isWriteAllowed,
   wasPhoneShared,
   matchCode,
+  walletSessionId,
 }: {
   chat: ApiChat;
   messageId: number;
@@ -472,14 +474,16 @@ export async function acceptBotUrlAuth({
   isWriteAllowed?: boolean;
   wasPhoneShared?: boolean;
   matchCode?: string;
+  walletSessionId?: string;
 }) {
-  return invokeUrlAuthRequest(new GramJs.messages.AcceptUrlAuth({
+  return acceptUrlAuth(walletSessionId, (tonconnectSession) => new GramJs.messages.AcceptUrlAuth({
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
     buttonId,
     writeAllowed: isWriteAllowed || undefined,
     sharePhoneNumber: wasPhoneShared || undefined,
     matchCode: matchCode || undefined,
+    tonconnectSession,
   }));
 }
 
@@ -490,19 +494,39 @@ export async function requestLinkUrlAuth({ url }: { url: string }) {
 }
 
 export async function acceptLinkUrlAuth({
-  url, isWriteAllowed, wasPhoneShared, matchCode,
+  url, isWriteAllowed, wasPhoneShared, matchCode, walletSessionId,
 }: {
   url: string;
   isWriteAllowed?: boolean;
   wasPhoneShared?: boolean;
   matchCode?: string;
+  walletSessionId?: string;
 }) {
-  return invokeUrlAuthRequest(new GramJs.messages.AcceptUrlAuth({
+  return acceptUrlAuth(walletSessionId, (tonconnectSession) => new GramJs.messages.AcceptUrlAuth({
     url,
     writeAllowed: isWriteAllowed || undefined,
     sharePhoneNumber: wasPhoneShared || undefined,
     matchCode: matchCode || undefined,
+    tonconnectSession,
   }));
+}
+
+// Without the prepared connection the login is not sent: the site would get the login but not the wallet
+async function acceptUrlAuth(
+  walletSessionId: string | undefined,
+  buildRequest: (tonconnectSession?: GramJs.InputTonConnectOauthSession) => GramJs.messages.AcceptUrlAuth,
+): Promise<ApiUrlAuthResult | undefined> {
+  const tonconnectSession = walletSessionId ? takeTonConnectOauthSession(walletSessionId) : undefined;
+
+  if (walletSessionId && !tonconnectSession) {
+    return { type: 'expired' };
+  }
+
+  try {
+    return await invokeUrlAuthRequest(buildRequest(tonconnectSession));
+  } finally {
+    tonconnectSession?.challengeAnswer.fill(0);
+  }
 }
 
 export async function checkUrlAuthMatchCode({ url, matchCode }: { url: string; matchCode: string }) {

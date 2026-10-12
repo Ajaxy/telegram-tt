@@ -15,6 +15,7 @@ import CustomEmoji from '../common/CustomEmoji';
 import FormattedDate from '../common/FormattedDate';
 import SafeLink from '../common/SafeLink';
 import Spoiler from '../common/spoiler/Spoiler';
+import TonAddressLink from '../common/TonAddressLink';
 import MentionLink from '../middle/message/MentionLink';
 import InlineImage from './InlineImage';
 import Latex from './Latex';
@@ -31,6 +32,7 @@ export type RichTextProps = {
   chatId?: string;
   messageId?: number;
   threadId?: ThreadId;
+  isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -46,6 +48,7 @@ const RichText = ({
   chatId,
   messageId,
   threadId,
+  isProtected,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   sharedCanvasRef,
@@ -85,6 +88,7 @@ const RichText = ({
           chatId={chatId}
           messageId={messageId}
           threadId={threadId}
+          isProtected={isProtected}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           sharedCanvasRef={sharedCanvasRef}
@@ -228,6 +232,11 @@ const RichText = ({
           {renderNestedText()}
         </FormattedDate>
       );
+    case 'tonAddress': {
+      const address = getRichTextPlainText(text.text);
+
+      return <TonAddressLink address={address} noCopy={isProtected}>{renderNestedText()}</TonAddressLink>;
+    }
     case 'hashtag':
     case 'botCommand':
     case 'cashtag':
@@ -258,6 +267,7 @@ const RichText = ({
         chatId={chatId}
         messageId={messageId}
         threadId={threadId}
+        isProtected={isProtected}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         sharedCanvasRef={sharedCanvasRef}

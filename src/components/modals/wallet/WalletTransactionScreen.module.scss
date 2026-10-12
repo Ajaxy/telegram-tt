@@ -1,0 +1,153 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  @include mixins.scrollable-padding(0.75rem);
+}
+
+.diamond {
+  width: 7.5rem;
+  height: 7.5rem;
+  margin-bottom: -0.5rem;
+}
+
+// 3/4 of `.amountValue`
+.amount {
+  font-size: 2.0625rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 3.5rem;
+}
+
+.amountValue {
+  font-size: 2.75rem;
+}
+
+.amountFraction {
+  font-size: 1.75rem;
+}
+
+.positive {
+  color: var(--color-success);
+}
+
+.keyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 4.75rem;
+  height: 4.75rem;
+  border-radius: 50%;
+
+  background-image: linear-gradient(180deg, #8699aa, #6e8397);
+}
+
+.keyIconImage {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.collectible {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 1.5rem;
+}
+
+.title {
+  margin-top: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.address {
+  cursor: var(--custom-cursor, pointer);
+
+  font-family: var(--font-family-monospace);
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  overflow-wrap: normal;
+  white-space: pre-line;
+}
+
+.peer {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+}
+
+// Breaking anywhere would let the flex row squeeze the text to a single character
+.peerText {
+  overflow-wrap: break-word;
+}
+
+.fee {
+  display: inline-flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.feeIcon {
+  width: 0.9375rem;
+  height: 0.8125rem;
+}
+
+.fiatFee {
+  color: var(--color-text-secondary);
+}
+
+.feeInfoButton {
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+
+  :global(.icon) {
+    font-size: 1rem;
+  }
+}
+
+.fiat {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.status {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.failed {
+  color: var(--color-error);
+}
+
+.table {
+  align-self: stretch;
+  margin-block: 1.5rem;
+}
+
+.okButton {
+  align-self: stretch;
+  margin-top: auto;
+}
+
+.decryptButton,
+.sendButton {
+  width: auto;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.domain {
+  color: var(--color-primary);
+}
+
+.sendButton {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}

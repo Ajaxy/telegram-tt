@@ -1,0 +1,92 @@
+.root {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+  height: 2.5rem;
+  border-radius: var(--border-radius-default-small);
+
+  background-color: var(--color-background-secondary);
+  box-shadow: inset 0 0 0 0.125rem transparent;
+
+  transition: box-shadow 150ms;
+}
+
+.focused {
+  box-shadow: inset 0 0 0 0.125rem var(--color-primary);
+}
+
+.invalid {
+  box-shadow: inset 0 0 0 0.125rem var(--color-error);
+}
+
+.invalid .input {
+  color: var(--color-error);
+}
+
+.number {
+  flex-shrink: 0;
+
+  min-width: 2rem;
+  margin: 0;
+  padding-inline-start: 0.5rem;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: end;
+}
+
+.input {
+  min-width: 0;
+  height: 100%;
+  padding: 0 0.5rem;
+  border: none;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+
+  background: transparent;
+  outline: none;
+}
+
+.suggestions {
+  position: absolute;
+  z-index: var(--z-menu-bubble);
+  inset-inline-start: 0;
+
+  overflow: hidden;
+
+  min-width: 100%;
+  border-radius: var(--border-radius-default-small);
+
+  visibility: hidden;
+  background-color: var(--color-background);
+  box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+}
+
+// The gap matches `SUGGESTIONS_GAP_PX` in the component
+.bottom {
+  top: calc(100% + 0.25rem);
+  visibility: visible;
+}
+
+.top {
+  bottom: calc(100% + 0.25rem);
+  visibility: visible;
+}
+
+.suggestion {
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.suggestion:hover,
+.active {
+  background-color: var(--color-chat-hover);
+}

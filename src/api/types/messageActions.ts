@@ -251,6 +251,29 @@ export interface ApiMessageActionGiftTon extends ActionMediaType {
   transactionId?: string;
 }
 
+export interface ApiMessageActionWalletTonConnectRequest extends ActionMediaType {
+  type: 'walletTonConnectRequest';
+  sessionId: string;
+  expires: number;
+  topic?: string;
+  traceId?: string;
+  dappName?: string;
+  isAccepted?: boolean;
+  isDeclined?: boolean;
+}
+
+// The service account reports transfers from senders the server cannot name, e.g. outside wallets
+export interface ApiMessageActionGramTransfer extends ActionMediaType {
+  type: 'gramTransfer';
+  // Nanotons, always positive
+  amount: number;
+  peerAddress: string;
+  transactionId: string;
+  comment?: string;
+  // Base64, decrypted on the client
+  encryptedComment?: string;
+}
+
 export interface ApiMessageActionPrizeStars extends ActionMediaType {
   type: 'prizeStars';
   isUnclaimed?: true;
@@ -435,4 +458,4 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionStarGiftPurchaseOffer
   | ApiMessageActionStarGiftPurchaseOfferDeclined | ApiMessageActionNewCreatorPending
   | ApiMessageActionChangeCreator | ApiMessageActionNoForwardsToggle | ApiMessageActionNoForwardsRequest
-  | ApiMessageActionChangeCommunity;
+  | ApiMessageActionChangeCommunity | ApiMessageActionGramTransfer | ApiMessageActionWalletTonConnectRequest;

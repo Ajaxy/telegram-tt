@@ -25,6 +25,7 @@ type OwnProps = {
   autoComplete?: string;
   maxLength?: number;
   hasLengthIndicator?: boolean;
+  maxLengthIndicator?: string;
   tabIndex?: number;
   title?: string;
   autoFocus?: boolean;
@@ -55,6 +56,7 @@ const InputText = ({
   inputMode,
   maxLength,
   hasLengthIndicator,
+  maxLengthIndicator,
   tabIndex,
   title,
   autoFocus,
@@ -113,9 +115,9 @@ const InputText = ({
       {labelText && (
         <label htmlFor={id}>{labelText}</label>
       )}
-      {hasLengthIndicator && maxLength !== undefined && (
+      {(maxLengthIndicator || (hasLengthIndicator && maxLength !== undefined)) && (
         <div className="max-length-indicator">
-          <AnimatedCounter text={Math.max(0, maxLength - (value || '').length).toString()} />
+          <AnimatedCounter text={maxLengthIndicator || Math.max(0, maxLength! - (value || '').length).toString()} />
         </div>
       )}
     </div>

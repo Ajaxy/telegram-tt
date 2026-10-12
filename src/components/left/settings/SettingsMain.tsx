@@ -253,7 +253,7 @@ const SettingsMain = ({
             narrow
             onClick={() => openStarsBalanceModal({ currency: TON_CURRENCY_CODE })}
           >
-            {lang('MenuGram')}
+            {lang('GramEarnings')}
             {Boolean(tonBalance) && (
               <span className="settings-item__current-value">
                 {formatTonAsIcon(lang, convertCurrencyFromBaseUnit(tonBalance.amount, tonBalance.currency), {

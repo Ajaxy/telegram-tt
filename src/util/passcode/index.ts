@@ -9,6 +9,7 @@ import {
   loadPasscodeMeta,
   PASSCODE_META_KEY,
   type PasscodeMeta,
+  requestPasscodeStateLock,
 } from './meta';
 import { clearPasscodeNavigationDek } from './navigation';
 import {
@@ -36,6 +37,7 @@ const WALLPAPER_TYPE_LENGTH_BYTES = 4;
 const SESSIONS_VAULT_KEY_PREFIX = 'sessionsVault_';
 const GLOBALS_VAULT_KEY_PREFIX = 'globalsVault_';
 const WALLPAPERS_VAULT_KEY_PREFIX = 'wallpapersVault_';
+const WALLET_VAULT_KEY_PREFIX = 'walletVault_';
 const PASSCODE_SESSION_LOCK_NAME = 'tt-passcode-session';
 const PASSCODE_GLOBALS_LOCK_NAME = 'tt-passcode-globals';
 
@@ -186,7 +188,7 @@ export async function createPasscode(passcode: string, globalSnapshots: GlobalSn
 
   const { dek, generation, meta } = await createPasscodeContext(passcode, 0);
   const sessionSnapshot = collectSessionStorageSnapshot();
-  const entries = await encryptVaultEntries(dek, generation, sessionSnapshot, globalSnapshots, []);
+  const entries = await encryptVaultEntries(dek, generation, sessionSnapshot, globalSnapshots, [], []);
 
   await PASSCODE_IDB_STORE.setMany([
     [PASSCODE_META_KEY, meta],
@@ -207,13 +209,16 @@ async function changePasscodeNow(passcode: string) {
   const sessionSnapshot = await decryptSessionsVault();
   const globalSnapshots = await readGlobalSnapshots(currentContext);
   const wallpaperBlobs = await readWallpaperBlobs(currentContext);
+  const walletSecrets = await readWalletSecrets(currentContext);
 
   const { dek, generation, meta } = await createPasscodeContext(
     passcode,
     currentContext.meta.lockEpoch,
     currentContext.meta.autolockDuration,
   );
-  const entries = await encryptVaultEntries(dek, generation, sessionSnapshot, globalSnapshots, wallpaperBlobs);
+  const entries = await encryptVaultEntries(
+    dek, generation, sessionSnapshot, globalSnapshots, wallpaperBlobs, walletSecrets,
+  );
 
   const latestMeta = await loadPasscodeMeta();
   if (
@@ -499,10 +504,94 @@ export async function clearWallpaperVaultBlobs() {
   await PASSCODE_IDB_STORE.delMany(storageKeys);
 }
 
+// Keyed by address, the current wallet and the saved ones alike; only the current address counts as the local key
+export async function writeWalletVaultSecret(slot: number | undefined, secret: ArrayBuffer, address: string) {
+  await requestPasscodeStateLock(async () => {
+    const { dek, generation, meta } = await loadCurrentDekContext();
+
+    if (meta.isLocked || meta.isDisabling) {
+      throw new PasscodeDataCorruptedError('[passcode] Wallet vault is not writable');
+    }
+
+    const key = await importAesKey(dek);
+    const storageKey = getWalletVaultKey(generation, slot, address);
+    await PASSCODE_IDB_STORE.set(storageKey, await encryptVaultData(secret, key, generation, storageKey));
+  });
+}
+
+export async function readWalletVaultSecret(slot: number | undefined, address: string) {
+  if (!currentDek || !currentDekGeneration) return undefined;
+
+  const { dek, generation, meta } = await loadCurrentDekContext();
+  if (meta.isLocked) return undefined;
+
+  const storageKey = getWalletVaultKey(generation, slot, address);
+  const data = await PASSCODE_IDB_STORE.get<ArrayBuffer>(storageKey);
+  if (!data) return undefined;
+
+  const key = await importAesKey(dek);
+
+  return decryptVaultData(data, key, generation, storageKey);
+}
+
+export async function hasWalletVaultSecret(slot: number | undefined, address: string) {
+  const meta = await loadPasscodeMeta();
+  if (!meta) return false;
+
+  return Boolean(await PASSCODE_IDB_STORE.get(getWalletVaultKey(meta.generation, slot, address)));
+}
+
+export async function listWalletVaultSecrets(slot: number | undefined) {
+  const meta = await loadPasscodeMeta();
+  if (!meta) return [];
+
+  const prefix = getWalletVaultKey(meta.generation, slot, '');
+
+  return (await getWalletVaultKeys(meta.generation))
+    .filter((storageKey) => storageKey.startsWith(prefix))
+    .map((storageKey) => storageKey.slice(prefix.length));
+}
+
+export async function hasOtherSlotWalletVaultSecrets(slot: number | undefined) {
+  const meta = await loadPasscodeMeta();
+  if (!meta) return false;
+
+  const ownPrefix = getWalletVaultKey(meta.generation, slot, '');
+
+  return (await getWalletVaultKeys(meta.generation)).some((storageKey) => !storageKey.startsWith(ownPrefix));
+}
+
+export async function removeWalletVaultSecret(slot: number | undefined, address: string) {
+  await requestPasscodeStateLock(async () => {
+    const meta = await loadPasscodeMeta();
+    if (!meta) return;
+
+    await PASSCODE_IDB_STORE.del(getWalletVaultKey(meta.generation, slot, address));
+  });
+}
+
+export async function removeWalletVaultSecrets(slot: number | undefined) {
+  await requestPasscodeStateLock(() => removeWalletVaultSecretsNow(slot));
+}
+
+// For a caller already holding the passcode state lock, which is not reentrant
+export async function removeWalletVaultSecretsNow(slot: number | undefined) {
+  const meta = await loadPasscodeMeta();
+  if (!meta) return;
+
+  const prefix = getWalletVaultKey(meta.generation, slot, '');
+  const storageKeys = (await getWalletVaultKeys(meta.generation))
+    .filter((storageKey) => storageKey.startsWith(prefix));
+
+  await PASSCODE_IDB_STORE.delMany(storageKeys);
+}
+
 export async function clearPasscodeStore() {
-  await PASSCODE_IDB_STORE.clear();
-  forgetDek();
-  resetSessionStore();
+  await requestPasscodeStateLock(async () => {
+    await PASSCODE_IDB_STORE.clear();
+    forgetDek();
+    resetSessionStore();
+  });
 }
 
 export async function hasLegacyEncryptedSession() {
@@ -684,6 +773,19 @@ async function getWallpaperVaultKeys(generation?: string) {
   return getVaultKeys(getWallpaperVaultKeyPrefix(generation));
 }
 
+function getWalletVaultKeyPrefix(generation?: string) {
+  return generation ? `${WALLET_VAULT_KEY_PREFIX}${generation}_` : WALLET_VAULT_KEY_PREFIX;
+}
+
+// An empty `address` yields the prefix all of a slot's wallets share
+function getWalletVaultKey(generation: string, slot: number | undefined, address: string) {
+  return `${getWalletVaultKeyPrefix(generation)}${slot || 1}#${address}`;
+}
+
+async function getWalletVaultKeys(generation?: string) {
+  return getVaultKeys(getWalletVaultKeyPrefix(generation));
+}
+
 async function getGlobalVaultKeys(generation?: string) {
   return getVaultKeys(getGlobalsVaultKeyPrefix(generation));
 }
@@ -744,12 +846,35 @@ async function readWallpaperBlobs({ dek, generation }: Awaited<ReturnType<typeof
   return blobs;
 }
 
+async function readWalletSecrets({ dek, generation }: Awaited<ReturnType<typeof loadCurrentDekContext>>) {
+  const storageKeys = await getWalletVaultKeys(generation);
+  const entries = await PASSCODE_IDB_STORE.getMany<ArrayBuffer>(storageKeys);
+  const key = await importAesKey(dek);
+  const secrets: Array<[string, ArrayBuffer]> = [];
+
+  for (let index = 0; index < storageKeys.length; index++) {
+    const entry = entries[index];
+    if (!entry) continue;
+
+    try {
+      const storageKey = storageKeys[index];
+      const walletKey = storageKey.slice(getWalletVaultKeyPrefix(generation).length);
+      secrets.push([walletKey, await decryptVaultData(entry, key, generation, storageKey)]);
+    } catch (err) {
+      // A secret that fails to decrypt is corrupted beyond recovery and is dropped with the old generation
+    }
+  }
+
+  return secrets;
+}
+
 async function encryptVaultEntries(
   dek: ArrayBuffer,
   generation: string,
   sessionSnapshot: Record<string, string>,
   globalSnapshots: GlobalSnapshot[],
   wallpaperBlobs: Array<[string, Blob]>,
+  walletSecrets: Array<[string, ArrayBuffer]>,
 ) {
   const key = await importAesKey(dek);
   const sessionsStorageKey = getSessionsVaultKey(generation);
@@ -774,6 +899,11 @@ async function encryptVaultEntries(
     ]);
   }
 
+  for (const [walletKey, secret] of walletSecrets) {
+    const storageKey = `${getWalletVaultKeyPrefix(generation)}${walletKey}`;
+    entries.push([storageKey, await encryptVaultData(secret, key, generation, storageKey)]);
+  }
+
   return entries;
 }
 
@@ -781,10 +911,13 @@ async function removeVaultGeneration(generation: string) {
   try {
     const wallpaperVaultKeys = await getWallpaperVaultKeys(generation);
     const globalVaultKeys = await getGlobalVaultKeys(generation);
+    const walletVaultKeys = await getWalletVaultKeys(generation);
+
     await PASSCODE_IDB_STORE.delMany([
       getSessionsVaultKey(generation),
       ...globalVaultKeys,
       ...wallpaperVaultKeys,
+      ...walletVaultKeys,
     ]);
   } catch {
     // Old-generation cleanup is best-effort

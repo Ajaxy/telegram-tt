@@ -14,6 +14,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { waitForAnimationEnd } from '../../../util/cssAnimationEndListeners';
 import { disableDirectTextInput, enableDirectTextInput } from '../../../util/directInputManager';
+import { countOpenModal } from '../../../util/openModals';
 
 import useContext from '../../../hooks/data/useContext';
 import useFrozenProps from '../../../hooks/useFrozenProps';
@@ -53,6 +54,7 @@ export type ModalProps = {
   noContainment?: boolean;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
+  onEsc?: NoneToVoidFunction;
 };
 
 type ModalContextType = {
@@ -84,6 +86,8 @@ type ModalTitleProps = {
 type ModalCloseButtonProps = {
   asAbsolute?: boolean;
   className?: string;
+  // Turns the cross into a back arrow
+  onBack?: NoneToVoidFunction;
 };
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -108,12 +112,16 @@ function useModalContext() {
 
 function addBodyDialogClass() {
   openModalCount += 1;
+
+  const stopCounting = countOpenModal();
+
   requestMutation(() => {
     document.body.classList.add('has-open-dialog');
   });
 
   return () => {
     openModalCount = Math.max(0, openModalCount - 1);
+    stopCounting();
 
     if (!openModalCount) {
       requestMutation(() => {
@@ -141,6 +149,7 @@ const Modal = ({
   noContainment,
   onClose,
   onCloseAnimationEnd,
+  onEsc,
 }: ModalProps) => {
   const [hasEverOpened, setHasEverOpened] = useState(Boolean(isOpen));
   const [shouldRender, setShouldRender] = useState(Boolean(isOpen));
@@ -180,13 +189,6 @@ const Modal = ({
 
   const finishClose = useLastCallback(() => {
     cleanupCloseAnimation();
-
-    const dialogElement = dialogRef.current;
-
-    if (dialogElement?.open) {
-      dialogElement.close();
-    }
-
     setIsClosing(false);
     setShouldRender(false);
     onCloseAnimationEnd?.();
@@ -202,6 +204,12 @@ const Modal = ({
     if (noLightDismiss || !isOpen || isClosing) return;
 
     event.preventDefault();
+
+    if (onEsc) {
+      onEsc();
+      return;
+    }
+
     handleRequestClose();
   });
 
@@ -524,11 +532,16 @@ const ModalSubtitle = ({ className, children }: ModalSlotProps) => {
   );
 };
 
-const ModalCloseButton = ({ asAbsolute, className }: ModalCloseButtonProps) => {
+const ModalCloseButton = ({ asAbsolute, className, onBack }: ModalCloseButtonProps) => {
   const lang = useLang();
   const modalContext = useModalContext();
 
   const handleClick = useLastCallback(() => {
+    if (onBack) {
+      onBack();
+      return;
+    }
+
     modalContext?.onClose();
   });
 
@@ -537,7 +550,7 @@ const ModalCloseButton = ({ asAbsolute, className }: ModalCloseButtonProps) => {
       round
       color="translucent"
       size="tiny"
-      ariaLabel={lang('Close')}
+      ariaLabel={onBack ? lang('Back') : lang('Close')}
       className={buildClassName(
         styles.closeButton,
         asAbsolute && styles.closeButtonAbsolute,
@@ -545,7 +558,7 @@ const ModalCloseButton = ({ asAbsolute, className }: ModalCloseButtonProps) => {
       )}
       onClick={handleClick}
     >
-      <div className="animated-close-icon" />
+      <div className={buildClassName('animated-close-icon', onBack && 'state-back')} />
     </Button>
   );
 };

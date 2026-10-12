@@ -1,0 +1,52 @@
+// The column is set explicitly, or the warning laid over the row would push the avatar past the text
+.avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  margin-inline: -0.3125rem 1.6875rem;
+
+  :global(.MenuItem.compact) > & {
+    margin-inline: 0.0625rem 0.8125rem;
+  }
+}
+
+.placeholder {
+  pointer-events: none;
+}
+
+// On the baseline the skeleton would make the line taller
+.lineSkeleton {
+  vertical-align: middle;
+}
+
+// Shorter than the title and the subtitle together, so the row keeps its height when the warning shows
+.noAccount {
+  grid-column: 1 / -1;
+  grid-row: 1 / span 2;
+  align-self: center;
+
+  font-size: 0.8125rem;
+  line-height: 1.0625rem;
+  color: var(--color-text-secondary);
+
+  :global(.MenuItem.compact) > & {
+    margin-inline-start: 0.5rem;
+  }
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.appear {
+  animation: appear 0.3s ease-out;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,30 @@
+.root {
+  pointer-events: none;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.preview {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  transition: opacity 0.22s linear;
+}
+
+.previewHidden {
+  opacity: 0;
+}
+
+.canvas {
+  position: relative;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.22s linear;
+}
+
+.ready {
+  opacity: 1;
+}

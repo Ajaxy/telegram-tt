@@ -1,0 +1,23 @@
+.words {
+  column-count: 2;
+  column-gap: 0.75rem;
+  padding: 1rem;
+}
+
+.word {
+  display: flex;
+  gap: 0.375rem;
+
+  padding-block: 0.1875rem;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+}
+
+.wordNumber {
+  min-width: 1.5rem;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-secondary);
+  text-align: right;
+}

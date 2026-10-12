@@ -115,6 +115,7 @@ type RichTextContext = {
   chatId?: string;
   messageId?: number;
   threadId?: ThreadId;
+  isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -189,6 +190,7 @@ const RichContent = ({
     chatId,
     messageId,
     threadId,
+    isProtected,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
     sharedCanvasRef,

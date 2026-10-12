@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react';
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import {
   memo, useCallback, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
@@ -39,7 +39,7 @@ type OwnProps = {
   noReplaceNewlines?: boolean;
 };
 
-const TextArea: FC<OwnProps> = ({
+const TextArea = ({
   ref,
   id,
   className,
@@ -63,7 +63,7 @@ const TextArea: FC<OwnProps> = ({
   onBlur,
   onPaste,
   noReplaceNewlines,
-}) => {
+}: OwnProps) => {
   let textareaRef = useRef<HTMLTextAreaElement>();
   if (ref) {
     textareaRef = ref;
@@ -81,7 +81,12 @@ const TextArea: FC<OwnProps> = ({
     className,
   );
 
+  // Lets the effect below skip values already sized by typing
+  const lastResizeValueRef = useRef<string>();
+
   const resizeHeight = useLastCallback((element: HTMLTextAreaElement) => {
+    lastResizeValueRef.current = element.value;
+
     requestMutation(() => {
       element.style.height = '0';
       requestForcedReflow(() => {
@@ -93,11 +98,13 @@ const TextArea: FC<OwnProps> = ({
     });
   });
 
+  // The height also follows values set from outside, not only user input
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
-    if (!textarea) return;
+    if (!textarea || textarea.value === lastResizeValueRef.current) return;
+
     resizeHeight(textarea);
-  }, []);
+  }, [value]);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.currentTarget;

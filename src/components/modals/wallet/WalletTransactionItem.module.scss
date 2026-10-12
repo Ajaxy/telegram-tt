@@ -1,0 +1,185 @@
+.root {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  gap: 0.75rem;
+
+  padding: 0.5rem 0.75rem 0.4375rem 0.5rem;
+  border-radius: 0.5rem;
+
+  transition: background-color 0.25s ease-out;
+
+  &:hover {
+    background-color: var(--color-chat-hover);
+  }
+}
+
+.pending {
+  background-color: var(--color-background);
+  box-shadow: 0 0.125rem 0.5rem var(--color-default-shadow);
+}
+
+.pendingDiamond {
+  margin: -0.5rem 0 -0.5rem 0.125rem;
+}
+
+.preview {
+  flex-shrink: 0;
+  width: 2.625rem;
+  height: 2.625rem;
+}
+
+.direction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  color: var(--color-white);
+}
+
+// Gradient pairs from the mockup; the incoming one is the same pair rotated to green
+.directionOut {
+  background-image: linear-gradient(180deg, #70a7db, #408acf);
+}
+
+.directionIn {
+  background-image: linear-gradient(180deg, #70db83, #40ce58);
+}
+
+.directionIcon {
+  font-size: 1.75rem;
+}
+
+// The glyph only points up
+.directionIconDown {
+  transform: rotate(180deg);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.title,
+.description,
+.date {
+  margin-bottom: 0;
+}
+
+.title,
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3125rem;
+}
+
+.description,
+.date {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.date {
+  color: var(--color-text-secondary);
+}
+
+.after {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.125rem;
+  align-items: flex-end;
+}
+
+.amount {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3125rem;
+}
+
+.amountPending {
+  font-size: 1.4375rem;
+  line-height: 1.75rem;
+}
+
+.collectible {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.collectibleImage {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+}
+
+.collectibleInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.collectibleName,
+.collectibleKind {
+  overflow: hidden;
+
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collectibleName {
+  font-weight: var(--font-weight-medium);
+}
+
+.collectibleKind {
+  color: var(--color-text-secondary);
+}
+
+.collectibleIcon {
+  margin-left: 0.125rem;
+  font-size: 0.875rem;
+}
+
+.status {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.statusFailed {
+  color: var(--color-error);
+}
+
+.gramIcon {
+  height: 0.875rem;
+  margin: 0.0625rem 0 0 0.125rem;
+  vertical-align: 0 !important;
+}
+
+.positive {
+  color: var(--color-success);
+}
+
+.negative {
+  color: var(--color-text);
+}

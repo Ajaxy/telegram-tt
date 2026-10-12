@@ -349,6 +349,13 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     const senderName = sender ? getMessageSenderName(getTranslationFn(), chat.id, sender) : undefined;
     let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 
+    // The chat list preview stays without the comment, as in the Android app
+    const { action } = message.content;
+
+    if (action?.type === 'gramTransfer' && action.comment) {
+      summary = `${summary}: ${action.comment}`;
+    }
+
     if (hasReaction) {
       const emoji = getReactionEmoji(reaction);
       summary = oldTranslate('PushReactText', [emoji, summary]);

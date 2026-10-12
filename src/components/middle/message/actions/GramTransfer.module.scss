@@ -1,0 +1,335 @@
+// Sizes are the mockup's pixels over 16; the card is 216 by 148
+
+.root {
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+  z-index: 0;
+
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  align-items: center;
+
+  padding: 0.25rem;
+  border-radius: 1.5rem;
+
+  color: white;
+
+  background-color: var(--action-message-bg);
+}
+
+.withComment {
+  padding-bottom: 0.5rem;
+}
+
+.card {
+  isolation: isolate;
+  position: relative;
+
+  overflow: hidden;
+
+  width: 13.5rem;
+  height: 9.25rem;
+  border-radius: 1.25rem;
+
+  background-color: #0d81fe;
+}
+
+// Reproduces the Android app's 140 KB card picture: a conic gradient sampled from its middle part, plus a
+// radial layer in the average color for the blur where the rays meet
+.gradient {
+  position: absolute;
+  z-index: -1;
+  // A square as wide as the card's diagonal keeps the card covered at any angle while it turns
+  inset: -3.5625rem -1.4375rem;
+  background:
+    radial-gradient(
+      circle at 49.5% 49.9%,
+      rgb(13 129 254) 0,
+      rgb(13 129 254 / 98%) 0.1875rem,
+      rgb(13 129 254 / 83%) 0.5625rem,
+      rgb(13 129 254 / 41%) 1.3125rem,
+      rgb(13 129 254 / 23%) 1.8125rem,
+      rgb(13 129 254 / 11%) 2.625rem,
+      rgb(13 129 254 / 3%) 4.5rem,
+      rgb(13 129 254 / 0%) 7.625rem
+    ),
+    conic-gradient(
+      at 49.5% 49.9%,
+      #036eff 0deg,
+      #097bff 65deg,
+      #0d83ff 81deg,
+      #1698ff 105deg,
+      #1aa1ff 115deg,
+      #1aa0fe 122deg,
+      #118cfd 145deg,
+      #0a7efc 165deg,
+      #036efb 198deg,
+      #016bfc 208deg,
+      #036dfe 216deg,
+      #0877fe 240deg,
+      #1289fe 270deg,
+      #1ea1fe 299deg,
+      #1da0fe 305deg,
+      #0c7ffe 330deg,
+      #0470ff 345deg,
+      #036dff 351deg,
+      #036eff 360deg
+    );
+}
+
+.spinning {
+  animation: gradient-spin 4s linear infinite;
+}
+
+.paused {
+  animation-play-state: paused;
+}
+
+@keyframes gradient-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Overhangs the card by 2px, as in the mockup; the outer rounding trims the tip
+.ribbon {
+  top: 0.125rem;
+  right: 0.125rem;
+}
+
+.shine {
+  // Two card widths
+  --shine-tile: 27rem;
+
+  pointer-events: none;
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  // Three card widths: shown, a soft edge and hidden. Sliding it reveals the shine from the left,
+  // and the reversed mask wipes it out in the same direction.
+  mask-image: linear-gradient(90deg, #000 33.3%, transparent 66.7%);
+  mask-size: 300% 100%;
+
+  animation: shine-reveal 550ms linear both;
+
+  &::before {
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        rgb(75 213 249 / 12.5%) calc(var(--shine-tile) * 0.67),
+        transparent var(--shine-tile)
+      );
+  }
+
+  &:global(.closing) {
+    mask-image: linear-gradient(90deg, transparent 33.3%, #000 66.7%);
+    animation: shine-hide 320ms ease-out both;
+  }
+}
+
+.shineStroke {
+  position: absolute;
+  inset: 0;
+
+  padding: 0.125rem;
+  border-radius: inherit;
+
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+
+  &::before {
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 calc(var(--shine-tile) * 0.4),
+        rgb(75 213 249 / 75%) calc(var(--shine-tile) * 0.67),
+        transparent var(--shine-tile)
+      );
+  }
+}
+
+.shine::before,
+.shineStroke::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--shine-tile));
+
+  width: calc(100% + var(--shine-tile));
+
+  animation: shine-run 0.6s linear infinite;
+}
+
+@keyframes shine-run {
+  to {
+    transform: translateX(var(--shine-tile));
+  }
+}
+
+// Separate names, as the browser would not restart an animation that only changes its timing
+@keyframes shine-reveal {
+  from {
+    mask-position: 100% 0;
+  }
+
+  to {
+    mask-position: 0 0;
+  }
+}
+
+@keyframes shine-hide {
+  from {
+    mask-position: 100% 0;
+  }
+
+  to {
+    mask-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinning,
+  .shine,
+  .shine:global(.closing),
+  .shine::before,
+  .shineStroke::before {
+    animation: none;
+  }
+}
+
+// Fades in late enough that a quick answer never shows it
+.loading {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.25);
+
+  animation: fade-in 0.15s 0.35s both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.ribbonText {
+  font-family: var(--font-family-rounded);
+  font-size: 0.6875rem;
+  text-transform: lowercase;
+  letter-spacing: 0.0357rem;
+}
+
+.icon {
+  position: absolute;
+  top: 0.875rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.amount {
+  position: absolute;
+  top: 3.875rem;
+  left: 50%;
+  transform: translateX(-50%);
+
+  overflow: hidden;
+
+  max-width: calc(100% - 2rem);
+  padding-inline-end: 0.25rem;
+
+  font-family: var(--font-family-rounded);
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.375rem;
+  letter-spacing: 0.0228rem;
+  white-space: nowrap;
+}
+
+.amountFraction {
+  font-size: 0.875rem;
+}
+
+.amountContent {
+  transform-origin: center;
+  transform: scale(var(--fit-scale, 1));
+  white-space: nowrap;
+}
+
+// Fixed colors in both themes, as in the Android app
+.ticker {
+  margin-inline-start: 0.25rem;
+  color: #5de3ff;
+}
+
+.peer {
+  position: absolute;
+  top: 6.125rem;
+  right: 1rem;
+  left: 1rem;
+
+  overflow: hidden;
+
+  font-family: var(--font-family-monospace);
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  color: #5de3ff;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.address {
+  pointer-events: none;
+
+  position: absolute;
+  top: 7.125rem;
+  right: 1rem;
+  left: 1rem;
+
+  display: flex;
+  flex-direction: column;
+}
+
+// Solid, as a translucent black would read greyer on the bright diagonal of the gradient
+.addressLine {
+  font-family: var(--font-family-monospace);
+  font-size: 0.5625rem;
+  font-weight: var(--font-weight-normal);
+  line-height: 1.35;
+  color: #0068c6;
+  text-align: center;
+  text-shadow: 0 0.0625rem 0 rgb(255 255 255 / 6%);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.comment {
+  max-width: 13.5rem;
+  padding-inline: 0.25rem;
+
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}

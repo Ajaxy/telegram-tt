@@ -29,6 +29,8 @@ import RoundTimer from './RoundTimer';
 
 import './Notification.scss';
 
+const OPEN_DIALOG_SELECTOR = 'dialog[open]';
+
 type OwnProps = {
   notification: ApiNotification;
 };
@@ -65,6 +67,27 @@ const Notification = ({
   const isMessageLangFnParam = isLangFnParam(message);
 
   const [isOpen, setIsOpen] = useState(true);
+
+  // A modal `<dialog>` sits in the top layer, so a toast over it has to render inside the topmost one.
+  // Picked once, on mount: moving the toast to another portal would restart its animation.
+  const [portalElement, setPortalElement] = useState(() => {
+    if (containerSelector) return undefined;
+
+    const dialogs = document.querySelectorAll<HTMLDialogElement>(OPEN_DIALOG_SELECTOR);
+
+    return dialogs[dialogs.length - 1];
+  });
+
+  // The dialog would take the toast away with it when it closes, so the toast moves to the regular portal
+  useEffect(() => {
+    if (!portalElement) return undefined;
+
+    const handleDialogClose = () => setPortalElement(undefined);
+    portalElement.addEventListener('close', handleDialogClose);
+
+    return () => portalElement.removeEventListener('close', handleDialogClose);
+  }, [portalElement]);
+
   const actionActivationRef = useRef<boolean>(false);
   const timerRef = useRef<number | undefined>();
   const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
@@ -205,7 +228,11 @@ const Notification = ({
   }, [customEmojiIconId, icon, shouldUseCustomIcon]);
 
   return (
-    <Portal className="Notification-container" containerSelector={containerSelector}>
+    <Portal
+      className={buildClassName('Notification-container', portalElement && 'in-dialog')}
+      containerSelector={containerSelector}
+      containerElement={portalElement}
+    >
       <div
         className={buildClassName('Notification', transitionClassNames, className)}
         onClick={handleClick}

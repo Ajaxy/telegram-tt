@@ -1,0 +1,89 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  @include mixins.scrollable-padding(1rem);
+}
+
+.card {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+
+  width: 13.75rem;
+  padding: 1.25rem 1.25rem 1rem;
+  border-radius: 1.625rem;
+
+  background-color: #ffffff;
+}
+
+.qr {
+  position: relative;
+  width: 11.25rem;
+  height: 11.25rem;
+}
+
+.qrCode {
+  position: absolute;
+  inset: 0;
+}
+
+.qrLogo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 2.375rem;
+  height: 2.375rem;
+}
+
+.addressBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.address {
+  font-family: var(--font-family-monospace);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #000000;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.addressGroupMuted {
+  color: #707579;
+}
+
+.copyHint {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #707579;
+}
+
+.note {
+  max-width: 13.5rem;
+
+  font-size: 1rem;
+  line-height: 1.3125rem;
+  color: #ffffff;
+  text-align: center;
+}
+
+.buyButton {
+  --button-text-color: #707579;
+  --button-background-color: #ffffff;
+
+  align-self: stretch;
+  margin-top: auto;
+}

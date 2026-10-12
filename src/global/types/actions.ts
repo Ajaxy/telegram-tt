@@ -64,6 +64,8 @@ import type {
   ApiStickerSetInfo,
   ApiThemeParameters,
   ApiTodoItem,
+  ApiTonConnectConnectRequest,
+  ApiTonConnectSession,
   ApiTopPeerCategory,
   ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
@@ -1417,6 +1419,10 @@ export interface ActionPayloads {
   } & WithTabId;
 
   loadStarStatus: undefined;
+  loadCurrencyRates: undefined;
+  setWalletCurrency: {
+    currency: string;
+  };
   loadStarsTransactions: {
     type: StarsTransactionType;
     isTon?: boolean;
@@ -1447,6 +1453,188 @@ export interface ActionPayloads {
     currency?: ApiTypeCurrencyAmount['currency'];
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
+
+  openWalletTonConnect: {
+    dappClientId: string;
+    connectRequest: ApiTonConnectConnectRequest;
+    traceId?: string;
+  } & WithTabId;
+  openWalletTonConnectSession: {
+    session: ApiTonConnectSession;
+  } & WithTabId;
+  openWalletTonConnectRequest: {
+    sessionId: string;
+    messageId: number;
+  } & WithTabId;
+  loadWalletTonConnectSessions: undefined;
+  unlockWalletTonConnectRequest: {
+    sessionId: string;
+    requestMsgId: number;
+    passcode?: string;
+    password?: string;
+  } & WithTabId;
+  respondWalletTonConnect: {
+    sessionId: string;
+    requestMsgId?: number;
+    passcode?: string;
+    password?: string;
+    isDeclined?: boolean;
+  } & WithTabId;
+  openWalletTonConnectOauth: WithTabId | undefined;
+  connectWalletTonConnectOauth: {
+    passcode?: string;
+    password?: string;
+  } & WithTabId;
+  finishWalletTonConnectDisconnects: { sessionIds: string[] };
+  disconnectWalletTonConnect: { sessionId: string; passcode?: string; password?: string } & WithTabId;
+  disconnectAllWalletTonConnect: { passcode?: string; password?: string } & WithTabId;
+  clearWalletTonConnectError: WithTabId | undefined;
+  clearWalletTonConnect: WithTabId | undefined;
+
+  openWalletModal: {
+    shouldOpenTonConnect?: boolean;
+    initialRecipient?: string;
+    // Nanotons
+    initialAmount?: number;
+    initialComment?: string;
+    isInitialCommentEncrypted?: boolean;
+    shouldCloseAfterSend?: boolean;
+    initialTransactionId?: string;
+    shouldShowIntro?: boolean;
+    shouldReleaseKey?: boolean;
+  } & WithTabId | undefined;
+  openWalletTransaction: {
+    transactionId: string;
+  } & WithTabId;
+  closeWalletModal: WithTabId | undefined;
+  dismissWalletIntro: WithTabId | undefined;
+  loadWalletMnemonic: {
+    password?: string;
+    passcode?: string;
+    // A wallet kept on this device instead of the current one
+    savedAddress?: string;
+  } & WithTabId | undefined;
+  clearWalletMnemonic: WithTabId | undefined;
+  enableWalletBackup: {
+    // Absent when the phrase kept on the device should be used instead
+    words?: string[];
+    password?: string;
+    passcode?: string;
+  } & WithTabId;
+  disableWalletBackup: {
+    fromAddress: string;
+    // Replaces the signing key on the chain
+    shouldRotateKey?: boolean;
+    password?: string;
+  } & WithTabId;
+  loadWalletKeyRotationFee: undefined;
+  clearWalletBackup: WithTabId | undefined;
+  dropWalletVaultSecrets: WithTabId | undefined;
+  replaceWallet: {
+    fromAddress: string;
+    // Words import a wallet, `savedAddress` restores one kept here; without either the server generates one
+    words?: string[];
+    savedAddress?: string;
+    shouldSaveCurrent?: boolean;
+    password?: string;
+  } & WithTabId;
+  clearWalletReplace: WithTabId | undefined;
+  keepWalletPhrase: {
+    words: string[];
+  } & WithTabId;
+  loadSavedWallets: undefined;
+  removeSavedWallet: {
+    address: string;
+  };
+  loadWalletState: undefined;
+  loadExistingWaltBalance: undefined;
+  openWalletTransferLink: {
+    // A wallet address or a `@username`
+    to?: string;
+    // A user whose current address the server is asked for
+    userId?: string;
+    // Nanotons
+    amount?: number;
+    comment?: string;
+    isCommentEncrypted?: boolean;
+    shouldCloseAfterSend?: boolean;
+  } & WithTabId;
+  watchWalletActivity: undefined;
+  unwatchWalletActivity: undefined;
+  loadWalletGaslessInfo: undefined;
+  loadWalletTransactions: {
+    shouldRefresh?: boolean;
+  } | undefined;
+  loadWalletCollectibles: {
+    shouldRefresh?: boolean;
+  } | undefined;
+  loadWalletUserAddresses: {
+    userIds?: string[];
+    addresses?: string[];
+    isForced?: boolean;
+  };
+  loadWalletDomainAddress: {
+    domain: string;
+  } & WithTabId;
+  searchWalletRecipients: {
+    query: string;
+  } & WithTabId;
+  loadWalletTransferFee: {
+    toAddress: string;
+    // Nanotons
+    amount: number;
+    comment?: string;
+    shouldEncryptComment?: boolean;
+    shouldSendAll?: boolean;
+    collectibleAddress?: string;
+  } & WithTabId;
+  clearWalletTransferFee: WithTabId | undefined;
+  sendWalletTransfer: {
+    fromAddress: string;
+    toAddress: string;
+    toUserId?: string;
+    // Nanotons
+    amount: number;
+    comment?: string;
+    shouldEncryptComment?: boolean;
+    // The fees are taken out of `amount` instead of on top of it
+    shouldSendAll?: boolean;
+    collectibleAddress?: string;
+    isGasless?: boolean;
+    password?: string;
+    passcode?: string;
+  } & WithTabId;
+  clearWalletTransfer: WithTabId | undefined;
+  decryptWalletComment: {
+    transactionId: string;
+    password?: string;
+    passcode?: string;
+  } & WithTabId;
+  clearWalletCommentDecryption: WithTabId | undefined;
+
+  loadOnrampProviders: WithTabId | undefined;
+  loadWalletBuyContext: {
+    provider: string;
+  } & WithTabId;
+  setWalletBuyCurrency: {
+    baseCurrency: string;
+  } & WithTabId;
+  loadOnrampQuote: {
+    baseCurrency: string;
+    baseAmount?: string;
+    cryptoAmount?: string;
+    paymentMethod?: string;
+  } & WithTabId;
+  loadOnrampLimits: {
+    paymentMethod?: string;
+  } & WithTabId;
+  clearWalletBuy: WithTabId | undefined;
+  openOnrampSession: {
+    provider: string;
+    baseCurrency?: string;
+    baseAmount?: string;
+    paymentMethod?: string;
+  } & WithTabId;
 
   checkChatlistInvite: {
     slug: string;
@@ -2752,7 +2940,10 @@ export interface ActionPayloads {
 
   // Passcode
   setPasscode: { passcode: string } & WithTabId;
-  clearPasscode: undefined;
+  clearPasscode: {
+    // The wallet phrases of the account go with the passcode instead of blocking its removal
+    shouldDropWalletKeys?: boolean;
+  } | undefined;
   lockScreen: undefined;
   unlockScreen: { passcode: string };
   unlockScreenWithPasskey: { isConditional?: boolean } | undefined;

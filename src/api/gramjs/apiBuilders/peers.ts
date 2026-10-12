@@ -160,7 +160,7 @@ export function buildApiBotVerification(botVerification: GramJs.BotVerification)
   return {
     botId: buildApiPeerId(botVerification.botId, 'user'),
     iconId: botVerification.icon.toString(),
-    description: botVerification.description,
+    description: botVerification.description.text,
   };
 }
 

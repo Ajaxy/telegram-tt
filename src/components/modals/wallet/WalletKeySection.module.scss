@@ -1,0 +1,20 @@
+.actionLabel {
+  color: var(--color-primary);
+}
+
+.dangerLabel {
+  color: var(--color-error);
+}
+
+.importButton {
+  color: var(--color-primary);
+}
+
+.savedActions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.deleteButton {
+  color: var(--color-error);
+}

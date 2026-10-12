@@ -619,6 +619,9 @@ class TelegramClient {
             await sender.send(req);
             sender._authenticated = true;
           });
+        } else {
+          // Heads the queue, so later requests go out initialized; awaiting it would make its failure the connection's
+          void sender.send(this._initWith(new Api.help.GetConfig()))?.catch(() => undefined);
         }
 
         sender._dcId = dcId;
@@ -667,6 +670,17 @@ class TelegramClient {
         // eslint-disable-next-line no-console
         console.error(err);
 
+        // A refusal does not go away on a retry, unlike a dropped connection or a server failure
+        if (err instanceof RPCError && !(err instanceof ServerError || err instanceof TimedOutError)) {
+          sender.disconnect();
+
+          if (firstConnectResolver) {
+            firstConnectResolver();
+            delete this._waitingForAuthKey[dcId];
+          }
+          throw err;
+        }
+
         await sleep(1000);
         sender.disconnect();
         if (err instanceof HttpStreamError && err.status === 404 && this.session.dcId === dcId && hasAuthKey) {
@@ -710,10 +724,8 @@ class TelegramClient {
 
     const i = index || 0;
 
-    let shouldAnnounceLayer = false;
     if (!this._exportedSenderPromises[dcId]) {
       this._exportedSenderPromises[dcId] = {};
-      shouldAnnounceLayer = true;
     }
     if (!this._exportedSenderRefCounter[dcId]) this._exportedSenderRefCounter[dcId] = {};
 
@@ -765,6 +777,13 @@ class TelegramClient {
       console.error(err);
 
       const shouldReplace = this._exportedSenderPromises[dcId]?.[i] === senderPromise;
+
+      // A refused sender fails the request instead of reconnecting endlessly; the next borrower starts a fresh one
+      if (err instanceof RPCError) {
+        if (shouldReplace) this._exportedSenderPromises[dcId][i] = undefined;
+        throw err;
+      }
+
       return this._borrowExportedSender(dcId, shouldReplace, undefined, i, isPremium, abortSignal);
     } finally {
       abortSignal?.removeEventListener('abort', handleAbort);
@@ -775,11 +794,6 @@ class TelegramClient {
     if (this._exportedSenderReleaseTimeouts[dcId][i]) {
       clearTimeout(this._exportedSenderReleaseTimeouts[dcId][i]);
       this._exportedSenderReleaseTimeouts[dcId][i] = undefined;
-    }
-
-    if (shouldAnnounceLayer) {
-      // Dummy request to let DC know about our API layer
-      sender.send(this._initWith(new Api.help.GetConfig()));
     }
 
     return sender;
@@ -1083,9 +1097,8 @@ class TelegramClient {
           limit: WEBDOCUMENT_REQUEST_PART_SIZE,
         });
 
-        const sender = await this._borrowExportedSender(
-          this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID,
-        );
+        const sender = await this._borrowExportedSender(await this.getWebfileDcId());
+
         if (!sender) {
           throw new Error('Failed to obtain sender');
         }
@@ -1103,9 +1116,9 @@ class TelegramClient {
       }
       return concat(...buff);
     } catch (err: unknown) {
-      // the file is no longer saved in telegram's cache.
+      // Nothing is returned, so an empty file is not cached and the next request tries again
       if (err instanceof RPCError && err.errorMessage === 'WEBFILE_NOT_AVAILABLE') {
-        return new Uint8Array(0);
+        return undefined;
       } else {
         throw err;
       }
@@ -1147,9 +1160,8 @@ class TelegramClient {
 
         let sender: MTProtoSender | undefined;
         try {
-          sender = await this._borrowExportedSender(
-            this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID,
-          );
+          sender = await this._borrowExportedSender(await this.getWebfileDcId());
+
           if (!sender) {
             throw new Error('Failed to obtain sender');
           }
@@ -1319,6 +1331,13 @@ class TelegramClient {
     if (!this._config) {
       this._config = await this.invoke(new Api.help.GetConfig());
     }
+  }
+
+  // The DC that serves web documents and the Toncenter API proxy
+  async getWebfileDcId() {
+    await this.loadConfig();
+
+    return this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID;
   }
 
   async start(authParams: UserAuthParams, onConnected?: NoneToVoidFunction) {

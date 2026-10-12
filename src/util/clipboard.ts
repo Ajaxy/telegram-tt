@@ -11,7 +11,12 @@ textCopyEl.className = 'visually-hidden';
 
 export const copyTextToClipboard = (str: string): boolean => {
   textCopyEl.value = str;
-  document.body.appendChild(textCopyEl);
+
+  // While a modal `<dialog>` is open, the rest of the document is inert, so the textarea has to live inside it
+  const openDialogs = document.querySelectorAll('dialog[open]');
+  const container = openDialogs.length ? openDialogs[openDialogs.length - 1] : document.body;
+  container.appendChild(textCopyEl);
+
   const selection = document.getSelection();
   let isCopied = false;
 
@@ -27,7 +32,8 @@ export const copyTextToClipboard = (str: string): boolean => {
     }
   }
 
-  document.body.removeChild(textCopyEl);
+  container.removeChild(textCopyEl);
+
   return isCopied;
 };
 

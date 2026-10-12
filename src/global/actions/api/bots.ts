@@ -1341,6 +1341,7 @@ addActionHandler('acceptBotUrlAuth', async (global, actions, payload): Promise<v
     isWriteAllowed,
     wasPhoneShared,
     matchCode: providedMatchCode || tabState.urlAuth.matchCode,
+    walletSessionId: tabState.urlAuth.request?.walletRequest?.sessionId,
   });
   if (!result) return;
   global = getGlobal();
@@ -1383,6 +1384,7 @@ addActionHandler('acceptLinkUrlAuth', async (global, actions, payload): Promise<
     isWriteAllowed,
     wasPhoneShared,
     matchCode: providedMatchCode || tabState.urlAuth.matchCode,
+    walletSessionId: tabState.urlAuth.request?.walletRequest?.sessionId,
   });
   if (!result) return;
   global = getGlobal();
@@ -1417,6 +1419,10 @@ addActionHandler('checkUrlAuthMatchCode', async (global, actions, payload): Prom
     },
   }, tabId);
   setGlobal(global);
+
+  if (tabState.urlAuth.request?.walletRequest) {
+    actions.openWalletTonConnectOauth({ tabId });
+  }
 });
 
 addActionHandler('declineUrlAuth', async (global, actions, payload): Promise<void> => {
@@ -1462,6 +1468,7 @@ function handleUrlAuthResult<T extends GlobalState>(
       urlAuth: {
         ...tabState.urlAuth,
         matchCode: undefined,
+        isWalletConnected: undefined,
         request: {
           ...request,
           botId: bot.id,
@@ -1469,6 +1476,13 @@ function handleUrlAuthResult<T extends GlobalState>(
       },
     }, tabId);
     setGlobal(global);
+
+    // A login that asks for the wallet starts with the wallet's connection screen, after the emoji code if any
+    const isMatchCodeFirst = Boolean(request.matchCodesFirst && request.matchCodes?.length);
+
+    if (request.walletRequest && !isMatchCodeFirst) {
+      actions.openWalletTonConnectOauth({ tabId });
+    }
     return;
   }
 

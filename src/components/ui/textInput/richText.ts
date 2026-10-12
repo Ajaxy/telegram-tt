@@ -893,6 +893,7 @@ function getNestedSupportedRichText(text: ApiRichText): ApiRichText {
     case 'autoEmail':
     case 'autoPhone':
     case 'bankCard':
+    case 'tonAddress':
       return text.text;
     default:
       return EMPTY_RICH_TEXT;

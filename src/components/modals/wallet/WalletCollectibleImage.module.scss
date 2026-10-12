@@ -1,0 +1,21 @@
+.root {
+  container-type: size;
+  overflow: hidden;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  background-color: var(--color-background-secondary);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  font-size: 40cqmin;
+  color: var(--color-text-secondary);
+}

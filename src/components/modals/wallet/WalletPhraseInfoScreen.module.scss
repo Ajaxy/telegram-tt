@@ -1,0 +1,21 @@
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.25rem 1rem;
+}
+
+.bullet {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+
+.bulletIcon {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+}

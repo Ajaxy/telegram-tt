@@ -22,7 +22,7 @@ import {
 } from '../../../util/multiaccount';
 import { unsubscribe } from '../../../util/notifications';
 import {
-  clearPasscodeStore, removeGlobalsVaultForSlot, requestPasscodeStateLock,
+  clearPasscodeStore, removeGlobalsVaultForSlot, removeWalletVaultSecrets, requestPasscodeStateLock,
 } from '../../../util/passcode';
 import { broadcastPasscodeReset } from '../../../util/passcode/channel';
 import {
@@ -314,6 +314,7 @@ function resetStorage() {
   resetStoragePromise = Promise.all([
     clearSessionPromise,
     clearGlobalsVaultPromise,
+    removeWalletVaultSecrets(ACCOUNT_SLOT),
     removeGlobalFromCache(),
   ]).then(async () => {
     const hasAccounts = Boolean(Object.values(getAccountsInfo()).length);

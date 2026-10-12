@@ -10,6 +10,7 @@ import useLastCallback from '../../../hooks/useLastCallback.ts';
 
 import InteractiveSparkles from '../../common/InteractiveSparkles';
 import StickerView from '../../common/StickerView';
+import WalletDiamond from '../wallet/WalletDiamond';
 import SpeedingDiamond from './SpeedingDiamond.tsx';
 import SwayingStar from './SwayingStar.tsx';
 
@@ -18,7 +19,7 @@ import styles from './ParticlesHeader.module.scss';
 import Cocoon from '../../../assets/cocoon.webp';
 
 interface OwnProps {
-  model: 'swaying-star' | 'speeding-diamond' | 'ai-egg' | 'sticker';
+  model: 'swaying-star' | 'speeding-diamond' | 'diamond-3d' | 'ai-egg' | 'sticker';
   sticker?: ApiSticker;
   color: 'purple' | 'gold' | 'blue';
   title: TeactNode;
@@ -29,6 +30,7 @@ interface OwnProps {
 }
 
 const GIFT_STICKER_SIZE = 8 * REM;
+const DIAMOND_3D_SIZE = 130;
 
 const PARTICLE_PARAMS = {
   centerShift: [0, -36] as const,
@@ -84,6 +86,10 @@ function ParticlesHeader({
         />
       ) : model === 'speeding-diamond' ? (
         <SpeedingDiamond className={modelClassName} onMouseMove={handleMouseMove} />
+      ) : model === 'diamond-3d' ? (
+        <div className={buildClassName(styles.diamond3d, modelClassName)} onMouseMove={handleMouseMove}>
+          <WalletDiamond size={DIAMOND_3D_SIZE} />
+        </div>
       ) : model === 'sticker' && sticker && (
         <div
           ref={stickerRef}

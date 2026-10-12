@@ -26,13 +26,17 @@ import {
   selectPeer,
   selectSender,
   selectTopic,
+  selectWalletCurrency,
+  selectWalletCurrencyRate,
 } from '../../../global/selectors';
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
 import {
   formatCountdown, formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
 } from '../../../util/dates/oldDateFormat';
-import { convertTonFromNanos, formatCurrency } from '../../../util/formatCurrency';
+import {
+  convertTonFromNanos, formatCurrency, formatTonFromNanos, formatTonInFiat,
+} from '../../../util/formatCurrency';
 import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
@@ -68,6 +72,9 @@ type StateProps = {
   sender?: ApiPeer;
   replyMessage?: ApiMessage;
   chat?: ApiChat;
+  tonUsdRate?: number;
+  walletCurrency?: string;
+  walletCurrencyRate?: number;
 };
 
 const NBSP = '\u00A0';
@@ -81,6 +88,9 @@ const ActionMessageText = ({
   sender,
   chat,
   replyMessage,
+  tonUsdRate,
+  walletCurrency,
+  walletCurrencyRate,
   isInsideTopic,
   asPreview,
 }: OwnProps & StateProps) => {
@@ -473,6 +483,38 @@ const ActionMessageText = ({
           { count: winnersCount },
           { pluralValue: winnersCount },
         );
+      }
+
+      case 'walletTonConnectRequest':
+        return lang('WalletConnectRequest');
+
+      case 'gramTransfer': {
+        const formattedAmount = formatTonFromNanos(action.amount);
+        const [whole, fraction] = formattedAmount.split('.');
+        const groupedAmount = fraction ? `${lang.number(Number(whole))}.${fraction}` : lang.number(Number(whole));
+        const amount = renderStrong(
+          lang('GramAmountText', { amount: groupedAmount }, { pluralValue: Number(formattedAmount) }),
+        );
+        const fiat = formatTonInFiat(
+          action.amount, tonUsdRate, walletCurrency!, walletCurrencyRate, lang.code, { isInNanos: true },
+        );
+        const worth = fiat ? `${NBSP}${lang('ActionGramTransferWorth', { fiat })}` : '';
+
+        // The service chat reports transfers from senders the server does not name, so the text names no sender
+        if (isServiceNotificationsChat) {
+          return asPreview
+            ? lang('ActionGramReceivedPreview', { amount }, { withNodes: true })
+            : lang('ActionGramReceivedText', { amount, worth }, { withNodes: true });
+        }
+
+        // In a private chat the counterparty of an outgoing transfer is the chat itself
+        const from = isOutgoing ? chatLink : senderLink;
+
+        if (asPreview) {
+          return translateWithYou(lang, 'ActionGramTransferPreview', isOutgoing, { from, amount });
+        }
+
+        return translateWithYou(lang, 'ActionGramTransferText', isOutgoing, { from, amount, worth });
       }
 
       case 'giftStars':
@@ -1268,6 +1310,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, message.chatId);
     const sender = selectSender(global, message);
 
+    const isGramTransfer = message.content.action?.type === 'gramTransfer';
     const { replyToMsgId, replyToPeerId } = getMessageReplyInfo(message) || {};
     const replyMessage = replyToMsgId
       ? selectChatMessage(global, replyToPeerId || message.chatId, replyToMsgId) : undefined;
@@ -1277,6 +1320,9 @@ export default memo(withGlobal<OwnProps>(
       replyMessage,
       chat,
       sender,
+      tonUsdRate: isGramTransfer ? global.appConfig.tonUsdRate : undefined,
+      walletCurrency: isGramTransfer ? selectWalletCurrency(global) : undefined,
+      walletCurrencyRate: isGramTransfer ? selectWalletCurrencyRate(global) : undefined,
     };
   },
 )(ActionMessageText));

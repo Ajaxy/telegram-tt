@@ -19,6 +19,7 @@ import type {
   ApiMessage,
   ApiMessagePoll,
   ApiNotifyPeerType,
+  ApiOnrampProvider,
   ApiPaidReactionPrivacyType,
   ApiPasskey,
   ApiPasskeyOption,
@@ -48,6 +49,7 @@ import type {
   ApiStoryAlbum,
   ApiTimezone,
   ApiTonAmount,
+  ApiTonConnectSession,
   ApiTopPeerCategory,
   ApiTranscription,
   ApiUpdateAuthorizationStateType,
@@ -58,6 +60,13 @@ import type {
   ApiUserSavedMusic,
   ApiUserStatus,
   ApiVideo,
+  ApiWalletCollectible,
+  ApiWalletGaslessInfo,
+  ApiWalletSavedWallet,
+  ApiWalletState,
+  ApiWalletStatus,
+  ApiWalletTransaction,
+  ApiWalletUserAddress,
   ApiWallpaper,
   ApiWebPage,
   ApiWebSession,
@@ -517,6 +526,47 @@ export type GlobalState = {
     balance: ApiTonAmount;
     history: StarsTransactionHistory;
   };
+  wallet?: {
+    tonConnectSessions?: ApiTonConnectSession[];
+    isLoadingTonConnectSessions?: boolean;
+    hasTonConnectSessionsError?: boolean;
+    // Unknown until the first `wallet.getState` answers
+    status?: ApiWalletStatus;
+    // The last `wallet.getState` failed
+    hasStateError?: boolean;
+    state?: ApiWalletState;
+    transactions?: ApiWalletTransaction[];
+    // `undefined` means the whole history is loaded; the empty string is the cache's "stale, refresh first"
+    nextOffset?: string;
+    collectibles?: ApiWalletCollectible[];
+    collectiblesNextOffset?: string;
+    // Empty for a user the server knows no wallet of
+    userAddresses?: Record<string, string>;
+    // `false` records an address with no Telegram user
+    resolvedAddresses?: Record<string, ApiWalletUserAddress | false>;
+    hasLocalSecret?: boolean;
+    // Tells the echo of a swap made here from a swap made on another device
+    isReplacing?: boolean;
+    // The server balance a sent transfer was deducted from; the same figure from the server is stale
+    staleBalance?: {
+      amount: number;
+      // Server time, seconds
+      expiresAt: number;
+    };
+    onrampProviders?: ApiOnrampProvider[];
+    decryptedComments?: Record<string, string>;
+    gaslessInfo?: ApiWalletGaslessInfo;
+    // Nanotons
+    keyRotationFee?: number;
+    loadedTransactions?: Record<string, ApiWalletTransaction>;
+    savedWallets?: ApiWalletSavedWallet[];
+    // Present while the former wallet bot still holds money
+    existingWaltBalanceUrl?: string;
+  };
+
+  // Against USD
+  currencyRates?: Record<string, number>;
+  walletCurrency?: string;
 };
 
 export type RequiredGlobalState = GlobalState & { _: never };

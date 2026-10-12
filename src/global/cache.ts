@@ -68,6 +68,8 @@ import {
 import { getIsMobile } from '../hooks/useAppLayout';
 
 const UPDATE_THROTTLE = 5000;
+// The cached history is only a head start; the first page from the server replaces it
+const WALLET_TRANSACTIONS_CACHE_LIMIT = 20;
 
 // `patternColor` values the cache migration recognizes as defaults and replaces with the
 // wallpaper-derived ones
@@ -540,6 +542,8 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'savedReactionTags',
       'timezones',
       'availableEffectById',
+      'walletCurrency',
+      'currencyRates',
     ]),
     lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
     stickers: reduceStickers(global),
@@ -550,6 +554,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
+    wallet: reduceWallet(global),
     reactions: {
       ...pick(global.reactions, [
         'defaultTags',
@@ -843,6 +848,12 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     const cleanedById = Object.values(byId).reduce((acc, message) => {
       if (!message || message.isTypingDraft) return acc;
 
+      // Only the request that sends a transfer replaces its pending message, and a reload drops that request.
+      // If the transfer went out, the server's message comes with the history.
+      if (message.content.action?.type === 'gramTransfer' && message.sendingState === 'messageSendingStatePending') {
+        return acc;
+      }
+
       let cleanedMessage = omitLocalMedia(message);
       cleanedMessage = omitLocalPaidReactions(cleanedMessage);
       acc[message.id] = cleanedMessage;
@@ -977,6 +988,27 @@ function reduceGroupCalls<T extends GlobalState>(global: T): GlobalState['groupC
     ...global.groupCalls,
     byId: {},
     activeGroupCallId: undefined,
+  };
+}
+
+// A wallet still being created is not worth keeping: the next `wallet.getState` says whether it exists
+function reduceWallet<T extends GlobalState>(global: T): GlobalState['wallet'] {
+  const { wallet } = global;
+
+  if (!wallet?.status || wallet.status === 'provisioning') {
+    return undefined;
+  }
+
+  return {
+    status: wallet.status,
+    state: wallet.state,
+    // The logout warning counts their last known balances while the network has not answered
+    savedWallets: wallet.savedWallets,
+    // Sent transfers keep their hash and seqno; the cursor is reset to the stale marker
+    transactions: wallet.transactions
+      ?.filter(({ isPending, msgHash }) => !isPending || msgHash)
+      .slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT),
+    nextOffset: '',
   };
 }
 

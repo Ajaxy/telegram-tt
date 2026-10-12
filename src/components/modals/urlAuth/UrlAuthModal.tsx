@@ -62,7 +62,8 @@ const UrlAuthModal = ({
   const isMatchCodePrecheckPending = Boolean(
     modalRequest?.matchCodesFirst && modalRequest.matchCodes?.length && !modal?.matchCode,
   );
-  const isOpen = Boolean(modal?.url && modal?.request) && !isMatchCodePrecheckPending;
+  const isWalletPending = Boolean(modalRequest?.walletRequest && !modal?.isWalletConnected);
+  const isOpen = Boolean(modal?.url && modal?.request) && !isMatchCodePrecheckPending && !isWalletPending;
 
   const [isWriteAccessChecked, setIsWriteAccessChecked] = useState(
     () => Boolean(modalRequest?.shouldRequestWriteAccess),

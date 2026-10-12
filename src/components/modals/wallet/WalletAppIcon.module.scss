@@ -1,0 +1,42 @@
+.root {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.625rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+
+  background: var(--color-background-secondary);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+// The screen and the rows share a background, so the hero gets a fill of its own
+.large {
+  width: 4.75rem;
+  height: 4.75rem;
+  margin-inline: auto;
+  border-radius: 50%;
+
+  font-size: 2rem;
+  color: var(--color-white);
+
+  background: var(--color-primary);
+}

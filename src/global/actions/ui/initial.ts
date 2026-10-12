@@ -8,7 +8,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_ELECTRON, IS_MULTIACCOUNT_SUPPORTED, IS_TAURI } from '../../../util/browser/globalEnvironment';
 import {
   IS_ANDROID, IS_IOS, IS_LINUX,
-  IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS,
+  IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS, setScrollbarWidthProperty,
 } from '../../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
@@ -177,6 +177,8 @@ addCallback((global: GlobalState) => {
   const canAnimate = selectCanAnimateInterface(global);
 
   switchTheme(theme, canAnimate);
+  setScrollbarWidthProperty();
+
   // Make sure global has the latest theme. Will cause `switchTheme` on change
   global = updateSharedSettings(global, { theme });
 

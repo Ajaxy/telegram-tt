@@ -1,0 +1,9 @@
+@use '../../../styles/mixins';
+
+.root {
+  @include mixins.scrollable-padding(0.75rem);
+}
+
+.check {
+  color: var(--color-primary);
+}

@@ -46,6 +46,9 @@ export default function useClickable<T extends HTMLElement>(
   });
 
   const handleKeyDown = useLastCallback((e: React.KeyboardEvent<T>) => {
+    // A key pressed on a nested button must press that button, not the element around it
+    if (e.target !== e.currentTarget) return;
+
     if (e.key === 'Enter' && ROLES_WITH_ENTER_ACTIVATION.has(role)) {
       e.preventDefault();
       shouldHandleSyntheticClickRef.current = true;
@@ -59,7 +62,7 @@ export default function useClickable<T extends HTMLElement>(
   });
 
   const handleKeyUp = useLastCallback((e: React.KeyboardEvent<T>) => {
-    if (e.key !== ' ' || !ROLES_WITH_SPACE_ACTIVATION.has(role)) return;
+    if (e.target !== e.currentTarget || e.key !== ' ' || !ROLES_WITH_SPACE_ACTIVATION.has(role)) return;
 
     e.preventDefault();
     shouldHandleSyntheticClickRef.current = true;

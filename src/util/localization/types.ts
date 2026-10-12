@@ -161,6 +161,7 @@ export type LangFn = {
   withRegular: (params: RegularLangFnParameters) => string;
   withAdvanced: (params: AdvancedLangFnParameters) => TeactNode;
   region: (code: string) => string | undefined;
+  currency: (code: string) => string | undefined;
   conjunction: (list: string[]) => string;
   disjunction: (list: string[]) => string;
   number: (value: number) => string;
@@ -179,6 +180,7 @@ type ListFormat = Pick<Intl.ListFormat, 'format' | 'formatToParts'>;
 export type LangFormatters = {
   pluralRules: Intl.PluralRules;
   region: Intl.DisplayNames;
+  currency: Intl.DisplayNames;
   conjunction: ListFormat;
   disjunction: ListFormat;
   number: Intl.NumberFormat;

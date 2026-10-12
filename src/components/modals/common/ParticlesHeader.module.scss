@@ -65,6 +65,13 @@
   }
 }
 
+// Centered where `SpeedingDiamond` is
+.diamond3d {
+  position: absolute;
+  z-index: 1;
+  top: 1.125rem;
+}
+
 .cocoon {
   position: absolute;
   z-index: 1;

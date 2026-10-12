@@ -313,7 +313,8 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     processAndUpdateEntities(result);
 
     if (DEBUG) {
-      log('RESPONSE', request.className, result);
+      // The streaming URL carries a secret
+      log('RESPONSE', request.className, request instanceof GramJs.toncenter.GetStreamingUrl ? '[hidden]' : result);
     }
 
     if (!shouldIgnoreUpdates && isResponseUpdate(result)) {

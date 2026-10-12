@@ -1,0 +1,15 @@
+.root {
+  align-items: center;
+}
+
+.preview {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+}
+
+.subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -7,6 +7,7 @@ export * from './middleSearch';
 export * from './management';
 export * from './symbols';
 export * from './payments';
+export * from './wallet';
 export * from './settings';
 export * from './statistics';
 export * from './stories';

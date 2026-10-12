@@ -1,0 +1,119 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+
+  @include mixins.scrollable-padding(0);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+// The incoming slide stays in the flow, so the auto height does not collapse during the fade
+.stateTransition :global(.Transition_slide-to),
+.content :global(.Transition_slide-to) {
+  position: relative;
+}
+
+// `Transition` fills its parent; here it takes the rest of the column and lets the content set the height
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: auto;
+}
+
+// The slide on the way out keeps the full height, so its buttons stay at the bottom while they fade
+.content :global(.Transition_slide-active),
+.content :global(.Transition_slide-to) {
+  height: auto;
+}
+
+.contentSlide {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.iconSkeleton {
+  width: 4.75rem;
+  height: 4.75rem;
+  margin-inline: auto;
+}
+
+// The bars take the line boxes of the title and the host, so the heading does not move
+.titleSkeleton {
+  width: 70%;
+  height: 1.875rem;
+  margin-inline: auto;
+}
+
+.hostSkeleton {
+  width: 40%;
+  height: 1.3125rem;
+  margin-inline: auto;
+}
+
+// Tabular digits keep the centered countdown from shifting
+.description {
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.dangerLabel {
+  color: var(--color-error);
+}
+
+.host {
+  display: inline-flex;
+  gap: 0.1875rem;
+  align-items: center;
+  font-weight: var(--font-weight-medium);
+}
+
+.hostIcon {
+  font-size: 1rem;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.data {
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.comment {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.signText {
+  overflow-y: auto;
+
+  max-height: 15rem;
+  padding: 0.75rem 1rem;
+
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.error {
+  color: var(--color-error);
+  text-align: center;
+}
+
+.spinner {
+  margin-inline: auto;
+}

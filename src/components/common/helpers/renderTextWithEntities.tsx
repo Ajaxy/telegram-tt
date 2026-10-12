@@ -22,6 +22,7 @@ import FormattedDate from '../FormattedDate';
 import Blockquote from '../quote/Blockquote';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
+import TonAddressLink from '../TonAddressLink';
 
 interface IOrganizedEntity {
   entity: ApiMessageEntity;
@@ -593,6 +594,10 @@ function processEntity({
         >
           {renderNestedMessagePart()}
         </a>
+      );
+    case ApiMessageEntityTypes.TonAddress:
+      return (
+        <TonAddressLink address={entityText} noCopy={isProtected}>{renderNestedMessagePart()}</TonAddressLink>
       );
     case ApiMessageEntityTypes.Pre:
       return <CodeBlock text={entityText} language={entity.language} noCopy={isProtected} />;

@@ -1,0 +1,39 @@
+.root {
+  cursor: pointer;
+
+  // Or the message row's selection overlay (`::before` in `MessageList.scss`) takes the clicks
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+
+  width: 16rem;
+  max-width: 100%;
+  padding: 1.5rem 1rem;
+  border: 0;
+  border-radius: 1rem;
+
+  color: var(--color-text);
+
+  background: var(--color-background);
+
+  &:disabled {
+    cursor: default;
+  }
+
+  // `reboot.css` rings a mouse-clicked button too
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+.title {
+  font-weight: var(--font-weight-semibold);
+}
+
+.status {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}

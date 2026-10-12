@@ -14,6 +14,7 @@ export type QrGradientStops = {
 
 type CreateStyledQrCodeOptions = {
   size: number;
+  margin?: number;
   gradient?: QrGradientStops;
   image?: string;
   imageSize?: number;
@@ -35,6 +36,7 @@ function ensureQrCodeStyling() {
 // When `gradient` is passed, the dots and corners are tinted with a diagonal linear gradient.
 export async function createStyledQrCode({
   size,
+  margin = QR_MARGIN,
   gradient,
   image = blankUrl,
   imageSize = QR_IMAGE_SIZE_RATIO,
@@ -54,7 +56,7 @@ export async function createStyledQrCode({
     width: size,
     height: size,
     image,
-    margin: QR_MARGIN,
+    margin,
     type: 'svg',
     dotsOptions: {
       type: 'rounded',

@@ -1,0 +1,42 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  @include mixins.scrollable-padding(0);
+}
+
+// `ParticlesHeader` pads its canvas by 9rem, so it is pulled 1rem under the modal header
+.header {
+  position: relative;
+  align-self: stretch;
+  margin-top: -1rem;
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  margin: 0 -1rem;
+}
+
+.tip {
+  padding: 0.5rem 1rem;
+}
+
+.tipIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.75rem;
+  height: 1.75rem;
+
+  font-size: 1.75rem;
+  color: var(--color-primary);
+}
+
+.button {
+  margin-top: auto;
+}

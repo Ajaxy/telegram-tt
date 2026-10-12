@@ -11,6 +11,16 @@
   }
 }
 
+// As a regular block inside a `<dialog>` it would push the modal's content down
+.Notification-container.in-dialog {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  margin-inline: 0;
+}
+
 .Notification {
   --color-toast-action: var(--color-primary);
 

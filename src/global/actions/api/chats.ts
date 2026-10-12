@@ -574,6 +574,9 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
       return;
     }
 
+    // The saved list is keyed on the current user; `Main` asks for it again once the user lands
+    if (listType === 'saved' && !selectUser(global, global.currentUserId!)) return;
+
     const result = await loadChats(
       listType,
       true,
@@ -3706,10 +3709,13 @@ async function loadChats(
   const isFirstBatch = !shouldIgnorePagination && !offsetPeer && !offsetDate && !offsetId;
   const shouldReplaceStaleState = listType === 'active' && isFirstBatch;
   const isAccountFreeze = selectIsCurrentUserFrozen(global);
-  const currentUser = selectUser(global, global.currentUserId!)!;
+
+  // Right after a reload the current user may not be in the global yet
+  const currentUser = selectUser(global, global.currentUserId!);
+  if (listType === 'saved' && !currentUser) return;
 
   const result = listType === 'saved' ? await callApi('fetchSavedChats', {
-    parentPeer: currentUser,
+    parentPeer: currentUser!,
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     offsetId,

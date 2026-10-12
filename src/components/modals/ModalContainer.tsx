@@ -90,6 +90,7 @@ import SuggestedStatusModal from './suggestedStatus/SuggestedStatusModal.async';
 import SuggestMessageModal from './suggestMessage/SuggestMessageModal.async';
 import TwoFaCheckModal from './twoFaCheck/TwoFaCheckModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
+import WalletModal from './wallet/WalletModal.async';
 
 // `Pick` used only to provide tab completion
 type ModalKey = keyof Pick<TabState,
@@ -107,6 +108,7 @@ type ModalKey = keyof Pick<TabState,
   'reportAdModal' |
   'reportModal' |
   'starsBalanceModal' |
+  'walletModal' |
   'starsPayment' |
   'starsTransactionModal' |
   'paidReactionModal' |
@@ -255,6 +257,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   collectibleInfoModal: CollectibleInfoModal,
   starsPayment: StarsPaymentModal,
   starsBalanceModal: StarsBalanceModal,
+  walletModal: WalletModal,
   starsTransactionModal: StarsTransactionInfoModal,
   chatInviteModal: ChatInviteModal,
   paidReactionModal: PaidReactionModal,

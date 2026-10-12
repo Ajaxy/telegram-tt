@@ -227,12 +227,43 @@ export function bufferFromBase64(base64: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
+// Spreading a whole 1 MiB BOC into `fromCharCode` overflows the call stack
+const BASE64_CHUNK_SIZE = 0x8000;
+
+export function bufferToBase64(buffer: Uint8Array): string {
+  if (typeof buffer.toBase64 === 'function') {
+    return buffer.toBase64();
+  }
+
+  let binary = '';
+
+  for (let offset = 0; offset < buffer.length; offset += BASE64_CHUNK_SIZE) {
+    binary += String.fromCharCode(...buffer.subarray(offset, offset + BASE64_CHUNK_SIZE));
+  }
+
+  return btoa(binary);
+}
+
 export function bufferFromUtf8(value: string): Uint8Array<ArrayBuffer> {
   return textEncoder.encode(value);
 }
 
 export function bufferToUtf8(bytes: Uint8Array): string {
   return textDecoder.decode(bytes);
+}
+
+// A cut inside a character steps back over its continuation bytes, which have their high bits set to `10`
+export function truncateUtf8(value: string, maxBytes: number): string {
+  const bytes = bufferFromUtf8(value);
+  if (bytes.length <= maxBytes) return value;
+
+  let end = maxBytes;
+
+  while (end > 0 && (bytes[end] & 0xC0) === 0x80) {
+    end--;
+  }
+
+  return bufferToUtf8(bytes.subarray(0, end));
 }
 
 function checkBounds(buffer: Uint8Array, offset: number, byteLength: number) {

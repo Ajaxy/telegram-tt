@@ -127,6 +127,14 @@ declare module '*.strings?raw' {
   const content: string;
   export default content;
 }
+declare module '*.glsl?raw' {
+  const content: string;
+  export default content;
+}
+declare module '*.bin?url&no-inline' {
+  const url: string;
+  export default url;
+}
 
 declare module 'opus-recorder' {
   export interface IOpusRecorder extends Omit<MediaRecorder, 'start' | 'ondataavailable'> {

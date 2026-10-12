@@ -82,6 +82,9 @@ import {
   buildApiUserStatus,
 } from '../apiBuilders/users';
 import {
+  buildApiTonConnectSession, buildApiWalletGaslessInfo, buildApiWalletStateResult, buildApiWalletTransaction,
+} from '../apiBuilders/wallet';
+import {
   buildChatPhotoForLocalDb,
   buildMessageFromUpdate,
 } from '../gramjsBuilders';
@@ -1222,6 +1225,33 @@ export function updater(update: Update) {
     sendApiUpdate({
       '@type': 'updateStarsBalance',
       balance,
+    });
+  } else if (update instanceof GramJs.UpdateWalletTonConnectSession) {
+    sendApiUpdate({
+      '@type': 'updateWalletTonConnectSession',
+      session: buildApiTonConnectSession(update.session),
+    });
+  } else if (update instanceof GramJs.UpdateWalletTonConnectPendingDisconnect) {
+    sendApiUpdate({
+      '@type': 'updateWalletTonConnectPendingDisconnect',
+      sessionIds: update.sessionIds.map(String),
+    });
+  } else if (update instanceof GramJs.UpdateWalletState) {
+    sendApiUpdate({
+      '@type': 'updateWalletState',
+      wallet: buildApiWalletStateResult(update.state),
+    });
+  } else if (update instanceof GramJs.UpdateSentWalletTransaction) {
+    sendApiUpdate({
+      '@type': 'updateWalletSentTransaction',
+      msgHash: update.msgHash,
+      isGasless: update.gasless,
+      transaction: update.transaction && buildApiWalletTransaction(update.transaction),
+    });
+  } else if (update instanceof GramJs.UpdateWalletGaslessInfo) {
+    sendApiUpdate({
+      '@type': 'updateWalletGaslessInfo',
+      gaslessInfo: buildApiWalletGaslessInfo(update),
     });
   } else if (update instanceof GramJs.UpdateStarGiftAuctionState) {
     const state = buildApiTypeStarGiftAuctionState(update.state);

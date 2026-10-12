@@ -667,6 +667,7 @@ export enum ApiMessageEntityTypes {
   DiffInsert = 'MessageEntityDiffInsert',
   DiffReplace = 'MessageEntityDiffReplace',
   DiffDelete = 'MessageEntityDiffDelete',
+  TonAddress = 'MessageEntityTonAddress',
 }
 
 export interface ApiFormattedText {

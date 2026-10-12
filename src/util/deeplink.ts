@@ -1,4 +1,4 @@
-import { getActions } from '../global';
+import { getActions, getGlobal } from '../global';
 
 import type {
   ApiChatType, ApiFormattedText, LinkContext,
@@ -6,12 +6,57 @@ import type {
 import type { DeepLinkMethod } from './deepLinkParser';
 import { LeftColumnContent, SettingsScreens } from '../types';
 
-import { API_CHAT_TYPES, RE_TG_LINK, TON_CURRENCY_CODE } from '../config';
+import {
+  API_CHAT_TYPES, RE_TG_LINK, TON_CURRENCY_CODE, WALLET_BOT_USERNAME,
+} from '../config';
 import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
-import { tryParseDeepLink } from './deepLinkParser';
+import { RE_TON_TRANSFER_LINK, tryParseDeepLink } from './deepLinkParser';
+import { parseTonTransferLink } from './tonAddress';
+import { buildTonConnectLinkFromStartApp, isTonConnectLink, parseTonConnectLink } from './tonConnectLink';
+
+function openTonConnectLink(url: string) {
+  const actions = getActions();
+
+  void parseTonConnectLink(url).then((request) => {
+    actions.openWalletTonConnect(request);
+  }).catch(() => {
+    actions.showNotification({ message: { key: 'WalletConnectInvalid' } });
+  });
+}
 
 export const processDeepLink = (url: string, linkContext?: LinkContext): boolean => {
   const actions = getActions();
+
+  // Claimed even without the wallet, or `ton://…` would go through the `https` parsing
+  const isWalletAvailable = getGlobal().appConfig.isWalletAvailable;
+
+  if (isTonConnectLink(url)) {
+    if (isWalletAvailable) openTonConnectLink(url);
+
+    return true;
+  }
+
+  const transferLink = parseTonTransferLink(url);
+
+  if (transferLink) {
+    if (!isWalletAvailable) return true;
+
+    actions.openWalletModal({
+      initialRecipient: transferLink.address ?? '',
+      initialAmount: transferLink.amount,
+      initialComment: transferLink.comment,
+      isInitialCommentEncrypted: transferLink.isCommentEncrypted,
+    });
+
+    return true;
+  }
+
+  // Must not fall through to the `t.me` parsing, which would read the path as the `transfer` username
+  if (RE_TON_TRANSFER_LINK.test(url)) {
+    if (isWalletAvailable) actions.showNotification({ message: { key: 'WalletSendInvalidAddress' } });
+
+    return true;
+  }
 
   const parsedLink = tryParseDeepLink(url);
   if (parsedLink) {
@@ -38,6 +83,16 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
         return true;
       }
       case 'publicUsernameOrBotLink': {
+        // A dApp addresses the wallet through the wallet bot's link; without the wallet it opens the bot
+        const tonConnectUrl = isWalletAvailable && parsedLink.username.toLowerCase() === WALLET_BOT_USERNAME
+          && parsedLink.startApp ? buildTonConnectLinkFromStartApp(parsedLink.startApp) : undefined;
+
+        if (tonConnectUrl) {
+          openTonConnectLink(tonConnectUrl);
+
+          return true;
+        }
+
         const choose = parseChooseParameter(parsedLink.choose);
 
         actions.openChatByUsername({
@@ -117,6 +172,26 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
       case 'ton':
         actions.openStarsBalanceModal({ currency: TON_CURRENCY_CODE });
         return true;
+      case 'sendGramsLink': {
+        if (!isWalletAvailable) break;
+
+        const tonConnectUrl = parsedLink.startApp ? buildTonConnectLinkFromStartApp(parsedLink.startApp) : undefined;
+
+        if (tonConnectUrl) {
+          openTonConnectLink(tonConnectUrl);
+
+          return true;
+        }
+
+        actions.openWalletTransferLink({
+          to: parsedLink.to,
+          amount: parsedLink.amount,
+          comment: parsedLink.comment,
+          isCommentEncrypted: parsedLink.isCommentEncrypted,
+        });
+
+        return true;
+      }
       case 'oauth':
         if (linkContext?.type !== 'inner') return false;
         actions.requestLinkUrlAuth({ url: parsedLink.url });

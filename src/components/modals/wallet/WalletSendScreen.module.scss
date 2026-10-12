@@ -1,0 +1,199 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+
+  @include mixins.scrollable-padding(0.25rem, 0.75rem, 1rem);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.75rem;
+}
+
+.collectible {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+}
+
+.collectibleImage {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+}
+
+.collectibleName {
+  overflow: hidden;
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recipientField {
+  position: relative;
+}
+
+.recipientSpinner {
+  --spinner-size: 1.25rem;
+
+  position: absolute;
+  inset-inline-end: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.paste {
+  position: absolute;
+  inset-inline-end: 0.5625rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: auto;
+}
+
+.linkedRecipient {
+  margin-top: -0.75rem;
+}
+
+.amountBlock,
+.commentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.amountField,
+.commentField {
+  position: relative;
+}
+
+.amountIcon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 1.125rem;
+  transform: translateY(-50%);
+
+  width: 1.25rem;
+  height: 1.25rem;
+
+  color: var(--color-primary);
+}
+
+// The raised label keeps its place whether the field is focused or only filled
+.amountInput {
+  &:global(.touched) label,
+  :global(.form-control:focus + label),
+  :global(.form-control.focus + label) {
+    transform: scale(0.75) translate(-2.375rem, -2rem) !important;
+  }
+
+  :global(.form-control.form-control) {
+    padding-inline: 2.75rem 5rem;
+  }
+}
+
+.amountUsd {
+  position: absolute;
+  top: 50%;
+  right: 1.125rem;
+  transform: translateY(-50%);
+
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.balance {
+  display: flex;
+  gap: 0.25rem;
+  align-items: baseline;
+
+  padding-inline: 1rem;
+
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.maxButton {
+  cursor: var(--custom-cursor, pointer);
+
+  margin-inline-start: auto;
+  padding: 0;
+  border: none;
+
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  text-transform: uppercase;
+
+  background: none;
+}
+
+.commentInput :global(.form-control.form-control) {
+  padding-inline-end: 3.5rem;
+}
+
+.commentLock {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  :global(.icon) {
+    color: var(--color-text-secondary);
+  }
+}
+
+.commentLockClosed :global(.icon) {
+  color: var(--color-primary);
+}
+
+.commentHint {
+  padding-inline: 1rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.feeLine {
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.feeInfoButton {
+  display: inline-flex;
+
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+
+  vertical-align: -0.25rem;
+
+  :global(.icon) {
+    font-size: 1rem;
+  }
+}
+
+.formBeforeSubmit {
+  margin-bottom: 1rem;
+}
+
+// The floating label doubles as a placeholder, so it clears the gem too
+.amountInput :global(label) {
+  inset-inline-start: 2.75rem;
+}

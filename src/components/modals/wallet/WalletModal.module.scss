@@ -1,0 +1,179 @@
+.dialog {
+  --modal-content-block-padding: 0;
+}
+
+.header {
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.header::before {
+  content: "";
+
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 1px;
+
+  opacity: 0;
+  background-color: var(--color-borders);
+
+  transition: opacity 0.2s ease-in-out;
+}
+
+.headerScrolled::before {
+  opacity: 1;
+}
+
+.headerOnAccent {
+  color: var(--color-white);
+  background-color: var(--color-primary);
+
+  .headerButton :global(.animated-close-icon) {
+    &,
+    &::before,
+    &::after {
+      background-color: var(--color-white);
+    }
+  }
+}
+
+// The modal is transformed, so the menu's fixed backdrop would stretch it
+.headerMenu :global(.backdrop) {
+  position: absolute;
+  inset: 0;
+}
+
+// Laid over the header rather than in its grid: mid-animation both titles leave the flow, and a grid
+// column measured on them collapses. `width` and `height` come from `Transition` itself.
+.header .headerTitle {
+  position: absolute;
+  inset: 0 3.5rem;
+  width: auto;
+  height: auto;
+}
+
+.headerTitle :global(.Transition_slide) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle:global(.Transition-slideVerticalFade) {
+  > :global(.Transition_slide-to) {
+    transform: translateY(50%);
+    animation-name: title-in;
+  }
+
+  > :global(.Transition_slide-from) {
+    animation-name: title-out;
+  }
+}
+
+.headerTitle:global(.Transition-slideVerticalFadeBackwards) {
+  > :global(.Transition_slide-to) {
+    transform: translateY(-50%);
+    animation-name: title-in-backwards;
+  }
+
+  > :global(.Transition_slide-from) {
+    animation-name: title-out-backwards;
+  }
+}
+
+@keyframes title-in {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes title-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+}
+
+@keyframes title-in-backwards {
+  from {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes title-out-backwards {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+}
+
+// The container keeps one height so the dialog does not resize under every step
+.transition {
+  height: min(40rem, calc(var(--modal-max-height) - var(--modal-header-height)));
+}
+
+// The gutter is held with or without the bar, so a longer screen does not nudge the content sideways.
+// The tilted wallet card reaches into it, which must not scroll the screen sideways.
+.slide {
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+}
+
+// A grid stretches its single item, so `margin-top: auto` pins an action to the bottom of a short screen
+.slideContent {
+  display: grid;
+  // Capped at the slide width for long unbreakable text
+  grid-template-columns: minmax(0, 1fr);
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+.slideAccent {
+  background-color: var(--color-primary);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrongPhraseAddress {
+  margin-top: 1rem;
+
+  font-family: var(--font-family-monospace);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.wrongPhraseGroupMuted {
+  color: var(--color-text-secondary);
+}

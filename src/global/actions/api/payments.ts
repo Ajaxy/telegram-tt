@@ -10,7 +10,7 @@ import type {
 } from '../../types';
 import { PaymentStep } from '../../../types';
 
-import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
+import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
@@ -55,6 +55,7 @@ import {
 const LOCAL_BOOST_COOLDOWN = 86400; // 24 hours
 const SMART_GLOCAL_DOMAIN = 'smart-glocal.com';
 const SMART_GLOCAL_TOKENIZE_PATH = '/cds/v1/tokenize/card';
+const CURRENCY_CODE_REGEX = /^[A-Z]{3}$/;
 
 function isValidSmartGlocalTokenizeUrl(tokenizeUrl: string) {
   if (tokenizeUrl !== tokenizeUrl.trim()) {
@@ -1368,3 +1369,24 @@ function handlePaymentFormError(error: string, tabId: number) {
 
   getActions().showDialog({ data: { type: 'error', message: error, hasErrorKey: true }, tabId });
 }
+
+addActionHandler('loadCurrencyRates', async (global): Promise<void> => {
+  const rates = await callApi('fetchCurrencyRates');
+  if (!rates) return;
+
+  global = getGlobal();
+
+  global = {
+    ...global,
+    // `Intl.NumberFormat` throws on a malformed code, and a non-positive rate would show `NaN`
+    currencyRates: rates.reduce<Record<string, number>>((acc, { currency, rate }) => {
+      if (CURRENCY_CODE_REGEX.test(currency) && Number.isFinite(rate) && rate > 0) {
+        acc[currency] = rate;
+      }
+
+      return acc;
+    }, { [USD_CURRENCY_CODE]: 1 }),
+  };
+
+  setGlobal(global);
+});

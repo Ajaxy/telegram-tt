@@ -382,9 +382,13 @@ export default class MTProtoSender {
       const hasAuthKey = Boolean(this.authKey.getKey());
       try {
         if (attempt >= this._retriesToFallback && this._shouldAllowHttpTransport) {
-          this._isFallback = true;
-          this.logWithIndex.warn('Using fallback connection');
-          this._log.warn('Using fallback connection');
+          // Attempts alternate between HTTP and WebSocket, so a socket that failed only for a moment is retried
+          this._isFallback = this._shouldForceHttpTransport || (attempt - this._retriesToFallback) % 2 === 0;
+
+          if (this._isFallback) {
+            this.logWithIndex.warn('Using fallback connection');
+            this._log.warn('Using fallback connection');
+          }
         }
         this.logWithIndex.warn('Connecting...');
         await this._connect(this.getConnection()!);
@@ -1131,7 +1135,11 @@ export default class MTProtoSender {
       this._sendQueue.setReady?.(true);
     }
 
-    if (this._state.consumeMessageReplay(message)) return;
+    // On a new connection the server can answer two outdated-salt messages with `BadServerSalt` under the same ID;
+    // dropping the second as a replay would hang its request. A replayed notification finds nothing to do anyway.
+    const isBadMessageNotice = message.obj instanceof Api.BadServerSalt
+      || message.obj instanceof Api.BadMsgNotification;
+    if (this._state.consumeMessageReplay(message) && !isBadMessageNotice) return;
 
     let handler = this._handlers[message.obj.CONSTRUCTOR_ID];
     if (!handler) {

@@ -351,6 +351,26 @@ export const RE_TME_LINK = /^(https?:\/\/)?(?:([-a-zA-Z0-9@:%_+~#=]{1,32}\.)?t\.
 export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//i;
 export const TME_LINK_PREFIX = 'https://t.me/';
 export const BOT_FATHER_USERNAME = 'botfather';
+// Gram Wallet
+export const WALLET_BOT_USERNAME = 'walt';
+export const WALLET_SEND_LINK_DOMAIN = 'sendgrams';
+// An address or `transaction/<hash>` is appended as is
+export const DEFAULT_TON_EXPLORER_URL = 'https://tonviewer.com/';
+export const USD_CURRENCY_CODE = 'USD';
+// The Android client's limit on an encrypted comment, in UTF-8 bytes
+export const WALLET_COMMENT_MAX_BYTES = 960;
+// The most `wallet.sendTransfer` takes in one data field: Android and tdesktop hardcode the same limit
+export const WALLET_TRANSFER_DATA_MAX_BYTES = 16 * 1024;
+// Nanotons, used until the fee estimate arrives
+export const GRAM_TRANSFER_FEE_RESERVE = 15_000_000;
+export const WALLET_FIRST_TRANSFER_SUGGESTION = 'WALLET_FIRST_INCOMING_TRANSFER';
+// The item contract takes its fees from the attached amount, forwards the second one and returns the rest
+export const NFT_TRANSFER_ATTACHED_NANOS = 100_000_000;
+export const NFT_TRANSFER_FORWARD_NANOS = 10_000_000;
+export const TON_CONNECT_BAD_REQUEST_ERROR_CODE = 1;
+export const TON_CONNECT_UNKNOWN_APP_ERROR_CODE = 100;
+export const TON_CONNECT_USER_DECLINED_ERROR_CODE = 300;
+export const TON_CONNECT_UNSUPPORTED_METHOD_ERROR_CODE = 400;
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
 export const MESSAGE_ID_REQUIRED_ERROR = 'MESSAGE_ID_REQUIRED';
 export const PURCHASE_USERNAME = 'auction';

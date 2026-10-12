@@ -3044,7 +3044,7 @@ function handleMultipleLocalMessagesUpdate(
   handleGramJsUpdate(update);
 }
 
-function handleLocalMessageUpdate(
+export function handleLocalMessageUpdate(
   localMessage: ApiMessage,
   update: GramJs.TypeUpdates | GramJs.UpdateMessageID,
   scheduledMessageUpdate?: GramJs.UpdateNewScheduledMessage,

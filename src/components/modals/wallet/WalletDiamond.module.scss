@@ -1,0 +1,35 @@
+.root {
+  position: relative;
+}
+
+// The still never takes the pointer, which the model is dragged with
+.preview {
+  pointer-events: none;
+
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  transition: opacity 0.22s linear;
+}
+
+.previewHidden {
+  opacity: 0;
+}
+
+.canvas {
+  touch-action: none;
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+
+  opacity: 0;
+
+  transition: opacity 0.22s linear;
+}
+
+.ready {
+  opacity: 1;
+}

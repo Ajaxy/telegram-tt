@@ -18,6 +18,7 @@ import Button from '../ui/Button';
 import Icon from './icons/Icon';
 
 type OwnProps = {
+  className?: string;
   submitLabel?: string;
   error?: string;
   hint?: string;
@@ -44,6 +45,7 @@ const PasswordForm = ({
   placeholder,
   submitLabel,
   description,
+  className,
   shouldShowSubmit,
   shouldResetValue,
   shouldOfferPasskey,
@@ -66,6 +68,7 @@ const PasswordForm = ({
   useEffect(() => {
     if (shouldResetValue) {
       setPassword('');
+      setCanSubmit(false);
     }
   }, [shouldResetValue]);
 
@@ -126,7 +129,7 @@ const PasswordForm = ({
   }
 
   return (
-    <form action="" onSubmit={onSubmit ? handleSubmit : stopEvent} autoComplete="off">
+    <form className={className} action="" onSubmit={onSubmit ? handleSubmit : stopEvent} autoComplete="off">
       <div
         className={buildClassName('input-group password-input', password && 'touched', error && 'error')}
         dir={lang.isRtl ? 'rtl' : undefined}

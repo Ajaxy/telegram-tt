@@ -8,6 +8,7 @@ import type { TextPart } from '../../types';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
+import { countOpenModal } from '../../util/openModals';
 import trapFocus from '../../util/trapFocus';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -211,12 +212,15 @@ const Modal = (props: OwnProps) => {
   useLayoutEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', Boolean(isOpen));
 
+    const stopCounting = isOpen ? countOpenModal() : undefined;
+
     if (isOpen || (!isOpen && prevIsOpen !== undefined)) {
       beginHeavyAnimation(ANIMATION_DURATION);
     }
 
     return () => {
       document.body.classList.remove('has-open-dialog');
+      stopCounting?.();
     };
   }, [isOpen]);
 

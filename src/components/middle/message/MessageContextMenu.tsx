@@ -154,6 +154,7 @@ type OwnProps = {
   onReactionPickerOpen?: (position: IAnchorPosition) => void;
   userFullName?: string;
   canGift?: boolean;
+  canSendGram?: boolean;
   noForwardsNotice?: string;
 };
 
@@ -260,10 +261,12 @@ const MessageContextMenu = ({
   onSelectLanguage,
   userFullName,
   canGift,
+  canSendGram,
   noForwardsNotice,
 }: OwnProps) => {
   const {
     showNotification, openStickerSet, openCustomEmojiSets, loadStickers, openGiftModal,
+    openWalletTransferLink,
   } = getActions();
   const menuRef = useRef<HTMLDivElement>();
   const scrollableRef = useRef<HTMLDivElement>();
@@ -316,6 +319,11 @@ const MessageContextMenu = ({
 
   const handleGiftClick = useLastCallback(() => {
     openGiftModal({ forUserId: message.chatId });
+    onClose();
+  });
+
+  const handleSendGramClick = useLastCallback(() => {
+    openWalletTransferLink({ userId: message.chatId, shouldCloseAfterSend: true });
     onClose();
   });
 
@@ -457,6 +465,11 @@ const MessageContextMenu = ({
                 : oldLang('Conversation.ContextMenuSendGiftTo', userFullName)}
             </MenuItem>
           )}
+        {canSendGram && (
+          <MenuItem icon="gram-outline" onClick={handleSendGramClick}>
+            {lang('WalletSendMoney')}
+          </MenuItem>
+        )}
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{oldLang('MessageScheduleSend')}</MenuItem>}
         {canReschedule && (
           <MenuItem icon="schedule" onClick={onReschedule}>{oldLang('MessageScheduleEditTime')}</MenuItem>

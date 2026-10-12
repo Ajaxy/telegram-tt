@@ -2,7 +2,7 @@ import type { ApiTypeCurrencyAmount } from '../../api/types';
 import type { LangFn } from './types';
 
 import { STARS_ICON_PLACEHOLDER, TON_CURRENCY_CODE } from '../../config';
-import { convertTonFromNanos } from '../../util/formatCurrency';
+import { convertTonFromNanos, formatTonFromNanos, formatTonShortFromNanos } from '../../util/formatCurrency';
 import buildClassName from '../buildClassName';
 
 import GramIcon from '../../components/common/icons/GramIcon';
@@ -23,6 +23,12 @@ export function formatStarsAsText(lang: LangFn, amount: number) {
 export function formatTonAsText(lang: LangFn, amount: number, shouldConvertFromNanos?: boolean) {
   const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
   return lang('GramAmountText', { amount: lang.preciseNumber(formattedAmount) }, { pluralValue: formattedAmount });
+}
+
+export function formatTonTextFromNanos(lang: LangFn, nanos: number, isShort?: boolean) {
+  const amount = isShort ? formatTonShortFromNanos(nanos) : formatTonFromNanos(nanos);
+
+  return lang('GramAmountText', { amount }, { pluralValue: convertTonFromNanos(nanos) });
 }
 
 export function formatTonAsIcon(

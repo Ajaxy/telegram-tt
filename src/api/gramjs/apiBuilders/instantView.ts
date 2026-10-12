@@ -236,6 +236,10 @@ export function buildApiRichText(text: GramJs.TypeRichText, context: PageMediaCo
     return { type: 'bankCard', text: buildApiRichText(text.text, context) };
   }
 
+  if (text instanceof GramJs.TextTonAddress) {
+    return { type: 'tonAddress', text: buildApiRichText(text.text, context) };
+  }
+
   if (text instanceof GramJs.TextMentionName) {
     return {
       type: 'mentionName',

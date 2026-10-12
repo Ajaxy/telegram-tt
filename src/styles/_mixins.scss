@@ -13,6 +13,13 @@
   margin-inline-end: calc(max($margin - var(--scrollbar-width), $forceSpace));
 }
 
+// The inline-end side gives up whatever width the scrollbar takes
+@mixin scrollable-padding($top, $side: 1rem, $bottom: $side) {
+  padding: $top $side $bottom;
+
+  @include adapt-padding-to-scrollbar($side);
+}
+
 @mixin filter-outline($width: 0.125rem, $color) {
   filter:
     drop-shadow($width $width 0 $color)

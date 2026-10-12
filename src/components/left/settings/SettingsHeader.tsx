@@ -1,12 +1,22 @@
 import {
-  memo, useCallback, useMemo, useState,
+  memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, getGlobal, getPromiseActions } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
 
+import {
+  selectHasLocalOnlyWalletPhrase, selectIsWalletAvailable, selectWalletLocalOnlyNanos, selectWalletSavedWallets,
+} from '../../../global/selectors';
+import { formatTonShortFromNanos } from '../../../util/formatCurrency';
+import { formatTonAsIcon } from '../../../util/localization/format';
+import { pause } from '../../../util/schedulers';
+
+import useSelector from '../../../hooks/data/useSelector';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMultiClick from '../../../hooks/useMultiClick';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -14,6 +24,8 @@ import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
+
+const WALLET_CHECK_TIMEOUT = 10000;
 
 type OwnProps = {
   currentScreen: SettingsScreens;
@@ -36,14 +48,46 @@ const SettingsHeader = ({
 
   const { isMobile } = useAppLayout();
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
+  const [isCheckingWallets, markCheckingWallets, unmarkCheckingWallets] = useFlag();
+  const walletCheckIdRef = useRef(0);
+  const isWalletAvailable = useSelector(selectIsWalletAvailable);
+  const hasLocalOnlyWalletPhrase = useSelector(selectHasLocalOnlyWalletPhrase);
+  const localOnlyWalletNanos = useSelector(selectWalletLocalOnlyNanos);
+  const savedWallets = useSelector(selectWalletSavedWallets);
+  // A phrase stored only on this device is lost on logout whatever its balance, so the warning does not wait for the sum
+  const hasUnbackedWallet = isWalletAvailable && (hasLocalOnlyWalletPhrase || Boolean(savedWallets?.length));
+  const unbackedWalletNanos = useMemo(() => (
+    savedWallets?.reduce((sum, { balance }) => sum + (balance ?? 0), localOnlyWalletNanos) ?? localOnlyWalletNanos
+  ), [savedWallets, localOnlyWalletNanos]);
 
   const handleMultiClick = useMultiClick(5, () => {
     openSettingsScreen({ screen: SettingsScreens.Experimental });
   });
 
-  const openSignOutConfirmation = useCallback(() => {
+  // Until the checks answer, the dialog would offer a logout that deletes the local phrases, so the button waits,
+  // but no longer than `WALLET_CHECK_TIMEOUT` in case a check stalls
+  const openSignOutConfirmation = useLastCallback(async () => {
     setIsSignOutDialogOpen(true);
-  }, []);
+
+    if (!getGlobal().appConfig.isWalletAvailable) return;
+
+    const checkId = ++walletCheckIdRef.current;
+    markCheckingWallets();
+
+    const { loadWalletState, loadSavedWallets } = getPromiseActions();
+
+    await Promise.race([
+      (async () => {
+        await loadWalletState();
+        await loadSavedWallets();
+      })(),
+      pause(WALLET_CHECK_TIMEOUT),
+    ]);
+
+    if (checkId === walletCheckIdRef.current) {
+      unmarkCheckingWallets();
+    }
+  });
 
   const closeSignOutConfirmation = useCallback(() => {
     setIsSignOutDialogOpen(false);
@@ -310,10 +354,20 @@ const SettingsHeader = ({
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
-        text={oldLang('lng_sure_logout')}
+        text={hasUnbackedWallet ? undefined : oldLang('lng_sure_logout')}
+        textParts={hasUnbackedWallet ? (
+          <p>
+            {lang(
+              'AreYouSureLogoutGrams',
+              { amount: formatTonAsIcon(lang, formatTonShortFromNanos(unbackedWalletNanos)) },
+              { withNodes: true, withMarkdown: true, renderTextFilters: ['br'] },
+            )}
+          </p>
+        ) : undefined}
         confirmLabel={oldLang('AccountSettings.Logout')}
         confirmHandler={handleSignOutMessage}
         confirmIsDestructive
+        isConfirmLoading={isCheckingWallets}
       />
     </div>
   );

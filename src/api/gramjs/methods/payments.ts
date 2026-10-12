@@ -14,6 +14,7 @@ import {
   buildApiBoost,
   buildApiBoostsStatus,
   buildApiCheckedGiftCode,
+  buildApiCurrencyRate,
   buildApiGiveawayInfo,
   buildApiMyBoost,
   buildApiPaymentForm,
@@ -408,4 +409,14 @@ export function launchPrepaidGiveaway({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchCurrencyRates() {
+  const result = await invokeRequest(new GramJs.payments.GetCurrencyRates());
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.rates.map(buildApiCurrencyRate);
 }

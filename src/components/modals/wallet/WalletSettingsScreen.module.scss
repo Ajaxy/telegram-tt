@@ -1,0 +1,8 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+
+  @include mixins.scrollable-padding(0.75rem);
+}

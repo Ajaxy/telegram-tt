@@ -382,7 +382,7 @@ const MessageListContent = ({
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
           <ActionMessage
-            key={message.id}
+            key={getMessageOriginalId(message)}
             message={message}
             threadId={threadId}
             observeIntersectionForBottom={observeIntersectionForReading}

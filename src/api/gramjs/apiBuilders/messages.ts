@@ -39,6 +39,7 @@ import type {
   ApiVideo,
   MediaContent,
 } from '../../types';
+import type { ApiMessageAction } from '../../types/messageActions';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../types';
 
 import {
@@ -525,6 +526,7 @@ export function buildLocalMessage({
   isPending,
   messagePriceInStars,
   dice,
+  action,
 }: {
   chat: ApiChat;
   lastMessageId?: number;
@@ -550,6 +552,7 @@ export function buildLocalMessage({
   isPending?: true;
   messagePriceInStars?: number;
   dice?: string;
+  action?: ApiMessageAction;
 }) {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
@@ -585,6 +588,7 @@ export function buildLocalMessage({
       pollId: localPoll?.summary.id,
       todo: localTodo,
       dice: localDice,
+      action,
     }),
     date: scheduledAt || getServerTime(),
     isOutgoing: !isChannel,

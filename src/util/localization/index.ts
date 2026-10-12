@@ -170,6 +170,7 @@ function createFormatters() {
     formatters = {
       pluralRules: new Intl.PluralRules(intlLocale),
       region: new Intl.DisplayNames(intlLocale, { type: 'region' }),
+      currency: new Intl.DisplayNames(intlLocale, { type: 'currency' }),
       conjunction: createListFormat(intlLocale, 'conjunction'),
       disjunction: createListFormat(intlLocale, 'disjunction'),
       number: new Intl.NumberFormat(intlLocale),
@@ -184,6 +185,7 @@ function createFormatters() {
     formatters = {
       pluralRules: new Intl.PluralRules(FORMATTERS_FALLBACK_LANG),
       region: new Intl.DisplayNames(FORMATTERS_FALLBACK_LANG, { type: 'region' }),
+      currency: new Intl.DisplayNames(FORMATTERS_FALLBACK_LANG, { type: 'currency' }),
       conjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'conjunction'),
       disjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'disjunction'),
       number: new Intl.NumberFormat(FORMATTERS_FALLBACK_LANG),
@@ -337,6 +339,7 @@ function createTranslationFn(): LangFn {
     return processTranslationAdvanced(key, variables, options);
   };
   fn.region = (code: string) => formatters?.region.of(code);
+  fn.currency = (code: string) => formatters?.currency.of(code);
   fn.conjunction = (list: string[]) => formatters?.conjunction.format(list) || list.join(', ');
   fn.disjunction = (list: string[]) => formatters?.disjunction.format(list) || list.join(', ');
   fn.number = (value: number) => formatters?.number.format(value) || String(value);

@@ -185,6 +185,7 @@ function countRichTextCustomEmojis(text: ApiRichText): number {
     case 'autoEmail':
     case 'autoPhone':
     case 'bankCard':
+    case 'tonAddress':
     case 'mentionName':
     case 'date':
     case 'button':
@@ -410,6 +411,7 @@ function hasRichTextSpoileredCustomEmojis(text: ApiRichText): boolean {
     case 'autoEmail':
     case 'autoPhone':
     case 'bankCard':
+    case 'tonAddress':
     case 'mentionName':
     case 'date':
       return hasRichTextSpoileredCustomEmojis(text.text);

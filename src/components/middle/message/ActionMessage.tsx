@@ -21,8 +21,8 @@ import {
 } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
-import { MESSAGE_APPEARANCE_DELAY } from '../../../config';
-import { getMessageHtmlId } from '../../../global/helpers';
+import { MESSAGE_APPEARANCE_DELAY, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { getMessageHtmlId, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
@@ -34,13 +34,15 @@ import {
   selectIsInSelectMode,
   selectIsMessageFocused,
   selectSender,
+  selectShouldLoopStickers,
   selectTabState,
+  selectUser,
 } from '../../../global/selectors';
 import { selectThreadReadState } from '../../../global/selectors/threads';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { isLocalMessageId } from '../../../util/keys/messageKey';
+import { getMtpEphemeralMessageId, isLocalMessageId } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
@@ -61,6 +63,7 @@ import ActionMessageText from './ActionMessageText';
 import ChannelPhoto from './actions/ChannelPhoto';
 import Gift from './actions/Gift';
 import GiveawayPrize from './actions/GiveawayPrize';
+import GramTransfer from './actions/GramTransfer';
 import NoForwardsRequest from './actions/NoForwardsRequest';
 import StarGift from './actions/StarGift';
 import StarGiftPurchaseOffer from './actions/StarGiftPurchaseOffer';
@@ -70,6 +73,7 @@ import SuggestedPhoto from './actions/SuggestedPhoto';
 import SuggestedPostApproval from './actions/SuggestedPostApproval';
 import SuggestedPostBalanceTooLow from './actions/SuggestedPostBalanceTooLow';
 import SuggestedPostRejected from './actions/SuggestedPostRejected';
+import WalletTonConnectRequest from './actions/WalletTonConnectRequest';
 import ContextMenuContainer from './ContextMenuContainer';
 import InlineButtons from './InlineButtons';
 import Reactions from './reactions/Reactions';
@@ -108,6 +112,9 @@ type StateProps = {
   scrollTargetPosition?: ScrollTargetPosition;
   isAccountFrozen?: boolean;
   noForwardsRequestExpirePeriod: number;
+  transferPeerName?: string;
+  isTransferLoading?: boolean;
+  shouldLoopStickers?: boolean;
 };
 
 const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
@@ -149,6 +156,9 @@ const ActionMessage = ({
   scrollTargetPosition,
   isAccountFrozen,
   noForwardsRequestExpirePeriod,
+  transferPeerName,
+  isTransferLoading,
+  shouldLoopStickers,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -163,6 +173,7 @@ const ActionMessage = ({
     openPremiumModal,
     openStarsTransactionFromGift,
     openGiftInfoModalFromMessage,
+    openWalletTransaction,
     toggleChannelRecommendations,
     animateUnreadReaction,
     markMentionsRead,
@@ -424,6 +435,13 @@ const ActionMessage = ({
         break;
       }
 
+      case 'gramTransfer': {
+        if (!action.transactionId) break;
+
+        openWalletTransaction({ transactionId: action.transactionId });
+        break;
+      }
+
       case 'starGift': {
         openGiftInfoModalFromMessage({
           chatId: message.chatId,
@@ -541,6 +559,32 @@ const ActionMessage = ({
           />
         );
 
+      case 'walletTonConnectRequest': {
+        // The server names a request by the wire id of its message, which an anchored one keeps in `ephemeralId`
+        const ephemeralId = message.isEphemeral ? message.id : message.ephemeralId;
+
+        return (
+          <WalletTonConnectRequest
+            action={action}
+            messageId={ephemeralId === undefined ? message.id : getMtpEphemeralMessageId(ephemeralId)}
+          />
+        );
+      }
+
+      case 'gramTransfer':
+        return (
+          <GramTransfer
+            action={action}
+            peerName={message.chatId === SERVICE_NOTIFICATIONS_USER_ID ? lang('WalletUnknownUser') : transferPeerName}
+            isOutgoing={message.isOutgoing}
+            isSending={message.sendingState === 'messageSendingStatePending'}
+            isFailed={message.sendingState === 'messageSendingStateFailed'}
+            isLoading={isTransferLoading}
+            shouldLoopStickers={shouldLoopStickers}
+            onClick={handleClick}
+          />
+        );
+
       case 'starGift':
         return (
           <StarGift
@@ -618,6 +662,7 @@ const ActionMessage = ({
     }
   }, [
     action, message, observeIntersectionForLoading, sender, observeIntersectionForPlaying, shouldRenderGiftOfferButtons,
+    transferPeerName, isTransferLoading, shouldLoopStickers, lang,
   ]);
 
   if ((isInsideTopic && action.type === 'topicCreate') || action.type === 'phoneCall') {
@@ -767,6 +812,18 @@ export default memo(withGlobal<OwnProps>(
     const hasUnreadPollVote = readState?.unreadPollVotes?.includes(message.id);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
+    const messageAction = message.content.action;
+    const isTransfer = messageAction?.type === 'gramTransfer';
+
+    // The service chat reports transfers from senders the server does not name
+    const transferPeerName = isTransfer && message.chatId !== SERVICE_NOTIFICATIONS_USER_ID
+      ? getUserFullName(selectUser(global, message.chatId))
+      : undefined;
+    const isTransferLoading = isTransfer && tabState.loadingWalletTransactionId === messageAction.transactionId;
+
+    // Read only for a transfer card, so other service messages do not re-render on the setting
+    const shouldLoopStickers = isTransfer ? selectShouldLoopStickers(global) : undefined;
+
     return {
       sender,
       currentUserId: global.currentUserId,
@@ -784,6 +841,9 @@ export default memo(withGlobal<OwnProps>(
       scrollTargetPosition,
       isAccountFrozen,
       noForwardsRequestExpirePeriod: global.appConfig.noForwardsRequestExpirePeriod,
+      transferPeerName,
+      isTransferLoading,
+      shouldLoopStickers,
     };
   },
 )(ActionMessage));
