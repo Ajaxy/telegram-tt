@@ -2,6 +2,7 @@ import { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { AccountSettings } from '../../../types';
+import { SettingsScreens } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { purgeClearableCache } from '../../../util/cacheApi';
@@ -54,7 +55,7 @@ const SettingsDataStorage = ({
   autoLoadFileMaxSizeMb,
   onReset,
 }: OwnProps & StateProps) => {
-  const { setSettingOption, showNotification } = getActions();
+  const { setSettingOption, showNotification, openSettingsScreen } = getActions();
 
   const lang = useLang();
 
@@ -75,7 +76,7 @@ const SettingsDataStorage = ({
   });
 
   const handlePurge = useLastCallback(() => {
-    purgeClearableCache();
+    void purgeClearableCache();
     showNotification({
       message: { key: 'SettingsDataClearMediaDone' },
     });
@@ -139,6 +140,18 @@ const SettingsDataStorage = ({
 
   return (
     <div className="settings-content custom-scroll">
+      <Island>
+        <ListItem
+          icon="piechart-filled"
+          iconBg="blue"
+          multiline
+          narrow
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.StorageUsage })}
+        >
+          <span className="title">{lang('StorageUsageTitle')}</span>
+          <span className="subtitle">{lang('StorageUsageSubtitle')}</span>
+        </ListItem>
+      </Island>
       {renderAutoDownloadBlock(
         lang('AutoDownloadPhotosTitle'),
         'Photo',

@@ -298,6 +298,7 @@ export enum SettingsScreens {
   Stickers,
   QuickReaction,
   CustomEmoji,
+  StorageUsage,
   DoNotTranslate,
   FoldersShare,
   Passkeys,

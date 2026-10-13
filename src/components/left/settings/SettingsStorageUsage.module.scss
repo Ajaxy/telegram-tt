@@ -1,0 +1,141 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.donut {
+  position: relative;
+  width: 11.25rem;
+  height: 11.25rem;
+}
+
+.donutSvg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.donutTrack {
+  fill: none;
+  stroke: var(--color-borders);
+}
+
+.donutSegment {
+  fill: none;
+  stroke-linecap: butt;
+  transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease;
+}
+
+.donutCenter {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.donutValue {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.donutCaption {
+  max-width: 7rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.description {
+  max-width: 20rem;
+  margin: 1rem 0 0;
+
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.device {
+  padding: 0.75rem 1rem;
+}
+
+.deviceRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.deviceQuota {
+  color: var(--color-text-secondary);
+}
+
+.deviceTrack {
+  overflow: hidden;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-borders);
+}
+
+.deviceFill {
+  height: 100%;
+  border-radius: 0.25rem;
+  background: var(--color-primary);
+}
+
+.empty {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.rowBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: 0.9375rem;
+}
+
+.rowSubtitle {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.rowSize {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+
+.rowClear {
+  flex-shrink: 0;
+}
+
+.rowClearBusy {
+  opacity: 0.5;
+}
