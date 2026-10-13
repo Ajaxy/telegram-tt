@@ -4,6 +4,7 @@ import {
 import { getActions, withGlobal } from '../../global';
 
 import type { OldLangFn } from '../../hooks/useOldLang';
+import type { ChatCalendarDay } from '../../types/chatCalendar';
 import type { RepeatedMessageMode } from '../../util/scheduledMessages';
 
 import { MAX_INT_32 } from '../../config';
@@ -23,6 +24,7 @@ import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import Modal from '../ui/Modal';
+import CalendarDayThumb from './CalendarDayThumb';
 
 import './CalendarModal.scss';
 
@@ -47,6 +49,11 @@ export type OwnProps = {
   onSubmit: (date: Date, repeatMode?: RepeatedMessageMode) => void;
   onDateChange?: (date: Date) => void;
   onSecondButtonClick?: NoneToVoidFunction;
+  // Activity markers keyed by local `YYYY-M-D` (month is zero-based)
+  dayMarkers?: Record<string, ChatCalendarDay>;
+  maxDayCount?: number;
+  markersChatId?: string;
+  onMonthChange?: (monthStart: Date) => void;
 };
 
 type StateProps = {
@@ -84,6 +91,10 @@ const CalendarModal = ({
   onSubmit,
   onDateChange,
   onSecondButtonClick,
+  dayMarkers,
+  maxDayCount,
+  markersChatId,
+  onMonthChange,
 }: OwnProps & StateProps) => {
   const { showNotification } = getActions();
 
@@ -137,6 +148,14 @@ const CalendarModal = ({
   const selectedDay = formatDay(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
   const currentYear = currentMonthAndYear.getFullYear();
   const currentMonth = currentMonthAndYear.getMonth();
+
+  const handleMonthChange = useLastCallback(() => {
+    onMonthChange?.(currentMonthAndYear);
+  });
+
+  useEffect(() => {
+    if (isOpen) handleMonthChange();
+  }, [isOpen, currentMonthAndYear]);
 
   const isDisabled = (isFutureMode && selectedDate.getTime() < minDate.getTime())
     || (isPastMode && selectedDate.getTime() > maxDate.getTime());
@@ -440,6 +459,10 @@ const CalendarModal = ({
           ))}
           {currentMonthGrid.map((gridDate) => {
             const isSelected = selectedDay === formatDay(currentYear, currentMonth, gridDate);
+            const markerKey = `${currentYear}-${currentMonth}-${gridDate}`;
+            const marker = dayMarkers && gridDate ? dayMarkers[markerKey] : undefined;
+            const heat = marker && maxDayCount ? Math.min(1, Math.sqrt(marker.count / maxDayCount)) : 0;
+            const thumbMessageId = markersChatId ? marker?.mediaMessageId : undefined;
             return (
               <Button
                 key={`current-month-${gridDate}`}
@@ -455,9 +478,18 @@ const CalendarModal = ({
                 nonInteractive={!gridDate}
                 size="smaller"
                 color={isSelected ? 'primary' : 'translucent'}
-                className={buildClassName('day-button div-button', isSelected && 'selected')}
+                className={buildClassName(
+                  'day-button div-button',
+                  isSelected && 'selected',
+                  Boolean(marker) && 'with-activity',
+                  Boolean(marker?.mediaMessageId) && 'with-thumb',
+                )}
+                style={marker ? `--day-heat: ${heat.toFixed(2)}` : undefined}
               >
-                {gridDate}
+                {thumbMessageId !== undefined && (
+                  <CalendarDayThumb chatId={markersChatId!} messageId={thumbMessageId} />
+                )}
+                <span className="day-number">{gridDate}</span>
               </Button>
             );
           })}

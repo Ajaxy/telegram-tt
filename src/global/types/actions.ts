@@ -991,6 +991,11 @@ export interface ActionPayloads {
     selectedAt?: number;
   } & WithTabId;
   closeHistoryCalendar: WithTabId | undefined;
+  loadChatCalendar: {
+    chatId: string;
+    untilDate?: number;
+  } & WithTabId;
+  resetChatCalendar: WithTabId | undefined;
   disableContextMenuHint: undefined;
   focusNextReply: WithTabId | undefined;
 

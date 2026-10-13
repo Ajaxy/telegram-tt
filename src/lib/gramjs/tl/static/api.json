@@ -101,6 +101,7 @@
     "messages.getDialogs",
     "messages.getHistory",
     "messages.search",
+    "messages.getSearchResultsCalendar",
     "messages.readHistory",
     "messages.deleteHistory",
     "messages.deleteMessages",
