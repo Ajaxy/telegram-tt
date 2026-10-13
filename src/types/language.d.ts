@@ -2729,6 +2729,13 @@ export interface LangPair {
   'RichButtonCenter': undefined;
   'RichButtonRight': undefined;
   'RichEditorButtonCopyText': undefined;
+  'ShareAsCard': undefined;
+  'MessageCardTitle': undefined;
+  'MessageCardShowSender': undefined;
+  'MessageCardCopy': undefined;
+  'MessageCardSave': undefined;
+  'MessageCardSend': undefined;
+  'MessageCardCopiedToast': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

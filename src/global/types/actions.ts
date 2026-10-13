@@ -3112,6 +3112,12 @@ export interface ActionPayloads {
   } & WithTabId;
   closeAutoDeleteTimerModal: WithTabId | undefined;
 
+  openMessageCardModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeMessageCardModal: WithTabId | undefined;
+
   openTwoFaCheckModal: WithTabId | undefined;
   closeTwoFaCheckModal: WithTabId | undefined;
 
