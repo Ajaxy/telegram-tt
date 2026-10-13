@@ -121,6 +121,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
+import type { CatchUpSummary } from '../../types/catchUp';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -1304,6 +1305,12 @@ export type TabState = {
 
   autoDeleteTimerModal?: {
     chatId: string;
+  };
+
+  catchUpModal?: {
+    chatId: string;
+    isLoading: boolean;
+    summary?: CatchUpSummary;
   };
 
   isTwoFaCheckModalOpen?: true;

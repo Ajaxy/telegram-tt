@@ -87,6 +87,7 @@ import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.asy
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import Transition from '../ui/Transition';
+import CatchUpPill from './CatchUpPill';
 import ChatLanguageModal from './ChatLanguageModal.async';
 import { DropAreaState } from './composer/DropArea';
 import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
@@ -618,6 +619,9 @@ function MiddleColumn({
               isChatClosing={!chatId}
               onFocusPinnedMessage={handleFocusPinnedMessage}
             />
+            {renderingMessageListType === 'thread' && (
+              <CatchUpPill key={renderingChatId} chatId={renderingChatId!} threadId={renderingThreadId!} />
+            )}
             <Transition
               name={resolveTransitionName(
                 'slide',
