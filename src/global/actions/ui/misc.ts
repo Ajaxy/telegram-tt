@@ -991,6 +991,16 @@ addActionHandler('openAutoDeleteTimerModal', (global, actions, payload): ActionR
 
 addTabStateResetterAction('closeAutoDeleteTimerModal', 'autoDeleteTimerModal');
 
+addActionHandler('openMessageReminderModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    messageReminderModal: { chatId, messageId },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeMessageReminderModal', 'messageReminderModal');
+
 addActionHandler('openTwoFaCheckModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 

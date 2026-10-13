@@ -3112,6 +3112,17 @@ export interface ActionPayloads {
   } & WithTabId;
   closeAutoDeleteTimerModal: WithTabId | undefined;
 
+  openMessageReminderModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeMessageReminderModal: WithTabId | undefined;
+  setMessageReminder: {
+    chatId: string;
+    messageId: number;
+    scheduledAt: number;
+  } & WithTabId;
+
   openTwoFaCheckModal: WithTabId | undefined;
   closeTwoFaCheckModal: WithTabId | undefined;
 

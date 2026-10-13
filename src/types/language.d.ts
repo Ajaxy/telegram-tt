@@ -2729,6 +2729,15 @@ export interface LangPair {
   'RichButtonCenter': undefined;
   'RichButtonRight': undefined;
   'RichEditorButtonCopyText': undefined;
+  'RemindMe': undefined;
+  'RemindMeTitle': undefined;
+  'RemindMeDescription': undefined;
+  'RemindMeInOneHour': undefined;
+  'RemindMeInThreeHours': undefined;
+  'RemindMeThisEvening': undefined;
+  'RemindMeTomorrowMorning': undefined;
+  'RemindMeNextWeek': undefined;
+  'RemindMeCustom': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -4624,6 +4633,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'WalletConnectFee': {
     'amount': V;
+  };
+  'ReminderSetForToast': {
+    'time': V;
   };
 }
 

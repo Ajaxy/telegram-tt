@@ -1,0 +1,49 @@
+.preview {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+
+  margin: 0 0.75rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--border-radius-default);
+
+  background: var(--color-background-secondary);
+}
+
+.previewText {
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.previewTitle {
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.previewSummary {
+  overflow: hidden;
+
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.description {
+  margin: 0 0.75rem 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.options {
+  padding-bottom: 0.5rem;
+}
+
+.time {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}

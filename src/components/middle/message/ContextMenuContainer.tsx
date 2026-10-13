@@ -138,6 +138,7 @@ type StateProps = {
   canEdit?: boolean;
   canAppendTodoList?: boolean;
   canForward?: boolean;
+  canSetReminder?: boolean;
   canFaveSticker?: boolean;
   canUnfaveSticker?: boolean;
   canCopy?: boolean;
@@ -220,6 +221,7 @@ const ContextMenuContainer = ({
   isPrivate,
   isCurrentUserPremium,
   canForward,
+  canSetReminder,
   canBuyPremium,
   canFaveSticker,
   canUnfaveSticker,
@@ -266,6 +268,7 @@ const ContextMenuContainer = ({
     startEditingMessage,
     pinMessage,
     openForwardMenu,
+    openMessageReminderModal,
     openReplyMenu,
     faveSticker,
     unfaveSticker,
@@ -577,6 +580,11 @@ const ContextMenuContainer = ({
     }
   });
 
+  const handleSetReminder = useLastCallback(() => {
+    closeMenu();
+    openMessageReminderModal({ chatId: message.chatId, messageId: message.id });
+  });
+
   const handleFaveSticker = useLastCallback(() => {
     closeMenu();
     faveSticker({ sticker: message.content.sticker! });
@@ -812,6 +820,7 @@ const ContextMenuContainer = ({
         canEdit={canEdit}
         canAppendTodoList={canAppendTodoList}
         canForward={canForward}
+        canSetReminder={canSetReminder}
         canFaveSticker={canFaveSticker}
         canUnfaveSticker={canUnfaveSticker}
         canCopy={canCopy}
@@ -849,6 +858,7 @@ const ContextMenuContainer = ({
         onPin={handlePin}
         onUnpin={handleUnpin}
         onForward={handleForward}
+        onSetReminder={handleSetReminder}
         onDelete={handleDelete}
         onReport={handleReport}
         onFaveSticker={handleFaveSticker}
@@ -1051,6 +1061,7 @@ export default memo(withGlobal<OwnProps>(
       canEdit: !message.isEphemeral && !isPinned && canEdit,
       canAppendTodoList: !message.isEphemeral && canAppendTodoList,
       canForward: !isScheduled && canForward,
+      canSetReminder: !isScheduled && !message.isEphemeral && !isLocal && canForward,
       canFaveSticker: !message.isEphemeral && !isScheduled && canFaveSticker,
       canUnfaveSticker: !message.isEphemeral && !isScheduled && canUnfaveSticker,
       canCopy: (canCopyNumber || (!isProtected && canCopy)),

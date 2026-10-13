@@ -3649,3 +3649,13 @@
 "RichButtonCenter" = "Center";
 "RichButtonRight" = "Right";
 "RichEditorButtonCopyText" = "Text to copy";
+"RemindMe" = "Remind Me";
+"RemindMeTitle" = "Remind Me";
+"RemindMeDescription" = "This message will be sent to your Saved Messages at the chosen time, with a notification on all your devices.";
+"RemindMeInOneHour" = "In 1 hour";
+"RemindMeInThreeHours" = "In 3 hours";
+"RemindMeThisEvening" = "This evening";
+"RemindMeTomorrowMorning" = "Tomorrow morning";
+"RemindMeNextWeek" = "Next week";
+"RemindMeCustom" = "Pick date and time";
+"ReminderSetForToast" = "Reminder set for **{time}** in Saved Messages";

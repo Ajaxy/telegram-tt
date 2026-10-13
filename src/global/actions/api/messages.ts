@@ -3281,6 +3281,15 @@ addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionRet
   actions.forwardMessages({ isSilent: true, scheduledAt, tabId });
 });
 
+addActionHandler('setMessageReminder', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageId, scheduledAt, tabId = getCurrentTabId(),
+  } = payload;
+
+  actions.openForwardMenu({ fromChatId: chatId, messageIds: [messageId], tabId });
+  actions.forwardToSavedMessages({ scheduledAt, tabId });
+});
+
 interface ForwardToChatOptions {
   global: GlobalState;
   fromChat: ApiChat;
