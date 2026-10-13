@@ -92,6 +92,7 @@ export type OwnProps = {
   canCall?: boolean;
   canMute?: boolean;
   canViewStatistics?: boolean;
+  canViewInsights?: boolean;
   canViewBoosts?: boolean;
   canViewMonetization?: boolean;
   canShowBoostModal?: boolean;
@@ -165,6 +166,7 @@ const HeaderMenuContainer = ({
   canCall,
   canMute,
   canViewStatistics,
+  canViewInsights,
   canViewMonetization,
   canViewBoosts,
   pendingJoinRequests,
@@ -215,6 +217,7 @@ const HeaderMenuContainer = ({
     openFrozenAccountModal,
     requestMasterAndRequestCall,
     toggleStatistics,
+    openChatInsightsModal,
     openMonetizationStatistics,
     openBoostStatistics,
     openGiftModal,
@@ -436,6 +439,11 @@ const HeaderMenuContainer = ({
 
   const handleSearch = useLastCallback(() => {
     onSearchClick();
+    closeMenu();
+  });
+
+  const handleInsightsClick = useLastCallback(() => {
+    openChatInsightsModal({ chatId });
     closeMenu();
   });
 
@@ -846,6 +854,14 @@ const HeaderMenuContainer = ({
               onClick={handleStatisticsClick}
             >
               {oldLang('Statistics')}
+            </MenuItem>
+          )}
+          {canViewInsights && (
+            <MenuItem
+              icon="stats"
+              onClick={handleInsightsClick}
+            >
+              {lang('ChatInsights')}
             </MenuItem>
           )}
           {isChannel && canViewMonetization && (

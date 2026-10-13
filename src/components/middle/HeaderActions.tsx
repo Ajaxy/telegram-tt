@@ -69,6 +69,7 @@ interface StateProps {
   canCall?: boolean;
   canMute?: boolean;
   canViewStatistics?: boolean;
+  canViewInsights?: boolean;
   canViewMonetization?: boolean;
   canViewBoosts?: boolean;
   canShowBoostModal?: boolean;
@@ -99,6 +100,7 @@ const HeaderActions = ({
   canCall,
   canMute,
   canViewStatistics,
+  canViewInsights,
   canViewMonetization,
   canViewBoosts,
   canShowBoostModal,
@@ -412,6 +414,7 @@ const HeaderActions = ({
           canCall={canCall}
           canMute={canMute}
           canViewStatistics={canViewStatistics}
+          canViewInsights={canViewInsights}
           canViewBoosts={canViewBoosts}
           canViewMonetization={canViewMonetization}
           canShowBoostModal={canShowBoostModal}
@@ -478,6 +481,8 @@ export default memo(withGlobal<OwnProps>(
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
       && getHasAdminRight(chat, 'manageCall') && !chat.isMonoforum;
     const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
+    const canViewInsights = isMainThread && !isChannel && !isChatWithSelf && !isSavedDialog && !chat.isMonoforum
+      && !bot && !chat.isSupport;
     const canViewMonetization = isMainThread && chatFullInfo?.canViewMonetization;
     const canViewBoosts = isMainThread && !chat.isMonoforum
       && (isSuperGroup || isChannel) && (canViewStatistics || getHasAdminRight(chat, 'postStories'));
@@ -501,6 +506,7 @@ export default memo(withGlobal<OwnProps>(
       canCall,
       canMute,
       canViewStatistics,
+      canViewInsights,
       canViewMonetization,
       canViewBoosts,
       canShowBoostModal,
