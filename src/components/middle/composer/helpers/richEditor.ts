@@ -149,7 +149,6 @@ const ORDERED_LIST_REVERSED_ATTR = 'reversed';
 const DEFAULT_TEXT_BLOCK_NODE_TYPE = 'paragraph';
 const RICH_TEXT_INLINE_CONTENT = 'inline*';
 const REFRESH_LANG = 'refreshLang';
-const renderListItemMarkdown = ListItem.config.renderMarkdown!;
 const getFalse = () => false;
 const ignoreMediaEdit = () => undefined;
 const ignoreMediaFiles = () => undefined;
@@ -1282,7 +1281,7 @@ const RichEditorListItem = ListItem.extend({
 
   renderMarkdown(node, helpers, context) {
     if (!node.attrs?.[LIST_ITEM_CHECKBOX_ATTR]) {
-      return renderListItemMarkdown(node, helpers, context);
+      return this.parent!(node, helpers, context);
     }
 
     return renderNestedMarkdownContent(
