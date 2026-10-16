@@ -29,8 +29,9 @@ export function clearGlobalForLockScreen<T extends GlobalState>(global: T, withT
     passcode: global.passcode,
     sharedState: global.sharedState,
     ...(withTabState && {
-      byTabId: Object.values(global.byTabId).reduce((acc, { id: tabId, isMasterTab }) => {
-        acc[tabId] = { ...INITIAL_TAB_STATE, isMasterTab, id: tabId };
+      // `uiReadyState` is kept, since `UiLoader` reads its reset as an account switch and covers the lock screen
+      byTabId: Object.values(global.byTabId).reduce((acc, { id: tabId, isMasterTab, uiReadyState }) => {
+        acc[tabId] = { ...INITIAL_TAB_STATE, isMasterTab, uiReadyState, id: tabId };
         return acc;
       }, {} as Record<number, TabState>),
     }),
