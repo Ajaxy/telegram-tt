@@ -1,6 +1,7 @@
 import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK, WALLET_SEND_LINK_DOMAIN } from '../config';
+import { MAX_COINS } from '../lib/ton/cell';
 import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
 import { ensureProtocol } from './browser/url';
 import { parseTimestampDuration } from './dates/timestamp';
@@ -127,7 +128,7 @@ interface SendGramsLink {
   // A wallet address or a `@username`
   to?: string;
   // Nanotons
-  amount?: number;
+  amount?: bigint;
   comment?: string;
   isCommentEncrypted?: boolean;
   startApp?: string;
@@ -867,16 +868,16 @@ function buildSendGramsLink(params: SendGramsLinkBuilderParams): BuilderReturnTy
     return undefined;
   }
 
-  const nanos = amount === undefined ? 0 : parseTonToNanos(amount);
+  const nanos = amount === undefined ? undefined : parseTonToNanos(amount);
 
-  if (!Number.isSafeInteger(nanos)) {
+  if (nanos !== undefined && nanos >= MAX_COINS) {
     return undefined;
   }
 
   return {
     type: 'sendGramsLink',
     to: to || undefined,
-    amount: nanos > 0 ? nanos : undefined,
+    amount: nanos || undefined,
     ...parseTransferComment(text, comment, encrypted),
     startApp: startApp || undefined,
   };

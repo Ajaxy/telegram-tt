@@ -1,7 +1,7 @@
 import { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiTonAmount, ApiUser } from '../../../api/types';
+import type { ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
@@ -30,7 +30,7 @@ type OwnProps = {
 type StateProps = {
   bot?: ApiUser;
   address?: string;
-  balance?: ApiTonAmount;
+  balance?: bigint;
 };
 
 const AVATAR_SIZE = 76;
@@ -55,9 +55,9 @@ const WalletTonConnectLoginScreen = ({
         <Island>
           <Control>
             <ControlLabel>{shortenAddress(address)}</ControlLabel>
-            {balance && (
+            {balance !== undefined && (
               <ControlDescription>
-                {lang('WalletSendBalance', { amount: formatTonTextFromNanos(lang, balance.amount) })}
+                {lang('WalletSendBalance', { amount: formatTonTextFromNanos(lang, balance) })}
               </ControlDescription>
             )}
           </Control>

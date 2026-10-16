@@ -27,7 +27,7 @@ export function updateWalletServerState<T extends GlobalState>(
   const isServerStale = staleBalance !== undefined
     && getServerTime() < staleBalance.expiresAt
     && state !== undefined && currentState !== undefined
-    && state.balance.amount <= staleBalance.amount && state.balance.amount > currentState.balance.amount;
+    && state.balance <= staleBalance.amount && state.balance > currentState.balance;
 
   return updateWallet(global, {
     status,

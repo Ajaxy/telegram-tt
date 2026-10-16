@@ -1,7 +1,5 @@
 import { memo, useRef } from '../../../lib/teact/teact';
 
-import type { ApiTonAmount } from '../../../api/types';
-
 import buildClassName from '../../../util/buildClassName';
 import { formatTonInFiat } from '../../../util/formatCurrency';
 import { splitAddressInHalves } from '../../../util/tonAddress';
@@ -22,7 +20,7 @@ import QrIcon from '../../../assets/wallet-card-qr.svg';
 type OwnProps = {
   address: string;
   ownerName?: string;
-  balance?: ApiTonAmount;
+  balance?: bigint;
   usdRate?: number;
   currency: string;
   currencyRate?: number;
@@ -45,8 +43,7 @@ const WalletCard = ({
 
   const [addressStart, addressEnd] = splitAddressInHalves(address);
 
-  const fiatAmount = balance && formatTonInFiat(balance.amount, usdRate, currency, currencyRate, lang.code, {
-    isInNanos: true,
+  const fiatAmount = balance !== undefined && formatTonInFiat(balance, usdRate, currency, currencyRate, lang.code, {
     shouldOmitFractions: true,
   });
 
@@ -59,7 +56,7 @@ const WalletCard = ({
         <div ref={amountRef} className={styles.amount}>
           <div ref={amountContentRef} className={styles.amountContent}>
             <GramIcon isMono className={styles.gramIcon} />
-            <ExpandableTonAmount nanos={balance?.amount ?? 0} fractionClassName={styles.amountFraction} />
+            <ExpandableTonAmount nanos={balance ?? 0n} fractionClassName={styles.amountFraction} />
             <span className={styles.ticker}>{lang('WalletCurrencyTicker')}</span>
           </div>
         </div>

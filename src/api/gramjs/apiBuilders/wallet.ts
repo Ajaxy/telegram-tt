@@ -16,9 +16,8 @@ import type {
   ApiWalletTransactionPeer,
 } from '../../types';
 
-import { TON_CURRENCY_CODE } from '../../../config';
 import { toNonBounceableAddress } from '../../../lib/ton/address';
-import { toJSNumber } from '../../../util/numbers';
+import { getBigIntAbs } from '../../../util/numbers';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import { buildApiWebDocument } from './messageContent';
@@ -77,7 +76,7 @@ export function buildApiWalletStateResult(state: GramJs.TypeWalletState): ApiWal
     state: {
       address: toNonBounceableAddress(state.address),
       publicKey: serializeBytes(state.publicKey),
-      balance: { currency: TON_CURRENCY_CODE, amount: toJSNumber(state.balance) },
+      balance: state.balance,
       isBackupEnabled: state.backupEnabled,
       canExportPhrase: state.canExportPhrase,
       canEnableBackup: state.canEnableBackup,
@@ -97,8 +96,8 @@ export function buildApiWalletTransaction(transaction: GramJs.WalletTransaction)
     isKeyChange: transaction.keyChange,
     peer: buildApiWalletTransactionPeer(transaction.peer),
     // The server signs the amount by direction, but `ApiWalletTransaction` keeps it positive
-    amount: Math.abs(toJSNumber(transaction.amount)),
-    fee: toJSNumber(transaction.fee),
+    amount: getBigIntAbs(transaction.amount),
+    fee: transaction.fee,
     comment: isCommentEncrypted ? undefined : transaction.comment,
     encryptedComment: isCommentEncrypted ? transaction.comment : undefined,
     txHash: transaction.txHash,
@@ -161,7 +160,7 @@ export function buildApiWalletGaslessInfo(info: GramJs.UpdateWalletGaslessInfo):
     isAvailable: info.available,
     left: info.left,
     resetAt: info.resetAt,
-    minAmount: toJSNumber(info.minAmount),
+    minAmount: info.minAmount,
   };
 }
 

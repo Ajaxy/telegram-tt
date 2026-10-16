@@ -186,6 +186,11 @@ function getLimit(appConfig: GramJsAppConfig, key: Limit, fallbackKey: ApiLimitT
   return [defaultLimit, premiumLimit] as const;
 }
 
+// The config is JSON, so nanotons arrive as doubles and only whole values are taken
+function buildNanotons(value?: number) {
+  return value !== undefined && Number.isInteger(value) ? BigInt(value) : undefined;
+}
+
 export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
@@ -270,8 +275,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsStargiftResaleAmountMax: appConfig.stars_stargift_resale_amount_max,
     starsStargiftResaleCommissionPermille: appConfig.stars_stargift_resale_commission_permille,
     stargiftsCraftAttributePermilles: appConfig.stargifts_craft_attribute_permilles,
-    tonStargiftResaleAmountMin: appConfig.ton_stargift_resale_amount_min,
-    tonStargiftResaleAmountMax: appConfig.ton_stargift_resale_amount_max,
+    tonStargiftResaleAmountMin: buildNanotons(appConfig.ton_stargift_resale_amount_min),
+    tonStargiftResaleAmountMax: buildNanotons(appConfig.ton_stargift_resale_amount_max),
     tonStargiftResaleCommissionPermille: appConfig.ton_stargift_resale_commission_permille,
     starsSuggestedPostAmountMax: appConfig.stars_suggested_post_amount_max,
     starsSuggestedPostAmountMin: appConfig.stars_suggested_post_amount_min,
@@ -281,12 +286,12 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starsSuggestedPostFutureMin: appConfig.stars_suggested_post_future_min,
     noForwardsRequestExpirePeriod: appConfig.no_forwards_request_expire_period,
     tonSuggestedPostCommissionPermille: appConfig.ton_suggested_post_commission_permille,
-    tonSuggestedPostAmountMax: appConfig.ton_suggested_post_amount_max,
-    tonSuggestedPostAmountMin: appConfig.ton_suggested_post_amount_min,
+    tonSuggestedPostAmountMax: buildNanotons(appConfig.ton_suggested_post_amount_max),
+    tonSuggestedPostAmountMin: buildNanotons(appConfig.ton_suggested_post_amount_min),
     tonUsdRate: appConfig.ton_usd_rate,
     tonTopupUrl: appConfig.ton_topup_url,
     isWalletAvailable: appConfig.wallet_available,
-    walletTransferMinNanos: appConfig.wallet_transfer_min_nanos,
+    walletTransferMinNanos: buildNanotons(appConfig.wallet_transfer_min_nanos),
     walletGaslessDailyTransfers: appConfig.wallet_gasless_daily_transfers,
     pollMaxAnswers: appConfig.poll_answers_max,
     pollClosePeriodMax: appConfig.poll_close_period_max,

@@ -7,6 +7,7 @@ import type {
   ApiMessageActionGiftStars,
   ApiMessageActionGiftTon } from '../../../../api/types/messageActions';
 
+import { TON_CURRENCY_CODE } from '../../../../config';
 import {
   selectCanPlayAnimatedEmojis,
   selectGiftStickerForDuration,
@@ -14,7 +15,7 @@ import {
   selectGiftStickerForTon,
 } from '../../../../global/selectors';
 import { formatCountdownDays } from '../../../../util/dates/duration';
-import { formatCurrency } from '../../../../util/formatCurrency';
+import { formatTonAsIcon } from '../../../../util/localization/format';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -53,8 +54,8 @@ const GiftAction = ({
 
   const renderTonTitle = () => {
     const { cryptoAmount, cryptoCurrency } = action;
-    const price = cryptoAmount
-      ? formatCurrency(lang, cryptoAmount, cryptoCurrency!, { asFontIcon: true })
+    const price = cryptoAmount && cryptoCurrency === TON_CURRENCY_CODE
+      ? formatTonAsIcon(lang, cryptoAmount, { isMono: true })
       : undefined;
 
     return price;

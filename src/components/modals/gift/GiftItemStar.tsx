@@ -46,7 +46,7 @@ function GiftItemStar({
   const ref = useRef<HTMLDivElement>();
 
   function getPriceAmount(amounts?: ApiTypeCurrencyAmount[]) {
-    if (!amounts) return { amount: 0, currency: STARS_CURRENCY_CODE };
+    if (!amounts) return undefined;
 
     if (gift.type === 'starGiftUnique' && gift.resaleTonOnly) {
       const tonAmount = amounts.find((amount) => amount.currency === TON_CURRENCY_CODE);
@@ -66,13 +66,12 @@ function GiftItemStar({
   const uniqueGift = isGiftUnique ? gift : undefined;
   const regularGift = !isGiftUnique ? gift : undefined;
 
-  const priceInfo = !isGiftUnique
-    ? { amount: regularGift?.stars || 0, currency: STARS_CURRENCY_CODE }
-    : getPriceAmount(uniqueGift?.resellPrice);
-  const priceCurrency = priceInfo?.currency || STARS_CURRENCY_CODE;
+  const uniquePrice = getPriceAmount(uniqueGift?.resellPrice);
+  const tonPrice = uniquePrice?.currency === TON_CURRENCY_CODE ? uniquePrice.amount : undefined;
   const resellMinStars = regularGift?.resellMinStars;
-  const formattedPrice = !isGiftUnique && isResale && resellMinStars
-    ? lang.number(resellMinStars) + '+' : priceInfo?.amount || 0;
+  const starsPrice = !isGiftUnique && isResale && resellMinStars
+    ? lang.number(resellMinStars) + '+'
+    : uniquePrice?.currency === STARS_CURRENCY_CODE ? uniquePrice.amount : regularGift?.stars || 0;
   const isLimited = !isGiftUnique && Boolean(regularGift?.isLimited);
   const isSoldOut = !isGiftUnique && Boolean(regularGift?.isSoldOut);
   const isAuction = !isGiftUnique && !isResale && Boolean(regularGift?.isAuction);
@@ -178,19 +177,18 @@ function GiftItemStar({
       return lang('GiftAuctionJoin');
     }
 
-    if (priceCurrency === TON_CURRENCY_CODE) {
-      return formatTonAsIcon(lang, formattedPrice || 0, {
-        shouldConvertFromNanos: true,
+    if (tonPrice !== undefined) {
+      return formatTonAsIcon(lang, tonPrice, {
         isMono: true,
         className: styles.star,
       });
     }
 
-    return formatStarsAsIcon(lang, formattedPrice || 0, {
+    return formatStarsAsIcon(lang, starsPrice, {
       asFont: true,
       className: styles.star,
     });
-  }, [withTransferBadge, priceCurrency, formattedPrice, isAuction, lang]);
+  }, [withTransferBadge, tonPrice, starsPrice, isAuction, lang]);
 
   return (
     <GiftAttributeItem

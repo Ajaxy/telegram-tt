@@ -246,9 +246,13 @@ export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
   }));
 
   const totalAmount = prices.reduce((acc, cur) => acc + toJSNumber(cur.amount), 0);
+  const totalPrice: ApiTypeCurrencyAmount | undefined = currency === TON_CURRENCY_CODE
+    ? { currency: TON_CURRENCY_CODE, amount: prices.reduce((acc, cur) => acc + cur.amount, 0n) }
+    : currency === STARS_CURRENCY_CODE ? { currency: STARS_CURRENCY_CODE, amount: totalAmount, nanos: 0 } : undefined;
 
   return {
     totalAmount,
+    totalPrice,
     currency,
     isTest: test,
     isRecurring: recurring,
@@ -478,7 +482,7 @@ export function buildApiCurrencyAmount(amount: GramJs.TypeStarsAmount): ApiTypeC
   if (amount instanceof GramJs.StarsTonAmount) {
     return {
       currency: TON_CURRENCY_CODE,
-      amount: toJSNumber(amount.amount),
+      amount: amount.amount,
     };
   }
 

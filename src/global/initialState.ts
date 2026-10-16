@@ -116,7 +116,7 @@ export const INITIAL_SHARED_STATE: SharedState = {
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
-  cacheVersion: 7,
+  cacheVersion: 8,
   isInited: true,
   attachMenu: { bots: {} },
   passcode: {},

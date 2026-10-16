@@ -31,6 +31,7 @@ import {
   COMPOSITE_WORD_COUNT, deriveBip39MnemonicSeeds, deriveImportedWalletSeeds, deriveTonMnemonicSeeds,
   deriveWholeBip39MnemonicSeeds, isBip39Mnemonic,
 } from '../../../lib/ton/bip39';
+import { MAX_COINS } from '../../../lib/ton/cell';
 import { decryptE2eBlob, encryptE2eBlob, generateE2eSeed } from '../../../lib/ton/e2e';
 import { getEd25519PublicKey } from '../../../lib/ton/ed25519';
 import {
@@ -53,6 +54,7 @@ import { WALLET_IDB_STORE } from '../../../util/browser/idb';
 import {
   bufferFromBase64, bufferFromHex, buffersEqual, bufferToBase64, bufferToHex,
 } from '../../../util/encoding/buffer';
+import { getBigIntMax } from '../../../util/numbers';
 import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { parseTonTransferAddress } from '../../../util/tonAddress';
@@ -433,7 +435,7 @@ export async function estimateWalletTransferFee({
   publicKey: string;
   toAddress: string;
   // Nanotons
-  amount: number;
+  amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
@@ -443,7 +445,7 @@ export async function estimateWalletTransferFee({
   const own = parseTonTransferAddress(ownAddress);
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
-  if (!to || !own || (collectibleAddress && !collectible)) {
+  if (!to || !own || (collectibleAddress && !collectible) || amount >= MAX_COINS) {
     return undefined;
   }
 
@@ -459,15 +461,15 @@ export async function estimateWalletTransferFee({
   // The bounce flags are those of `sendWalletTransfer`
   const body = await buildUnsignedTransferBodyBoc(collectible ? {
     to: { ...collectible, isBounceable: true },
-    amount: BigInt(NFT_TRANSFER_ATTACHED_NANOS),
+    amount: NFT_TRANSFER_ATTACHED_NANOS,
     seqno: state.seqno,
     now: getServerTime(),
     payload: await buildNftTransferPayload({
-      newOwner: to, responseDestination: own, forwardAmount: BigInt(NFT_TRANSFER_FORWARD_NANOS), comment,
+      newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
     }),
   } : {
     to: { ...to, isBounceable: false },
-    amount: BigInt(Math.max(0, Math.trunc(amount))),
+    amount,
     seqno: state.seqno,
     now: getServerTime(),
     comment: shouldEncrypt ? undefined : comment,
@@ -486,7 +488,7 @@ export async function estimateWalletTransferFee({
 // Nanotons, for a body with blank signatures
 export async function estimateFee(
   ownAddress: string, body: string, init?: { code: string; data: string },
-): Promise<number | undefined> {
+): Promise<bigint | undefined> {
   const result = await invokeTonApiRequest<EstimateFeeResponse>({
     endpoint: '/api/v3/estimateFee',
     payload: JSON.stringify({
@@ -505,7 +507,7 @@ export async function estimateFee(
     return undefined;
   }
 
-  return (fees.in_fwd_fee || 0) + (fees.storage_fee || 0) + (fees.gas_fee || 0) + (fees.fwd_fee || 0);
+  return BigInt((fees.in_fwd_fee || 0) + (fees.storage_fee || 0) + (fees.gas_fee || 0) + (fees.fwd_fee || 0));
 }
 
 // Each holder DC keeps one XOR share and re-encrypts it to a key that lives only for this call
@@ -799,7 +801,7 @@ export async function fetchWalletChainPublicKey({ ownAddress }: { ownAddress: st
 // Nanotons
 export async function estimateWalletKeyRotationFee({
   ownAddress,
-}: { ownAddress: string }): Promise<number | undefined> {
+}: { ownAddress: string }): Promise<bigint | undefined> {
   const state = await fetchToncenterWalletState(ownAddress);
 
   if (!state?.isDeployed || !state.isSupportedContract) {
@@ -1120,7 +1122,7 @@ export async function sendTonTransfer({
   chat?: ApiChat;
   lastMessageId?: number;
   // Nanotons; ignored for a collectible, which always carries `NFT_TRANSFER_ATTACHED_NANOS`
-  amount: number;
+  amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
@@ -1142,8 +1144,7 @@ export async function sendTonTransfer({
     amount = NFT_TRANSFER_ATTACHED_NANOS;
   }
 
-  // Past the safe range `Number` has already rounded the amount
-  if (!Number.isSafeInteger(amount) || amount <= 0) {
+  if (amount <= 0n || amount >= MAX_COINS) {
     return { error: 'SEND_FAILED' };
   }
 
@@ -1237,7 +1238,7 @@ export async function sendTonTransfer({
 
     // Sending everything takes the fees out of the value, so no reserve is needed. It only applies to the
     // balance the user confirmed: a balance grown since sends exactly the shown amount the ordinary way.
-    const isSendingAll = Boolean(shouldSendAll) && !collectible && state.balance === BigInt(amount);
+    const isSendingAll = Boolean(shouldSendAll) && !collectible && state.balance === amount;
 
     // The relayer cannot carry the state init, so a wallet not deployed yet pays for its own deployment
     if (isGasless && !state.isDeployed) {
@@ -1249,16 +1250,16 @@ export async function sendTonTransfer({
     // return the value if it refuses the call.
     const transfer = collectible ? {
       to: { ...collectible, isBounceable: true },
-      amount: BigInt(amount),
+      amount,
       seqno: state.seqno,
       now: getServerTime(),
       secretSeed: keys.seed,
       payload: await buildNftTransferPayload({
-        newOwner: to, responseDestination: own, forwardAmount: BigInt(NFT_TRANSFER_FORWARD_NANOS), comment,
+        newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
       }),
     } : {
       to: { ...to, isBounceable: false },
-      amount: BigInt(amount),
+      amount,
       seqno: state.seqno,
       now: getServerTime(),
       secretSeed: keys.seed,
@@ -1273,9 +1274,9 @@ export async function sendTonTransfer({
       await buildUnsignedTransferBodyBoc(transfer),
       state.isDeployed ? undefined : await buildWalletInitBocs(anchorPublicKey),
     );
-    const reserve = Math.max(fee ?? 0, GRAM_TRANSFER_FEE_RESERVE);
+    const reserve = getBigIntMax(fee ?? 0n, GRAM_TRANSFER_FEE_RESERVE);
 
-    if (state.balance < (isSendingAll ? BigInt(amount) : BigInt(amount) + BigInt(reserve))) {
+    if (state.balance < (isSendingAll ? amount : amount + reserve)) {
       return { error: 'INSUFFICIENT_FUNDS' };
     }
 
@@ -1643,10 +1644,10 @@ export async function fetchWalletBalances({ addresses }: { addresses: string[] }
   }
 
   const balancesByRaw = Object.fromEntries((result.accounts || []).map((account) => (
-    [account.address?.toLowerCase(), Number(account.balance) || 0]
+    [account.address?.toLowerCase(), BigInt(account.balance || 0)]
   )));
 
-  return Object.fromEntries(addresses.map((address) => [address, balancesByRaw[toRawAddress(address)!] || 0]));
+  return Object.fromEntries(addresses.map((address) => [address, balancesByRaw[toRawAddress(address)!] ?? 0n]));
 }
 
 // A wallet that is not deployed has no getter to ask and is left out

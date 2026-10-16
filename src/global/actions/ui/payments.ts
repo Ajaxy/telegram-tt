@@ -167,7 +167,6 @@ addActionHandler('openPriceConfirmModal', (global, actions, payload): ActionRetu
   const {
     originalAmount,
     newAmount,
-    currency,
     directInfo,
     tabId = getCurrentTabId(),
   } = payload;
@@ -176,7 +175,6 @@ addActionHandler('openPriceConfirmModal', (global, actions, payload): ActionRetu
     priceConfirmModal: {
       originalAmount,
       newAmount,
-      currency,
       directInfo,
     },
   }, tabId);

@@ -1,5 +1,4 @@
 import type { ApiWebDocument } from './bots';
-import type { ApiTonAmount } from './stars';
 
 export interface ApiTonConnectManifest {
   url: string;
@@ -68,7 +67,7 @@ export interface ApiTonConnectRequestPreview {
   request: ApiTonConnectAppRequest;
   transaction?: ApiTonConnectTransaction;
   signData?: ApiTonConnectSignData;
-  fee?: number;
+  fee?: bigint;
   expires: number;
   isInvalid?: boolean;
 }
@@ -86,7 +85,8 @@ export interface ApiWalletState {
   // Non-bounceable form, `UQ...`
   address: string;
   publicKey: string;
-  balance: ApiTonAmount;
+  // Nanotons
+  balance: bigint;
   isBackupEnabled?: boolean;
   canExportPhrase?: boolean;
   canEnableBackup?: boolean;
@@ -117,9 +117,9 @@ export interface ApiWalletTransaction {
   isKeyChange?: boolean;
   peer: ApiWalletTransactionPeer;
   // Nanotons, always positive; sign is derived from `isIncoming`
-  amount: number;
+  amount: bigint;
   // Nanotons; absent on a local pending entry
-  fee?: number;
+  fee?: bigint;
   comment?: string;
   // Base64; `decryptWalletComment` yields the text
   encryptedComment?: string;
@@ -137,7 +137,7 @@ export interface ApiTonConnectSentTransfer {
   seqno: number;
   validUntil: number;
   // Nanotons
-  amount: number;
+  amount: bigint;
   // The first recipient stands for the batch in the history
   toAddress: string;
 }
@@ -159,7 +159,7 @@ export interface ApiWalletSentTransfer {
 export interface ApiWalletSavedWallet {
   address: string;
   // Nanotons; absent until the chain answers
-  balance?: number;
+  balance?: bigint;
 }
 
 export interface ApiWalletGaslessInfo {
@@ -168,7 +168,7 @@ export interface ApiWalletGaslessInfo {
   // Unix seconds
   resetAt: number;
   // Nanotons
-  minAmount: number;
+  minAmount: bigint;
 }
 
 // `type` is what Fragment sells the item as; an item from elsewhere is `other`
@@ -268,7 +268,7 @@ export type ReplaceWalletResult = { state: ApiWalletStateResult } | { error: Rep
 
 export interface ApiWalletTransferFee {
   // Nanotons
-  fee: number;
+  fee: bigint;
   canEncryptComment?: boolean;
   // A wallet not deployed yet sends its state init in an external message, which the relayer cannot carry
   canUseRelayer: boolean;

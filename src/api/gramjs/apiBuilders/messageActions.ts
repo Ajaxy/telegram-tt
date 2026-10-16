@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiPhoneCallDiscardReason } from '../../types';
 import type { ApiMessageAction } from '../../types/messageActions';
 
-import { toJSNumber } from '../../../util/numbers';
+import { getBigIntAbs, toJSNumber } from '../../../util/numbers';
 import { buildApiBotApp } from './bots';
 import { buildApiFormattedText, buildApiPhoto } from './common';
 import { buildApiStarGift } from './gifts';
@@ -291,7 +291,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       amount: toJSNumber(amount),
       days,
       cryptoCurrency,
-      cryptoAmount: toJSNumber(cryptoAmount),
+      cryptoAmount,
       message: message && buildApiFormattedText(message),
     };
   }
@@ -351,7 +351,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       currency,
       amount: toJSNumber(amount),
       cryptoCurrency,
-      cryptoAmount: toJSNumber(cryptoAmount),
+      cryptoAmount,
       message: message && buildApiFormattedText(message),
     };
   }
@@ -396,7 +396,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       amount: toJSNumber(amount),
       stars: toJSNumber(stars),
       cryptoCurrency,
-      cryptoAmount: toJSNumber(cryptoAmount),
+      cryptoAmount,
       transactionId,
     };
   }
@@ -410,7 +410,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       currency,
       amount: toJSNumber(amount),
       cryptoCurrency,
-      cryptoAmount: toJSNumber(cryptoAmount),
+      cryptoAmount,
       transactionId,
     };
   }
@@ -439,7 +439,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       mediaType: 'action',
       type: 'gramTransfer',
       // The server signs the amount by direction, as in the wallet history
-      amount: Math.abs(toJSNumber(amount)),
+      amount: getBigIntAbs(amount),
       peerAddress,
       transactionId,
       comment: commentEncrypted ? undefined : comment,

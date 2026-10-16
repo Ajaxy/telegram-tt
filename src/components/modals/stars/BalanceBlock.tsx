@@ -6,7 +6,7 @@ import type { ApiTypeCurrencyAmount } from '../../../api/types';
 import { NNBSP, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { formatStarsAmount } from '../../../global/helpers/payments';
 import buildClassName from '../../../util/buildClassName';
-import { convertCurrencyFromBaseUnit } from '../../../util/formatCurrency';
+import { convertTonFromNanos } from '../../../util/formatCurrency';
 
 import useLang from '../../../hooks/useLang';
 
@@ -59,7 +59,8 @@ const BalanceBlock = ({ balance, className, withAddButton }: OwnProps) => {
       <span>
         <GramIcon />
         {NNBSP}
-        {balance !== undefined ? convertCurrencyFromBaseUnit(balance.amount, balance.currency) : '…'}
+        {balance === undefined ? '…'
+          : balance.currency === TON_CURRENCY_CODE ? convertTonFromNanos(balance.amount) : balance.amount}
       </span>
     );
   };

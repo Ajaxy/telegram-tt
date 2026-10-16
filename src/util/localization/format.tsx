@@ -20,12 +20,12 @@ export function formatStarsAsText(lang: LangFn, amount: number) {
   return lang('StarsAmountText', { amount }, { pluralValue: amount });
 }
 
-export function formatTonAsText(lang: LangFn, amount: number, shouldConvertFromNanos?: boolean) {
-  const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
-  return lang('GramAmountText', { amount: lang.preciseNumber(formattedAmount) }, { pluralValue: formattedAmount });
+export function formatTonAsText(lang: LangFn, nanos: bigint) {
+  const amount = convertTonFromNanos(nanos);
+  return lang('GramAmountText', { amount: lang.preciseNumber(amount) }, { pluralValue: amount });
 }
 
-export function formatTonTextFromNanos(lang: LangFn, nanos: number, isShort?: boolean) {
+export function formatTonTextFromNanos(lang: LangFn, nanos: bigint, isShort?: boolean) {
   const amount = isShort ? formatTonShortFromNanos(nanos) : formatTonFromNanos(nanos);
 
   return lang('GramAmountText', { amount }, { pluralValue: convertTonFromNanos(nanos) });
@@ -33,19 +33,19 @@ export function formatTonTextFromNanos(lang: LangFn, nanos: number, isShort?: bo
 
 export function formatTonAsIcon(
   lang: LangFn,
-  amount: number | string,
+  // Nanotons, or an amount already formatted for display
+  amount: bigint | string,
   options?: {
     className?: string;
     containerClassName?: string;
     withWrapper?: boolean;
-    shouldConvertFromNanos?: boolean;
     isMono?: boolean;
     withIconLast?: boolean;
   }) {
   const {
-    className, containerClassName, withWrapper, shouldConvertFromNanos, isMono, withIconLast,
+    className, containerClassName, withWrapper, isMono, withIconLast,
   } = options || {};
-  const formattedAmount = shouldConvertFromNanos ? convertTonFromNanos(Number(amount)) : amount;
+  const formattedAmount = typeof amount === 'bigint' ? convertTonFromNanos(amount) : amount;
   const icon = (
     <GramIcon
       isMono={isMono}
@@ -112,7 +112,7 @@ export function formatStarsAsIcon(lang: LangFn, amount: number | string, options
 
 export function formatCurrencyAmountAsText(lang: LangFn, currencyAmount: ApiTypeCurrencyAmount) {
   if (currencyAmount.currency === TON_CURRENCY_CODE) {
-    return formatTonAsText(lang, currencyAmount.amount, true);
+    return formatTonAsText(lang, currencyAmount.amount);
   }
 
   const amount = currencyAmount.amount + currencyAmount.nanos / 1e9;

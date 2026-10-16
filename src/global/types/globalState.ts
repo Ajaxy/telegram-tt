@@ -549,7 +549,7 @@ export type GlobalState = {
     isReplacing?: boolean;
     // The server balance a sent transfer was deducted from; the same figure from the server is stale
     staleBalance?: {
-      amount: number;
+      amount: bigint;
       // Server time, seconds
       expiresAt: number;
     };
@@ -557,7 +557,7 @@ export type GlobalState = {
     decryptedComments?: Record<string, string>;
     gaslessInfo?: ApiWalletGaslessInfo;
     // Nanotons
-    keyRotationFee?: number;
+    keyRotationFee?: bigint;
     loadedTransactions?: Record<string, ApiWalletTransaction>;
     savedWallets?: ApiWalletSavedWallet[];
     // Present while the former wallet bot still holds money

@@ -9,7 +9,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 type OwnProps = {
   isOpen: boolean;
   // Nanotons; absent when the relayer paid
-  fee?: number;
+  fee?: bigint;
   freeTransfersPerDay: number;
   onClose: NoneToVoidFunction;
 };

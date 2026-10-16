@@ -16,7 +16,7 @@ import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
-import { convertCurrencyFromBaseUnit, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
+import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -100,7 +100,8 @@ const StarsBalanceModal = ({
     || originReaction?.amount
     || originGift?.gift.stars
     || topup?.balanceNeeded;
-  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance?.amount || 0) : undefined;
+  const starsBalanceAmount = balance?.currency === STARS_CURRENCY_CODE ? balance.amount : 0;
+  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - starsBalanceAmount : undefined;
   const starsNeededText = useMemo(() => {
     const global = getGlobal();
 
@@ -232,7 +233,7 @@ const StarsBalanceModal = ({
   };
 
   const renderTonHeaderSection = () => {
-    const tonAmount = convertCurrencyFromBaseUnit(balance?.amount || 0, TON_CURRENCY_CODE);
+    const tonNanos = balance?.currency === TON_CURRENCY_CODE ? balance.amount : 0n;
     return (
       <>
         <ParticlesHeader
@@ -245,12 +246,12 @@ const StarsBalanceModal = ({
         <div className={styles.tonBalanceContainer}>
           <div className={styles.tonBalance}>
             <GramIcon className={styles.tonIconBalance} />
-            {tonAmount}
+            {convertTonFromNanos(tonNanos)}
           </div>
           {Boolean(tonUsdRate) && (
             <span className={styles.tonInUsd}>
               {`≈ ${formatCurrencyAsString(
-                convertTonToUsd(balance?.amount || 0, tonUsdRate, true),
+                convertTonToUsd(tonNanos, tonUsdRate),
                 'USD',
                 lang.code,
               )}`}

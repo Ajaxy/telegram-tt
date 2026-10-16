@@ -2,7 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/t
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiTonAmount, ApiUser, ApiWalletCollectible, ApiWalletGaslessInfo, ApiWalletUserAddress,
+  ApiUser, ApiWalletCollectible, ApiWalletGaslessInfo, ApiWalletUserAddress,
 } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
@@ -20,6 +20,7 @@ import { bufferFromUtf8 } from '../../../util/encoding/buffer';
 import { isUserId } from '../../../util/entities/ids';
 import { formatTonFromNanos, formatTonInFiat, parseTonToNanos } from '../../../util/formatCurrency';
 import { unique } from '../../../util/iteratees';
+import { getBigIntMax } from '../../../util/numbers';
 import { parseTonTransferAddress, parseTonTransferLink } from '../../../util/tonAddress';
 import { normalizeAmountInput } from './helpers/amount';
 import { loadCurrentUserAddress } from './helpers/loadCurrentUserAddress';
@@ -49,7 +50,7 @@ export type WalletTransferPayload = {
   toAddress: string;
   toUserId?: string;
   // Nanotons
-  amount: number;
+  amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
@@ -81,7 +82,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  balance?: ApiTonAmount;
+  balance?: bigint;
   usdRate?: number;
   currency: string;
   currencyRate?: number;
@@ -102,7 +103,7 @@ type StateProps = {
   gaslessInfo?: ApiWalletGaslessInfo;
   freeTransfersPerDay?: number;
   // Nanotons. The server accepts smaller transfers but leaves them out of the history.
-  minAmount?: number;
+  minAmount?: bigint;
 };
 
 const RECENT_LIMIT = 50;
@@ -151,7 +152,7 @@ const WalletSendScreen = ({
     : parseTonToNanos(amount);
 
   // Emptying the wallet is a distinct transfer mode, where the fees come out of the amount itself
-  const shouldSendAll = !collectibleAddress && amountNanos === balance?.amount;
+  const shouldSendAll = !collectibleAddress && amountNanos === balance;
   const trimmedRecipient = recipient.trim();
   const hasRecipient = Boolean(trimmedRecipient);
   const isRecipientValid = Boolean(parseTonTransferAddress(trimmedRecipient));
@@ -211,7 +212,7 @@ const WalletSendScreen = ({
   // The API's safety reserve is kept even for gasless transfers, which may fall back to a regular message
   const estimatedFee = currentFee?.fee;
   const canShowFeesInfo = Boolean(estimatedFee && freeTransfersPerDay);
-  const feeToCover = Math.max(estimatedFee ?? 0, GRAM_TRANSFER_FEE_RESERVE);
+  const feeToCover = getBigIntMax(estimatedFee ?? 0n, GRAM_TRANSFER_FEE_RESERVE);
 
   // The relayer takes neither collectibles nor transfers to the wallet itself
   const isSelfTransfer = Boolean(normalizedRecipient && draft.fromAddress)
@@ -223,13 +224,11 @@ const WalletSendScreen = ({
     && Boolean(gaslessInfo?.isAvailable && gaslessInfo.left > 0 && amountNanos >= gaslessInfo.minAmount)
     && Boolean(currentFee?.canUseRelayer);
   const requiredNanos = shouldSendAll ? amountNanos : amountNanos + feeToCover;
-  const isBelowMin = Boolean(!collectibleAddress && minAmount && amountNanos > 0 && amountNanos < minAmount);
-  const isInsufficient = Boolean(balance && amountNanos > 0 && requiredNanos > balance.amount);
+  const isBelowMin = Boolean(!collectibleAddress && minAmount && amountNanos > 0n && amountNanos < minAmount);
+  const isInsufficient = balance !== undefined && amountNanos > 0n && requiredNanos > balance;
 
-  // Past the safe integer range the nanotons are already rounded and would not match what was typed
   const canSubmit = isRecipientValid
-    && amountNanos > 0
-    && Number.isSafeInteger(amountNanos)
+    && amountNanos > 0n
     && !isBelowMin
     && !isCommentTooLong
     && !isCommentEncryptionUnavailable
@@ -249,7 +248,7 @@ const WalletSendScreen = ({
   );
 
   useEffect(() => {
-    if (!isRecipientValid || amountNanos <= 0) return;
+    if (!isRecipientValid || amountNanos <= 0n) return;
 
     debouncedLoadFee(feePayload);
   }, [feePayload, isRecipientValid, amountNanos, debouncedLoadFee]);
@@ -263,7 +262,7 @@ const WalletSendScreen = ({
   });
 
   const handleMaxClick = useLastCallback(() => {
-    updateDraft({ amount: formatTonFromNanos(balance!.amount) });
+    updateDraft({ amount: formatTonFromNanos(balance!) });
   });
 
   useEffect(() => {
@@ -310,8 +309,8 @@ const WalletSendScreen = ({
     return { localIds, globalIds };
   }, [isSearching, candidateIds, trimmedRecipient, walletRecipientSearch, currentUserId, usersById]);
 
-  const fiatAmount = Number(amount) > 0
-    ? formatTonInFiat(Number(amount), usdRate, currency, currencyRate, lang.code)
+  const fiatAmount = amountNanos > 0n
+    ? formatTonInFiat(amountNanos, usdRate, currency, currencyRate, lang.code)
     : undefined;
 
   // An edit after a tap on a row cancels the tap. Otherwise the row's address would replace the newer input when
@@ -449,10 +448,10 @@ const WalletSendScreen = ({
             <div className={styles.balance}>
               {lang(
                 'WalletSendBalance',
-                { amount: <ExpandableTonAmount nanos={balance?.amount ?? 0} withTicker /> },
+                { amount: <ExpandableTonAmount nanos={balance ?? 0n} withTicker /> },
                 { withNodes: true },
               )}
-              {Boolean(balance?.amount) && (
+              {Boolean(balance) && (
                 <button type="button" className={styles.maxButton} onClick={handleMaxClick}>
                   {lang('WalletSendMax')}
                 </button>

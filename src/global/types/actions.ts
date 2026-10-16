@@ -1495,7 +1495,7 @@ export interface ActionPayloads {
     shouldOpenTonConnect?: boolean;
     initialRecipient?: string;
     // Nanotons
-    initialAmount?: number;
+    initialAmount?: bigint;
     initialComment?: string;
     isInitialCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
@@ -1554,7 +1554,7 @@ export interface ActionPayloads {
     // A user whose current address the server is asked for
     userId?: string;
     // Nanotons
-    amount?: number;
+    amount?: bigint;
     comment?: string;
     isCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
@@ -1582,7 +1582,7 @@ export interface ActionPayloads {
   loadWalletTransferFee: {
     toAddress: string;
     // Nanotons
-    amount: number;
+    amount: bigint;
     comment?: string;
     shouldEncryptComment?: boolean;
     shouldSendAll?: boolean;
@@ -1594,7 +1594,7 @@ export interface ActionPayloads {
     toAddress: string;
     toUserId?: string;
     // Nanotons
-    amount: number;
+    amount: bigint;
     comment?: string;
     shouldEncryptComment?: boolean;
     // The fees are taken out of `amount` instead of on top of it
@@ -3522,9 +3522,8 @@ export interface ActionPayloads {
   openPaymentMessageConfirmDialogOpen: { dialogKey: string } & WithTabId;
   closePaymentMessageConfirmDialogOpen: WithTabId | undefined;
   openPriceConfirmModal: {
-    originalAmount: number;
-    newAmount: number;
-    currency: 'TON' | 'XTR';
+    originalAmount: ApiTypeCurrencyAmount;
+    newAmount: ApiTypeCurrencyAmount;
     directInfo: {
       formId: string;
       inputInvoice: ApiInputInvoice;

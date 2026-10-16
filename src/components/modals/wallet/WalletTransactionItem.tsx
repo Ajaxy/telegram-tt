@@ -111,7 +111,7 @@ const WalletTransactionItem = ({ transaction, user, onClick }: OwnProps) => {
             </>
           ) : (
             <>
-              {amount !== 0 && (isIncoming ? '+' : '−')}
+              {amount !== 0n && (isIncoming ? '+' : '−')}
               <ExpandableTonAmount nanos={amount} />
               {isPending ? (
                 <WalletSpinningDiamond size={PENDING_DIAMOND_SIZE} className={styles.pendingDiamond} />

@@ -15,6 +15,7 @@ import {
   ACCOUNT_SLOT, getAccountSlots, getAccountSlotUrl, loadSlotSession,
 } from '../../../util/multiaccount';
 import { unsubscribe } from '../../../util/notifications';
+import { parseJsonWithBigInt } from '../../../util/numbers';
 import {
   abortPasscodeDisable,
   addPasskeyToMeta,
@@ -730,11 +731,11 @@ async function unlockLegacySession(passcode: string) {
   const sharedState = parseLegacySharedState(sharedStateJson);
   let migrationGeneration: string | undefined;
   try {
-    const legacyGlobal = JSON.parse(globalJson) as GlobalState;
+    const legacyGlobal = parseJsonWithBigInt<GlobalState>(globalJson);
     migrateCache(legacyGlobal, cloneDeep(INITIAL_GLOBAL_STATE));
     if (sharedState) legacyGlobal.sharedState = sharedState;
     if (sharedState) await cacheSharedState(sharedState);
-    const session = JSON.parse(sessionJson) as Parameters<typeof storeSession>[0] & { userId?: string };
+    const session = parseJsonWithBigInt<Parameters<typeof storeSession>[0] & { userId?: string }>(sessionJson);
     enableEncryptedSessionStore(collectSessionStorageSnapshot());
     await storeSession(session);
     if (session.userId) await updateSessionUserId(session.userId);
@@ -835,7 +836,7 @@ function parseLegacySharedState(sharedStateJson?: string): GlobalState['sharedSt
   if (!sharedStateJson) return undefined;
 
   try {
-    return JSON.parse(sharedStateJson) as GlobalState['sharedState'];
+    return parseJsonWithBigInt<GlobalState['sharedState']>(sharedStateJson);
   } catch (err) {
     return undefined;
   }
@@ -885,7 +886,7 @@ async function restoreGlobalCaches(currentGlobal: GlobalState) {
       global = currentGlobal;
     } else {
       const globalJson = await readGlobalsVaultForSlot(slot);
-      global = globalJson ? JSON.parse(globalJson) as GlobalState : cloneDeep(INITIAL_GLOBAL_STATE);
+      global = globalJson ? parseJsonWithBigInt<GlobalState>(globalJson) : cloneDeep(INITIAL_GLOBAL_STATE);
       if (!globalJson) global.currentUserId = session!.userId;
       global.sharedState = currentGlobal.sharedState;
       migrateCache(global, cloneDeep(INITIAL_GLOBAL_STATE));
@@ -990,7 +991,7 @@ async function applyUnlockedState(
   let global = getGlobal();
   const beforeTabStates = Object.values(global.byTabId);
   const previousGlobal = global;
-  global = JSON.parse(globalJson) as GlobalState;
+  global = parseJsonWithBigInt<GlobalState>(globalJson);
   global.byTabId = previousGlobal.byTabId;
   global.sharedState = sharedState || previousGlobal.sharedState;
   migrateCache(global, cloneDeep(INITIAL_GLOBAL_STATE));

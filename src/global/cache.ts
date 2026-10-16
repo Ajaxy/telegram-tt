@@ -7,8 +7,11 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiPhoto,
+  ApiTonAmount,
+  ApiTypeCurrencyAmount,
   ApiVideo,
 } from '../api/types';
+import type { ApiMessageAction } from '../api/types/messageActions';
 import type {
   IThemeSettings, MessageList, PerformanceType, ThemeKey, ThreadId, TopicsInfo,
 } from '../types';
@@ -31,6 +34,7 @@ import {
   IS_SCREEN_LOCKED_CACHE_KEY,
   SAVED_FOLDER_ID,
   SHARED_STATE_CACHE_KEY,
+  TON_CURRENCY_CODE,
 } from '../config';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
@@ -39,6 +43,7 @@ import {
   compact, pick, pickTruthy, unique,
 } from '../util/iteratees';
 import { ACCOUNT_SLOT, getGlobalStateCacheKey, GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
+import { parseJsonWithBigInt, stringifyJsonWithBigInt } from '../util/numbers';
 import { getDek, writeGlobalsVaultForSlot } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
 import { getServerTime } from '../util/serverTime';
@@ -70,6 +75,10 @@ import { getIsMobile } from '../hooks/useAppLayout';
 const UPDATE_THROTTLE = 5000;
 // The cached history is only a head start; the first page from the server replaces it
 const WALLET_TRANSACTIONS_CACHE_LIMIT = 20;
+const APP_CONFIG_NANOTON_KEYS = [
+  'tonSuggestedPostAmountMax', 'tonSuggestedPostAmountMin', 'tonStargiftResaleAmountMax', 'tonStargiftResaleAmountMin',
+  'walletTransferMinNanos',
+] as const;
 
 // `patternColor` values the cache migration recognizes as defaults and replaces with the
 // wallpaper-derived ones
@@ -200,7 +209,7 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
   }
 
   const json = localStorage.getItem(GLOBAL_STATE_CACHE_KEY);
-  const cachedFromLocalStorage = json ? JSON.parse(json) as GlobalState : undefined;
+  const cachedFromLocalStorage = json ? parseJsonWithBigInt<GlobalState>(json) : undefined;
   if (cachedFromLocalStorage) localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
 
   let cached = cachedFromLocalStorage || await loadCachedGlobal();
@@ -428,6 +437,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.cacheVersion = 7;
   }
 
+  if (cached.cacheVersion < 8) {
+    migrateNanotonsToBigInt(cached);
+    cached.cacheVersion = 8;
+  }
+
   if (!cached.auth) {
     cached.auth = initialState.auth;
     cached.auth.rememberMe = untypedCached.authRememberMe;
@@ -590,11 +604,7 @@ function reduceSharedState(sharedState: SharedState): SharedState {
 }
 
 export function serializeGlobal<T extends GlobalState>(global: T) {
-  return JSON.stringify(reduceGlobal(global));
-}
-
-export function serializeShared(sharedState: SharedState) {
-  return JSON.stringify(reduceSharedState(sharedState));
+  return stringifyJsonWithBigInt(reduceGlobal(global));
 }
 
 function reduceStickers<T extends GlobalState>(global: T): GlobalState['stickers'] {
@@ -1040,4 +1050,75 @@ function migrateButtonActions(cached: GlobalState) {
       });
     });
   });
+}
+
+// A cache saved by an earlier app version holds TON amounts as plain numbers, and the wallet balance is an
+// `ApiTonAmount` object
+function migrateNanotonsToBigInt(cached: GlobalState) {
+  const { wallet, appConfig } = cached;
+
+  if (wallet?.state) {
+    const balance = wallet.state.balance as bigint | number | ApiTonAmount;
+    wallet.state.balance = BigInt(typeof balance === 'object' ? balance.amount : balance);
+  }
+
+  wallet?.transactions?.forEach((transaction) => {
+    transaction.amount = BigInt(transaction.amount);
+    if (transaction.fee !== undefined) transaction.fee = BigInt(transaction.fee);
+  });
+
+  wallet?.savedWallets?.forEach((savedWallet) => {
+    if (savedWallet.balance !== undefined) savedWallet.balance = BigInt(savedWallet.balance);
+  });
+
+  APP_CONFIG_NANOTON_KEYS.forEach((key) => {
+    const value = appConfig?.[key];
+    if (value !== undefined) appConfig[key] = BigInt(value);
+  });
+
+  Object.values(cached.messages.byChatId).forEach(({ byId, ephemeralById, threadsById }) => {
+    [...Object.values(byId), ...Object.values(ephemeralById)].forEach(({ content: { action }, suggestedPostInfo }) => {
+      migrateCurrencyAmountToBigInt(suggestedPostInfo?.price);
+      if (action) migrateActionNanotonsToBigInt(action);
+    });
+
+    Object.values(threadsById).forEach(({ localState }) => {
+      migrateCurrencyAmountToBigInt(localState?.draft?.suggestedPostInfo?.price);
+    });
+  });
+
+  Object.values(cached.messages.webPageById).forEach((webPage) => {
+    if (webPage.webpageType === 'full') webPage.gift?.resellPrice?.forEach(migrateCurrencyAmountToBigInt);
+  });
+}
+
+function migrateActionNanotonsToBigInt(action: ApiMessageAction) {
+  switch (action.type) {
+    case 'gramTransfer':
+      action.amount = BigInt(action.amount);
+      break;
+    case 'giftPremium':
+    case 'giftCode':
+    case 'giftStars':
+    case 'giftTon':
+      if (action.cryptoAmount !== undefined) action.cryptoAmount = BigInt(action.cryptoAmount);
+      break;
+    case 'starGiftUnique':
+      migrateCurrencyAmountToBigInt(action.resaleAmount);
+      action.gift.resellPrice?.forEach(migrateCurrencyAmountToBigInt);
+      break;
+    case 'suggestedPostApproval':
+    case 'suggestedPostSuccess':
+      migrateCurrencyAmountToBigInt(action.amount);
+      break;
+    case 'starGiftPurchaseOffer':
+    case 'starGiftPurchaseOfferDeclined':
+      migrateCurrencyAmountToBigInt(action.price);
+      action.gift.resellPrice?.forEach(migrateCurrencyAmountToBigInt);
+      break;
+  }
+}
+
+function migrateCurrencyAmountToBigInt(currencyAmount?: ApiTypeCurrencyAmount) {
+  if (currencyAmount?.currency === TON_CURRENCY_CODE) currencyAmount.amount = BigInt(currencyAmount.amount);
 }

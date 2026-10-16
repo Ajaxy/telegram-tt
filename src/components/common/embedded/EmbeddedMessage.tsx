@@ -146,7 +146,6 @@ const EmbeddedMessage = ({
         ? (suggestedPostInfo.price.currency === TON_CURRENCY_CODE
           ? formatTonAsIcon(lang, suggestedPostInfo.price.amount, {
             className: 'suggested-price-ton-icon',
-            shouldConvertFromNanos: true,
           })
           : formatStarsAsIcon(lang, suggestedPostInfo.price.amount, {
             className: 'suggested-price-star-icon',

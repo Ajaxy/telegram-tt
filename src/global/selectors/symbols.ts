@@ -1,9 +1,9 @@
 import type { ApiSticker, ApiStickerSet, ApiStickerSetInfo } from '../../api/types';
 import type { GlobalState } from '../types';
 
-import { RESTRICTED_EMOJI_SET_ID, TON_CURRENCY_CODE } from '../../config';
+import { RESTRICTED_EMOJI_SET_ID } from '../../config';
 import { hasMixedEmojiSkinTones, removeEmojiSkinTone } from '../../util/emoji/skinTone';
-import { convertCurrencyFromBaseUnit } from '../../util/formatCurrency';
+import { convertTonFromNanos } from '../../util/formatCurrency';
 import { selectIsCurrentUserPremium } from './users';
 
 // Duration in days
@@ -237,10 +237,10 @@ export function selectGiftStickerForStars<T extends GlobalState>(global: T, star
   return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
 }
 
-export function selectGiftStickerForTon<T extends GlobalState>(global: T, amount?: number) {
+export function selectGiftStickerForTon<T extends GlobalState>(global: T, amount?: bigint) {
   const stickers = global.tonGifts?.stickers;
   if (!stickers || !amount) return undefined;
-  const convertedAmount = convertCurrencyFromBaseUnit(amount, TON_CURRENCY_CODE);
+  const convertedAmount = convertTonFromNanos(amount);
 
   let emoji;
   if (convertedAmount < 10) {

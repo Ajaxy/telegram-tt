@@ -1,7 +1,7 @@
 import type {
   ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift,
   ApiInputInvoiceStarGiftAuctionBid, ApiInputInvoiceStarGiftResale,
-  ApiRequestInputInvoice,
+  ApiRequestInputInvoice, ApiTypeCurrencyAmount,
 } from '../../../api/types';
 import type { ApiCredentials } from '../../../components/payment/PaymentModal';
 import type { RegularLangFnParameters } from '../../../util/localization';
@@ -10,7 +10,7 @@ import type {
 } from '../../types';
 import { PaymentStep } from '../../../types';
 
-import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
+import { TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getStripeError } from '../../../util/payments/stripe';
 import { getServerTime } from '../../../util/serverTime';
@@ -18,6 +18,8 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
 import {
+  areCurrencyAmountsEqual,
+  buildStarsAmount,
   getRequestInputInvoice,
   getRequestInputSavedStarGift,
 } from '../../helpers/payments';
@@ -167,7 +169,7 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
     shouldUpgrade: shouldUpgrade || undefined,
   };
 
-  payInputStarInvoice(global, inputInvoice, gift.stars, tabId);
+  payInputStarInvoice(global, inputInvoice, buildStarsAmount(gift.stars), tabId);
 });
 
 addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => {
@@ -184,7 +186,7 @@ addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => 
     shouldShowName,
   };
 
-  payInputStarInvoice(global, inputInvoice, price.amount, tabId);
+  payInputStarInvoice(global, inputInvoice, price, tabId);
 });
 
 addActionHandler('sendPremiumGiftByStars', (global, actions, payload): ActionReturnType => {
@@ -199,7 +201,7 @@ addActionHandler('sendPremiumGiftByStars', (global, actions, payload): ActionRet
     message,
   };
 
-  payInputStarInvoice(global, inputInvoice, amount, tabId);
+  payInputStarInvoice(global, inputInvoice, buildStarsAmount(amount), tabId);
 });
 
 addActionHandler('getReceipt', async (global, actions, payload): Promise<void> => {
@@ -1116,7 +1118,7 @@ addActionHandler('upgradeGift', async (global, actions, payload): Promise<void> 
     shouldKeepOriginalDetails: shouldKeepOriginalDetails || undefined,
   };
 
-  payInputStarInvoice(global, invoice, upgradeStars, tabId);
+  payInputStarInvoice(global, invoice, buildStarsAmount(upgradeStars), tabId);
 });
 
 addActionHandler('transferGift', (global, actions, payload): ActionReturnType => {
@@ -1156,7 +1158,7 @@ addActionHandler('transferGift', (global, actions, payload): ActionReturnType =>
     recipientId,
   };
 
-  payInputStarInvoice(global, invoice, transferStars, tabId);
+  payInputStarInvoice(global, invoice, buildStarsAmount(transferStars), tabId);
 });
 
 addActionHandler('removeGiftDescription', (global, actions, payload): ActionReturnType => {
@@ -1167,7 +1169,7 @@ addActionHandler('removeGiftDescription', (global, actions, payload): ActionRetu
     inputSavedGift: gift,
   };
 
-  payInputStarInvoice(global, invoice, price, tabId);
+  payInputStarInvoice(global, invoice, buildStarsAmount(price), tabId);
 });
 
 addActionHandler('upgradePrepaidGift', (global, actions, payload): ActionReturnType => {
@@ -1179,7 +1181,7 @@ addActionHandler('upgradePrepaidGift', (global, actions, payload): ActionReturnT
     hash,
   };
 
-  payInputStarInvoice(global, invoice, stars, tabId);
+  payInputStarInvoice(global, invoice, buildStarsAmount(stars), tabId);
 });
 
 addActionHandler('sendStarGiftAuctionBid', (global, actions, payload): ActionReturnType => {
@@ -1197,22 +1199,20 @@ addActionHandler('sendStarGiftAuctionBid', (global, actions, payload): ActionRet
     isUpdateBid,
   };
 
-  payInputStarInvoice(global, invoice, bidAmount, tabId);
+  payInputStarInvoice(global, invoice, buildStarsAmount(bidAmount), tabId);
 });
 
 async function payInputStarInvoice<T extends GlobalState>(
-  global: T, inputInvoice: ApiInputInvoice, price: number,
+  global: T, inputInvoice: ApiInputInvoice, price: ApiTypeCurrencyAmount,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const actions = getActions();
-  const isTon = inputInvoice.type === 'stargiftResale' && inputInvoice.currency === TON_CURRENCY_CODE;
-  const balance = isTon ? global.ton?.balance : global.stars?.balance;
-  const currency = isTon ? TON_CURRENCY_CODE : STARS_CURRENCY_CODE;
+  const balance = price.currency === TON_CURRENCY_CODE ? global.ton?.balance : global.stars?.balance;
 
   if (balance === undefined) return;
 
-  if (balance.amount < price) {
-    actions.openStarsBalanceModal({ currency, tabId });
+  if (balance.amount < price.amount) {
+    actions.openStarsBalanceModal({ currency: price.currency, tabId });
     return;
   }
 
@@ -1245,12 +1245,11 @@ async function payInputStarInvoice<T extends GlobalState>(
     return;
   }
 
-  const formPrice = form.invoice.totalAmount;
-  if (formPrice !== price) {
+  const formPrice = form.invoice.totalPrice;
+  if (formPrice && !areCurrencyAmountsEqual(formPrice, price)) {
     actions.openPriceConfirmModal({
       originalAmount: price,
       newAmount: formPrice,
-      currency,
       directInfo: {
         inputInvoice,
         formId: form.formId,

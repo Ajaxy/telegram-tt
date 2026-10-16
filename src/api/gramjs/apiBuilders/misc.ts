@@ -367,7 +367,7 @@ export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInf
   return {
     amount: toJSNumber(amount),
     currency,
-    cryptoAmount: toJSNumber(cryptoAmount),
+    cryptoAmount,
     cryptoCurrency,
     purchaseDate,
     url,

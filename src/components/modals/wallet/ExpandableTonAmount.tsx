@@ -11,7 +11,7 @@ import styles from './ExpandableTonAmount.module.scss';
 
 type OwnProps = {
   // Nanotons
-  nanos: number;
+  nanos: bigint;
   className?: string;
   fractionClassName?: string;
   withTicker?: boolean;

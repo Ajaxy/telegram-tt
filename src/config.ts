@@ -359,11 +359,11 @@ export const WALLET_COMMENT_MAX_BYTES = 960;
 // The most `wallet.sendTransfer` takes in one data field: Android and tdesktop hardcode the same limit
 export const WALLET_TRANSFER_DATA_MAX_BYTES = 16 * 1024;
 // Nanotons, used until the fee estimate arrives
-export const GRAM_TRANSFER_FEE_RESERVE = 15_000_000;
+export const GRAM_TRANSFER_FEE_RESERVE = 15_000_000n;
 export const WALLET_FIRST_TRANSFER_SUGGESTION = 'WALLET_FIRST_INCOMING_TRANSFER';
 // The item contract takes its fees from the attached amount, forwards the second one and returns the rest
-export const NFT_TRANSFER_ATTACHED_NANOS = 100_000_000;
-export const NFT_TRANSFER_FORWARD_NANOS = 10_000_000;
+export const NFT_TRANSFER_ATTACHED_NANOS = 100_000_000n;
+export const NFT_TRANSFER_FORWARD_NANOS = 10_000_000n;
 export const TON_CONNECT_BAD_REQUEST_ERROR_CODE = 1;
 export const TON_CONNECT_UNKNOWN_APP_ERROR_CODE = 100;
 export const TON_CONNECT_USER_DECLINED_ERROR_CODE = 300;

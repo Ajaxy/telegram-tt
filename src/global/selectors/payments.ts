@@ -112,7 +112,3 @@ export function selectStarsGiftResaleCommission<T extends GlobalState>(global: T
   const permille = global.appConfig?.starsStargiftResaleCommissionPermille;
   return permille !== undefined ? permille / 1000 : undefined;
 }
-export function selectTonGiftResaleCommission<T extends GlobalState>(global: T) {
-  const permille = global.appConfig?.tonStargiftResaleCommissionPermille;
-  return permille !== undefined ? permille / 1000 : undefined;
-}

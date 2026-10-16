@@ -10,7 +10,7 @@ export function buildWalletTransferFeeKey({
   toAddress, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
 }: {
   toAddress: string;
-  amount: number;
+  amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;

@@ -51,7 +51,7 @@ export function selectHasLocalOnlyWalletPhrase<T extends GlobalState>(global: T)
 
 // A wallet without a working phrase on the device counts as zero
 export function selectWalletLocalOnlyNanos<T extends GlobalState>(global: T) {
-  return selectHasLocalOnlyWalletPhrase(global) ? global.wallet!.state?.balance.amount ?? 0 : 0;
+  return selectHasLocalOnlyWalletPhrase(global) ? global.wallet!.state?.balance ?? 0n : 0n;
 }
 
 export function selectWalletSavedWallets<T extends GlobalState>(global: T) {

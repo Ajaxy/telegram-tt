@@ -11,11 +11,12 @@ import {
   STARS_CURRENCY_CODE,
   TON_CURRENCY_CODE,
 } from '../../../config';
+import { buildStarsAmount } from '../../../global/helpers/payments';
 import { selectIsMonoforumAdmin, selectPeer } from '../../../global/selectors';
 import { selectDraft } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 import { formatShortDuration } from '../../../util/dates/duration';
-import { convertTonFromNanos, convertTonToNanos } from '../../../util/formatCurrency';
+import { formatTonFromNanos, parseTonPrefixToNanos } from '../../../util/formatCurrency';
 import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import {
   formatStarsAsIcon,
@@ -43,13 +44,13 @@ export type OwnProps = {
 
 type StateProps = {
   starBalance?: ApiStarsAmount;
-  tonBalance?: number;
+  tonBalance?: bigint;
   peer?: ApiPeer;
   currentDraft?: ApiDraft;
   maxStarsAmount: number;
   minStarsAmount: number;
-  tonMaxAmount: number;
-  tonMinAmount: number;
+  tonMaxAmount: bigint;
+  tonMinAmount: bigint;
   ageMinSeconds: number;
   futureMin: number;
   futureMax: number;
@@ -81,9 +82,8 @@ const SuggestMessageModal = ({
   const currentReplyInfo = currentDraft?.replyInfo;
   const isInSuggestChangesMode = Boolean(currentReplyInfo);
 
-  const [currencyAmount, setCurrencyAmount] = useState<number | undefined>(
-    currentSuggestedPostInfo?.price?.amount || undefined,
-  );
+  // Kept as typed, so that a price in Grams turns into nanotons without a float in between
+  const [amountText, setAmountText] = useState(() => formatPriceText(currentSuggestedPostInfo?.price));
   const [selectedCurrency, setSelectedCurrency] = useState<ApiTypeCurrencyAmount['currency']>(
     currentSuggestedPostInfo?.price?.currency || STARS_CURRENCY_CODE,
   );
@@ -94,9 +94,7 @@ const SuggestMessageModal = ({
   );
 
   useEffect(() => {
-    const price = currentSuggestedPostInfo?.price;
-    const amount = price?.currency === TON_CURRENCY_CODE ? convertTonFromNanos(price.amount) : price?.amount;
-    setCurrencyAmount(amount);
+    setAmountText(formatPriceText(currentSuggestedPostInfo?.price));
     setSelectedCurrency(currentSuggestedPostInfo?.price?.currency || STARS_CURRENCY_CODE);
     setScheduleDate(currentSuggestedPostInfo?.scheduleDate
       ? currentSuggestedPostInfo.scheduleDate * 1000
@@ -106,6 +104,9 @@ const SuggestMessageModal = ({
   const lang = useLang();
 
   const isCurrencyStars = selectedCurrency === STARS_CURRENCY_CODE;
+  const starsAmount = Number(amountText) || 0;
+  const tonAmount = parseTonPrefixToNanos(amountText);
+  const hasAmount = isCurrencyStars ? starsAmount > 0 : tonAmount > 0n;
   const now = getServerTime();
   const minAt = (now + futureMin) * 1000;
   const maxAt = (now + futureMax) * 1000;
@@ -113,12 +114,17 @@ const SuggestMessageModal = ({
 
   const handleAmountChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+
+    if (!isCurrencyStars) {
+      setAmountText(parseTonPrefixToNanos(value) > tonMaxAmount ? formatTonFromNanos(tonMaxAmount) : value);
+      return;
+    }
+
     const number = parseFloat(value);
-
     const result = value === '' || Number.isNaN(number) ? undefined
-      : Math.min(Math.max(number, 0), currentMaxAmount);
+      : Math.min(Math.max(number, 0), maxStarsAmount);
 
-    setCurrencyAmount(result);
+    setAmountText(result?.toString() ?? '');
   });
 
   const handleExpireDateChange = useLastCallback((date: Date) => {
@@ -131,16 +137,10 @@ const SuggestMessageModal = ({
     closeCalendar();
   });
 
-  const currentMinAmount = isCurrencyStars ? minStarsAmount : convertTonFromNanos(tonMinAmount);
-  const currentMaxAmount = isCurrencyStars ? maxStarsAmount : convertTonFromNanos(tonMaxAmount);
-  const isDisabled = Boolean(currencyAmount) && currencyAmount < currentMinAmount;
+  const isBelowMin = hasAmount && (isCurrencyStars ? starsAmount < minStarsAmount : tonAmount < tonMinAmount);
 
   const handleOffer = useLastCallback(() => {
-    const neededAmount = currencyAmount
-      ? (isCurrencyStars ? currencyAmount : convertTonToNanos(currencyAmount))
-      : 0;
-
-    if (isDisabled) {
+    if (isBelowMin) {
       return;
     }
 
@@ -148,17 +148,17 @@ const SuggestMessageModal = ({
       if (isCurrencyStars) {
         const currentBalance = starBalance?.amount || 0;
 
-        if (neededAmount > currentBalance) {
+        if (starsAmount > currentBalance) {
           openStarsBalanceModal({
             topup: {
-              balanceNeeded: neededAmount,
+              balanceNeeded: starsAmount,
             },
           });
           return;
         }
       } else {
-        const currentTonBalance = tonBalance || 0;
-        if (neededAmount > currentTonBalance) {
+        const currentTonBalance = tonBalance || 0n;
+        if (tonAmount > currentTonBalance) {
           openStarsBalanceModal({
             currency: TON_CURRENCY_CODE,
           });
@@ -168,7 +168,7 @@ const SuggestMessageModal = ({
     }
 
     updateDraftSuggestedPostInfo({
-      price: { currency: selectedCurrency, amount: neededAmount, nanos: 0 },
+      price: isCurrencyStars ? buildStarsAmount(starsAmount) : { currency: TON_CURRENCY_CODE, amount: tonAmount },
       scheduleDate: scheduleDate
         ? Math.max(scheduleDate / 1000, getServerTime() + futureMin + FUTURE_TIME_ADJUSTMENT)
         : undefined,
@@ -219,18 +219,18 @@ const SuggestMessageModal = ({
           <InputText
             label={lang('InputPlaceholderPrice')}
             className={buildClassName(styles.input)}
-            value={currencyAmount?.toString()}
+            value={amountText}
             onChange={handleAmountChange}
             inputMode="numeric"
             tabIndex={0}
             teactExperimentControlled={isCurrencyStars}
           />
           <div className={styles.description}>
-            {currencyAmount !== undefined && currencyAmount > 0 && currencyAmount < currentMinAmount
+            {isBelowMin
               ? lang('DescriptionSuggestedPostMinimumOffer', {
                 amount: isCurrencyStars
-                  ? formatStarsAsText(lang, currentMinAmount)
-                  : formatTonAsText(lang, currentMinAmount) },
+                  ? formatStarsAsText(lang, minStarsAmount)
+                  : formatTonAsText(lang, tonMinAmount) },
               { withNodes: true, withMarkdown: true })
               : isCurrencyStars
                 ? lang('SuggestMessagePriceDescriptionStars')
@@ -280,14 +280,14 @@ const SuggestMessageModal = ({
         <Button
           className={styles.offerButton}
           onClick={handleOffer}
-          disabled={isDisabled}
+          disabled={isBelowMin}
           inline
         >
           {isInSuggestChangesMode ? lang('ButtonUpdateTerms')
-            : currencyAmount ? lang('ButtonOfferAmount', {
+            : hasAmount ? lang('ButtonOfferAmount', {
               amount: isCurrencyStars
-                ? formatStarsAsIcon(lang, currencyAmount, { asFont: true })
-                : formatTonAsIcon(lang, currencyAmount),
+                ? formatStarsAsIcon(lang, starsAmount, { asFont: true })
+                : formatTonAsIcon(lang, tonAmount),
             }, {
               withNodes: true,
               withMarkdown: true,
@@ -297,6 +297,12 @@ const SuggestMessageModal = ({
     </Modal>
   );
 };
+
+function formatPriceText(price?: ApiTypeCurrencyAmount) {
+  if (!price?.amount) return '';
+
+  return price.currency === TON_CURRENCY_CODE ? formatTonFromNanos(price.amount) : String(price.amount);
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): Complete<StateProps> => {

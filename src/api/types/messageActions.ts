@@ -165,7 +165,7 @@ export interface ApiMessageActionGiftPremium extends ActionMediaType {
   amount: number;
   days: number;
   cryptoCurrency?: string;
-  cryptoAmount?: number;
+  cryptoAmount?: bigint;
   message?: ApiFormattedText;
 }
 
@@ -204,7 +204,7 @@ export interface ApiMessageActionGiftCode extends ActionMediaType {
   currency?: string;
   amount?: number;
   cryptoCurrency?: string;
-  cryptoAmount?: number;
+  cryptoAmount?: bigint;
   message?: ApiFormattedText;
 }
 
@@ -238,7 +238,7 @@ export interface ApiMessageActionGiftStars extends ActionMediaType {
   amount: number;
   stars: number;
   cryptoCurrency?: string;
-  cryptoAmount?: number;
+  cryptoAmount?: bigint;
   transactionId?: string;
 }
 
@@ -247,7 +247,7 @@ export interface ApiMessageActionGiftTon extends ActionMediaType {
   currency: string;
   amount: number;
   cryptoCurrency: string;
-  cryptoAmount: number;
+  cryptoAmount: bigint;
   transactionId?: string;
 }
 
@@ -266,7 +266,7 @@ export interface ApiMessageActionWalletTonConnectRequest extends ActionMediaType
 export interface ApiMessageActionGramTransfer extends ActionMediaType {
   type: 'gramTransfer';
   // Nanotons, always positive
-  amount: number;
+  amount: bigint;
   peerAddress: string;
   transactionId: string;
   comment?: string;

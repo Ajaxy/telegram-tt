@@ -228,4 +228,20 @@ export default defineConfig(
       },
     },
   },
+  {
+    name: 'global-state-json',
+    // Global state may hold `bigint`: plain `JSON.stringify` throws on it, and plain `JSON.parse` cannot restore it
+    files: ['src/global/cache.ts', 'src/global/actions/api/passcode.ts', 'src/util/init.ts'],
+    rules: {
+      'no-restricted-properties': ['error', {
+        object: 'JSON',
+        property: 'parse',
+        message: 'Use `parseJsonWithBigInt` from `src/util/numbers.ts` for global state.',
+      }, {
+        object: 'JSON',
+        property: 'stringify',
+        message: 'Use `stringifyJsonWithBigInt` from `src/util/numbers.ts` for global state.',
+      }],
+    },
+  },
 );

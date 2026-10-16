@@ -1,13 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiStarsAmount } from '../../../api/types';
+import type { ApiStarsAmount, ApiTonAmount } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
+import { TON_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { convertTonFromNanos } from '../../../util/formatCurrency';
-import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
+import { formatCurrencyAmountAsText } from '../../../util/localization/format';
 
 import useLang from '../../../hooks/useLang';
 
@@ -19,14 +18,14 @@ export type OwnProps = {
 
 type StateProps = {
   starBalance?: ApiStarsAmount;
-  tonBalance?: number;
+  tonBalance?: ApiTonAmount;
 };
 
-const PriceConfirmModal: FC<OwnProps & StateProps> = ({
+const PriceConfirmModal = ({
   modal,
   starBalance,
   tonBalance,
-}) => {
+}: OwnProps & StateProps) => {
   const actions = getActions();
 
   const lang = useLang();
@@ -37,18 +36,17 @@ const PriceConfirmModal: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const { currency, newAmount } = modal;
-    const isTon = currency === 'TON';
-    const currentBalance = isTon ? tonBalance : starBalance?.amount;
+    const { newAmount } = modal;
+    const currentBalance = newAmount.currency === TON_CURRENCY_CODE ? tonBalance : starBalance;
 
     if (currentBalance === undefined) {
       actions.closePriceConfirmModal();
       return;
     }
 
-    if (currentBalance < newAmount!) {
+    if (currentBalance.amount < newAmount.amount) {
       actions.openStarsBalanceModal({
-        currency: isTon ? 'TON' : 'XTR',
+        currency: newAmount.currency,
         tabId: getCurrentTabId(),
       });
       actions.closePriceConfirmModal();
@@ -70,25 +68,6 @@ const PriceConfirmModal: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
-  const {
-    originalAmount,
-    newAmount,
-    currency,
-  } = modal;
-
-  const isTon = currency === 'TON';
-
-  let originalAmountText: string;
-  let newAmountText: string;
-
-  if (isTon) {
-    originalAmountText = formatTonAsText(lang, convertTonFromNanos(originalAmount!));
-    newAmountText = formatTonAsText(lang, convertTonFromNanos(newAmount!));
-  } else {
-    originalAmountText = formatStarsAsText(lang, originalAmount!);
-    newAmountText = formatStarsAsText(lang, newAmount!);
-  }
-
   return (
     <ConfirmDialog
       isOpen={Boolean(modal)}
@@ -99,8 +78,8 @@ const PriceConfirmModal: FC<OwnProps & StateProps> = ({
     >
       <p>
         {lang('PriceChangedText', {
-          originalAmount: originalAmountText,
-          newAmount: newAmountText,
+          originalAmount: formatCurrencyAmountAsText(lang, modal.originalAmount),
+          newAmount: formatCurrencyAmountAsText(lang, modal.newAmount),
         }, {
           withMarkdown: true,
           withNodes: true,
@@ -112,7 +91,7 @@ const PriceConfirmModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   const starBalance = global.stars?.balance;
-  const tonBalance = global.ton?.balance?.amount;
+  const tonBalance = global.ton?.balance;
 
   return {
     starBalance,

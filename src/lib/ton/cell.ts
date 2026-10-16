@@ -1,5 +1,7 @@
 const MAX_BITS = 1023;
 const MAX_REFS = 4;
+// `storeCoins` keeps the byte length in 4 bits, so an amount takes at most 15 bytes and stays below this limit
+export const MAX_COINS = 1n << 120n;
 
 export class Cell {
   constructor(

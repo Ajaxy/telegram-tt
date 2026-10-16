@@ -338,16 +338,16 @@ export interface ApiAppConfig {
   starsSuggestedPostFutureMin: number;
   noForwardsRequestExpirePeriod: number;
   tonSuggestedPostCommissionPermille: number;
-  tonSuggestedPostAmountMax: number;
-  tonSuggestedPostAmountMin: number;
-  tonStargiftResaleAmountMax?: number;
-  tonStargiftResaleAmountMin?: number;
+  tonSuggestedPostAmountMax: bigint;
+  tonSuggestedPostAmountMin: bigint;
+  tonStargiftResaleAmountMax?: bigint;
+  tonStargiftResaleAmountMin?: bigint;
   tonStargiftResaleCommissionPermille?: number;
   tonUsdRate?: number;
   tonTopupUrl: string;
   isWalletAvailable?: boolean;
   // Transfers below this are hidden from the wallet history
-  walletTransferMinNanos?: number;
+  walletTransferMinNanos?: bigint;
   walletGaslessDailyTransfers?: number;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;
@@ -486,7 +486,7 @@ export type ApiUrlAuthResult =
 export interface ApiCollectibleInfo {
   amount: number;
   currency: string;
-  cryptoAmount: number;
+  cryptoAmount: bigint;
   cryptoCurrency: string;
   purchaseDate: number;
   url: string;

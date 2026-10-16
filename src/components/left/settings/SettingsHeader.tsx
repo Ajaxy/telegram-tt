@@ -57,7 +57,7 @@ const SettingsHeader = ({
   // A phrase stored only on this device is lost on logout whatever its balance, so the warning does not wait for the sum
   const hasUnbackedWallet = isWalletAvailable && (hasLocalOnlyWalletPhrase || Boolean(savedWallets?.length));
   const unbackedWalletNanos = useMemo(() => (
-    savedWallets?.reduce((sum, { balance }) => sum + (balance ?? 0), localOnlyWalletNanos) ?? localOnlyWalletNanos
+    savedWallets?.reduce((sum, { balance }) => sum + (balance ?? 0n), localOnlyWalletNanos) ?? localOnlyWalletNanos
   ), [savedWallets, localOnlyWalletNanos]);
 
   const handleMultiClick = useMultiClick(5, () => {

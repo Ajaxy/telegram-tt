@@ -251,6 +251,8 @@ export interface ApiMessagePoll {
 export interface ApiInvoice {
   prices: ApiLabeledPrice[];
   totalAmount: number;
+  // Set for an invoice in Stars or TON. TON is counted in nanotons, which `totalAmount` cannot hold exactly.
+  totalPrice?: ApiTypeCurrencyAmount;
   currency: string;
   isTest?: boolean;
   isRecurring?: boolean;

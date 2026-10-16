@@ -26,6 +26,7 @@ type StateProps = {
 
 // `formatTonInFiat` takes the rate against USD, which is 1 for USD itself
 const USD_RATE = 1;
+const ONE_GRAM_NANOS = 1_000_000_000n;
 
 const TIPS: [IconName, RegularLangKey, RegularLangKey][] = [
   ['send', 'WalletIntroSendTitle', 'WalletIntroSendText'],
@@ -37,7 +38,9 @@ const WalletIntroScreen = ({ tonUsdRate, onDone }: OwnProps & StateProps) => {
   const lang = useLang();
 
   const hasRate = tonUsdRate !== undefined && Number.isFinite(tonUsdRate) && tonUsdRate > 0;
-  const rate = hasRate ? formatTonInFiat(1, tonUsdRate, USD_CURRENCY_CODE, USD_RATE, lang.code) : undefined;
+  const rate = hasRate
+    ? formatTonInFiat(ONE_GRAM_NANOS, tonUsdRate, USD_CURRENCY_CODE, USD_RATE, lang.code)
+    : undefined;
   const description = (
     <>
       {rate && <div>{lang('WalletIntroRate', { rate })}</div>}

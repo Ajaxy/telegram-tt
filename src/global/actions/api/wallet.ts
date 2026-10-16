@@ -555,7 +555,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 });
 
 // Only incoming transfers under the server's threshold count as dust
-function filterDustTransactions(transactions: ApiWalletTransaction[], minAmount?: number) {
+function filterDustTransactions(transactions: ApiWalletTransaction[], minAmount?: bigint) {
   if (!minAmount) return transactions;
 
   return transactions.filter(({ amount, isIncoming, isKeyChange, collectible }) => (
@@ -1438,10 +1438,10 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
     global = updateWallet(global, {
       state: {
         ...walletState,
-        balance: { ...walletState.balance, amount: Math.max(0, walletState.balance.amount - spentAmount) },
+        balance: walletState.balance > spentAmount ? walletState.balance - spentAmount : 0n,
       },
       staleBalance: {
-        amount: global.wallet?.staleBalance?.amount ?? walletState.balance.amount,
+        amount: global.wallet?.staleBalance?.amount ?? walletState.balance,
         expiresAt: getServerTime() + PENDING_TTL_SECONDS,
       },
     });
@@ -1462,7 +1462,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         isPending: true,
         peer: { type: 'address', address: toAddress },
         // The server lists a collectible transfer with a zero amount as well
-        amount: collectibleAddress ? 0 : amount,
+        amount: collectibleAddress ? 0n : amount,
         // The cache keeps pending records, so a private comment is held only encrypted, as the server lists it
         comment: result.encryptedComment ? undefined : comment,
         encryptedComment: result.encryptedComment,

@@ -616,24 +616,22 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const messagePriceInStars = await getPeerStarsForMessage(global, chatId!);
 
   const suggestedPostPrice = draftSuggestedPostInfo?.price;
-  const suggestedPostCurrency = suggestedPostPrice?.currency || STARS_CURRENCY_CODE;
-  const suggestedPostAmount = suggestedPostPrice?.amount || 0;
-  if (suggestedPostAmount && !draftReplyInfo) {
-    if (suggestedPostCurrency === STARS_CURRENCY_CODE) {
+  if (suggestedPostPrice?.amount && !draftReplyInfo) {
+    if (suggestedPostPrice.currency === STARS_CURRENCY_CODE) {
       const currentBalance = global.stars?.balance?.amount || 0;
 
-      if (suggestedPostAmount > currentBalance) {
+      if (suggestedPostPrice.amount > currentBalance) {
         actions.openStarsBalanceModal({
           topup: {
-            balanceNeeded: suggestedPostAmount,
+            balanceNeeded: suggestedPostPrice.amount,
           },
           tabId,
         });
         return;
       }
-    } else if (suggestedPostCurrency === TON_CURRENCY_CODE) {
-      const currentTonBalance = global.ton?.balance?.amount || 0;
-      if (suggestedPostAmount > currentTonBalance) {
+    } else {
+      const currentTonBalance = global.ton?.balance?.amount || 0n;
+      if (suggestedPostPrice.amount > currentTonBalance) {
         actions.openStarsBalanceModal({
           currency: TON_CURRENCY_CODE,
           tabId,
@@ -2916,24 +2914,22 @@ addActionHandler('approveSuggestedPost', async (global, actions, payload): Promi
 
   const isAdmin = selectIsMonoforumAdmin(global, chatId);
 
-  if (!isAdmin && message?.suggestedPostInfo?.price?.amount) {
-    const neededAmount = message.suggestedPostInfo.price.amount;
-    const isCurrencyStars = message.suggestedPostInfo.price.currency === STARS_CURRENCY_CODE;
-
-    if (isCurrencyStars) {
+  const price = message?.suggestedPostInfo?.price;
+  if (!isAdmin && price?.amount) {
+    if (price.currency === STARS_CURRENCY_CODE) {
       const currentBalance = global.stars?.balance?.amount || 0;
-      if (neededAmount > currentBalance) {
+      if (price.amount > currentBalance) {
         actions.openStarsBalanceModal({
           topup: {
-            balanceNeeded: neededAmount,
+            balanceNeeded: price.amount,
           },
           tabId,
         });
         return;
       }
     } else {
-      const currentTonBalance = global.ton?.balance?.amount || 0;
-      if (neededAmount > currentTonBalance) {
+      const currentTonBalance = global.ton?.balance?.amount || 0n;
+      if (price.amount > currentTonBalance) {
         actions.openStarsBalanceModal({
           currency: TON_CURRENCY_CODE,
           tabId,

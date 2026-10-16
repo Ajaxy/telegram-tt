@@ -196,7 +196,7 @@ const SavedGift = ({
           inline
         >
           {resellPrice.currency === 'TON'
-            ? formatTonAsIcon(lang, resellPrice.amount, { shouldConvertFromNanos: true, className: styles.star })
+            ? formatTonAsIcon(lang, resellPrice.amount, { className: styles.star })
             : formatStarsAsIcon(lang, resellPrice.amount, { asFont: true, className: styles.star })}
         </Button>
       )}

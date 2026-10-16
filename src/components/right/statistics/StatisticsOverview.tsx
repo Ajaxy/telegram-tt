@@ -2,10 +2,11 @@ import { memo } from '../../../lib/teact/teact';
 
 import type {
   ApiBoostStatistics, ApiChannelMonetizationStatistics,
-  ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsOverviewItem,
+  ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, ApiTypeCurrencyAmount, StatisticsOverviewItem,
 } from '../../../api/types';
 import type { RegularLangKey } from '../../../types/language';
 
+import { TON_CURRENCY_CODE } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
@@ -205,17 +206,17 @@ const StatisticsOverview = ({
           <tr>
             <td className={styles.tableCell}>
               {renderBalanceCell(
-                balances?.availableBalance ? convertTonFromNanos(balances.availableBalance.amount) : 0,
+                convertBalanceToGrams(balances?.availableBalance),
                 usdRate || 0,
                 'ChannelEarnAvailable',
               )}
               {renderBalanceCell(
-                balances?.currentBalance ? convertTonFromNanos(balances.currentBalance.amount) : 0,
+                convertBalanceToGrams(balances?.currentBalance),
                 usdRate || 0,
                 'ChannelEarnReward',
               )}
               {renderBalanceCell(
-                balances?.overallRevenue ? convertTonFromNanos(balances.overallRevenue.amount) : 0,
+                convertBalanceToGrams(balances?.overallRevenue),
                 usdRate || 0,
                 'ChannelEarnTotal',
               )}
@@ -276,6 +277,10 @@ const StatisticsOverview = ({
     </div>
   );
 };
+
+function convertBalanceToGrams(balance?: ApiTypeCurrencyAmount) {
+  return balance?.currency === TON_CURRENCY_CODE ? convertTonFromNanos(balance.amount) : 0;
+}
 
 function getSchemaByType(type: StatisticsType) {
   switch (type) {

@@ -16,6 +16,7 @@ import { purgePasscodeCaches } from './cacheApi';
 import { cloneDeep } from './iteratees';
 import { ACCOUNT_SLOT } from './multiaccount';
 import { unsubscribeLocally } from './notifications';
+import { parseJsonWithBigInt } from './numbers';
 import {
   abortPasscodeDisable,
   clearLegacyEncryptedSessionIfAllowed,
@@ -229,7 +230,7 @@ function buildLockedGlobal<T extends GlobalState>(
 }
 
 function restoreGlobal<T extends GlobalState>(global: T, globalJson?: string): T {
-  const restoredGlobal = globalJson ? JSON.parse(globalJson) as T : cloneDeep(INITIAL_GLOBAL_STATE) as T;
+  const restoredGlobal = globalJson ? parseJsonWithBigInt<T>(globalJson) : cloneDeep(INITIAL_GLOBAL_STATE) as T;
   restoredGlobal.byTabId = global.byTabId;
   restoredGlobal.sharedState = global.sharedState;
   if (globalJson) migrateCache(restoredGlobal, cloneDeep(INITIAL_GLOBAL_STATE));

@@ -47,6 +47,7 @@ import {
 } from '../../../lib/ton/wallet';
 import { TON_CONNECT_IDB_STORE } from '../../../util/browser/idb';
 import { bufferToBase64 } from '../../../util/encoding/buffer';
+import { getBigIntMax } from '../../../util/numbers';
 import { getServerTime } from '../../../util/serverTime';
 import {
   buildApiTonConnectRequest, buildApiTonConnectSession, buildApiWalletSentTransfer,
@@ -74,7 +75,7 @@ type TonConnectRequestParams = TonConnectCredentials & {
 type TonConnectRespondParams = TonConnectRequestParams & {
   currentUserId: string;
   isDeclined?: boolean;
-  previewFee?: number;
+  previewFee?: bigint;
   // See `ApiWalletSentTransfer`
   pendingSeqno?: number;
   pendingValidUntil?: number;
@@ -500,9 +501,9 @@ async function processTonConnectRequest({
 
         // The balance is checked against the fee the user saw in the preview, and the reserve serves as the minimum
         // threshold. The claim cannot be undone, so a transfer the wallet cannot pay for has to be refused here.
-        const reserve = Math.max(previewFee ?? 0, GRAM_TRANSFER_FEE_RESERVE * params.messages.length);
+        const reserve = getBigIntMax(previewFee ?? 0n, GRAM_TRANSFER_FEE_RESERVE * BigInt(params.messages.length));
 
-        if (total + BigInt(reserve) > state.balance) throw new TonConnectError('INSUFFICIENT_FUNDS');
+        if (total + reserve > state.balance) throw new TonConnectError('INSUFFICIENT_FUNDS');
 
         // A bounceable message to an account with no code comes straight back with the fees spent, unless
         // the message brings the code along as its state init
@@ -592,7 +593,6 @@ async function processTonConnectRequest({
 
       const { validUntil: requestedUntil, messages: [firstMessage] } = transaction;
       const total = transaction.messages.reduce((sum, message) => sum + BigInt(message.amount), 0n);
-      const amount = Number(total);
       const data = await runWalletSend(credentials.ownAddress, async () => {
         // The seqno and the balance are read again under the lock: a transfer sent meanwhile has moved
         // the seqno on, or is still on its way, or has spent what this batch needs
@@ -611,9 +611,9 @@ async function processTonConnectRequest({
           await buildUnsignedBatchTransferBodyBoc(params),
           current.isDeployed ? undefined : await buildWalletInitBocs(keys.anchorPublicKey),
         );
-        const reserve = Math.max(fee ?? 0, GRAM_TRANSFER_FEE_RESERVE * params.messages.length);
+        const reserve = getBigIntMax(fee ?? 0n, GRAM_TRANSFER_FEE_RESERVE * BigInt(params.messages.length));
 
-        if (total + BigInt(reserve) > current.balance) {
+        if (total + reserve > current.balance) {
           throw new Error('Insufficient funds');
         }
 
@@ -628,7 +628,7 @@ async function processTonConnectRequest({
 
         if (sent) {
           sentTransfer = {
-            msgHash: sent.msgHash, seqno: current.seqno, validUntil, amount, toAddress: firstMessage.address,
+            msgHash: sent.msgHash, seqno: current.seqno, validUntil, amount: total, toAddress: firstMessage.address,
           };
         }
 

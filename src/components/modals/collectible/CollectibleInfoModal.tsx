@@ -7,8 +7,9 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiCountryCode } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
+import { TON_CURRENCY_CODE } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatCurrencyAsString } from '../../../util/formatCurrency';
+import { formatCurrencyAsString, formatTonAsCurrency } from '../../../util/formatCurrency';
 import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
@@ -96,9 +97,11 @@ const CollectibleInfoModal = ({
       secondsToDate(modal.purchaseDate),
       { variant: 'date', isShort: true, withTime: true },
     );
-    const currency = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
-    const cryptoCurrency = formatCurrencyAsString(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
-    const paid = `${cryptoCurrency} (${currency})`;
+    const fiat = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
+    // Only TON has a known number of decimals, so another crypto amount would come out wrong
+    const paid = modal.cryptoCurrency === TON_CURRENCY_CODE
+      ? `${formatTonAsCurrency(modal.cryptoAmount, lang.code)} (${fiat})`
+      : fiat;
     return lang(key, { date, amount: paid, details: '' });
   }, [modal, isUsername, lang]);
 

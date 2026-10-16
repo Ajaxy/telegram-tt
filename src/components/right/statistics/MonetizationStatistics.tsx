@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChannelMonetizationStatistics } from '../../../api/types';
 import type { RegularLangKey } from '../../../types/language';
 
+import { TON_CURRENCY_CODE } from '../../../config';
 import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -135,7 +136,9 @@ const MonetizationStatistics = ({
   }, [isReady, statistics, lang, chatId, dcId, forceUpdate]);
 
   function renderAvailableReward() {
-    const tonAmount = availableBalance ? convertTonFromNanos(availableBalance.amount) : 0;
+    const tonAmount = availableBalance?.currency === TON_CURRENCY_CODE
+      ? convertTonFromNanos(availableBalance.amount)
+      : 0;
     const [integerTonPart, decimalTonPart] = tonAmount.toFixed(4).split('.');
     const [integerUsdPart, decimalUsdPart] = availableBalance
       && statistics?.usdRate ? (tonAmount * statistics.usdRate).toFixed(2).split('.') : [0];

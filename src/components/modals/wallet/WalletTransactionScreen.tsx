@@ -138,7 +138,7 @@ const WalletTransactionScreen = ({
     }
 
     if (fee !== undefined) {
-      const fiatFee = formatTonInFiat(fee, tonUsdRate, currency, currencyRate, lang.code, { isInNanos: true });
+      const fiatFee = formatTonInFiat(fee, tonUsdRate, currency, currencyRate, lang.code);
 
       rows.push([
         lang('WalletTransactionFee'),
@@ -196,9 +196,9 @@ const WalletTransactionScreen = ({
     currency, decryptedComment, encryptedComment, isDecryptingComment, canShowFeesInfo, onDecryptComment, onSend,
   ]);
 
-  const fiatAmount = formatTonInFiat(amount, tonUsdRate, currency, currencyRate, lang.code, { isInNanos: true });
+  const fiatAmount = formatTonInFiat(amount, tonUsdRate, currency, currencyRate, lang.code);
 
-  const sign = amount === 0 ? '' : isIncoming ? '+' : '−';
+  const sign = amount === 0n ? '' : isIncoming ? '+' : '−';
 
   return (
     <div className={styles.root}>

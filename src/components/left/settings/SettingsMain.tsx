@@ -11,7 +11,6 @@ import {
   selectIsPremiumPurchaseBlocked,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { convertCurrencyFromBaseUnit } from '../../../util/formatCurrency';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 
 import useFlag from '../../../hooks/useFlag';
@@ -256,7 +255,7 @@ const SettingsMain = ({
             {lang('GramEarnings')}
             {Boolean(tonBalance) && (
               <span className="settings-item__current-value">
-                {formatTonAsIcon(lang, convertCurrencyFromBaseUnit(tonBalance.amount, tonBalance.currency), {
+                {formatTonAsIcon(lang, tonBalance.amount, {
                   withIconLast: true,
                   className: styles.balanceGem,
                 })}

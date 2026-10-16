@@ -564,9 +564,8 @@ export type TabState = {
   };
 
   priceConfirmModal?: {
-    originalAmount?: number;
-    newAmount?: number;
-    currency: 'TON' | 'XTR';
+    originalAmount: ApiTypeCurrencyAmount;
+    newAmount: ApiTypeCurrencyAmount;
     directInfo?: {
       formId: string;
       inputInvoice: ApiInputInvoice;
@@ -1006,7 +1005,7 @@ export type TabState = {
   walletModal?: {
     shouldOpenTonConnect?: boolean;
     initialRecipient?: string;
-    initialAmount?: number;
+    initialAmount?: bigint;
     initialComment?: string;
     isInitialCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
@@ -1047,7 +1046,7 @@ export type TabState = {
     // See `buildWalletTransferFeeKey`
     key?: string;
     // Nanotons
-    fee?: number;
+    fee?: bigint;
     canEncryptComment?: boolean;
     canUseRelayer?: boolean;
     isLoading?: boolean;

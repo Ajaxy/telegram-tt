@@ -267,7 +267,8 @@ const StarsTransactionModal = ({
       ]);
     }
 
-    if (transaction.starRefCommision && transaction.paidMessages) {
+    if (transaction.starRefCommision && transaction.paidMessages
+      && transaction.amount.currency === STARS_CURRENCY_CODE) {
       tableData.push([
         lang('PaidMessageTransactionTotal'),
         formatStarsAsIcon(lang,

@@ -4,7 +4,7 @@ import { truncateUtf8 } from './encoding/buffer';
 
 type TonTransferLink = {
   address?: string;
-  amount?: number;
+  amount?: bigint;
   comment?: string;
   isCommentEncrypted?: boolean;
 };
@@ -75,12 +75,12 @@ export function parseTonTransferLink(value: string): TonTransferLink | undefined
   const params = new URLSearchParams(match[2] || '');
   const amountParam = params.get('amount');
 
-  // Nanotons come as plain digits; `Number` would also take exponents and hex, and round big values
-  const amount = amountParam && RE_NANOTONS.test(amountParam) ? Number(amountParam) : undefined;
+  // The `amount` parameter is plain digits in nanotons. `BigInt` alone would also accept hex and surrounding spaces.
+  const amount = amountParam && RE_NANOTONS.test(amountParam) ? BigInt(amountParam) : undefined;
 
   return {
     address,
-    amount: amount !== undefined && Number.isSafeInteger(amount) && amount > 0 ? amount : undefined,
+    amount: amount || undefined,
     ...parseTransferComment(
       params.get('text') ?? undefined, params.get('comment') ?? undefined, params.get('encrypted') ?? undefined,
     ),

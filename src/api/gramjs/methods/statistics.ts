@@ -44,6 +44,7 @@ export async function fetchChannelMonetizationStatistics({
   dcId?: number;
 }) {
   const result = await invokeRequest(new GramJs.payments.GetStarsRevenueStats({
+    ton: true,
     peer: buildInputPeer(peer.id, peer.accessHash),
   }), {
     dcId,
@@ -240,6 +241,7 @@ export async function fetchMonetizationRevenueWithdrawalUrl({
     }
 
     const result = await invokeRequest(new GramJs.payments.GetStarsRevenueWithdrawalUrl({
+      ton: true,
       peer: buildInputPeer(peer.id, peer.accessHash),
       password,
     }), {

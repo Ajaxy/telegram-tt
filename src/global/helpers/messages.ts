@@ -46,6 +46,7 @@ import {
   selectWebPageFromMessage,
 } from '../selectors';
 import { selectThreadIdFromMessage } from '../selectors/threads';
+import { areCurrencyAmountsEqual } from './payments';
 import { getRichMessagePreviewText, getRichMessageUsage } from './richMessage';
 import { getMainUsername } from './users';
 
@@ -557,9 +558,7 @@ export function getSuggestedChangesInfo(
   const isNewText = !areDeepEqual(originalText, suggestedText);
   const isNewMedia = !areDeepEqual(originalMediaContent, suggestedMediaContent);
 
-  const originalPrice = original.price?.amount;
-  const suggestedPrice = suggested.price?.amount;
-  const isNewPrice = originalPrice !== suggestedPrice;
+  const isNewPrice = !areCurrencyAmountsEqual(original.price, suggested.price);
 
   const originalTime = original.scheduleDate;
   const suggestedTime = suggested.scheduleDate;

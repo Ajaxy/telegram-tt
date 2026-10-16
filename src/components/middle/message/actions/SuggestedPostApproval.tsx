@@ -12,7 +12,6 @@ import { selectIsMonoforumAdmin, selectMonoforumChannel,
   selectSender } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatShortDuration } from '../../../../util/dates/duration';
-import { convertTonFromNanos } from '../../../../util/formatCurrency';
 import { formatCalendarDate, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
@@ -63,13 +62,10 @@ const SuggestedPostApproval = ({
 
   const isPostPublished = scheduleDate ? scheduleDate <= getServerTime() : false;
 
-  const currency = amount?.currency;
-  const amountValue = amount?.amount || 0;
-
-  const formattedAmount = amountValue > 0
-    ? (currency === TON_CURRENCY_CODE
-      ? formatTonAsText(lang, convertTonFromNanos(amountValue))
-      : formatStarsAsText(lang, amountValue))
+  const formattedAmount = amount?.amount
+    ? (amount.currency === TON_CURRENCY_CODE
+      ? formatTonAsText(lang, amount.amount)
+      : formatStarsAsText(lang, amount.amount))
     : undefined;
 
   const duration = formatShortDuration(lang, ageMinSeconds, true);

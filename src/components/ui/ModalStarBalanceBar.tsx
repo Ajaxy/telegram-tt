@@ -3,9 +3,10 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiStarsAmount, ApiTonAmount } from '../../api/types';
 
+import { TON_CURRENCY_CODE } from '../../config';
 import { formatStarsAmount } from '../../global/helpers/payments';
 import buildClassName from '../../util/buildClassName';
-import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../util/formatCurrency';
+import { convertTonToUsd, formatCurrencyAsString } from '../../util/formatCurrency';
 import { formatStarsAsIcon, formatTonAsIcon, NEXT_ARROW_REPLACEMENT } from '../../util/localization/format';
 
 import useIsTopmostBalanceBarModal from '../../hooks/element/useIsTopmostBalanceBarModal';
@@ -71,16 +72,16 @@ function ModalStarBalanceBar({
       ref={ref}
     >
       <div>
-        {isTonMode ? (
+        {currentBalance.currency === TON_CURRENCY_CODE ? (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatTonAsIcon(lang, convertTonFromNanos(currentBalance.amount)),
+            stars: formatTonAsIcon(lang, currentBalance.amount),
           }, {
             withNodes: true,
             withMarkdown: true,
           })
         ) : (
           lang('ModalStarsBalanceBarDescription', {
-            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance as ApiStarsAmount)),
+            stars: formatStarsAsIcon(lang, formatStarsAmount(lang, currentBalance)),
           }, {
             withNodes: true,
             withMarkdown: true,
@@ -88,10 +89,10 @@ function ModalStarBalanceBar({
         )}
       </div>
       <div>
-        {isTonMode && Boolean(tonUsdRate) && (
+        {currentBalance.currency === TON_CURRENCY_CODE && Boolean(tonUsdRate) && (
           <div className={styles.tonInUsdDescription} style="color: var(--color-text-secondary)">
             {`≈ ${formatCurrencyAsString(
-              convertTonToUsd((currentBalance as ApiTonAmount).amount, tonUsdRate, true),
+              convertTonToUsd(currentBalance.amount, tonUsdRate),
               'USD',
               lang.code,
             )}`}

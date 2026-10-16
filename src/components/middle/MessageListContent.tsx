@@ -26,7 +26,6 @@ import { getMessageForumTopicId, isMessageInForumTopic } from '../../global/help
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
-import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
 import { formatCalendarDate, formatMessageListDate, secondsToDate } from '../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
@@ -301,7 +300,7 @@ const MessageListContent = ({
 
       const tableData: TableEntry[] = compact([
         [lang('TitlePrice'), price ? (price.currency === 'TON'
-          ? formatTonAsText(lang, convertTonFromNanos(price.amount))
+          ? formatTonAsText(lang, price.amount)
           : formatStarsAsText(lang, price.amount)) : lang('SuggestMessageNoPrice')],
         [lang('TitleTime'),
           scheduleDate

@@ -22,7 +22,7 @@ type OwnProps = {
 
 type StateProps = {
   // Nanotons
-  keyRotationFee?: number;
+  keyRotationFee?: bigint;
   currency: string;
   tonUsdRate?: number;
   currencyRate?: number;
@@ -44,7 +44,7 @@ const WalletDisableBackupScreen = ({
   const handleConfirm = useLastCallback(() => onConfirm(shouldRotateKey));
 
   const fiatFee = keyRotationFee !== undefined
-    ? formatTonInFiat(keyRotationFee, tonUsdRate, currency, currencyRate, lang.code, { isInNanos: true })
+    ? formatTonInFiat(keyRotationFee, tonUsdRate, currency, currencyRate, lang.code)
     : undefined;
 
   return (

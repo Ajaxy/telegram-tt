@@ -15,7 +15,7 @@ import { getMainUsername } from '../../../../global/helpers/users';
 import { selectPeer, selectPeerPaidMessagesStars, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatCurrency, formatCurrencyAsString } from '../../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
@@ -322,7 +322,9 @@ const GiftInfoModal = ({
         <Button className={styles.buyButton} onClick={handleBuyGift}>
           <span>
             {lang('ButtonBuyGift', {
-              stars: formatCurrency(lang, resellPrice.amount, resellPrice.currency, { asFontIcon: true }),
+              stars: resellPrice.currency === TON_CURRENCY_CODE
+                ? formatTonAsIcon(lang, resellPrice.amount, { isMono: true })
+                : formatStarsAsIcon(lang, resellPrice.amount, { asFont: true }),
             }, { withNodes: true })}
           </span>
           {resellPrice?.currency === TON_CURRENCY_CODE && Boolean(resellPriceInStars) && (
@@ -540,10 +542,9 @@ const GiftInfoModal = ({
       <div className={styles.headerRightButtons}>
         {Boolean(resellPrice?.amount) && (
           <div className={styles.giftResalePriceContainer}>
-            {formatCurrency(lang, resellPrice.amount, resellPrice.currency, {
-              asFontIcon: true,
-              iconClassName: styles.giftResalePriceStar,
-            })}
+            {resellPrice.currency === TON_CURRENCY_CODE
+              ? formatTonAsIcon(lang, resellPrice.amount, { isMono: true, className: styles.giftResalePriceStar })
+              : formatStarsAsIcon(lang, resellPrice.amount, { asFont: true, className: styles.giftResalePriceStar })}
           </div>
         )}
         {canCraft && (
@@ -903,7 +904,7 @@ const GiftInfoModal = ({
           onClose={closeConfirmModal}
           confirmLabel={lang('ButtonBuyGift', {
             stars: confirmPrice?.currency === TON_CURRENCY_CODE
-              ? formatTonAsIcon(lang, confirmPrice.amount, { shouldConvertFromNanos: true })
+              ? formatTonAsIcon(lang, confirmPrice.amount)
               : formatStarsAsIcon(lang, confirmPrice.amount, { asFont: true }),
           }, { withNodes: true })}
           confirmHandler={handleConfirmBuyGift}
@@ -928,7 +929,7 @@ const GiftInfoModal = ({
                 {lang('GiftBuyConfirmDescription', {
                   gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
                   stars: confirmPrice?.currency === TON_CURRENCY_CODE
-                    ? formatTonAsText(lang, confirmPrice.amount, true)
+                    ? formatTonAsText(lang, confirmPrice.amount)
                     : formatStarsAsText(lang, confirmPrice.amount),
                 }, {
                   withNodes: true,
@@ -942,7 +943,7 @@ const GiftInfoModal = ({
                 {lang('GiftBuyForPeerConfirmDescription', {
                   gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
                   stars: confirmPrice?.currency === TON_CURRENCY_CODE
-                    ? formatTonAsText(lang, confirmPrice.amount, true)
+                    ? formatTonAsText(lang, confirmPrice.amount)
                     : formatStarsAsText(lang, confirmPrice.amount),
                   peer: getPeerTitle(lang, recipientPeer),
                 }, {
