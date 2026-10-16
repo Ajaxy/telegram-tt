@@ -122,7 +122,15 @@ const WebPage = ({
 
   const handleArticleClick = useLastCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    openUrl({ url: webPage.url!, shouldSkipModal: messageWebPage.isSafe });
+    // The nested site-name `SafeLink` handles its own clicks (including modifier clicks)
+    if ((e.target as HTMLElement).closest('a')) return;
+
+    openUrl({
+      url: webPage.url!,
+      shouldSkipModal: messageWebPage.isSafe,
+      tryInstant: Boolean(cachedPage),
+      previewId: webPage.id,
+    });
   });
 
   const handleOpenTelegramLink = useLastCallback(() => {
@@ -253,7 +261,14 @@ const WebPage = ({
             className={buildClassName('WebPage-text', 'WebPage-text_interactive')}
             onClick={handleArticleClick}
           >
-            <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
+            <SafeLink
+              className="site-name"
+              url={url}
+              text={siteName || displayUrl}
+              shouldSkipModal={messageWebPage.isSafe}
+              tryInstantView={Boolean(cachedPage)}
+              previewId={webPage.id}
+            />
             {title && (
               <p className="site-title">{renderText(title)}</p>
             )}
