@@ -30,8 +30,16 @@ export type MockChannel = Partial<Api.Channel> & {
 export type MockAdminRights = Api.ChatAdminRights;
 export type MockBannedRights = Partial<Api.ChatBannedRights>;
 
-export type MockMessage = Omit<Partial<Api.Message>, 'reactions'> & {
+export type MockMessageEntity = {
+  type: 'url' | 'mention';
+  offset: number;
+  length: number;
+};
+
+export type MockMessage = Omit<Partial<Api.Message>, 'reactions' | 'fromId' | 'entities'> & {
   id: number;
+  fromUserId?: string;
+  entities?: MockMessageEntity[];
   media?: MockMessageMedia;
   reactions?: MockMessageReactions;
   replyToTopId?: number;
@@ -63,6 +71,9 @@ export type MockDocument = Partial<Api.Document> & {
   size: bigint;
   url: string;
   bytes: Uint8Array;
+  // Used for photos
+  width?: number;
+  height?: number;
 };
 
 export type MockDialogFilter = Partial<Api.DialogFilter> & {
@@ -87,6 +98,7 @@ export type MockTypes = {
   documents: MockDocument[];
   dialogFilters: MockDialogFilter[];
   topPeers: string[];
+  langPack?: Record<string, string>;
 };
 
 export const MOCK_STARTING_DATE = 1_66_69_69_420;
