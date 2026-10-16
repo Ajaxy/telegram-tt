@@ -225,6 +225,8 @@ addActionHandler('requestMasterAndJoinGroupCall', (global, actions, payload): Ac
 });
 
 addActionHandler('requestMasterAndAcceptCall', (global, actions, payload): ActionReturnType => {
+  sounds?.incoming.pause();
+
   actions.requestMasterAndCallAction({
     action: 'acceptCall',
     payload: undefined,
