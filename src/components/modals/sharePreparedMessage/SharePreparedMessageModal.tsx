@@ -17,8 +17,8 @@ import {
 } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePaidMessageConfirmation from '../../middle/composer/hooks/usePaidMessageConfirmation';
 
 import PaymentMessageConfirmDialog from '../../common/PaymentMessageConfirmDialog';
@@ -51,7 +51,7 @@ const SharePreparedMessageModal = ({
     showNotification,
     updateSharePreparedMessageModalSendArgs,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const isOpen = Boolean(modal);
 
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
@@ -103,7 +103,11 @@ const SharePreparedMessageModal = ({
       });
       if (!starsForSendMessage) {
         showNotification({
-          message: lang('BotSharedToOne', getPeerTitle(lang, peer!)),
+          message: {
+            key: 'BotSharedToOne',
+            variables: { peer: getPeerTitle(lang, peer!) },
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
         });
       }
       sendWebAppEvent({

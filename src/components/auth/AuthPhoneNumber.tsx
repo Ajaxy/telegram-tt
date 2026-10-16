@@ -10,8 +10,8 @@ import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
+import { loadAndChangeLanguage } from '../../util/localization';
 import { getAccountSlotUrl } from '../../util/multiaccount';
-import { oldSetLanguage } from '../../util/oldLangProvider';
 import { formatPhoneNumber, getCountryCodeByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
 import { navigateBack } from './helpers/backNavigation';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
@@ -141,14 +141,16 @@ const AuthPhoneNumber = ({
     setPhoneNumber(formatPhoneNumber(newFullNumber, selectedCountry));
   });
 
-  const handleLangChange = useLastCallback(() => {
+  const handleLangChange = useLastCallback(async () => {
     markIsLoading();
 
-    void oldSetLanguage(suggestedLanguage, () => {
+    try {
+      if (await loadAndChangeLanguage(suggestedLanguage)) {
+        setSharedSettingOption({ language: suggestedLanguage });
+      }
+    } finally {
       unmarkIsLoading();
-
-      setSharedSettingOption({ language: suggestedLanguage });
-    });
+    }
   });
 
   useEffect(() => {

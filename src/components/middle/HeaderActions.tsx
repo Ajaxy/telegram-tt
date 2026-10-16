@@ -39,7 +39,6 @@ import focusNoScroll from '../../util/focusNoScroll';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmoji from '../common/CustomEmoji';
 import Icon from '../common/icons/Icon';
@@ -136,7 +135,7 @@ const HeaderActions = ({
     openCocoonModal,
   } = getActions();
   const menuButtonRef = useRef<HTMLButtonElement>();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -209,24 +208,20 @@ const HeaderActions = ({
     handleSearchClick();
   });
 
-  const getTextWithLanguage = useCallback((langKey: string, langCode: string) => {
-    const simplified = langCode.split('-')[0];
-    const translationKey = `TranslateLanguage${simplified.toUpperCase()}`;
-    const name = oldLang(translationKey);
-    if (name !== translationKey) {
-      return oldLang(langKey, name);
-    }
-
+  const getTextWithLanguage = useCallback((
+    key: 'TranslateToButton' | 'DoNotTranslateLanguage' | 'AddedToDoNotTranslate',
+    langCode: string,
+  ) => {
     const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
     const translatedName = translatedNames.of(langCode)!;
-    return oldLang(`${langKey}Other`, translatedName);
-  }, [language, oldLang]);
+    return lang(key, { language: translatedName });
+  }, [language, lang]);
 
   const buttonText = useMemo(() => {
-    if (isTranslating) return oldLang('ShowOriginalButton');
+    if (isTranslating) return lang('ShowOriginalButton');
 
     return getTextWithLanguage('TranslateToButton', translationLanguage);
-  }, [translationLanguage, getTextWithLanguage, isTranslating, oldLang]);
+  }, [translationLanguage, getTextWithLanguage, isTranslating, lang]);
 
   const doNotTranslateText = useMemo(() => {
     if (!detectedChatLanguage) return undefined;
@@ -276,11 +271,11 @@ const HeaderActions = ({
         size="smaller"
         className={isOpen ? 'active' : ''}
         onClick={onTrigger}
-        ariaLabel={oldLang('TranslateMessage')}
+        ariaLabel={lang('AiMessageEditorTranslate')}
         iconName="language"
       />
     );
-  }, [isRightColumnShown, oldLang]);
+  }, [isRightColumnShown, lang]);
 
   return (
     <div className="HeaderActions">
@@ -294,7 +289,7 @@ const HeaderActions = ({
             {buttonText}
           </MenuItem>
           <MenuItem icon="replace" onClick={handleChangeLanguage}>
-            {oldLang('Chat.Translate.Menu.To')}
+            {lang('ChatTranslateMenuTo')}
           </MenuItem>
           <NestedMenuItem
             icon="tone"
@@ -330,7 +325,7 @@ const HeaderActions = ({
           <MenuSeparator />
           {detectedChatLanguage
             && <MenuItem icon="hand-stop" onClick={handleDoNotTranslate}>{doNotTranslateText}</MenuItem>}
-          <MenuItem icon="close-circle" onClick={handleHide}>{oldLang('Hide')}</MenuItem>
+          <MenuItem icon="close-circle" onClick={handleHide}>{lang('Hide')}</MenuItem>
           <MenuSeparator />
           <MenuItem withWrap onClick={handleCocoonClick}>
             {lang('TranslateMenuCocoon', {
@@ -358,7 +353,7 @@ const HeaderActions = ({
               color="translucent"
               size="smaller"
               onClick={handleSearchClick}
-              ariaLabel={oldLang('Conversation.SearchPlaceholder')}
+              ariaLabel={lang('ConversationSearchPlaceholder')}
               iconName="search"
             />
           )}
@@ -368,7 +363,7 @@ const HeaderActions = ({
               color="translucent"
               size="smaller"
               onClick={handleRequestCall}
-              ariaLabel="Call"
+              ariaLabel={lang('Call')}
               iconName="phone"
             />
           )}
@@ -383,7 +378,7 @@ const HeaderActions = ({
           size="smaller"
           iconName="user"
           onClick={handleJoinRequestsClick}
-          ariaLabel={isChannel ? oldLang('SubscribeRequests') : oldLang('MemberRequests')}
+          ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
@@ -396,7 +391,7 @@ const HeaderActions = ({
         size="smaller"
         color="translucent"
         disabled={noMenu}
-        ariaLabel="More actions"
+        ariaLabel={lang('AccDescrMoreOptions')}
         onClick={handleHeaderMenuOpen}
         iconName="more"
       />

@@ -1,10 +1,10 @@
 import { memo, useEffect, useState } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
-import { formatCountdownShort } from '../../util/dates/oldDateFormat';
+import { formatCountdownShort } from '../../util/dates/duration';
 
 import useInterval from '../../hooks/schedulers/useInterval';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import AnimatedCounter from '../common/AnimatedCounter';
 
@@ -21,7 +21,7 @@ const TIMER_RADIUS = 14;
 
 const RoundTimer = ({ duration, className, onEnd }: OwnProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
-  const lang = useOldLang();
+  const lang = useLang();
 
   useInterval(
     () => setTimeLeft((prev) => prev - 1),

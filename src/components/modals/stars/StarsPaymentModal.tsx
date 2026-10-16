@@ -18,7 +18,6 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import Avatar from '../../common/Avatar';
@@ -67,7 +66,6 @@ const StarPaymentModal = ({
 
   const photo = form?.photo;
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   useEffect(() => {
@@ -81,20 +79,28 @@ const StarPaymentModal = ({
       return '';
     }
 
-    const botName = getUserFullName(bot);
-    const starsText = oldLang('Stars.Intro.PurchasedText.Stars', amount);
+    const botName = getUserFullName(lang, bot);
+    const starsText = lang('StarsAmountText', { amount }, { pluralValue: amount! });
 
     if (paidMediaMessage) {
       const extendedMedia = paidMediaMessage.content.paidMedia!.extendedMedia as ApiMediaExtendedPreview[];
       const areAllPhotos = extendedMedia.every((media) => !media.duration);
       const areAllVideos = extendedMedia.every((media) => Boolean(media.duration));
 
-      const mediaText = areAllPhotos ? oldLang('Stars.Transfer.Photos', extendedMedia.length)
-        : areAllVideos ? oldLang('Stars.Transfer.Videos', extendedMedia.length)
-          : oldLang('Media', extendedMedia.length);
+      const mediaText = areAllPhotos ? lang(
+        'StarsTransferPhotos',
+        { count: extendedMedia.length },
+        { pluralValue: extendedMedia.length },
+      )
+        : areAllVideos ? lang(
+          'StarsTransferVideos',
+          { count: extendedMedia.length },
+          { pluralValue: extendedMedia.length },
+        )
+          : lang('Media', { count: extendedMedia.length }, { pluralValue: extendedMedia.length });
 
-      const channelTitle = getChatTitle(oldLang, paidMediaChat!);
-      return oldLang('Stars.Transfer.UnlockInfo', [mediaText, channelTitle, starsText]);
+      const channelTitle = getChatTitle(lang, paidMediaChat!);
+      return lang('StarsTransferUnlockInfo', { media: mediaText, chat: channelTitle, amount: starsText });
     }
 
     if (subscriptionInfo) {
@@ -118,10 +124,10 @@ const StarPaymentModal = ({
       });
     }
 
-    return oldLang('Stars.Transfer.Info', [form!.title, botName, starsText]);
+    return lang('StarsTransferInfo', { title: form!.title, bot: botName, amount: starsText });
   }, [
-    renderingModal?.inputInvoice, bot, oldLang, amount, paidMediaMessage, subscriptionInfo, isBotSubscription, form,
-    paidMediaChat, lang,
+    renderingModal?.inputInvoice, bot, lang, amount, paidMediaMessage, subscriptionInfo, isBotSubscription, form,
+    paidMediaChat,
   ]);
 
   const disclaimerText = useMemo(() => {
@@ -192,7 +198,7 @@ const StarPaymentModal = ({
         <img className={styles.paymentImageBackground} src={StarsBackground} alt="" draggable={false} />
       </div>
       <h2 className={styles.headerText}>
-        {inviteCustomPeer ? oldLang('StarsSubscribeTitle') : oldLang('StarsConfirmPurchaseTitle')}
+        {inviteCustomPeer ? lang('StarsSubscribeTitle') : lang('StarsConfirmPurchaseTitle')}
       </h2>
       {canShowPeerItem && <PeerChip className={styles.botItem} peerId={form?.botId} />}
       <div className={styles.description}>

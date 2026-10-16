@@ -58,7 +58,7 @@ const UrlAuthModal = ({
   const modalRequest = modal?.request;
   const renderingRequest = renderingModal?.request;
   const confirmedMatchCode = renderingModal?.matchCode;
-  const botName = getUserFullName(currentBot) || currentBot?.firstName;
+  const botName = getUserFullName(lang, currentBot) || currentBot?.firstName;
   const isMatchCodePrecheckPending = Boolean(
     modalRequest?.matchCodesFirst && modalRequest.matchCodes?.length && !modal?.matchCode,
   );

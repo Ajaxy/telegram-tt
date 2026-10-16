@@ -63,10 +63,6 @@ const EDITOR_TABS = [
 ];
 
 const INITIAL_MODE = 'draw';
-const TABS = EDITOR_TABS.map((tab) => ({
-  title: <Icon name={tab.icon} />,
-}));
-
 const TRANSITION_DURATION = 300;
 const GHOST_LANDING_MAX_WAIT = 1500;
 const MEDIA_VIEWER_SLIDE_SELECTOR = '.MediaViewerSlide--active img, .MediaViewerSlide--active video';
@@ -86,6 +82,9 @@ const MediaEditor = ({
   const { closeMediaViewer } = getActions();
 
   const lang = useLang();
+  const tabs = useMemo(() => EDITOR_TABS.map((tab) => ({
+    title: <Icon name={tab.icon} role="img" ariaLabel={lang(tab.type === 'draw' ? 'Draw' : 'Crop')} />,
+  })), [lang]);
   const animationLevel = useSelector(selectAnimationLevel);
   const theme = useSelector(selectTheme);
 
@@ -872,7 +871,7 @@ const MediaEditor = ({
               {renderPanelContent()}
             </Transition>
             <SquareTabList
-              tabs={TABS}
+              tabs={tabs}
               activeTab={activeTabIndex}
               onSwitchTab={handleTabSwitch}
               className={styles.modeTabs}

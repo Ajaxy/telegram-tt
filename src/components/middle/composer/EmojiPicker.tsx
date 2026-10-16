@@ -6,6 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiEmojiGroup, ApiSticker, ApiStickerSet } from '../../../api/types';
 import type { StickerSetOrReactionsSetOrRecent } from '../../../types';
 import type { IconName } from '../../../types/icons';
+import type { RegularLangKey } from '../../../types/language';
 import type { EmojiData } from '../../../util/emoji/emoji';
 import type { PillCategory } from './EmojiCategoryPill';
 
@@ -39,8 +40,8 @@ import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionA
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -62,6 +63,10 @@ import EmojiSearch from './EmojiSearch';
 import StickerSetCover from './StickerSetCover';
 
 import './EmojiPicker.scss';
+
+const EMOJI_CATEGORY_KEYS: RegularLangKey[] = [
+  'Emoji1', 'Emoji2', 'Emoji3', 'Emoji4', 'Emoji5', 'Emoji6', 'Emoji7', 'Emoji8',
+];
 
 type OwnProps = {
   chatId?: string;
@@ -240,7 +245,7 @@ const EmojiPicker = ({
 
   useHorizontalScroll(headerRef, isMobile || !shouldRenderContent);
 
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const customSets = useMemo(() => {
     const defaultSets: StickerSetOrReactionsSetOrRecent[] = [];
@@ -253,7 +258,7 @@ const EmojiPicker = ({
         defaultSets.push({
           id: RECENT_SYMBOL_SET_ID,
           accessHash: '0',
-          title: oldLang('RecentStickers'),
+          title: lang('RecentStickers'),
           stickers: recentCustomEmojis,
           count: recentCustomEmojis.length,
           isEmoji: true,
@@ -275,7 +280,7 @@ const EmojiPicker = ({
     ];
   }, [
     isCurrentUserPremium, isSavedMessages, customEmojisById, recentCustomEmojiIds, addedCustomEmojiIds,
-    chatEmojiSetId, customEmojiFeaturedIds, stickerSetsById, oldLang,
+    chatEmojiSetId, customEmojiFeaturedIds, stickerSetsById, lang,
   ]);
 
   const sections = useMemo((): EmojiSection[] => {
@@ -288,13 +293,13 @@ const EmojiPicker = ({
     if (recentEmojis?.length) {
       list.push({
         type: 'category',
-        category: { id: RECENT_SYMBOL_SET_ID, name: oldLang('RecentStickers'), emojis: recentEmojis },
-        title: oldLang('RecentStickers'),
+        category: { id: RECENT_SYMBOL_SET_ID, name: lang('RecentStickers'), emojis: recentEmojis },
+        title: lang('RecentStickers'),
       });
     }
 
     categories.forEach((category, index) => {
-      list.push({ type: 'category', category, title: oldLang(`Emoji${index + 1}`) });
+      list.push({ type: 'category', category, title: lang(EMOJI_CATEGORY_KEYS[index]) });
     });
 
     customSets.forEach((set) => {
@@ -302,7 +307,7 @@ const EmojiPicker = ({
     });
 
     return list;
-  }, [categories, recentEmojis, customSets, chatEmojiSetId, oldLang]);
+  }, [categories, recentEmojis, customSets, chatEmojiSetId, lang]);
 
   const firstCategoryIndex = recentEmojis?.length ? 1 : 0;
   const lastCategoryIndex = firstCategoryIndex + (categories?.length || 0) - 1;
@@ -593,7 +598,7 @@ const EmojiPicker = ({
           <div
             ref={headerRef}
             className={headerClassName}
-            dir={oldLang.isRtl ? 'rtl' : undefined}
+            dir={lang.isRtl ? 'rtl' : undefined}
           >
             <div className="EmojiPicker-header-items">
               {Boolean(recentEmojis?.length) && (
@@ -606,7 +611,7 @@ const EmojiPicker = ({
                   faded
                   color="translucent"
                   onClick={handleRecentSelect}
-                  ariaLabel={oldLang('RecentStickers')}
+                  ariaLabel={lang('RecentStickers')}
                   iconName="clock"
                 />
               )}

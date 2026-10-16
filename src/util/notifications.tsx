@@ -40,7 +40,6 @@ import jsxToHtml from './element/jsxToHtml';
 import { buildCollectionByKey } from './iteratees';
 import { getTranslationFn } from './localization';
 import * as mediaLoader from './mediaLoader';
-import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
 import { getServerTime } from './serverTime';
 
@@ -331,6 +330,7 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
 }
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: ApiPeerReaction) {
+  const lang = getTranslationFn();
   const global = getGlobal();
   let sender = selectSender(global, message);
   const hasReaction = Boolean(reaction);
@@ -346,7 +346,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     !isScreenLocked
     && getShouldShowMessagePreview(chat, selectNotifyDefaults(global), getChatNotifyException(global, chat))
   ) {
-    const senderName = sender ? getMessageSenderName(getTranslationFn(), chat.id, sender) : undefined;
+    const senderName = sender ? getMessageSenderName(lang, chat.id, sender) : undefined;
     let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 
     // The chat list preview stays without the comment, as in the Android app
@@ -358,15 +358,15 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
 
     if (hasReaction) {
       const emoji = getReactionEmoji(reaction);
-      summary = oldTranslate('PushReactText', [emoji, summary]);
+      summary = lang('PushReactText', { emoji, summary });
     }
 
     body = senderName ? `${senderName}: ${summary}` : summary;
   } else {
-    body = getTranslationFn()('NotificationMessageTextHidden');
+    body = lang('NotificationMessageTextHidden');
   }
 
-  let title = isScreenLocked ? APP_NAME : getChatTitle(oldTranslate, chat, isSelf);
+  let title = isScreenLocked ? APP_NAME : getChatTitle(lang, chat, isSelf);
 
   if (message.isSilent) {
     title += ' 🔕';
@@ -411,7 +411,7 @@ export async function notifyAboutCall({
   const icon = await getAvatar(user);
 
   const options: NotificationOptions = {
-    body: getUserFullName(user),
+    body: getUserFullName(getTranslationFn(), user),
     icon,
     badge: icon,
     tag: `call_${call.id}`,
@@ -422,7 +422,7 @@ export async function notifyAboutCall({
     options.vibrate = [200, 100, 200];
   }
 
-  const notification = new Notification(oldTranslate('VoipIncoming'), options);
+  const notification = new Notification(getTranslationFn()('VoipIncoming'), options);
 
   notification.onclick = () => {
     notification.close();

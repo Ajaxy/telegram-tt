@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
@@ -7,8 +6,8 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { STICKER_SIZE_GENERAL_SETTINGS } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
@@ -25,14 +24,14 @@ type OwnProps = {
   onClick: (value: ApiSticker) => void;
 };
 
-const StickerSetCard: FC<OwnProps> = ({
+const StickerSetCard = ({
   stickerSet,
   noPlay,
   className,
   observeIntersection,
   onClick,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   const firstSticker = stickerSet?.stickers?.[0];
 
@@ -86,7 +85,11 @@ const StickerSetCard: FC<OwnProps> = ({
       {renderPreview()}
       <div className="multiline-item">
         <div className="title">{stickerSet.title}</div>
-        <div className="subtitle">{lang('StickerPack.StickerCount', stickerSet.count, 'i')}</div>
+        <div className="subtitle">
+          {lang('StickerPackStickerCount', {
+            count: lang.number(stickerSet.count),
+          }, { pluralValue: stickerSet.count })}
+        </div>
       </div>
     </ListItem>
   );

@@ -1,4 +1,3 @@
-import type { ChangeEvent, FormEvent } from 'react';
 import type { ElementRef } from '../../lib/teact/teact';
 import {
   memo, useCallback, useLayoutEffect, useRef,
@@ -8,8 +7,8 @@ import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/faster
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import buildClassName from '../../util/buildClassName';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import AnimatedCounter from '../common/AnimatedCounter';
 
@@ -30,8 +29,8 @@ type OwnProps = {
   hasLengthIndicator?: boolean;
   tabIndex?: number;
   inputMode?: 'text' | 'none' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
-  onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  onInput?: (e: FormEvent<HTMLTextAreaElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onInput?: (e: React.FormEvent<HTMLTextAreaElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
@@ -69,7 +68,7 @@ const TextArea = ({
     textareaRef = ref;
   }
 
-  const lang = useOldLang();
+  const lang = useLang();
   const labelText = error || success || label;
   const fullClassName = buildClassName(
     'input-group',
@@ -106,7 +105,7 @@ const TextArea = ({
     resizeHeight(textarea);
   }, [value]);
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const target = e.currentTarget;
     if (!noReplaceNewlines) {
       const previousSelectionEnd = target.selectionEnd;

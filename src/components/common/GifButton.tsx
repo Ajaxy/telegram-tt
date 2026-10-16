@@ -18,7 +18,6 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -53,7 +52,6 @@ const GifButton = ({
 }: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
@@ -207,15 +205,15 @@ const GifButton = ({
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         >
-          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="mute">{oldLang('SendWithoutSound')}</MenuItem>}
+          {!isSavedMessages && <MenuItem onClick={handleSendQuiet} icon="mute">{lang('SendWithoutSound')}</MenuItem>}
           <MenuItem onClick={handleSendScheduled} icon="calendar">
-            {oldLang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+            {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
           </MenuItem>
           {onAddCaption && (
             <MenuItem icon="add-caption" onClick={handleAddCaption}>{lang('MenuAddCaption')}</MenuItem>
           )}
           {onUnsaveClick && (
-            <MenuItem destructive icon="delete" onClick={handleContextDelete}>{oldLang('Delete')}</MenuItem>
+            <MenuItem destructive icon="delete" onClick={handleContextDelete}>{lang('Delete')}</MenuItem>
           )}
         </Menu>
       )}

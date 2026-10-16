@@ -74,7 +74,6 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { useResize } from '../../hooks/useResize';
@@ -260,7 +259,6 @@ function MiddleColumn({
 
   const { isTablet, isDesktop } = useAppLayout();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
   const [isScrollDownNeeded, setIsScrollDownNeeded] = useState(false);
@@ -505,10 +503,10 @@ function MiddleColumn({
   );
 
   const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
-    oldLang, currentUserBannedRights, defaultBannedRights,
+    lang, currentUserBannedRights, defaultBannedRights,
   );
   const forumComposerPlaceholder = getForumComposerPlaceholder(
-    oldLang, chat, threadId, topics, Boolean(draftReplyInfo),
+    lang, chat, threadId, topics, Boolean(draftReplyInfo),
   );
 
   const composerRestrictionMessage = messageSendingRestrictionReason

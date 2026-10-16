@@ -3,9 +3,9 @@ import { memo } from '../../lib/teact/teact';
 import type { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
+import { formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import MessageOutgoingStatus from './MessageOutgoingStatus';
 
@@ -21,7 +21,7 @@ type OwnProps = {
 const LastMessageMeta = ({
   className, message, outgoingStatus, draftDate,
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const shouldUseDraft = draftDate && draftDate > message.date;
   return (
@@ -30,7 +30,7 @@ const LastMessageMeta = ({
         <MessageOutgoingStatus status={outgoingStatus} />
       )}
       <span className="time">
-        {formatPastTimeShort(lang, (shouldUseDraft ? draftDate : message.date) * 1000)}
+        {formatCompactTimestamp(lang, secondsToDate(shouldUseDraft ? draftDate : message.date))}
       </span>
     </div>
   );

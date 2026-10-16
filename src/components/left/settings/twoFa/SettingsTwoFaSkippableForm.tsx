@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
@@ -12,7 +11,7 @@ import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Island from '../../../gili/layout/Island';
@@ -39,7 +38,7 @@ type StateProps = {
 
 const ICON_SIZE = 160;
 
-const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
+const SettingsTwoFaSkippableForm = ({
   animatedEmoji,
   type = 'text',
   isLoading,
@@ -50,7 +49,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
   onSubmit,
   isActive,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const inputRef = useRef<HTMLInputElement>();
 
   const [value, setValue] = useState<string>('');
@@ -89,7 +88,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
     onSubmit();
   }, [onSubmit, unmarkIsConfirmShown]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -9,7 +8,7 @@ import type { ApiUser } from '../../api/types';
 import { getUserFullName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -20,12 +19,12 @@ export type OwnProps = {
   shouldRequestWriteAccess?: boolean;
 };
 
-const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) => {
+const BotTrustModal = ({ bot, type, shouldRequestWriteAccess }: OwnProps) => {
   const { cancelBotTrustRequest, markBotTrusted } = getActions();
 
   const [isWriteAllowed, setIsWriteAllowed] = useState(shouldRequestWriteAccess || false);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleBotTrustAccept = useCallback(() => {
     markBotTrusted({ botId: bot!.id, isWriteAllowed });
@@ -35,13 +34,13 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
     cancelBotTrustRequest();
   }, []);
 
-  const title = type === 'game' ? lang('AppName') : lang('BotOpenPageTitle');
+  const title = type === 'game' ? lang('Telegram') : lang('BotOpenPageTitle');
   const text = useMemo(() => {
     switch (type) {
       case 'game':
-        return lang('BotPermissionGameAlert', getUserFullName(bot));
+        return lang('BotPermissionGameAlert', { bot: getUserFullName(lang, bot) });
       case 'webApp':
-        return lang('BotOpenPageMessage', getUserFullName(bot));
+        return lang('BotOpenPageMessage', { bot: getUserFullName(lang, bot) });
       case 'botApp':
       default:
         return lang('BotWebViewStartPermission');
@@ -61,7 +60,7 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
           className="dialog-checkbox"
           checked={isWriteAllowed}
           label={renderText(
-            lang('WebApp.AddToAttachmentAllowMessages', bot?.firstName),
+            lang('WebAppAddToAttachmentAllowMessages', { user: bot?.firstName }),
             ['simple_markdown'],
           )}
           onCheck={setIsWriteAllowed}

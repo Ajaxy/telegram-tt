@@ -1,5 +1,3 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -17,9 +15,9 @@ import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island from '../../gili/layout/Island';
 import Switch from '../../gili/primitives/Switch';
@@ -51,10 +49,10 @@ type StateProps = {
   canToggleAutoTranslation?: boolean;
 };
 
-const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
+const CHANNEL_TITLE_EMPTY = 'NewChannelTitleEmptyError';
 const CHANNEL_MAX_DESCRIPTION = 255;
 
-const ManageChannel: FC<OwnProps & StateProps> = ({
+const ManageChannel = ({
   chatId,
   chat,
   chatFullInfo,
@@ -68,7 +66,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   onClose,
   hasAutoTranslation,
   canToggleAutoTranslation,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     updateChat,
     closeManagement,
@@ -92,7 +90,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const imageHash = chat && getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
-  const lang = useOldLang();
+  const lang = useLang();
 
   const hasAutoTranslationAvailable = chat && isChatChannel(chat);
 
@@ -153,12 +151,12 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     setIsProfileFieldsTouched(true);
   });
 
-  const handleTitleChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setIsProfileFieldsTouched(true);
   });
 
-  const handleAboutChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleAboutChange = useLastCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setAbout(e.target.value);
     setIsProfileFieldsTouched(true);
   });
@@ -238,7 +236,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               label={lang('EnterChannelName')}
               onChange={handleTitleChange}
               value={title}
-              error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
+              error={error === CHANNEL_TITLE_EMPTY ? lang(CHANNEL_TITLE_EMPTY) : undefined}
               disabled={!canChangeInfo}
             />
             <TextArea
@@ -274,7 +272,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               multiline
               disabled={!exportedInvites}
             >
-              <span className="title">{lang('GroupInfo.InviteLinks')}</span>
+              <span className="title">{lang('GroupInfoInviteLinks')}</span>
               <span className="subtitle">
                 {exportedInvites ? formatInteger(exportedInvites.length) : lang('Loading')}
               </span>
@@ -347,7 +345,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
         </Island>
         <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
-            {chat.isOwner ? lang('ChannelDelete') : lang('LeaveChannel')}
+            {chat.isOwner ? lang('ChannelDelete') : lang('ChannelLeave')}
           </ListItem>
         </Island>
       </div>
@@ -363,7 +361,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
         text={chat.isOwner ? lang('ChannelDeleteAlert') : lang('ChannelLeaveAlert')}
-        confirmLabel={chat.isOwner ? lang('ChannelDelete') : lang('LeaveChannel')}
+        confirmLabel={chat.isOwner ? lang('ChannelDelete') : lang('ChannelLeave')}
         confirmHandler={handleDeleteChannel}
         confirmIsDestructive
       />

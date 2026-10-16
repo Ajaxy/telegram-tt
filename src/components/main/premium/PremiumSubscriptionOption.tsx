@@ -1,5 +1,4 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiPremiumGiftCodeOption, ApiPremiumSubscriptionOption } from '../../../api/types';
@@ -8,7 +7,6 @@ import buildClassName from '../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import styles from './PremiumSubscriptionOption.module.scss';
 
@@ -21,11 +19,10 @@ type OwnProps = {
   onChange: (month: number) => void;
 };
 
-const PremiumSubscriptionOption: FC<OwnProps> = ({
+const PremiumSubscriptionOption = ({
   option, checked, fullMonthlyAmount,
   onChange, className, isGiveaway,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
 
   const {
@@ -69,22 +66,19 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
           {Boolean(discount) && (
             <span
               className={buildClassName(styles.giveawayDiscount, styles.discount)}
-              title={oldLang('GiftDiscount')}
+              title={lang('GiftDiscount', { percent: discount })}
             >
-              {' '}
-              &minus;
-              {discount}
-              %
+              {lang('GiftDiscount', { percent: discount })}
             </span>
           )}
-          {oldLang('Months', months)}
+          {lang('Months', { count: months }, { pluralValue: months })}
         </div>
         <div className={styles.perMonth}>
-          {(isGiveaway || isUserCountPlural) ? `${formatCurrencyAsString(amount, currency, oldLang.code)} x ${users!}`
-            : oldLang('PricePerMonth', formatCurrencyAsString(perMonth, currency, oldLang.code))}
+          {(isGiveaway || isUserCountPlural) ? `${formatCurrencyAsString(amount, currency, lang.code)} x ${users!}`
+            : lang('PricePerMonth', { amount: formatCurrencyAsString(perMonth, currency, lang.code) })}
         </div>
         <div className={styles.amount}>
-          {formatCurrencyAsString(amount, currency, oldLang.code)}
+          {formatCurrencyAsString(amount, currency, lang.code)}
         </div>
       </div>
     </label>

@@ -6,12 +6,12 @@ import type { ApiMessage } from '../../../api/types';
 import { getMediaDimensions, getMessageInvoice } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -31,7 +31,7 @@ const InvoiceMediaPreview = ({
   isConnected,
 }: OwnProps) => {
   const { openInvoice, loadExtendedMedia } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const invoice = getMessageInvoice(message);
 
   const { chatId, id } = message;
@@ -79,7 +79,7 @@ const InvoiceMediaPreview = ({
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
         <Icon name="lock" className={styles.lock} />
-        {lang('Checkout.PayPrice', formatCurrencyAsString(amount, currency))}
+        {lang('CheckoutPayPrice', { amount: formatCurrencyAsString(amount, currency) })}
       </div>
     </div>
   );

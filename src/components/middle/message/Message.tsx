@@ -156,7 +156,6 @@ import useFlag from '../../../hooks/useFlag';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePeerColor from '../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -511,7 +510,6 @@ const Message = ({
   const bottomMarkerRef = useRef<HTMLDivElement>();
   const quickReactionRef = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const {
     id: messageId, chatId, forwardInfo, viaBotId, guestChatViaId, isTranscriptionError, factCheck,
@@ -735,7 +733,6 @@ const Message = ({
     handleDocumentGroupSelectAll,
     handleStoryClick,
   } = useInnerHandlers({
-    lang: oldLang,
     selectMessage,
     message,
     webPage,
@@ -1020,7 +1017,7 @@ const Message = ({
     scrollTargetPosition,
   });
 
-  const viaBusinessBotTitle = viaBusinessBot ? getPeerFullTitle(oldLang, viaBusinessBot) : undefined;
+  const viaBusinessBotTitle = viaBusinessBot ? getPeerFullTitle(lang, viaBusinessBot) : undefined;
 
   const canShowPostAuthor = !message.senderId;
   const signature = viaBusinessBotTitle || (canShowPostAuthor && message.postAuthorTitle)
@@ -1263,7 +1260,7 @@ const Message = ({
       } else if (ephemeralBot.hasUsername) {
         ephemeralBotName = `@${getMainUsername(ephemeralBot)}`;
       } else {
-        ephemeralBotName = getPeerFullTitle(oldLang, ephemeralBot);
+        ephemeralBotName = getPeerFullTitle(lang, ephemeralBot);
       }
     }
 
@@ -1505,7 +1502,7 @@ const Message = ({
             )}
             dir="auto"
           >
-            {(isTranscriptionError ? oldLang('NoWordsRecognized') : (
+            {(isTranscriptionError ? lang('NoWordsRecognized') : (
               isTranscribing && transcribedText ? <DotAnimation content={transcribedText} /> : transcribedText
             ))}
           </p>
@@ -1702,7 +1699,7 @@ const Message = ({
         )}
         {asForwarded && (
           <span className="forward-title">
-            {oldLang('ForwardedFrom')}
+            {lang('ForwardedFrom')}
           </span>
         )}
       </span>
@@ -1769,19 +1766,19 @@ const Message = ({
   ) {
     let senderTitle;
     if (senderPeer && !(isCustomShape && hasViaSender)) {
-      senderTitle = getPeerFullTitle(oldLang, senderPeer);
+      senderTitle = getPeerFullTitle(lang, senderPeer);
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
     } else if (storyData && originSender) {
-      senderTitle = getPeerFullTitle(oldLang, originSender);
+      senderTitle = getPeerFullTitle(lang, originSender);
     }
     const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
-    const guestFromSenderTitle = guestFromSender ? getPeerTitle(oldLang, guestFromSender) : undefined;
+    const guestFromSenderTitle = guestFromSender ? getPeerTitle(lang, guestFromSender) : undefined;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
     const adminTitle = (!shouldSkipRenderAdminTitle && !signature) ? (forwardInfo?.isLinkedChannelPost ? (
-      <span className="admin-title" dir="auto">{oldLang('DiscussChannel')}</span>
+      <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
     ) : message.postAuthorTitle && isGroup && !asForwarded ? (
       <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
     ) : (senderChatMember || fromRank) && !asForwarded ? (
@@ -2020,7 +2017,7 @@ const Message = ({
                     className="message-action-button"
                     color="translucent-white"
                     round
-                    ariaLabel={oldLang('lng_context_forward_msg')}
+                    ariaLabel={lang('Forward')}
                     onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
                     iconName="share-filled"
                   />
@@ -2104,7 +2101,7 @@ const Message = ({
         >
           <div className="decline-dialog-question">
             {renderText(lang('DeclinePostDialogQuestion', {
-              sender: sender ? getPeerFullTitle(oldLang, sender) : '',
+              sender: sender ? getPeerFullTitle(lang, sender) : '',
             }, { withNodes: true, withMarkdown: true }))}
           </div>
           <InputText

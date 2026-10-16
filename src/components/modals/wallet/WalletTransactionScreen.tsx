@@ -9,8 +9,8 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { convertTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatAddressInGroups } from '../../../util/tonAddress';
 
 import useClickable from '../../../hooks/useClickable';
@@ -104,7 +104,7 @@ const WalletTransactionScreen = ({
         peerLabel,
         <span className={styles.peer}>
           <Avatar peer={user} size="small" />
-          <span className={styles.peerText}>{getUserFullName(user)}</span>
+          <span className={styles.peerText}>{getUserFullName(lang, user)}</span>
           {sendToAddress && sendButton(sendToAddress, peer.type === 'user' ? peer.userId : undefined)}
         </span>,
       ]);
@@ -165,7 +165,11 @@ const WalletTransactionScreen = ({
       ]);
     }
 
-    rows.push([lang('WalletTransactionDate'), formatDateTimeToString(timestamp * 1000, lang.code, true)]);
+    rows.push([lang('WalletTransactionDate'), formatDateTime(
+      lang,
+      secondsToDate(timestamp),
+      { date: 'short', time: 'short' },
+    )]);
 
     const commentText = decryptedComment ?? comment;
 

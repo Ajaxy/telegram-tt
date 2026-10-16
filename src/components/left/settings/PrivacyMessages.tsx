@@ -20,7 +20,6 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
@@ -58,7 +57,7 @@ function PrivacyMessages({
   privacy,
 }: OwnProps & StateProps) {
   const { updateGlobalPrivacySettings, openSettingsScreen, showNotification } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   const canChangeForContactsAndPremium = isCurrentUserPremium || canLimitNewMessagesWithoutPremium;
@@ -106,14 +105,14 @@ function PrivacyMessages({
 
   const options = useMemo(() => {
     return [
-      { value: 'everybody', label: oldLang('P2PEverybody') },
+      { value: 'everybody', label: lang('P2PEverybody') },
       {
         value: 'contacts_and_premium',
         label: canChangeForContactsAndPremium ? (
-          oldLang('PrivacyMessagesContactsAndPremium')
+          lang('PrivacyMessagesContactsAndPremium')
         ) : (
           <PrivacyLockedOption
-            label={oldLang('PrivacyMessagesContactsAndPremium')}
+            label={lang('PrivacyMessagesContactsAndPremium')}
             isChecked={selectedValue === 'contacts_and_premium'}
           />
         ),
@@ -134,7 +133,7 @@ function PrivacyMessages({
         isCanCheckedInDisabled: true,
       },
     ];
-  }, [oldLang, lang, canChangeForContactsAndPremium, canChangeChargeForMessages, selectedValue]);
+  }, [lang, canChangeForContactsAndPremium, canChangeChargeForMessages, selectedValue]);
 
   const handleChange = useLastCallback((privacyValue: string) => {
     updateGlobalPrivacySettings({
@@ -157,7 +156,9 @@ function PrivacyMessages({
 
   function renderSectionNoPaidMessagesForUsers() {
     const itemSubtitle = !noPaidReactionsForUsersCount ? lang('SubtitlePrivacyAddUsers')
-      : oldLang('Users', noPaidReactionsForUsersCount, 'i');
+      : lang('Users', {
+        count: lang.number(noPaidReactionsForUsersCount),
+      }, { pluralValue: noPaidReactionsForUsersCount });
 
     return (
       <>
@@ -197,7 +198,7 @@ function PrivacyMessages({
   return (
     <div className="settings-content custom-scroll">
       <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-        {oldLang('PrivacyMessagesTitle')}
+        {lang('PrivacyMessagesTitle')}
       </IslandTitle>
       <Island>
         <RadioGroup

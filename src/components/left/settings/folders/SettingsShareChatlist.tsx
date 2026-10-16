@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../../lib/teact/teact';
@@ -21,7 +20,6 @@ import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import LinkField from '../../../common/LinkField';
@@ -42,7 +40,7 @@ type StateProps = {
   isLoading?: boolean;
 };
 
-const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
+const SettingsShareChatlist = ({
   isActive,
   onReset,
   folderId,
@@ -50,13 +48,12 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   peerIds,
   url,
   isLoading,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     createChatlistInvite, deleteChatlistInvite, editChatlistInvite, showNotification,
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const [isTouched, setIsTouched] = useState(false);
 
@@ -115,19 +112,19 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
     const chat = selectChat(global, id);
     if (user && isUserBot(user)) {
       showNotification({
-        message: oldLang('FolderLinkScreen.AlertTextUnavailableBot'),
+        message: lang('FolderLinkScreenAlertTextUnavailableBot'),
       });
     } else if (user) {
       showNotification({
-        message: oldLang('FolderLinkScreen.AlertTextUnavailableUser'),
+        message: lang('FolderLinkScreenAlertTextUnavailableUser'),
       });
     } else if (chat && isChatChannel(chat)) {
       showNotification({
-        message: oldLang('FolderLinkScreen.AlertTextUnavailablePublicChannel'),
+        message: lang('FolderLinkScreenAlertTextUnavailablePublicChannel'),
       });
     } else {
       showNotification({
-        message: oldLang('FolderLinkScreen.AlertTextUnavailablePublicGroup'),
+        message: lang('FolderLinkScreenAlertTextUnavailablePublicGroup'),
       });
     }
   });
@@ -171,10 +168,10 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         )}
       </div>
 
-      <IslandTitle>{oldLang('InviteLink.InviteLink')}</IslandTitle>
+      <IslandTitle>{lang('InviteLink')}</IslandTitle>
       <Island>
         <LinkField
-          link={!url ? oldLang('Loading') : url}
+          link={!url ? lang('Loading') : url}
           withShare
           noTitle
           onRevoke={handleRevoke}
@@ -199,7 +196,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         isShown={isLoading || isTouched}
         disabled={isDisabled}
         onClick={handleSubmit}
-        ariaLabel="Save changes"
+        ariaLabel={lang('SettingsSaveChanges')}
         iconName="check"
         isLoading={isLoading}
       />

@@ -2,7 +2,7 @@ import { memo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 import Modal, { type OwnProps as ModalProps } from '../../ui/Modal';
@@ -25,7 +25,7 @@ const PickerModal = ({
   withPremiumGradient,
   ...modalProps
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const hasButton = Boolean(confirmButtonText || onConfirm);
 
   return (
@@ -50,7 +50,7 @@ const PickerModal = ({
             color="primary"
             disabled={isConfirmDisabled}
           >
-            {confirmButtonText || lang('Confirm')}
+            {confirmButtonText || lang('GeneralConfirm')}
           </Button>
         </div>
       )}

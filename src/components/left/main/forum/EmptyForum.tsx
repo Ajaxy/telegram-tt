@@ -11,7 +11,6 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 import useAppLayout from '../../../../hooks/useAppLayout';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Button from '../../../ui/Button';
@@ -35,7 +34,7 @@ const EmptyForum = ({
   const { openCreateTopicPanel } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const { isMobile } = useAppLayout();
 
   const handleCreateTopic = useLastCallback(() => {
@@ -47,9 +46,9 @@ const EmptyForum = ({
       <div className={styles.sticker}>
         {animatedEmoji && <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} />}
       </div>
-      <h3 className={styles.title} dir="auto">{oldLang('ChatList.EmptyTopicsTitle')}</h3>
+      <h3 className={styles.title} dir="auto">{lang('ChatListEmptyTopicsTitle')}</h3>
       <p className={buildClassName(styles.description, styles.centered)} dir="auto">
-        {oldLang('ChatList.EmptyTopicsDescription')}
+        {lang('ChatListEmptyTopicsDescription')}
       </p>
       {canManageTopics && (
         <Button
@@ -59,7 +58,7 @@ const EmptyForum = ({
           isRtl={lang.isRtl}
         >
           <div className={styles.buttonText}>
-            {oldLang('ChatList.EmptyTopicsCreate')}
+            {lang('ChatListEmptyTopicsCreate')}
           </div>
         </Button>
       )}

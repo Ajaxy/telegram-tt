@@ -1,12 +1,12 @@
-import type { ElementRef, FC } from '../../../lib/teact/teact';
+import type { ElementRef } from '../../../lib/teact/teact';
 import {
   memo, useRef,
 } from '../../../lib/teact/teact';
 
 import type { IAnchorPosition } from '../../../types';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -29,7 +29,7 @@ type OwnProps = {
   onSponsoredReport?: NoneToVoidFunction;
 };
 
-const SponsoredContextMenu: FC<OwnProps> = ({
+const SponsoredContextMenu = ({
   isOpen,
   sponsorInfo,
   canReport,
@@ -42,9 +42,9 @@ const SponsoredContextMenu: FC<OwnProps> = ({
   onSponsoredHide,
   onSponsorInfo,
   onSponsoredReport,
-}) => {
+}: OwnProps) => {
   const menuRef = useRef<HTMLDivElement>();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const getTriggerElement = useLastCallback(() => triggerRef.current);
   const getLayout = useLastCallback(() => ({ withPortal: true }));

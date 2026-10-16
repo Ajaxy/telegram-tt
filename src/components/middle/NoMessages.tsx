@@ -1,14 +1,13 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
 import type { MessageListType } from '../../types';
+import type { LangFn } from '../../util/localization';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Icon from '../common/icons/Icon';
 import TopicIcon from '../common/TopicIcon';
@@ -16,6 +15,7 @@ import TopicIcon from '../common/TopicIcon';
 import './NoMessages.scss';
 
 const ICON_SIZE = 3 * REM;
+const GROUP_MEMBERS_LIMIT = 200000;
 
 type OwnProps = {
   chatId: string;
@@ -25,13 +25,13 @@ type OwnProps = {
   topic?: ApiTopic;
 };
 
-const NoMessages: FC<OwnProps> = ({
+const NoMessages = ({
   isChatWithSelf,
   type,
   isGroupChatJustCreated,
   topic,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   if (type === 'scheduled') {
     return renderScheduled(lang);
@@ -54,7 +54,7 @@ const NoMessages: FC<OwnProps> = ({
   );
 };
 
-function renderTopic(lang: OldLangFn, topic: ApiTopic) {
+function renderTopic(lang: LangFn, topic: ApiTopic) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
@@ -63,47 +63,47 @@ function renderTopic(lang: OldLangFn, topic: ApiTopic) {
           size={ICON_SIZE}
           className="no-messages-icon topic-icon"
         />
-        <h3 className="title">{lang('Chat.EmptyTopicPlaceholder.Title')}</h3>
-        <p className="description topic-description">{renderText(lang('Chat.EmptyTopicPlaceholder.Text'), ['br'])}</p>
+        <h3 className="title">{lang('ChatEmptyTopicPlaceholderTitle')}</h3>
+        <p className="description topic-description">{renderText(lang('ChatEmptyTopicPlaceholderText'), ['br'])}</p>
       </div>
     </div>
   );
 }
 
-function renderScheduled(lang: OldLangFn) {
+function renderScheduled(lang: LangFn) {
   return (
-    <div className="empty"><span>{lang('ScheduledMessages.EmptyPlaceholder')}</span></div>
+    <div className="empty"><span>{lang('ScheduledMessagesEmptyPlaceholder')}</span></div>
   );
 }
 
-function renderSavedMessages(lang: OldLangFn) {
+function renderSavedMessages(lang: LangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
         <Icon name="cloud-download" className="no-messages-icon" />
-        <h3 className="title">{lang('Conversation.CloudStorageInfo.Title')}</h3>
+        <h3 className="title">{lang('ConversationCloudStorageInfoTitle')}</h3>
         <ul className="description">
-          <li>{lang('Conversation.ClousStorageInfo.Description1')}</li>
-          <li>{lang('Conversation.ClousStorageInfo.Description2')}</li>
-          <li>{lang('Conversation.ClousStorageInfo.Description3')}</li>
-          <li>{lang('Conversation.ClousStorageInfo.Description4')}</li>
+          <li>{lang('ConversationClousStorageInfoDescription1')}</li>
+          <li>{lang('ConversationClousStorageInfoDescription2')}</li>
+          <li>{lang('ConversationClousStorageInfoDescription3')}</li>
+          <li>{lang('ConversationClousStorageInfoDescription4')}</li>
         </ul>
       </div>
     </div>
   );
 }
 
-function renderGroup(lang: OldLangFn) {
+function renderGroup(lang: LangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper" dir={lang.isRtl ? 'rtl' : undefined}>
-        <h3 className="title">{lang('EmptyGroupInfo.Title')}</h3>
-        <p className="description">{lang('EmptyGroupInfo.Subtitle')}</p>
+        <h3 className="title">{lang('EmptyGroupInfoTitle')}</h3>
+        <p className="description">{lang('EmptyGroupInfoSubtitle')}</p>
         <ul className="list-checkmarks">
-          <li>{lang('EmptyGroupInfo.Line1')}</li>
-          <li>{lang('EmptyGroupInfo.Line2')}</li>
-          <li>{lang('EmptyGroupInfo.Line3')}</li>
-          <li>{lang('EmptyGroupInfo.Line4')}</li>
+          <li>{lang('EmptyGroupInfoLine1', { count: GROUP_MEMBERS_LIMIT })}</li>
+          <li>{lang('EmptyGroupInfoLine2')}</li>
+          <li>{lang('EmptyGroupInfoLine3')}</li>
+          <li>{lang('EmptyGroupInfoLine4')}</li>
         </ul>
       </div>
     </div>

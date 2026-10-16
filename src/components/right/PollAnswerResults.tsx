@@ -11,12 +11,11 @@ import type {
   ApiPollResult,
 } from '../../api/types';
 import type { PollVote } from '../../global/types/tabState';
-import type { LangFn } from '../../util/localization';
 
 import { selectTabState } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
 import {
-  formatDateTime, getCalendarDayDiff, isSameLocalDay, secondsToDate,
+  formatCompactTimestamp, formatDateTime, secondsToDate,
 } from '../../util/localization/dateFormat';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
@@ -48,7 +47,6 @@ type StateProps = {
 
 const INITIAL_LIMIT = 4;
 const VIEW_MORE_LIMIT = 50;
-const WEEKDAY_RANGE_DAYS = 7;
 
 const PollAnswerResults = ({
   chat,
@@ -103,8 +101,7 @@ const PollAnswerResults = ({
 
     return answerVote.votersCount > INITIAL_LIMIT && leftVotersCount > 0 && (
       <ShowMoreButton
-        count={leftVotersCount}
-        itemName="voter"
+        text={lang('ShowMoreVoters', { count: leftVotersCount }, { pluralValue: leftVotersCount })}
         isLoading={isLoading}
         onClick={handleViewMoreClick}
       />
@@ -151,7 +148,7 @@ const PollAnswerResults = ({
                   className="vote-date"
                   title={formatDateTime(lang, secondsToDate(date), { date: 'long', time: 'short' })}
                 >
-                  {formatVoteDate(lang, date)}
+                  {formatCompactTimestamp(lang, secondsToDate(date), { variant: 'poll', withTime: true })}
                 </span>
               </ListItem>
             ))
@@ -165,25 +162,6 @@ const PollAnswerResults = ({
 
 function getPercentage(value: number, total: number) {
   return total > 0 ? ((value / total) * 100).toFixed() : 0;
-}
-
-function formatVoteDate(lang: LangFn, date: number) {
-  const voteDate = secondsToDate(date);
-  const now = new Date();
-
-  if (isSameLocalDay(voteDate, now)) {
-    return formatDateTime(lang, voteDate, { time: 'short' });
-  }
-
-  if (Math.abs(getCalendarDayDiff(voteDate, now)) < WEEKDAY_RANGE_DAYS) {
-    return formatDateTime(lang, voteDate, { weekday: 'short', time: 'short' });
-  }
-
-  return formatDateTime(lang, voteDate, {
-    date: 'numeric',
-    time: 'short',
-    includeYear: voteDate.getFullYear() !== now.getFullYear(),
-  });
 }
 
 export default memo(withGlobal<OwnProps>(

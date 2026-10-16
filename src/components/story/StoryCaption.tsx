@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
@@ -33,7 +33,7 @@ const LINES_TO_SHOW = 3;
 function StoryCaption({
   story, isExpanded, className, onExpand, onFold,
 }: OwnProps) {
-  const lang = useOldLang();
+  const lang = useLang();
   const ref = useRef<HTMLDivElement>();
   const contentRef = useRef<HTMLDivElement>();
   const textRef = useRef<HTMLDivElement>();
@@ -154,7 +154,7 @@ function StoryCaption({
           className={buildClassName(styles.captionShowMore, transitionClassNames)}
           onClick={onExpand}
         >
-          {lang('Story.CaptionShowMore')}
+          {lang('ShowMore')}
         </div>
       )}
     </div>

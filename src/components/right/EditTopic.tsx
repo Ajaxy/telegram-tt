@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -15,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
@@ -42,18 +41,18 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const EditTopic: FC<OwnProps & StateProps> = ({
+const EditTopic = ({
   isActive,
   chat,
   topic,
   editTopicPanel,
   isCurrentUserPremium,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { editTopic, openPremiumModal } = getActions();
   const [title, setTitle] = useState('');
   const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isLoading = Boolean(editTopicPanel?.isLoading);
   const isGeneral = topic?.id === GENERAL_TOPIC_ID;
@@ -156,7 +155,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
                 value={title}
                 onChange={handleTitleChange}
                 onKeyDown={handleTitleKeyDown}
-                label={lang('lng_forum_topic_title')}
+                label={lang('ForumTopicTitle')}
                 disabled={isLoading}
                 teactExperimentControlled
               />

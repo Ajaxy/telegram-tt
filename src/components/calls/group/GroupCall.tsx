@@ -1,6 +1,5 @@
 import '../../../global/actions/calls';
 
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -25,8 +24,8 @@ import { compact } from '../../../util/iteratees';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 
@@ -57,17 +56,17 @@ type StateProps = {
   canInvite: boolean;
 };
 
-const GroupCall: FC<OwnProps & StateProps> = ({
+const GroupCall = ({
   groupCallId,
   isCallPanelVisible,
   connectionState,
-  participantsCount,
+  participantsCount = 0,
   title,
   meParticipant,
   isAdmin,
   participants,
   canInvite,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     toggleGroupCallVideo,
     toggleGroupCallPresentation,
@@ -78,7 +77,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     createGroupCallInviteLink,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
 
   const primaryVideoContainerRef = useRef<HTMLDivElement>();
@@ -124,7 +123,9 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   const hasVideoParticipants = videoParticipants.length > 0;
 
   const groupCallTitle = title || lang('VoipGroupVoiceChat');
-  const membersString = lang('Participants', participantsCount, 'i');
+  const membersString = lang('Participants', {
+    count: lang.number(participantsCount),
+  }, { pluralValue: participantsCount });
 
   const [isConfirmLeaveModalOpen, openConfirmLeaveModal, closeConfirmLeaveModal] = useFlag();
   const [isEndGroupCallModal, setIsEndGroupCallModal] = useState(false);
@@ -461,7 +462,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             canRequestToSpeak && styles.canRequestToSpeak,
           )}
           onClick={handleClickVideo}
-          ariaLabel={lang(hasVideo ? 'VoipStopVideo' : 'VoipStartVideo')}
+          ariaLabel={lang(hasVideo ? 'CallStopVideo' : 'CallStartVideo')}
           disabled={isConnecting}
           iconName={!hasVideo ? 'video-stop' : 'video'}
         />
@@ -476,7 +477,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             canRequestToSpeak && styles.canRequestToSpeak,
           )}
           onClick={handleToggleGroupCallPresentation}
-          ariaLabel={lang(hasPresentation ? 'lng_group_call_screen_share_stop' : 'lng_group_call_tooltip_screen')}
+          ariaLabel={lang(hasPresentation ? 'GroupCallScreenShareStop' : 'VoipChatStartScreenCapture')}
           disabled={isConnecting || !IS_SCREENSHARE_SUPPORTED}
           iconName={!hasPresentation ? 'share-screen-stop' : 'share-screen'}
         />
@@ -492,7 +493,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             !hasAudioStream && styles.muted,
             canRequestToSpeak && styles.canRequestToSpeak,
           )}
-          ariaLabel={lang('lng_group_call_settings')}
+          ariaLabel={lang('Settings')}
           disabled
           iconName="settings-filled"
         />
@@ -506,7 +507,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             styles.destructive,
           )}
           onClick={handleLeaveGroupCall}
-          ariaLabel={lang('lng_group_call_leave')}
+          ariaLabel={lang('VoipGroupLeave')}
           iconName="close"
         />
       </div>

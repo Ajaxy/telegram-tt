@@ -1,11 +1,10 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo, useMemo } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { TabState } from '../../../../global/types';
 
-import { formatDateToString } from '../../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../../util/formatCurrency';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
 
@@ -26,9 +25,9 @@ export type OwnProps = {
 const HEADER_STICKER_SIZE = 120;
 const FOOTER_STICKER_SIZE = 24;
 
-const GiftInfoValueModal: FC<OwnProps> = ({
+const GiftInfoValueModal = ({
   modal,
-}) => {
+}: OwnProps) => {
   const { closeGiftInfoValueModal, openUrl, openGiftInMarket } = getActions();
 
   const lang = useLang();
@@ -84,7 +83,7 @@ const GiftInfoValueModal: FC<OwnProps> = ({
 
     tableData.push([
       lang('GiftValueTitleInitialSale'),
-      formatDateToString(valueInfo.initialSaleDate * 1000, lang.code),
+      formatDateTime(lang, secondsToDate(valueInfo.initialSaleDate), { date: 'short' }),
     ]);
 
     tableData.push([
@@ -100,7 +99,7 @@ const GiftInfoValueModal: FC<OwnProps> = ({
     if (valueInfo.lastSaleDate) {
       tableData.push([
         lang('GiftValueTitleLastSale'),
-        formatDateToString(valueInfo.lastSaleDate * 1000, lang.code),
+        formatDateTime(lang, secondsToDate(valueInfo.lastSaleDate), { date: 'short' }),
       ]);
     }
 

@@ -6,7 +6,6 @@ import type {
   ApiConfig,
   ApiCountry,
   ApiLanguage,
-  ApiOldLangString,
   ApiPasskey,
   ApiPendingSuggestion,
   ApiPrivacyKey,
@@ -21,13 +20,10 @@ import type {
   LangPackStringValue,
 } from '../../types';
 
-import {
-  omit, omitUndefined, pick,
-} from '../../../util/iteratees';
+import { omitUndefined, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { addUserToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
-import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction } from './reactions';
@@ -290,21 +286,6 @@ function buildApiPendingSuggestion(pendingSuggestion: GramJs.TypePendingSuggesti
     description: buildApiFormattedText(description),
     url,
   };
-}
-
-export function oldBuildLangPack(mtpLangPack: GramJs.LangPackDifference) {
-  return mtpLangPack.strings.reduce<Record<string, ApiOldLangString | undefined>>((acc, mtpString) => {
-    acc[mtpString.key] = oldBuildLangPackString(mtpString);
-    return acc;
-  }, {});
-}
-
-function oldBuildLangPackString(mtpString: GramJs.TypeLangPackString) {
-  return mtpString instanceof GramJs.LangPackString
-    ? mtpString.value
-    : mtpString instanceof GramJs.LangPackStringPluralized
-      ? omit(omitVirtualClassFields(mtpString), ['key'])
-      : undefined;
 }
 
 export function buildLangStrings(strings: GramJs.TypeLangPackString[]) {

@@ -17,8 +17,8 @@ import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import { useFastClick } from '../../../hooks/useFastClick';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePeerColor from '../../../hooks/usePeerColor';
 
 import Icon from '../icons/Icon';
@@ -48,7 +48,7 @@ const EmbeddedStoryForward = ({
   const { openStoryViewer, loadPeerStoriesByIds, openChat } = getActions();
   const ref = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useEffect(() => {
     if (!story && forwardInfo.fromPeerId && forwardInfo.storyId) {

@@ -11,8 +11,8 @@ import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import PickerModal from '../../common/pickers/PickerModal';
@@ -36,7 +36,7 @@ const GiveawayChannelPickerModal = ({
   onClose,
 }: OwnProps) => {
   const { showNotification } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [pendingChannelId, setPendingChannelId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -79,7 +79,16 @@ const GiveawayChannelPickerModal = ({
 
     if (selectedIds?.length >= selectionLimit) {
       showNotification({
-        message: lang('BoostingSelectUpToWarningChannelsPlural', selectionLimit),
+        message: {
+          key: 'BoostingSelectUpToWarningChannelsPlural',
+          variables: { count: selectionLimit },
+          options: {
+            pluralValue: selectionLimit,
+            withNodes: true,
+            withMarkdown: true,
+            renderTextFilters: ['br', 'links'],
+          },
+        },
       });
       return;
     }
@@ -108,7 +117,7 @@ const GiveawayChannelPickerModal = ({
     <PickerModal
       isOpen={isOpen}
       onClose={onClose}
-      title={lang('RequestPeer.ChooseChannelTitle')}
+      title={lang('RequestPeerChooseChannelTitle')}
       hasCloseButton
       withFixedHeight
       confirmButtonText={lang('Save')}

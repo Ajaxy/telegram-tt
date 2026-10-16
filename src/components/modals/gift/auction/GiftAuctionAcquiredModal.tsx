@@ -5,7 +5,7 @@ import type { ApiStarGiftAuctionAcquiredGift, ApiSticker } from '../../../../api
 import type { TabState } from '../../../../global/types';
 
 import { selectTabState } from '../../../../global/selectors';
-import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -72,7 +72,7 @@ const GiftAuctionAcquiredModal = ({ modal, acquiredGifts, giftTitle, giftSticker
           </span>
         )],
         [lang('GiftAuctionRecipient'), { chatId: gift.peerId }],
-        [lang('GiftAuctionDate'), formatDateTimeToString(gift.date * 1000, lang.code, true)],
+        [lang('GiftAuctionDate'), formatDateTime(lang, secondsToDate(gift.date), { date: 'short', time: 'short' })],
         [lang('GiftAuctionAcceptedBid'), (
           <span className={styles.bidValue}>
             {formatStarsAsIcon(lang, gift.bidAmount, { className: styles.starIcon })}

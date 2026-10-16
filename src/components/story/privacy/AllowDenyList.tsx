@@ -4,7 +4,7 @@ import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { unique } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 
@@ -25,7 +25,7 @@ function AllowDenyList({
   lockedIds,
   onSelect,
 }: OwnProps) {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const displayedIds = useMemo(() => {

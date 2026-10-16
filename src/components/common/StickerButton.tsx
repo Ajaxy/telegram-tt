@@ -1,4 +1,3 @@
-import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import type {
   ElementRef } from '../../lib/teact/teact';
 import {
@@ -8,6 +7,7 @@ import { getActions } from '../../global';
 
 import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { PluralLangKeyWithVariables } from '../../types/language';
 
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -17,8 +17,8 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -57,13 +57,13 @@ type OwnProps<T> = {
   onDismiss?: NoneToVoidFunction;
 };
 
-const contentForStatusMenuContext = [
-  { title: 'SetTimeoutFor.Hours', value: 1, arg: 3600 },
-  { title: 'SetTimeoutFor.Hours', value: 2, arg: 7200 },
-  { title: 'SetTimeoutFor.Hours', value: 8, arg: 28800 },
-  { title: 'SetTimeoutFor.Days', value: 1, arg: 86400 },
-  { title: 'SetTimeoutFor.Days', value: 2, arg: 172800 },
-];
+const STATUS_DURATION_ITEMS = [
+  { title: 'SetTimeoutForHours', value: 1, arg: 3600 },
+  { title: 'SetTimeoutForHours', value: 2, arg: 7200 },
+  { title: 'SetTimeoutForHours', value: 8, arg: 28800 },
+  { title: 'SetTimeoutForDays', value: 1, arg: 86400 },
+  { title: 'SetTimeoutForDays', value: 2, arg: 172800 },
+] satisfies { title: PluralLangKeyWithVariables; value: number; arg: number }[];
 
 const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult | undefined = undefined>({
   sticker,
@@ -96,7 +96,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const { openStickerSet, setEmojiStatus, showNotification } = getActions();
   const ref = useRef<HTMLDivElement>();
   const menuRef = useRef<HTMLDivElement>();
-  const lang = useOldLang();
+  const lang = useLang();
   const hasCustomColor = sticker.shouldUseTextColor;
   const customColor = useDynamicColorListener(ref, undefined, !hasCustomColor);
 
@@ -157,7 +157,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleBeforeContextMenu(e);
   };
 
-  const handleRemoveClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleRemoveClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
     e.preventDefault();
 
@@ -213,13 +213,13 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const contextMenuItems = useMemo(() => {
     if (!shouldRenderContextMenu || noContextMenu || (isCustomEmoji && !isStatusPicker)) return [];
 
-    const items: ReactNode[] = [];
+    const items: React.ReactNode[] = [];
 
     if (isCustomEmoji) {
-      contentForStatusMenuContext.forEach((item) => {
+      STATUS_DURATION_ITEMS.forEach((item) => {
         items.push(
           <MenuItem onClick={handleEmojiStatusExpiresClick} clickArg={item.arg}>
-            {lang(item.title, item.value, 'i')}
+            {lang(item.title, { count: lang.number(item.value) }, { pluralValue: item.value })}
           </MenuItem>,
         );
       });
@@ -230,7 +230,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     if (onUnfaveClick) {
       items.push(
         <MenuItem icon="star-regular" onClick={handleContextUnfave}>
-          {lang('Stickers.RemoveFromFavorites')}
+          {lang('StickersRemoveFromFavorites')}
         </MenuItem>,
       );
     }
@@ -238,7 +238,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     if (onFaveClick) {
       items.push(
         <MenuItem icon="star-regular" onClick={handleContextFave}>
-          {lang('Stickers.AddToFavorites')}
+          {lang('StickersAddToFavorites')}
         </MenuItem>,
       );
     }

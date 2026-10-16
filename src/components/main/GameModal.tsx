@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -9,7 +8,7 @@ import { selectChat, selectChatFullInfo } from '../../global/selectors';
 import { isMessageFromIframe } from '../../util/browser/iframe';
 
 import useInterval from '../../hooks/schedulers/useInterval';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
 
 import Modal from '../ui/Modal';
@@ -29,9 +28,9 @@ type StateProps = {
   canPost?: boolean;
 };
 
-const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }) => {
+const GameModal = ({ openedGame, gameTitle, canPost }: OwnProps & StateProps) => {
   const { closeGame, openForwardMenu } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const { url, chatId, messageId } = openedGame || {};
   const isOpen = Boolean(url);
   const frameRef = useRef<HTMLIFrameElement>();

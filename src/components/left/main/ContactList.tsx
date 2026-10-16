@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -11,7 +10,7 @@ import { filterPeersByQuery } from '../../../global/helpers/peers';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -31,20 +30,20 @@ type StateProps = {
   contactIds?: string[];
 };
 
-const ContactList: FC<OwnProps & StateProps> = ({
+const ContactList = ({
   isActive,
   filter,
   usersById,
   userStatusesById,
   contactIds,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openChat,
     openNewContactDialog,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
 
   useHistoryBack({
@@ -89,7 +88,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
         ))
       ) : viewportIds && !viewportIds.length ? (
         <p className="no-results" key="no-results" dir="auto">
-          {filter.length ? 'No contacts matched your search.' : 'Contact list is empty.'}
+          {lang(filter.length ? 'NoContactsFound' : 'ContactListEmpty')}
         </p>
       ) : (
         <Loading key="loading" />

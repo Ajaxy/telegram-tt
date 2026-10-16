@@ -42,7 +42,7 @@ const WalletTonConnectLoginScreen = ({
 
   const { oauth, status, error } = flow;
   const isLoading = status === 'pending';
-  const botName = bot ? getUserFullName(bot) : undefined;
+  const botName = bot ? getUserFullName(lang, bot) : undefined;
 
   return (
     <WalletNoticeScreen

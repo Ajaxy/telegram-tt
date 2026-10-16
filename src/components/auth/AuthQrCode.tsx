@@ -9,7 +9,7 @@ import { STRICTERDOM_ENABLED } from '../../config';
 import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
-import { oldSetLanguage } from '../../util/oldLangProvider';
+import { loadAndChangeLanguage } from '../../util/localization';
 import { createStyledQrCode } from '../../util/qrCode/buildStyledQrCode';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import { navigateBack } from './helpers/backNavigation';
@@ -111,14 +111,16 @@ const AuthCode = ({
     navigateBack();
   });
 
-  const handleLangChange = useLastCallback(() => {
+  const handleLangChange = useLastCallback(async () => {
     markIsLoading();
 
-    void oldSetLanguage(suggestedLanguage, () => {
+    try {
+      if (await loadAndChangeLanguage(suggestedLanguage)) {
+        setSharedSettingOption({ language: suggestedLanguage });
+      }
+    } finally {
       unmarkIsLoading();
-
-      setSharedSettingOption({ language: suggestedLanguage });
-    });
+    }
   });
 
   const handleReturnToAuthPhoneNumber = useLastCallback(() => {

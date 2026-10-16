@@ -1,14 +1,13 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ActionReturnType, GlobalState } from '../../types';
-import { type LangCode, LeftColumnContent, SettingsScreens } from '../../../types';
+import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { setTimeFormat as setLocalizedTimeFormat } from '../../../util/localization';
-import { oldSetLanguage, setTimeFormat as setLegacyTimeFormat } from '../../../util/oldLangProvider';
+import { loadAndChangeLanguage, setTimeFormat } from '../../../util/localization';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme from '../../../util/switchTheme';
 import { updatePeerColors } from '../../../util/theme';
@@ -57,12 +56,11 @@ addCallback((global: GlobalState) => {
   }
 
   if (sharedSettings.language !== oldSharedSettings.language) {
-    oldSetLanguage(sharedSettings.language as LangCode);
+    void loadAndChangeLanguage(sharedSettings.language);
   }
 
   if (sharedSettings.timeFormat !== oldSharedSettings.timeFormat) {
-    setLocalizedTimeFormat(sharedSettings.timeFormat);
-    setLegacyTimeFormat(sharedSettings.timeFormat);
+    setTimeFormat(sharedSettings.timeFormat);
   }
 
   if (sharedSettings.messageTextSize !== oldSharedSettings.messageTextSize) {

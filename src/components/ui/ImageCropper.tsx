@@ -6,6 +6,7 @@ import { blobToFile } from '../../util/files';
 import { clamp } from '../../util/math';
 import { REM } from '../common/helpers/mediaDimensions';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -33,6 +34,8 @@ const ImageCropper = ({
   maxOutputSize,
   minOutputSize,
 }: OwnProps) => {
+  const lang = useLang();
+
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(MIN_ZOOM);
   const isDraggingRef = useRef(false);
@@ -206,7 +209,7 @@ const ImageCropper = ({
           color="primary"
           iconName="check"
           onClick={handleCrop}
-          ariaLabel="Crop"
+          ariaLabel={lang('Crop')}
         />
       </div>
     </div>

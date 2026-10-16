@@ -14,9 +14,9 @@ import trapFocus from '../../util/trapFocus';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useFrozenProps from '../../hooks/useFrozenProps';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Button, { type OwnProps as ButtonProps } from './Button';
@@ -224,7 +224,7 @@ const Modal = (props: OwnProps) => {
     };
   }, [isOpen]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   if (!shouldRender) {
     return undefined;

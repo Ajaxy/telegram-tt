@@ -8,8 +8,8 @@ import { selectCanGift } from '../../../../global/selectors';
 import { unique } from '../../../../util/iteratees';
 import sortChatIds from '../../../common/helpers/sortChatIds';
 
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import PeerPicker from '../../../common/pickers/PeerPicker';
 import PickerModal from '../../../common/pickers/PickerModal';
@@ -32,7 +32,7 @@ const GiftRecipientPicker = ({
 }: OwnProps & StateProps) => {
   const { closeGiftRecipientPicker, openGiftModal } = getActions();
 
-  const oldLang = useOldLang();
+  const lang = useLang();
   const isOpen = modal;
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -57,7 +57,7 @@ const GiftRecipientPicker = ({
       className={styles.root}
       isOpen={isOpen}
       onClose={closeGiftRecipientPicker}
-      title={oldLang('GiftTelegramPremiumOrStarsTitle')}
+      title={lang('GiftTelegramPremiumOrStarsTitle')}
       hasCloseButton
       withFixedHeight
     >
@@ -66,7 +66,7 @@ const GiftRecipientPicker = ({
         className={styles.picker}
         itemIds={displayedUserIds}
         filterValue={searchQuery}
-        filterPlaceholder={oldLang('Search')}
+        filterPlaceholder={lang('Search')}
         onSelectedIdChange={handleSelectedUserIdsChange}
         onFilterChange={setSearchQuery}
         isSearchable

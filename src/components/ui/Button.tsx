@@ -1,4 +1,3 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import { useRef, useState } from '../../lib/teact/teact';
 
@@ -9,8 +8,8 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
 import { useFileHoverOpenHandler } from '../../hooks/useFileHoverOpen';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Sparkles from '../common/Sparkles';
@@ -68,11 +67,11 @@ export type OwnProps = {
   iconAlignment?: 'top' | 'bottom' | 'start' | 'end';
   iconClassName?: string;
   iconHasPremiumBadge?: boolean;
-  onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
-  onMouseUp?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseUp?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onMouseEnter?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onTransitionEnd?: NoneToVoidFunction;
@@ -142,7 +141,7 @@ const Button = ({
     elementRef = ref;
   }
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [isClicked, setIsClicked] = useState(false);
   const handleFileHoverOpen = useFileHoverOpenHandler(onFileHoverOpen);
@@ -175,7 +174,7 @@ const Button = ({
     Boolean(iconName && children) && `content-with-icon-${iconAlignment}`,
   );
 
-  const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if ((allowDisabledClick || !isNotInteractive) && onClick) {
       onClick(e);
     }
@@ -190,7 +189,7 @@ const Button = ({
     }, CLICKED_TIMEOUT);
   });
 
-  const handleMouseDown = useLastCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     if (!noPreventDefault) e.preventDefault();
 
     if ((allowDisabledClick || !isNotInteractive) && onMouseDown) {
@@ -211,7 +210,7 @@ const Button = ({
     if (isLoading) {
       return (
         <div className="loading-content">
-          <span dir={isRtl ? 'auto' : undefined}>{lang('Cache.ClearProgress')}</span>
+          <span dir={isRtl ? 'auto' : undefined}>{lang('PleaseWait')}</span>
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       );

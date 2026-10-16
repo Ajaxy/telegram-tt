@@ -17,8 +17,8 @@ import buildClassName from '../../../../util/buildClassName';
 import { getMessageKey } from '../../../../util/keys/messageKey';
 
 import useEffectOnce from '../../../../hooks/useEffectOnce';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionButton from './ReactionButton';
 import SavedTagButton from './SavedTagButton';
@@ -61,7 +61,7 @@ const Reactions = ({
     showNotification,
     openFrozenAccountModal,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { results, areTags, recentReactions } = message.reactions!;
   const withServiceReactions = Boolean(message.areReactionsPossible && message.reactions);
@@ -151,9 +151,18 @@ const Reactions = ({
 
     showNotification({
       localId: getMessageKey(message),
-      title: lang('StarsSentTitle'),
-      message: lang('StarsSentText', paidLocalCount),
-      actionText: lang('StarsSentUndo'),
+      title: {
+        key: 'StarsSentTitle',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      message: {
+        key: 'StarsSentText',
+        variables: { count: paidLocalCount },
+        options: {
+          pluralValue: paidLocalCount, withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'],
+        },
+      },
+      actionText: { key: 'ButtonUndo' },
       cacheBreaker: paidLocalCount.toString(),
       action: {
         action: 'resetLocalPaidReactions',
@@ -168,7 +177,7 @@ const Reactions = ({
       disableClickDismiss: true,
       icon: 'star',
     });
-  }, [lang, message, paidLocalCount]);
+  }, [message, paidLocalCount]);
 
   const handleRemoveReaction = useLastCallback((reaction: ApiReaction) => {
     if (isAccountFrozen) {

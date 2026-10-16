@@ -5,7 +5,7 @@ import { getActions } from '../../../global';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
@@ -23,9 +23,9 @@ const RatePhoneCallModal = ({
 }: OwnProps) => {
   const { closeCallRatingModal, setCallRating } = getActions();
 
+  const lang = useLang();
   const inputRef = useRef<HTMLInputElement>();
 
-  const lang = useOldLang();
   const [rating, setRating] = useState<number | undefined>();
 
   const handleSend = useCallback(() => {
@@ -48,7 +48,7 @@ const RatePhoneCallModal = ({
   }, [closeCallRatingModal]);
 
   return (
-    <Modal title={lang('lng_call_rate_label')} className="narrow" onClose={closeCallRatingModal} isOpen={isOpen}>
+    <Modal title={lang('CallRateLabel')} className="narrow" onClose={closeCallRatingModal} isOpen={isOpen}>
       <div className={styles.stars}>
         {new Array(5).fill(undefined).map((_, i) => {
           const isFilled = rating !== undefined && rating >= i;
@@ -66,7 +66,7 @@ const RatePhoneCallModal = ({
       </div>
       <InputText
         ref={inputRef}
-        placeholder={lang('lng_call_rate_comment')}
+        placeholder={lang('CallRateComment')}
         className={buildClassName(styles.comment, rating !== 4 && rating !== undefined && styles.visible)}
       />
 

@@ -9,7 +9,7 @@ import {
 } from '../../util/entities/username';
 import { debounce } from '../../util/schedulers';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import InputText from '../ui/InputText';
@@ -41,8 +41,7 @@ const UsernameInput = ({
   const { checkUsername, checkPublicLink } = getActions();
   const [username, setUsername] = useState(currentUsername || '');
 
-  const lang = useOldLang();
-  const langPrefix = asLink ? 'SetUrl' : 'Username';
+  const lang = useLang();
   const label = asLink ? lang('SetUrlPlaceholder') : lang('Username');
 
   const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
@@ -56,13 +55,13 @@ const UsernameInput = ({
     }
 
     if (username.length < MIN_UPDATE_USERNAME_LENGTH) {
-      return [undefined, lang(`${langPrefix}InvalidShort`)];
+      return [undefined, lang(asLink ? 'SetUrlShort' : 'UsernameShort')];
     }
     if (username.length > MAX_USERNAME_LENGTH) {
-      return [undefined, lang(`${langPrefix}InvalidLong`)];
+      return [undefined, lang(asLink ? 'SetUrlLong' : 'UsernameLong')];
     }
     if (!USERNAME_REGEX.test(username)) {
-      return [undefined, lang(`${langPrefix}Invalid`)];
+      return [undefined, lang(asLink ? 'SetUrlInvalid' : 'UsernameInvalid')];
     }
 
     if (renderingIsUsernameAvailable === undefined || isChecking) {
@@ -71,10 +70,12 @@ const UsernameInput = ({
 
     // Variable `isUsernameAvailable` is initialized with `undefined`, so a strict false check is required
     return [
-      renderingIsUsernameAvailable ? lang(`${langPrefix}Available`, label) : undefined,
-      renderingIsUsernameAvailable === false ? lang(`${langPrefix}InUse`) : undefined,
+      renderingIsUsernameAvailable
+        ? (asLink ? lang('SetUrlAvailable', { url: label }) : lang('UsernameAvailable', { username: label }))
+        : undefined,
+      renderingIsUsernameAvailable === false ? lang(asLink ? 'SetUrlInUse' : 'UsernameInUse') : undefined,
     ];
-  }, [username, renderingIsUsernameAvailable, isChecking, lang, langPrefix, label]);
+  }, [username, renderingIsUsernameAvailable, isChecking, lang, asLink, label]);
 
   useEffect(() => {
     setUsername(currentUsername || '');

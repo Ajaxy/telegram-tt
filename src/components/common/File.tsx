@@ -9,7 +9,7 @@ import type { IconName } from '../../types/icons';
 import type { MenuItemContextAction } from '../ui/ListItem';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDateTime, formatPastTimeShort } from '../../util/dates/oldDateFormat';
+import { formatCalendarDate, formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import { getColorFromExtension } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
@@ -17,7 +17,6 @@ import renderText from './helpers/renderText';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Link from '../ui/Link';
@@ -82,7 +81,6 @@ const File = ({
   onClick,
   onDateClick,
 }: OwnProps) => {
-  const oldLang = useOldLang();
   const lang = useLang();
   let elementRef = useRef<HTMLDivElement>();
   if (ref) {
@@ -179,13 +177,15 @@ const File = ({
           {!sender && Boolean(timestamp) && (
             <>
               <span className="bullet">&bull;</span>
-              <Link onClick={onDateClick}>{formatMediaDateTime(oldLang, timestamp * 1000, true)}</Link>
+              <Link onClick={onDateClick}>
+                {formatCalendarDate(lang, secondsToDate(timestamp), { isShort: true, withTime: true })}
+              </Link>
             </>
           )}
         </div>
       </div>
       {sender && Boolean(timestamp) && (
-        <Link onClick={onDateClick}>{formatPastTimeShort(oldLang, timestamp * 1000)}</Link>
+        <Link onClick={onDateClick}>{formatCompactTimestamp(lang, secondsToDate(timestamp))}</Link>
       )}
       {contextActions && contextMenuAnchor !== undefined && (
         <Menu

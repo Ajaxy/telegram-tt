@@ -22,8 +22,8 @@ import selectViewableMedia from './helpers/getViewableMedia';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import { useSignalEffect } from '../../hooks/useSignalEffect';
 import useThrottledCallback from '../../hooks/useThrottledCallback';
 import useUniqueId from '../../hooks/useUniqueId';
@@ -87,7 +87,7 @@ const MediaViewerContent = ({
 }: OwnProps & StateProps) => {
   const { updateLastPlaybackTimestamp } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const captionContainerId = useUniqueId();
 
   const isAvatar = item.type === 'avatar';
@@ -178,7 +178,7 @@ const MediaViewerContent = ({
   const textParts = textMessage && (
     textMessage.content.action
       ? (textMessage.content.action.type === 'suggestProfilePhoto'
-        ? lang('Conversation.SuggestedPhotoTitle') : undefined)
+        ? lang('ConversationSuggestedPhotoTitle') : undefined)
       : renderMessageText({
         message: textMessage, maxTimestamp, threadId, forcePlayback: true, isForMediaViewer: true,
       }));

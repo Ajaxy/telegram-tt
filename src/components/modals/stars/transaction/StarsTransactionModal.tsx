@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
@@ -24,7 +23,7 @@ import {
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
@@ -32,7 +31,6 @@ import { getTransactionTitle, isNegativeAmount } from '../helpers/transaction';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 import usePrevious from '../../../../hooks/usePrevious';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
@@ -61,17 +59,17 @@ type StateProps = {
   paidMessageCommission?: number;
 };
 
-const StarsTransactionModal: FC<OwnProps & StateProps> = ({
+const StarsTransactionModal = ({
   modal,
   peer,
   canPlayAnimatedEmojis,
   topSticker,
   paidMessageCommission,
-}) => {
+}: OwnProps & StateProps) => {
   const { showNotification, openMediaViewer, closeStarsTransactionModal } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const { transaction } = modal || {};
   const triggerSparklesRef = useRef<(() => void) | undefined>();
 
@@ -113,9 +111,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       && buildStarsTransactionCustomPeer(transaction)) || undefined;
 
     const peerId = transaction.peer?.type === 'peer' ? transaction.peer.id : undefined;
-    const toName = transaction.peer && oldLang(getStarsPeerTitleKey(transaction.peer));
+    const toName = transaction.peer && lang(getStarsPeerTitleKey(transaction.peer));
 
-    const title = getTransactionTitle(oldLang, lang, transaction);
+    const title = getTransactionTitle(lang, transaction);
 
     const messageLink = peer && transaction.messageId && !isGiftUpgrade && !isDropOriginalDetails
       ? getMessageLink(peer, undefined, transaction.messageId) : undefined;
@@ -127,9 +125,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     const areAllPhotos = media?.every((m) => !m.video);
     const areAllVideos = media?.every((m) => !m.photo);
 
-    const mediaText = areAllPhotos ? oldLang('Stars.Transfer.Photos', mediaAmount)
-      : areAllVideos ? oldLang('Stars.Transfer.Videos', mediaAmount)
-        : oldLang('Media', mediaAmount);
+    const mediaText = areAllPhotos ? lang('StarsTransferPhotos', { count: mediaAmount }, { pluralValue: mediaAmount })
+      : areAllVideos ? lang('StarsTransferVideos', { count: mediaAmount }, { pluralValue: mediaAmount })
+        : lang('Media', { count: mediaAmount }, { pluralValue: mediaAmount });
 
     const description = transaction.description
       || ((isGiftUpgrade || isDropOriginalDetails) && starGift?.type === 'starGiftUnique' ? starGift.title : undefined)
@@ -221,28 +219,28 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     if (transaction && starRefCommision && !transaction.paidMessages && !isGiftResale) {
       tableData.push([
-        oldLang('StarsTransaction.StarRefReason.Title'),
-        oldLang('StarsTransaction.StarRefReason.Program'),
+        lang('StarsTransactionStarRefReasonTitle'),
+        lang('StarsTransactionStarRefReasonProgram'),
       ]);
     }
 
     if (isGiftUpgrade) {
       tableData.push([
-        oldLang('StarGiftReason'),
-        oldLang('StarGiftReasonUpgrade'),
+        lang('StarGiftReason'),
+        lang('StarGiftReasonUpgrade'),
       ]);
     }
 
     if (isDropOriginalDetails) {
       tableData.push([
-        oldLang('StarGiftReason'),
+        lang('StarGiftReason'),
         lang('StarGiftReasonDropOriginalDetails'),
       ]);
     }
 
     if (isGiftResale) {
       tableData.push([
-        oldLang('StarGiftReason'),
+        lang('StarGiftReason'),
         isNegativeAmount(transaction.amount)
           ? lang('StarGiftSaleTransaction')
           : lang('StarGiftPurchaseTransaction'),
@@ -251,15 +249,15 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     let peerLabel;
     if (isGiftUpgrade) {
-      peerLabel = oldLang('Stars.Transaction.GiftFrom');
+      peerLabel = lang('StarsTransactionGiftFrom');
     } else if (isNegativeAmount(amount) || transaction.isMyGift) {
-      peerLabel = oldLang('Stars.Transaction.To');
+      peerLabel = lang('StarsTransactionTo');
     } else if (transaction.starRefCommision && !transaction.paidMessages && !isGiftResale) {
-      peerLabel = oldLang('StarsTransaction.StarRefReason.Miniapp');
+      peerLabel = lang('StarsTransactionStarRefReasonMiniapp');
     } else if (peerId) {
-      peerLabel = oldLang('Star.Transaction.From');
+      peerLabel = lang('StarTransactionFrom');
     } else {
-      peerLabel = oldLang('Stars.Transaction.Via');
+      peerLabel = lang('StarsTransactionVia');
     }
 
     if (!transaction.isPostsSearch && !isDropOriginalDetails && !transaction.isStarGiftAuctionBid) {
@@ -279,17 +277,20 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     if (messageLink) {
-      tableData.push([oldLang('Stars.Transaction.Reaction.Post'), <SafeLink url={messageLink} text={messageLink} />]);
+      tableData.push([lang('StarsTransactionReactionPost'), <SafeLink url={messageLink} text={messageLink} />]);
     }
 
     if (giveawayMessageLink && transaction.amount.currency === STARS_CURRENCY_CODE) {
-      tableData.push([oldLang('BoostReason'), <SafeLink url={giveawayMessageLink} text={oldLang('Giveaway')} />]);
-      tableData.push([oldLang('Gift'), oldLang('Stars', transaction.amount, 'i')]);
+      tableData.push([lang('BoostReason'), <SafeLink url={giveawayMessageLink} text={lang('AttachGiveaway')} />]);
+      tableData.push([
+        lang('GiftInfoTitle'),
+        lang('StarsAmountText', { amount: transaction.amount.amount }, { pluralValue: transaction.amount.amount }),
+      ]);
     }
 
     if (transaction.id) {
       tableData.push([
-        oldLang('Stars.Transaction.Id'),
+        lang('StarsTransactionId'),
         (
           <>
             <div
@@ -297,7 +298,10 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
               onClick={() => {
                 copyTextToClipboard(transaction.id!);
                 showNotification({
-                  message: oldLang('StarsTransactionIDCopied'),
+                  message: {
+                    key: 'StarsTransactionIDCopied',
+                    options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+                  },
                 });
               }}
             >
@@ -310,8 +314,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     tableData.push([
-      oldLang('Stars.Transaction.Date'),
-      formatDateTimeToString(transaction.date * 1000, oldLang.code, true),
+      lang('StarsTransactionDate'),
+      formatDateTime(lang, secondsToDate(transaction.date), { date: 'short', time: 'short' }),
     ]);
 
     if (transaction.isStarGiftAuctionBid && gift?.type === 'starGift' && gift.availabilityTotal) {
@@ -326,14 +330,11 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       ]);
     }
 
-    const footerText = oldLang('lng_credits_box_out_about');
-    const footerTextParts = footerText.split('{link}');
-
     const footer = (
       <span className={styles.footer}>
-        {footerTextParts[0]}
-        <SafeLink url={oldLang('StarsTOSLink')} text={oldLang('lng_credits_summary_options_about_link')} />
-        {footerTextParts[1]}
+        {lang('StarsTransactionTOS', {
+          link: <SafeLink url={lang('StarsTOSLink')} text={lang('CreditsSummaryOptionsAboutLink')} />,
+        }, { withNodes: true })}
       </span>
     );
 
@@ -342,7 +343,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData,
       footer,
     };
-  }, [transaction, oldLang, lang, peer, canPlayAnimatedEmojis, topSticker,
+  }, [transaction, lang, peer, canPlayAnimatedEmojis, topSticker,
     paidMessageCommission, handleRequestAnimation]);
 
   const prevModalData = usePrevious(starModalData);
@@ -356,7 +357,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       header={renderingModalData?.header}
       tableData={renderingModalData?.tableData}
       footer={renderingModalData?.footer}
-      buttonText={oldLang('OK')}
+      buttonText={lang('OK')}
       onClose={closeStarsTransactionModal}
     />
   );
@@ -395,8 +396,8 @@ function getStarsPeerTitleKey(peer: ApiStarsTransactionPeer) {
     case 'ads':
       return 'StarsTransactionAds';
     case 'api':
-      return 'Stars.Intro.Transaction.TelegramBotApi.Subtitle';
+      return 'StarsIntroTransactionTelegramBotApiSubtitle';
     default:
-      return 'Stars.Transaction.Unsupported.Title';
+      return 'StarsTransactionUnsupportedTitle';
   }
 }

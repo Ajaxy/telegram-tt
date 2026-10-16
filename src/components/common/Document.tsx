@@ -19,9 +19,9 @@ import { preloadDocumentMedia } from './helpers/preloadDocumentMedia';
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -83,7 +83,7 @@ const Document = ({
 
   const ref = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
+  const lang = useLang();
   const [isFileIpDialogOpen, openFileIpDialog, closeFileIpDialog] = useFlag();
   const [shouldNotWarnAboutFiles, setShouldNotWarnAboutFiles] = useState(false);
 
@@ -223,11 +223,11 @@ const Document = ({
         onClose={closeFileIpDialog}
         confirmHandler={handleFileIpConfirm}
       >
-        {oldLang('lng_launch_svg_warning')}
+        {lang('LaunchSvgWarning')}
         <Checkbox
           className="dialog-checkbox"
           checked={shouldNotWarnAboutFiles}
-          label={oldLang('lng_launch_exe_dont_ask')}
+          label={lang('LaunchExeDontAsk')}
           onCheck={setShouldNotWarnAboutFiles}
         />
       </ConfirmDialog>

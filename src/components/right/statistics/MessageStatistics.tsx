@@ -7,6 +7,7 @@ import type {
   ApiMessagePublicForward,
   ApiPostStatistics,
 } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 import { LoadMoreDirection } from '../../../types';
 
 import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
@@ -18,7 +19,6 @@ import { isGraph } from './helpers/isGraph';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island, { IslandTitle } from '../../gili/layout/Island';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -28,9 +28,9 @@ import StatisticsOverview from './StatisticsOverview';
 
 import styles from './Statistics.module.scss';
 
-const GRAPH_TITLES = {
-  viewsGraph: 'Stats.MessageInteractionsTitle',
-  reactionsGraph: 'ReactionsByEmotionChartTitle',
+const GRAPH_TITLES: Record<string, RegularLangKey> = {
+  viewsGraph: 'StatsMessageInteractionsTitle',
+  reactionsGraph: 'Reactions',
 };
 const GRAPHS = Object.keys(GRAPH_TITLES) as (keyof ApiPostStatistics)[];
 
@@ -53,7 +53,7 @@ function MessageStatistics({
   messageId,
 }: OwnProps & StateProps) {
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
   const loadedChartsRef = useRef<Set<string>>(new Set());
@@ -131,11 +131,11 @@ function MessageStatistics({
 
         new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
           ...graph,
-          title: oldLang((GRAPH_TITLES as Record<string, string>)[name]),
+          title: lang(GRAPH_TITLES[name]),
           onZoom: zoomToken
             ? (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId })
             : undefined,
-          zoomOutLabel: zoomToken ? oldLang('Graph.ZoomOut') : undefined,
+          zoomOutLabel: zoomToken ? lang('GraphZoomOut') : undefined,
         });
 
         loadedChartsRef.current.add(name);
@@ -144,7 +144,7 @@ function MessageStatistics({
       forceUpdate();
     })();
   }, [
-    isReady, statistics, oldLang, chatId, messageId, loadStatisticsAsyncGraph, dcId, forceUpdate,
+    isReady, statistics, lang, chatId, messageId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
 
   const handleLoadMore = useLastCallback(({ direction }: { direction: LoadMoreDirection }) => {

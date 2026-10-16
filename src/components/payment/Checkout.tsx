@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -21,7 +20,6 @@ import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import useOldLang from '../../hooks/useOldLang';
 
 import SafeLink from '../common/SafeLink';
 import Checkbox from '../ui/Checkbox';
@@ -56,7 +54,7 @@ export type OwnProps = {
   botName?: string;
 };
 
-const Checkout: FC<OwnProps> = ({
+const Checkout = ({
   title,
   description,
   photo,
@@ -73,10 +71,9 @@ const Checkout: FC<OwnProps> = ({
   savedCredentials,
   isPaymentFormUrl,
   botName,
-}) => {
+}: OwnProps) => {
   const { setPaymentStep } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const isInteractive = Boolean(dispatch);
 
@@ -140,26 +137,13 @@ const Checkout: FC<OwnProps> = ({
     );
   }
 
-  function renderTosLink(url: string, isRtl?: boolean) {
-    const langString = oldLang('PaymentCheckoutAcceptRecurrent', botName);
-    const langStringSplit = langString.split('*');
-    return (
-      <>
-        {langStringSplit[0]}
-        <SafeLink
-          url={url}
-          text={langStringSplit[1]}
-          isRtl={isRtl}
-        />
-        {langStringSplit.slice(2)}
-      </>
-    );
-  }
-
   function renderTos(url: string) {
     return (
       <Checkbox
-        label={renderTosLink(url, lang.isRtl)}
+        label={lang('PaymentCheckoutAcceptTerms', {
+          bot: botName,
+          link: <SafeLink url={url} text={lang('StarsTransactionTOSLinkText')} isRtl={lang.isRtl} />,
+        }, { withNodes: true })}
         name="checkout_tos"
         checked={Boolean(isTosAccepted)}
         className={styles.tosCheckbox}
@@ -210,40 +194,40 @@ const Checkout: FC<OwnProps> = ({
         ))}
         {suggestedTipAmounts && suggestedTipAmounts.length > 0 && renderTips()}
         {totalPrice !== undefined && (
-          renderPaymentItem(lang, oldLang('Checkout.TotalAmount'), totalPrice, invoice.currency, true)
+          renderPaymentItem(lang, lang('CheckoutTotalAmount'), totalPrice, invoice.currency, true)
         )}
       </div>
       <div className={styles.invoiceInfo}>
         {!isPaymentFormUrl && renderCheckoutItem({
           title: paymentMethod || savedCredentials?.[0].title,
-          label: oldLang('PaymentCheckoutMethod'),
+          label: lang('PaymentCheckoutMethod'),
           icon: 'card',
           onClick: isInteractive ? handlePaymentMethodClick : undefined,
         })}
         {paymentProvider && renderCheckoutItem({
           title: paymentProvider,
-          label: oldLang('PaymentCheckoutProvider'),
+          label: lang('PaymentCheckoutProvider'),
           customIcon: buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
         })}
         {(needAddress || (!isInteractive && shippingAddress)) && renderCheckoutItem({
           title: shippingAddress,
-          label: oldLang('PaymentShippingAddress'),
+          label: lang('PaymentShippingAddress'),
           icon: 'location',
           onClick: isInteractive ? handleShippingAddressClick : undefined,
         })}
         {name && renderCheckoutItem({
           title: name,
-          label: oldLang('PaymentCheckoutName'),
+          label: lang('PaymentCheckoutName'),
           icon: 'user',
         })}
         {phone && renderCheckoutItem({
           title: phone,
-          label: oldLang('PaymentCheckoutPhoneNumber'),
+          label: lang('PaymentCheckoutPhoneNumber'),
           icon: 'phone',
         })}
         {(hasShippingOptions || (!isInteractive && shippingMethod)) && renderCheckoutItem({
           title: shippingMethod,
-          label: oldLang('PaymentCheckoutShippingMethod'),
+          label: lang('PaymentCheckoutShippingMethod'),
           icon: 'truck',
           onClick: isInteractive ? handleShippingMethodClick : undefined,
         })}

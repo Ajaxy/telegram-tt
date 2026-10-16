@@ -39,7 +39,7 @@ const EditableCodeBlock = ({
   const lang = useLang();
 
   const language = typeof node.attrs.language === 'string' ? node.attrs.language : undefined;
-  const languageLabel = language ? getPrettyCodeLanguageName(language) : lang('RichEditorCodeLanguageAuto');
+  const languageLabel = language ? getPrettyCodeLanguageName(lang, language) : lang('RichEditorCodeLanguageAuto');
   const isCodeBlockEmpty = !node.textContent;
   const codeBlockClassName = buildClassName(
     styles.codeBlock,
@@ -211,7 +211,7 @@ const EditableCodeBlock = ({
               withPreventDefaultOnMouseDown
               onClick={() => handleSetLanguage(langCode)}
             >
-              {getPrettyCodeLanguageName(langCode)}
+              {getPrettyCodeLanguageName(lang, langCode)}
             </MenuItem>
           ))}
         </div>

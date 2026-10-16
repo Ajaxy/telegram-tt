@@ -1,6 +1,6 @@
 import type { ApiChat, ApiPeer, ApiUser } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
 import type { CustomPeer } from '../../types';
+import type { RegularLangKey } from '../../types/language';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserId } from '../../util/entities/ids';
@@ -57,18 +57,18 @@ export function filterPeersByQuery({
   });
 }
 
-export function getPeerTypeKey(peer: ApiPeer) {
+export function getPeerTypeKey(peer: ApiPeer): RegularLangKey | undefined {
   if (isApiPeerChat(peer)) {
     if (peer.type === 'chatTypeBasicGroup' || peer.type === 'chatTypeSuperGroup') {
-      return 'ChatList.PeerTypeGroup';
+      return 'ChatListPeerTypeGroup';
     }
 
     if (peer.type === 'chatTypeChannel') {
-      return 'ChatList.PeerTypeChannel';
+      return 'ChatListPeerTypeChannel';
     }
 
     if (peer.type === 'chatTypePrivate') {
-      return 'ChatList.PeerTypeNonContact';
+      return 'ChatListPeerTypeNonContact';
     }
 
     return undefined;
@@ -83,32 +83,30 @@ export function getPeerTypeKey(peer: ApiPeer) {
   }
 
   if (peer.type && peer.type === 'userTypeBot') {
-    return 'ChatList.PeerTypeBot';
+    return 'Bot';
   }
 
   if (peer.isContact) {
-    return 'ChatList.PeerTypeContact';
+    return 'ChatListPeerTypeContact';
   }
 
-  return 'ChatList.PeerTypeNonContactUser';
+  return 'ChatListPeerTypeNonContactUser';
 }
 
-export function getPeerTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
+export function getPeerTitle(lang: LangFn, peer: ApiPeer | CustomPeer) {
   if (!peer) return undefined;
   if ('isCustomPeer' in peer) {
-    // TODO: Remove any after full migration to new lang
-    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
+    return peer.titleKey ? lang(peer.titleKey) : peer.title;
   }
-  return isApiPeerUser(peer) ? getUserFirstOrLastName(peer) : getChatTitle(lang, peer);
+  return isApiPeerUser(peer) ? getUserFirstOrLastName(lang, peer) : getChatTitle(lang, peer);
 }
 
-export function getPeerFullTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
+export function getPeerFullTitle(lang: LangFn, peer: ApiPeer | CustomPeer) {
   if (!peer) return undefined;
   if ('isCustomPeer' in peer) {
-    // TODO: Remove any after full migration to new lang
-    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
+    return peer.titleKey ? lang(peer.titleKey) : peer.title;
   }
-  return isApiPeerUser(peer) ? getUserFullName(peer) : getChatTitle(lang, peer);
+  return isApiPeerUser(peer) ? getUserFullName(lang, peer) : getChatTitle(lang, peer);
 }
 
 export function getMessageSenderName(lang: LangFn, chatId: string, sender: ApiPeer) {

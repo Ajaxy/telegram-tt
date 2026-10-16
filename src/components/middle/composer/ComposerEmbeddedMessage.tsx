@@ -35,7 +35,6 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePeerColor from '../../../hooks/usePeerColor';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
@@ -118,7 +117,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     requestMessageMediaEditor,
   } = getActions();
   const ref = useRef<HTMLDivElement>();
-  const oldLang = useOldLang();
+
   const lang = useLang();
   const { isMobile } = useAppLayout();
 
@@ -320,7 +319,9 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const customText = !frozenMessage && frozenReplyInfo?.type === 'ephemeral'
     ? lang('EphemeralReplyUnavailable')
     : frozenForwardedMessagesCount && frozenForwardedMessagesCount > 1
-      ? oldLang('ForwardedMessageCount', frozenForwardedMessagesCount)
+      ? lang('PreviewForwardedMessage', { count: frozenForwardedMessagesCount }, {
+        pluralValue: frozenForwardedMessagesCount,
+      })
       : undefined;
 
   const strippedMessage = useMemo(() => {
@@ -373,8 +374,8 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           composerForwardSenders={forwardSenders}
           customText={customText}
           noCaptions={noCaptions}
-          title={(frozenEditingId && !isShowingReplyRendering) ? oldLang('EditMessage')
-            : noAuthors ? oldLang('HiddenSendersNameDescription') : undefined}
+          title={(frozenEditingId && !isShowingReplyRendering) ? lang('PreviewEditMessage')
+            : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
           onPictogramClick={canMediaBeEdited ? handlePictogramClick : undefined}
           pictogramActionIcon={canMediaBeEdited ? 'edit' : undefined}
@@ -385,7 +386,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           round
           faded
           color="translucent"
-          ariaLabel={oldLang('Cancel')}
+          ariaLabel={lang('Cancel')}
           onClick={handleClearClick}
           iconName="close"
         />
@@ -410,7 +411,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                     noAuthors: false,
                   })}
                 >
-                  {oldLang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
+                  {lang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
                 </MenuItem>
                 <MenuItem
                   icon={noAuthors ? 'check' : undefined}
@@ -420,7 +421,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                     noAuthors: true,
                   })}
                 >
-                  {oldLang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
+                  {lang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
                 </MenuItem>
                 {forwardsHaveCaptions && (
                   <>
@@ -433,8 +434,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                         noCaptions: false,
                       })}
                     >
-                      {oldLang(frozenForwardedMessagesCount > 1
-                        ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
+                      {lang(frozenForwardedMessagesCount > 1 ? 'ConversationForwardOptionsShowCaption' : 'ShowCaption')}
                     </MenuItem>
                     <MenuItem
                       icon={noCaptions ? 'check' : undefined}
@@ -444,14 +444,13 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                         noCaptions: true,
                       })}
                     >
-                      {oldLang(frozenForwardedMessagesCount > 1
-                        ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
+                      {lang(frozenForwardedMessagesCount > 1 ? 'ConversationForwardOptionsHideCaption' : 'HideCaption')}
                     </MenuItem>
                   </>
                 )}
                 <MenuSeparator />
                 <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick}>
-                  {oldLang('ForwardAnotherChat')}
+                  {lang('ForwardToAnotherChat')}
                 </MenuItem>
               </>
             )}
@@ -461,14 +460,14 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                   icon="show-message"
                   onClick={handleShowMessageClick}
                 >
-                  {oldLang('Message.Context.Goto')}
+                  {lang('AudioShowInChat')}
                 </MenuItem>
                 {isReplyWithQuoteRendering && (
                   <MenuItem
                     icon="remove-quote"
                     onClick={handleRemoveQuoteClick}
                   >
-                    {oldLang('RemoveQuote')}
+                    {lang('RemoveQuote')}
                   </MenuItem>
                 )}
                 {canReplyInSenderChat && (
@@ -477,10 +476,10 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                   </MenuItem>
                 )}
                 <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick}>
-                  {oldLang('ReplyToAnotherChat')}
+                  {lang('ReplyToAnotherChat')}
                 </MenuItem>
                 <MenuItem icon="delete" onClick={handleDoNotReplyClick}>
-                  {oldLang('DoNotReply')}
+                  {lang('DoNotReply')}
                 </MenuItem>
               </>
             )}

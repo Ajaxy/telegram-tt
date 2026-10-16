@@ -1,7 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 
-import { formatDateToString } from '../../../util/dates/oldDateFormat';
+import type { LangFn } from '../../../util/localization';
+
+import { parseCalendarDate } from '../../../util/dates/dateMath';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
+import { getServerTime } from '../../../util/serverTime';
+
+import useLang from '../../../hooks/useLang';
 
 import Icon from '../../common/icons/Icon';
 
@@ -14,10 +19,11 @@ export type OwnProps = {
   onSelect: (value: Date) => void;
 };
 
-const DateSuggest: FC<OwnProps> = ({
+const DateSuggest = ({
   searchDate, onSelect,
-}) => {
-  const suggestions = useMemo(() => getSuggestionsFromDate(searchDate), [searchDate]);
+}: OwnProps) => {
+  const lang = useLang();
+  const suggestions = useMemo(() => getSuggestionsFromDate(lang, searchDate), [lang, searchDate]);
   return (
     <section className="DateSuggest custom-scroll custom-scroll-x">
       {suggestions.map(({ date, text }) => {
@@ -36,23 +42,23 @@ const DateSuggest: FC<OwnProps> = ({
   );
 };
 
-function getSuggestionsFromDate(searchDate: string) {
+function getSuggestionsFromDate(lang: LangFn, searchDate: string) {
   const hasYear = searchDate.match(/^\d{2,4}-\d{2}-\d{2}$/g);
   if (hasYear) {
-    const date = new Date(searchDate);
-    return [{ date, text: formatDateToString(date) }];
+    const date = parseCalendarDate(searchDate);
+    return [{ date, text: formatDateTime(lang, date, { date: 'short' }) }];
   }
 
   const suggestion = [];
-  const currentDate = new Date();
+  const currentDate = secondsToDate(getServerTime());
   const currentYear = currentDate.getFullYear();
-  const latestYear = currentDate.getTime() > (new Date(`${currentYear}-${searchDate}`)).getTime()
+  const latestYear = currentDate.getTime() > parseCalendarDate(`${currentYear}-${searchDate}`).getTime()
     ? currentYear
     : currentYear - 1;
 
   for (let i = 0; i < SUGGESTION_COUNT; i++) {
-    const date = new Date(`${latestYear - i}-${searchDate}`);
-    suggestion.push({ date, text: formatDateToString(date) });
+    const date = parseCalendarDate(`${latestYear - i}-${searchDate}`);
+    suggestion.push({ date, text: formatDateTime(lang, date, { date: 'short' }) });
   }
 
   return suggestion;

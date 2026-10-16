@@ -34,7 +34,6 @@ import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
 import { getIsMobile } from '../../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 import useTuckFilter from '../../../../hooks/useTuckFilter';
 
 import CustomEmojiPicker from '../../../common/CustomEmojiPicker';
@@ -83,8 +82,6 @@ const ReactionPicker = ({
     toggleReaction, closeReactionPicker, sendMessage, showNotification, sendStoryReaction, saveEffectInDraft,
     requestEffectInComposer, addLocalPaidReaction, openPaidReactionModal,
   } = getActions();
-
-  const lang = useOldLang();
 
   const renderedMessageId = useCurrentOrPrev(message?.id, true);
   const renderedChatId = useCurrentOrPrev(message?.chatId, true);
@@ -168,12 +165,15 @@ const ReactionPicker = ({
 
     if (sticker && !sticker.isFree && !isCurrentUserPremium) {
       showNotification({
-        message: lang('UnlockPremiumEmojiHint'),
+        message: {
+          key: 'UnlockPremiumEmojiHint',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
         action: {
           action: 'openPremiumModal',
           payload: { initialSection: 'animated_emoji' },
         },
-        actionText: lang('PremiumMore'),
+        actionText: { key: 'PremiumMore' },
       });
 
       closeReactionPicker();

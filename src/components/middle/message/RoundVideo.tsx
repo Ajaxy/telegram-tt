@@ -15,7 +15,7 @@ import {
 } from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayback/playbackController';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 import safePlay from '../../../util/safePlay';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 

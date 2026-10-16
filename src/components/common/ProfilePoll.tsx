@@ -9,13 +9,12 @@ import type { MenuItemContextAction } from '../ui/ListItem';
 import { getPeerTitle } from '../../global/helpers/peers';
 import { selectPollFromMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
+import { formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import renderText from './helpers/renderText';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePeerColor from '../../hooks/usePeerColor';
 
 import Island from '../gili/layout/Island';
@@ -47,7 +46,6 @@ const ProfilePoll = ({
   const menuRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const { className: peerColorClass, style: peerColorStyle } = usePeerColor({ peer: sender, theme });
 
@@ -86,7 +84,7 @@ const ProfilePoll = ({
           </div>
         )}
         <Link className={styles.date} isRtl={lang.isRtl} onClick={handleDateClick}>
-          {formatPastTimeShort(oldLang, message.date * 1000)}
+          {formatCompactTimestamp(lang, secondsToDate(message.date))}
         </Link>
       </div>
       <Poll

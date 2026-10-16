@@ -2,7 +2,6 @@ import type { ActionReturnType, ReportSection } from '../../types';
 
 import { DEBUG, MESSAGE_ID_REQUIRED_ERROR } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { oldTranslate } from '../../../util/oldLangProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
@@ -480,7 +479,10 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
 
   if (error === MESSAGE_ID_REQUIRED_ERROR) {
     actions.showNotification({
-      message: oldTranslate('lng_report_please_select_messages'),
+      message: {
+        key: 'ReportPleaseSelectMessages',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     actions.closeReportModal({ tabId });
@@ -492,8 +494,11 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
   if (result.type === 'reported') {
     actions.showNotification({
       message: result
-        ? oldTranslate('ReportPeer.AlertSuccess')
-        : 'An error occurred while submitting your report. Please, try again later.',
+        ? {
+          key: 'ReportPeerAlertSuccess',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        }
+        : { key: 'ReportSubmitError' },
       tabId,
     });
     actions.closeReportModal({ tabId });

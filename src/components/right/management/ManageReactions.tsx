@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo,
   useState,
@@ -13,7 +12,7 @@ import { isChatChannel, isSameReaction } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
@@ -37,7 +36,7 @@ type StateProps = {
   isChannel?: boolean;
 };
 
-const ManageReactions: FC<OwnProps & StateProps> = ({
+const ManageReactions = ({
   availableReactions,
   enabledReactions,
   chat,
@@ -46,10 +45,10 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   maxUniqueReactions,
   reactionsLimit,
   isChannel,
-}) => {
+}: OwnProps & StateProps) => {
   const { setChatEnabledReactions } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isTouched, setIsTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [localEnabledReactions, setLocalEnabledReactions] = useState<ApiChatReactions | undefined>(enabledReactions);
@@ -179,7 +178,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   }, []);
 
   const renderReactionsMaxCountValue = useCallback((value: number) => {
-    return lang('PeerInfo.AllowedReactions.MaxCountValue', value);
+    return lang('PeerInfoAllowedReactionsMaxCountValue', { count: value }, { pluralValue: value });
   }, [lang]);
 
   const shouldShowReactionsLimit = isChannel
@@ -204,7 +203,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
               />
             </Island>
             <IslandDescription>
-              {lang('ChannelReactions.MaxCount.Info')}
+              {lang('ChannelReactionsMaxCountInfo')}
             </IslandDescription>
           </>
         )}

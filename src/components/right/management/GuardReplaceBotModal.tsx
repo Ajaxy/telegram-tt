@@ -29,8 +29,8 @@ const GuardReplaceBotModal = ({
 }: OwnProps) => {
   const lang = useLang();
 
-  const currentName = getUserFullName(currentBot) || '';
-  const newName = getUserFullName(newBot) || '';
+  const currentName = getUserFullName(lang, currentBot) || '';
+  const newName = getUserFullName(lang, newBot) || '';
 
   return (
     <Modal

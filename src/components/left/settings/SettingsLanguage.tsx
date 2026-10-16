@@ -1,22 +1,21 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { SharedSettings } from '../../../global/types';
-import type { AccountSettings, LangCode } from '../../../types';
+import type { AccountSettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
-import { oldSetLanguage } from '../../../util/oldLangProvider';
+import { getTranslationFn, loadAndChangeLanguage } from '../../../util/localization';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
@@ -35,7 +34,7 @@ type StateProps = {
 } & Pick<AccountSettings, 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>
 & Pick<SharedSettings, 'language' | 'languages'>;
 
-const SettingsLanguage: FC<OwnProps & StateProps> = ({
+const SettingsLanguage = ({
   isActive,
   isCurrentUserPremium,
   languages,
@@ -44,7 +43,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   canTranslateChats,
   doNotTranslate,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadLanguages,
     setSettingOption,
@@ -53,12 +52,13 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     openSettingsScreen,
   } = getActions();
 
+  const lang = useLang();
+
   const [selectedLanguage, setSelectedLanguage] = useState<string>(language);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
+  const languageRequestRef = useRef(0);
 
   const canTranslateChatsEnabled = isCurrentUserPremium && canTranslateChats;
-
-  const lang = useOldLang();
 
   useEffect(() => {
     if (!languages?.length) {
@@ -66,15 +66,21 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     }
   }, [languages]);
 
-  const handleChange = useLastCallback((langCode: string) => {
+  const handleChange = useLastCallback(async (langCode: string) => {
+    const requestId = ++languageRequestRef.current;
     setSelectedLanguage(langCode);
     markIsLoading();
 
-    void oldSetLanguage(langCode as LangCode, () => {
-      unmarkIsLoading();
-
-      setSharedSettingOption({ language: langCode });
-    });
+    try {
+      if (await loadAndChangeLanguage(langCode) && requestId === languageRequestRef.current) {
+        setSharedSettingOption({ language: langCode });
+      }
+    } finally {
+      if (requestId === languageRequestRef.current) {
+        setSelectedLanguage(getTranslationFn().rawCode);
+        unmarkIsLoading();
+      }
+    }
   });
 
   const options = useMemo(() => {
@@ -118,7 +124,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
       return originalNames.of(doNotTranslate[0])!;
     }
 
-    return lang('Languages', doNotTranslate.length);
+    return lang('Languages', { count: doNotTranslate.length }, { pluralValue: doNotTranslate.length });
   }, [doNotTranslate, lang, language]);
 
   const handleDoNotSelectOpen = useLastCallback(() => {
@@ -159,7 +165,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
             )}
           </Island>
           <IslandDescription>
-            {lang('lng_translate_settings_about')}
+            {lang('TranslateSettingsAbout')}
           </IslandDescription>
         </>
       )}
@@ -167,7 +173,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
       <Transition activeKey={options ? 1 : 0} name="fade" className="settings-language-transition">
         {options ? (
           <>
-            <IslandTitle>{lang('Localization.InterfaceLanguage')}</IslandTitle>
+            <IslandTitle>{lang('LocalizationInterfaceLanguage')}</IslandTitle>
             <Island>
               <ItemPicker
                 items={options}

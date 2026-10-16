@@ -1,14 +1,13 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
+import type { RegularLangKey } from '../../types/language';
 
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -18,22 +17,21 @@ import styles from './ScrollDownButton.module.scss';
 
 type OwnProps = {
   icon: IconName;
-  ariaLabelLang: string;
+  ariaLabelLang: RegularLangKey;
   unreadCount?: number;
   onClick: VoidFunction;
   onReadAll?: VoidFunction;
   className?: string;
 };
 
-const ScrollDownButton: FC<OwnProps> = ({
+const ScrollDownButton = ({
   icon,
   ariaLabelLang,
   unreadCount,
   onClick,
   onReadAll,
   className,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
 
   const ref = useRef<HTMLDivElement>();
@@ -52,7 +50,7 @@ const ScrollDownButton: FC<OwnProps> = ({
         className={styles.button}
         onClick={onClick}
         onContextMenu={handleContextMenu}
-        ariaLabel={oldLang(ariaLabelLang)}
+        ariaLabel={lang(ariaLabelLang)}
         iconName={icon}
         iconClassName={styles.icon}
       />
@@ -66,7 +64,7 @@ const ScrollDownButton: FC<OwnProps> = ({
           positionX="right"
           positionY="bottom"
         >
-          <MenuItem icon="readchats" onClick={onReadAll}>{oldLang('MarkAllAsRead')}</MenuItem>
+          <MenuItem icon="readchats" onClick={onReadAll}>{lang('ChatListMarkAllAsRead')}</MenuItem>
         </Menu>
       )}
     </div>

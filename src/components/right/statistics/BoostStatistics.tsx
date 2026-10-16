@@ -11,13 +11,13 @@ import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
 import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import BadgeButton from '../../common/BadgeButton';
 import Icon from '../../common/icons/Icon';
@@ -73,7 +73,7 @@ const BoostStatistics = ({
   const {
     openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal, showNotification,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const transitionRef = useRef<HTMLDivElement>();
 
   const isLoaded = boostStatistics?.boostStatus;
@@ -83,6 +83,8 @@ const BoostStatistics = ({
     === boostStatistics?.giftedBoosts?.count;
   const shouldDisplayGiftList = !isGiftListEqual && boostStatistics?.giftedBoosts
     && boostStatistics?.giftedBoosts?.list?.length > 0;
+  const boostsCount = boostStatistics?.boosts?.count ?? 0;
+  const giftsCount = boostStatistics?.giftedBoosts?.count ?? 0;
 
   const {
     currentLevel,
@@ -121,16 +123,16 @@ const BoostStatistics = ({
       return [
         {
           type: 'boostList',
-          title: lang('BoostingBoostsCount', boostStatistics?.boosts?.count, 'i'),
+          title: lang('BoostingBoostsCount', { count: lang.number(boostsCount) }, { pluralValue: boostsCount }),
         },
         {
           type: 'giftedBoostList',
-          title: lang('BoostingGiftsCount', boostStatistics?.giftedBoosts?.count, 'i'),
+          title: lang('BoostingGiftsCount', { count: lang.number(giftsCount) }, { pluralValue: giftsCount }),
         },
       ];
     }
     return [];
-  }, [shouldDisplayGiftList, lang, boostStatistics?.boosts?.count, boostStatistics?.giftedBoosts?.count]);
+  }, [shouldDisplayGiftList, lang, boostsCount, giftsCount]);
 
   const initialTab = useMemo(() => {
     return boostStatistics?.boosts && boostStatistics.boosts?.list.length > 0 ? 1 : 0;
@@ -184,8 +186,7 @@ const BoostStatistics = ({
         >
           <Icon name="gift" className={styles.floatingBadgeIcon} />
           <div className={styles.floatingBadgeValue}>
-            {lang(boost.isFromGiveaway
-              ? 'BoostingGiveaway' : 'BoostingGift')}
+            {lang(boost.isFromGiveaway ? 'AttachGiveaway' : 'GiftInfoTitle')}
           </div>
         </div>
       </div>
@@ -210,7 +211,7 @@ const BoostStatistics = ({
     if (hasStars) {
       customPeer = {
         ...CUSTOM_PEER_STAR_TEMPLATE,
-        title: lang('Stars', boost.stars),
+        title: lang('StarsAmountText', { amount: boost.stars }, { pluralValue: boost.stars }),
       };
     }
 
@@ -227,7 +228,9 @@ const BoostStatistics = ({
           className={styles.user}
           userId={boost.userId}
           customPeer={customPeer}
-          status={lang('BoostExpireOn', formatDateAtTime(lang, boost.expires * 1000))}
+          status={lang('BoostExpireOn', { date: formatCalendarDate(lang, secondsToDate(boost.expires), {
+            variant: 'date', isShort: true, withTime: true,
+          }) })}
           noEmojiStatus
           forceShowSelf
           noFake
@@ -266,7 +269,7 @@ const BoostStatistics = ({
         ) : (
           <Icon name="down" className={styles.down} />
         )}
-        {lang('ShowVotes', boostersToLoadCount, 'i')}
+        {lang('ShowVotes', { count: lang.number(boostersToLoadCount) }, { pluralValue: boostersToLoadCount })}
       </ListItem>
     );
   }
@@ -298,8 +301,8 @@ const BoostStatistics = ({
         <>
           <Island>
             <PremiumProgress
-              leftText={lang('BoostsLevel', currentLevel)}
-              rightText={hasNextLevel ? lang('BoostsLevel', currentLevel + 1) : undefined}
+              leftText={lang('BoostsLevel', { level: currentLevel })}
+              rightText={hasNextLevel ? lang('BoostsLevel', { level: currentLevel + 1 }) : undefined}
               progress={levelProgress}
               floatingBadgeText={formatInteger(boosts)}
               floatingBadgeIcon="boost"
@@ -334,12 +337,18 @@ const BoostStatistics = ({
                     >
                       <span className="title list-item-ellipsis">
                         {isStarsGiveaway
-                          ? lang('Giveaway.Stars.Prepaid.Title', prepaidGiveaway.stars)
-                          : lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
+                          ? lang('GiveawayStarsPrepaidTitle', { count: prepaidGiveaway.stars })
+                          : lang('BoostingTelegramPremiumCountPlural', {
+                            count: prepaidGiveaway.quantity,
+                          }, { pluralValue: prepaidGiveaway.quantity })}
                       </span>
                       <span className="subtitle">
-                        {isStarsGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', prepaidGiveaway.quantity)
-                          : lang('PrepaidGiveawayMonths', prepaidGiveaway.months)}
+                        {isStarsGiveaway ? lang('GiveawayStarsPrepaidDesc', {
+                          count: prepaidGiveaway.quantity,
+                        }, { pluralValue: prepaidGiveaway.quantity })
+                          : lang('PrepaidGiveawayMonths', {
+                            count: prepaidGiveaway.months,
+                          }, { pluralValue: prepaidGiveaway.months })}
                       </span>
                     </ListItem>
                   );
@@ -368,7 +377,7 @@ const BoostStatistics = ({
           ) : (
             <>
               <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-                {lang('BoostingBoostsCount', boostStatistics?.boosts?.count)}
+                {lang('BoostingBoostsCount', { count: boostsCount }, { pluralValue: boostsCount })}
               </IslandTitle>
               {!boostStatistics?.boosts?.list?.length ? (
                 <IslandDescription>
@@ -398,9 +407,7 @@ const BoostStatistics = ({
                 </ListItem>
               </Island>
               <IslandDescription>
-                {lang(
-                  isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup',
-                )}
+                {lang(isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup')}
               </IslandDescription>
             </>
           )}

@@ -3,8 +3,8 @@ import { getActions } from '../../../global';
 
 import type { ApiPremiumSection } from '../../../api/types';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
 import Island, { IslandDescription } from '../../gili/layout/Island';
@@ -16,7 +16,7 @@ type OwnProps = {
 
 function PremiumStatusItem({ premiumSection }: OwnProps) {
   const { openPremiumModal } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal({ initialSection: premiumSection }));
 
   return (
@@ -30,7 +30,7 @@ function PremiumStatusItem({ premiumSection }: OwnProps) {
         </ListItem>
       </Island>
       <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
-        {lang('lng_messages_privacy_premium_about')}
+        {lang('MessagesPrivacyPremiumAbout')}
       </IslandDescription>
     </>
   );

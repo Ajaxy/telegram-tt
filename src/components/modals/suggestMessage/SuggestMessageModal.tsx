@@ -14,8 +14,9 @@ import {
 import { selectIsMonoforumAdmin, selectPeer } from '../../../global/selectors';
 import { selectDraft } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
-import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../util/dates/duration';
 import { convertTonFromNanos, convertTonToNanos } from '../../../util/formatCurrency';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import {
   formatStarsAsIcon,
   formatStarsAsText,
@@ -26,7 +27,6 @@ import { getServerTime } from '../../../util/serverTime';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import CalendarModal from '../../common/CalendarModal';
 import GramIcon from '../../common/icons/GramIcon';
@@ -104,7 +104,6 @@ const SuggestMessageModal = ({
   }, [currentSuggestedPostInfo]);
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const isCurrencyStars = selectedCurrency === STARS_CURRENCY_CODE;
   const now = getServerTime();
@@ -245,7 +244,7 @@ const SuggestMessageModal = ({
               type="text"
               className={buildClassName('form-control', isCalendarOpened && 'focus')}
               value={scheduleDate
-                ? formatScheduledDateTime(scheduleDate / 1000, lang, oldLang)
+                ? formatCalendarDate(lang, secondsToDate(scheduleDate / 1000), { isShort: true, withTime: true })
                 : lang('SuggestMessageAnytime')}
               autoComplete="off"
               onClick={openCalendar}

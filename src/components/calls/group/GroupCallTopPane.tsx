@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useMemo,
 } from '../../../lib/teact/teact';
@@ -11,8 +10,8 @@ import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 
 import useFrozenProps from '../../../hooks/useFrozenProps';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useHeaderPane, { type PaneState } from '../../middle/hooks/useHeaderPane';
 
 import AvatarList from '../../common/AvatarList';
@@ -33,18 +32,18 @@ type StateProps = {
 
 const PREVIEW_AVATARS_COUNT = 3;
 
-const GroupCallTopPane: FC<OwnProps & StateProps> = ({
+const GroupCallTopPane = ({
   chatId,
   isActive,
   className,
   groupCall,
   onPaneStateChange,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     requestMasterAndJoinGroupCall,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const participants = groupCall?.participants;
 
@@ -100,7 +99,11 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
     >
       <div className="info">
         <span className="title">{lang('VoipGroupVoiceChat')}</span>
-        <span className="participants">{lang('Participants', renderingParticipantCount ?? 0, 'i')}</span>
+        <span className="participants">
+          {lang('Participants', {
+            count: lang.number(renderingParticipantCount ?? 0),
+          }, { pluralValue: renderingParticipantCount ?? 0 })}
+        </span>
       </div>
       {Boolean(renderingFetchedParticipants?.length) && (
         <AvatarList size="small" peers={renderingFetchedParticipants} className="avatars" />

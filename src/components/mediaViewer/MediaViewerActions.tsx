@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -31,9 +30,9 @@ import selectViewableMedia from './helpers/getViewableMedia';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import useOldLang from '../../hooks/useOldLang';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
 import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
@@ -77,7 +76,7 @@ type StateProps = {
   viewableMedia?: ViewableMedia;
 };
 
-const MediaViewerActions: FC<OwnProps & StateProps> = ({
+const MediaViewerActions = ({
   item,
   mediaData,
   isVideo,
@@ -99,11 +98,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   onCloseMediaViewer,
   onBeforeDelete,
   onForward,
-}) => {
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
-  const [getZoomChange, setZoomChange] = useZoomChange();
-  const { isMobile } = useAppLayout();
-
+}: OwnProps & StateProps) => {
   const {
     downloadMedia,
     cancelMediaDownload,
@@ -116,6 +111,11 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     reportMessages,
     requestMessageMediaEditor,
   } = getActions();
+
+  const lang = useLang();
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
+  const [getZoomChange, setZoomChange] = useZoomChange();
+  const { isMobile } = useAppLayout();
 
   const isMessage = item?.type === 'message';
   const message = item?.type === 'message' ? item.message : undefined;
@@ -198,21 +198,19 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const lang = useOldLang();
-
-  const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
+  const MenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
       <Button
         round
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : undefined}
         onClick={onTrigger}
-        ariaLabel="More actions"
+        ariaLabel={lang('AriaLabelOpenMenu')}
         iconName="more"
       />
     );
-  }, []);
+  }, [lang]);
 
   function renderDeleteModal() {
     return (item?.type === 'avatar') ? (
@@ -302,7 +300,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         menuItems.push({
           icon: isDownloading ? 'close' : 'download',
           onClick: handleDownloadClick,
-          children: isDownloading ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download',
+          children: isDownloading
+            ? lang('MediaViewDownloading', { count: lang.number(Math.round(downloadProgress * 100)) })
+            : lang('AccActionDownload'),
         });
       } else {
         menuItems.push({
@@ -318,7 +318,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       menuItems.push({
         icon: 'flag',
         onClick: onReport,
-        children: lang('ReportPeer.Report'),
+        children: lang('ReportPeerReport'),
       });
     }
 
@@ -326,7 +326,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       menuItems.push({
         icon: 'flag',
         onClick: handleReportMessage,
-        children: lang('ReportPeer.Report'),
+        children: lang('ReportPeerReport'),
       });
     }
 
@@ -334,7 +334,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       menuItems.push({
         icon: 'copy-media',
         onClick: handleUpdate,
-        children: lang('ProfilePhoto.SetMainPhoto'),
+        children: lang('ProfilePhotoSetMainPhoto'),
       });
     }
 
@@ -422,7 +422,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           round
           size="smaller"
           color="translucent-white"
-          ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
+          ariaLabel={lang(isVideo ? 'PeerInfoReportProfileVideo' : 'PeerInfoReportProfilePhoto')}
           onClick={onReport}
           iconName="flag"
         />
@@ -432,7 +432,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           round
           size="smaller"
           color="translucent-white"
-          ariaLabel={lang('ReportPeer.Report')}
+          ariaLabel={lang('ReportPeerReport')}
           onClick={handleReportMessage}
           iconName="flag"
         />
@@ -442,7 +442,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           round
           size="smaller"
           color="translucent-white"
-          ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
+          ariaLabel={lang('ProfilePhotoSetMainPhoto')}
           onClick={handleUpdate}
           iconName="copy-media"
         />

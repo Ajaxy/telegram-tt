@@ -9,12 +9,12 @@ import type { IconName } from '../../types/icons';
 import { getUserFullName } from '../../global/helpers';
 import { selectPeer } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
+import { formatCalendarDate, secondsToDate } from '../../util/localization/dateFormat';
 import { REM } from '../common/helpers/mediaDimensions';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -53,7 +53,7 @@ const StoryView = ({
     closeStoryViewModal,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleClick = useLastCallback(() => {
     const { type } = storyView;
@@ -83,7 +83,7 @@ const StoryView = ({
     const { peerId, areStoriesBlocked, isUserBlocked } = storyView;
     const user = peer as ApiUser;
     const { isContact } = user || {};
-    const fullName = getUserFullName(user);
+    const fullName = getUserFullName(lang, user);
 
     const actions: MenuItemContextAction[] = [];
 
@@ -94,7 +94,7 @@ const StoryView = ({
             blockUser({ userId: peerId, isOnlyStories: true });
             updateStoryView({ userId: peerId, areStoriesBlocked: true });
           },
-          title: lang('StoryHideFrom', fullName),
+          title: lang('StoryHideFrom', { user: fullName }),
           icon: 'hand-stop',
         });
       } else {
@@ -103,7 +103,7 @@ const StoryView = ({
             unblockUser({ userId: peerId, isOnlyStories: true });
             updateStoryView({ userId: peerId, areStoriesBlocked: false });
           },
-          title: lang('StoryShowBackTo', fullName),
+          title: lang('StoryShowBackTo', { user: fullName }),
           icon: 'play-story',
         });
       }
@@ -144,9 +144,11 @@ const StoryView = ({
 
   const status = useMemo(() => {
     const isModified = storyView.type === 'repost' && storyView.story.forwardInfo?.isModified;
-    const parts = [formatDateAtTime(lang, storyView.date * 1000)];
+    const parts = [formatCalendarDate(lang, secondsToDate(storyView.date), {
+      variant: 'date', isShort: true, withTime: true,
+    })];
     if (isModified) {
-      parts.push(lang('lng_edited'));
+      parts.push(lang('Edited'));
     }
 
     return parts.join(` ${BULLET} `);
@@ -197,7 +199,7 @@ const StoryView = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { storyView }) => {
+export default memo(withGlobal<OwnProps>((global, { storyView }): Complete<StateProps> => {
   const peer = selectPeer(global, storyView.peerId);
 
   return {

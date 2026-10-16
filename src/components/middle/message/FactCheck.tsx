@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef } from '../../../lib/teact/teact';
+import { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiFactCheck, ApiPeerColor } from '../../../api/types';
 
@@ -6,8 +6,8 @@ import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
@@ -27,7 +27,7 @@ const COLOR: ApiPeerColor = {
 const MAX_LINES = 4;
 
 const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const ref = useRef<HTMLDivElement>();
   const cutoutRef = useRef<HTMLDivElement>();
@@ -35,12 +35,7 @@ const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
     isCollapsed, isCollapsible, setIsCollapsed,
   } = useCollapsibleLines(ref, MAX_LINES, { cutoutRef });
 
-  const countryLocalized = useMemo(() => {
-    if (!factCheck.countryCode || !lang.code) return undefined;
-
-    const displayNames = new Intl.DisplayNames([lang.code], { type: 'region' });
-    return displayNames.of(factCheck.countryCode);
-  }, [factCheck.countryCode, lang.code]);
+  const countryLocalized = factCheck.countryCode ? lang.region(factCheck.countryCode) : undefined;
 
   const canExpand = !isToggleDisabled && isCollapsed;
 
@@ -70,7 +65,7 @@ const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
           })}
         </div>
         <Separator className={styles.separator} />
-        <div className={styles.footnote}>{lang('FactCheckFooter', countryLocalized)}</div>
+        <div className={styles.footnote}>{lang('FactCheckFooter', { country: countryLocalized })}</div>
       </div>
       {isCollapsible && (
         <div

@@ -15,9 +15,9 @@ import { getAccountSlotUrl } from '../../../util/multiaccount';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMultiaccountInfo from '../../../hooks/useMultiaccountInfo';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Island from '../../gili/layout/Island';
@@ -50,7 +50,7 @@ const SettingsExperimental = ({
   const snapButtonRef = useRef<HTMLDivElement>();
   const [isSnapButtonAnimating, setIsSnapButtonAnimating] = useState(false);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const accounts = useMultiaccountInfo();
 
@@ -109,14 +109,14 @@ const SettingsExperimental = ({
           nonInteractive
           noLoop={false}
         />
-        <p className="settings-item-description pt-3" dir="auto">{lang('lng_settings_experimental_about')}</p>
+        <p className="settings-item-description pt-3" dir="auto">{lang('SettingsExperimentalAbout')}</p>
       </div>
       <Island>
         <ListItem
           href={newAccountUrl}
           icon="add-user"
         >
-          <div className="title">Login on Test Server</div>
+          <div className="title">{lang('SettingsTestServerLogin')}</div>
         </ListItem>
       </Island>
       <Island>
@@ -124,14 +124,14 @@ const SettingsExperimental = ({
           onClick={handleRequestConfetti}
           icon="animations"
         >
-          <div className="title">Launch some confetti!</div>
+          <div className="title">{lang('LaunchConfetti')}</div>
         </ListItem>
         <ListItem
           onClick={handleRequestWave}
           icon="story-expired"
           disabled={!IS_WAVE_TRANSFORM_SUPPORTED}
         >
-          <div className="title">Start wave</div>
+          <div className="title">{lang('SettingsStartWave')}</div>
         </ListItem>
         <ListItem
           ref={snapButtonRef}
@@ -140,17 +140,17 @@ const SettingsExperimental = ({
           disabled={!IS_SNAP_EFFECT_SUPPORTED}
           style={isSnapButtonAnimating ? 'visibility: hidden' : ''}
         >
-          <div className="title">Vaporize this button</div>
+          <div className="title">{lang('SettingsVaporizeButton')}</div>
         </ListItem>
       </Island>
       <Island>
         <Checkbox
-          label="Allow HTTP Transport"
+          label={lang('SettingsAllowHttp')}
           checked={Boolean(shouldAllowHttpTransport)}
           onCheck={() => setSharedSettingOption({ shouldAllowHttpTransport: !shouldAllowHttpTransport })}
         />
         <Checkbox
-          label="Force HTTP Transport"
+          label={lang('SettingsForceHttp')}
           disabled={!shouldAllowHttpTransport}
           checked={Boolean(shouldForceHttpTransport)}
           onCheck={() => setSharedSettingOption({ shouldForceHttpTransport: !shouldForceHttpTransport })}
@@ -163,7 +163,7 @@ const SettingsExperimental = ({
           onCheck={() => setSharedSettingOption({ shouldCollectDebugLogs: !shouldCollectDebugLogs })}
         />
         <Checkbox
-          label="Enable exported senders debug"
+          label={lang('DebugExportedSenders')}
           checked={Boolean(shouldDebugExportedSenders)}
           onCheck={() => setSharedSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
         />
@@ -171,7 +171,7 @@ const SettingsExperimental = ({
           onClick={handleDownloadLog}
           icon="bug"
         >
-          <div className="title">Download log</div>
+          <div className="title">{lang('DebugDownloadLog')}</div>
         </ListItem>
       </Island>
     </div>

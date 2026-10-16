@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
   useState,
@@ -12,8 +11,8 @@ import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectTabState } from '../../../global/selectors';
 import { throttle } from '../../../util/schedulers';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import NothingFound from '../../common/NothingFound';
@@ -37,12 +36,12 @@ type StateProps = {
 const LESS_LIST_ITEMS_AMOUNT = 5;
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const BotAppResults: FC<OwnProps & StateProps> = ({
+const BotAppResults = ({
   searchQuery,
   isLoading,
   foundIds,
   recentBotIds,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     searchPopularBotApps,
     openChatWithInfo,
@@ -50,7 +49,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
 
   const containerRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [shouldShowMoreMine, setShouldShowMoreMine] = useState<boolean>(false);
 
@@ -98,8 +97,8 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
         {canRenderContents && !filteredFoundIds?.length && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={lang('ChatListSearchNoResults')}
+            description={lang('ChatListSearchNoResultsDescription')}
           />
         )}
         {canRenderContents && !searchQuery && Boolean(recentBotIds?.length) && (
@@ -107,7 +106,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
             <h3 className="section-heading">
               {recentBotIds.length > LESS_LIST_ITEMS_AMOUNT && (
                 <Link className="Link" onClick={handleToggleShowMoreMine}>
-                  {lang(shouldShowMoreMine ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+                  {lang(shouldShowMoreMine ? 'ChatListSearchShowLess' : 'ChatListSearchShowMore')}
                 </Link>
               )}
               {lang('SearchAppsMine')}
@@ -129,7 +128,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
         )}
         {canRenderContents && Boolean(filteredFoundIds?.length) && (
           <Island className="search-island search-section">
-            <h3 className="section-heading">{lang('SearchAppsPopular')}</h3>
+            <h3 className="section-heading">{lang('PopularApps')}</h3>
             {filteredFoundIds.map((id) => {
               return (
                 <LeftSearchResultChat

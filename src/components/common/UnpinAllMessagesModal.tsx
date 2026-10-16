@@ -1,7 +1,6 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -14,22 +13,26 @@ export type OwnProps = {
   onUnpin: () => void;
 };
 
-const UnpinAllMessagesModal: FC<OwnProps> = ({
+const UnpinAllMessagesModal = ({
   isOpen,
   pinnedMessagesCount = 0,
   onClose,
   onUnpin,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       className="unpin-all"
-      title={lang('Chat.PanelUnpinAllMessages')}
+      title={lang('ChatPanelUnpinAllMessages')}
     >
-      <p>{lang('Chat.UnpinAllMessagesConfirmation', pinnedMessagesCount, 'i')}</p>
+      <p>
+        {lang('ChatUnpinAllMessagesConfirmation', {
+          count: lang.number(pinnedMessagesCount),
+        }, { pluralValue: pinnedMessagesCount })}
+      </p>
       <div className="dialog-buttons mt-2">
         <Button className="confirm-dialog-button" isText onClick={onUnpin}>
           {lang('DialogUnpin')}

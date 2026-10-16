@@ -45,7 +45,6 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -176,7 +175,6 @@ const StickerPicker = ({
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const areAddedLoaded = Boolean(addedSetIds);
@@ -198,7 +196,7 @@ const StickerPicker = ({
         effectSets.push({
           id: EFFECT_STICKERS_SET_ID,
           accessHash: '0',
-          title: oldLang('StickerEffects'),
+          title: lang('StickerEffects'),
           stickers: effectStickers,
           count: effectStickers.length,
         });
@@ -216,7 +214,7 @@ const StickerPicker = ({
       defaultSets.push({
         id: FAVORITE_SYMBOL_SET_ID,
         accessHash: '0',
-        title: oldLang('FavoriteStickers'),
+        title: lang('FavoriteStickers'),
         stickers: favoriteStickers,
         count: favoriteStickers.length,
       });
@@ -226,7 +224,7 @@ const StickerPicker = ({
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
         accessHash: '0',
-        title: oldLang('RecentStickers'),
+        title: lang('RecentStickers'),
         stickers: recentStickers,
         count: recentStickers.length,
       });
@@ -249,7 +247,7 @@ const StickerPicker = ({
     favoriteStickers,
     recentStickers,
     chatStickerSetId,
-    oldLang,
+    lang,
     effectStickers,
     isForEffects,
     effectEmojis,
@@ -757,9 +755,9 @@ const StickerPicker = ({
     <Transition className={fullClassName} activeKey={isLoading ? 0 : 1} name="fade" shouldCleanup>
       {!shouldRenderContents ? (
         !canSendStickers && !isForEffects ? (
-          <div className={styles.pickerDisabled}>{oldLang('ErrorSendRestrictedStickersAll')}</div>
+          <div className={styles.pickerDisabled}>{lang('ErrorSendRestrictedStickersAll')}</div>
         ) : noPopulatedSets ? (
-          <div className={styles.pickerDisabled}>{oldLang('NoStickers')}</div>
+          <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
         ) : (
           <Loading />
         )
@@ -817,7 +815,7 @@ const StickerPicker = ({
                 <div>
                   {trendingSets && renderTrending()}
                   {noPopulatedSets && (
-                    <div className={styles.pickerDisabled}>{oldLang('NoStickers')}</div>
+                    <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
                   )}
                   {allSets.map((stickerSet, i) => (
                     <StickerSet

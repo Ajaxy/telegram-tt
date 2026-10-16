@@ -9,7 +9,6 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
@@ -38,7 +37,6 @@ const CommentButton = ({
 
   const shouldRenderLoading = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const {
     originMessageId, chatId, messagesCount, recentReplierIds, originChannelId, hasUnread,
@@ -89,11 +87,9 @@ const CommentButton = ({
     );
   }
 
-  const commentsText = messagesCount ? (oldLang('CommentsCount', '%COMMENTS_COUNT%', undefined, messagesCount))
-    .split('%')
-    .map((s) => {
-      return (s === 'COMMENTS_COUNT' ? <AnimatedCounter text={formatIntegerCompact(lang, messagesCount)} /> : s);
-    })
+  const commentsText = messagesCount ? lang('CommentsCount', {
+    count: <AnimatedCounter text={formatIntegerCompact(lang, messagesCount)} />,
+  }, { pluralValue: messagesCount, withNodes: true })
     : undefined;
 
   return (
@@ -121,7 +117,7 @@ const CommentButton = ({
       {!recentRepliers?.length && <Icon name="message" />}
       {renderRecentRepliers()}
       <div className="label" dir="auto">
-        {messagesCount ? commentsText : oldLang('LeaveAComment')}
+        {messagesCount ? commentsText : lang('LeaveAComment')}
       </div>
       <div className="CommentButton_right">
         {isLoading && (

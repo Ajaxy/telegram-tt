@@ -2,19 +2,18 @@ import { memo, useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiLimitTypeWithModal } from '../../../../api/types';
-import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IconName } from '../../../../types/icons';
+import type { LangKey } from '../../../../types/language';
+import type { LangFn } from '../../../../util/localization';
 
 import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { type LangFn } from '../../../../util/localization';
 import { formatFileSize } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
@@ -22,7 +21,7 @@ import PremiumLimitsCompare from './PremiumLimitsCompare';
 
 import styles from './PremiumLimitReachedModal.module.scss';
 
-const LIMIT_DESCRIPTION: Record<ApiLimitTypeWithModal, string> = {
+const LIMIT_DESCRIPTION = {
   dialogFiltersChats: 'LimitReachedChatInFolders',
   uploadMaxFileparts: 'LimitReachedFileSize',
   dialogFilters: 'LimitReachedFolders',
@@ -32,9 +31,9 @@ const LIMIT_DESCRIPTION: Record<ApiLimitTypeWithModal, string> = {
   chatlistInvites: 'LimitReachedFolderLinks',
   chatlistJoined: 'LimitReachedSharedFolders',
   savedDialogsPinned: 'LimitReachedPinSavedDialogs',
-};
+} as const satisfies Record<ApiLimitTypeWithModal, LangKey>;
 
-const LIMIT_DESCRIPTION_BLOCKED: Record<ApiLimitTypeWithModal, string> = {
+const LIMIT_DESCRIPTION_BLOCKED = {
   dialogFiltersChats: 'LimitReachedChatInFoldersLocked',
   uploadMaxFileparts: 'LimitReachedFileSizeLocked',
   dialogFilters: 'LimitReachedFoldersLocked',
@@ -43,10 +42,10 @@ const LIMIT_DESCRIPTION_BLOCKED: Record<ApiLimitTypeWithModal, string> = {
   channels: 'LimitReachedCommunitiesLocked',
   chatlistInvites: 'LimitReachedFolderLinksLocked',
   chatlistJoined: 'LimitReachedSharedFoldersLocked',
-  savedDialogsPinned: 'LimitReachedPinSavedDialogsLocked',
-};
+  savedDialogsPinned: 'LimitReachedPinDialogsLocked',
+} as const satisfies Record<ApiLimitTypeWithModal, LangKey>;
 
-const LIMIT_DESCRIPTION_PREMIUM: Record<ApiLimitTypeWithModal, string> = {
+const LIMIT_DESCRIPTION_PREMIUM = {
   dialogFiltersChats: 'LimitReachedChatInFoldersPremium',
   uploadMaxFileparts: 'LimitReachedFileSizePremium',
   dialogFilters: 'LimitReachedFoldersPremium',
@@ -55,8 +54,8 @@ const LIMIT_DESCRIPTION_PREMIUM: Record<ApiLimitTypeWithModal, string> = {
   channels: 'LimitReachedCommunitiesPremium',
   chatlistInvites: 'LimitReachedFolderLinksPremium',
   chatlistJoined: 'LimitReachedSharedFoldersPremium',
-  savedDialogsPinned: 'LimitReachedPinSavedDialogsPremium',
-};
+  savedDialogsPinned: 'LimitReachedPinDialogsPremium',
+} as const satisfies Record<ApiLimitTypeWithModal, LangKey>;
 
 const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
   dialogFiltersChats: 'chat-badge',
@@ -81,7 +80,6 @@ const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any
 
 function getLimiterDescription({
   lang,
-  oldLang,
   limitType,
   isPremium,
   canBuyPremium,
@@ -90,7 +88,6 @@ function getLimiterDescription({
   valueFormatter,
 }: {
   lang: LangFn;
-  oldLang: OldLangFn;
   limitType?: ApiLimitTypeWithModal;
   isPremium?: boolean;
   canBuyPremium?: boolean;
@@ -106,13 +103,20 @@ function getLimiterDescription({
   const premiumValueFormatted = valueFormatter ? valueFormatter(lang, premiumValue) : premiumValue;
 
   if (isPremium) {
-    return oldLang(LIMIT_DESCRIPTION_PREMIUM[limitType], premiumValueFormatted);
+    return limitType === 'channelsPublic'
+      ? lang(LIMIT_DESCRIPTION_PREMIUM[limitType])
+      : lang(LIMIT_DESCRIPTION_PREMIUM[limitType], { limit: premiumValueFormatted });
   }
 
-  return canBuyPremium
-    ? oldLang(LIMIT_DESCRIPTION[limitType],
-      limitType === 'channelsPublic' ? premiumValueFormatted : [defaultValueFormatted, premiumValueFormatted])
-    : oldLang(LIMIT_DESCRIPTION_BLOCKED[limitType], defaultValueFormatted);
+  if (canBuyPremium) {
+    return limitType === 'channelsPublic'
+      ? lang(LIMIT_DESCRIPTION[limitType], { limit2: premiumValueFormatted })
+      : lang(LIMIT_DESCRIPTION[limitType], { limit: defaultValueFormatted, limit2: premiumValueFormatted });
+  }
+
+  return limitType === 'channelsPublic'
+    ? lang(LIMIT_DESCRIPTION_BLOCKED[limitType])
+    : lang(LIMIT_DESCRIPTION_BLOCKED[limitType], { limit: defaultValueFormatted });
 }
 
 export type OwnProps = {
@@ -135,7 +139,6 @@ const PremiumLimitReachedModal = ({
 }: OwnProps & StateProps) => {
   const { closeLimitReachedModal, openPremiumModal } = getActions();
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const [isClosing, startClosing, stopClosing] = useFlag();
 
@@ -152,7 +155,6 @@ const PremiumLimitReachedModal = ({
   const valueFormatter = limit && LIMIT_VALUE_FORMATTER[limit];
   const description = getLimiterDescription({
     lang,
-    oldLang,
     limitType: limit,
     isPremium,
     canBuyPremium,

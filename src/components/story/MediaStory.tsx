@@ -4,11 +4,12 @@ import {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiTypeStory } from '../../api/types';
+import type { AdvancedLangFnOptions } from '../../util/localization/types';
 
 import { getStoryMediaHash } from '../../global/helpers';
 import { selectChat, selectPinnedStories } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
 import stopEvent from '../../util/stopEvent';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -16,7 +17,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Menu from '../ui/Menu';
@@ -37,6 +37,12 @@ interface StateProps {
   canPin?: boolean;
 }
 
+const NOTIFICATION_OPTIONS = {
+  withNodes: true,
+  withMarkdown: true,
+  renderTextFilters: ['br', 'links'],
+} satisfies AdvancedLangFnOptions;
+
 function MediaStory({
   story, className, isProtected, isArchive, isPinned, canPin,
 }: OwnProps & StateProps) {
@@ -49,7 +55,7 @@ function MediaStory({
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const containerRef = useRef<HTMLDivElement>();
 
   const getTriggerElement = useLastCallback(() => containerRef.current);
@@ -100,7 +106,7 @@ function MediaStory({
 
     toggleStoryInProfile({ peerId, storyId: story.id, isInProfile: true });
     showNotification({
-      message: oldLang('Story.ToastSavedToProfileText'),
+      message: { key: 'StoryToastSavedToProfileText', options: NOTIFICATION_OPTIONS },
     });
     handleContextMenuClose();
   });
@@ -110,7 +116,7 @@ function MediaStory({
 
     toggleStoryInProfile({ peerId, storyId: story.id, isInProfile: false });
     showNotification({
-      message: oldLang('Story.ToastRemovedFromProfileText'),
+      message: { key: 'StoryToastRemovedFromProfileText', options: NOTIFICATION_OPTIONS },
     });
     handleContextMenuClose();
   });
@@ -131,7 +137,7 @@ function MediaStory({
       {isDeleted && (
         <span>
           <Icon className={styles.mainIcon} name="story-expired" />
-          {oldLang('ExpiredStory')}
+          {lang('ExpiredStory')}
         </span>
       )}
       {isUnsupportedStory && (
@@ -171,22 +177,22 @@ function MediaStory({
         >
           {isArchive && (
             <MenuItem icon="archive" onClick={handleUnarchiveClick}>
-              {oldLang('StoryList.SaveToProfile')}
+              {lang('StoryListSaveToProfile')}
             </MenuItem>
           )}
           {!isArchive && (
             <MenuItem icon="archive" onClick={handleArchiveClick}>
-              {oldLang('Story.Context.RemoveFromProfile')}
+              {lang('StoryContextRemoveFromProfile')}
             </MenuItem>
           )}
           {!isArchive && !isPinned && canPin && (
             <MenuItem icon="pin" onClick={handleTogglePinned}>
-              {oldLang('StoryList.ItemAction.Pin')}
+              {lang('StoryListItemActionPin')}
             </MenuItem>
           )}
           {!isArchive && isPinned && (
             <MenuItem icon="unpin" onClick={handleTogglePinned}>
-              {oldLang('StoryList.ItemAction.Unpin')}
+              {lang('StoryListItemActionUnpin')}
             </MenuItem>
           )}
         </Menu>

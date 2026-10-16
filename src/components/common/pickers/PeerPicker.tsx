@@ -5,6 +5,7 @@ import {
 import { getGlobal } from '../../../global';
 
 import type { CustomPeerType, UniqueCustomPeer } from '../../../types';
+import type { RegularLangKey } from '../../../types/language';
 
 import { DEBUG } from '../../../config';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
@@ -19,7 +20,6 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
@@ -82,7 +82,7 @@ type OwnProps<CategoryType extends string> = {
   lockedUnselectedSubtitle?: string;
   filterValue?: string;
   filterPlaceholder?: string;
-  categoryPlaceholderKey?: string;
+  categoryPlaceholderKey?: RegularLangKey;
   notFoundText?: string;
   searchInputId?: string;
   itemClassName?: string;
@@ -136,7 +136,6 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
   onLoadMore,
   ...optionalProps
 }: OwnProps<CategoryType>) => {
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const itemIds = useMemo(() => {
@@ -263,7 +262,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
         ref={inputRef}
         value={filterValue}
         onChange={handleFilterChange}
-        placeholder={filterPlaceholder || oldLang('SelectChat')}
+        placeholder={filterPlaceholder || lang('SelectChat')}
       />
     );
   }
@@ -282,8 +281,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
       if (DEBUG) {
         return (
           <div key={id}>
-            No peer or category with ID
-            {id}
+            {lang('PeerPickerUnknownPeer', { id })}
           </div>
         );
       }
@@ -326,14 +324,14 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 
         const userStatus = selectUserStatus(global, peer.id);
         return [
-          getUserStatus(oldLang, peer, userStatus),
+          getUserStatus(lang, peer, userStatus),
           buildClassName(isUserOnline(peer, userStatus, true) && styles.onlineStatus),
         ];
       }
 
       if (withPeerTypes) {
         const langKey = getPeerTypeKey(peer);
-        return langKey && [oldLang(langKey)];
+        return langKey && [lang(langKey)];
       }
 
       return undefined;
@@ -367,9 +365,9 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
       />
     );
   }, [
-    categoriesByType, forceShowSelf, isViewOnly, itemClassName, itemInputType, oldLang, lockedSelectedIdsSet,
+    categoriesByType, forceShowSelf, isViewOnly, itemClassName, itemInputType, lang, lockedSelectedIdsSet,
     lockedUnselectedIdsSet, lockedUnselectedSubtitle, onDisabledClick, selectedCategories, selectedIds,
-    withPeerTypes, withStatus, withPeerUsernames, lang,
+    withPeerTypes, withStatus, withPeerUsernames,
   ]);
 
   const searchChips = useMemo(() => {
@@ -411,12 +409,12 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
     if (!categories?.length) return undefined;
     return (
       <div key="categories">
-        {categoryPlaceholderKey && <div className={styles.pickerCategoryTitle}>{oldLang(categoryPlaceholderKey)}</div>}
+        {categoryPlaceholderKey && <div className={styles.pickerCategoryTitle}>{lang(categoryPlaceholderKey)}</div>}
         {categories?.map((category) => renderItem(category.type, true))}
-        <div className={styles.pickerCategoryTitle}>{oldLang('FilterChats')}</div>
+        <div className={styles.pickerCategoryTitle}>{lang('FilterChats')}</div>
       </div>
     );
-  }, [categories, categoryPlaceholderKey, oldLang, renderItem]);
+  }, [categories, categoryPlaceholderKey, lang, renderItem]);
 
   const renderItems = useCallback(() => {
     if (!sections) {
@@ -457,7 +455,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
             inputId={searchInputId}
             className={styles.islandSearch}
             value={filterValue}
-            placeholder={filterPlaceholder || oldLang('SelectChat')}
+            placeholder={filterPlaceholder || lang('SelectChat')}
             chips={searchChips}
             onChange={handleSearchFieldChange}
             onChipClick={handleItemClick}
@@ -465,7 +463,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
         ) : (
           <div
             className={buildClassName(styles.header, 'custom-scroll')}
-            dir={oldLang.isRtl ? 'rtl' : undefined}
+            dir={lang.isRtl ? 'rtl' : undefined}
           >
             {selectedCategories?.map((category) => (
               <PeerChip
@@ -520,7 +518,7 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
           </InfiniteScroll>,
         )
       ) : !isLoading && viewportIds && !viewportIds.length ? (
-        <p className={styles.noResults}>{notFoundText || 'Sorry, nothing found.'}</p>
+        <p className={styles.noResults}>{notFoundText || lang('NothingFound')}</p>
       ) : (
         <Loading />
       )}

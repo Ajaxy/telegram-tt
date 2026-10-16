@@ -15,7 +15,6 @@ import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import useLang from '../../../hooks/useLang';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Skeleton from '../../ui/placeholder/Skeleton';
 
@@ -39,7 +38,6 @@ const Invoice = ({
 }: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const invoice = getMessageInvoice(message);
 
@@ -118,7 +116,7 @@ const Invoice = ({
         )}
         <p className="description-text">
           {formatCurrency(lang, amount, currency, { iconClassName: 'invoice-currency-icon' })}
-          {isTest && <span className="test-invoice">{oldLang('PaymentTestInvoice')}</span>}
+          {isTest && <span className="test-invoice">{lang('PaymentTestInvoice')}</span>}
         </p>
       </div>
     </div>

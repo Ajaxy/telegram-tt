@@ -94,7 +94,6 @@ import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps.ts';
 import useAsyncRendering from './hooks/useAsyncRendering';
@@ -358,7 +357,6 @@ const Profile = ({
 
   const shouldSkipTransitionRef = useRef(false);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const [isGiftTransitionEnabled, enableGiftTransition, disableGiftTransition] = useFlag();
@@ -832,7 +830,7 @@ const Profile = ({
 
     if (memberId !== currentUserId && canDeleteMembers) {
       actions.push({
-        title: oldLang('lng_context_remove_from_group'),
+        title: lang('ContextRemoveFromGroup'),
         icon: 'stop',
         handler: () => {
           openDeleteMemberModal({ chatId, peerId: memberId });
@@ -1018,34 +1016,34 @@ const Profile = ({
           text = areMembersHidden ? lang('ChatMemberListNoAccess') : lang('NoMembersFound');
           break;
         case 'commonChats':
-          text = oldLang('NoGroupsInCommon');
+          text = lang('NoGroupsInCommon');
           break;
         case 'documents':
-          text = oldLang('lng_media_file_empty');
+          text = lang('MediaFileEmpty');
           break;
         case 'links':
-          text = oldLang('lng_media_link_empty');
+          text = lang('MediaLinkEmpty');
           break;
         case 'audio':
-          text = oldLang('lng_media_song_empty');
+          text = lang('MediaSongEmpty');
           break;
         case 'voice':
-          text = oldLang('lng_media_audio_empty');
+          text = lang('MediaAudioEmpty');
           break;
         case 'polls':
           text = lang('ProfilePollsEmpty');
           break;
         case 'stories':
-          text = oldLang('StoryList.SavedEmptyState.Title');
+          text = lang('StoryListSavedEmptyStateTitle');
           break;
         case 'storiesArchive':
-          text = oldLang('StoryList.ArchivedEmptyState.Title');
+          text = lang('StoryListArchivedEmptyStateTitle');
           break;
         case 'gif':
-          text = oldLang('lng_media_gif_empty');
+          text = lang('MediaGifEmpty');
           break;
         default:
-          text = oldLang('SharedMedia.EmptyTitle');
+          text = lang('SharedMediaEmptyTitle');
       }
 
       return (
@@ -1153,7 +1151,7 @@ const Profile = ({
                 key={id}
                 theme={theme}
                 message={message}
-                senderTitle={getSenderName(oldLang, message, chatsById, usersById)}
+                senderTitle={getSenderName(lang, message, chatsById, usersById)}
                 variant="sharedMedia"
                 threadId={threadId}
                 date={message.date}
@@ -1246,10 +1244,10 @@ const Profile = ({
                   iconName="unlock-filled"
                   iconAlignment="end"
                 >
-                  {oldLang('UnlockSimilar')}
+                  {lang('UnlockSimilar')}
                 </Button>
                 <div className={styles.moreSimilar}>
-                  {renderText(oldLang('MoreSimilarText', limitSimilarPeers), ['simple_markdown'])}
+                  {renderText(lang('MoreSimilarText', { limit: limitSimilarPeers }), ['simple_markdown'])}
                 </div>
               </>
             )}
@@ -1450,7 +1448,7 @@ const Profile = ({
           style={createVtnStyle('profileFab')}
           isShown={canRenderContent}
           onClick={handleNewMemberDialogOpen}
-          ariaLabel={oldLang('lng_channel_add_users')}
+          ariaLabel={lang('ChannelAddUsers')}
           iconName="add-user-filled"
         />
       )}

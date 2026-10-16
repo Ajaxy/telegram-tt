@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -21,8 +20,8 @@ import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import FullNameTitle from '../../common/FullNameTitle';
 import Button from '../../ui/Button';
@@ -50,7 +49,7 @@ type StateProps = {
   chat?: ApiChat;
 };
 
-const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
+const GroupCallParticipantVideo = ({
   layout,
   pinnedVideo,
   setPinned,
@@ -59,8 +58,8 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   participant,
   user,
   chat,
-}) => {
-  const lang = useOldLang();
+}: OwnProps & StateProps) => {
+  const lang = useLang();
 
   const thumbnailRef = useRef<HTMLCanvasElement>();
   const videoRef = useRef<HTMLVideoElement>();
@@ -96,8 +95,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
     }
 
     if (participant.volume && participant.volume !== GROUP_CALL_DEFAULT_VOLUME) {
-      return lang('SpeakingWithVolume', formatGroupCallVolume(participant))
-        .replace('%%', '%');
+      return lang('SpeakingWithVolume', { volume: formatGroupCallVolume(participant) });
     }
 
     return lang('Speaking');
@@ -284,7 +282,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             ripple
             color="translucent"
             className={styles.pinButton}
-            ariaLabel={lang(isPinned ? 'lng_group_call_context_unpin_camera' : 'lng_group_call_context_pin_camera')}
+            ariaLabel={lang(isPinned ? 'GroupCallContextUnpinCamera' : 'GroupCallContextPinCamera')}
             onClick={handleClickPin}
             iconName={isPinned ? 'unpin' : 'pin'}
           />

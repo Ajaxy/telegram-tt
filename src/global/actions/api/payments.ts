@@ -12,7 +12,6 @@ import { PaymentStep } from '../../../types';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -975,7 +974,10 @@ addActionHandler('checkGiftCode', async (global, actions, payload): Promise<void
 
   if (!result) {
     actions.showNotification({
-      message: langProvider.oldTranslate('lng_gift_link_expired'),
+      message: {
+        key: 'GiftLinkExpired',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;

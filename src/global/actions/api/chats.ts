@@ -44,7 +44,6 @@ import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
-import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -447,7 +446,10 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
     setGlobal(global);
 
     actions.showNotification({
-      message: langProvider.oldTranslate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
+      message: {
+        key: isComments ? 'ChannelPostDeleted' : 'MessageNotFound',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
 
@@ -492,7 +494,10 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       setGlobal(global);
 
       actions.showNotification({
-        message: langProvider.oldTranslate('Group.ErrorAccessDenied'),
+        message: {
+          key: 'GroupErrorAccessDenied',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
         tabId,
       });
     },
@@ -1684,7 +1689,13 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
   if (!chat) {
     actions.openPreviousChat({ tabId });
     actions.showNotification({
-      message: langProvider.oldTranslate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
+      message: {
+        key: 'UsernameByPhoneNotFound',
+        variables: {
+          phone: phoneNumber,
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;
@@ -2914,7 +2925,10 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     result = await callApi('toggleForum', { chat, isEnabled });
   } catch (error) {
     if ((error as ApiError).message === 'FLOOD') {
-      actions.showNotification({ message: langProvider.oldTranslate('FloodWait'), tabId });
+      actions.showNotification({ message: {
+        key: 'FloodWait',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }, tabId });
     } else {
       actions.showDialog({ data: { type: 'error', ...(error as ApiError), hasErrorKey: true }, tabId });
     }
@@ -3035,7 +3049,13 @@ addActionHandler('toggleTopicPinned', (global, actions, payload): ActionReturnTy
 
   if (isPinned && Object.values(topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
     actions.showNotification({
-      message: langProvider.oldTranslate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
+      message: {
+        key: 'LimitReachedPinnedTopics',
+        variables: {
+          limit: topicsPinnedLimit,
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;
@@ -3050,7 +3070,10 @@ addActionHandler('checkChatlistInvite', async (global, actions, payload): Promis
   const result = await callApi('checkChatlistInvite', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.oldTranslate('lng_group_invite_bad_link'),
+      message: {
+        key: 'GroupInviteBadLink',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;
@@ -3622,7 +3645,10 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
   const result = await callApi('resolveBusinessChatLink', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.oldTranslate('BusinessLink.ErrorExpired'),
+      message: {
+        key: 'BusinessLinkErrorExpired',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;
@@ -4001,7 +4027,10 @@ async function getAttachBotOrNotify<T extends GlobalState>(
   global = getGlobal();
   if (!result) {
     actions.showNotification({
-      message: langProvider.oldTranslate('WebApp.AddToAttachmentUnavailableError'),
+      message: {
+        key: 'WebAppAddToAttachmentUnavailableError',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
 
@@ -4078,7 +4107,7 @@ async function openChatByUsername<T extends GlobalState>(
   if (!chat) {
     if (!isCurrentChat) {
       actions.openPreviousChat({ tabId });
-      actions.showNotification({ message: 'User does not exist', tabId });
+      actions.showNotification({ message: { key: 'NoUsernameFound' }, tabId });
     }
 
     return;

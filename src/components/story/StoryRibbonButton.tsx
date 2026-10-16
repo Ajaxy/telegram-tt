@@ -6,7 +6,7 @@ import { StoryViewerOrigin } from '../../types';
 
 import { getPeerTitle } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
 import { isUserId } from '../../util/entities/ids';
 import { getServerTime } from '../../util/serverTime';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
@@ -94,8 +94,12 @@ function StoryRibbonButton({ peer, isArchived, stealthModeActiveUntil }: OwnProp
     const diff = stealthModeActiveUntil ? stealthModeActiveUntil - getServerTime() : 0;
     if (diff > 0) {
       showNotification({
-        title: lang('StealthModeOnTitle'),
-        message: lang('StealthModeOnHint', { time: formatMediaDuration(diff) }),
+        title: { key: 'StealthModeOnTitle' },
+        message: {
+          key: 'StealthModeOnHint',
+          variables: { time: formatMediaDuration(diff) },
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
         duration: STEALTH_MODE_NOTIFICATION_DURATION,
       });
       openStoryViewer({ peerId: peer.id, origin: StoryViewerOrigin.StoryRibbon });

@@ -121,6 +121,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
+import type { RegularLangKey } from '../../types/language';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -544,6 +545,7 @@ export type TabState = {
       field?: string;
       messageKey?: RegularLangFnParameters;
       descriptionKey?: RegularLangFnParameters;
+      description?: string;
     };
     isPaymentModalOpen?: boolean;
     isExtendedMedia?: boolean;
@@ -573,7 +575,7 @@ export type TabState = {
 
   chatCreation?: {
     progress: ChatCreationProgress;
-    error?: string;
+    error?: RegularLangKey;
   };
 
   profileEdit?: {

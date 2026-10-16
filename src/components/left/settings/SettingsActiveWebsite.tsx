@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiUser, ApiWebSession } from '../../../api/types';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -31,7 +31,7 @@ const SettingsActiveWebsite = ({
   onClose,
 }: OwnProps & StateProps) => {
   const { terminateWebAuthorization } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const renderingSession = useCurrentOrPrev(session, true);
   const renderingBot = useCurrentOrPrev(bot, true);
@@ -80,18 +80,18 @@ const SettingsActiveWebsite = ({
       </div>
 
       <dl className={styles.box}>
-        <dt>{lang('AuthSessions.View.Browser')}</dt>
+        <dt>{lang('AuthSessionsViewBrowser')}</dt>
         <dd>
           {renderingSession?.browser}
         </dd>
 
-        <dt>{lang('SessionPreview.Ip')}</dt>
+        <dt>{lang('SessionPreviewIp')}</dt>
         <dd>{renderingSession?.ip}</dd>
 
-        <dt>{lang('SessionPreview.Location')}</dt>
+        <dt>{lang('SessionPreviewLocation')}</dt>
         <dd>{renderingSession?.region}</dd>
       </dl>
-      <p className={styles.note}>{lang('AuthSessions.View.LocationInfo')}</p>
+      <p className={styles.note}>{lang('AuthSessionsViewLocationInfo')}</p>
       <div className="dialog-buttons mt-2">
         <Button
           color="danger"
@@ -99,7 +99,7 @@ const SettingsActiveWebsite = ({
           isText
           onClick={handleTerminateSessionClick}
         >
-          {lang('AuthSessions.LogOut')}
+          {lang('AuthSessionsLogOut')}
         </Button>
       </div>
     </Modal>

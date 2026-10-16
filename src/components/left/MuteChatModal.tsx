@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -6,7 +5,7 @@ import { getActions } from '../../global';
 
 import { MUTE_INDEFINITE_TIMESTAMP } from '../../config';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -29,25 +28,25 @@ enum MuteDuration {
   Forever = '-1',
 }
 
-const MuteChatModal: FC<OwnProps> = ({
+const MuteChatModal = ({
   isOpen,
   chatId,
   topicId,
   onClose,
   onCloseAnimationEnd,
-}) => {
+}: OwnProps) => {
   const [muteUntilOption, setMuteUntilOption] = useState(MuteDuration.Forever);
   const { updateChatMutedState, updateTopicMutedState } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const muteForOptions = useMemo(() => [
-    { label: lang('MuteFor.Hours', 1), value: MuteDuration.OneHour },
-    { label: lang('MuteFor.Hours', 4), value: MuteDuration.FourHours },
-    { label: lang('MuteFor.Hours', 8), value: MuteDuration.EightHours },
-    { label: lang('MuteFor.Days', 1), value: MuteDuration.OneDay },
-    { label: lang('MuteFor.Days', 3), value: MuteDuration.ThreeDays },
-    { label: lang('MuteFor.Forever'), value: MuteDuration.Forever },
+    { label: lang('MuteForHours', { count: 1 }, { pluralValue: 1 }), value: MuteDuration.OneHour },
+    { label: lang('MuteForHours', { count: 4 }, { pluralValue: 4 }), value: MuteDuration.FourHours },
+    { label: lang('MuteForHours', { count: 8 }, { pluralValue: 8 }), value: MuteDuration.EightHours },
+    { label: lang('MuteForDays', { count: 1 }, { pluralValue: 1 }), value: MuteDuration.OneDay },
+    { label: lang('MuteForDays', { count: 3 }, { pluralValue: 3 }), value: MuteDuration.ThreeDays },
+    { label: lang('MuteForForever'), value: MuteDuration.Forever },
   ], [lang]);
 
   const handleSubmit = useCallback(() => {
@@ -83,7 +82,7 @@ const MuteChatModal: FC<OwnProps> = ({
       />
       <div className="dialog-buttons">
         <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
-          {lang('Common.Done')}
+          {lang('Done')}
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>

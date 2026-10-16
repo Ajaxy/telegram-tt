@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
   useState,
@@ -19,8 +18,8 @@ import {
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dates/oldDateFormat';
 import { unique } from '../../util/iteratees';
+import { formatCalendarDate, secondsToDate } from '../../util/localization/dateFormat';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { REM } from '../common/helpers/mediaDimensions';
@@ -30,7 +29,6 @@ import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useScrollNotch from '../../hooks/useScrollNotch';
 
 import Avatar from '../common/Avatar';
@@ -64,7 +62,7 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByDate
 
 const DEFAULT_REACTION_SIZE = 1.5 * REM;
 
-const ReactorListModal: FC<OwnProps & StateProps> = ({
+const ReactorListModal = ({
   isOpen,
   reactors,
   reactions,
@@ -75,7 +73,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   animationLevel,
   canDeleteReactions,
   currentUserId,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadReactors,
     closeReactorListModal,
@@ -87,7 +85,6 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const chatsById = getGlobal().chats.byId;
   const usersById = getGlobal().users.byId;
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
   const [chosenTab, setChosenTab] = useState<ApiReaction | undefined>(undefined);
@@ -190,7 +187,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen && !isClosing}
       onClose={handleClose}
       className="ReactorListModal narrow"
-      title={oldLang('Reactions')}
+      title={lang('Reactions')}
       onCloseAnimationEnd={handleCloseAnimationEnd}
       isCondensedHeader
       hasCloseButton
@@ -285,7 +282,9 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                           <FullNameTitle peer={peer} withEmojiStatus />
                           <span className="status" dir="auto">
                             <Icon name="heart-outline" className="status-icon" />
-                            {formatDateAtTime(oldLang, r.addedDate * 1000)}
+                            {formatCalendarDate(lang, secondsToDate(r.addedDate), {
+                              variant: 'date', isShort: true, withTime: true,
+                            })}
                           </span>
                         </div>
                         {r.reaction && (
@@ -328,7 +327,9 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                           userId={peerId}
                           noStatusOrTyping
                           avatarSize="medium"
-                          status={seenByUser ? formatDateAtTime(oldLang, seenByUser * 1000) : undefined}
+                          status={seenByUser ? formatCalendarDate(lang, secondsToDate(seenByUser), {
+                            variant: 'date', isShort: true, withTime: true,
+                          }) : undefined}
                           statusIcon="message-read"
                         />
                       </ListItem>,

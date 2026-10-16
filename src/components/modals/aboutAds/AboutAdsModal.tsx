@@ -9,8 +9,8 @@ import renderText from '../../common/helpers/renderText';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import SafeLink from '../../common/SafeLink';
 import SponsoredMessageContextMenuContainer from '../../middle/message/SponsoredContextMenuContainer';
@@ -43,25 +43,25 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
 
   const renderingIsNewDesign = useCurrentOrPrev(isMonetizationSharing);
 
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const regularAdContent = useMemo(() => {
     return (
       <>
-        <h3>{oldLang('SponsoredMessageInfoScreen.Title')}</h3>
-        <p>{renderText(oldLang('SponsoredMessageInfoDescription1'), ['br'])}</p>
-        <p>{renderText(oldLang('SponsoredMessageInfoDescription2'), ['br'])}</p>
-        <p>{renderText(oldLang('SponsoredMessageInfoDescription3'), ['br'])}</p>
+        <h3>{lang('SponsoredMessageInfo')}</h3>
+        <p>{renderText(lang('SponsoredMessageInfoDescription1'), ['br'])}</p>
+        <p>{renderText(lang('SponsoredMessageInfoDescription2'), ['br'])}</p>
+        <p>{renderText(lang('SponsoredMessageInfoDescription3'), ['br'])}</p>
         <p>
           <SafeLink
-            url={oldLang('SponsoredMessageAlertLearnMoreUrl')}
-            text={oldLang('SponsoredMessageAlertLearnMoreUrl')}
+            url={lang('PromoteUrl')}
+            text={lang('PromoteUrl')}
           />
         </p>
-        <p>{renderText(oldLang('SponsoredMessageInfoDescription4'), ['br'])}</p>
+        <p>{renderText(lang('SponsoredMessageInfoDescription4'), ['br'])}</p>
       </>
     );
-  }, [oldLang]);
+  }, [lang]);
 
   const {
     isContextMenuOpen, contextMenuAnchor,
@@ -79,9 +79,9 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
 
     const header = (
       <>
-        <h3 className={styles.title}>{oldLang('AboutRevenueSharingAds')}</h3>
+        <h3 className={styles.title}>{lang('AboutRevenueSharingAds')}</h3>
         <p className={buildClassName(styles.description, styles.secondary)}>
-          {oldLang('RevenueSharingAdsAlertSubtitle')}
+          {lang('RevenueSharingAdsAlertSubtitle')}
         </p>
         <Button
           ref={moreMenuRef}
@@ -96,22 +96,22 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
     );
 
     const listItemData = [
-      ['lock', oldLang('RevenueSharingAdsInfo1Title'),
-        renderText(oldLang('RevenueSharingAdsInfo1Subtitle'), ['simple_markdown'])],
-      ['revenue-split', oldLang('RevenueSharingAdsInfo2Title'),
-        renderText(oldLang('RevenueSharingAdsInfo2Subtitle'), ['simple_markdown'])],
-      ['nochannel', oldLang('RevenueSharingAdsInfo3Title'),
-        renderText(oldLang('RevenueSharingAdsInfo3Subtitle', minLevelToRestrictAds), ['simple_markdown'])],
+      ['lock', lang('RevenueSharingAdsInfo1Title'),
+        renderText(lang('RevenueSharingAdsInfo1Subtitle'), ['simple_markdown'])],
+      ['revenue-split', lang('RevenueSharingAdsInfo2Title'),
+        renderText(lang('RevenueSharingAdsInfo2Subtitle'), ['simple_markdown'])],
+      ['nochannel', lang('RevenueSharingAdsInfo3Title'),
+        renderText(lang('RevenueSharingAdsInfo3Subtitle', { level: minLevelToRestrictAds }), ['simple_markdown'])],
     ] satisfies TableAboutData;
 
     const footer = (
       <>
-        <h3 className={styles.title}>{renderText(oldLang('RevenueSharingAdsInfo4Title'), ['simple_markdown'])}</h3>
+        <h3 className={styles.title}>{renderText(lang('RevenueSharingAdsInfo4Title'), ['simple_markdown'])}</h3>
         <p className={styles.description}>
-          {renderText(oldLang('RevenueSharingAdsInfo4Subtitle2', ''), ['simple_markdown'])}
+          {renderText(lang('RevenueSharingAdsInfo4Subtitle2', { details: '' }), ['simple_markdown'])}
           <SafeLink
-            url={oldLang('PromoteUrl')}
-            text={oldLang('LearnMoreArrow')}
+            url={lang('PromoteUrl')}
+            text={lang('LearnMoreArrow')}
           />
         </p>
       </>
@@ -122,7 +122,7 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
       listItemData,
       footer,
     };
-  }, [isOpen, oldLang, handleContextMenu, minLevelToRestrictAds]);
+  }, [isOpen, lang, handleContextMenu, minLevelToRestrictAds]);
 
   if (renderingIsNewDesign) {
     return (
@@ -135,7 +135,7 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
           withSeparator
           header={modalData?.header}
           footer={modalData?.footer}
-          buttonText={oldLang('RevenueSharingAdsUnderstood')}
+          buttonText={lang('Understood')}
           onClose={handleClose}
         />
         {contextMenuAnchor && randomId && (
@@ -168,7 +168,7 @@ const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) 
       <Button
         onClick={handleClose}
       >
-        {oldLang('RevenueSharingAdsUnderstood')}
+        {lang('Understood')}
       </Button>
     </Modal>
   );

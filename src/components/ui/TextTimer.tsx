@@ -1,7 +1,7 @@
 import { useEffect } from '../../lib/teact/teact';
 
-import { formatCountdown } from '../../util/dates/oldDateFormat';
-import { formatClockDuration, formatCountdownDateTime, secondsToDate } from '../../util/localization/dateFormat';
+import { formatClockDuration, formatCountdown } from '../../util/dates/duration';
+import { formatCountdownDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 
 import useInterval from '../../hooks/schedulers/useInterval';

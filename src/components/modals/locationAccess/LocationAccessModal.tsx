@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useRef,
 } from '../../../lib/teact/teact';
@@ -14,7 +13,6 @@ import buildClassName from '../../../util/buildClassName';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
@@ -31,17 +29,16 @@ export type StateProps = {
   currentUser?: ApiUser;
 };
 
-const LocationAccessModal: FC<OwnProps & StateProps> = ({
+const LocationAccessModal = ({
   modal,
   currentUser,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeLocationAccessModal, toggleUserLocationPermission, sendWebAppEvent, showNotification,
   } = getActions();
 
   const isOpen = Boolean(modal);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -68,7 +65,12 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
             },
           },
         });
-        showNotification({ message: oldLang('PermissionNoLocationPosition') });
+        showNotification(
+          { message: {
+            key: 'PermissionNoLocationPosition',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          } },
+        );
         return;
       }
 
@@ -135,7 +137,7 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
   const renderStatusText = useLastCallback(() => {
     if (!modal?.bot) return undefined;
     return lang('LocationPermissionText', {
-      name: getUserFullName(modal?.bot),
+      name: getUserFullName(lang, modal?.bot),
     }, {
       withNodes: true,
       withMarkdown: true,
@@ -161,7 +163,7 @@ const LocationAccessModal: FC<OwnProps & StateProps> = ({
             onClick={confirmHandler}
             color="primary"
           >
-            {oldLang('lng_bot_allow_write_confirm')}
+            {lang('BotAllowWriteConfirm')}
           </Button>
           <Button
             className="confirm-dialog-button"

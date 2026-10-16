@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -8,7 +7,7 @@ import buildClassName from '../../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import renderText from '../../common/helpers/renderText';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
@@ -21,13 +20,13 @@ type OwnProps = {
   suggestedPeerIds?: string[];
 };
 
-const ChatlistDelete: FC<OwnProps> = ({
+const ChatlistDelete = ({
   folder,
   suggestedPeerIds = MEMO_EMPTY_ARRAY,
-}) => {
+}: OwnProps) => {
   const { closeChatlistModal, leaveChatlist } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>([]);
 
@@ -53,7 +52,11 @@ const ChatlistDelete: FC<OwnProps> = ({
           <div className={buildClassName(styles.pickerWrapper, 'custom-scroll')}>
             <div className={styles.pickerHeader}>
               <div className={styles.pickerHeaderInfo}>
-                {lang('FolderLinkHeaderChatsQuit', selectedPeerIds.length, 'i')}
+                {lang(
+                  'FolderLinkHeaderChatsQuit',
+                  { count: lang.number(selectedPeerIds.length) },
+                  { pluralValue: selectedPeerIds.length },
+                )}
               </div>
               <div
                 className={styles.selectionToggle}
@@ -61,7 +64,9 @@ const ChatlistDelete: FC<OwnProps> = ({
                 tabIndex={0}
                 onClick={handleSelectionToggle}
               >
-                {selectedPeerIds.length === suggestedPeerIds.length ? lang('DeselectAll') : lang('SelectAll')}
+                {selectedPeerIds.length === suggestedPeerIds.length
+                  ? lang('DeselectAll')
+                  : lang('ContextMenuItemSelectAll')}
               </div>
             </div>
             <PeerPicker

@@ -40,7 +40,7 @@ import { getRichTextPlainText, hasRichText } from '../../global/helpers/richMess
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { formatDateTime } from '../../util/localization/dateFormat';
+import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import {
   EMPTY_RICH_MEDIA_CAPTION,
   getRichMediaRef,
@@ -198,7 +198,7 @@ const RichContent = ({
   };
 
   const formatPublishedDate = useCallback((date: number) => {
-    return formatDateTime(lang, new Date(date * 1000), { date: 'long' });
+    return formatDateTime(lang, secondsToDate(date), { date: 'long' });
   }, [lang]);
 
   const handleOpenMap = useLastCallback((geoPoint: ApiGeoPoint, zoom: number) => {
@@ -291,7 +291,7 @@ const RichContent = ({
       case 'authorDate': {
         const hasAuthor = hasRichText(block.author);
         const publishedDate = block.publishedDate
-          ? formatDateTime(lang, new Date(block.publishedDate * 1000), { date: 'long', time: 'short' })
+          ? formatDateTime(lang, secondsToDate(block.publishedDate), { date: 'long', time: 'short' })
           : undefined;
 
         return (

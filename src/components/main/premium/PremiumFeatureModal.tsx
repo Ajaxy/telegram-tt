@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -11,7 +10,7 @@ import type {
   ApiPremiumSubscriptionOption,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { LangPair } from '../../../types/language';
+import type { LangKey, RegularLangKey } from '../../../types/language';
 
 import { PREMIUM_BOTTOM_VIDEOS, PREMIUM_FEATURE_SECTIONS, PREMIUM_LIMITS_ORDER } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -23,7 +22,6 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import SliderDots from '../../common/SliderDots';
@@ -36,7 +34,7 @@ import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
 
 import styles from './PremiumFeatureModal.module.scss';
 
-export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
+export const PREMIUM_FEATURE_TITLES = {
   double_limits: 'PremiumPreviewLimits',
   infinite_reactions: 'PremiumPreviewReactions2',
   premium_stickers: 'PremiumPreviewStickers',
@@ -54,14 +52,14 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTags2',
   last_seen: 'PremiumPreviewLastSeen',
   message_privacy: 'PremiumPreviewMessagePrivacy',
-  effects: 'Premium.MessageEffects',
+  effects: 'PremiumMessageEffects',
   ai_compose: 'PremiumPreviewAiTools',
   rich_formatting: 'PremiumPreviewRichFormatting',
   todo: 'PremiumPreviewTodo',
   pm_noforwards: 'PremiumPreviewNoForwards',
-};
+} as const satisfies Record<ApiPremiumSection, RegularLangKey>;
 
-export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
+export const PREMIUM_FEATURE_DESCRIPTIONS = {
   double_limits: 'PremiumPreviewLimitsDescription',
   infinite_reactions: 'PremiumPreviewReactions2Description',
   premium_stickers: 'PremiumPreviewStickersDescription',
@@ -79,16 +77,14 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTagsDescription2',
   last_seen: 'PremiumPreviewLastSeenDescription',
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
-  effects: 'Premium.MessageEffectsInfo',
+  effects: 'PremiumMessageEffectsInfo',
   ai_compose: 'PremiumPreviewAiToolsDescription',
   rich_formatting: 'PremiumPreviewRichFormattingDescription',
   todo: 'PremiumPreviewTodoDescription',
   pm_noforwards: 'PremiumPreviewNoForwardsDescription',
-};
+} as const satisfies Record<ApiPremiumSection, LangKey>;
 
-export const NEW_LANG_SECTIONS: ApiPremiumSection[] = ['ai_compose', 'rich_formatting', 'todo', 'pm_noforwards'];
-
-const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
+const LIMITS_TITLES = {
   channels: 'GroupsAndChannelsLimitTitle',
   dialogFolderPinned: 'PinChatsLimitTitle',
   channelsPublic: 'PublicLinksLimitTitle',
@@ -100,9 +96,9 @@ const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
   dialogFiltersChats: 'ChatPerFolderLimitTitle',
   recommendedChannels: 'SimilarChannelsLimitTitle',
   moreAccounts: 'ConnectedAccountsLimitTitle',
-};
+} as const satisfies Record<ApiLimitTypeForPromo, RegularLangKey>;
 
-const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeForPromo, string> = {
+const LIMITS_DESCRIPTIONS = {
   channels: 'GroupsAndChannelsLimitSubtitle',
   dialogFolderPinned: 'PinChatsLimitSubtitle',
   channelsPublic: 'PublicLinksLimitSubtitle',
@@ -114,7 +110,7 @@ const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeForPromo, string> = {
   dialogFiltersChats: 'ChatPerFolderLimitSubtitle',
   recommendedChannels: 'SimilarChannelsLimitSubtitle',
   moreAccounts: 'ConnectedAccountsLimitSubtitle',
-};
+} as const satisfies Record<ApiLimitTypeForPromo, LangKey>;
 
 const BORDER_THRESHOLD = 20;
 
@@ -129,7 +125,7 @@ type OwnProps = {
   onClickSubscribe: (startParam?: string) => void;
 };
 
-const PremiumFeatureModal: FC<OwnProps> = ({
+const PremiumFeatureModal = ({
   promo,
   initialSection,
   isPremium,
@@ -138,8 +134,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   subscriptionOption,
   onBack,
   onClickSubscribe,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
   const scrollContainerRef = useRef<HTMLDivElement>();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(PREMIUM_FEATURE_SECTIONS.indexOf(initialSection));
@@ -240,7 +235,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         className={buildClassName(styles.backButton, hasHeaderBackdrop && styles.whiteBackButton)}
         color={hasHeaderBackdrop ? 'translucent-white' : 'translucent'}
         onClick={onBack}
-        ariaLabel={oldLang('Back')}
+        ariaLabel={lang('Back')}
         iconName="arrow-left"
       />
 
@@ -253,7 +248,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             return (
               <div className={buildClassName(styles.slide, styles.limits)}>
                 <h2 className={buildClassName(styles.header, isScrolledToTop && styles.noHeaderBorder)}>
-                  {oldLang(PREMIUM_FEATURE_TITLES.double_limits)}
+                  {lang(PREMIUM_FEATURE_TITLES.double_limits)}
                 </h2>
                 <div className={buildClassName(styles.limitsContent, 'custom-scroll')} onScroll={handleLimitsScroll}>
                   {PREMIUM_LIMITS_ORDER.map((limit, i) => {
@@ -261,8 +256,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                     const premiumLimit = limits?.[limit][1].toString();
                     return (
                       <PremiumLimitPreview
-                        title={oldLang(LIMITS_TITLES[limit])}
-                        description={oldLang(LIMITS_DESCRIPTIONS[limit], premiumLimit)}
+                        title={lang(LIMITS_TITLES[limit])}
+                        description={limit === 'aboutLength' || limit === 'captionLength'
+                          ? lang(LIMITS_DESCRIPTIONS[limit])
+                          : lang(LIMITS_DESCRIPTIONS[limit], { count: premiumLimit })}
                         leftValue={defaultLimit}
                         rightValue={premiumLimit}
                         colorStepProgress={i / (PREMIUM_LIMITS_ORDER.length - 1)}
@@ -281,10 +278,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                   <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
-                  {oldLang(PREMIUM_FEATURE_TITLES.premium_stickers)}
+                  {lang(PREMIUM_FEATURE_TITLES.premium_stickers)}
                 </h1>
                 <div className={styles.description}>
-                  {renderText(oldLang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
+                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
                 </div>
               </div>
             );
@@ -304,10 +301,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                 <PremiumFeaturePreviewNoForwards />
                 <div className={styles.noForwardFooter}>
                   <h1 className={styles.title}>
-                    {lang(PREMIUM_FEATURE_TITLES.pm_noforwards as keyof LangPair)}
+                    {lang(PREMIUM_FEATURE_TITLES.pm_noforwards)}
                   </h1>
                   <div className={styles.description}>
-                    {lang(PREMIUM_FEATURE_DESCRIPTIONS.pm_noforwards as keyof LangPair)}
+                    {lang(PREMIUM_FEATURE_DESCRIPTIONS.pm_noforwards)}
                   </div>
                 </div>
               </div>
@@ -315,7 +312,6 @@ const PremiumFeatureModal: FC<OwnProps> = ({
           }
 
           const i = promo.videoSections.indexOf(section);
-          const shouldUseNewLang = NEW_LANG_SECTIONS.includes(section);
           return (
             <div className={styles.slide}>
               <div className={styles.frame}>
@@ -329,23 +325,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                 />
               </div>
               <h1 className={styles.title}>
-                {shouldUseNewLang
-                  ? lang(
-                    PREMIUM_FEATURE_TITLES[section] as keyof LangPair,
-                    undefined,
-                    { withNodes: true, renderTextFilters: ['br'] },
-                  )
-                  : oldLang(PREMIUM_FEATURE_TITLES[section])}
+                {lang(PREMIUM_FEATURE_TITLES[section], undefined, { withNodes: true, renderTextFilters: ['br'] })}
               </h1>
               <div className={styles.description}>
-                {renderText(shouldUseNewLang
-                  ? lang(
-                    PREMIUM_FEATURE_DESCRIPTIONS[section] as keyof LangPair,
-                    undefined,
-                    { withNodes: true, renderTextFilters: ['br'] },
-                  )
-                  : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section]), ['br'],
-                )}
+                {lang(PREMIUM_FEATURE_DESCRIPTIONS[section], undefined, { withNodes: true, renderTextFilters: ['br'] })}
               </div>
             </div>
           );

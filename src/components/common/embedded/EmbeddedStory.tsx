@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiPeer, ApiTypeStory } from '../../../api/types';
@@ -9,8 +8,8 @@ import buildClassName from '../../../util/buildClassName';
 import renderText from '../helpers/renderText';
 
 import { useFastClick } from '../../../hooks/useFastClick';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import CompactMediaPreview, { canRenderCompactMediaPreview } from '../CompactMediaPreview';
 import Icon from '../icons/Icon';
@@ -30,7 +29,7 @@ type OwnProps = {
 
 const NBSP = '\u00A0';
 
-const EmbeddedStory: FC<OwnProps> = ({
+const EmbeddedStory = ({
   story,
   sender,
   noUserColors,
@@ -38,13 +37,13 @@ const EmbeddedStory: FC<OwnProps> = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
-}) => {
+}: OwnProps) => {
   const { showNotification } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const isFullStory = story && 'content' in story;
   const isExpiredStory = story && 'isDeleted' in story;
-  const title = isFullStory ? 'Story' : (isExpiredStory ? 'ExpiredStory' : 'Loading');
+  const title = isFullStory ? 'AttachStory' : (isExpiredStory ? 'ExpiredStory' : 'Loading');
 
   const hasPictogram = isFullStory && canRenderCompactMediaPreview(story.content);
 

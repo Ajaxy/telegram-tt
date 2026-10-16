@@ -24,7 +24,6 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
@@ -79,7 +78,6 @@ const StarsBalanceModal = ({
   const { balance, history } = currentState || {};
   const { subscriptions } = (currency === STARS_CURRENCY_CODE && starsBalanceState) || {};
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const [isHeaderHidden, setIsHeaderHidden] = useState(true);
@@ -109,23 +107,23 @@ const StarsBalanceModal = ({
     if (originReaction) {
       const channel = selectChat(global, originReaction.chatId);
       if (!channel) return undefined;
-      return oldLang('StarsNeededTextReactions', getChatTitle(oldLang, channel));
+      return lang('StarsNeededTextReactions', { chat: getChatTitle(lang, channel) });
     }
 
     if (originStarsPayment) {
       const bot = originStarsPayment.form?.botId ? selectUser(global, originStarsPayment.form.botId) : undefined;
       if (!bot) return undefined;
-      return oldLang('StarsNeededText', getUserFullName(bot));
+      return lang('StarsNeededText', { user: getUserFullName(lang, bot) });
     }
 
     if (originGift) {
       const peer = selectUser(global, originGift.peerId);
       if (!peer) return undefined;
-      return oldLang('StarsNeededTextGift', getPeerTitle(lang, peer));
+      return lang('StarsNeededTextGift', { peer: getPeerTitle(lang, peer) });
     }
 
     if (topup?.purpose === SUBSCRIPTION_PURPOSE) {
-      return oldLang('StarsNeededTextLink');
+      return lang('StarsNeededTextLink');
     }
 
     if (topup?.purpose === PAID_MESSAGES_PURPOSE) {
@@ -136,7 +134,7 @@ const StarsBalanceModal = ({
     }
 
     return undefined;
-  }, [originReaction, originStarsPayment, originGift, topup?.purpose, lang, oldLang]);
+  }, [originReaction, originStarsPayment, originGift, topup?.purpose, lang]);
 
   const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
   const shouldSuggestGifting = !shouldOpenOnBuy;
@@ -182,14 +180,10 @@ const StarsBalanceModal = ({
   const tosText = useMemo(() => {
     if (!isOpen) return undefined;
 
-    const text = oldLang('lng_credits_summary_options_about');
-    const parts = text.split('{link}');
-    return [
-      parts[0],
-      <SafeLink url={oldLang('StarsTOSLink')} text={oldLang('lng_credits_summary_options_about_link')} />,
-      parts[1],
-    ];
-  }, [isOpen, oldLang]);
+    return lang('CreditsSummaryOptionsAbout', {
+      link: <SafeLink url={lang('StarsTOSLink')} text={lang('CreditsSummaryOptionsAboutLink')} />,
+    }, { withNodes: true });
+  }, [isOpen, lang]);
 
   const renderStarsHeaderSection = () => {
     return (
@@ -197,9 +191,11 @@ const StarsBalanceModal = ({
         <ParticlesHeader
           model="swaying-star"
           color="gold"
-          title={starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
+          title={starsNeeded
+            ? lang('StarsNeededTitle', { count: ongoingTransactionAmount }, { pluralValue: ongoingTransactionAmount! })
+            : lang('TelegramStars')}
           description={renderText(
-            starsNeededText || oldLang('TelegramStarsInfo'),
+            starsNeededText || lang('TelegramStarsInfo'),
             ['simple_markdown', 'emoji'],
           )}
           isDisabled={!isOpen}
@@ -210,7 +206,7 @@ const StarsBalanceModal = ({
             onClick={showBuyOptions}
             fluid
           >
-            {oldLang('Star.List.BuyMoreStars')}
+            {lang('StarListBuyMoreStars')}
           </Button>
         )}
         {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
@@ -221,7 +217,7 @@ const StarsBalanceModal = ({
             fluid
             onClick={openStarsGiftingPickerModalHandler}
           >
-            {oldLang('TelegramStarsGift')}
+            {lang('TelegramStarsGift')}
           </Button>
         )}
         {areBuyOptionsShown && starsBalanceState?.topupOptions && (
@@ -361,7 +357,7 @@ const StarsBalanceModal = ({
           )}
         >
           <h2 className={styles.starHeaderText}>
-            {oldLang('TelegramStars')}
+            {lang('TelegramStars')}
           </h2>
         </div>
         <div className={styles.section}>
@@ -374,7 +370,7 @@ const StarsBalanceModal = ({
         )}
         {shouldShowItems && Boolean(subscriptions?.list.length) && (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{oldLang('StarMySubscriptions')}</h3>
+            <h3 className={styles.sectionTitle}>{lang('StarMySubscriptions')}</h3>
             <div className={styles.subscriptions}>
               {subscriptions?.list.map((subscription) => (
                 <StarsSubscriptionItem
@@ -392,7 +388,7 @@ const StarsBalanceModal = ({
                   onClick={handleLoadMoreSubscriptions}
                 >
                   <Icon name="down" className={styles.loadMoreIcon} />
-                  {oldLang('StarMySubscriptionsExpand')}
+                  {lang('ShowMore')}
                 </Button>
               )}
             </div>

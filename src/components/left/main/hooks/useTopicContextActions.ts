@@ -10,7 +10,6 @@ import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/browser/windowEnv
 import { compact } from '../../../../util/iteratees';
 
 import useLang from '../../../../hooks/useLang';
-import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useTopicContextActions({
   topic,
@@ -34,7 +33,6 @@ export default function useTopicContextActions({
   handleUnmute?: NoneToVoidFunction;
 }) {
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const preparedActions = useMemo(() => {
     const {
@@ -72,7 +70,7 @@ export default function useTopicContextActions({
 
     const actionUnreadMark = unreadCount || !wasOpened
       ? {
-        title: oldLang('MarkAsRead'),
+        title: lang('ChatListContextMarkAsRead'),
         icon: 'readchats',
         handler: () => {
           markTopicRead({ chatId, topicId });
@@ -82,42 +80,42 @@ export default function useTopicContextActions({
 
     const actionPin = canTogglePinned ? (isPinned
       ? {
-        title: oldLang('UnpinFromTop'),
+        title: lang('ChatListUnpinFromTop'),
         icon: 'unpin',
         handler: () => toggleTopicPinned({ chatId, topicId, isPinned: false }),
       }
       : {
-        title: oldLang('PinToTop'),
+        title: lang('ChatListPinToTop'),
         icon: 'pin',
         handler: () => toggleTopicPinned({ chatId, topicId, isPinned: true }),
       }) : undefined;
 
     const actionMute = ((isChatMuted && notifySettings.mutedUntil === undefined) || notifySettings.mutedUntil)
       ? {
-        title: oldLang('ChatList.Unmute'),
+        title: lang('ChatsUnmute'),
         icon: 'unmute',
         handler: handleUnmute,
       }
       : {
-        title: `${oldLang('ChatList.Mute')}...`,
+        title: `${lang('ChatsMute')}...`,
         icon: 'mute',
         handler: handleMute,
       };
 
     const actionCloseTopic = canToggleClosed ? (isClosed
       ? {
-        title: oldLang('lng_forum_topic_reopen'),
+        title: lang('ForumTopicReopen'),
         icon: 'reopen-topic',
         handler: () => editTopic({ chatId, topicId, isClosed: false }),
       }
       : {
-        title: oldLang('lng_forum_topic_close'),
+        title: lang('ForumTopicClose'),
         icon: 'pause-circle',
         handler: () => editTopic({ chatId, topicId, isClosed: true }),
       }) : undefined;
 
     const actionDelete = canDelete ? {
-      title: oldLang('lng_forum_topic_delete'),
+      title: lang('Delete'),
       icon: 'delete',
       destructive: true,
       handler: handleDelete,
@@ -134,7 +132,7 @@ export default function useTopicContextActions({
     ]) as MenuItemContextAction[];
   }, [
     chat, topic, unreadCount, wasOpened, isChatMuted, canDelete,
-    handleDelete, handleMute, handleUnmute, lang, oldLang,
+    handleDelete, handleMute, handleUnmute, lang,
   ]);
 
   return preparedActions;

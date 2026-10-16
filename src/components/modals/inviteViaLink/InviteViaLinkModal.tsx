@@ -89,14 +89,18 @@ const InviteViaLinkModal = ({
   const premiumSectionText = useMemo(() => {
     if (!invitableWithPremiumPeers?.length) return undefined;
     if (invitableWithPremiumPeers.length === 1) {
-      return lang('InviteRestrictedPremiumReasonSingle', { user: getUserFullName(invitableWithPremiumPeers[0]) }, {
+      return lang('InviteRestrictedPremiumReasonSingle', {
+        user: getUserFullName(lang, invitableWithPremiumPeers[0]),
+      }, {
         withMarkdown: true,
         withNodes: true,
       });
     }
 
     if (invitableWithPremiumPeers.length <= 3) {
-      const list = lang.conjunction(invitableWithPremiumPeers.map((peer) => getUserFullName(peer)).filter(Boolean));
+      const list = lang.conjunction(
+        invitableWithPremiumPeers.map((peer) => getUserFullName(lang, peer)).filter(Boolean),
+      );
       return lang('InviteRestrictedPremiumReasonMultiple', { list }, {
         withMarkdown: true,
         withNodes: true,
@@ -106,7 +110,7 @@ const InviteViaLinkModal = ({
     if (invitableWithPremiumPeers.length > 3) {
       const moreCount = invitableWithPremiumPeers.length - 2;
       const peers = invitableWithPremiumPeers.slice(0, 2);
-      const list = lang.conjunction(peers.map((peer) => getUserFullName(peer)).filter(Boolean));
+      const list = lang.conjunction(peers.map((peer) => getUserFullName(lang, peer)).filter(Boolean));
       return lang('InviteRestrictedPremiumReasonMultipleMore', { list, count: moreCount }, {
         pluralValue: moreCount,
         withMarkdown: true,

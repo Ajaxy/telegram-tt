@@ -8,8 +8,9 @@ import type {
 import type { LangFn } from '../../../util/localization';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/oldDateFormat';
-import { formatDateTime, isSameLocalDay, secondsToDate } from '../../../util/localization/dateFormat';
+import {
+  formatCalendarDate, formatCompactTimestamp, formatDateTime, isSameLocalDay, secondsToDate,
+} from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getRepeatPeriodText } from '../../../util/scheduledMessages';
 import { formatIntegerCompact } from '../../../util/textFormat';
@@ -17,7 +18,6 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
 import Icon from '../../common/icons/Icon';
@@ -69,7 +69,6 @@ const MessageMeta = ({
 
   const [isActivated, markActivated] = useFlag();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   function handleImportedClick(e: React.MouseEvent) {
@@ -93,15 +92,14 @@ const MessageMeta = ({
 
   const dateTitle = useMemo(() => {
     if (!isActivated) return undefined;
-    const createDateTime = formatDateTimeToString(message.date * 1000, oldLang.code, undefined, oldLang.timeFormat);
+    const createDateTime = formatDateTime(lang, secondsToDate(message.date), { date: 'short', time: 'long' });
     const editDateTime = message.isEdited
-      && formatDateTimeToString(message.editDate! * 1000, oldLang.code, undefined, oldLang.timeFormat);
+      && formatDateTime(lang, secondsToDate(message.editDate!), { date: 'short', time: 'long' });
     const forwardedDateTime = message.forwardInfo
-      && formatDateTimeToString(
-        (message.forwardInfo.savedDate || message.forwardInfo.date) * 1000,
-        oldLang.code,
-        undefined,
-        oldLang.timeFormat,
+      && formatDateTime(
+        lang,
+        secondsToDate(message.forwardInfo.savedDate || message.forwardInfo.date),
+        { date: 'short', time: 'long' },
       );
 
     let text = createDateTime;
@@ -115,9 +113,7 @@ const MessageMeta = ({
     }
 
     return text;
-    // We need to listen to timeformat change
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [isActivated, oldLang, message, oldLang.timeFormat]);
+  }, [isActivated, lang, message]);
 
   const viewsTitle = useMemo(() => {
     if (!message.viewsCount) return undefined;
@@ -147,10 +143,10 @@ const MessageMeta = ({
       return formatEditedDate(lang, message.date, message.editDate!, withFullDate, message.isVideoProcessingPending);
     }
 
-    const time = formatTime(oldLang, message.date * 1000);
+    const time = formatDateTime(lang, secondsToDate(message.date), { time: 'short' });
     const baseDate = !withFullDate
       ? time
-      : formatPastTimeShort(oldLang, (message.forwardInfo?.date || message.date) * 1000, true);
+      : formatCompactTimestamp(lang, secondsToDate(message.forwardInfo?.date || message.date), { withTime: true });
 
     if (repeatPeriodText) {
       return lang('FormatDateAtTime', { date: repeatPeriodText, time: baseDate });
@@ -158,7 +154,7 @@ const MessageMeta = ({
 
     return baseDate;
   }, [
-    lang, message.date, message.editDate, message.forwardInfo?.date, message.isVideoProcessingPending, oldLang,
+    lang, message.date, message.editDate, message.forwardInfo?.date, message.isVideoProcessingPending,
     repeatPeriodText, shouldShowPrimaryEditedDate, withFullDate,
   ]);
 
@@ -219,7 +215,7 @@ const MessageMeta = ({
         {message.forwardInfo?.isImported && (
           <>
             <span className="message-imported" onClick={handleImportedClick}>
-              {formatDateTimeToString(message.forwardInfo.date * 1000, lang.code, true)}
+              {formatDateTime(lang, secondsToDate(message.forwardInfo.date), { date: 'short', time: 'short' })}
             </span>
             <span className="message-imported" onClick={handleImportedClick}>{lang('MessageMetaImported')}</span>
           </>
@@ -249,11 +245,7 @@ function formatEditedDate(
     return lang('MessageMetaEditedAtTime', { time });
   }
 
-  const shouldIncludeYear = editedDate.getFullYear() !== new Date().getFullYear();
-  const date = formatDateTime(lang, editedDate, {
-    date: 'short',
-    includeYear: shouldIncludeYear,
-  });
+  const date = formatCalendarDate(lang, editedDate, { variant: 'absolute', isShort: true });
 
   return lang('MessageMetaEditedOnDateAtTime', { date, time });
 }

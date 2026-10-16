@@ -1287,6 +1287,8 @@ export function updater(update: Update) {
     const { strings, keysToRemove } = buildLangStrings(update.difference.strings);
     sendApiUpdate({
       '@type': 'updateLangPack',
+      langCode: update.difference.langCode,
+      fromVersion: update.difference.fromVersion,
       version: update.difference.version,
       strings,
       keysToRemove,

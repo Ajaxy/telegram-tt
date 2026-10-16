@@ -123,7 +123,7 @@ const PreparedMessageModal = ({
       </Wallpaper>
       <div className={styles.container}>
         <p className={styles.info}>
-          {lang('WebAppShareMessageInfo', { user: getUserFullName(bot) })}
+          {lang('WebAppShareMessageInfo', { user: getUserFullName(lang, bot) })}
         </p>
         <Button
           onClick={handleOpenClick}

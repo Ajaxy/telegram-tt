@@ -3,7 +3,6 @@ import type { ActionReturnType } from '../../types';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import * as langProvider from '../../../util/oldLangProvider';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler, setGlobal } from '../../index';
@@ -126,8 +125,11 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
 
   if (!shouldIgnoreBalance && starBalance && topup && topup.balanceNeeded <= starBalance.amount) {
     actions.showNotification({
-      message: langProvider.oldTranslate('StarsTopupLinkEnough'),
-      actionText: langProvider.oldTranslate('StarsTopupLinkTopupAnyway'),
+      message: {
+        key: 'StarsTopupLinkEnough',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      actionText: { key: 'StarsTopupLinkTopupAnyway' },
       action: {
         action: 'openStarsBalanceModal',
         payload: { topup, shouldIgnoreBalance: true, tabId },

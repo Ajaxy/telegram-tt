@@ -24,7 +24,6 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Marquee from '../ui/Marquee';
 import Transition from '../ui/Transition';
@@ -81,13 +80,12 @@ const FullNameTitle = ({
 }: OwnProps) => {
   const { showNotification } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const realPeer = 'id' in peer ? peer : undefined;
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;
   const isUser = realPeer && isApiPeerUser(realPeer);
-  const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(oldLang, realPeer));
+  const title = realPeer && (isUser ? getUserFullName(lang, realPeer) : getChatTitle(lang, realPeer));
   const isPremium = (isUser && realPeer.isPremium) || customPeer?.isPremium;
   const canShowEmojiStatus = withEmojiStatus && !isSavedMessages;
   const emojiStatus = realPeer?.emojiStatus
@@ -100,32 +98,32 @@ const FullNameTitle = ({
 
     stopEvent(e);
     copyTextToClipboard(title);
-    showNotification({ message: `${isUser ? 'User' : 'Chat'} name was copied` });
+    showNotification({ message: { key: isUser ? 'UserNameCopied' : 'ChatNameCopied' } });
   });
 
   const specialTitle = useMemo(() => {
     if (customPeer) {
-      return renderText(customPeer.title || oldLang(customPeer.titleKey!));
+      return renderText(customPeer.title || lang(customPeer.titleKey!));
     }
 
     if (isSavedMessages) {
-      return oldLang(isSavedDialog ? 'MyNotes' : 'SavedMessages');
+      return lang(isSavedDialog ? 'MyNotes' : 'SavedMessages');
     }
 
     if (isAnonymousForwardsChat(realPeer!.id)) {
-      return oldLang('AnonymousForward');
+      return lang('AnonymousForward');
     }
 
     if (isChatWithRepliesBot(realPeer!.id)) {
-      return oldLang('RepliesTitle');
+      return lang('RepliesTitle');
     }
 
     if (isChatWithVerificationCodesBot(realPeer!.id)) {
-      return oldLang('VerifyCodesNotifications');
+      return lang('VerifyCodesNotifications');
     }
 
     return undefined;
-  }, [customPeer, isSavedDialog, isSavedMessages, oldLang, realPeer]);
+  }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
   const botVerificationIconId = !isSavedMessages && !isSavedDialog ? realPeer?.botVerificationIconId : undefined;
   const renderedTitle = useMemo(() => specialTitle || renderText(title || ''), [specialTitle, title]);
 

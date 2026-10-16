@@ -36,8 +36,8 @@ import { createLocationHash } from '../../../../util/routing';
 import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 import useChatListEntry from '../hooks/useChatListEntry';
 import useTopicContextActions from '../hooks/useTopicContextActions';
 
@@ -114,7 +114,7 @@ const Topic = ({
     openQuickPreview,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
@@ -248,7 +248,7 @@ const Topic = ({
           onCloseAnimationEnd={unmarkRenderDeleteModal}
           confirmIsDestructive
           confirmHandler={handleDelete}
-          text={lang('lng_forum_topic_delete_sure')}
+          text={lang('ForumTopicDeleteSure')}
           confirmLabel={lang('Delete')}
         />
       )}

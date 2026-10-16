@@ -10,8 +10,8 @@ import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdo
 import buildClassName from '../../../util/buildClassName';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Button from '../../ui/Button';
@@ -35,7 +35,7 @@ const ReportModal = ({
   const {
     reportMessages, reportStory, closeReportModal, openPreviousReportModal,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const isOpen = Boolean(modal);
 
   const transitionRef = useRef<HTMLDivElement>();
@@ -106,7 +106,7 @@ const ReportModal = ({
         <div className={buildClassName('modal-title', styles.modalTitle, hasSubtitle && styles.titleMultiline)}>
           <h3 className={buildClassName(styles.title, renderingDepth && styles.hasDepth)}>
             {isOptionsSection
-              ? lang(modal?.subject === 'story' ? 'ReportStory' : 'Report') : renderingSection?.title}
+              ? lang(modal?.subject === 'story' ? 'ReportStory' : 'ReportPeerReport') : renderingSection?.title}
           </h3>
           {isOptionsSection && renderingSection.subtitle && (
             <span className={styles.subtitle}>{renderingSection.subtitle}</span>

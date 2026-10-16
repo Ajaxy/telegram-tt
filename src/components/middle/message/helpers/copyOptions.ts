@@ -1,6 +1,7 @@
 import type { ApiMessage, StatefulMediaContent } from '../../../../api/types';
 import type { MessageListType, ThreadId } from '../../../../types';
 import type { IconName } from '../../../../types/icons';
+import type { RegularLangKey } from '../../../../types/language';
 import type { ClipboardTextFormat, MessageCopyRequest } from '../../../../types/messageCopy';
 import { ApiMediaFormat } from '../../../../api/types';
 
@@ -23,7 +24,7 @@ import * as mediaLoader from '../../../../util/mediaLoader';
 import { captureMessageCopyRequest } from './getSelectionAsFormattedText';
 
 type ICopyOptions = {
-  label: string;
+  label: RegularLangKey;
   icon: IconName;
   canCopyWithFormat?: boolean;
   handler: (textFormat?: ClipboardTextFormat) => void;
@@ -54,7 +55,7 @@ export function getMessageCopyOptions(
 
   if (canImageBeCopied) {
     options.push({
-      label: 'lng_context_copy_image',
+      label: 'ContextCopyImage',
       icon: 'copy-media',
       handler: () => {
         Promise.resolve(mediaHash ? mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl) : photo.blobUrl)
@@ -67,7 +68,7 @@ export function getMessageCopyOptions(
 
   if (canCopy && href) {
     options.push({
-      label: 'lng_context_copy_link',
+      label: 'CopyLink',
       icon: 'copy',
       handler: () => {
         copyTextToClipboard(href);
@@ -114,7 +115,7 @@ export function getMessageCopyOptions(
 
   if (onCopyLink) {
     options.push({
-      label: 'lng_context_copy_message_link',
+      label: 'ContextCopyMessageLink',
       icon: 'link',
       handler: onCopyLink,
     });
@@ -122,7 +123,7 @@ export function getMessageCopyOptions(
 
   if (contact && onCopyNumber) {
     options.push({
-      label: 'lng_profile_copy_phone',
+      label: 'ProfileCopyPhone',
       icon: 'copy',
       handler: () => {
         onCopyNumber();
@@ -140,9 +141,9 @@ function checkMessageHasSelection(message: ApiMessage): boolean {
   const selectedMessageElement = selectionParentNode?.closest<HTMLDivElement>('.Message.message-list-item');
   return String(message.id) === selectedMessageElement?.dataset.messageId;
 }
-function getCopyLabel(hasSelection: boolean): string {
+function getCopyLabel(hasSelection: boolean): RegularLangKey {
   if (hasSelection) {
-    return 'lng_context_copy_selected';
+    return 'ContextCopySelected';
   }
-  return 'lng_context_copy_text';
+  return 'ContextCopyText';
 }

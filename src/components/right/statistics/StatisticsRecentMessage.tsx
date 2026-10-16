@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -9,8 +8,8 @@ import {
   getMessageVideo,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useMessageMediaHash from '../../../hooks/media/useMessageMediaHash';
@@ -28,9 +27,10 @@ export type OwnProps = {
   message: ApiMessage;
 };
 
-const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
-  const lang = useLang();
+const StatisticsRecentMessage = ({ postStatistic, message }: OwnProps) => {
   const { toggleMessageStatistics } = getActions();
+
+  const lang = useLang();
 
   const thumbDataUri = useThumbnail(message);
   const mediaHash = useMessageMediaHash(message, 'micro');
@@ -64,7 +64,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
 
       <div className={styles.info}>
         <div className={styles.date}>
-          {formatDateTimeToString(message.date * 1000, lang.code)}
+          {formatDateTime(lang, secondsToDate(message.date), { date: 'short', time: 'short' })}
         </div>
         <StatisticsRecentPostMeta postStatistic={postStatistic} />
       </div>

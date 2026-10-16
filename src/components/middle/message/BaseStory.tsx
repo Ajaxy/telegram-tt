@@ -6,14 +6,14 @@ import type { ApiMessageStoryData, ApiTypeStory } from '../../../api/types';
 import { getStoryMediaHash } from '../../../global/helpers';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Icon from '../../common/icons/Icon';
@@ -34,7 +34,7 @@ function BaseStory({
 }: OwnProps) {
   const { openStoryViewer, loadPeerStoriesByIds, showNotification } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
   const isExpired = story && 'isDeleted' in story;
   const isLoaded = story && 'content' in story;
@@ -67,7 +67,10 @@ function BaseStory({
   const handleClick = useLastCallback(() => {
     if (isExpired) {
       showNotification({
-        message: lang('StoryNotFound'),
+        message: {
+          key: 'StoryNotFound',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
       });
       return;
     }

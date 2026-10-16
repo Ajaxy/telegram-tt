@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
   useState,
@@ -19,8 +18,8 @@ import { formatCurrencyAsString } from '../../../../util/formatCurrency';
 import renderText from '../../../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import Avatar from '../../../common/Avatar';
 import SafeLink from '../../../common/SafeLink';
@@ -42,10 +41,10 @@ type StateProps = {
 
 const AVATAR_SIZE = 100;
 
-const StarsGiftModal: FC<OwnProps & StateProps> = ({
+const StarsGiftModal = ({
   modal,
   user,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeStarsGiftModal, openInvoice, requestConfetti,
   } = getActions();
@@ -55,7 +54,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 
   const renderingModal = useCurrentOrPrev(modal);
 
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [selectedOption, setSelectedOption] = useState<ApiStarTopupOption | undefined>();
   const [isHeaderHidden, setIsHeaderHidden] = useState(true);
@@ -123,26 +122,27 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 
   function renderGiftTitle() {
     if (renderingModal?.isCompleted) {
-      return user ? renderText(oldLang('Notification.StarsGift.SentYou',
-        formatCurrencyAsString(selectedOption!.amount, selectedOption!.currency, oldLang.code)), ['simple_markdown'])
-        : renderText(oldLang('StarsAcquiredInfo', selectedOption?.stars), ['simple_markdown']);
+      return user ? renderText(
+        lang(
+          'NotificationStarsGiftSentYou',
+          { amount: formatCurrencyAsString(selectedOption!.amount, selectedOption!.currency, lang.code) },
+        ),
+        ['simple_markdown'],
+      )
+        : renderText(
+          lang('StarsAcquiredInfo', { count: selectedOption!.stars }, { pluralValue: selectedOption!.stars }),
+          ['simple_markdown'],
+        );
     }
 
-    return user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars');
+    return user ? lang('GiftStarsTitle') : lang('StarListGetStars');
   }
 
   const bottomText = useMemo(() => {
-    const text = oldLang('lng_credits_summary_options_about');
-    const parts = text.split('{link}');
-    return [
-      parts[0],
-      <SafeLink
-        url={oldLang('StarsTOSLink')}
-        text={oldLang('lng_credits_summary_options_about_link')}
-      />,
-      parts[1],
-    ];
-  }, [oldLang]);
+    return lang('CreditsSummaryOptionsAbout', {
+      link: <SafeLink url={lang('StarsTOSLink')} text={lang('CreditsSummaryOptionsAboutLink')} />,
+    }, { withNodes: true });
+  }, [lang]);
 
   return (
     <Modal
@@ -157,7 +157,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
-            {user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars')}
+            {user ? lang('GiftStarsTitle') : lang('StarListGetStars')}
           </h2>
         </div>
         <div className={styles.headerInfo}>
@@ -182,8 +182,8 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
         </h2>
         <p className={styles.description}>
           {user ? renderText(
-            oldLang('ActionGiftStarsSubtitle', getPeerTitle(oldLang, user)), ['simple_markdown'],
-          ) : oldLang('Stars.Purchase.GetStarsInfo')}
+            lang('ActionGiftStarsSubtitle', { peer: getPeerTitle(lang, user) }), ['simple_markdown'],
+          ) : lang('StarsPurchaseGetStarsInfo')}
         </p>
         <div className={styles.section}>
           <StarTopupOptionList

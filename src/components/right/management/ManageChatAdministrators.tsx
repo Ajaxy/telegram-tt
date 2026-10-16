@@ -9,8 +9,8 @@ import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Island, { IslandDescription } from '../../gili/layout/Island';
@@ -44,7 +44,7 @@ const ManageChatAdministrators = ({
   onClose,
 }: OwnProps & StateProps) => {
   const { toggleSignatures } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -102,7 +102,7 @@ const ManageChatAdministrators = ({
     const promotedByUser = member.promotedByUserId ? usersById[member.promotedByUserId] : undefined;
 
     if (promotedByUser) {
-      return lang('EditAdminPromotedBy', getUserFullName(promotedByUser));
+      return lang('EditAdminPromotedBy', { user: getUserFullName(lang, promotedByUser) });
     }
 
     return lang('ChannelAdmin');
@@ -123,9 +123,7 @@ const ManageChatAdministrators = ({
         </Island>
 
         <IslandDescription dir="auto">
-          {lang(isChannel
-            ? 'Channel.Management.AddModeratorHelp'
-            : 'Group.Management.AddModeratorHelp')}
+          {lang(isChannel ? 'ChannelManagementAddAdminDescription' : 'GroupManagementAddAdminDescription')}
         </IslandDescription>
         <Island dir={lang.isRtl ? 'rtl' : undefined}>
           {adminMembers.map((member) => (
@@ -146,7 +144,7 @@ const ManageChatAdministrators = ({
           <FloatingActionButton
             isShown={canAddNewAdmins}
             onClick={handleAddAdminClick}
-            ariaLabel={lang('Channel.Management.AddModerator')}
+            ariaLabel={lang('ChannelManagementAddModerator')}
             iconName="add-user-filled"
           />
         </Island>

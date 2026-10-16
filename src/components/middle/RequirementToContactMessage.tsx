@@ -11,7 +11,6 @@ import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import Icon from '../common/icons/Icon';
@@ -33,9 +32,8 @@ type StateProps = {
 function RequirementToContactMessage({
   patternColor, peer, paidMessagesStars,
 }: OwnProps & StateProps) {
-  const oldLang = useOldLang();
-  const lang = useLang();
   const { openPremiumModal, openStarsBalanceModal } = getActions();
+  const lang = useLang();
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
 
@@ -72,7 +70,7 @@ function RequirementToContactMessage({
                 withNodes: true,
                 withMarkdown: true,
               })
-              : renderText(oldLang('MessageLockedPremium', getPeerTitle(lang, peer)), ['simple_markdown'])
+              : renderText(lang('MessageLockedPremium', { peer: getPeerTitle(lang, peer) }), ['simple_markdown'])
           }
         </span>
         <Button
@@ -90,7 +88,7 @@ function RequirementToContactMessage({
                   <Sparkles preset="button" />
                 </>
               )
-              : oldLang('MessagePremiumUnlock')
+              : lang('MessagePremiumUnlock')
           }
         </Button>
       </div>

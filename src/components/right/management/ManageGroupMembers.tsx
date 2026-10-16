@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -24,7 +23,6 @@ import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePeerSearch, { userGlobalSearch } from '../../../hooks/usePeerSearch';
 
 import NothingFound from '../../common/NothingFound';
@@ -59,7 +57,7 @@ type StateProps = {
   canHideParticipants?: boolean;
 };
 
-const ManageGroupMembers: FC<OwnProps & StateProps> = ({
+const ManageGroupMembers = ({
   chatId,
   noAdmins,
   members,
@@ -76,13 +74,13 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   onClose,
   onScreenSelect,
   onChatMemberSelect,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openChat, closeManagement,
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
     openDeleteMemberModal,
   } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
   const inputRef = useRef<HTMLInputElement>();
   const containerRef = useRef<HTMLDivElement>();
@@ -180,7 +178,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
-      title: oldLang('lng_context_remove_from_group'),
+      title: lang('ContextRemoveFromGroup'),
       icon: 'stop',
       handler: () => {
         openDeleteMemberModal({ chatId, peerId: memberId });
@@ -190,12 +188,12 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
   function renderSearchField() {
     return (
-      <Island dir={oldLang.isRtl ? 'rtl' : undefined}>
+      <Island dir={lang.isRtl ? 'rtl' : undefined}>
         <InputText
           ref={inputRef}
           value={searchQuery}
           onChange={handleFilterChange}
-          placeholder={oldLang('Search')}
+          placeholder={lang('Search')}
           noMargin
         />
       </Island>
@@ -210,12 +208,12 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
           <>
             <Island>
               <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
-                <span>{oldLang('ChannelHideMembers')}</span>
+                <span>{lang('ChannelHideMembers')}</span>
                 <Switch checked={Boolean(areParticipantsHidden)} />
               </ListItem>
             </Island>
             <IslandDescription>
-              {oldLang(areParticipantsHidden ? 'GroupMembers.MembersHiddenOn' : 'GroupMembers.MembersHiddenOff')}
+              {lang(areParticipantsHidden ? 'GroupMembersMembersHiddenOn' : 'GroupMembersMembersHiddenOff')}
             </IslandDescription>
           </>
         )}
@@ -257,7 +255,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown
           onClick={handleNewMemberDialogOpen}
-          ariaLabel={oldLang('lng_channel_add_users')}
+          ariaLabel={lang('ChannelAddUsers')}
           iconName="add-user-filled"
         />
       )}

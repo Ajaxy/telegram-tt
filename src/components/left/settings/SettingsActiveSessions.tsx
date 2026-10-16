@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -7,13 +6,12 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
-import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
+import { formatCompactTimestamp, secondsToDate } from '../../../util/localization/dateFormat';
 import getSessionIcon, { DEVICE_BACKDROP } from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island, { IslandTitle } from '../../gili/layout/Island';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -30,20 +28,19 @@ type OwnProps = {
 
 type StateProps = GlobalState['activeSessions'];
 
-const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
+const SettingsActiveSessions = ({
   isActive,
   onReset,
   byHash,
   orderedHashes,
   ttlDays,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     terminateAuthorization,
     terminateAllAuthorizations,
     changeSessionTtl,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
@@ -249,7 +246,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         <div className="multiline-item full-size" dir="auto">
           <span className="title title-with-date">
             {session.deviceModel}
-            <span className="date">{formatPastTimeShort(oldLang, session.dateActive * 1000)}</span>
+            <span className="date">{formatCompactTimestamp(lang, secondsToDate(session.dateActive))}</span>
           </span>
           <span className="subtitle black tight">
             {session.appName}

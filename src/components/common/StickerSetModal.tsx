@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -29,7 +28,7 @@ import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useScrolledState from '../../hooks/useScrolledState';
@@ -63,7 +62,7 @@ type StateProps = {
 
 const INTERSECTION_THROTTLE = 200;
 
-const StickerSetModal: FC<OwnProps & StateProps> = ({
+const StickerSetModal = ({
   isOpen,
   fromSticker,
   stickerSetShortName,
@@ -76,7 +75,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   shouldUpdateStickerSetOrder,
   currentMessageList,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadStickers,
     toggleStickerSet,
@@ -87,7 +86,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>();
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { isMobile } = useAppLayout();
 
@@ -159,17 +158,19 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   const renderButtonText = () => {
     if (!renderingStickerSet) return lang('Loading');
 
-    const suffix = isEmoji ? 'Emoji' : 'Sticker';
+    const key = isEmoji
+      ? (isAdded ? 'StickerPackRemoveEmojiCount' : 'StickerPackAddEmojiCount')
+      : (isAdded ? 'StickerPackRemoveStickerCount' : 'StickerPackAddStickerCount');
 
     return lang(
-      isAdded ? `StickerPack.Remove${suffix}Count` : `StickerPack.Add${suffix}Count`,
-      renderingStickerSet.count,
-      'i',
+      key,
+      { count: lang.number(renderingStickerSet.count) },
+      { pluralValue: renderingStickerSet.count },
     );
   };
 
-  const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen: isMenuOpen }) => (
+  const MoreMenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen: isMenuOpen }: { isOpen?: boolean; onTrigger: () => void }) => (
       <Button
         round
         ripple={!isMobile}
@@ -177,11 +178,11 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
         onClick={onTrigger}
-        ariaLabel="More actions"
+        ariaLabel={lang('AccDescrMoreOptions')}
         iconName="more"
       />
     );
-  }, [isMobile]);
+  }, [isMobile, lang]);
 
   function renderHeader() {
     const fullClassName = buildClassName('modal-header', !shouldHideTopBorder && 'with-top-border');
@@ -204,7 +205,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
           trigger={MoreMenuButton}
           positionX="right"
         >
-          <MenuItem icon="copy" onClick={handleCopyLink}>{lang('StickersCopy')}</MenuItem>
+          <MenuItem icon="copy" onClick={handleCopyLink}>{lang('CopyLink')}</MenuItem>
         </DropdownMenu>
       </div>
     );

@@ -10,6 +10,7 @@ import type {
   ApiDialogMessage,
 } from '../../api/types';
 import type { MessageList } from '../../types';
+import type { LangFn } from '../../util/localization';
 
 import { selectCurrentMessageList, selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';
@@ -117,12 +118,12 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
 
   const renderError = (error: ApiDialogError) => {
     const renderedErrorMessage = error.hasErrorKey
-      ? getReadableErrorText(error)
+      ? getReadableErrorText(lang, error)
       : error.entities?.length
         ? renderTextWithEntities({ text: error.message, entities: error.entities })
         : error.message;
 
-    return renderTextDialog(renderedErrorMessage, getErrorHeader(error));
+    return renderTextDialog(renderedErrorMessage, getErrorHeader(lang, error));
   };
 
   const renderDialog = (dialog: ApiDialog) => {
@@ -144,16 +145,16 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
   return Boolean(dialogs.length) && renderDialog(dialogs[dialogs.length - 1]);
 };
 
-function getErrorHeader(error: ApiDialogError) {
+function getErrorHeader(lang: LangFn, error: ApiDialogError) {
   if (error.isSlowMode) {
-    return 'Slowmode enabled';
+    return lang('SlowmodeEnabled');
   }
 
   if (!error.hasErrorKey) {
     return 'Telegram';
   }
 
-  return 'Something went wrong';
+  return lang('SomethingWentWrong');
 }
 
 export default memo(withGlobal(

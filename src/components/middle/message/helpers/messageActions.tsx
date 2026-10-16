@@ -23,14 +23,16 @@ import Link from '../../../ui/Link';
 import styles from '../ActionMessage.module.scss';
 
 type SuffixKey<T, K extends keyof T> = `${K & string}You` extends keyof T ? T[`${K & string}You`] : never;
-type VariablesForKey<K extends LangKey> =
+type RemoveYouSuffix<K extends string> = K extends `${infer Key}You` ? Key : never;
+type LangKeyWithYou = Extract<LangKey, RemoveYouSuffix<LangKey>>;
+type VariablesForKey<K extends LangKeyWithYou> =
   K extends RegularLangKeyWithVariables
     ? LangPairWithVariables<TeactNode | undefined>[K] | SuffixKey<LangPairWithVariables, K>
     : K extends PluralLangKeyWithVariables
       ? LangPairPluralWithVariables<TeactNode | undefined>[K] | SuffixKey<LangPairPluralWithVariables, K>
       : undefined;
 
-export function translateWithYou<K extends LangKey>(
+export function translateWithYou<K extends LangKeyWithYou>(
   lang: LangFn,
   key: K,
   isYou: boolean,

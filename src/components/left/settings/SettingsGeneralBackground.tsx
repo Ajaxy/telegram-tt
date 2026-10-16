@@ -23,7 +23,6 @@ import { removeWallpaperBlobIfUnused } from '../../../util/wallpaperStorage';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island, { IslandTitle } from '../../gili/layout/Island';
 import Checkbox from '../../ui/Checkbox';
@@ -176,7 +175,6 @@ const SettingsGeneralBackground = ({
   });
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -226,7 +224,7 @@ const SettingsGeneralBackground = ({
           disabled={isUploading}
           onClick={handleUploadWallpaper}
         >
-          {oldLang('UploadImage')}
+          {lang('UploadImage')}
         </ListItem>
 
         <ListItem
@@ -234,15 +232,15 @@ const SettingsGeneralBackground = ({
           className="mb-0"
           onClick={handleSetColor}
         >
-          {oldLang('SetColor')}
+          {lang('SetColor')}
         </ListItem>
 
         <ListItem icon="star-regular" onClick={handleResetToDefault}>
-          {oldLang('ThemeResetToDefaults')}
+          {lang('ThemeResetToDefaults')}
         </ListItem>
 
         <Checkbox
-          label={oldLang('BackgroundBlurred')}
+          label={lang('BackgroundBlurred')}
           checked={isImageBackground && Boolean(isBlurred)}
           disabled={!isImageBackground}
           onChange={handleWallPaperBlurChange}

@@ -5,7 +5,7 @@ import type { TabState } from '../../../global/types';
 
 import { getMainUsername } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
-import { formatDateToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime } from '../../../util/localization/dateFormat';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 
@@ -108,7 +108,7 @@ const FrozenAccountModal = ({
       ['frozen-time', lang('FrozenAccountAppealTitle'),
         lang('FrozenAccountAppealSubtitle', {
           botLink,
-          date: formatDateToString(date, lang.code),
+          date: formatDateTime(lang, date, { date: 'short' }),
         }, {
           withNodes: true,
         })],

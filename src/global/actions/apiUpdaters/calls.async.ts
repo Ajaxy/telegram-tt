@@ -15,7 +15,6 @@ import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { logDebugMessage } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/oldLangProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
 import { callApi } from '../../../api/gramjs';
 import { runForAllTabs } from '../../helpers';
@@ -85,7 +84,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
     case 'updateGroupCallConnection': {
       if (update.data.stream) {
-        actions.showNotification({ message: 'Big live streams are not yet supported', tabId: getCurrentTabId() });
+        actions.showNotification({ message: { key: 'LiveStreamUnsupported' }, tabId: getCurrentTabId() });
         if ('leaveGroupCall' in actions) actions.leaveGroupCall({ tabId: getCurrentTabId() });
         break;
       }
@@ -165,7 +164,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           const user = selectPhoneCallUser(global);
           if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
           actions.showNotification({
-            message: langProvider.oldTranslate('VoipPeerIncompatible', user?.firstName),
+            message: {
+              key: 'VoipPeerIncompatible',
+              variables: {
+                user: user?.firstName,
+              },
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            },
             tabId: getCurrentTabId(),
           });
           return undefined;

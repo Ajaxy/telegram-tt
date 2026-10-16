@@ -1,11 +1,10 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 
 import type { IconName } from '../../../../types/icons';
 
 import buildClassName from '../../../../util/buildClassName';
 
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 import Icon from '../../../common/icons/Icon';
 
@@ -19,14 +18,14 @@ type OwnProps = {
   rightStyle?: string;
 };
 
-const PremiumLimitsCompare: FC<OwnProps> = ({
+const PremiumLimitsCompare = ({
   leftValue,
   rightValue,
   className,
   floatingBadgeIcon,
   rightStyle,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   return (
     <div className={buildClassName(styles.root, className)}>

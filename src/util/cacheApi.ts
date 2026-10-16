@@ -1,6 +1,5 @@
 import {
   CUSTOM_BG_CACHE_NAME,
-  LANG_CACHE_NAME,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
@@ -40,12 +39,6 @@ export enum Type {
   ArrayBuffer,
 }
 
-function getCacheName(cacheName: string) {
-  if (cacheName === LANG_CACHE_NAME) return cacheName;
-
-  return getAccountScopedCacheName(cacheName);
-}
-
 function getAccountScopedCacheName(cacheName: string) {
   const suffix = ACCOUNT_SLOT ? `_${ACCOUNT_SLOT}` : '';
   return `${cacheName}${suffix}`;
@@ -54,7 +47,7 @@ function getAccountScopedCacheName(cacheName: string) {
 export async function fetch(
   cacheName: string, key: string, type: Type, isHtmlAllowed = false,
 ) {
-  return fetchFromCache(getCacheName(cacheName), key, type, isHtmlAllowed);
+  return fetchFromCache(getAccountScopedCacheName(cacheName), key, type, isHtmlAllowed);
 }
 
 export async function fetchShared(
@@ -152,7 +145,7 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
     return false;
   }
 
-  const resolvedCacheName = getCacheName(cacheName);
+  const resolvedCacheName = getAccountScopedCacheName(cacheName);
   if (isPasscodeProtectedCache(resolvedCacheName)) {
     return requestPasscodeStateLock(async () => {
       if (await loadPasscodeMeta()) return false;
@@ -187,7 +180,7 @@ async function saveToCache(
 }
 
 export async function remove(cacheName: string, key: string) {
-  return removeFromCache(getCacheName(cacheName), key);
+  return removeFromCache(getAccountScopedCacheName(cacheName), key);
 }
 
 export async function removeShared(cacheName: string, key: string) {
@@ -215,7 +208,7 @@ async function removeFromCache(resolvedCacheName: string, key: string) {
 }
 
 export async function clear(cacheName: string) {
-  return clearCache(getCacheName(cacheName));
+  return clearCache(getAccountScopedCacheName(cacheName));
 }
 
 export async function clearShared(cacheName: string) {
@@ -247,7 +240,7 @@ export async function cleanup(cacheNames: string[]) {
 
   try {
     for (const cacheName of cacheNames) {
-      const cache = await cacheApi.open(getCacheName(cacheName));
+      const cache = await cacheApi.open(getAccountScopedCacheName(cacheName));
       const keys = await cache.keys();
       const now = Date.now();
 

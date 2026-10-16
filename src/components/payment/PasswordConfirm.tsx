@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -9,7 +8,6 @@ import type { RegularLangFnParameters } from '../../util/localization';
 import { selectTabState } from '../../global/selectors';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import PasswordForm from '../common/PasswordForm';
 import PasswordMonkey from '../common/PasswordMonkey';
@@ -27,17 +25,16 @@ interface StateProps {
   savedCredentials?: ApiPaymentCredentials[];
 }
 
-const PasswordConfirm: FC<OwnProps & StateProps> = ({
+const PasswordConfirm = ({
   isActive,
   errorKey,
   state,
   savedCredentials,
   passwordHint,
   onPasswordChange,
-}) => {
+}: OwnProps & StateProps) => {
   const { clearPaymentError } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const [shouldShowPassword, setShouldShowPassword] = useState(false);
@@ -54,8 +51,8 @@ const PasswordConfirm: FC<OwnProps & StateProps> = ({
       <PasswordForm
         error={errorKey && lang.withRegular(errorKey)}
         hint={passwordHint}
-        description={oldLang('PaymentConfirmationMessage', cardName)}
-        placeholder={oldLang('Password')}
+        description={lang('PaymentConfirmationMessage', { cardName })}
+        placeholder={lang('PasswordFormPlaceholder')}
         onClearError={clearPaymentError}
         shouldShowSubmit={false}
         shouldResetValue={isActive}

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -15,7 +14,7 @@ import { getTopicColors } from '../../util/forumColors';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
@@ -39,18 +38,18 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const CreateTopic: FC<OwnProps & StateProps> = ({
+const CreateTopic = ({
   isActive,
   chat,
   createTopicPanel,
   isCurrentUserPremium,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { createTopic, openPremiumModal } = getActions();
   const [title, setTitle] = useState('');
   const [iconColorIndex, setIconColorIndex] = useState(0);
   const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isTouched = Boolean(title);
   const isLoading = Boolean(createTopicPanel?.isLoading);
@@ -134,7 +133,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
           <InputText
             value={title}
             onChange={handleTitleChange}
-            label={lang('lng_forum_topic_title')}
+            label={lang('ForumTopicTitle')}
             disabled={isLoading}
             teactExperimentControlled
           />

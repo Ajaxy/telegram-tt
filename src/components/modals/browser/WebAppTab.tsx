@@ -5,6 +5,7 @@ import type { ApiAttachBot, ApiBotAppSettings, ApiUser } from '../../../api/type
 import type { TabState } from '../../../global/types';
 import type { BotAppPermissions, ThemeKey } from '../../../types';
 import type { BrowserModalStateType } from '../../../types/browser';
+import type { RegularLangKey } from '../../../types/language';
 import type {
   PopupOptions,
   WebApp,
@@ -40,7 +41,6 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFullscreen';
 import usePopupLimit from './hooks/usePopupLimit';
@@ -105,7 +105,7 @@ const POPUP_BUTTON_TEXT_MAX_LENGTH = 64;
 const POPUP_MAX_BUTTONS = 3;
 const POPUP_BUTTON_TYPES = ['ok', 'close', 'cancel', 'default', 'destructive'];
 const APP_NAME_DISPLAY_DURATION = 3800;
-const DEFAULT_BUTTON_TEXT: Record<string, string> = {
+const DEFAULT_BUTTON_TEXT: Record<string, RegularLangKey> = {
   ok: 'OK',
   cancel: 'Cancel',
   close: 'Close',
@@ -258,7 +258,6 @@ const WebAppTab = ({
 
   const frameRef = useRef<HTMLIFrameElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const isOpen = modal?.isModalOpen || false;
   const isSimple = Boolean(buttonText);
@@ -868,7 +867,12 @@ const WebAppTab = ({
       const handleRequestLocation = async () => {
         if (!isAvailable) {
           sendLocationUnavailable();
-          showNotification({ message: oldLang('PermissionNoLocationPosition') });
+          showNotification(
+            { message: {
+              key: 'PermissionNoLocationPosition',
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            } },
+          );
           handleAppPopupClose(undefined);
           return;
         }
@@ -892,7 +896,12 @@ const WebAppTab = ({
 
         if (!accessGranted || !accessRequested || !geolocation) {
           sendLocationUnavailable();
-          showNotification({ message: oldLang('PermissionNoLocationPosition') });
+          showNotification(
+            { message: {
+              key: 'PermissionNoLocationPosition',
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            } },
+          );
           handleAppPopupClose(undefined);
           return;
         }
@@ -1084,7 +1093,7 @@ const WebAppTab = ({
     isBackButtonVisible && styles.stateBack,
   );
   const backButtonCaption = shouldShowAppNameInFullscreen ? appName
-    : oldLang(isBackButtonVisible ? 'Back' : 'Close');
+    : lang(isBackButtonVisible ? 'Back' : 'Close');
 
   const hasHeaderElement = headerButtonCaptionRef?.current;
 
@@ -1324,7 +1333,7 @@ const WebAppTab = ({
               isText
               onClick={() => handleAppPopupClose(button.id)}
             >
-              {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
+              {button.text || lang(DEFAULT_BUTTON_TEXT[button.type])}
             </Button>
           ))}
         </div>
@@ -1345,10 +1354,10 @@ const WebAppTab = ({
       <ConfirmDialog
         isOpen={isRequestingWriteAccess}
         onClose={handleRejectWriteAccess}
-        title={oldLang('lng_bot_allow_write_title')}
-        text={oldLang('lng_bot_allow_write')}
+        title={lang('BotAllowWriteTitle')}
+        text={lang('BotAllowWrite')}
         confirmHandler={handleAcceptWriteAccess}
-        confirmLabel={oldLang('lng_bot_allow_write_confirm')}
+        confirmLabel={lang('BotAllowWriteConfirm')}
       />
       <ConfirmDialog
         isOpen={Boolean(requestedFileDownload)}
@@ -1368,24 +1377,24 @@ const WebAppTab = ({
       <ConfirmDialog
         isOpen={isCloseModalOpen}
         onClose={handleHideCloseModal}
-        title={oldLang('lng_bot_close_warning_title')}
-        text={oldLang('lng_bot_close_warning')}
+        title={lang('BotCloseWarningTitle')}
+        text={lang('BotCloseWarning')}
         confirmHandler={handleConfirmCloseModal}
         confirmIsDestructive
-        confirmLabel={oldLang('lng_bot_close_warning_sure')}
+        confirmLabel={lang('BotCloseWarningSure')}
       />
       <ConfirmDialog
         isOpen={isRemoveModalOpen}
         onClose={handleHideRemoveModal}
-        title={oldLang('BotRemoveFromMenuTitle')}
-        textParts={renderText(oldLang('BotRemoveFromMenu', bot?.firstName), ['simple_markdown'])}
+        title={lang('BotRemoveFromMenuTitle')}
+        textParts={renderText(lang('BotRemoveFromMenu', { user: bot?.firstName }), ['simple_markdown'])}
         confirmHandler={handleRemoveAttachBot}
         confirmIsDestructive
       />
       <ConfirmDialog
         isOpen={Boolean(clipboardRequestId)}
         title={lang('BotReadTextFromClipboardTitle')}
-        text={lang('BotReadTextFromClipboardDescription', { bot: getUserFullName(bot) })}
+        text={lang('BotReadTextFromClipboardDescription', { bot: getUserFullName(lang, bot) })}
         confirmLabel={lang('BotReadTextFromClipboardConfirm')}
         onClose={handleRejectClipboardText}
         confirmHandler={handleConfirmClipboardText}

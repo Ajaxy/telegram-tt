@@ -7,7 +7,7 @@ import type { RegularLangKey } from '../../../types/language';
 
 import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { shortenAddress } from '../../../util/tonAddress';
 
 import useClickable from '../../../hooks/useClickable';
@@ -43,7 +43,7 @@ const WalletTransactionItem = ({ transaction, user, onClick }: OwnProps) => {
 
   const onrampIcon = peer.type === 'onramp' ? getOnrampProviderIcon(peer.providerName).icon : undefined;
   const title = user
-    ? getUserFullName(user)
+    ? getUserFullName(lang, user)
     : peer.type === 'onramp'
       ? lang(onrampIcon === 'walt' ? 'WalletTransactionTopUpCrypto' : 'WalletTransactionTopUp')
       : peer.type !== 'unsupported'
@@ -88,7 +88,13 @@ const WalletTransactionItem = ({ transaction, user, onClick }: OwnProps) => {
             </div>
           </div>
         )}
-        <p className={styles.date}>{formatDateTimeToString(timestamp * 1000, lang.code, true)}</p>
+        <p className={styles.date}>
+          {formatDateTime(
+            lang,
+            secondsToDate(timestamp),
+            { date: 'short', time: 'short' },
+          )}
+        </p>
       </div>
       <span className={styles.after}>
         <span

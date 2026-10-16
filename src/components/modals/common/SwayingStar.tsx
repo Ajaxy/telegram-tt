@@ -3,6 +3,7 @@ import { memo, useRef } from '@teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom.ts';
 import buildClassName from '../../../util/buildClassName.ts';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback.ts';
 
 import styles from './SwayingStar.module.scss';
@@ -22,6 +23,8 @@ function SwayingStar({
   centerShift,
   onMouseMove,
 }: OwnProps) {
+  const lang = useLang();
+
   const starRef = useRef<HTMLDivElement>();
 
   const handleMouseMove = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -58,7 +61,7 @@ function SwayingStar({
         ref={starRef}
         className={buildClassName(styles.star, styles[`star_${color}`])}
         role="img"
-        aria-label="Telegram Stars"
+        aria-label={lang('TelegramStars')}
       />
     </div>
   );

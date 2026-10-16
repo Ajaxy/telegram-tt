@@ -59,8 +59,8 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import { exitPictureInPictureIfNeeded, PICTURE_IN_PICTURE_SIGNAL } from '../../hooks/usePictureInPicture';
 import usePrevious from '../../hooks/usePrevious';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -147,6 +147,7 @@ const MediaViewer = ({
     openUrl,
   } = getActions();
 
+  const lang = useLang();
   const dialogRef = useRef<HTMLDialogElement>();
   const isOpen = Boolean(avatarOwner || message || standaloneMedia || pageMedia || sponsoredMessage);
   const prevIsOpen = usePreviousDeprecated(isOpen);
@@ -550,8 +551,6 @@ const MediaViewer = ({
 
     handleClose();
   });
-
-  const lang = useOldLang();
 
   const content = (
     <>

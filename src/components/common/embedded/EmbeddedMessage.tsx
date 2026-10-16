@@ -21,14 +21,13 @@ import { getMediaContentTypeDescription } from '../../../global/helpers/messageS
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getRichMessagePreviewText } from '../../../global/helpers/richMessage';
 import buildClassName from '../../../util/buildClassName';
-import { formatScheduledDateTime } from '../../../util/dates/oldDateFormat';
 import { isUserId } from '../../../util/entities/ids';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
 import RippleEffect from '../../ui/RippleEffect';
@@ -120,10 +119,9 @@ const EmbeddedMessage = ({
     ? { text: getRichMessagePreviewText(translatedRichMessage) } : translatedText,
   [translatedRichMessage, translatedText]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
-  const senderTitle = sender ? getPeerTitle(oldLang, sender)
+  const senderTitle = sender ? getPeerTitle(lang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);
 
   const forwardSendersTitle = useMemo(() => {
@@ -133,8 +131,8 @@ const EmbeddedMessage = ({
     return lang.conjunction(peerTitles);
   }, [composerForwardSenders, lang]);
 
-  const senderChatTitle = senderChat ? getPeerTitle(oldLang, senderChat) : undefined;
-  const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
+  const senderChatTitle = senderChat ? getPeerTitle(lang, senderChat) : undefined;
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
 
@@ -155,7 +153,7 @@ const EmbeddedMessage = ({
           }))
         : '';
       const scheduleText = suggestedPostInfo.scheduleDate
-        ? formatScheduledDateTime(suggestedPostInfo.scheduleDate, lang, oldLang)
+        ? formatCalendarDate(lang, secondsToDate(suggestedPostInfo.scheduleDate), { isShort: true, withTime: true })
         : '';
       if (priceText && !scheduleText) {
         return (
@@ -266,7 +264,7 @@ const EmbeddedMessage = ({
         {checkShouldRenderSenderTitle() && (
           <span className="embedded-sender">
             {!composerForwardSenders && senderTitle
-              && renderText(isReplyToQuote ? oldLang('ReplyToQuote', senderTitle) : senderTitle)}
+              && renderText(isReplyToQuote ? lang('ReplyToQuote', { senderTitle }) : senderTitle)}
             {forwardSendersTitle && renderText(lang('ComposerTitleForwardFrom', {
               users: forwardSendersTitle,
             }, {

@@ -6,7 +6,7 @@ import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
-import { formatShortDuration } from '../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../util/dates/duration';
 import { getServerTime } from '../../../util/serverTime';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -54,7 +54,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
   const description = useMemo(() => {
     if (!renderingModal || !bot) return undefined;
 
-    const botName = getUserFullName(bot);
+    const botName = getUserFullName(lang, bot);
 
     if (renderingModal.duration) {
       return lang('BotSuggestedStatusFor', {

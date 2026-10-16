@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
-import { formatVoiceRecordDuration } from '../../../util/dates/oldDateFormat';
+import { formatVoiceRecordDuration } from '../../../util/dates/duration';
 import { oggToWav } from '../../../util/oggToWav';
 import { fastRaf } from '../../../util/schedulers';
 import LiveWaveformRenderer from '../../../util/voiceRecording/liveWaveformRenderer';
@@ -13,7 +13,6 @@ import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Icon from '../../common/icons/Icon';
@@ -74,7 +73,6 @@ const VoiceRecordBar = ({
   useTimeout(markMounted, ICON_SWAP_ANIMATION_MS);
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const canReplay = Boolean(recording.getSnapshot || recording.getPlaybackMedia);
 
@@ -343,7 +341,7 @@ const VoiceRecordBar = ({
           className={buildClassName(styles.sideButton, isViewOnceEnabled && styles.viewOnceActive)}
           round
           color="translucent"
-          ariaLabel={oldLang('Chat.PlayOnceVoiceMessageTooltip')}
+          ariaLabel={lang('ChatPlayOnceVoiceMessageTooltip')}
           onClick={onToggleViewOnce}
         >
           <Icon

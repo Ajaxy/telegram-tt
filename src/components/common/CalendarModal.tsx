@@ -3,20 +3,21 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { OldLangFn } from '../../hooks/useOldLang';
+import type { LangFn } from '../../util/localization';
 import type { RepeatedMessageMode } from '../../util/scheduledMessages';
 
 import { MAX_INT_32 } from '../../config';
 import { selectIsCurrentUserPremium } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateToString, formatTime, getDayStart } from '../../util/dates/oldDateFormat';
+import { getDayStart } from '../../util/dates/dateMath';
+import { formatDateTime, formatWeekday, isSameLocalDay, secondsToDate } from '../../util/localization/dateFormat';
 import { ALL_REPEAT_MODES, getScheduleRepeatModeText, TEST_SERVER_ONLY_MODES } from '../../util/scheduledMessages';
+import { getServerTime } from '../../util/serverTime';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
@@ -54,15 +55,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const WEEKDAY_LETTERS = [
-  'lng_weekday1',
-  'lng_weekday2',
-  'lng_weekday3',
-  'lng_weekday4',
-  'lng_weekday5',
-  'lng_weekday6',
-  'lng_weekday7',
-];
+const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 
 const CalendarModal = ({
   selectedAt,
@@ -90,7 +83,6 @@ const CalendarModal = ({
   const menuRef = useRef<HTMLDivElement>();
   const dialogRef = useRef<HTMLDivElement>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   // eslint-disable-next-line @eslint-react/purity
   const now = new Date();
@@ -196,8 +188,8 @@ const CalendarModal = ({
   ), [currentMonth, currentYear]);
 
   const submitLabel = useMemo(() => {
-    return submitButtonLabel || formatSubmitLabel(oldLang, selectedDate);
-  }, [oldLang, selectedDate, submitButtonLabel]);
+    return submitButtonLabel || formatSubmitLabel(lang, selectedDate);
+  }, [lang, selectedDate, submitButtonLabel]);
 
   const handleRepeatModeClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     if (!isCurrentUserPremium) {
@@ -391,9 +383,7 @@ const CalendarModal = ({
         <div className="month-selector">
 
           <h4>
-            {oldLang(`lng_month${currentMonth + 1}`)}
-            {' '}
-            {currentYear}
+            {formatDateTime(lang, currentMonthAndYear, { date: 'long', includeDay: false })}
           </h4>
 
           <Button
@@ -422,9 +412,9 @@ const CalendarModal = ({
 
       <div className="calendar-wrapper">
         <div className="calendar-grid">
-          {WEEKDAY_LETTERS.map((day) => (
+          {WEEKDAYS.map((day) => (
             <div className="day-button faded weekday">
-              {oldLang(day)}
+              {formatWeekday(lang, day, true)}
             </div>
           ))}
           {prevMonthGrid.map((gridDate) => (
@@ -556,15 +546,16 @@ function formatDay(year: number, month: number, day: number) {
   return `${year}-${month + 1}-${day}`;
 }
 
-function formatSubmitLabel(lang: OldLangFn, date: Date) {
-  const day = formatDateToString(date, lang.code);
-  const today = formatDateToString(new Date(), lang.code);
-
-  if (day === today) {
-    return lang('Conversation.ScheduleMessage.SendToday', formatTime(lang, date));
+function formatSubmitLabel(lang: LangFn, date: Date) {
+  const time = formatDateTime(lang, date, { time: 'short' });
+  if (isSameLocalDay(date, secondsToDate(getServerTime()))) {
+    return lang('ConversationScheduleMessageSendToday', { time });
   }
 
-  return lang('Conversation.ScheduleMessage.SendOn', [day, formatTime(lang, date)]);
+  return lang('ConversationScheduleMessageSendOn', {
+    date: formatDateTime(lang, date, { date: 'short' }),
+    time,
+  });
 }
 
 export default memo(withGlobal<OwnProps>(

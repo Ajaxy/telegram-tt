@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -6,7 +5,7 @@ import type { ApiPhoto } from '../../api/types';
 
 import { isUserId } from '../../util/entities/ids';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -19,13 +18,13 @@ export type OwnProps = {
   onClose: NoneToVoidFunction;
 };
 
-const DeleteProfilePhotoModal: FC<OwnProps> = ({
+const DeleteProfilePhotoModal = ({
   isOpen,
   photo,
   profileId,
   onClose,
   onConfirm,
-}) => {
+}: OwnProps) => {
   const {
     deleteProfilePhoto,
     deleteChatPhoto,
@@ -44,7 +43,7 @@ const DeleteProfilePhotoModal: FC<OwnProps> = ({
     onClose();
   }, [onConfirm, profileId, onClose, deleteProfilePhoto, photo, deleteChatPhoto]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   return (
     <Modal
@@ -56,7 +55,7 @@ const DeleteProfilePhotoModal: FC<OwnProps> = ({
     >
       <div className="dialog-buttons mt-2">
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeletePhoto}>
-          {lang('Preview.DeletePhoto')}
+          {lang('PreviewDeletePhoto')}
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>

@@ -9,14 +9,14 @@ import type { GlobalState } from '../../../../global/types';
 import { NNBSP } from '../../../../config';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
-import { formatDateToString } from '../../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { getServerTime } from '../../../../util/serverTime';
 import { formatInteger } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useSelector from '../../../../hooks/data/useSelector';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import Avatar from '../../../common/Avatar';
 import StarIcon from '../../../common/icons/StarIcon';
@@ -40,7 +40,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
   const {
     peerId, pricing, until, isCancelled, title, photo,
   } = subscription;
-  const lang = useOldLang();
+  const lang = useLang();
 
   const peer = useSelector(selectProvidedPeer(peerId))!;
 
@@ -53,7 +53,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
   }
 
   const hasExpired = until < getServerTime();
-  const formattedDate = formatDateToString(until * 1000, lang.code, true, 'long');
+  const formattedDate = formatDateTime(lang, secondsToDate(until), { date: 'long', includeYear: false });
 
   return (
     <div className={styles.root} onClick={handleClick}>
@@ -71,16 +71,17 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
         )}
         <p className={styles.description}>
           {lang(
-            hasExpired ? 'StarsSubscriptionExpired'
+            hasExpired
+              ? 'StarsSubscriptionExpired'
               : isCancelled ? 'StarsSubscriptionExpires' : 'StarsSubscriptionRenews',
-            formattedDate,
+            { date: formattedDate },
           )}
         </p>
       </div>
       <div className={styles.status}>
         {(isCancelled || hasExpired) ? (
           <div className={styles.statusEnded}>
-            {lang(hasExpired ? 'StarsSubscriptionStatusExpired' : 'StarsSubscriptionStatusCancelled')}
+            {lang(hasExpired ? 'InviteLinkExpired' : 'StarsSubscriptionStatusCancelled')}
           </div>
         ) : (
           <>

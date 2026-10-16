@@ -12,8 +12,8 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useContextMenuHandlers from '../../../../hooks/useContextMenuHandlers';
 import useFlag from '../../../../hooks/useFlag';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionAnimatedEmoji from '../../../common/reactions/ReactionAnimatedEmoji';
 import PromptDialog from '../../../modals/prompt/PromptDialog';
@@ -62,7 +62,7 @@ const SavedTagButton = ({
   const ref = useRef<HTMLButtonElement>();
   const menuRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isRenamePromptOpen, openRenamePrompt, closeRenamePrompt] = useFlag();
 
   const { title, count } = tag || {};
@@ -147,7 +147,7 @@ const SavedTagButton = ({
           maxLength={TITLE_MAX_LENGTH}
           title={lang(tag?.title ? 'SavedTagRenameTag' : 'SavedTagLabelTag')}
           subtitle={lang('SavedTagLabelTagText')}
-          placeholder={lang('SavedTagLabelPlaceholder')}
+          placeholder={lang('PaymentCheckoutName')}
           initialValue={tag?.title}
           onClose={closeRenamePrompt}
           onSubmit={handleRenameTag}

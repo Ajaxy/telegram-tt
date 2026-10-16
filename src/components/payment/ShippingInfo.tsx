@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo,
   useCallback, useEffect, useRef,
@@ -12,7 +11,6 @@ import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import focusNoScroll from '../../util/focusNoScroll';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -30,7 +28,7 @@ export type OwnProps = {
   dispatch: FormEditDispatch;
 };
 
-const ShippingInfo: FC<OwnProps> = ({
+const ShippingInfo = ({
   state,
   needEmail,
   needPhone,
@@ -38,7 +36,7 @@ const ShippingInfo: FC<OwnProps> = ({
   needAddress,
   countryList,
   dispatch,
-}) => {
+}: OwnProps) => {
   const inputRef = useRef<HTMLInputElement>();
   const phoneRef = useRef<HTMLInputElement>();
   const selectCountryRef = useRef<HTMLSelectElement>();
@@ -50,7 +48,6 @@ const ShippingInfo: FC<OwnProps> = ({
     }
   }, [state.countryIso2]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   useEffect(() => {
@@ -114,10 +111,10 @@ const ShippingInfo: FC<OwnProps> = ({
       <form>
         {needAddress ? (
           <div>
-            <h5>{oldLang('PaymentShippingAddress')}</h5>
+            <h5>{lang('PaymentShippingAddress')}</h5>
             <InputText
               ref={inputRef}
-              label={oldLang('PaymentShippingAddress1Placeholder')}
+              label={lang('PaymentShippingAddress1Placeholder')}
               onChange={handleAddress1Change}
               value={state.streetLine1}
               inputMode="text"
@@ -125,7 +122,7 @@ const ShippingInfo: FC<OwnProps> = ({
               error={formErrors.streetLine1 && lang.withRegular(formErrors.streetLine1)}
             />
             <InputText
-              label={oldLang('PaymentShippingAddress2Placeholder')}
+              label={lang('PaymentShippingAddress2Placeholder')}
               onChange={handleAddress2Change}
               value={state.streetLine2}
               inputMode="text"
@@ -133,7 +130,7 @@ const ShippingInfo: FC<OwnProps> = ({
               error={formErrors.streetLine2 && lang.withRegular(formErrors.streetLine2)}
             />
             <InputText
-              label={oldLang('PaymentShippingCityPlaceholder')}
+              label={lang('PaymentShippingCityPlaceholder')}
               onChange={handleCityChange}
               value={state.city}
               inputMode="text"
@@ -141,14 +138,14 @@ const ShippingInfo: FC<OwnProps> = ({
               error={formErrors.city && lang.withRegular(formErrors.city)}
             />
             <InputText
-              label={oldLang('PaymentShippingStatePlaceholder')}
+              label={lang('PaymentShippingStatePlaceholder')}
               onChange={handleStateChange}
               value={state.state}
               inputMode="text"
               error={formErrors.state && lang.withRegular(formErrors.state)}
             />
             <Select
-              label={oldLang('PaymentShippingCountry')}
+              label={lang('PaymentShippingCountry')}
               onChange={handleCountryChange}
               value={state.countryIso2}
               hasArrow={Boolean(true)}
@@ -169,7 +166,7 @@ const ShippingInfo: FC<OwnProps> = ({
             </Select>
 
             <InputText
-              label={oldLang('PaymentShippingZipPlaceholder')}
+              label={lang('PaymentShippingZipPlaceholder')}
               onChange={handlePostCodeChange}
               value={state.postCode}
               inputMode="text"
@@ -179,11 +176,11 @@ const ShippingInfo: FC<OwnProps> = ({
           </div>
         ) : undefined}
         {needName || needEmail || needPhone ? (
-          <h5>{oldLang('PaymentShippingReceiver')}</h5>
+          <h5>{lang('PaymentShippingReceiver')}</h5>
         ) : undefined}
         {needName && (
           <InputText
-            label={oldLang('PaymentShippingName')}
+            label={lang('PaymentShippingName')}
             onChange={handleFullNameChange}
             value={state.fullName}
             inputMode="text"
@@ -193,7 +190,7 @@ const ShippingInfo: FC<OwnProps> = ({
         )}
         {needEmail && (
           <InputText
-            label={oldLang('PaymentShippingEmailPlaceholder')}
+            label={lang('PaymentShippingEmailPlaceholder')}
             onChange={handleEmailChange}
             value={state.email}
             inputMode="email"
@@ -203,7 +200,7 @@ const ShippingInfo: FC<OwnProps> = ({
         )}
         {needPhone && (
           <InputText
-            label={oldLang('PaymentShippingPhoneNumber')}
+            label={lang('PaymentShippingPhoneNumber')}
             onChange={handlePhoneChange}
             value={state.phone}
             inputMode="tel"
@@ -213,8 +210,8 @@ const ShippingInfo: FC<OwnProps> = ({
           />
         )}
         <Checkbox
-          label={oldLang('PaymentShippingSave')}
-          subLabel={oldLang('PaymentShippingSaveInfo')}
+          label={lang('PaymentShippingSave')}
+          subLabel={lang('PaymentShippingSaveInfo')}
           checked={Boolean(state.saveInfo)}
           tabIndex={0}
           onChange={handleSaveInfoChange}

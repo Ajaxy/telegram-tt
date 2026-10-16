@@ -257,7 +257,7 @@ const ManageGroupAdminRights = ({
       : undefined;
 
     if (promotedByUser) {
-      return lang('EditAdminPromotedBy', { user: getUserFullName(promotedByUser) });
+      return lang('EditAdminPromotedBy', { user: getUserFullName(lang, promotedByUser) });
     }
 
     return lang('ChannelAdmin');
@@ -291,7 +291,7 @@ const ManageGroupAdminRights = ({
     if (!selectedUserId) return;
 
     const user = usersById[selectedUserId];
-    const userName = user ? getUserFullName(user) : '';
+    const userName = user ? getUserFullName(lang, user) : '';
 
     transferChatOwnership({
       chatId: chat.id,
@@ -602,7 +602,7 @@ const ManageGroupAdminRights = ({
         title={lang(isChannel ? 'EditAdminTransferChannelOwnership' : 'EditAdminTransferGroupOwnership')}
         textParts={lang('EditAdminTransferOwnershipText', {
           chat: chat.title,
-          user: selectedUserId ? getUserFullName(usersById[selectedUserId]) : '',
+          user: selectedUserId ? getUserFullName(lang, usersById[selectedUserId]) : '',
         }, { withNodes: true, withMarkdown: true })}
         confirmLabel={lang('EditAdminTransferChangeOwner')}
         confirmHandler={handleConfirmTransfer}
@@ -620,7 +620,7 @@ const ManageGroupAdminRights = ({
         title={lang('GuardApproveNewMembers')}
         text={lang.withRegular({
           key: getGuardConfirmTextKey(pendingGuardBotEnabled, isChannel),
-          variables: { bot: selectedUser ? getUserFullName(selectedUser) : '' },
+          variables: { bot: selectedUser ? getUserFullName(lang, selectedUser) : '' },
         })}
         confirmLabel={lang(pendingGuardBotEnabled ? 'Enable' : 'Disable')}
         confirmHandler={handleConfirmGuardToggle}

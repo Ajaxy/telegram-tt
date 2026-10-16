@@ -19,7 +19,6 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { pick } from '../../../util/iteratees.ts';
 import { type AdvancedLangFnParameters, getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
-import { oldTranslate } from '../../../util/oldLangProvider';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { debounce } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -123,7 +122,13 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
 
     case 'copy': {
       copyTextToClipboard(button.action.copyText);
-      actions.showNotification({ message: oldTranslate('ExactTextCopied', button.action.copyText), tabId });
+      actions.showNotification({ message: {
+        key: 'ExactTextCopied',
+        variables: {
+          text: button.action.copyText,
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }, tabId });
       return;
     }
 
@@ -1043,7 +1048,10 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
   global = getGlobal();
 
   if (!botApp) {
-    actions.showNotification({ message: oldTranslate('lng_username_app_not_found'), tabId });
+    actions.showNotification({ message: {
+      key: 'UsernameAppNotFound',
+      options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+    }, tabId });
     return;
   }
 
@@ -1631,7 +1639,10 @@ async function answerCallbackButton<T extends GlobalState>(
   const { message, alert: isError, url } = result;
 
   if (isError) {
-    showDialog({ data: { type: 'error', message: message || 'Error' }, tabId });
+    showDialog({
+      data: message ? { type: 'error', message } : { type: 'localized', text: { key: 'ErrorUnspecified' } },
+      tabId,
+    });
   } else if (message) {
     showNotification({ message, tabId });
   } else if (url) {

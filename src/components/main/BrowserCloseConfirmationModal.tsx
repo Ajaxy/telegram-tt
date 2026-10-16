@@ -9,7 +9,6 @@ import buildClassName from '../../util/buildClassName';
 
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -24,7 +23,6 @@ const BrowserCloseConfirmationModal = ({
 }: OwnProps) => {
   const { closeBrowserCloseConfirmationModal, closeBrowserModal } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const isOpen = Boolean(modal);
@@ -73,10 +71,10 @@ const BrowserCloseConfirmationModal = ({
           onClick={confirmHandler}
           color="danger"
         >
-          {oldLang('Confirm')}
+          {lang('GeneralConfirm')}
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>
-          {oldLang('Cancel')}
+          {lang('Cancel')}
         </Button>
       </div>
     </Modal>

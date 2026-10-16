@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect,
   useRef, useState,
@@ -10,7 +9,7 @@ import focusNoScroll from '../../util/focusNoScroll';
 import { CardType, detectCardType } from '../common/helpers/detectCardType';
 import { formatCardNumber } from '../middle/helpers/inputFormatters';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import InputText from '../ui/InputText';
 
@@ -29,8 +28,8 @@ export type OwnProps = {
   isActive?: boolean;
 };
 
-const CardInput: FC<OwnProps> = ({ value, error, onChange, isActive }) => {
-  const lang = useOldLang();
+const CardInput = ({ value, error, onChange, isActive }: OwnProps) => {
+  const lang = useLang();
   const cardNumberRef = useRef<HTMLInputElement>();
 
   useEffect(() => {

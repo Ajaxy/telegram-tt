@@ -15,7 +15,6 @@ import { throttle } from '../../../util/schedulers';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import SearchInput from '../../ui/SearchInput';
@@ -37,7 +36,6 @@ const MoreAppsTabContent = ({
   foundIds,
   recentBotIds,
 }: StateProps) => {
-  const oldLang = useOldLang();
   const lang = useLang();
   const [shouldShowMoreMine, setShouldShowMoreMine] = useState<boolean>(false);
   const {
@@ -87,9 +85,9 @@ const MoreAppsTabContent = ({
       {recentBotIds && !searchQuery && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
-            <span>{oldLang('SearchAppsMine')}</span>
+            <span>{lang('SearchAppsMine')}</span>
             <span className={styles.showMoreLink} onClick={handleToggleShowMoreMine}>
-              {oldLang(shouldShowMoreMine ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+              {lang(shouldShowMoreMine ? 'ChatListSearchShowLess' : 'ChatListSearchShowMore')}
             </span>
           </div>
           <div className={styles.sectionContent}>

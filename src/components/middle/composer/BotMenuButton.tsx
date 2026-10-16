@@ -1,26 +1,28 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
+
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 type OwnProps = {
   isOpen?: boolean;
-  onClick: VoidFunction;
   text: string;
   isDisabled?: boolean;
+  onClick: VoidFunction;
 };
 
-const BotMenuButton: FC<OwnProps> = ({
+const BotMenuButton = ({
   isOpen,
   onClick,
   text,
   isDisabled,
-}) => {
+}: OwnProps) => {
+  const lang = useLang();
   const textRef = useRef<HTMLSpanElement>();
 
   useEffect(() => {
@@ -48,7 +50,7 @@ const BotMenuButton: FC<OwnProps> = ({
       color="translucent"
       disabled={isDisabled}
       onClick={onClick}
-      ariaLabel="Open bot command keyboard"
+      ariaLabel={lang('AriaOpenBotMenu')}
     >
       <Icon name="webapp" className={buildClassName('bot-menu-icon', isOpen && 'open')} />
       <span ref={textRef} className="bot-menu-text">{renderText(text)}</span>

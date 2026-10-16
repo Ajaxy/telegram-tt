@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect,
   useMemo,
@@ -10,7 +9,6 @@ import type { ShippingOption } from '../../types';
 import { formatCurrency } from '../../util/formatCurrency';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import RadioGroup from '../ui/RadioGroup';
 
@@ -23,13 +21,12 @@ export type OwnProps = {
   dispatch: FormEditDispatch;
 };
 
-const Shipping: FC<OwnProps> = ({
+const Shipping = ({
   state,
   shippingOptions,
   currency,
   dispatch,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
 
   useEffect(() => {
@@ -52,7 +49,7 @@ const Shipping: FC<OwnProps> = ({
   return (
     <div className="Shipping">
       <form>
-        <p>{oldLang('PaymentShippingMethod')}</p>
+        <p>{lang('PaymentShippingMethod')}</p>
         <RadioGroup
           name="shipping-options"
           options={options}

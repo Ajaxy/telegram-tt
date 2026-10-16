@@ -4,6 +4,14 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type {
+  ApiKeyboardButton,
+  ApiMessage,
+  ApiPeer,
+  ApiUser,
+  KeyboardButtonGiftOffer,
+  KeyboardButtonNoForwardsRequest,
+} from '../../../api/types';
 import type { ApiMessageAction } from '../../../api/types/messageActions';
 import type {
   FocusDirection,
@@ -11,14 +19,7 @@ import type {
   ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
-import {
-  type ApiKeyboardButton,
-  type ApiMessage,
-  type ApiPeer,
-  type KeyboardButtonGiftOffer,
-  type KeyboardButtonNoForwardsRequest,
-  MAIN_THREAD_ID,
-} from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { MESSAGE_APPEARANCE_DELAY, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
@@ -112,7 +113,7 @@ type StateProps = {
   scrollTargetPosition?: ScrollTargetPosition;
   isAccountFrozen?: boolean;
   noForwardsRequestExpirePeriod: number;
-  transferPeerName?: string;
+  transferPeer?: ApiUser;
   isTransferLoading?: boolean;
   shouldLoopStickers?: boolean;
 };
@@ -156,7 +157,7 @@ const ActionMessage = ({
   scrollTargetPosition,
   isAccountFrozen,
   noForwardsRequestExpirePeriod,
-  transferPeerName,
+  transferPeer,
   isTransferLoading,
   shouldLoopStickers,
   observeIntersectionForBottom,
@@ -217,6 +218,7 @@ const ActionMessage = ({
   const shouldSkipRender = isInsideTopic && action.type === 'topicCreate';
 
   const lang = useLang();
+  const transferPeerName = getUserFullName(lang, transferPeer);
   const { isTouchScreen } = useAppLayout();
 
   const giftOfferInlineButtons: KeyboardButtonGiftOffer[][] = useMemo(() => [
@@ -816,8 +818,8 @@ export default memo(withGlobal<OwnProps>(
     const isTransfer = messageAction?.type === 'gramTransfer';
 
     // The service chat reports transfers from senders the server does not name
-    const transferPeerName = isTransfer && message.chatId !== SERVICE_NOTIFICATIONS_USER_ID
-      ? getUserFullName(selectUser(global, message.chatId))
+    const transferPeer = isTransfer && message.chatId !== SERVICE_NOTIFICATIONS_USER_ID
+      ? selectUser(global, message.chatId)
       : undefined;
     const isTransferLoading = isTransfer && tabState.loadingWalletTransactionId === messageAction.transactionId;
 
@@ -841,7 +843,7 @@ export default memo(withGlobal<OwnProps>(
       scrollTargetPosition,
       isAccountFrozen,
       noForwardsRequestExpirePeriod: global.appConfig.noForwardsRequestExpirePeriod,
-      transferPeerName,
+      transferPeer,
       isTransferLoading,
       shouldLoopStickers,
     };

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -12,7 +11,7 @@ import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -37,17 +36,17 @@ type StateProps = {
   phoneCodeList: ApiCountryCode[];
 };
 
-const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
+const SettingsPrivacyBlockedUsers = ({
   isActive,
   onReset,
   chatsByIds,
   usersByIds,
   blockedIds,
   phoneCodeList,
-}) => {
+}: OwnProps & StateProps) => {
   const { unblockUser } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const handleUnblockClick = useCallback((userId: string) => {
     unblockUser({ userId });

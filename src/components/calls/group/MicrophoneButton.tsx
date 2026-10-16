@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -11,7 +10,7 @@ import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -38,20 +37,20 @@ const REQUEST_TO_SPEAK_THROTTLE = 3000;
 const HOLD_TO_SPEAK_TIME = 200;
 const ICON_SIZE = 36;
 
-const MicrophoneButton: FC<OwnProps & StateProps> = ({
+const MicrophoneButton = ({
   className,
   noAudioStream,
   canSelfUnmute,
   isMuted,
   connectionState,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     toggleGroupCallMute,
     requestToSpeak,
     playGroupCallSound,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const muteMouseDownStateRef = useRef('up');
 
   const [isRequestingToSpeak, setIsRequestingToSpeak] = useState(false);

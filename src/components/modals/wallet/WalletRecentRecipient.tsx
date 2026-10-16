@@ -8,7 +8,6 @@ import { selectUser, selectUserStatus } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Control, { ControlBefore, ControlDescription, ControlLabel } from '@gili/layout/Control';
@@ -33,7 +32,6 @@ const WalletRecentRecipient = ({
   userId, user, userStatus, isLinkedAddress, withUsername, className, onSelect,
 }: OwnProps & StateProps) => {
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const handleClick = useLastCallback(() => {
     onSelect(userId);
@@ -49,11 +47,13 @@ const WalletRecentRecipient = ({
         <ControlBefore>
           <Avatar peer={user} size="medium" />
         </ControlBefore>
-        <ControlLabel>{getUserFullName(user)}</ControlLabel>
+        <ControlLabel>{getUserFullName(lang, user)}</ControlLabel>
         <ControlDescription>
           {isLinkedAddress
-            ? lang('WalletSendAddressLinked', { name: getUserFullName(user) }, { withNodes: true, withMarkdown: true })
-            : username ? `@${username}` : getUserStatus(oldLang, user, userStatus)}
+            ? lang('WalletSendAddressLinked', { name: getUserFullName(lang, user) }, {
+              withNodes: true, withMarkdown: true,
+            })
+            : username ? `@${username}` : getUserStatus(lang, user, userStatus)}
         </ControlDescription>
       </Control>
     </Interactive>

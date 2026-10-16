@@ -13,7 +13,8 @@ import {
   isGeoLiveExpired,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownShort, formatLocationLastUpdate } from '../../../util/dates/oldDateFormat';
+import { formatCountdownShort } from '../../../util/dates/duration';
+import { formatRecentTimestamp, secondsToDate } from '../../../util/localization/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
@@ -22,9 +23,9 @@ import { getServerTime } from '../../../util/serverTime';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
@@ -59,7 +60,7 @@ const Location = ({
   const { openMapModal } = getActions();
   const ref = useRef<HTMLDivElement>();
   const countdownRef = useRef<HTMLDivElement>();
-  const lang = useOldLang();
+  const lang = useLang();
   const forceUpdate = useForceUpdate();
 
   const location = getMessageLocation(message)!;
@@ -158,7 +159,7 @@ const Location = ({
         <div className="location-info">
           <div className="location-info-title">{lang('AttachLiveLocation')}</div>
           <div className="location-info-subtitle">
-            {formatLocationLastUpdate(lang, serverTime, message.editDate)}
+            {formatRecentTimestamp(lang, secondsToDate(message.editDate ?? message.date), { context: 'location' })}
           </div>
           {!isExpired && (
             <div className="geo-countdown" ref={countdownRef}>
@@ -188,7 +189,7 @@ const Location = ({
       <img
         className="full-media map"
         src={mapBlobUrl}
-        alt="Location on a map"
+        alt={lang('MediaLocaltionImageAlt')}
         draggable={false}
       />
     );

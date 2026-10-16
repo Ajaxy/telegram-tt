@@ -52,6 +52,7 @@ import type {
 import type { DC_IDS } from '../config';
 import type { SearchResultKey } from '../util/keys/searchResultKey';
 import type { IconName } from './icons';
+import type { RegularLangKey } from './language';
 
 export type TextPart = TeactNode;
 
@@ -602,7 +603,7 @@ export type CustomPeerType = 'premium' | 'toBeDistributed' | 'contacts' | 'nonCo
 export type CustomPeer = {
   isCustomPeer: true;
   key?: string | number;
-  subtitleKey?: string;
+  subtitleKey?: RegularLangKey;
   avatarIcon?: IconName;
   isAvatarSquare?: boolean;
   peerColorId?: number;
@@ -613,7 +614,7 @@ export type CustomPeer = {
   withPremiumGradient?: boolean;
   isPremium?: boolean;
 } & ({
-  titleKey: string;
+  titleKey: RegularLangKey;
   title?: undefined;
 } | {
   title: string;

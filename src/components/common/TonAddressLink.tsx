@@ -132,7 +132,7 @@ const TonAddressLink = ({ address, noCopy, children }: OwnProps) => {
           customIcon={<Avatar size="small" peer={ownerUser} className={styles.avatar} />}
           onClick={handleOpenProfile}
         >
-          <MenuItemTitle>{getUserFullName(ownerUser)}</MenuItemTitle>
+          <MenuItemTitle>{getUserFullName(lang, ownerUser)}</MenuItemTitle>
           <MenuItemSubtitle>{lang('HeaderMenuViewProfile')}</MenuItemSubtitle>
           {warning}
         </MenuItem>

@@ -4,7 +4,6 @@ import type { GlobalState } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { unique } from '../../../util/iteratees';
-import { oldTranslate } from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateUserFullInfo, updateUserSavedMusic } from '../../reducers';
@@ -173,8 +172,11 @@ addActionHandler('reportPeer', async (global, actions, payload): Promise<void> =
 
   actions.showNotification({
     message: result
-      ? oldTranslate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
+      ? {
+        key: 'ReportPeerAlertSuccess',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }
+      : { key: 'ReportSubmitError' },
     tabId,
   });
 });
@@ -205,8 +207,11 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload): Promise
 
   actions.showNotification({
     message: result
-      ? oldTranslate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
+      ? {
+        key: 'ReportPeerAlertSuccess',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }
+      : { key: 'ReportSubmitError' },
     tabId,
   });
 });

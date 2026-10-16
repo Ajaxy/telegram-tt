@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -10,7 +9,7 @@ import { ALL_FOLDER_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import CheckboxGroup from '../ui/CheckboxGroup';
@@ -30,17 +29,17 @@ type StateProps = {
   folderOrderedIds?: number[];
 };
 
-const ChatFolderModal: FC<OwnProps & StateProps> = ({
+const ChatFolderModal = ({
   isOpen,
   chatId,
   foldersById,
   folderOrderedIds,
   onClose,
   onCloseAnimationEnd,
-}) => {
+}: OwnProps & StateProps) => {
   const { editChatFolders } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const initialSelectedFolderIds = useMemo(() => {
     if (!foldersById) {

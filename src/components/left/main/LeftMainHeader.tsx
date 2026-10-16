@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
@@ -21,14 +20,13 @@ import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_APP, IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { formatDateToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import MainMenuDropdown from '../../common/MainMenuDropdown';
@@ -108,7 +106,6 @@ const LeftMainHeader = ({
     closeForumPanel,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const { isMobile } = useAppLayout();
 
@@ -119,9 +116,9 @@ const LeftMainHeader = ({
 
   const selectedSearchDate = useMemo(() => {
     return searchDate
-      ? formatDateToString(new Date(searchDate * 1000))
+      ? formatDateTime(lang, secondsToDate(searchDate), { date: 'short' })
       : undefined;
-  }, [searchDate]);
+  }, [lang, searchDate]);
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
     lang,
@@ -153,8 +150,8 @@ const LeftMainHeader = ({
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined), [canSetPasscode]));
 
-  const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
+  const MainButton = useMemo(() => {
+    return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
       <Button
         round
         ripple={hasMenu && !isMobile}
@@ -294,7 +291,7 @@ const LeftMainHeader = ({
             ripple={!isMobile}
             size="smaller"
             color="translucent"
-            ariaLabel={`${oldLang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
+            ariaLabel={`${lang('ShortcutsControllerOthersLockByPasscode')} (Ctrl+Shift+L)`}
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
             iconName="unlock"

@@ -25,7 +25,6 @@ import useFlag from '../../hooks/useFlag';
 import useFrozenProps from '../../hooks/useFrozenProps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import AnimatedCounter from '../common/AnimatedCounter';
@@ -80,7 +79,6 @@ const ForwardRecipientPicker = ({
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const renderingIsStory = usePreviousDeprecated(isStory, true);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
@@ -183,18 +181,26 @@ const ForwardRecipientPicker = ({
       if (isUserId(recipientId)) {
         showNotification({
           message: isSelf
-            ? oldLang('Conversation.StoryForwardTooltip.SavedMessages.One')
-            : oldLang(
-              'StorySharedTo',
-              getUserFirstOrLastName(selectUser(global, recipientId)),
-            ),
+            ? {
+              key: 'ConversationStoryForwardTooltipSavedMessagesOne',
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            }
+            : {
+              key: 'StorySharedTo',
+              variables: { user: getUserFirstOrLastName(lang, selectUser(global, recipientId)) },
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            },
         });
       } else {
         const chat = selectChat(global, recipientId);
         if (!chat) return;
 
         showNotification({
-          message: oldLang('StorySharedTo', getChatTitle(oldLang, chat)),
+          message: {
+            key: 'StorySharedTo',
+            variables: { user: getChatTitle(lang, chat) },
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
         });
       }
       return;
@@ -211,7 +217,7 @@ const ForwardRecipientPicker = ({
         openChatOrTopicWithReplyInDraft({ chatId, topicId });
       }
     }
-  }, [currentUserId, isStory, isAudioTrack, oldLang, isForwarding]);
+  }, [currentUserId, isStory, isAudioTrack, lang, isForwarding]);
 
   const handleClose = useCallback(() => {
     exitForwardMode();
@@ -298,7 +304,16 @@ const ForwardRecipientPicker = ({
     forwardToMultipleChats({ targets, comment: caption || undefined });
 
     showNotification({
-      message: lang('FwdMessagesToChats', { count: selectedIds.length }, { pluralValue: selectedIds.length }),
+      message: {
+        key: 'FwdMessagesToChats',
+        variables: { count: selectedIds.length },
+        options: {
+          pluralValue: selectedIds.length,
+          withNodes: true,
+          withMarkdown: true,
+          renderTextFilters: ['br', 'links'],
+        },
+      },
     });
     exitForwardMode();
   });
@@ -365,7 +380,7 @@ const ForwardRecipientPicker = ({
           <Transition name="fade" activeKey={isInitial ? 0 : 1} slideClassName={styles.buttonSlide}>
             <span>
               {isInitial
-                ? (canCopyLink ? oldLang('CopyLink') : lang('SelectChats'))
+                ? (canCopyLink ? lang('CopyLink') : lang('SelectChats'))
                 : (singleChatStars > 0
                   ? lang(
                     'ForwardForStars',
@@ -417,7 +432,7 @@ const ForwardRecipientPicker = ({
       </div>
     );
   }, [isForwarding, isStory, selectedCount, showComposer, caption, canCopyLink, displayedTotalStars,
-    paidChatsInfo, handleForwardToMultiple, handleCopyLink, lang, oldLang]);
+    paidChatsInfo, handleForwardToMultiple, handleCopyLink, lang]);
 
   if (!isOpen && !isShown) {
     return undefined;

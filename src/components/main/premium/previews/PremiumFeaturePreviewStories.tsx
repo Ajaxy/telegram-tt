@@ -3,12 +3,13 @@ import { withGlobal } from '../../../../global';
 
 import type { ApiUser } from '../../../../api/types';
 import type { IconName } from '../../../../types/icons';
+import type { RegularLangKey } from '../../../../types/language';
 
 import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 import useScrolledState from '../../../../hooks/useScrolledState';
 import useDevicePixelRatio from '../../../../hooks/window/useDevicePixelRatio';
 
@@ -26,13 +27,13 @@ const STORY_COLORS = ['#A667FF', '#55A5FF'];
 
 const STORY_FEATURE_TITLES = {
   stories_order: 'PremiumStoriesPriority',
-  stories_stealth: 'PremiumStoriesStealth',
+  stories_stealth: 'StealthModeTitle',
   stories_views: 'PremiumStoriesViews',
-  stories_timer: 'lng_premium_stories_subtitle_expiration',
+  stories_timer: 'PremiumStoriesSubtitleExpiration',
   stories_save: 'PremiumStoriesSaveToGallery',
-  stories_caption: 'lng_premium_stories_subtitle_caption',
-  stories_link: 'lng_premium_stories_subtitle_links',
-};
+  stories_caption: 'PremiumStoriesSubtitleCaption',
+  stories_link: 'PremiumStoriesSubtitleLinks',
+} as const satisfies Record<string, RegularLangKey>;
 
 const STORY_FEATURE_DESCRIPTIONS = {
   stories_order: 'PremiumStoriesPriorityDescription',
@@ -42,7 +43,7 @@ const STORY_FEATURE_DESCRIPTIONS = {
   stories_save: 'PremiumStoriesSaveToGalleryDescription',
   stories_caption: 'PremiumStoriesCaptionDescription',
   stories_link: 'PremiumStoriesFormattingDescription',
-};
+} as const satisfies Record<keyof typeof STORY_FEATURE_TITLES, RegularLangKey>;
 
 const STORY_FEATURE_ICONS: Record<string, IconName> = {
   stories_order: 'story-priority',
@@ -66,7 +67,7 @@ const PremiumFeaturePreviewVideo = ({
 }: StateProps) => {
   const circleRef = useRef<HTMLCanvasElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const dpr = useDevicePixelRatio();
 
@@ -116,7 +117,7 @@ const PremiumFeaturePreviewVideo = ({
             />
           );
         })}
-        <div className={styles.mobile}>{lang('lng_premium_stories_about_mobile')}</div>
+        <div className={styles.mobile}>{lang('PremiumStoriesAboutMobile')}</div>
       </div>
     </div>
   );

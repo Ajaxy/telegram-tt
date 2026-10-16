@@ -1,6 +1,8 @@
 import { memo, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ApiUser } from '../../api/types';
+
 import {
   getUserFirstOrLastName,
   isChatBasicGroup,
@@ -11,8 +13,8 @@ import { selectChat, selectIsChatWithSelf, selectUser } from '../../global/selec
 import { isUserId } from '../../util/entities/ids';
 import renderText from './helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -32,7 +34,7 @@ type StateProps = {
   isGroup: boolean;
   isSuperGroup: boolean;
   canPinForAll: boolean;
-  contactName?: string;
+  contactUser?: ApiUser;
 };
 
 const PinMessageModal = ({
@@ -43,7 +45,7 @@ const PinMessageModal = ({
   isGroup,
   isSuperGroup,
   canPinForAll,
-  contactName,
+  contactUser,
   onClose,
 }: OwnProps & StateProps) => {
   const { pinMessage } = getActions();
@@ -61,7 +63,8 @@ const PinMessageModal = ({
     onClose();
   });
 
-  const lang = useOldLang();
+  const lang = useLang();
+  const contactName = getUserFirstOrLastName(lang, contactUser);
 
   function renderMessage() {
     if (isChannel) {
@@ -86,8 +89,8 @@ const PinMessageModal = ({
       {canPinForAll && (
         <Checkbox
           className="dialog-checkbox"
-          label={contactName ? renderText(lang('Conversation.PinMessagesFor', contactName))
-            : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
+          label={contactName ? renderText(lang('ConversationPinMessagesFor', { user: contactName }))
+            : lang('ConversationPinMessageAlertPinAndNotifyMembers')}
           checked={shouldPinForAll}
           onCheck={setShouldPinForAll}
         />
@@ -111,8 +114,8 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
     const canPinForAll = (isPrivateChat && !isChatWithSelf) || isSuperGroup || isGroup;
-    const contactName = chatId && isUserId(chatId)
-      ? getUserFirstOrLastName(selectUser(global, chatId))
+    const contactUser = chatId && isUserId(chatId)
+      ? selectUser(global, chatId)
       : undefined;
 
     return {
@@ -122,7 +125,7 @@ export default memo(withGlobal<OwnProps>(
       isGroup,
       isSuperGroup,
       canPinForAll,
-      contactName,
+      contactUser,
     };
   },
 )(PinMessageModal));

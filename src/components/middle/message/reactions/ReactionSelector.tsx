@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -17,8 +16,8 @@ import {
 } from '../../../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../../../util/buildClassName';
 
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import Button from '../../../ui/Button';
 import Link from '../../../ui/Link';
@@ -58,7 +57,7 @@ const cn = createClassNameBuilder('ReactionSelector');
 const REACTIONS_AMOUNT = 7;
 const FADE_IN_DELAY = 20;
 
-const ReactionSelector: FC<OwnProps> = ({
+const ReactionSelector = ({
   allAvailableReactions,
   topReactions,
   defaultTagReactions,
@@ -80,10 +79,10 @@ const ReactionSelector: FC<OwnProps> = ({
   onSendPaidReaction,
   onShowPaidReactionModal,
   onShowMore,
-}) => {
+}: OwnProps) => {
   const { openPremiumModal } = getActions();
   const ref = useRef<HTMLDivElement>();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const areReactionsLocked = isInSavedMessages && !isCurrentUserPremium && !isInStoryViewer;
 
@@ -158,17 +157,13 @@ const ReactionSelector: FC<OwnProps> = ({
   const hintText = useMemo(() => {
     if (isInSavedMessages) {
       if (!isCurrentUserPremium) {
-        const text = lang('lng_subscribe_tag_about');
-        const parts = text.split('{link}');
-        return (
-          <span>
-            {parts[0]}
+        return lang('SubscribeTagAbout', {
+          link: (
             <Link isPrimary onClick={handleOpenPremiumModal}>
-              {lang('lng_subscribe_tag_link')}
+              {lang('SubscribeTagLink')}
             </Link>
-            {parts[1]}
-          </span>
-        );
+          ),
+        }, { withNodes: true });
       }
 
       return lang('SavedTagReactionsHint2');
@@ -193,7 +188,7 @@ const ReactionSelector: FC<OwnProps> = ({
       <div className={cn('items-wrapper')}>
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />
         <div className={cn('items')}>
-          {hintText && <div className={cn('hint')}>{hintText}</div>}
+          {Boolean(hintText) && <div className={cn('hint')}>{hintText}</div>}
           <div className={cn('reactions')} dir={lang.isRtl ? 'rtl' : undefined}>
             {reactionsToRender.map((reaction, i) => (
               'reaction' in reaction ? (

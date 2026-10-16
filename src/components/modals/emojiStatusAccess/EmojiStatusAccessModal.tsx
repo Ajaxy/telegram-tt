@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect,
   useMemo, useRef, useState,
@@ -17,7 +16,6 @@ import buildClassName from '../../../util/buildClassName';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
@@ -38,13 +36,13 @@ export type StateProps = {
 
 const INTERVAL = 3200;
 
-const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
+const EmojiStatusAccessModal = ({
   modal,
   currentUser,
   stickerSet,
   isPremium,
   isAccountFrozen,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeEmojiStatusAccessModal,
     toggleUserEmojiStatusPermission,
@@ -55,7 +53,6 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
 
   const isOpen = Boolean(modal);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -151,7 +148,7 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
   const renderStatusText = useLastCallback(() => {
     if (!modal?.bot) return undefined;
     return lang('EmojiStatusAccessText', {
-      name: getUserFullName(modal?.bot),
+      name: getUserFullName(lang, modal?.bot),
     }, {
       withNodes: true,
       withMarkdown: true,
@@ -178,7 +175,7 @@ const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
             onClick={confirmHandler}
             color="primary"
           >
-            {oldLang('lng_bot_allow_write_confirm')}
+            {lang('BotAllowWriteConfirm')}
           </Button>
           <Button
             className="confirm-dialog-button"

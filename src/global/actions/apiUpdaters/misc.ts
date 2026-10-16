@@ -284,7 +284,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateLangPack': {
-      applyLangPackDifference(update.version, update.strings, update.keysToRemove);
+      applyLangPackDifference(update);
       break;
     }
 

@@ -3,11 +3,11 @@ import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dates/oldDateFormat';
+import { formatCalendarDate, secondsToDate } from '../../util/localization/dateFormat';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
@@ -35,7 +35,7 @@ function SeenByModal({
     closeSeenByModal,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const renderingSeenByDates = useCurrentOrPrev(seenByDates, true);
   const memberIds = useMemo(() => {
@@ -66,7 +66,7 @@ function SeenByModal({
       isOpen={isOpen}
       onClose={closeSeenByModal}
       className={buildClassName(styles.modal, 'narrow')}
-      title={`Seen by ${memberIds?.length} users`}
+      title={lang('SeenByUsers', { count: memberIds?.length || 0 }, { pluralValue: memberIds?.length || 0 })}
     >
       <div dir={lang.isRtl ? 'rtl' : undefined}>
         {memberIds && memberIds.map((userId) => (
@@ -79,7 +79,9 @@ function SeenByModal({
             <PrivateChatInfo
               userId={userId}
               noStatusOrTyping
-              status={formatDateAtTime(lang, renderingSeenByDates![userId] * 1000)}
+              status={formatCalendarDate(lang, secondsToDate(renderingSeenByDates![userId]), {
+                variant: 'date', isShort: true, withTime: true,
+              })}
               statusIcon="message-read"
             />
           </ListItem>

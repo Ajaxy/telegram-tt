@@ -8,6 +8,7 @@ import type {
   ApiPostStatistics,
   ApiUser,
 } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 
 import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
 import { selectChatFullInfo, selectTabState } from '../../../global/selectors';
@@ -16,8 +17,8 @@ import { callApi } from '../../../api/gramjs';
 import { isGraph } from './helpers/isGraph';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -27,9 +28,9 @@ import StatisticsStoryPublicForward from './StatisticsStoryPublicForward';
 
 import styles from './Statistics.module.scss';
 
-const GRAPH_TITLES = {
-  viewsGraph: 'Stats.StoryInteractionsTitle',
-  reactionsGraph: 'ReactionsByEmotionChartTitle',
+const GRAPH_TITLES: Record<string, RegularLangKey> = {
+  viewsGraph: 'StatsStoryInteractionsTitle',
+  reactionsGraph: 'Reactions',
 };
 const GRAPHS = Object.keys(GRAPH_TITLES) as (keyof ApiPostStatistics)[];
 
@@ -55,7 +56,7 @@ function StoryStatistics({
   chatsById,
   usersById,
 }: OwnProps & StateProps) {
-  const lang = useOldLang();
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
   const loadedChartsRef = useRef<Set<string>>(new Set());
@@ -133,11 +134,11 @@ function StoryStatistics({
 
         new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
           ...graph,
-          title: lang((GRAPH_TITLES as Record<string, string>)[name]),
+          title: lang(GRAPH_TITLES[name]),
           onZoom: zoomToken
             ? (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId })
             : undefined,
-          zoomOutLabel: zoomToken ? lang('Graph.ZoomOut') : undefined,
+          zoomOutLabel: zoomToken ? lang('GraphZoomOut') : undefined,
         });
 
         loadedChartsRef.current.add(name);
@@ -179,7 +180,7 @@ function StoryStatistics({
 
       {Boolean(statistics.publicForwards) && (
         <div className={styles.publicForwards}>
-          <h2 className={styles.publicForwardsTitle}>{lang('Stats.Message.PublicShares')}</h2>
+          <h2 className={styles.publicForwardsTitle}>{lang('StatsMessagePublicShares')}</h2>
 
           <InfiniteScroll
             items={statistics.publicForwardsData}

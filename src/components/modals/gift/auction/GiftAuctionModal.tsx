@@ -9,8 +9,9 @@ import type { TabState } from '../../../../global/types';
 import { TME_LINK_PREFIX } from '../../../../config';
 import { selectTabState } from '../../../../global/selectors';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatCountdown, formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
+import { formatCountdown } from '../../../../util/dates/duration';
 import { HOUR } from '../../../../util/dates/units';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import {
@@ -127,7 +128,10 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
     if (!auctionLink) return;
     copyTextToClipboard(auctionLink);
     showNotification({
-      message: lang('LinkCopied'),
+      message: {
+        key: 'LinkCopied',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
     });
   });
 
@@ -220,12 +224,12 @@ const GiftAuctionModal = ({ modal, auctionState }: OwnProps & StateProps) => {
 
     tableData.push([
       lang('GiftAuctionStarted'),
-      formatDateTimeToString(state.startDate * 1000, lang.code, true),
+      formatDateTime(lang, secondsToDate(state.startDate), { date: 'short', time: 'short' }),
     ]);
 
     tableData.push([
       lang('GiftAuctionEnds'),
-      formatDateTimeToString(state.endDate * 1000, lang.code, true),
+      formatDateTime(lang, secondsToDate(state.endDate), { date: 'short', time: 'short' }),
     ]);
 
     if (gift.availabilityTotal) {

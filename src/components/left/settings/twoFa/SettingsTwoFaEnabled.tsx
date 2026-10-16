@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -8,7 +7,7 @@ import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import renderText from '../../../common/helpers/renderText';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Island from '../../../gili/layout/Island';
@@ -21,11 +20,11 @@ type OwnProps = {
   onReset: () => void;
 };
 
-const SettingsTwoFaEnabled: FC<OwnProps> = ({
+const SettingsTwoFaEnabled = ({
   isActive, onReset,
-}) => {
+}: OwnProps) => {
   const { openSettingsScreen } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,

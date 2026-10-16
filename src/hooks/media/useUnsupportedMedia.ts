@@ -4,7 +4,6 @@ import { getActions } from '../../global';
 
 import { IS_MOBILE } from '../../util/browser/windowEnvironment';
 import useLastCallback from '../useLastCallback';
-import useOldLang from '../useOldLang';
 
 const NOTIFICATION_DURATION = 8000;
 
@@ -12,7 +11,6 @@ export default function useUnsupportedMedia(
   ref: ElementRef<HTMLVideoElement>, shouldDisableNotification?: boolean, isDisabled?: boolean,
 ) {
   const { showNotification } = getActions();
-  const lang = useOldLang();
   const [isUnsupported, setIsUnsupported] = useState(false);
 
   const handleUnsupported = useLastCallback(() => {
@@ -20,7 +18,10 @@ export default function useUnsupportedMedia(
     if (shouldDisableNotification) return;
 
     showNotification({
-      message: IS_MOBILE ? lang('Video.Unsupported.Mobile') : lang('Video.Unsupported.Desktop'),
+      message: {
+        key: IS_MOBILE ? 'VideoUnsupportedMobile' : 'VideoUnsupportedDesktop',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       duration: NOTIFICATION_DURATION,
     });
   });

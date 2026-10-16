@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
@@ -13,11 +12,10 @@ import {
   selectPeer,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 import usePrevious from '../../../../hooks/usePrevious';
 
 import Avatar from '../../../common/Avatar';
@@ -39,9 +37,9 @@ type StateProps = {
 
 const AVATAR_SPARKLES_CENTER_SHIFT = [0, -50] as const;
 
-const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
+const StarsSubscriptionModal = ({
   modal, peer,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeStarsSubscriptionModal,
     fulfillStarsSubscription,
@@ -50,7 +48,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     loadStarStatus,
     openInvoice,
   } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
   const { subscription } = modal || {};
   const triggerSparklesRef = useRef<(() => void) | undefined>();
@@ -151,7 +149,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
           onRequestAnimation={handleRequestAnimation}
           centerShift={AVATAR_SPARKLES_CENTER_SHIFT}
         />
-        <h1 className={styles.title}>{title || oldLang('StarsSubscriptionTitle')}</h1>
+        <h1 className={styles.title}>{title || lang('StarsSubscriptionTitle')}</h1>
         <span className={styles.amount}>
           {lang('StarsPerMonth', {
             amount: pricing.amount,
@@ -168,22 +166,23 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     const tableData: TableData = [];
 
     tableData.push([
-      oldLang(isBotSubscription ? 'StarsSubscriptionBot' : 'StarsSubscriptionChannel'),
+      lang(isBotSubscription ? 'Bot' : 'StarsSubscriptionChannel'),
       { chatId: peer.id },
     ]);
 
     if (title) {
       tableData.push([
-        oldLang('StarsSubscriptionBotProduct'),
+        lang('StarsSubscriptionBotProduct'),
         title,
       ]);
     }
 
     const hasExpired = until < Date.now() / 1000;
     tableData.push([
-      oldLang(hasExpired ? 'StarsSubscriptionUntilExpired'
+      lang(hasExpired
+        ? 'InviteLinkExpired'
         : isCancelled ? 'StarsSubscriptionUntilExpires' : 'StarsSubscriptionUntilRenews'),
-      formatDateTimeToString(until * 1000, oldLang.code, true),
+      formatDateTime(lang, secondsToDate(until), { date: 'short', time: 'short' }),
     ]);
 
     const footerTos = lang('StarsTransactionTOS', {
@@ -197,22 +196,31 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
         <p className={styles.secondary}>{footerTos}</p>
         {isCancelled && (
           <p className={styles.danger}>
-            {oldLang(hasBotCancelled ? 'StarsSubscriptionBotCancelledText' : 'StarsSubscriptionCancelledText')}
+            {lang(hasBotCancelled ? 'StarsSubscriptionBotCancelledText' : 'StarsSubscriptionCancelledText')}
           </p>
         )}
         {canRefulfill && (
           <p className={styles.secondary}>
-            {oldLang('StarsSubscriptionRefulfillInfo', formatDateTimeToString(until * 1000, oldLang.code, true))}
+            {lang(
+              'StarsSubscriptionRefulfillInfo',
+              { date: formatDateTime(lang, secondsToDate(until), { date: 'short', time: 'short' }) },
+            )}
           </p>
         )}
         {!isCancelled && !canRefulfill && hasExpired && (
           <p className={styles.secondary}>
-            {oldLang('StarsSubscriptionExpiredInfo', formatDateTimeToString(until * 1000, oldLang.code, true))}
+            {lang(
+              'StarsSubscriptionExpiredInfo',
+              { date: formatDateTime(lang, secondsToDate(until), { date: 'short', time: 'short' }) },
+            )}
           </p>
         )}
         {!isCancelled && !canRefulfill && !hasExpired && (
           <p className={styles.secondary}>
-            {oldLang('StarsSubscriptionCancelInfo', formatDateTimeToString(until * 1000, oldLang.code, true))}
+            {lang(
+              'StarsSubscriptionCancelInfo',
+              { date: formatDateTime(lang, secondsToDate(until), { date: 'short', time: 'short' }) },
+            )}
           </p>
         )}
         {buttonState !== 'hidden' && (
@@ -221,12 +229,13 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
             isText={buttonState === 'cancel'}
             onClick={handleButtonClick}
           >
-            {oldLang(
-              buttonState === 'cancel' ? 'StarsSubscriptionCancel'
-                : buttonState === 'refulfill' ? 'StarsSubscriptionRefulfill'
-                  : buttonState === 'restart' ? 'StarsSubscriptionAgain'
-                    : buttonState === 'renew' ? 'StarsSubscriptionRenew' : 'OK',
-            )}
+            {lang(buttonState === 'cancel'
+              ? 'StarsSubscriptionCancel'
+              : buttonState === 'refulfill'
+                ? 'ProfileJoinChannel'
+                : buttonState === 'restart'
+                  ? 'StarsSubscriptionAgain'
+                  : buttonState === 'renew' ? 'StarsSubscriptionRenew' : 'OK')}
           </Button>
         )}
       </span>
@@ -237,7 +246,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
       tableData,
       footer,
     };
-  }, [buttonState, lang, oldLang, peer, subscription]);
+  }, [buttonState, lang, peer, subscription]);
 
   const prevModalData = usePrevious(starModalData);
   const renderingModalData = prevModalData || starModalData;

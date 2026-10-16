@@ -89,6 +89,7 @@ import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
@@ -296,6 +297,7 @@ const MessageList = ({
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
     loadMessageViews, loadPeerStoriesByIds, loadFactChecks, requestChatTranslation,
   } = getActions();
+  const lang = useLang();
 
   const restrictionReasons = useMemo(() => getApplicableRestrictionReasons(
     rawRestrictionReasons, ignoreRestrictionReasons,
@@ -1346,7 +1348,9 @@ const MessageList = ({
     return activeKey === Content.Restricted ? (
       <div className="empty">
         <span>
-          {restrictionReasons?.[0]?.text || `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
+          {restrictionReasons?.[0]?.text || lang(
+            isChannelChat ? 'RestictionReasonPrivateChannel' : 'RestictionReasonPrivateChat',
+          )}
         </span>
       </div>
     ) : activeKey === Content.StarsRequired ? (

@@ -30,7 +30,6 @@ import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer'
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 import { getPeerColorClass } from '../../../../hooks/usePeerColor';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
@@ -77,8 +76,8 @@ const INITIAL_CHATS_LIMIT = 5;
 
 const FOLDER_COLORS = [0, 1, 2, 3, 4, 5, 6];
 
-export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
-export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
+export const ERROR_NO_TITLE = 'ChatListFilterErrorTitleEmpty';
+export const ERROR_NO_CHATS = 'ChatListFilterErrorEmpty';
 
 const DEFAULT_FOLDER_ICON = '🗂';
 
@@ -167,7 +166,6 @@ const SettingsFoldersEdit = ({
     loadedActiveChatIds, loadedArchivedChatIds,
   ]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   useHistoryBack({
@@ -255,7 +253,7 @@ const SettingsFoldersEdit = ({
 
     // Ignoring global updates is a known drawback here
     if (!selectCanShareFolder(getGlobal(), state.folderId!)) {
-      showNotification({ message: oldLang('ChatList.Filter.InviteLink.IncludeExcludeError') });
+      showNotification({ message: lang('ChatListFilterInviteLinkIncludeExcludeError') });
       return;
     }
 
@@ -280,7 +278,7 @@ const SettingsFoldersEdit = ({
     });
   }, [
     invites, state.folderId, state.isTouched, chatListCount, maxInviteLinks, isCreating, onSaveFolder,
-    onShareFolder, oldLang, maxChatLists, state.folder.isChatList,
+    onShareFolder, lang, maxChatLists, state.folder.isChatList,
   ]);
 
   const handleEditInviteClick = useCallback((e: React.MouseEvent<HTMLElement>, url: string) => {
@@ -351,7 +349,7 @@ const SettingsFoldersEdit = ({
             onClick={clickHandler}
             icon="down"
           >
-            {oldLang('FilterShowMoreChats', leftChatsCount, 'i')}
+            {lang('ShowMoreChats', { count: lang.number(leftChatsCount) }, { pluralValue: leftChatsCount })}
           </ListItem>
         )}
       </>
@@ -402,7 +400,7 @@ const SettingsFoldersEdit = ({
               value={titleText}
               maxLength={folderTitleMaxLength}
               onChange={handleChange}
-              error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
+              error={state.error && state.error === ERROR_NO_TITLE ? lang(ERROR_NO_TITLE) : undefined}
             />
 
             {!isMobile && (
@@ -431,7 +429,7 @@ const SettingsFoldersEdit = ({
           <>
             {state.error && state.error === ERROR_NO_CHATS && (
               <IslandDescription className="color-danger" dir={lang.isRtl ? 'rtl' : undefined}>
-                {oldLang(state.error)}
+                {lang(state.error)}
               </IslandDescription>
             )}
 
@@ -538,7 +536,7 @@ const SettingsFoldersEdit = ({
         </IslandDescription>
 
         <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-          {oldLang('FolderLinkScreen.Title')}
+          {lang('FolderLinkScreenTitle')}
         </IslandTitle>
         <Island>
           <ListItem
@@ -547,7 +545,7 @@ const SettingsFoldersEdit = ({
             narrow
             onClick={handleCreateInviteClick}
           >
-            {oldLang('ChatListFilter.CreateLinkNew')}
+            {lang('ChatListFilterCreateLinkNew')}
           </ListItem>
 
           {invites?.map((invite) => (
@@ -561,7 +559,9 @@ const SettingsFoldersEdit = ({
             >
               <span className="title" dir="auto">{invite.title || invite.url}</span>
               <span className="subtitle">
-                {oldLang('ChatListFilter.LinkLabelChatCount', invite.peerIds.length, 'i')}
+                {lang('ChatListFilterLinkLabelChatCount', {
+                  count: lang.number(invite.peerIds.length),
+                }, { pluralValue: invite.peerIds.length })}
               </span>
             </ListItem>
           ))}
@@ -572,7 +572,7 @@ const SettingsFoldersEdit = ({
         isShown={Boolean(state.isTouched)}
         disabled={state.isLoading}
         onClick={handleSubmit}
-        ariaLabel={state.mode === 'edit' ? 'Save changes' : 'Create folder'}
+        ariaLabel={lang(state.mode === 'edit' ? 'SettingsSaveChanges' : 'SettingsFolderCreate')}
         iconName="check"
         isLoading={state.isLoading}
       />

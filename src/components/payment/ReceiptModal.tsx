@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -25,11 +24,11 @@ type StateProps = {
   receipt?: ApiReceiptRegular;
 };
 
-const ReceiptModal: FC<OwnProps & StateProps> = ({
+const ReceiptModal = ({
   isOpen,
   onClose,
   receipt,
-}) => {
+}: OwnProps & StateProps) => {
   const lang = useLang();
 
   const [isModalOpen, openModal, closeModal] = useFlag();
@@ -64,7 +63,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
               round
               size="smaller"
               onClick={closeModal}
-              ariaLabel="Close"
+              ariaLabel={lang('Close')}
               iconName="close"
             />
             <h3>

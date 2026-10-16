@@ -8,8 +8,8 @@ import { selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import Avatar from '../../common/Avatar';
@@ -28,12 +28,12 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
   const { acceptChatInvite, closeChatInviteModal } = getActions();
   const participantsRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const prevModal = usePrevious(modal);
   const { hash, inviteInfo } = modal || prevModal || {};
   const {
-    about, isBroadcast, participantIds, participantsCount, photo, isRequestNeeded,
+    about, isBroadcast, participantIds, participantsCount = 0, photo, isRequestNeeded,
   } = inviteInfo || {};
 
   const handleClose = useLastCallback(() => {
@@ -46,8 +46,8 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
   });
 
   const acceptLangKey = isBroadcast ? 'ProfileJoinChannel' : 'JoinGroup';
-  const requestToJoinLangKey = isBroadcast ? 'MemberRequests.RequestToJoinChannel'
-    : 'MemberRequests.RequestToJoinGroup';
+  const requestToJoinLangKey = isBroadcast ? 'MemberRequestsRequestToJoinChannel'
+    : 'MemberRequestsRequestToJoinGroup';
 
   const customPeer = useMemo(() => {
     if (!inviteInfo) return undefined;
@@ -78,12 +78,16 @@ const ChatInviteModal = ({ modal }: OwnProps) => {
       {customPeer && <FullNameTitle className={styles.title} peer={customPeer} />}
       {about && <p className={styles.about}>{about}</p>}
       <p className={styles.participantCount}>
-        {lang(isBroadcast ? 'Subscribers' : 'Members', participantsCount, 'i')}
+        {lang(
+          isBroadcast ? 'Subscribers' : 'NMembers',
+          { count: participantsCount },
+          { pluralValue: participantsCount },
+        )}
       </p>
       {participants && (
         <div ref={participantsRef} className={buildClassName(styles.participants, 'no-scrollbar')}>
           {participants.map((participant) => (
-            <PeerBadge className={styles.participant} peer={participant} text={getUserFullName(participant)} />
+            <PeerBadge className={styles.participant} peer={participant} text={getUserFullName(lang, participant)} />
           ))}
         </div>
       )}

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
 import type { ApiPaymentCredentials } from '../../api/types';
@@ -6,7 +5,7 @@ import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymen
 
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import RadioGroup from '../ui/RadioGroup';
@@ -18,13 +17,13 @@ interface OwnProps {
   onNewCardClick: NoneToVoidFunction;
 }
 
-const SavedPaymentCredentials: FC<OwnProps> = ({
+const SavedPaymentCredentials = ({
   state,
   savedCredentials,
   dispatch,
   onNewCardClick,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   const options = useMemo(() => {
     return savedCredentials?.length

@@ -20,7 +20,6 @@ import { getPrivacyKey } from './helpers/privacy';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -55,7 +54,6 @@ const SettingsPrivacyVisibilityExceptionList = ({
 }: OwnProps & StateProps) => {
   const { setPrivacySettings } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const customPeerBots: UniqueCustomPeer = useMemo(() => {
@@ -189,7 +187,7 @@ const SettingsPrivacyVisibilityExceptionList = ({
         selectedIds={newSelectedContactIds}
         selectedCategories={newSelectedCategoryTypes}
         filterValue={searchQuery}
-        filterPlaceholder={isAllowList ? oldLang('AlwaysAllowPlaceholder') : oldLang('NeverAllowPlaceholder')}
+        filterPlaceholder={isAllowList ? lang('AlwaysAllowPlaceholder') : lang('NeverAllowPlaceholder')}
         categoryPlaceholderKey="PrivacyUserTypes"
         searchInputId="new-group-picker-search"
         isSearchable
@@ -206,7 +204,7 @@ const SettingsPrivacyVisibilityExceptionList = ({
       <FloatingActionButton
         isShown={isSubmitShown}
         onClick={handleSubmit}
-        ariaLabel={isAllowList ? oldLang('AlwaysAllow') : oldLang('NeverAllow')}
+        ariaLabel={isAllowList ? lang('AlwaysAllow') : lang('NeverAllow')}
         iconName="check"
       />
     </div>

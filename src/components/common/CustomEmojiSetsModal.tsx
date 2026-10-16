@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo,
   useMemo,
@@ -12,8 +11,8 @@ import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Modal from '../ui/Modal';
@@ -30,13 +29,13 @@ type StateProps = {
   canPlayAnimatedEmojis?: boolean;
 };
 
-const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
+const CustomEmojiSetsModal = ({
   customEmojiSetIds,
   canPlayAnimatedEmojis,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { openStickerSet } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const customEmojiSets = useMemo(() => {
     return customEmojiSetIds?.map((id) => getGlobal().stickers.setsById[id]);
@@ -62,7 +61,7 @@ const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
       className={styles.root}
       onClose={onClose}
       hasCloseButton
-      title={lang('lng_custom_emoji_used_sets')}
+      title={lang('CustomEmojiUsedSets')}
     >
       <div className={buildClassName(styles.sets, 'custom-scroll')} ref={customEmojiModalRef} teactFastList>
         {renderingCustomEmojiSets?.map((customEmojiSet) => {

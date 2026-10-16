@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -8,8 +7,8 @@ import { STICKER_SIZE_TWO_FA } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import Button from '../../../ui/Button';
@@ -19,11 +18,11 @@ type OwnProps = {
   onReset: () => void;
 };
 
-const SettingsTwoFaCongratulations: FC<OwnProps> = ({
+const SettingsTwoFaCongratulations = ({
   isActive, onReset,
-}) => {
+}: OwnProps) => {
   const { openSettingsScreen } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleClick = useLastCallback(() => {
     openSettingsScreen({ screen: SettingsScreens.Privacy });

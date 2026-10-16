@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -8,7 +8,7 @@ import type { TabState } from '../../../global/types';
 import { selectChatFolder } from '../../../global/selectors';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import Modal from '../../ui/Modal';
@@ -27,13 +27,13 @@ type StateProps = {
   folder?: ApiChatFolder;
 };
 
-const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
+const ChatlistInviteModal = ({
   modal,
   folder,
-}) => {
+}: OwnProps & StateProps) => {
   const { closeChatlistModal } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isOpen = Boolean(modal);
   const renderingInfo = usePreviousDeprecated(modal) || modal;
@@ -46,7 +46,7 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
       if ('alreadyPeerIds' in invite) {
         return invite.missingPeerIds.length ? lang('FolderLinkTitleAddChats') : lang('FolderLinkTitleAlready');
       }
-      return lang('FolderLinkTitleAdd');
+      return lang('FolderLinkAddFolder');
     }
     if (renderingInfo.removal) {
       return lang('FolderLinkTitleRemove');

@@ -19,8 +19,8 @@ import {
 } from '../../global/selectors';
 import { selectThreadReadState } from '../../global/selectors/threads';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import StickerView from '../common/StickerView';
 
@@ -55,7 +55,7 @@ const ContactGreeting = ({
     markMessageListRead,
   } = getActions();
 
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const containerRef = useRef<HTMLDivElement>();
 
@@ -92,8 +92,8 @@ const ContactGreeting = ({
     });
   });
 
-  const title = businessIntro?.title || oldLang('Conversation.EmptyPlaceholder');
-  const description = businessIntro?.description || oldLang('Conversation.GreetingText');
+  const title = businessIntro?.title || lang('ConversationEmptyPlaceholder');
+  const description = businessIntro?.description || lang('ConversationGreetingText');
 
   return (
     <div className={styles.root}>
@@ -114,7 +114,7 @@ const ContactGreeting = ({
       </div>
       {businessIntro && (
         <div className={styles.explainer}>
-          {oldLang('Chat.EmptyStateIntroFooter', getUserFullName(user))}
+          {lang('ChatEmptyStateIntroFooter', { user: getUserFullName(lang, user) })}
         </div>
       )}
     </div>

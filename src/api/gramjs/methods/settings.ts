@@ -1,7 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
 
-import type { LANG_PACKS } from '../../../config';
 import type {
   ApiBirthday,
   ApiChat,
@@ -37,7 +36,6 @@ import {
   buildApiWallpaper,
   buildApiWebSession,
   buildLangStrings,
-  oldBuildLangPack,
 } from '../apiBuilders/misc';
 import {
   buildApiPeerColors,
@@ -61,8 +59,6 @@ import { buildInputPasskeyCredential } from '../gramjsBuilders/passkeys';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { getClient, invokeRequest, uploadFile } from './client';
-
-const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz', 'en'];
 
 export function updateProfile({
   firstName,
@@ -448,6 +444,8 @@ export async function fetchLangPack({
   const { strings, keysToRemove } = buildLangStrings(result.strings);
 
   return {
+    langCode: result.langCode,
+    fromVersion: result.fromVersion,
     version: result.version,
     strings,
     keysToRemove,
@@ -475,6 +473,8 @@ export async function fetchLangDifference({
   const { strings, keysToRemove } = buildLangStrings(result.strings);
 
   return {
+    langCode: result.langCode,
+    fromVersion: result.fromVersion,
     version: result.version,
     strings,
     keysToRemove,
@@ -529,25 +529,6 @@ export async function fetchLangStrings({
   }
 
   return buildLangStrings(result);
-}
-
-export async function oldFetchLangPack({ sourceLangPacks, langCode }: {
-  sourceLangPacks: typeof LANG_PACKS;
-  langCode: string;
-}) {
-  const results = await Promise.all(sourceLangPacks.map((langPack) => {
-    return invokeRequest(new GramJs.langpack.GetLangPack({
-      langPack,
-      langCode: BETA_LANG_CODES.includes(langCode) ? `${langCode}-raw` : langCode,
-    }));
-  }));
-
-  const collections = results.filter(Boolean).map(oldBuildLangPack);
-  if (!collections.length) {
-    return undefined;
-  }
-
-  return { langPack: Object.assign({}, ...collections.reverse()) as typeof collections[0] };
 }
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {

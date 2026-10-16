@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useMemo } from '../../lib/teact/teact';
 
 import type { TableAboutData } from '../modals/common/TableAboutModal';
@@ -6,7 +5,6 @@ import type { TableAboutData } from '../modals/common/TableAboutModal';
 import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import TableAboutModal from '../modals/common/TableAboutModal';
 import GramIcon from './icons/GramIcon';
@@ -20,20 +18,19 @@ export type OwnProps = {
   onClose: NoneToVoidFunction;
 };
 
-const AboutMonetizationModal: FC<OwnProps> = ({
+const AboutMonetizationModal = ({
   isOpen,
   onClose,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
 
   const blockchainText = useMemo(() => {
-    const linkText = oldLang('LearnMore');
+    const linkText = lang('LearnMore');
     return lang(
       'ChannelEarnLearnCoinAbout',
       {
         link: (
-          <SafeLink url={oldLang('MonetizationInfoTONLink')} text={linkText}>
+          <SafeLink url={lang('MonetizationInfoTONLink')} text={linkText}>
             {linkText}
             <Icon name="next" />
           </SafeLink>
@@ -43,7 +40,7 @@ const AboutMonetizationModal: FC<OwnProps> = ({
         withNodes: true,
       },
     );
-  }, [lang, oldLang]);
+  }, [lang]);
 
   const monetizationTitle = useMemo(() => {
     return lang(
@@ -60,16 +57,16 @@ const AboutMonetizationModal: FC<OwnProps> = ({
     if (!isOpen) return undefined;
 
     const header = (
-      <h3 className={styles.title}>{oldLang('lng_channel_earn_learn_title')}</h3>
+      <h3 className={styles.title}>{lang('ChannelEarnLearnTitle')}</h3>
     );
 
     const listItemData = [
-      ['channel', oldLang('lng_channel_earn_learn_in_subtitle'),
-        renderText(oldLang('lng_channel_earn_learn_in_about'), ['simple_markdown'])],
-      ['revenue-split', oldLang('lng_channel_earn_learn_split_subtitle'),
-        renderText(oldLang('Monetization.Intro.Split.Text'), ['simple_markdown'])],
-      ['cash-circle', oldLang('lng_channel_earn_learn_out_subtitle'),
-        renderText(oldLang('lng_channel_earn_learn_out_about'), ['simple_markdown'])],
+      ['channel', lang('ChannelEarnLearnInSubtitle'),
+        renderText(lang('ChannelEarnLearnInAbout'), ['simple_markdown'])],
+      ['revenue-split', lang('ChannelEarnLearnSplitSubtitle'),
+        renderText(lang('MonetizationIntroSplitText'), ['simple_markdown'])],
+      ['cash-circle', lang('ChannelEarnLearnOutSubtitle'),
+        renderText(lang('ChannelEarnLearnOutAbout'), ['simple_markdown'])],
     ] satisfies TableAboutData;
 
     const footer = (
@@ -84,7 +81,7 @@ const AboutMonetizationModal: FC<OwnProps> = ({
       listItemData,
       footer,
     };
-  }, [isOpen, oldLang, monetizationTitle, blockchainText]);
+  }, [isOpen, lang, monetizationTitle, blockchainText]);
 
   if (!modalData) {
     return undefined;
@@ -99,7 +96,7 @@ const AboutMonetizationModal: FC<OwnProps> = ({
       withSeparator
       header={modalData.header}
       footer={modalData.footer}
-      buttonText={oldLang('RevenueSharingAdsUnderstood')}
+      buttonText={lang('ButtonUnderstood')}
       onClose={onClose}
     />
   );

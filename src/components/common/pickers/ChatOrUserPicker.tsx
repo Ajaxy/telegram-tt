@@ -38,7 +38,6 @@ import useInputFocusOnOpen from '../../../hooks/useInputFocusOnOpen';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import InfiniteScroll, { type OwnProps as InfiniteScrollProps } from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -121,7 +120,6 @@ const ChatOrUserPicker = ({
 }: OwnProps & StateProps) => {
   const { loadTopics } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const [chatKeyDownHandler, setChatKeyDownHandler] = useState<React.KeyboardEventHandler<HTMLDivElement>>();
   const topicContainerRef = useRef<HTMLDivElement>();
@@ -263,14 +261,14 @@ const ChatOrUserPicker = ({
 
     function getSubtitle() {
       if (!peer) return undefined;
-      if (peer.id === currentUserId) return [oldLang('SavedMessagesInfo')];
+      if (peer.id === currentUserId) return [lang('SavedMessagesInfo')];
       if (isApiPeerChat(peer)) {
         return [getGroupStatus(lang, peer)];
       }
 
       const userStatus = selectUserStatus(global, peer.id);
       return [
-        getUserStatus(oldLang, peer, userStatus),
+        getUserStatus(lang, peer, userStatus),
         buildClassName(isUserOnline(peer, userStatus, true) && 'online'),
       ];
     }
@@ -321,7 +319,7 @@ const ChatOrUserPicker = ({
         onClick={() => handleClick(id)}
       />
     );
-  }, [currentUserId, oldLang, lang, viewportOffset, selectedIds]);
+  }, [currentUserId, lang, viewportOffset, selectedIds]);
 
   function renderTopicList() {
     return (

@@ -1,10 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiChatFolder } from '../../api/types';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -13,11 +12,11 @@ export type OwnProps = {
   folder?: ApiChatFolder;
 };
 
-const DeleteFolderDialog: FC<OwnProps> = ({
+const DeleteFolderDialog = ({
   folder,
-}) => {
+}: OwnProps) => {
   const { closeDeleteChatFolderModal, deleteChatFolder, openDeleteChatFolderModal } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isOpen = Boolean(folder);
 

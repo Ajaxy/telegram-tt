@@ -3,11 +3,11 @@ import { useMemo, useState } from '../lib/teact/teact';
 import type { RepeatedMessageMode } from '../util/scheduledMessages';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/dates/oldDateFormat';
+import { getDayStartAt } from '../util/dates/dateMath';
 import { getRepeatModeFromSeconds, getRepeatPeriodSeconds } from '../util/scheduledMessages';
 import { getServerTimeOffset } from '../util/serverTime';
+import useLang from './useLang';
 import useLastCallback from './useLastCallback';
-import useOldLang from './useOldLang';
 
 import CalendarModal from '../components/common/CalendarModal.async';
 
@@ -19,7 +19,7 @@ const useSchedule = (
   openAt?: number,
   initialRepeatPeriod?: number,
 ) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, repeatMode?: RepeatedMessageMode) => {
@@ -69,7 +69,7 @@ const useSchedule = (
       selectedAt={scheduledDefaultDate.getTime()}
       maxAt={getDayStartAt(scheduledMaxDate)}
       isFutureMode
-      secondButtonLabel={canScheduleUntilOnline ? lang('Schedule.SendWhenOnline') : undefined}
+      secondButtonLabel={canScheduleUntilOnline ? lang('ScheduleSendWhenOnline') : undefined}
       onClose={handleCloseCalendar}
       onSubmit={handleMessageSchedule}
       onSecondButtonClick={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}

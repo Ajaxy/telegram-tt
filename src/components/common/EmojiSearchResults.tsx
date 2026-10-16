@@ -10,7 +10,6 @@ import { REM } from './helpers/mediaDimensions';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import EmojiButton from '../middle/composer/EmojiButton';
 import StickerSetCover from '../middle/composer/StickerSetCover';
@@ -62,7 +61,6 @@ const EmojiSearchResults = ({
   onLocalSectionToggle,
   onGlobalSectionToggle,
 }: OwnProps) => {
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const handleGroupCustomEmojiClick = useLastCallback((documentId: string) => {
@@ -140,7 +138,7 @@ const EmojiSearchResults = ({
     return (
       <div
         className={buildClassName('symbol-set-container', 'shown', styles.grid)}
-        dir={oldLang.isRtl ? 'rtl' : undefined}
+        dir={lang.isRtl ? 'rtl' : undefined}
       >
         {customResults && renderCustomStickers(customResults)}
         {onEmojiSelect && nativeResults?.map((emoji) => (
@@ -240,7 +238,7 @@ const EmojiSearchResults = ({
         >
           <div
             className={buildClassName('symbol-set-container', 'shown', styles.grid)}
-            dir={oldLang.isRtl ? 'rtl' : undefined}
+            dir={lang.isRtl ? 'rtl' : undefined}
           >
             {renderCustomStickers(dedupedGlobalResults)}
           </div>

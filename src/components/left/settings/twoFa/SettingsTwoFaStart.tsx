@@ -1,10 +1,9 @@
-import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Button from '../../../ui/Button';
@@ -17,10 +16,10 @@ type OwnProps = {
   onReset: () => void;
 };
 
-const SettingsTwoFaStart: FC<OwnProps> = ({
+const SettingsTwoFaStart = ({
   isActive, onReset, onStart,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   useHistoryBack({
     isActive,

@@ -7,12 +7,12 @@ import type { TabState } from '../../../global/types';
 import { TME_LINK_PREFIX } from '../../../config';
 import { selectChatMessage, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownDays, formatDateTimeToString } from '../../../util/dates/oldDateFormat';
+import { formatCountdownDays } from '../../../util/dates/duration';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import LinkField from '../../common/LinkField';
 import TableInfoModal, { type TableData } from '../common/TableInfoModal';
@@ -41,7 +41,7 @@ const GiftCodeModal = ({
     closeGiftCodeModal, applyGiftCode, focusMessage,
   } = getActions();
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const isOpen = Boolean(modal);
 
   const canUse = (!modal?.info.toId || modal?.info.toId === currentUserId) && !modal?.info.usedAt;
@@ -72,41 +72,44 @@ const GiftCodeModal = ({
     const header = (
       <>
         <img src={PremiumLogo} alt="" className={styles.logo} />
-        <p className={styles.centered}>{renderText(oldLang('lng_gift_link_about'), ['simple_markdown'])}</p>
-        <LinkField title="BoostingGiftLink" link={`${TME_LINK_PREFIX}/${GIFTCODE_PATH}/${slug}`} />
+        <p className={styles.centered}>{renderText(lang('GiftLinkAbout'), ['simple_markdown'])}</p>
+        <LinkField titleKey="BoostingGiftLink" link={`${TME_LINK_PREFIX}/${GIFTCODE_PATH}/${slug}`} />
       </>
     );
 
     const tableData: TableData = [
-      [oldLang('BoostingFrom'), fromId ? { chatId: fromId } : oldLang('BoostingNoRecipient')],
-      [oldLang('BoostingTo'), info.toId ? { chatId: info.toId } : oldLang('BoostingNoRecipient')],
-      [oldLang('BoostingGift'), oldLang('BoostingTelegramPremiumFor', formatCountdownDays(lang, info.days))],
+      [lang('BoostingFrom'), fromId ? { chatId: fromId } : lang('BoostingNoRecipient')],
+      [lang('BoostingTo'), info.toId ? { chatId: info.toId } : lang('BoostingNoRecipient')],
+      [lang('BoostingGift'), lang('BoostingTelegramPremiumFor', { duration: formatCountdownDays(lang, info.days) })],
     ];
     if (info.isFromGiveaway) {
       tableData.push([
-        oldLang('BoostingReason'),
+        lang('BoostingReason'),
         (
           <span
             className={buildClassName(info.giveawayMessageId && styles.clickable)}
             onClick={handleOpenGiveaway}
           >
             {info.isFromGiveaway && !info.toId
-              ? oldLang('BoostingIncompleteGiveaway')
-              : oldLang('BoostingGiveaway')}
+              ? lang('BoostingIncompleteGiveaway')
+              : lang('BoostingGiveaway')}
           </span>
         ),
       ]);
     }
     tableData.push([
-      oldLang('BoostingDate'),
-      formatDateTimeToString(info.date * 1000, oldLang.code, true),
+      lang('BoostingDate'),
+      formatDateTime(lang, secondsToDate(info.date), { date: 'short', time: 'short' }),
     ]);
 
     const footer = (
       <span className={styles.centered}>
         {renderText(
-          info.usedAt ? oldLang('BoostingUsedLinkDate', formatDateTimeToString(info.usedAt * 1000, oldLang.code, true))
-            : oldLang('BoostingSendLinkToAnyone'),
+          info.usedAt ? lang(
+            'BoostingUsedLinkDate',
+            { date: formatDateTime(lang, secondsToDate(info.usedAt), { date: 'short', time: 'short' }) },
+          )
+            : lang('BoostingSendLinkToAnyone'),
           ['simple_markdown'],
         )}
       </span>
@@ -117,18 +120,18 @@ const GiftCodeModal = ({
       tableData,
       footer,
     };
-  }, [lang, oldLang, messageSender?.id, modal]);
+  }, [lang, messageSender?.id, modal]);
 
   if (!modalData) return undefined;
 
   return (
     <TableInfoModal
       isOpen={isOpen}
-      title={oldLang('lng_gift_link_title')}
+      title={lang('GiftLinkTitle')}
       tableData={modalData.tableData}
       header={modalData.header}
       footer={modalData.footer}
-      buttonText={canUse ? oldLang('BoostingUseLink') : oldLang('Close')}
+      buttonText={canUse ? lang('BoostingUseLink') : lang('Close')}
       onButtonClick={handleButtonClick}
       onClose={closeGiftCodeModal}
     />

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
@@ -23,8 +22,8 @@ import useTimeout from '../../hooks/schedulers/useTimeout';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useDerivedState from '../../hooks/useDerivedState';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import { useSignalRef } from '../../hooks/useSignalRef';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -86,7 +85,7 @@ enum SwipeDirection {
   Vertical,
 }
 
-const MediaViewerSlides: FC<OwnProps> = ({
+const MediaViewerSlides = ({
   item,
   isVideo,
   isGif,
@@ -101,7 +100,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
   onClose,
   onFooterClick,
   handleSponsoredClick,
-}) => {
+}: OwnProps) => {
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
   const activeSlideRef = useRef<HTMLDivElement>();
   const leftSlideRef = useRef<HTMLDivElement>();
@@ -123,8 +123,6 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const activeItem = useDerivedState(getActiveItem);
   const { height: windowHeight, width: windowWidth, isResizing } = useWindowSize();
   const [getControlsVisible, setControlsVisible, lockControls] = useControlsSignal();
-
-  const lang = useOldLang();
 
   useHistoryBack({
     isActive: isOpen,

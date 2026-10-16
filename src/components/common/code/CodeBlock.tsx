@@ -6,6 +6,7 @@ import buildClassName from '../../../util/buildClassName';
 import { getPrettyCodeLanguageName } from '../../../util/codeLanguages';
 
 import useAsync from '../../../hooks/useAsync';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import PeerColorWrapper from '../PeerColorWrapper';
@@ -20,6 +21,8 @@ export type OwnProps = {
 };
 
 const CodeBlock = ({ text, language, noCopy }: OwnProps) => {
+  const lang = useLang();
+
   const [isWordWrap, setIsWordWrap] = useState(true);
 
   const { result: highlighted } = useAsync(() => {
@@ -41,7 +44,7 @@ const CodeBlock = ({ text, language, noCopy }: OwnProps) => {
     <PeerColorWrapper
       className="CodeBlock"
     >
-      {language && (<p className="code-title">{getPrettyCodeLanguageName(language)}</p>)}
+      {language && (<p className="code-title">{getPrettyCodeLanguageName(lang, language)}</p>)}
       <pre className={blockClass} data-entity-type={ApiMessageEntityTypes.Pre} data-language={language}>
         {highlighted ?? text}
         <CodeOverlay

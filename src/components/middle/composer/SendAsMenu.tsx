@@ -6,9 +6,9 @@ import type { ApiSendAsPeerId } from '../../../api/types';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useOldLang from '../../../hooks/useOldLang';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Avatar from '../../common/Avatar';
@@ -42,7 +42,7 @@ const SendAsMenu = ({
   const usersById = getGlobal().users.byId;
   const chatsById = getGlobal().chats.byId;
 
-  const lang = useOldLang();
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
 
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isOpen, onClose, undefined);
@@ -102,8 +102,11 @@ const SendAsMenu = ({
             handleUserSelect(id);
           } else {
             showNotification({
-              message: lang('SelectSendAsPeerPremiumHint'),
-              actionText: lang('Open'),
+              message: {
+                key: 'SelectSendAsPeerPremiumHint',
+                options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+              },
+              actionText: { key: 'Open' },
               action: {
                 action: 'openPremiumModal',
                 payload: {},
@@ -134,7 +137,7 @@ const SendAsMenu = ({
               <span className="subtitle">
                 {user
                   ? lang('VoipGroupPersonalAccount')
-                  : lang('Subscribers', chat?.membersCount, 'i')}
+                  : lang('Subscribers', { count: chat.membersCount || 0 }, { pluralValue: chat.membersCount || 0 })}
               </span>
             </div>
           </ListItem>

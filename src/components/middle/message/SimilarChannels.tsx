@@ -21,7 +21,6 @@ import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
@@ -59,7 +58,7 @@ const SimilarChannels = ({
 }: StateProps & OwnProps) => {
   const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
@@ -182,7 +181,7 @@ const SimilarChannels = ({
           </div>
           <div className={styles.inner}>
             <div className={styles.header}>
-              <span className={styles.title}>{lang('SimilarChannels')}</span>
+              <span className={styles.title}>{lang('SearchResultRecommendedChannels')}</span>
               <Button
                 className={styles.close}
                 color="translucent"
@@ -242,7 +241,7 @@ function MoreChannels({
   isCurrentUserPremium: boolean;
 }) {
   const { openPremiumModal, openChatWithInfo } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleClickMore = () => {
     if (isCurrentUserPremium) {

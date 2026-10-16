@@ -8,8 +8,8 @@ import type { TabState } from '../../../global/types';
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
@@ -31,7 +31,7 @@ const ReportAdModal = ({
   const {
     reportSponsored, closeReportAdModal, openPreviousReportAdModal,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const isOpen = Boolean(modal);
 
   const transitionRef = useRef<HTMLDivElement>();
@@ -58,16 +58,9 @@ const ReportAdModal = ({
 
   const bottomText = useMemo(() => {
     if (!modal) return undefined;
-    const template = lang('lng_report_sponsored_reported_learn');
-    const parts = template.split('{link}');
-    return [
-      parts[0],
-      <SafeLink
-        text={lang('lng_report_sponsored_reported_link')}
-        url={lang('ReportAd.Help_URL')}
-      />,
-      parts[1],
-    ];
+    return lang('ReportSponsoredReportedLearn', {
+      link: <SafeLink text={lang('ReportSponsoredReportedLink')} url={lang('ReportAdHelpURL')} />,
+    }, { withNodes: true });
   }, [lang, modal]);
 
   const header = useMemo(() => {

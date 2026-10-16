@@ -3,7 +3,7 @@ import { getActions } from '../../../global';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Icon from '../../common/icons/Icon';
 
@@ -15,8 +15,9 @@ type OwnProps = {
 };
 
 function PrivacyLockedOption({ label, isChecked }: OwnProps) {
-  const lang = useOldLang();
   const { showNotification } = getActions();
+
+  const lang = useLang();
 
   return (
     <div

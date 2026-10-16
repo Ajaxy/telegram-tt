@@ -1,12 +1,10 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -21,13 +19,13 @@ export type OwnProps = {
   onCloseAnimationEnd?: () => void;
 };
 
-const ReportAvatarModal: FC<OwnProps> = ({
+const ReportAvatarModal = ({
   isOpen,
   peerId,
   photo,
   onClose,
   onCloseAnimationEnd,
-}) => {
+}: OwnProps) => {
   const { reportProfilePhoto } = getActions();
 
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
@@ -44,28 +42,28 @@ const ReportAvatarModal: FC<OwnProps> = ({
     setSelectedReason(value as ApiReportReason);
   });
 
-  const handleDescriptionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleDescriptionChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
   });
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const REPORT_OPTIONS: { value: ApiReportReason; label: string }[] = useMemo(() => [
-    { value: 'spam', label: lang('lng_report_reason_spam') },
-    { value: 'violence', label: lang('lng_report_reason_violence') },
-    { value: 'pornography', label: lang('lng_report_reason_pornography') },
-    { value: 'childAbuse', label: lang('lng_report_reason_child_abuse') },
-    { value: 'copyright', label: lang('ReportPeer.ReasonCopyright') },
-    { value: 'illegalDrugs', label: 'Illegal Drugs' },
-    { value: 'personalDetails', label: 'Personal Details' },
-    { value: 'other', label: lang('lng_report_reason_other') },
+    { value: 'spam', label: lang('ReportReasonSpam') },
+    { value: 'violence', label: lang('ReportReasonViolence') },
+    { value: 'pornography', label: lang('ReportReasonPornography') },
+    { value: 'childAbuse', label: lang('ReportReasonChildAbuse') },
+    { value: 'copyright', label: lang('ReportPeerReasonCopyright') },
+    { value: 'illegalDrugs', label: lang('ReportChatIllegalDrugs') },
+    { value: 'personalDetails', label: lang('ReportChatPersonalDetails') },
+    { value: 'other', label: lang('ReportReasonOther') },
   ], [lang]);
 
   if (!peerId || !photo) {
     return undefined;
   }
 
-  const title = lang('ReportPeer.Report');
+  const title = lang('ReportPeerReport');
 
   return (
     <Modal
@@ -84,13 +82,13 @@ const ReportAvatarModal: FC<OwnProps> = ({
         selected={selectedReason}
       />
       <InputText
-        label={lang('lng_report_reason_description')}
+        label={lang('ReportReasonDescription')}
         value={description}
         onChange={handleDescriptionChange}
       />
       <div className="dialog-buttons">
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
-          {lang('lng_report_button')}
+          {lang('ReportButton')}
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>

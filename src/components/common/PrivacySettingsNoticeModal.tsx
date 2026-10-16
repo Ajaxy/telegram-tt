@@ -11,7 +11,6 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal, { ANIMATION_DURATION } from '../ui/Modal';
@@ -41,17 +40,16 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
     loadUser,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
-  const userName = getUserFirstOrLastName(user);
+  const userName = getUserFirstOrLastName(lang, user);
 
   const handleShowReadTime = useLastCallback(() => {
     updateGlobalPrivacySettings({ shouldHideReadMarks: false });
     closePrivacySettingsNoticeModal();
 
     setTimeout(() => {
-      showNotification({ message: oldLang('PremiumReadSet') });
+      showNotification({ message: lang('PremiumReadSet') });
     }, CLOSE_ANIMATION_DURATION);
   });
 
@@ -64,7 +62,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
     closePrivacySettingsNoticeModal();
 
     setTimeout(() => {
-      showNotification({ message: oldLang('PremiumLastSeenSet') });
+      showNotification({ message: lang('PremiumLastSeenSet') });
     }, CLOSE_ANIMATION_DURATION);
   });
 
@@ -89,7 +87,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           round
           size="tiny"
           onClick={handleClose}
-          ariaLabel="Close"
+          ariaLabel={lang('Close')}
           iconName="close"
         />
         <AnimatedIconWithPreview
@@ -100,14 +98,11 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           noLoop
         />
         <h2 className={styles.header}>
-          {oldLang(isReadDate ? 'PremiumReadHeader1' : 'PremiumLastSeenHeader1')}
+          {lang(isReadDate ? 'PremiumReadHeader1' : 'PremiumLastSeenHeader1')}
         </h2>
         <p className={styles.desc}>
           {renderText(
-            oldLang(
-              isReadDate ? 'PremiumReadText1' : 'PremiumLastSeenText1Locked',
-              userName,
-            ),
+            lang(isReadDate ? 'PremiumReadText1' : 'PremiumLastSeenText1Locked', { user: userName }),
             ['simple_markdown'],
           )}
         </p>
@@ -115,13 +110,13 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           onClick={isReadDate ? handleShowReadTime : handleShowLastSeen}
           className={styles.button}
         >
-          {oldLang(isReadDate ? 'PremiumReadButton1' : 'PremiumLastSeenButton1')}
+          {lang(isReadDate ? 'PremiumReadButton1' : 'PremiumLastSeenButton1')}
         </Button>
-        <Separator className={styles.separator}>{oldLang('PremiumOr')}</Separator>
-        <h2 className={styles.header}>{oldLang('PremiumReadHeader2')}</h2>
+        <Separator className={styles.separator}>{lang('PremiumOr')}</Separator>
+        <h2 className={styles.header}>{lang('PremiumReadHeader2')}</h2>
         <p className={styles.desc}>
           {renderText(
-            oldLang(isReadDate ? 'PremiumReadText2' : 'PremiumLastSeenText2', userName),
+            lang(isReadDate ? 'PremiumReadText2' : 'PremiumLastSeenText2', { user: userName }),
             ['simple_markdown'],
           )}
         </p>
@@ -130,7 +125,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
           onClick={handleOpenPremium}
           className={styles.button}
         >
-          {oldLang('PremiumLastSeenButton2')}
+          {lang('PremiumLastSeenButton2')}
         </Button>
       </div>
     </Modal>

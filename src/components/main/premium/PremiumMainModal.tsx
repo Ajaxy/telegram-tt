@@ -1,4 +1,3 @@
-import type { FC } from '@teact';
 import { memo, useEffect, useMemo, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -12,7 +11,6 @@ import type {
   ApiUser,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { LangPair } from '../../../types/language';
 
 import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
@@ -25,7 +23,7 @@ import {
 } from '../../../global/selectors';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownDays } from '../../../util/dates/oldDateFormat';
+import { formatCountdownDays } from '../../../util/dates/duration';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { getStickerFromGift } from '../../common/helpers/gifts';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -34,7 +32,6 @@ import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntit
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CustomEmoji from '../../common/CustomEmoji';
@@ -44,7 +41,7 @@ import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import PremiumFeatureItem from './PremiumFeatureItem';
 import PremiumFeatureModal, {
-  NEW_LANG_SECTIONS, PREMIUM_FEATURE_DESCRIPTIONS, PREMIUM_FEATURE_TITLES,
+  PREMIUM_FEATURE_DESCRIPTIONS, PREMIUM_FEATURE_TITLES,
 } from './PremiumFeatureModal';
 import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
@@ -127,7 +124,7 @@ type StateProps = {
   premiumPromoOrder?: ApiPremiumSection[];
 };
 
-const PremiumMainModal: FC<OwnProps & StateProps> = ({
+const PremiumMainModal = ({
   isOpen,
   currentUserId,
   fromUser,
@@ -149,14 +146,13 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   daysAmount,
   premiumPromoOrder,
   gift,
-}) => {
-  const dialogRef = useRef<HTMLDivElement>();
+}: OwnProps & StateProps) => {
   const {
     closePremiumModal, openInvoice, requestConfetti, openTelegramLink, loadStickers, openStickerSet,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
+  const dialogRef = useRef<HTMLDivElement>();
   const [isHeaderHidden, setIsHeaderHidden] = useState(true);
   const [currentSection, setCurrentSection] = useState<ApiPremiumSection | undefined>(initialSection);
   const [selectedSubscriptionOption, setSelectedSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
@@ -300,16 +296,15 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       const formattedDuration = daysAmount ? formatCountdownDays(lang, daysAmount) : '';
       return renderText(
         fromUser?.id === currentUserId
-          ? lang('DialogTitlePremiumGiftSentTo', { user: getUserFullName(toUser), amount: formattedDuration })
-          : lang('DialogTitlePremiumGiftReceivedFrom', { user: getUserFullName(fromUser), amount: formattedDuration }),
+          ? lang('DialogTitlePremiumGiftSentTo', { user: getUserFullName(lang, toUser), amount: formattedDuration })
+          : lang('DialogTitlePremiumGiftReceivedFrom', {
+            user: getUserFullName(lang, fromUser), amount: formattedDuration,
+          }),
         ['simple_markdown', 'emoji'],
       );
     }
 
     if (fromUserStatusSet && fromUser) {
-      const template = oldLang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
-      const [first, second] = template.split('{link}');
-
       const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
         <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
       ) : undefined;
@@ -319,13 +314,13 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
           {renderText(fromUserStatusSet.title)}
         </span>
       );
-      return [renderText(first), link, renderText(second)];
+      return lang('PremiumEmojiStatusTitle', { user: getUserFullName(lang, fromUser), link }, { withNodes: true });
     }
 
     return renderText(
       fromUser
-        ? oldLang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
-        : oldLang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium'),
+        ? lang('TelegramPremiumUserDialogTitle', { user: getUserFullName(lang, fromUser) })
+        : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium'),
       ['simple_markdown', 'emoji'],
     );
   }
@@ -339,17 +334,17 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
     if (isGift) {
       return fromUser?.id === currentUserId
-        ? oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', getUserFullName(toUser))
-        : oldLang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
+        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', { user: getUserFullName(lang, toUser) })
+        : lang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
     }
 
     if (fromUserStatusSet) {
-      return oldLang('TelegramPremiumUserStatusDialogSubtitle');
+      return lang('TelegramPremiumUserStatusDialogSubtitle');
     }
 
     return fromUser
-      ? oldLang('TelegramPremiumUserDialogSubtitle')
-      : oldLang(isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle');
+      ? lang('TelegramPremiumUserDialogSubtitle')
+      : lang(isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle');
   }
 
   function renderHeader() {
@@ -447,24 +442,24 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
-                {oldLang('TelegramPremium')}
+                {lang('TelegramPremium')}
               </h2>
             </div>
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
               {filteredSections.map((section, index) => {
-                const shouldUseNewLang = NEW_LANG_SECTIONS.includes(section);
                 return (
                   <PremiumFeatureItem
                     key={section}
-                    title={shouldUseNewLang
-                      ? lang(PREMIUM_FEATURE_TITLES[section] as keyof LangPair)
-                      : oldLang(PREMIUM_FEATURE_TITLES[section])}
+                    title={lang(PREMIUM_FEATURE_TITLES[section])}
                     text={section === 'double_limits'
-                      ? oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section],
-                        [limitChannels, limitFolders, limitPins, limitLinks, LIMIT_ACCOUNTS])
-                      : shouldUseNewLang
-                        ? lang(PREMIUM_FEATURE_DESCRIPTIONS[section] as keyof LangPair)
-                        : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
+                      ? lang(PREMIUM_FEATURE_DESCRIPTIONS[section], {
+                        limit1: limitChannels,
+                        limit2: limitFolders,
+                        limit3: limitPins,
+                        limit4: limitLinks,
+                        limit5: LIMIT_ACCOUNTS,
+                      })
+                      : lang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
                     icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
                     index={index}
                     count={filteredSections.length}
@@ -478,10 +473,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                 dir={lang.isRtl ? 'rtl' : undefined}
               >
                 <p>
-                  {renderText(oldLang('AboutPremiumDescription'), ['simple_markdown'])}
+                  {renderText(lang('AboutPremiumDescription'), ['simple_markdown'])}
                 </p>
                 <p>
-                  {renderText(oldLang('AboutPremiumDescription2'), ['simple_markdown'])}
+                  {renderText(lang('AboutPremiumDescription2'), ['simple_markdown'])}
                 </p>
               </div>
               {renderFooterText()}
@@ -489,7 +484,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && selectedSubscriptionOption && (
               <div className={styles.footer}>
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
-                  {oldLang('SubscribeToPremium', subscribeButtonText)}
+                  {lang('SubscribeToPremium', { price: subscribeButtonText }, { withNodes: true })}
                 </Button>
               </div>
             )}

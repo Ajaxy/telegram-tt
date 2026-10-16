@@ -13,7 +13,7 @@ import {
 } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
-import { formatShortHoursMinutes } from '../../../../util/dates/oldDateFormat';
+import { formatShortHoursMinutes } from '../../../../util/dates/duration';
 import { formatCurrencyAmountAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
@@ -23,7 +23,6 @@ import useIntervalForceUpdate from '../../../../hooks/schedulers/useIntervalForc
 import useFlag from '../../../../hooks/useFlag';
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
 import StickerView from '../../../common/StickerView';
@@ -62,7 +61,6 @@ const StarGiftPurchaseOffer = ({
 }: OwnProps & StateProps) => {
   const stickerRef = useRef<HTMLDivElement>();
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const [isHover, markHover, unmarkHover] = useFlag();
 
@@ -78,7 +76,7 @@ const StarGiftPurchaseOffer = ({
 
   const serverTime = getServerTime();
   const timeLeft = Math.max(0, action.expiresAt - serverTime);
-  const formattedTime = formatShortHoursMinutes(oldLang, timeLeft);
+  const formattedTime = formatShortHoursMinutes(lang, timeLeft);
   const hasExpired = timeLeft <= 0;
 
   const subtitle = useMemo(() => {

@@ -4,7 +4,7 @@ import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
   ANIMATION_WAVE_MIN_INTERVAL,
-  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
+  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, PAGE_TITLE,
   PAGE_TITLE_TAURI,
 } from '../../../config';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
@@ -14,8 +14,7 @@ import { getAllNotificationsCount } from '../../../util/folderManager';
 import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
 import { shouldShowErrorDialog } from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
-import { refreshFromCache } from '../../../util/localization';
-import * as langProvider from '../../../util/oldLangProvider';
+import { getTranslationFn, refreshFromCache } from '../../../util/localization';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
 import {
@@ -357,30 +356,39 @@ addActionHandler('showAllowedMessageTypesNotification', (global, actions, payloa
     canSendPlainText, canSendPhotos, canSendVideos, canSendDocuments, canSendAudios,
     canSendStickers, canSendRoundVideos, canSendVoices,
   } = getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isSavedMessages);
+  const lang = getTranslationFn();
   const allowedContent = compact([
-    canSendPlainText ? 'Chat.SendAllowedContentTypeText' : undefined,
-    canSendPhotos ? 'Chat.SendAllowedContentTypePhoto' : undefined,
-    canSendVideos ? 'Chat.SendAllowedContentTypeVideo' : undefined,
-    canSendVoices ? 'Chat.SendAllowedContentTypeVoiceMessage' : undefined,
-    canSendRoundVideos ? 'Chat.SendAllowedContentTypeVideoMessage' : undefined,
-    canSendDocuments ? 'Chat.SendAllowedContentTypeFile' : undefined,
-    canSendAudios ? 'Chat.SendAllowedContentTypeMusic' : undefined,
-    canSendStickers ? 'Chat.SendAllowedContentTypeSticker' : undefined,
-  ]).map((l) => langProvider.oldTranslate(l));
+    canSendPlainText ? lang('ChatAllowedText') : undefined,
+    canSendPhotos ? lang('ChatAllowedPhotos') : undefined,
+    canSendVideos ? lang('ChatAllowedVideos') : undefined,
+    canSendVoices ? lang('ChatAllowedVoices') : undefined,
+    canSendRoundVideos ? lang('ChatAllowedVideoMessages') : undefined,
+    canSendDocuments ? lang('ChatAllowedFiles') : undefined,
+    canSendAudios ? lang('ChatAllowedMusic') : undefined,
+    canSendStickers ? lang('ChatAllowedStickers') : undefined,
+  ]);
 
   if (!allowedContent.length) {
     actions.showNotification({
-      message: langProvider.oldTranslate('Chat.SendNotAllowedText'),
+      message: {
+        key: 'ChatSendNotAllowedText',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
     return;
   }
 
-  const lastDelimiter = langProvider.oldTranslate('AutoDownloadSettings.LastDelimeter');
-  const allowedContentString = allowedContent.join(', ').replace(/,([^,]*)$/, `${lastDelimiter}$1`);
+  const allowedContentString = lang.conjunction(allowedContent);
 
   actions.showNotification({
-    message: langProvider.oldTranslate('Chat.SendAllowedContentText', allowedContentString),
+    message: {
+      key: 'ChatSendAllowedContentText',
+      variables: {
+        types: allowedContentString,
+      },
+      options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+    },
     tabId,
   });
 });
@@ -811,9 +819,10 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
 
   const defaultTitle = IS_TAURI ? PAGE_TITLE_TAURI : PAGE_TITLE;
 
-  if (document.title.includes(INACTIVE_MARKER)) {
+  const lang = getTranslationFn();
+  if (selectTabState(global, tabId).inactiveReason) {
     updateIcon(false);
-    setPageTitleInstant(`${prefix}${defaultTitle} ${INACTIVE_MARKER}`);
+    setPageTitleInstant(`${prefix}${defaultTitle} ${lang('PageTitleInactive')}`);
     return;
   }
 
@@ -824,7 +833,8 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const newUnread = notificationCount - global.initialUnreadNotifications;
 
     if (newUnread > 0) {
-      setPageTitleInstant(`${prefix}${newUnread} notification${newUnread > 1 ? 's' : ''}`);
+      const notificationsTitle = lang('PageTitleNotifications', { count: newUnread }, { pluralValue: newUnread });
+      setPageTitleInstant(`${prefix}${notificationsTitle}`);
       updateIcon(true);
       return;
     }
@@ -838,7 +848,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const { chatId, threadId } = messageList;
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
-      const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
+      const title = getChatTitle(getTranslationFn(), currentChat, chatId === currentUserId);
       const topic = selectTopic(global, chatId, threadId);
       if (currentChat.isForum && topic) {
         setPageTitle(`${prefix}${title} › ${topic.title}`);
@@ -920,11 +930,19 @@ addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionRe
 
   runForFocusedTabs(global, (tabId) => {
     actions.showNotification({
-      title: langProvider.oldTranslate(isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited'),
-      message: langProvider.oldTranslate(
-        isUpload ? 'UploadSpeedLimitedMessage' : 'DownloadSpeedLimitedMessage',
-        isUpload ? bandwidthPremiumUploadSpeedup : bandwidthPremiumDownloadSpeedup,
-      ),
+      title: {
+        key: isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      message: isUpload ? {
+        key: 'UploadSpeedLimitedMessage',
+        variables: { factor: bandwidthPremiumUploadSpeedup },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      } : {
+        key: 'DownloadSpeedLimitedMessage',
+        variables: { factor: bandwidthPremiumDownloadSpeedup },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       duration: FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION,
       tabId,
     });

@@ -1,4 +1,4 @@
-import { type FC, memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -565,8 +565,8 @@ const AttachmentModal = ({
     });
   }, [lang, isOpen]);
 
-  const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen: isMenuOpen }) => (
+  const MoreMenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen: isMenuOpen }: { isOpen?: boolean; onTrigger: () => void }) => (
       <Button
         round
         ripple={!isMobile}
@@ -574,11 +574,11 @@ const AttachmentModal = ({
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
         onClick={onTrigger}
-        ariaLabel="More actions"
+        ariaLabel={lang('AccDescrMoreOptions')}
         iconName="more"
       />
     );
-  }, [isMobile]);
+  }, [isMobile, lang]);
 
   const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
@@ -675,7 +675,7 @@ const AttachmentModal = ({
           round
           color="translucent"
           size="tiny"
-          ariaLabel="Cancel attachments"
+          ariaLabel={lang('AriaCloseAttachmentModal')}
           onClick={onClear}
           iconName="close"
         />

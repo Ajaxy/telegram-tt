@@ -1,11 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import renderText from './helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
@@ -19,12 +18,10 @@ interface OwnProps {
   className?: string;
 }
 
-const DEFAULT_TEXT = 'Nothing found.';
-
-const NothingFound: FC<OwnProps> = ({
-  text = DEFAULT_TEXT, description, withSticker, className,
-}) => {
-  const lang = useOldLang();
+const NothingFound = ({
+  text, description, withSticker, className,
+}: OwnProps) => {
+  const lang = useLang();
   const { transitionClassNames } = useShowTransitionDeprecated(true);
 
   return (
@@ -45,8 +42,8 @@ const NothingFound: FC<OwnProps> = ({
           noLoop={false}
         />
       )}
-      {text}
-      {description && <p className="description">{renderText(lang(description), ['br'])}</p>}
+      {text ?? lang('NothingFound')}
+      {description && <p className="description">{renderText(description, ['br'])}</p>}
     </div>
   );
 };

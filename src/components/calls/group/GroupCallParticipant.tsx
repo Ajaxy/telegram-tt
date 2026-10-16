@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -15,7 +14,7 @@ import renderText from '../../common/helpers/renderText';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -34,13 +33,13 @@ type StateProps = {
   peer?: ApiPeer;
 };
 
-const GroupCallParticipant: FC<OwnProps & StateProps> = ({
+const GroupCallParticipant = ({
   participant,
   peer,
-}) => {
+}: OwnProps & StateProps) => {
+  const lang = useLang();
   const ref = useRef<HTMLDivElement>();
   const menuRef = useRef<HTMLDivElement>();
-  const lang = useOldLang();
 
   const {
     isSelf, isMutedByMe, isMuted, hasVideoStream, hasPresentationStream,
@@ -89,8 +88,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
 
     if (hasCustomVolume) {
       return [
-        lang('SpeakingWithVolume', formatGroupCallVolume(participant))
-          .replace('%%', '%'),
+        lang('SpeakingWithVolume', { volume: formatGroupCallVolume(participant) }),
         styles.subtitleGreen,
       ];
     }

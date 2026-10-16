@@ -52,7 +52,7 @@ type StateProps = {
   canEnableBackup?: boolean;
   hasCloudPassword?: boolean;
   address?: string;
-  ownerName?: string;
+  currentUser?: ApiUser;
   balance?: ApiTonAmount;
   tonUsdRate?: number;
   currency: string;
@@ -78,7 +78,7 @@ const HISTORY_PRELOAD_MARGIN = '100%';
 
 const WalletMainScreen = ({
   activeTab, scrollContainerRef,
-  status, hasStateError, canEnableBackup, hasCloudPassword, address, ownerName, balance, tonUsdRate, currency,
+  status, hasStateError, canEnableBackup, hasCloudPassword, address, currentUser, balance, tonUsdRate, currency,
   currencyRate,
   transactions, transferMinNanos, collectibles, hasMoreTransactions, hasMoreCollectibles, usersById,
   existingWaltBalanceUrl, savedWallets, earningsNanos,
@@ -270,7 +270,7 @@ const WalletMainScreen = ({
       )}
       <WalletCard
         address={address}
-        ownerName={ownerName}
+        ownerName={getUserFullName(lang, currentUser)}
         balance={balance}
         usdRate={tonUsdRate}
         currency={currency}
@@ -322,7 +322,7 @@ export default memo(withGlobal<OwnProps>(
       canEnableBackup: global.wallet?.state?.canEnableBackup,
       hasCloudPassword: global.settings.byKey.hasPassword,
       address: selectWalletAddress(global),
-      ownerName: currentUser ? getUserFullName(currentUser) : undefined,
+      currentUser,
       balance: global.wallet?.state?.balance,
       tonUsdRate: global.appConfig.tonUsdRate,
       currency: selectWalletCurrency(global),

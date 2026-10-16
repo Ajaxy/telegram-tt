@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useState,
 } from '../../../lib/teact/teact';
@@ -18,7 +17,6 @@ import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -53,7 +51,7 @@ export type OwnProps = {
 
 const ANIMATION_DURATION = 200;
 
-const CustomSendMenu: FC<OwnProps> = ({
+const CustomSendMenu = ({
   isOpen,
   isOpenToBottom = false,
   isSavedMessages,
@@ -76,7 +74,7 @@ const CustomSendMenu: FC<OwnProps> = ({
   isInSavedMessages,
   isInStoryViewer,
   canPlayAnimatedEmojis,
-}) => {
+}: OwnProps) => {
   const {
     openEffectPicker,
   } = getActions();
@@ -84,7 +82,6 @@ const CustomSendMenu: FC<OwnProps> = ({
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] = useState(false);
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const [areItemsHidden, hideItems, showItems] = useFlag();
 
@@ -160,15 +157,15 @@ const CustomSendMenu: FC<OwnProps> = ({
         )}
         dir={lang.isRtl ? 'rtl' : undefined}
       >
-        {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{oldLang('SendWithoutSound')}</MenuItem>}
+        {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{lang('SendWithoutSound')}</MenuItem>}
         {canSchedule && onSendSchedule && (
           <MenuItem icon="schedule" onClick={onSendSchedule}>
-            {oldLang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+            {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
           </MenuItem>
         )}
         {canSchedule && onSendSchedule && displayScheduleUntilOnline && (
           <MenuItem icon="user-online" onClick={onSendWhenOnline}>
-            {oldLang('SendWhenOnline')}
+            {lang('ScheduleSendWhenOnline')}
           </MenuItem>
         )}
         {withEffects && hasCurrentEffect && (

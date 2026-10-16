@@ -1,10 +1,11 @@
-import type { ChangeEvent } from 'react';
 import { memo } from '../../../lib/teact/teact';
+
+import type { RegularLangKey } from '../../../types/language';
 
 import buildClassName from '../../../util/buildClassName';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import IconBackdrop from '../../gili/primitives/IconBackdrop';
@@ -15,8 +16,8 @@ type ApiGiveawayType = 'premium_giveaway' | 'stars_giveaway';
 
 type OwnProps = {
   option: ApiGiveawayType;
-  name: string;
-  text: string;
+  name: RegularLangKey;
+  text: RegularLangKey;
   checked?: boolean;
   isLink: boolean;
   className?: string;
@@ -32,7 +33,7 @@ const GiveawayTypeOption = ({
   isLink, onChange, onClickAction, className,
   userNames, selectedMemberIds,
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const isStars = option === 'stars_giveaway';
 
   let displayText: string | undefined = lang(text);
@@ -40,7 +41,7 @@ const GiveawayTypeOption = ({
     displayText = selectedMemberIds.length > 2 ? selectedMemberIds.length.toString() : userNames;
   }
 
-  const handleChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       onChange(option);
     }

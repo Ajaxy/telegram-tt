@@ -133,7 +133,7 @@ const EditRankModal = ({
       />
       <p className={styles.description}>
         {isOwn ? lang('RankEditTextOwn') : lang('RankEditText', {
-          user: user && getUserFirstOrLastName(user),
+          user: user && getUserFirstOrLastName(lang, user),
         })}
       </p>
 

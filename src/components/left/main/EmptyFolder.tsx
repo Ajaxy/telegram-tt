@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -9,7 +8,7 @@ import { SettingsScreens } from '../../../types';
 import { selectAnimatedEmoji, selectChatFolder } from '../../../global/selectors';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import Button from '../../ui/Button';
@@ -29,11 +28,11 @@ type StateProps = {
 
 const ICON_SIZE = 96;
 
-const EmptyFolder: FC<OwnProps & StateProps> = ({
+const EmptyFolder = ({
   chatFolder, animatedEmoji, foldersDispatch,
-}) => {
+}: OwnProps & StateProps) => {
   const { openSettingsScreen } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
 
   const handleEditFolder = useCallback(() => {
@@ -48,7 +47,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
       </div>
       <h3 className={styles.title} dir="auto">{lang('FilterNoChatsToDisplay')}</h3>
       <p className={styles.description} dir="auto">
-        {lang(chatFolder ? 'ChatList.EmptyChatListFilterText' : 'Chat.EmptyChat')}
+        {lang(chatFolder ? 'ChatListEmptyChatListFilterText' : 'ChatEmptyChat')}
       </p>
       {chatFolder && (
         <Button
@@ -60,7 +59,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
           isRtl={lang.isRtl}
         >
           <div className={styles.buttonText}>
-            {lang('ChatList.EmptyChatListEditFilter')}
+            {lang('ChatListEmptyChatListEditFilter')}
           </div>
         </Button>
       )}

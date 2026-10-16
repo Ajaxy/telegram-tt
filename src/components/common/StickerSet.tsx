@@ -28,9 +28,9 @@ import buildClassName from '../../util/buildClassName';
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
-import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -135,7 +135,7 @@ const StickerSet = ({
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const { width: windowWidth } = useWindowSize();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const { isMobile } = useAppLayout();
@@ -267,7 +267,7 @@ const StickerSet = ({
     && (!isInstalled || (!isCurrentUserPremium && !isSavedMessages));
   const addSetButtonText = useMemo(() => {
     if (isLocked) {
-      if (isInstalled) return lang('lng_emoji_premium_restore');
+      if (isInstalled) return lang('EmojiPremiumRestore');
       return lang('Unlock');
     }
 
@@ -293,7 +293,9 @@ const StickerSet = ({
             )}
             {withAddSetButton && Boolean(stickerSet.stickers) && (
               <span className="symbol-set-amount">
-                {lang(isEmoji ? 'EmojiCount' : 'Stickers', stickerSet.stickers.length, 'i')}
+                {lang(isEmoji ? 'EmojiCount' : 'StickerPackStickerCount', {
+                  count: lang.number(stickerSet.stickers.length),
+                }, { pluralValue: stickerSet.stickers.length })}
               </span>
             )}
           </p>
@@ -335,7 +337,7 @@ const StickerSet = ({
             onClick={handleDefaultTopicIconClick}
             key="default-topic-icon"
           >
-            <img src={grey} alt="Reset" className="sticker-media" draggable={false} />
+            <img src={grey} alt={lang('Reset')} className="sticker-media" draggable={false} />
           </Button>
         )}
         {withDefaultStatusIcon && (

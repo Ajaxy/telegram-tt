@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiContact, ApiCountryCode, ApiUser } from '../../../api/types';
@@ -8,8 +7,8 @@ import { selectUser } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
@@ -29,13 +28,13 @@ type StateProps = {
 
 const UNREGISTERED_CONTACT_ID = '0';
 
-const Contact: FC<OwnProps & StateProps> = ({
+const Contact = ({
   contact, user, phoneCodeList, noUserColors,
-}) => {
-  const lang = useOldLang();
+}: OwnProps & StateProps) => {
   const {
     openChat, openAddContactDialog, showNotification, openChatWithInfo,
   } = getActions();
+  const lang = useLang();
 
   const { phoneNumber, userId } = contact;
   const isRegistered = userId !== UNREGISTERED_CONTACT_ID;
@@ -54,7 +53,12 @@ const Contact: FC<OwnProps & StateProps> = ({
       openChatWithInfo({ id: userId });
     } else {
       copyTextToClipboard(phoneNumber);
-      showNotification({ message: lang('PhoneCopied') });
+      showNotification({
+        message: {
+          key: 'PhoneCopied',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
+      });
     }
   });
 
@@ -69,7 +73,7 @@ const Contact: FC<OwnProps & StateProps> = ({
         <Avatar size="medium" peer={user} text={getContactName(contact)} />
         <div className={styles.info}>
           <div className={styles.name}>
-            {user ? getUserFullName(user) : getContactName(contact)}
+            {user ? getUserFullName(lang, user) : getContactName(contact)}
           </div>
           <div className={styles.phone}>
             {formatPhoneNumberWithCode(phoneCodeList, phoneNumber)}
@@ -88,7 +92,7 @@ const Contact: FC<OwnProps & StateProps> = ({
               onClick={handleOpenChat}
               className={styles.button}
             >
-              {lang('SharedContactMessage')}
+              {lang('Message')}
             </Button>
             {canAddContact && (
               <Button
@@ -99,7 +103,7 @@ const Contact: FC<OwnProps & StateProps> = ({
                 onClick={handleAddContact}
                 className={styles.button}
               >
-                {lang('SharedContactAdd')}
+                {lang('Add')}
               </Button>
             )}
           </div>

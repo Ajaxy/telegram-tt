@@ -3,6 +3,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType, ThreadId, ThreadReadState } from '../../types';
 import type { IconName } from '../../types/icons';
+import type { RegularLangKey } from '../../types/language';
 
 import { selectChat, selectCurrentMessageList, selectCurrentMiddleSearch } from '../../global/selectors';
 import { selectThreadReadState } from '../../global/selectors/threads';
@@ -29,7 +30,7 @@ type StateProps = {
 
 type UnreadCountButton = {
   icon: IconName;
-  ariaLabelLang: string;
+  ariaLabelLang: RegularLangKey;
   unreadCount?: number;
   isHidden: boolean;
   hiddenUnreadCountButtonsBelow: number;

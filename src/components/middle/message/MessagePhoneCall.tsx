@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -7,11 +6,12 @@ import type { ApiMessageActionPhoneCall } from '../../../api/types/messageAction
 
 import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatTimeDuration } from '../../../util/dates/oldDateFormat';
+import { formatTimeDuration } from '../../../util/dates/duration';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { getCallMessageKey } from './helpers/messageActions';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
@@ -24,14 +24,14 @@ type OwnProps = {
   chatId: string;
 };
 
-const MessagePhoneCall: FC<OwnProps> = ({
+const MessagePhoneCall = ({
   phoneCall,
   message,
   chatId,
-}) => {
+}: OwnProps) => {
   const { requestMasterAndRequestCall } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const {
     isVideo, reason, duration,
   } = phoneCall;
@@ -47,7 +47,7 @@ const MessagePhoneCall: FC<OwnProps> = ({
     return phoneCall.duration ? formatTimeDuration(lang, phoneCall.duration) : undefined;
   }, [lang, phoneCall.duration]);
 
-  const timeFormatted = formatTime(lang, message.date * 1000);
+  const timeFormatted = formatDateTime(lang, secondsToDate(message.date), { time: 'short' });
   return (
     <div className={styles.root}>
       <Button
@@ -74,7 +74,9 @@ const MessagePhoneCall: FC<OwnProps> = ({
             )}
           />
           <span className={styles.duration}>
-            {formattedDuration ? lang('CallMessageWithDuration', [timeFormatted, formattedDuration]) : timeFormatted}
+            {formattedDuration ? lang('CallMessageWithDuration', {
+              time: timeFormatted, duration: formattedDuration,
+            }) : timeFormatted}
           </span>
         </div>
       </div>

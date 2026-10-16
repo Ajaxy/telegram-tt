@@ -5,11 +5,11 @@ import type { ApiChatInviteImporter, ApiExportedInvite } from '../../../api/type
 
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
-import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/oldDateFormat';
+import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import LinkField from '../../common/LinkField';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -47,12 +47,11 @@ const ManageInviteInfo = ({
     openChat,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const {
     usage = 0, usageLimit, link, adminId,
   } = invite || {};
-  // eslint-disable-next-line @eslint-react/purity
-  const expireDate = invite?.expireDate && (invite.expireDate - getServerTime()) * 1000 + Date.now();
+  const expireDate = invite?.expireDate && secondsToDate(invite.expireDate);
   const isExpired = ((invite?.expireDate || 0) - getServerTime()) < 0;
 
   useEffect(() => {
@@ -72,15 +71,19 @@ const ManageInviteInfo = ({
     if (!importers) return <Spinner />;
     return (
       <>
-        <IslandTitle>{importers.length ? lang('PeopleJoined', usage) : lang('NoOneJoined')}</IslandTitle>
+        <IslandTitle>
+          {importers.length ? lang('PeopleJoined', { count: usage }, { pluralValue: usage }) : lang('NoOneJoined')}
+        </IslandTitle>
         <Island>
           {!importers.length && (
             <IslandDescription>
-              {usageLimit ? lang('PeopleCanJoinViaLinkCount', usageLimit - usage) : lang('NoOneJoinedYet')}
+              {usageLimit ? lang('PeopleCanJoinViaLinkCount', {
+                count: usageLimit - usage,
+              }, { pluralValue: usageLimit - usage }) : lang('NoOneJoinedYet')}
             </IslandDescription>
           )}
           {importers.map((importer) => {
-            const joinTime = formatMediaDateTime(lang, importer.date * 1000, true);
+            const joinTime = formatCalendarDate(lang, secondsToDate(importer.date), { isShort: true, withTime: true });
             const status = importer.isFromChatList ? `${joinTime} ${BULLET} ${lang('JoinedViaFolder')}` : joinTime;
             return (
               <ListItem
@@ -117,7 +120,7 @@ const ManageInviteInfo = ({
             >
               <PrivateChatInfo
                 userId={requester.userId}
-                status={formatMediaDateTime(lang, requester.date * 1000, true)}
+                status={formatCalendarDate(lang, secondsToDate(requester.date), { isShort: true, withTime: true })}
                 forceShowSelf
               />
             </ListItem>
@@ -141,7 +144,9 @@ const ManageInviteInfo = ({
                 <IslandDescription>
                   {isExpired
                     ? lang('ExpiredLink')
-                    : lang('LinkExpiresIn', `${formatFullDate(lang, expireDate)} ${formatTime(lang, expireDate)}`)}
+                    : lang('LinkExpiresIn', {
+                      time: formatDateTime(lang, expireDate, { date: 'numeric', time: 'short' }),
+                    })}
                 </IslandDescription>
               )}
             </Island>
@@ -156,7 +161,7 @@ const ManageInviteInfo = ({
                   >
                     <PrivateChatInfo
                       userId={adminId}
-                      status={formatMediaDateTime(lang, invite.date * 1000, true)}
+                      status={formatCalendarDate(lang, secondsToDate(invite.date), { isShort: true, withTime: true })}
                       forceShowSelf
                     />
                   </ListItem>

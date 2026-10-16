@@ -12,8 +12,8 @@ import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateToString } from '../../../util/dates/oldDateFormat';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { formatDateTime } from '../../../util/localization/dateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
 import renderText from '../helpers/renderText';
 
@@ -72,7 +72,7 @@ const UserBirthday = ({
       birthday.day,
     );
 
-    const formatted = formatDateToString(date, lang.code, true, 'long');
+    const formatted = formatDateTime(lang, date, { date: 'long', includeYear: false });
     const isBirthdayToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
     return {
       formattedDate: formatted,

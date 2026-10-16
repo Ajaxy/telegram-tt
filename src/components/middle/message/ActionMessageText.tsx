@@ -31,12 +31,11 @@ import {
 } from '../../../global/selectors';
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
-import {
-  formatCountdown, formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
-} from '../../../util/dates/oldDateFormat';
+import { formatCountdown, formatShortDuration } from '../../../util/dates/duration';
 import {
   convertTonFromNanos, formatCurrency, formatTonFromNanos, formatTonInFiat,
 } from '../../../util/formatCurrency';
+import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
@@ -53,7 +52,6 @@ import {
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import TopicDefaultIcon from '../../common/TopicDefaultIcon';
@@ -102,7 +100,6 @@ const ActionMessageText = ({
   const action = message.content.action!;
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   function renderStrong(text: TeactNode) {
     if (asPreview) return text;
@@ -561,7 +558,7 @@ const ActionMessageText = ({
 
       case 'groupCallScheduled': {
         const { scheduleDate } = action;
-        const formattedDate = formatDateTimeToString(scheduleDate * 1000, lang.code, true);
+        const formattedDate = formatDateTime(lang, secondsToDate(scheduleDate), { date: 'short', time: 'short' });
 
         if (isChannel) return lang('ActionGroupCallScheduledChannel', { date: formattedDate });
         return lang('ActionGroupCallScheduledGroup', { from: senderLink, date: formattedDate }, { withNodes: true });
@@ -1034,7 +1031,7 @@ const ActionMessageText = ({
 
         const { scheduleDate } = action;
         if (scheduleDate) {
-          const publishDate = formatScheduledDateTime(scheduleDate, lang, oldLang);
+          const publishDate = formatCalendarDate(lang, secondsToDate(scheduleDate), { isShort: true, withTime: true });
           const isPostPublished = scheduleDate <= getServerTime();
 
           return translateWithYou(

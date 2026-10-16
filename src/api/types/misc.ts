@@ -209,7 +209,7 @@ export type ApiError = {
 
 export type ApiFieldError = {
   field: string;
-  message: string;
+  messageKey: RegularLangFnParameters;
 };
 
 export type ApiExportedInvite = {

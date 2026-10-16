@@ -34,7 +34,6 @@ import useFlag from '../../hooks/useFlag';
 import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -195,6 +194,7 @@ const RightHeader = ({
   } = giftProfileFilter;
 
   const foldersChatCount = useFolderManagerForChatsCount();
+  const savedDialogsCount = foldersChatCount[SAVED_FOLDER_ID] ?? 0;
 
   const handleEditInviteClick = useLastCallback(() => {
     setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
@@ -240,7 +240,6 @@ const RightHeader = ({
     }, COLUMN_ANIMATION_DURATION);
   }, [isColumnOpen]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const isSecondaryBackground = headerBackground === 'secondary';
@@ -330,22 +329,22 @@ const RightHeader = ({
     }
 
     if (isSavedMessages) {
-      return oldLang('SavedMessages');
+      return lang('SavedMessages');
     }
 
     if (isInsideTopic) {
-      return oldLang('AccDescrTopic');
+      return lang('AccDescrTopic');
     }
 
     if (isChannel) {
-      return oldLang('Channel.TitleInfo');
+      return lang('ChannelTitleInfo');
     }
 
     if (userId) {
-      return oldLang(isBot ? 'lng_info_bot_title' : 'lng_info_user_title');
+      return lang(isBot ? 'BotInfoImageAlt' : 'InfoUserTitle');
     }
 
-    return oldLang('GroupInfo.Title');
+    return lang('GroupInfoTitle');
   }
 
   const PrimaryLinkMenuButton = useMemo(() => {
@@ -368,7 +367,7 @@ const RightHeader = ({
       round
       color="translucent"
       size="smaller"
-      ariaLabel={oldLang('EditTopic')}
+      ariaLabel={lang('EditTopic')}
       onClick={toggleEditTopic}
       iconName="edit"
     />
@@ -377,7 +376,7 @@ const RightHeader = ({
       round
       color="translucent"
       size="smaller"
-      ariaLabel={oldLang('Edit')}
+      ariaLabel={lang('Edit')}
       onClick={handleToggleManagement}
       iconName="edit"
     />
@@ -390,48 +389,48 @@ const RightHeader = ({
 
     switch (renderingContentKey) {
       case HeaderContent.PollResults:
-        return <h3 className="title">{oldLang('PollResults')}</h3>;
+        return <h3 className="title">{lang('PollResults')}</h3>;
       case HeaderContent.AddingMembers:
-        return <h3 className="title">{oldLang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
       case HeaderContent.ManageInitial:
-        return <h3 className="title">{oldLang('Edit')}</h3>;
+        return <h3 className="title">{lang('Edit')}</h3>;
       case HeaderContent.ManageChatPrivacyType:
-        return <h3 className="title">{oldLang(isChannel ? 'ChannelTypeHeader' : 'GroupTypeHeader')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelTypeHeader' : 'GroupTypeHeader')}</h3>;
       case HeaderContent.ManageDiscussion:
-        return <h3 className="title">{oldLang('Discussion')}</h3>;
+        return <h3 className="title">{lang('Discussion')}</h3>;
       case HeaderContent.ManageChatAdministrators:
-        return <h3 className="title">{oldLang('ChannelAdministrators')}</h3>;
+        return <h3 className="title">{lang('ChannelAdministrators')}</h3>;
       case HeaderContent.ManageGroupRecentActions:
-        return <h3 className="title">{oldLang('Group.Info.AdminLog')}</h3>;
+        return <h3 className="title">{lang('GroupInfoAdminLog')}</h3>;
       case HeaderContent.ManageGroupAdminRights:
-        return <h3 className="title">{oldLang('EditAdminRights')}</h3>;
+        return <h3 className="title">{lang('EditAdminRights')}</h3>;
       case HeaderContent.ManageGroupNewAdminRights:
-        return <h3 className="title">{oldLang('SetAsAdmin')}</h3>;
+        return <h3 className="title">{lang('SetAsAdmin')}</h3>;
       case HeaderContent.ManageGroupPermissions:
-        return <h3 className="title">{oldLang('ChannelPermissions')}</h3>;
+        return <h3 className="title">{lang('ChannelPermissions')}</h3>;
       case HeaderContent.ManageGroupRemovedUsers:
-        return <h3 className="title">{oldLang('BlockedUsers')}</h3>;
+        return <h3 className="title">{lang('BlockedUsers')}</h3>;
       case HeaderContent.ManageChannelRemovedUsers:
-        return <h3 className="title">{oldLang('ChannelBlockedUsers')}</h3>;
+        return <h3 className="title">{lang('ChannelBlockedUsers')}</h3>;
       case HeaderContent.ManageGroupUserPermissionsCreate:
-        return <h3 className="title">{oldLang('ChannelAddException')}</h3>;
+        return <h3 className="title">{lang('ChannelAddException')}</h3>;
       case HeaderContent.ManageGroupUserPermissions:
-        return <h3 className="title">{oldLang('UserRestrictions')}</h3>;
+        return <h3 className="title">{lang('UserRestrictions')}</h3>;
       case HeaderContent.ManageInvites:
-        return <h3 className="title">{oldLang('lng_group_invite_title')}</h3>;
+        return <h3 className="title">{lang('GroupInviteTitle')}</h3>;
       case HeaderContent.ManageEditInvite:
-        return <h3 className="title">{isEditingInvite ? oldLang('EditLink') : oldLang('NewLink')}</h3>;
+        return <h3 className="title">{isEditingInvite ? lang('EditLink') : lang('NewLink')}</h3>;
       case HeaderContent.ManageInviteInfo:
         return (
           <>
-            <h3 className="title">{oldLang('InviteLink')}</h3>
+            <h3 className="title">{lang('InviteLink')}</h3>
             <section className="tools">
               {currentInviteInfo && !currentInviteInfo.isRevoked && (
                 <Button
                   round
                   color="translucent"
                   size="smaller"
-                  ariaLabel={oldLang('Edit')}
+                  ariaLabel={lang('Edit')}
                   onClick={handleEditInviteClick}
                   iconName="edit"
                 />
@@ -442,17 +441,17 @@ const RightHeader = ({
                     round
                     color="danger"
                     size="smaller"
-                    ariaLabel={oldLang('Delete')}
+                    ariaLabel={lang('Delete')}
                     onClick={openDeleteDialog}
                     iconName="delete"
                   />
                   <ConfirmDialog
                     isOpen={isDeleteDialogOpen}
                     onClose={closeDeleteDialog}
-                    title={oldLang('DeleteLink')}
-                    text={oldLang('DeleteLinkHelp')}
+                    title={lang('DeleteLink')}
+                    text={lang('DeleteLinkHelp')}
                     confirmIsDestructive
-                    confirmLabel={oldLang('Delete')}
+                    confirmLabel={lang('Delete')}
                     confirmHandler={handleDeleteInviteClick}
                   />
                 </>
@@ -461,41 +460,45 @@ const RightHeader = ({
           </>
         );
       case HeaderContent.ManageJoinRequests:
-        return <h3 className="title">{isChannel ? oldLang('SubscribeRequests') : oldLang('MemberRequests')}</h3>;
+        return <h3 className="title">{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</h3>;
       case HeaderContent.ManageGroupAddAdmins:
-        return <h3 className="title">{oldLang('Channel.Management.AddModerator')}</h3>;
+        return <h3 className="title">{lang('ChannelManagementAddModerator')}</h3>;
       case HeaderContent.Statistics:
-        return <h3 className="title">{oldLang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelStatsTitle' : 'GroupStatsTitle')}</h3>;
       case HeaderContent.MessageStatistics:
-        return <h3 className="title">{oldLang('Stats.MessageTitle')}</h3>;
+        return <h3 className="title">{lang('StatsMessageTitle')}</h3>;
       case HeaderContent.StoryStatistics:
-        return <h3 className="title">{oldLang('Stats.StoryTitle')}</h3>;
+        return <h3 className="title">{lang('StatsStoryTitle')}</h3>;
       case HeaderContent.BoostStatistics:
-        return <h3 className="title">{oldLang('Boosts')}</h3>;
+        return <h3 className="title">{lang('Boosts')}</h3>;
       case HeaderContent.MonetizationStatistics:
-        return <h3 className="title">{oldLang('lng_channel_earn_title')}</h3>;
+        return <h3 className="title">{lang('ChannelEarnTitle')}</h3>;
       case HeaderContent.SharedMedia:
-        return <h3 className="title">{oldLang('SharedMedia')}</h3>;
+        return <h3 className="title">{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
-        return <h3 className="title">{oldLang('ChannelSubscribers')}</h3>;
+        return <h3 className="title">{lang('ChannelSubscribers')}</h3>;
       case HeaderContent.MemberList:
       case HeaderContent.ManageGroupMembers:
-        return <h3 className="title">{oldLang('GroupMembers')}</h3>;
+        return <h3 className="title">{lang('GroupMembers')}</h3>;
       case HeaderContent.StoryList:
-        return <h3 className="title">{oldLang(isSelf ? 'Settings.MyStories' : 'PeerInfo.PaneStories')}</h3>;
+        return <h3 className="title">{lang(isSelf ? 'SettingsMyStories' : 'PeerInfoPaneStories')}</h3>;
       case HeaderContent.SavedDialogs:
         return (
           <div className="header">
-            <h3 className="title">{oldLang('SavedMessagesTab')}</h3>
-            <div className="subtitle">{oldLang('Chats', foldersChatCount[SAVED_FOLDER_ID])}</div>
+            <h3 className="title">{lang('SavedMessages')}</h3>
+            <div className="subtitle">
+              {lang('ChatsPlural', {
+                count: savedDialogsCount,
+              }, { pluralValue: savedDialogsCount })}
+            </div>
           </div>
         );
       case HeaderContent.ManageReactions:
-        return <h3 className="title">{oldLang('Reactions')}</h3>;
+        return <h3 className="title">{lang('Reactions')}</h3>;
       case HeaderContent.CreateTopic:
-        return <h3 className="title">{oldLang('NewTopic')}</h3>;
+        return <h3 className="title">{lang('NewTopic')}</h3>;
       case HeaderContent.EditTopic:
-        return <h3 className="title">{oldLang('EditTopic')}</h3>;
+        return <h3 className="title">{lang('EditTopic')}</h3>;
       case HeaderContent.GiftList:
         return (
           <>
@@ -593,7 +596,7 @@ const RightHeader = ({
           </>
         );
       case HeaderContent.NewDiscussionGroup:
-        return <h3 className="title">{oldLang('NewGroup')}</h3>;
+        return <h3 className="title">{lang('NewGroup')}</h3>;
       default:
         return (
           <>
@@ -606,7 +609,7 @@ const RightHeader = ({
                   round
                   color="translucent"
                   size="smaller"
-                  ariaLabel={oldLang('AddContact')}
+                  ariaLabel={lang('AddContact')}
                   onClick={handleAddContact}
                   iconName="add-user"
                 />
@@ -617,7 +620,7 @@ const RightHeader = ({
                   round
                   color="translucent"
                   size="smaller"
-                  ariaLabel={oldLang('Statistics')}
+                  ariaLabel={lang('Statistics')}
                   onClick={handleToggleStatistics}
                   iconName="stats"
                 />
@@ -668,7 +671,7 @@ const RightHeader = ({
         color="translucent"
         size="smaller"
         onClick={handleClose}
-        ariaLabel={isBackButton ? oldLang('Common.Back') : oldLang('Common.Close')}
+        ariaLabel={isBackButton ? lang('Back') : lang('Close')}
       >
         <div className={buttonClassName} />
       </Button>

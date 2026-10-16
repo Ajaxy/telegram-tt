@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -17,8 +16,8 @@ import {
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import InputText from '../ui/InputText';
 import ListItem from '../ui/ListItem';
@@ -44,14 +43,14 @@ type StateProps = {
   currentTone?: TranslationTone;
 };
 
-const ChatLanguageModal: FC<OwnProps & StateProps> = ({
+const ChatLanguageModal = ({
   isOpen,
   chatId,
   messageId,
   activeTranslationLanguage,
   currentLanguageCode,
   currentTone,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     requestMessageTranslation,
     closeChatLanguageModal,
@@ -60,7 +59,7 @@ const ChatLanguageModal: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const [search, setSearch] = useState('');
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleSelect = useLastCallback((langCode: string) => {
     if (!chatId) return;

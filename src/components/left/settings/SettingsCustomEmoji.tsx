@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -13,7 +12,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import StickerSetCard from '../../common/StickerSetCard';
 import Island, { IslandDescription } from '../../gili/layout/Island';
@@ -32,16 +31,16 @@ type StateProps = Pick<AccountSettings, (
   canPlayAnimatedEmojis: boolean;
 };
 
-const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
+const SettingsCustomEmoji = ({
   isActive,
   customEmojiSetIds,
   stickerSetsById,
   shouldSuggestCustomEmoji,
   canPlayAnimatedEmojis,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const { openStickerSet, setSettingOption } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const stickerSettingsRef = useRef<HTMLDivElement>();
   const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: stickerSettingsRef });

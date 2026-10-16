@@ -4,6 +4,7 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChannelMonetizationStatistics } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 
 import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
@@ -16,7 +17,6 @@ import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AboutMonetizationModal from '../../common/AboutMonetizationModal.async';
 import GramIcon from '../../common/icons/GramIcon';
@@ -31,9 +31,9 @@ import StatisticsOverview from './StatisticsOverview';
 
 import styles from './MonetizationStatistics.module.scss';
 
-const MONETIZATION_GRAPHS_TITLES = {
-  topHoursGraph: 'ChannelStats.Graph.ViewsByHours',
-  revenueGraph: 'lng_channel_earn_chart_revenue',
+const MONETIZATION_GRAPHS_TITLES: Record<string, RegularLangKey> = {
+  topHoursGraph: 'ChannelStatsGraphViewsByHours',
+  revenueGraph: 'ChannelEarnChartRevenue',
 };
 const MONETIZATION_GRAPHS = Object.keys(MONETIZATION_GRAPHS_TITLES) as (keyof ApiChannelMonetizationStatistics)[];
 
@@ -55,7 +55,7 @@ const MonetizationStatistics = ({
   hasPassword,
 }: StateProps) => {
   const { loadChannelMonetizationStatistics, openMonetizationVerificationModal, loadPasswordInfo } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -122,7 +122,7 @@ const MonetizationStatistics = ({
 
         new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
           ...graph,
-          title: oldLang((MONETIZATION_GRAPHS_TITLES as Record<string, string>)[name]),
+          title: lang(MONETIZATION_GRAPHS_TITLES[name]),
         });
 
         loadedChartsRef.current.add(name);
@@ -132,7 +132,7 @@ const MonetizationStatistics = ({
 
       forceUpdate();
     })();
-  }, [isReady, statistics, oldLang, chatId, dcId, forceUpdate]);
+  }, [isReady, statistics, lang, chatId, dcId, forceUpdate]);
 
   function renderAvailableReward() {
     const tonAmount = availableBalance ? convertTonFromNanos(availableBalance.amount) : 0;
@@ -170,7 +170,7 @@ const MonetizationStatistics = ({
   }
 
   const topText = useMemo(() => {
-    const linkText = oldLang('LearnMore');
+    const linkText = lang('LearnMore');
     return lang(
       'ChannelEarnAbout',
       {
@@ -185,15 +185,15 @@ const MonetizationStatistics = ({
         withNodes: true,
       },
     );
-  }, [lang, oldLang]);
+  }, [lang]);
 
   const rewardsText = useMemo(() => {
-    const linkText = oldLang('LearnMore');
+    const linkText = lang('LearnMore');
     return lang(
       'MonetizationBalanceZeroInfo',
       {
         link: (
-          <SafeLink url={oldLang('MonetizationProceedsInfoLink')} text={linkText}>
+          <SafeLink url={lang('MonetizationProceedsTONInfoLink')} text={linkText}>
             {linkText}
             <Icon name="next" />
           </SafeLink>
@@ -203,7 +203,7 @@ const MonetizationStatistics = ({
         withNodes: true,
       },
     );
-  }, [lang, oldLang]);
+  }, [lang]);
 
   const verificationMonetizationHandler = useLastCallback(() => {
     if (hasPassword) {
@@ -228,10 +228,10 @@ const MonetizationStatistics = ({
           statistics={statistics}
           isToncoin
           type="monetization"
-          title={oldLang('MonetizationOverview')}
+          title={lang('MonetizationOverview')}
         />
       </Island>
-      <IslandDescription>{oldLang('MonetizationProceedsTONInfo')}</IslandDescription>
+      <IslandDescription>{lang('MonetizationProceedsTONInfo')}</IslandDescription>
 
       {!loadedChartsRef.current.size && <Loading />}
 
@@ -244,7 +244,7 @@ const MonetizationStatistics = ({
       </Island>
 
       <Island className={styles.balanceSection}>
-        <h4 className={styles.balanceTitle}>{oldLang('lng_channel_earn_balance_title')}</h4>
+        <h4 className={styles.balanceTitle}>{lang('ChannelEarnBalanceTitle')}</h4>
 
         {renderAvailableReward()}
 
@@ -253,7 +253,7 @@ const MonetizationStatistics = ({
           onClick={verificationMonetizationHandler}
           disabled={!canWithdraw}
         >
-          {oldLang('MonetizationWithdraw')}
+          {lang('MonetizationWithdraw')}
         </Button>
 
       </Island>
@@ -270,7 +270,7 @@ const MonetizationStatistics = ({
         confirmHandler={closeConfirmPasswordDialogOpen}
         confirmLabel={lang('OK')}
       >
-        <p>{renderText(oldLang('Monetization.Withdraw.Error.Text'), ['br'])}</p>
+        <p>{renderText(lang('MonetizationWithdrawErrorText'), ['br'])}</p>
       </ConfirmDialog>
     </div>
   );

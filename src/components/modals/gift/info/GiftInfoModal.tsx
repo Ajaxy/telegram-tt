@@ -15,8 +15,8 @@ import { getMainUsername } from '../../../../global/helpers/users';
 import { selectPeer, selectPeerPaidMessagesStars, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
-import { formatDateTimeToString } from '../../../../util/dates/oldDateFormat';
 import { formatCurrency, formatCurrencyAsString } from '../../../../util/formatCurrency';
+import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import {
   formatStarsAsIcon, formatStarsAsText, formatTonAsIcon, formatTonAsText,
   NEXT_ARROW_REPLACEMENT,
@@ -31,7 +31,6 @@ import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
@@ -108,7 +107,7 @@ const GiftInfoModal = ({
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
   const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
   const [giftMessage, setGiftMessage] = useState('');
@@ -399,11 +398,19 @@ const GiftInfoModal = ({
     let text = '';
     if (gift.type === 'starGift') {
       if (gift.firstSaleDate) {
-        text += `${lang('GiftInfoFirstSale')} ${formatDateTimeToString(gift.firstSaleDate * 1000, lang.code, true)}`;
+        text += `${lang('GiftInfoFirstSale')} ${formatDateTime(
+          lang,
+          secondsToDate(gift.firstSaleDate),
+          { date: 'short', time: 'short' },
+        )}`;
       }
       if (gift.lastSaleDate) {
         text += '\n';
-        text += `${lang('GiftInfoLastSale')} ${formatDateTimeToString(gift.lastSaleDate * 1000, lang.code, true)}`;
+        text += `${lang('GiftInfoLastSale')} ${formatDateTime(
+          lang,
+          secondsToDate(gift.lastSaleDate),
+          { date: 'short', time: 'short' },
+        )}`;
       }
     }
 
@@ -596,7 +603,7 @@ const GiftInfoModal = ({
         !fromId ? (
           <>
             <Avatar size="small" peer={CUSTOM_PEER_HIDDEN} />
-            <span className={styles.unknown}>{oldLang(CUSTOM_PEER_HIDDEN.titleKey!)}</span>
+            <span className={styles.unknown}>{lang(CUSTOM_PEER_HIDDEN.titleKey!)}</span>
           </>
         ) : { chatId: fromId },
       ]);
@@ -606,21 +613,27 @@ const GiftInfoModal = ({
       if (savedGift?.date) {
         tableData.push([
           lang('GiftInfoDate'),
-          <span title={saleDateInfo}>{formatDateTimeToString(savedGift.date * 1000, lang.code, true)}</span>,
+          <span title={saleDateInfo}>
+            {formatDateTime(
+              lang,
+              secondsToDate(savedGift.date),
+              { date: 'short', time: 'short' },
+            )}
+          </span>,
         ]);
       }
 
       if (gift.firstSaleDate && !savedGift) {
         tableData.push([
           lang('GiftInfoFirstSale'),
-          formatDateTimeToString(gift.firstSaleDate * 1000, lang.code, true),
+          formatDateTime(lang, secondsToDate(gift.firstSaleDate), { date: 'short', time: 'short' }),
         ]);
       }
 
       if (gift.lastSaleDate && !savedGift) {
         tableData.push([
           lang('GiftInfoLastSale'),
-          formatDateTimeToString(gift.lastSaleDate * 1000, lang.code, true),
+          formatDateTime(lang, secondsToDate(gift.lastSaleDate), { date: 'short', time: 'short' }),
         ]);
       }
 
@@ -777,7 +790,7 @@ const GiftInfoModal = ({
                 className={styles.removeMessageButton}
                 size="smaller"
                 color="translucent"
-                ariaLabel="Delete original details"
+                ariaLabel={lang('AriaDeleteGiftDetails')}
                 onClick={handleRemoveMessage}
                 iconName="delete"
               />
@@ -848,7 +861,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
-    canManage, hasConvertOption, isSender, oldLang, tonExplorerUrl,
+    canManage, hasConvertOption, isSender, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
     isGiftUnique, saleDateInfo, canCraft, handleOpenCraftModal,
     canBuyGift, giftOwnerTitle, resellPrice, uniqueGiftTitle, uniqueGiftSubtitle, releasedByPeer,

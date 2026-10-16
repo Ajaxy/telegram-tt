@@ -6,7 +6,7 @@ import type {
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
-import { timestampPlusDay } from '../../../util/dates/oldDateFormat';
+import { timestampPlusDay } from '../../../util/dates/dateMath';
 import { isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
 import { toChannelId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';

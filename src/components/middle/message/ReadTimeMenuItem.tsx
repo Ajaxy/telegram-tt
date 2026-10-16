@@ -3,9 +3,9 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import MenuItem from '../../ui/MenuItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
@@ -24,7 +24,7 @@ function ReadTimeMenuItem({
   message, shouldRenderShowWhen, canLoadReadDate, closeContextMenu,
 }: OwnProps) {
   const { openPrivacySettingsNoticeModal } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
   const { readDate } = message;
   const shouldRenderSkeleton = canLoadReadDate && !readDate && !shouldRenderShowWhen;
 
@@ -38,10 +38,14 @@ function ReadTimeMenuItem({
       <Transition name="fade" activeKey={shouldRenderSkeleton ? 1 : 2} className={styles.transition}>
         {shouldRenderSkeleton ? <Skeleton className={styles.skeleton} animation="wave" /> : (
           <>
-            {Boolean(readDate) && lang('PmReadAt', formatDateAtTime(lang, readDate * 1000))}
+            {Boolean(readDate) && lang('MessageReadAt', {
+              date: formatCalendarDate(lang, secondsToDate(readDate), {
+                variant: 'date', isShort: true, withTime: true,
+              }),
+            })}
             {!readDate && shouldRenderShowWhen && (
               <div>
-                {lang('PmRead')}
+                {lang('FilterRead')}
                 <span className={styles.get} onClick={handleOpenModal}>
                   {lang('PmReadShowWhen')}
                 </span>

@@ -1,7 +1,7 @@
 import type { ActionReturnType } from '../../types';
 
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
-import * as langProvider from '../../../util/oldLangProvider';
+import { getTranslationFn } from '../../../util/localization';
 import { getPeerTitle } from '../../helpers/peers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -25,8 +25,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (inputInvoice?.type === 'stars') {
         actions.closeStarsBalanceModal({ tabId });
         actions.showNotification({
-          message: langProvider.oldTranslate('StarsAcquiredInfo', inputInvoice.stars),
-          title: langProvider.oldTranslate('StarsAcquired'),
+          message: {
+            key: 'StarsAcquiredInfo',
+            variables: {
+              count: inputInvoice.stars,
+            },
+            options: {
+              withNodes: true,
+              withMarkdown: true,
+              renderTextFilters: ['br', 'links'],
+              pluralValue: inputInvoice.stars,
+            },
+          },
+          title: {
+            key: 'StarsAcquired',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
           icon: 'star',
           tabId,
         });
@@ -47,10 +61,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       } else {
         actions.showNotification({
           tabId,
-          message: langProvider.oldTranslate('PaymentInfoHint', [
-            formatCurrencyAsString(totalAmount, currency, langProvider.getTranslationFn().code),
-            form.title,
-          ]),
+          message: {
+            key: 'PaymentInfoHint',
+            variables: {
+              amount: formatCurrencyAsString(totalAmount, currency, getTranslationFn().code),
+              title: form.title,
+            },
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
         });
       }
 
@@ -67,11 +85,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
         actions.showNotification({
           tabId,
-          title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
-          message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
-            amount,
-            subscriptionInfo.title,
-          ], undefined, amount),
+          title: {
+            key: 'StarsSubscriptionCompleted',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
+          message: {
+            key: 'StarsSubscriptionCompletedText',
+            variables: {
+              amount,
+              channel: subscriptionInfo.title,
+            },
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'], pluralValue: amount },
+          },
           icon: 'star',
         });
       }
@@ -80,11 +105,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const amount = form.invoice.totalAmount;
         actions.showNotification({
           tabId,
-          title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
-          message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
-            amount,
-            form.title,
-          ], undefined, amount),
+          title: {
+            key: 'StarsSubscriptionCompleted',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
+          message: {
+            key: 'StarsSubscriptionCompletedText',
+            variables: {
+              amount,
+              channel: form.title,
+            },
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'], pluralValue: amount },
+          },
           icon: 'star',
         });
       }
@@ -209,7 +241,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (inputInvoice?.type === 'stargiftPrepaidUpgrade') {
         actions.reloadPeerSavedGifts({ peerId: inputInvoice.peerId });
 
-        const lang = langProvider.getTranslationFn();
+        const lang = getTranslationFn();
         const peer = selectPeer(global, inputInvoice.peerId);
         const peerTitle = peer ? getPeerTitle(lang, peer) : undefined;
 

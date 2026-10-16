@@ -5,7 +5,6 @@ import type { StatisticsMessageInteractionCounter, StatisticsStoryInteractionCou
 import { formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 
@@ -16,7 +15,6 @@ interface OwnProps {
 }
 
 function StatisticsRecentPostMeta({ postStatistic }: OwnProps) {
-  const oldLang = useOldLang();
   const lang = useLang();
   return (
     <div className={styles.meta}>
@@ -35,7 +33,7 @@ function StatisticsRecentPostMeta({ postStatistic }: OwnProps) {
       )}
 
       {!postStatistic.forwardsCount && !postStatistic.reactionsCount
-        && oldLang('ChannelStats.SharesCount_ZeroValueHolder')}
+        && lang('StatsNoShares')}
     </div>
   );
 }

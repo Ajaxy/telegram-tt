@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect,
   useRef,
@@ -8,7 +7,6 @@ import type { ApiCountry } from '../../api/types';
 import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -29,7 +27,7 @@ export type OwnProps = {
   isActive?: boolean;
 };
 
-const PaymentInfo: FC<OwnProps> = ({
+const PaymentInfo = ({
   state,
   canSaveCredentials,
   needCardholderName,
@@ -38,7 +36,7 @@ const PaymentInfo: FC<OwnProps> = ({
   countryList,
   dispatch,
   isActive,
-}) => {
+}: OwnProps) => {
   const selectCountryRef = useRef<HTMLSelectElement>();
 
   useEffect(() => {
@@ -77,7 +75,6 @@ const PaymentInfo: FC<OwnProps> = ({
     dispatch({ type: 'changeSaveCredentials', payload: e.target.value });
   }, [dispatch]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const { formErrors = {} } = state;
@@ -85,7 +82,7 @@ const PaymentInfo: FC<OwnProps> = ({
   return (
     <div className="PaymentInfo">
       <form>
-        <h5>{oldLang('PaymentCardTitle')}</h5>
+        <h5>{lang('PaymentCardTitle')}</h5>
         <CardInput
           onChange={handleCardNumberChange}
           value={state.cardNumber}
@@ -94,7 +91,7 @@ const PaymentInfo: FC<OwnProps> = ({
         />
         {needCardholderName && (
           <InputText
-            label={oldLang('Checkout.NewCard.CardholderNamePlaceholder')}
+            label={lang('CheckoutNewCardCardholderNamePlaceholder')}
             onChange={handleCardholderChange}
             value={state.cardholder}
             inputMode="text"
@@ -109,7 +106,7 @@ const PaymentInfo: FC<OwnProps> = ({
             error={formErrors.expiry && lang.withRegular(formErrors.expiry)}
           />
           <InputText
-            label={oldLang('lng_payments_card_cvc')}
+            label={lang('PaymentsCardCvc')}
             onChange={handleCvvChange}
             value={state.cvv}
             inputMode="numeric"
@@ -120,12 +117,12 @@ const PaymentInfo: FC<OwnProps> = ({
           />
         </section>
         {needCountry || needZip ? (
-          <h5>{oldLang('PaymentBillingAddress')}</h5>
+          <h5>{lang('PaymentBillingAddress')}</h5>
         ) : undefined}
         <section className="inline-inputs">
           {needCountry && (
             <Select
-              label={oldLang('PaymentShippingCountry')}
+              label={lang('PaymentShippingCountry')}
               onChange={handleCountryChange}
               value={state.billingCountry}
               hasArrow={Boolean(true)}
@@ -149,7 +146,7 @@ const PaymentInfo: FC<OwnProps> = ({
           )}
           {needZip && (
             <InputText
-              label={oldLang('PaymentShippingZipPlaceholder')}
+              label={lang('PaymentShippingZipPlaceholder')}
               onChange={handleBillingPostCodeChange}
               value={state.billingZip}
               inputMode="text"
@@ -161,10 +158,10 @@ const PaymentInfo: FC<OwnProps> = ({
         </section>
         <div className="checkbox">
           <Checkbox
-            label={oldLang('PaymentCardSavePaymentInformation')}
+            label={lang('PaymentCardSavePaymentInformation')}
             checked={canSaveCredentials ? state.saveCredentials : false}
             tabIndex={0}
-            subLabel={oldLang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
+            subLabel={lang(canSaveCredentials ? 'CheckoutNewCardSaveInfoHelp' : 'Checkout2FAText')}
             onChange={handleChangeSaveCredentials}
             disabled={!canSaveCredentials}
           />

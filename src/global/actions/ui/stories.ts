@@ -1,9 +1,9 @@
+import type { RegularLangKey } from '../../../types/language';
 import type { ActionReturnType } from '../../types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -286,7 +286,10 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
 
   copyTextToClipboard(link);
   actions.showNotification({
-    message: langProvider.oldTranslate('LinkCopied'),
+    message: {
+      key: 'LinkCopied',
+      options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+    },
     tabId,
   });
 });
@@ -304,20 +307,23 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
 
   const { gif, sticker, isReaction } = payload;
 
-  let message: string;
+  let message: RegularLangKey;
   if (gif) {
-    message = 'Story.Tooltip.GifSent';
+    message = 'StoryTooltipGifSent';
   } else if (sticker) {
-    message = 'Story.Tooltip.StickerSent';
+    message = 'StoryTooltipStickerSent';
   } else if (isReaction) {
-    message = 'Story.Tooltip.ReactionSent';
+    message = 'StoryTooltipReactionSent';
   } else {
-    message = 'Story.Tooltip.MessageSent';
+    message = 'StoryTooltipMessageSent';
   }
 
   actions.showNotification({
-    message: langProvider.oldTranslate(message),
-    actionText: langProvider.oldTranslate('Story.ToastViewInChat'),
+    message: {
+      key: message,
+      options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+    },
+    actionText: { key: 'StoryToastViewInChat' },
     action: [{
       action: 'closeStoryViewer',
       payload: undefined,

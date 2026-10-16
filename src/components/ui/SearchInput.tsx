@@ -1,5 +1,4 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import {
   memo, useEffect, useRef,
 } from '../../lib/teact/teact';
@@ -11,7 +10,6 @@ import useFlag from '../../hooks/useFlag';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Button from './Button';
@@ -46,14 +44,14 @@ type OwnProps = {
   onReset?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
-  onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onUpClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onDownClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onSpinnerClick?: NoneToVoidFunction;
   onEnter?: NoneToVoidFunction;
 };
 
-const SearchInput: FC<OwnProps> = ({
+const SearchInput = ({
   ref,
   children,
   resultsItemSelector,
@@ -84,7 +82,7 @@ const SearchInput: FC<OwnProps> = ({
   onDownClick,
   onSpinnerClick,
   onEnter,
-}) => {
+}: OwnProps) => {
   let inputRef = useRef<HTMLInputElement>();
   if (ref) {
     inputRef = ref;
@@ -106,7 +104,6 @@ const SearchInput: FC<OwnProps> = ({
     }
   }, [focused, placeholder]); // Trick for setting focus when selecting a contact to search for
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -183,7 +180,7 @@ const SearchInput: FC<OwnProps> = ({
         id={inputId}
         type="text"
         dir="auto"
-        placeholder={placeholder || oldLang('Search')}
+        placeholder={placeholder || lang('Search')}
         className="form-control"
         value={value}
         disabled={disabled}

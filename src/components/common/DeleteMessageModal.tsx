@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo,
   useEffect,
@@ -7,7 +6,7 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChat, ApiChatMember } from '../../api/types';
+import type { ApiChat, ApiChatMember, ApiUser } from '../../api/types';
 import type { ReactionDeletionContext } from '../../global/types';
 import type { IRadioOption } from '../ui/CheckboxGroup';
 
@@ -39,7 +38,6 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useManagePermissions from '../right/hooks/useManagePermissions';
 
@@ -65,7 +63,7 @@ type StateProps = {
   isSuperGroup?: boolean;
   messageIds?: number[];
   canDeleteForAll?: boolean;
-  contactName?: string;
+  contactUser?: ApiUser;
   currentUserId?: string;
   willDeleteForCurrentUserOnly?: boolean;
   willDeleteForAll?: boolean;
@@ -87,7 +85,7 @@ function isPeerIdValue(value: string) {
   return !Number.isNaN(Number(value));
 }
 
-const DeleteMessageModal: FC<OwnProps & StateProps> = ({
+const DeleteMessageModal = ({
   isOpen,
   chat,
   isChannel,
@@ -97,7 +95,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   messageIds,
   isOwner,
   canDeleteForAll,
-  contactName,
+  contactUser,
   willDeleteForCurrentUserOnly,
   willDeleteForAll,
   chatBot,
@@ -106,7 +104,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   linkedChatId,
   onConfirm,
   reactionContext,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeDeleteMessageModal,
     deleteMessages,
@@ -123,8 +121,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   const prevIsOpen = usePreviousDeprecated(isOpen);
 
-  const oldLang = useOldLang();
   const lang = useLang();
+  const contactName = getUserFirstOrLastName(lang, contactUser);
 
   const {
     permissions, havePermissionChanged, handlePermissionChange, resetPermissions,
@@ -213,7 +211,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     return [
       {
         value: messageIds && peerList.length >= 2 ? 'spam' : peerList?.[0]?.id,
-        label: oldLang('ReportSpamTitle'),
+        label: lang('ReportSpamTitle'),
         nestedOptions: messageIds && peerList.length >= 2 ? [
           ...buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
             && opt.value !== chat?.linkedMonoforumId
@@ -221,14 +219,14 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         ] : undefined,
       },
     ];
-  }, [messageIds, peerList, oldLang, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
+  }, [messageIds, peerList, lang, linkedChatId, chat?.linkedMonoforumId, currentUserId]);
 
   const ACTION_DELETE_OPTION: IRadioOption[] = useMemo(() => {
     if (messageIds && peerList.length >= 2) {
       return [
         {
           value: DELETE_ALL_VALUE,
-          label: oldLang('DeleteAllFromUsers'),
+          label: lang('DeleteAllFromUsers'),
           nestedOptions: buildNestedOptionListWithAvatars().filter((opt) => opt.value !== linkedChatId
             && opt.value !== chat?.linkedMonoforumId
             && opt.value !== currentUserId),
@@ -241,7 +239,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     return [
       {
         value: DELETE_ALL_VALUE,
-        label: oldLang('DeleteAllFrom', peerNames[peer.id]),
+        label: lang('DeleteAllFrom', { user: peerNames[peer.id] }),
         nestedOptions: [
           { value: DELETE_ALL_MESSAGES_VALUE, label: lang('DeleteAllMessages') },
           { value: DELETE_ALL_REACTIONS_VALUE, label: lang('DeleteAllReactions') },
@@ -249,7 +247,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       },
     ];
   }, [
-    messageIds, peerList, oldLang, peerNames, lang,
+    messageIds, peerList, lang, peerNames,
     linkedChatId, chat?.linkedMonoforumId, currentUserId,
   ]);
 
@@ -258,15 +256,15 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       {
         value: messageIds && peerList.length >= 2 ? 'ban' : peerList?.[0]?.id,
         label: messageIds && peerList.length >= 2
-          ? (isAdditionalOptionsVisible ? oldLang('DeleteRestrictUsers') : oldLang('DeleteBanUsers'))
-          : (isAdditionalOptionsVisible ? oldLang('KickFromSupergroup')
-            : oldLang('DeleteBan', Object.values(peerNames)[0])),
+          ? (isAdditionalOptionsVisible ? lang('DeleteRestrictUsers') : lang('DeleteBanUsers'))
+          : (isAdditionalOptionsVisible ? lang('KickFromSupergroup')
+            : lang('DeleteBan', { user: Object.values(peerNames)[0] })),
         nestedOptions: messageIds && peerList.length >= 2 ? [
           ...buildNestedOptionListWithAvatars(),
         ] : undefined,
       },
     ];
-  }, [isAdditionalOptionsVisible, oldLang, messageIds, peerList, peerNames]);
+  }, [isAdditionalOptionsVisible, lang, messageIds, peerList, peerNames]);
 
   const toggleAdditionalOptions = useLastCallback(() => {
     setIsAdditionalOptionsVisible((prev) => !prev);
@@ -451,7 +449,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         <h3 className={buildClassName(shouldShowOption ? styles.title : styles.singleTitle)}>
           {reactionContext
             ? lang('DeleteReactionTitle', { count: reactionContext.count }, { pluralValue: reactionContext.count })
-            : oldLang('Chat.DeleteMessagesConfirmation', messageIds?.length)}
+            : lang('ChatDeleteMessagesConfirmation', {
+              count: messageIds?.length || 0,
+            }, { pluralValue: messageIds?.length || 0 })}
         </h3>
       </div>
     );
@@ -492,7 +492,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         isAdditionalOptionsVisible && styles.restrictionContainerOpen)}
       >
         <h3 className={buildClassName(styles.actionTitle, styles.restrictionTitle)}>
-          {oldLang('UserRestrictionsCanDoUsers', peerList.length)}
+          {lang('UserRestrictionsCanDoUsers', { count: peerList.length }, { pluralValue: peerList.length })}
         </h3>
         <PermissionCheckboxList
           withCheckbox
@@ -521,7 +521,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         {renderHeader()}
         {shouldShowOption && (
           <>
-            <p className={styles.actionTitle}>{oldLang('DeleteAdditionalActions')}</p>
+            <p className={styles.actionTitle}>{lang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
             {renderPartiallyRestrictedUser()}
             {peerIdsToBan?.length && canBanUsers ? (
@@ -530,7 +530,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
                 buttonClassName={styles.button}
                 onClick={toggleAdditionalOptions}
               >
-                {oldLang(isAdditionalOptionsVisible ? 'DeleteToggleBanUsers' : 'DeleteToggleRestrictUsers')}
+                {lang(isAdditionalOptionsVisible ? 'DeleteToggleBanUsers' : 'DeleteToggleRestrictUsers')}
                 <Icon
                   name={isAdditionalOptionsVisible ? 'up' : 'down'}
                   className={buildClassName(styles.button, 'ml-2')}
@@ -546,18 +546,18 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
                 ? lang('AreYouSureDeleteFewMessages') : lang('AreYouSureDeleteSingleMessage')}
             </p>
             {willDeleteForCurrentUserOnly && (
-              <p>{oldLang('lng_delete_for_me_chat_hint', 1, 'i')}</p>
+              <p>{lang('DeleteForMeChatHint', undefined, { pluralValue: 1 })}</p>
             )}
             {willDeleteForAll && (
-              <p>{oldLang('lng_delete_for_everyone_hint', 1, 'i')}</p>
+              <p>{lang('DeleteForEveryoneHint', undefined, { pluralValue: 1 })}</p>
             )}
           </>
         )}
         {canDeleteForAll && (
           <Checkbox
             className="dialog-checkbox"
-            label={contactName ? renderText(oldLang('DeleteMessagesOptionAlso', contactName))
-              : oldLang('Conversation.DeleteMessagesForEveryone')}
+            label={contactName ? renderText(lang('DeleteMessagesOptionAlso', { user: contactName }))
+              : lang('ConversationDeleteMessagesForEveryone')}
             checked={shouldDeleteForAll}
             onCheck={setShouldDeleteForAll}
           />
@@ -566,9 +566,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
           isMediaDropdownOpen ? styles.dialogButtons : styles.proceedButtons)}
         >
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageList}>
-            {shouldShowOption ? oldLang('DeleteProceedBtn') : lang('Delete')}
+            {shouldShowOption ? lang('DeleteProceedBtn') : lang('Delete')}
           </Button>
-          <Button className="confirm-dialog-button" isText onClick={onCloseHandler}>{oldLang('Cancel')}</Button>
+          <Button className="confirm-dialog-button" isText onClick={onCloseHandler}>{lang('Cancel')}</Button>
         </div>
       </div>
     </Modal>
@@ -590,8 +590,8 @@ export default memo(withGlobal<OwnProps>(
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
     const isSchedule = deleteMessageModal?.isSchedule;
     const onConfirm = deleteMessageModal?.onConfirm;
-    const contactName = chatId && isUserId(chatId)
-      ? getUserFirstOrLastName(selectUser(global, chatId))
+    const contactUser = chatId && isUserId(chatId)
+      ? selectUser(global, chatId)
       : undefined;
     const chatBot = Boolean(chat && !isSystemBot(chat.id) && selectBot(global, chat.id));
     const adminMembersById = chatFullInfo?.adminMembersById;
@@ -608,7 +608,7 @@ export default memo(withGlobal<OwnProps>(
       messageIds,
       currentUserId: global.currentUserId,
       canDeleteForAll: !isSchedule && canDeleteForAll,
-      contactName,
+      contactUser,
       willDeleteForCurrentUserOnly,
       willDeleteForAll,
       adminMembersById,

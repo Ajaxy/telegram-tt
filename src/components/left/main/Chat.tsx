@@ -47,7 +47,7 @@ import {
 import { selectDraft, selectThreadLocalStateParam } from '../../../global/selectors/threads';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdown } from '../../../util/dates/oldDateFormat';
+import { formatCountdown } from '../../../util/dates/duration';
 import { isUserId } from '../../../util/entities/ids';
 import { getChatFolderIds } from '../../../util/folderManager';
 import { createLocationHash } from '../../../util/routing';

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -20,7 +19,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import StickerSetCard from '../../common/StickerSetCard';
@@ -47,7 +46,7 @@ type StateProps =
     canPlayAnimatedEmojis: boolean;
   };
 
-const SettingsStickers: FC<OwnProps & StateProps> = ({
+const SettingsStickers = ({
   isActive,
   addedSetIds,
   customEmojiSetIds,
@@ -58,13 +57,13 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
   availableReactions,
   canPlayAnimatedEmojis,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setSettingOption,
     openStickerSet,
     openSettingsScreen,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const stickerSettingsRef = useRef<HTMLDivElement>();
   const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: stickerSettingsRef });
@@ -105,7 +104,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           onClick={() => openSettingsScreen({ screen: SettingsScreens.CustomEmoji })}
           icon="smile"
         >
-          {lang('StickersList.EmojiItem')}
+          {lang('StickersListEmojiItem')}
           {customEmojiSetIds && <span className="settings-item__current-value">{customEmojiSetIds.length}</span>}
         </ListItem>
         {defaultReaction && (
@@ -126,17 +125,17 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
       </Island>
 
       <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-        {lang('InstalledStickers.DynamicPackOrder')}
+        {lang('InstalledStickersDynamicPackOrder')}
       </IslandTitle>
       <Island>
         <Checkbox
-          label={lang('InstalledStickers.DynamicPackOrder')}
+          label={lang('InstalledStickersDynamicPackOrder')}
           checked={shouldUpdateStickerSetOrder}
           onCheck={handleSuggestStickerSetOrderChange}
         />
       </Island>
       <IslandDescription dir="auto">
-        {lang('InstalledStickers.DynamicPackOrderInfo')}
+        {lang('InstalledStickersDynamicPackOrderInfo')}
       </IslandDescription>
 
       {stickerSets && (

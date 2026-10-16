@@ -15,7 +15,7 @@ import {
   selectChat, selectChatMessage, selectTabState, selectUser, selectUserFullInfo,
 } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { formatDateToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime } from '../../../util/localization/dateFormat';
 import { NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
@@ -28,7 +28,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import ManageUsernames from '../../common/ManageUsernames';
@@ -73,7 +72,7 @@ type StateProps = {
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
 
-const ERROR_FIRST_NAME_MISSING = 'Please provide your first name';
+const ERROR_FIRST_NAME_MISSING = 'EditProfileNoFirstName';
 
 const SettingsEditProfile = ({
   isActive,
@@ -103,7 +102,6 @@ const SettingsEditProfile = ({
     showNotification,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const firstEditableUsername = useMemo(() => usernames?.find(({ isEditable }) => isEditable), [usernames]);
@@ -221,7 +219,7 @@ const SettingsEditProfile = ({
       currentBirthday.day,
     );
 
-    return formatDateToString(date, lang.code, true, 'long');
+    return formatDateTime(lang, date, { date: 'long', includeYear: false });
   }, [currentBirthday, lang]);
 
   const handlePhotoChange = useLastCallback((newPhoto: File) => {
@@ -325,13 +323,10 @@ const SettingsEditProfile = ({
     const purchaseInfoLink = `${TME_LINK_PREFIX}${PURCHASE_USERNAME}`;
 
     return (
-      <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
-        {(oldLang('lng_username_purchase_available'))
-          .replace('{link}', '%PURCHASE_LINK%')
-          .split('%')
-          .map((s) => {
-            return (s === 'PURCHASE_LINK' ? <SafeLink url={purchaseInfoLink} text={`@${PURCHASE_USERNAME}`} /> : s);
-          })}
+      <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+        {lang('UsernamePurchaseAvailable', {
+          link: <SafeLink url={purchaseInfoLink} text={`@${PURCHASE_USERNAME}`} />,
+        }, { withNodes: true, withMarkdown: true })}
       </IslandDescription>
     );
   }
@@ -352,28 +347,28 @@ const SettingsEditProfile = ({
             <InputText
               value={firstName}
               onChange={handleFirstNameChange}
-              label={oldLang('FirstName')}
+              label={lang('FirstName')}
               disabled={isLoading}
-              error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
+              error={error === ERROR_FIRST_NAME_MISSING ? lang(ERROR_FIRST_NAME_MISSING) : undefined}
             />
             <InputText
               value={lastName}
               onChange={handleLastNameChange}
-              label={oldLang('LastName')}
+              label={lang('LastName')}
               disabled={isLoading}
             />
             <TextArea
               value={bio}
               onChange={handleBioChange}
-              label={oldLang('UserBio')}
+              label={lang('UserBio')}
               disabled={isLoading}
               maxLength={maxBioLength}
               maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
             />
           </div>
         </Island>
-        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
-          {renderText(oldLang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
+        <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderText(lang('SettingsAboutBio'), ['br', 'simple_markdown'])}
         </IslandDescription>
 
         <Island>
@@ -389,7 +384,7 @@ const SettingsEditProfile = ({
             <span className="flex-grow">{lang('SettingsBirthday')}</span>
           </ListItem>
         </Island>
-        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
+        <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('BirthdayPrivacySuggestion', {
             link: (
               <Link isPrimary onClick={handleBirthdayPrivacyClick}>
@@ -400,7 +395,7 @@ const SettingsEditProfile = ({
           }, { withNodes: true })}
         </IslandDescription>
 
-        <IslandTitle dir={oldLang.isRtl ? 'rtl' : undefined}>{oldLang('Username')}</IslandTitle>
+        <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('Username')}</IslandTitle>
         <Island>
           <div className="settings-input">
             <UsernameInput
@@ -413,12 +408,12 @@ const SettingsEditProfile = ({
           </div>
         </Island>
         {editUsernameError === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
-        <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
-          {renderText(oldLang('UsernameHelp'), ['br', 'simple_markdown'])}
+        <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderText(lang('UsernameHelp'), ['br', 'simple_markdown'])}
         </IslandDescription>
         {editableUsername && (
-          <IslandDescription dir={oldLang.isRtl ? 'rtl' : undefined}>
-            {oldLang('lng_username_link')}
+          <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('UsernameLink')}
             <br />
             <span className="username-link">
               {TME_LINK_PREFIX}
@@ -470,7 +465,7 @@ const SettingsEditProfile = ({
         isShown={isSaveButtonShown}
         onClick={handleProfileSave}
         disabled={isLoading}
-        ariaLabel={oldLang('Save')}
+        ariaLabel={lang('Save')}
         iconName="check"
         isLoading={isLoading}
       />

@@ -1,14 +1,14 @@
 import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
+import type { LangFn } from '../../util/localization';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
-import { formatFullDate, formatTime } from '../../util/dates/oldDateFormat';
 import { DAY } from '../../util/dates/units';
 import { orderBy } from '../../util/iteratees';
+import { formatRecentTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import { formatPhoneNumber } from '../../util/phoneNumber';
-import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
+import { getServerTime } from '../../util/serverTime';
 
-export function getUserFirstOrLastName(user?: ApiUser) {
+export function getUserFirstOrLastName(lang: LangFn, user?: ApiUser) {
   if (!user) {
     return undefined;
   }
@@ -22,7 +22,7 @@ export function getUserFirstOrLastName(user?: ApiUser) {
 
     case 'userTypeDeleted':
     case 'userTypeUnknown': {
-      return 'Deleted';
+      return lang('Deleted');
     }
 
     default:
@@ -30,13 +30,13 @@ export function getUserFirstOrLastName(user?: ApiUser) {
   }
 }
 
-export function getUserFullName(user?: ApiUser) {
+export function getUserFullName(lang: LangFn, user?: ApiUser) {
   if (!user) {
     return undefined;
   }
 
   if (isDeletedUser(user)) {
-    return 'Deleted Account';
+    return lang('HiddenName');
   }
 
   switch (user.type) {
@@ -66,7 +66,7 @@ export function getUserFullName(user?: ApiUser) {
 }
 
 export function getUserStatus(
-  lang: OldLangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
+  lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
 ) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications');
@@ -78,7 +78,7 @@ export function getUserStatus(
 
   if (user.type && user.type === 'userTypeBot') {
     if (user.botActiveUsers) {
-      return lang('BotUsers', user.botActiveUsers, 'i');
+      return lang('Users', { count: lang.number(user.botActiveUsers) }, { pluralValue: user.botActiveUsers });
     }
     return lang('Bot');
   }
@@ -103,54 +103,9 @@ export function getUserStatus(
     case 'userStatusOffline': {
       const { wasOnline } = userStatus;
 
-      if (!wasOnline) return lang('LastSeen.Offline');
+      if (!wasOnline) return lang('LastSeenOffline');
 
-      const serverTimeOffset = getServerTimeOffset();
-      const now = new Date(Date.now() + serverTimeOffset * 1000);
-      const wasOnlineDate = new Date(wasOnline * 1000);
-
-      if (wasOnlineDate >= now) {
-        return lang('LastSeen.JustNow');
-      }
-
-      const diff = new Date(now.getTime() - wasOnlineDate.getTime());
-
-      // within a minute
-      if (diff.getTime() / 1000 < 60) {
-        return lang('LastSeen.JustNow');
-      }
-
-      // within an hour
-      if (diff.getTime() / 1000 < 60 * 60) {
-        const minutes = Math.floor(diff.getTime() / 1000 / 60);
-        return lang('LastSeen.MinutesAgo', minutes);
-      }
-
-      // today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const serverToday = new Date(today.getTime() + serverTimeOffset * 1000);
-      if (wasOnlineDate > serverToday) {
-        // up to 6 hours ago
-        if (diff.getTime() / 1000 < 6 * 60 * 60) {
-          const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
-          return lang('LastSeen.HoursAgo', hours);
-        }
-
-        // other
-        return lang('LastSeen.TodayAt', formatTime(lang, wasOnlineDate));
-      }
-
-      // yesterday
-      const yesterday = new Date();
-      yesterday.setDate(now.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
-      const serverYesterday = new Date(yesterday.getTime() + serverTimeOffset * 1000);
-      if (wasOnlineDate > serverYesterday) {
-        return lang('LastSeen.YesterdayAt', formatTime(lang, wasOnlineDate));
-      }
-
-      return lang('LastSeen.AtDate', formatFullDate(lang, wasOnlineDate));
+      return formatRecentTimestamp(lang, secondsToDate(wasOnline), { context: 'lastSeen' });
     }
 
     case 'userStatusOnline': {

@@ -2,9 +2,9 @@ import { memo } from '../../../lib/teact/teact';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import MenuItem from '../../ui/MenuItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
@@ -18,14 +18,16 @@ type OwnProps = {
 function LastEditTimeMenuItem({
   message,
 }: OwnProps) {
-  const lang = useOldLang();
+  const lang = useLang();
   const { editDate } = message;
   const shouldRenderSkeleton = !editDate;
 
   return (
     <MenuItem icon="clock-edit" className={styles.item}>
       {shouldRenderSkeleton ? <Skeleton className={styles.skeleton} animation="wave" /> : Boolean(editDate)
-        && lang('Chat.PrivateMessageEditTimestamp.Date', formatDateAtTime(lang, editDate * 1000))}
+        && lang('ChatPrivateMessageEditTimestampDate', {
+          date: formatCalendarDate(lang, secondsToDate(editDate), { variant: 'date', isShort: true, withTime: true }),
+        })}
     </MenuItem>
   );
 }

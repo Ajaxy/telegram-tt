@@ -1,11 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
 import { memo, useRef } from '../../lib/teact/teact';
 
 import type { ApiBotPreviewMedia } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
 import stopEvent from '../../util/stopEvent';
 
 import useMessageMediaHash from '../../hooks/media/useMessageMediaHash';
@@ -27,7 +26,7 @@ type OwnProps = {
   index: number;
 };
 
-const PreviewMedia: FC<OwnProps> = ({
+const PreviewMedia = ({
   media,
   idPrefix = 'preview-media',
   className,
@@ -35,7 +34,7 @@ const PreviewMedia: FC<OwnProps> = ({
   observeIntersection,
   onClick,
   index,
-}) => {
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);

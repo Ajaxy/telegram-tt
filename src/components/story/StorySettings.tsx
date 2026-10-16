@@ -7,6 +7,7 @@ import type {
   ApiPrivacySettings, ApiStory, ApiUser, PrivacyVisibility,
 } from '../../api/types';
 import type { IconName } from '../../types/icons';
+import type { RegularLangKey } from '../../types/language';
 
 import { getUserFullName } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
@@ -16,8 +17,8 @@ import { getHours } from '../../util/dates/units';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
@@ -46,7 +47,7 @@ interface StateProps {
 type PrivacyAction = 'blockUserIds' | 'closeFriends' | 'blockContactUserIds' | 'allowUserIds';
 
 interface PrivacyOption {
-  name: string;
+  name: RegularLangKey;
   value: PrivacyVisibility;
   color: [string, string];
   icon: IconName;
@@ -60,7 +61,7 @@ const OPTIONS: PrivacyOption[] = [{
   icon: 'megaphone-filled',
   actions: 'blockUserIds',
 }, {
-  name: 'StoryPrivacyOptionContacts',
+  name: 'Contacts',
   value: 'contacts',
   color: ['#C36EFF', '#8B60FA'],
   icon: 'user-filled',
@@ -97,7 +98,7 @@ function StorySettings({
 }: OwnProps & StateProps) {
   const { editStoryPrivacy, toggleStoryInProfile } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isOpenModal, openModal, closeModal] = useFlag(false);
   const [privacy, setPrivacy] = useState<ApiPrivacySettings | undefined>(visibility);
   const [isPinned, setIsPinned] = useState(story?.isInProfile);
@@ -215,7 +216,9 @@ function StorySettings({
         return getPeerTitle(lang, usersById[closeFriendIds[0]]);
       }
 
-      return lang('StoryPrivacyOptionPeople', closeFriendIds.length, 'i');
+      return lang('StoryPrivacyOptionPeople', {
+        count: lang.number(closeFriendIds.length),
+      }, { pluralValue: closeFriendIds.length });
     }
 
     if ((action === 'blockUserIds' && privacy?.visibility === 'everybody')
@@ -225,10 +228,14 @@ function StorySettings({
       }
 
       if (privacy.blockUserIds.length === 1) {
-        return lang('StoryPrivacyOptionExcludePerson', getUserFullName(usersById[privacy.blockUserIds[0]]));
+        return lang('StoryPrivacyOptionExcludePerson', {
+          user: getUserFullName(lang, usersById[privacy.blockUserIds[0]]),
+        });
       }
 
-      return lang('StoryPrivacyOptionExcludePeople', privacy.blockUserIds.length, 'i');
+      return lang('StoryPrivacyOptionExcludePeople', {
+        count: lang.number(privacy.blockUserIds.length),
+      }, { pluralValue: privacy.blockUserIds.length });
     }
 
     if (!privacy?.allowUserIds || privacy.allowUserIds.length === 0) {
@@ -236,10 +243,12 @@ function StorySettings({
     }
 
     if (privacy.allowUserIds.length === 1) {
-      return getUserFullName(usersById[privacy.allowUserIds[0]]);
+      return getUserFullName(lang, usersById[privacy.allowUserIds[0]]);
     }
 
-    return lang('StoryPrivacyOptionPeople', privacy.allowUserIds.length, 'i');
+    return lang('StoryPrivacyOptionPeople', {
+      count: lang.number(privacy.allowUserIds.length),
+    }, { pluralValue: privacy.allowUserIds.length });
   }
 
   function renderHeaderContent() {
@@ -249,7 +258,7 @@ function StorySettings({
       case Screens.allowList:
         return <h3 className={styles.headerTitle}>{lang('StoryPrivacyAlertSelectContactsTitle')}</h3>;
       case Screens.closeFriends:
-        return <h3 className={styles.headerTitle}>{lang('CloseFriends')}</h3>;
+        return <h3 className={styles.headerTitle}>{lang('StoryPrivacyOptionCloseFriends')}</h3>;
       case Screens.denyList:
         return <h3 className={styles.headerTitle}>{lang('StoryPrivacyAlertExcludedContactsTitle')}</h3>;
     }
@@ -355,7 +364,9 @@ function StorySettings({
           </ListItem>
         </div>
         <div className={styles.footer}>
-          <div className={styles.info}>{lang('StoryKeepInfo', storyLifeTime)}</div>
+          <div className={styles.info}>
+            {lang('StoryKeepInfo', { count: storyLifeTime }, { pluralValue: storyLifeTime })}
+          </div>
           <div className={styles.submit}>
             <Button onClick={handleSubmit}>{lang('StoryPrivacyButtonSave')}</Button>
           </div>
@@ -379,7 +390,7 @@ function StorySettings({
           color="translucent"
           size="tiny"
           onClick={handleCloseButtonClick}
-          ariaLabel={isBackButton ? lang('Common.Back') : lang('Common.Close')}
+          ariaLabel={lang(isBackButton ? 'CommonBack' : 'CommonClose')}
         >
           <div className={buildClassName('animated-close-icon', isBackButton && 'state-back')} />
         </Button>

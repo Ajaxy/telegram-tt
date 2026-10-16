@@ -5,7 +5,6 @@ import {
 
 import type { ApiAudio, ApiVideo, ApiVoice } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
-import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
   AudioVariant, PlaybackCapabilities, PlaybackMediaType, ThemeKey,
 } from '../../types';
@@ -18,7 +17,8 @@ import { getMediaTransferState } from '../../global/helpers';
 import { ensureAudioContext } from '../../util/audioPlayback/audioAnalyser';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
-import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
+import { formatCalendarDate, formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import {
   generateVoiceWaveform, getGeneratedVoiceWaveform, MAX_GENERATED_WAVEFORM_DURATION,
   releaseVoiceWaveformRequest, retainVoiceWaveformRequest,
@@ -35,7 +35,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
@@ -154,7 +153,7 @@ const TrackRow = ({
   const wasPlayingBeforeSeekRef = useRef<boolean>(false);
   const pendingSeekTimeRef = useRef<number>(0);
   const seekerRef = useRef<HTMLDivElement>();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   const { isMobile } = useAppLayout();
@@ -326,7 +325,7 @@ const TrackRow = ({
 
   function renderFirstLine() {
     if (isVoice) {
-      return senderTitle || 'Voice';
+      return senderTitle || lang('AttachAudio');
     }
 
     const { title, fileName } = audio!;
@@ -386,7 +385,7 @@ const TrackRow = ({
                 className="date"
                 onClick={onDateClick}
               >
-                {formatPastTimeShort(oldLang, date * 1000)}
+                {formatCompactTimestamp(lang, secondsToDate(date))}
               </Link>
             )}
           </div>
@@ -497,7 +496,6 @@ const TrackRow = ({
       {shouldRenderWithTitle && renderWithTitle()}
       {!shouldRenderWithTitle && audio && renderAudio(
         lang,
-        oldLang,
         audio,
         duration,
         !noProgress && isPlaying,
@@ -575,7 +573,6 @@ function getSeeklineSpikeAmounts(isMobile?: boolean, withAvatar?: boolean) {
 
 function renderAudio(
   lang: LangFn,
-  oldLang: OldLangFn,
   audio: ApiAudio,
   duration: number,
   isPlaying: boolean,
@@ -620,7 +617,7 @@ function renderAudio(
             <>
               <span className="bullet">&bull;</span>
               <Link className="date" onClick={handleDateClick}>
-                {formatMediaDateTime(oldLang, date * 1000, true)}
+                {formatCalendarDate(lang, secondsToDate(date), { isShort: true, withTime: true })}
               </Link>
             </>
           )}

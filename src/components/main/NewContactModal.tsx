@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
@@ -16,7 +15,6 @@ import renderText from '../common/helpers/renderText';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import Button from '../ui/Button';
@@ -41,7 +39,7 @@ type StateProps = {
   noteText?: string;
 };
 
-const NewContactModal: FC<OwnProps & StateProps> = ({
+const NewContactModal = ({
   isOpen,
   userId,
   isByPhoneNumber,
@@ -50,10 +48,9 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   phoneCodeList,
   contactNoteLimit,
   noteText,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateContact, importContact, closeNewContactDialog } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const renderingUser = useCurrentOrPrev(user);
   const renderingIsByPhoneNumber = useCurrentOrPrev(isByPhoneNumber);
@@ -148,23 +145,23 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
             <p className="NewContactModal__phone-number">
               {renderingUser?.phoneNumber
                 ? formatPhoneNumberWithCode(phoneCodeList, renderingUser.phoneNumber)
-                : oldLang('MobileHidden')}
+                : lang('MobileHidden')}
             </p>
             <span className="NewContactModal__user-status" dir="auto">
-              {getUserStatus(oldLang, renderingUser!, userStatus)}
+              {getUserStatus(lang, renderingUser!, userStatus)}
             </span>
           </div>
         </div>
         <InputText
           ref={inputRef}
           value={firstName}
-          label={oldLang('FirstName')}
+          label={lang('FirstName')}
           tabIndex={0}
           onChange={handleFirstNameChange}
         />
         <InputText
           value={lastName}
-          label={oldLang('LastName')}
+          label={lang('LastName')}
           tabIndex={0}
           onChange={handleLastNameChange}
         />
@@ -183,7 +180,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
         </p>
         <p className="NewContactModal__help-text">
           {renderText(
-            oldLang('NewContact.Phone.Hidden.Text', renderingUser?.firstName || ''),
+            lang('NewContactPhoneHiddenText', { user: renderingUser?.firstName || '' }),
             ['emoji', 'simple_markdown'],
           )}
         </p>
@@ -192,10 +189,10 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           checked={shouldSharePhoneNumber}
           tabIndex={0}
           onCheck={setShouldSharePhoneNumber}
-          label={oldLang('lng_new_contact_share')}
+          label={lang('NewContactShare')}
         />
         <p className="NewContactModal__help-text">
-          {renderText(oldLang('AddContact.SharedContactExceptionInfo', renderingUser?.firstName))}
+          {renderText(lang('AddContactSharedContactExceptionInfo', { user: renderingUser?.firstName }))}
         </p>
       </>
     );
@@ -210,19 +207,19 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
             ref={inputRef}
             value={phone}
             inputMode="tel"
-            label={oldLang('lng_contact_phone')}
+            label={lang('ContactPhone')}
             tabIndex={0}
             onChange={handlePhoneChange}
           />
           <InputText
             value={firstName}
-            label={oldLang('FirstName')}
+            label={lang('FirstName')}
             tabIndex={0}
             onChange={handleFirstNameChange}
           />
           <InputText
             value={lastName}
-            label={oldLang('LastName')}
+            label={lang('LastName')}
             tabIndex={0}
             onChange={handleLastNameChange}
           />
@@ -234,7 +231,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   return (
     <Modal
       className="NewContactModal"
-      title={oldLang('NewContact')}
+      title={lang('NewContact')}
       isOpen={isOpen}
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}
@@ -248,14 +245,14 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           disabled={!canBeSubmitted}
           onClick={handleSubmit}
         >
-          {oldLang('Done')}
+          {lang('Done')}
         </Button>
         <Button
           isText
           className="confirm-dialog-button"
           onClick={handleClose}
         >
-          {oldLang('Cancel')}
+          {lang('Cancel')}
         </Button>
       </div>
     </Modal>

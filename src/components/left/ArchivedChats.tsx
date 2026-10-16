@@ -10,8 +10,8 @@ import { ANIMATION_DURATION } from '../story/helpers/ribbonAnimation';
 
 import useForumPanelRender from '../../hooks/useForumPanelRender';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useScrolledState from '../../hooks/useScrolledState';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
@@ -47,7 +47,7 @@ const ArchivedChats = ({
 }: OwnProps) => {
   const { updateArchiveSettings } = getActions();
   const containerRef = useRef<HTMLDivElement>();
-  const lang = useOldLang();
+  const lang = useLang();
   const { isAtBeginning, handleScroll, updateScrollState } = useScrolledState();
   const isScrolled = !isAtBeginning;
 
@@ -106,7 +106,7 @@ const ArchivedChats = ({
           color="translucent"
           onClick={onReset}
           onFileHoverOpen={onReset}
-          ariaLabel="Return to chat list"
+          ariaLabel={lang('AriaBackToChatList')}
           className={buildClassName(
             lang.isRtl && 'rtl',
             isForumPanelVisible && lang.isRtl && 'right-aligned',
@@ -126,7 +126,7 @@ const ArchivedChats = ({
             onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
           >
             <MenuItem icon="archive-from-main" onClick={handleDisplayArchiveInChats}>
-              {lang('lng_context_archive_to_list')}
+              {lang('ContextArchiveToList')}
             </MenuItem>
           </DropdownMenu>
         )}

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -9,7 +8,7 @@ import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
@@ -32,7 +31,7 @@ type StateProps = {
   globalPeerIds?: string[];
 };
 
-const NewChatStep1: FC<OwnProps & StateProps> = ({
+const NewChatStep1 = ({
   isChannel,
   isActive,
   selectedMemberIds,
@@ -44,12 +43,12 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   onSelectedMemberIdsChange,
   onNextStep,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setGlobalSearchQuery,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -94,7 +93,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           size="smaller"
           color="translucent"
           onClick={onReset}
-          ariaLabel="Return to Chat List"
+          ariaLabel={lang('AriaBackToChatList')}
           iconName="arrow-left"
         />
         <h3>{lang('GroupAddMembers')}</h3>
@@ -119,7 +118,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown
           onClick={handleNextStep}
-          ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
+          ariaLabel={lang(isChannel ? 'AriaNewChannelContinue' : 'AriaNewGroupContinue')}
           iconName="arrow-right"
         />
       </div>

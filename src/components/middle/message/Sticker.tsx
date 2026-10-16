@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -16,7 +15,6 @@ import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 import useOverlayPosition from './hooks/useOverlayPosition';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -45,7 +43,7 @@ type StateProps = {
   needsAgeVerification?: boolean;
 };
 
-const Sticker: FC<OwnProps & StateProps> = ({
+const Sticker = ({
   message,
   shouldLoop,
   shouldPlayEffect,
@@ -55,10 +53,9 @@ const Sticker: FC<OwnProps & StateProps> = ({
   observeIntersection,
   observeIntersectionForPlaying,
   needsAgeVerification,
-}) => {
+}: OwnProps & StateProps) => {
   const { showNotification, openStickerSet, updateContentSettings, openAgeVerificationModal } = getActions();
 
-  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const ref = useRef<HTMLDivElement>();
@@ -148,14 +145,17 @@ const Sticker: FC<OwnProps & StateProps> = ({
     if (hasEffect) {
       if (isPlayingEffect || !withEffect) {
         showNotification({
-          message: lang('PremiumStickerTooltip'),
+          message: {
+            key: 'PremiumStickerTooltip',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
           action: {
             action: 'openStickerSet',
             payload: {
               stickerSetInfo: sticker.stickerSetInfo,
             },
           },
-          actionText: lang('ViewAction'),
+          actionText: { key: 'ViewAction' },
         });
         return;
       } else if (withEffect) {

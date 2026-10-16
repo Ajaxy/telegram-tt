@@ -63,7 +63,7 @@ const DownloadManager = ({
 
       if (size > MAX_BUFFER_SIZE && !IS_OPFS_SUPPORTED && !IS_SERVICE_WORKER_SUPPORTED) {
         showNotification({
-          message: 'Downloading files bigger than 2GB is not supported in your browser.',
+          message: { key: 'DownloadSizeUnsupported' },
         });
         handleMediaDownloaded(mediaHash);
         return;
@@ -84,7 +84,7 @@ const DownloadManager = ({
 
           downloadWindow?.addEventListener('beforeunload', () => {
             showNotification({
-              message: 'Download started. Please, do not close the app before it is finished.',
+              message: { key: 'DownloadKeepAppOpen' },
             });
           }, { once: true });
         } else if (result) {

@@ -10,8 +10,8 @@ import {
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import AvatarList from '../common/AvatarList';
 import Icon from '../common/icons/Icon';
@@ -30,7 +30,7 @@ const StoryFooter = ({
   className,
 }: OwnProps) => {
   const { openStoryViewModal, openForwardMenu, sendStoryReaction } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const {
     views, isOut, peerId, id: storyId, sentReaction,
@@ -108,7 +108,9 @@ const StoryFooter = ({
             {viewsCount}
           </span>
         ) : (
-          <span className={styles.views}>{lang('Views', viewsCount, 'i')}</span>
+          <span className={styles.views}>
+            {lang('Views', { count: lang.number(viewsCount) }, { pluralValue: viewsCount })}
+          </span>
         )}
         {Boolean(reactionsCount) && !isChannel && (
           <span className={styles.reactionCount}>
@@ -138,7 +140,7 @@ const StoryFooter = ({
                 color="translucent"
                 size="smaller"
                 nonInteractive
-                ariaLabel={lang('PublicShares')}
+                ariaLabel={lang('StatsMessagePublicShares')}
                 iconName="loop"
               />
               <span>{forwardsCount}</span>

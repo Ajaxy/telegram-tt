@@ -12,7 +12,6 @@ import type {
   ApiThreadInfo,
   ApiTopic,
 } from '../../api/types';
-import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
   CustomPeer, ThreadId,
 } from '../../types';
@@ -25,8 +24,8 @@ import {
   ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
   VERIFICATION_CODES_USER_ID,
 } from '../../config';
-import { formatDateToString, formatTime } from '../../util/dates/oldDateFormat';
 import { getPeerIdDividend, isUserId } from '../../util/entities/ids';
+import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 import { selectIsChatRestricted } from '../selectors';
 import { getGlobal } from '..';
@@ -96,7 +95,7 @@ export function getChatTypeLangKey(chat: ApiChat): RegularLangKey {
   }
 }
 
-export function getChatTitle(lang: OldLangFn | LangFn, chat: ApiChat, isSelf = false) {
+export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
   if (isSelf) {
     return lang('SavedMessages');
   }
@@ -252,7 +251,7 @@ export function getAllowedAttachmentOptions(
 }
 
 export function getMessageSendingRestrictionReason(
-  lang: OldLangFn,
+  lang: LangFn,
   currentUserBannedRights?: ApiChatBannedRights,
   defaultBannedRights?: ApiChatBannedRights,
 ) {
@@ -260,24 +259,21 @@ export function getMessageSendingRestrictionReason(
     const { untilDate } = currentUserBannedRights;
     return untilDate && untilDate < FOREVER_BANNED_DATE
       ? lang(
-        'Channel.Persmission.Denied.SendMessages.Until',
-        lang(
-          'formatDateAtTime',
-          [formatDateToString(new Date(untilDate * 1000), lang.code), formatTime(lang, untilDate * 1000)],
-        ),
+        'ChannelPermissionDeniedSendMessagesUntil',
+        { date: formatDateTime(lang, secondsToDate(untilDate), { date: 'short', time: 'short' }) },
       )
-      : lang('Channel.Persmission.Denied.SendMessages.Forever');
+      : lang('ChannelPersmissionDeniedSendMessagesForever');
   }
 
   if (defaultBannedRights?.sendMessages) {
-    return lang('Channel.Persmission.Denied.SendMessages.DefaultRestrictedText');
+    return lang('ChannelPersmissionDeniedSendMessagesDefaultRestrictedText');
   }
 
   return undefined;
 }
 
 export function getForumComposerPlaceholder(
-  lang: OldLangFn,
+  lang: LangFn,
   chat?: ApiChat,
   threadId: ThreadId = MAIN_THREAD_ID,
   topics?: Record<number, ApiTopic>,
@@ -289,7 +285,7 @@ export function getForumComposerPlaceholder(
 
   if (threadId === MAIN_THREAD_ID) {
     if (isReplying || (topics && !topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
-    return lang('lng_forum_replies_only');
+    return lang('ForumRepliesOnly');
   }
 
   const topic = topics?.[Number(threadId)];

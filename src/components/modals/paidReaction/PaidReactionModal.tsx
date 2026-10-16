@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -26,7 +25,6 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -99,7 +97,6 @@ const PaidReactionModal = ({
 
   const senderPeer = sendAsPeerId ? (selectPeer(getGlobal(), sendAsPeerId)) : currentUser;
 
-  const oldLang = useOldLang();
   const { isMobile } = useAppLayout();
   const lang = useLang();
 
@@ -199,8 +196,8 @@ const PaidReactionModal = ({
     );
   });
 
-  const SendAsPeerMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
+  const SendAsPeerMenuButton = useMemo(() => {
+    return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
       <Button
         ripple={!isMobile}
         size="smaller"
@@ -289,7 +286,7 @@ const PaidReactionModal = ({
     return result.slice(0, MAX_TOP_REACTORS);
   }, [isTouched, message?.reactions?.topReactors, starsAmount, sendAsPeerId, shouldSendAsAnonymous]);
 
-  const chatTitle = chat && getPeerTitle(oldLang, chat);
+  const chatTitle = chat && getPeerTitle(lang, chat);
 
   return (
     <Modal
@@ -313,12 +310,12 @@ const PaidReactionModal = ({
         maxValue={maxAmount}
         onChange={handleAmountChange}
       />
-      <h3 className={styles.title}>{oldLang('StarsReactionTitle')}</h3>
+      <h3 className={styles.title}>{lang('StarsReactionTitle')}</h3>
       <div className={styles.description}>
-        {renderText(oldLang('StarsReactionText', chatTitle), ['simple_markdown', 'emoji'])}
+        {renderText(lang('StarsReactionText', { chat: chatTitle }), ['simple_markdown', 'emoji'])}
       </div>
       <Separator>
-        {topReactors && <div className={styles.topLabel}>{oldLang('StarsReactionTopSenders')}</div>}
+        {topReactors && <div className={styles.topLabel}>{lang('StarsReactionTopSenders')}</div>}
       </Separator>
       {topReactors && (
         <div className={styles.top}>
@@ -326,8 +323,8 @@ const PaidReactionModal = ({
             const countText = formatInteger(reactor.amount + reactor.localAmount);
             const peer = (reactor.isAnonymous || !reactor.user || (reactor.isMy && shouldSendAsAnonymous))
               ? ANONYMOUS_PEER : reactor.user;
-            const text = 'isCustomPeer' in peer ? oldLang(peer.titleKey)
-              : peer && getPeerTitle(oldLang, peer);
+            const text = 'isCustomPeer' in peer ? lang(peer.titleKey)
+              : peer && getPeerTitle(lang, peer);
             return (
               <PeerBadge
                 className={styles.topPeer}
@@ -347,7 +344,7 @@ const PaidReactionModal = ({
         className={buildClassName(styles.checkBox, 'dialog-checkbox')}
         checked={!shouldSendAsAnonymous}
         onChange={handleShowInTopSendersChange}
-        label={oldLang('StarsReactionShowMeInTopSenders')}
+        label={lang('StarsReactionShowMeInTopSenders')}
       />
       <Button
         inline

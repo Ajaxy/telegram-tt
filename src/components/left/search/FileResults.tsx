@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -10,15 +9,16 @@ import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading, getMessageDocument } from '../../../global/helpers';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dates/oldDateFormat';
+import { toYearMonth } from '../../../util/dates/dateMath';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { getSenderName } from './helpers/getSenderName';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Document from '../../common/Document';
@@ -37,7 +37,7 @@ const INTERSECTION_THROTTLE = 500;
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const FileResults: FC<OwnProps & StateProps> = ({
+const FileResults = ({
   searchQuery,
   isLoading,
   chatsById,
@@ -46,7 +46,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   foundIds,
   activeDownloads,
   shouldWarnAboutFiles,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     searchMessagesGlobal,
     focusMessage,
@@ -54,7 +54,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
 
   const containerRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
@@ -102,7 +102,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
               dir={lang.isRtl ? 'rtl' : undefined}
               key={message.date}
             >
-              {formatMonthAndYear(lang, new Date(message.date * 1000))}
+              {formatDateTime(lang, secondsToDate(message.date), { date: 'long', includeDay: false })}
             </p>
           )}
           <div
@@ -147,8 +147,8 @@ const FileResults: FC<OwnProps & StateProps> = ({
         {canRenderContents && (!foundIds || foundIds.length === 0) && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={lang('ChatListSearchNoResults')}
+            description={lang('ChatListSearchNoResultsDescription')}
           />
         )}
         {canRenderContents && foundIds && foundIds.length > 0 && (

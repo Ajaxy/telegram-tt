@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -9,7 +8,6 @@ import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
@@ -22,11 +20,10 @@ type OwnProps = {
   folder: ApiChatFolder;
 };
 
-const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
+const ChatlistAlready = ({ invite, folder }: OwnProps) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.missingPeerIds);
 
@@ -74,7 +71,11 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
           <>
             <div className={styles.pickerHeader}>
               <div className={styles.pickerHeaderInfo}>
-                {oldLang('FolderLinkHeaderChatsJoin', selectedPeerIds.length, 'i')}
+                {lang(
+                  'FolderLinkHeaderChatsJoin',
+                  { count: lang.number(selectedPeerIds.length) },
+                  { pluralValue: selectedPeerIds.length },
+                )}
               </div>
               <div
                 className={styles.selectionToggle}
@@ -83,7 +84,7 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
                 onClick={handleSelectionToggle}
               >
                 {selectedPeerIds.length === invite.missingPeerIds.length
-                  ? oldLang('DeselectAll') : oldLang('SelectAll')}
+                  ? lang('DeselectAll') : lang('ContextMenuItemSelectAll')}
               </div>
             </div>
             <PeerPicker
@@ -98,7 +99,7 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
         )}
         <div className={styles.pickerHeader}>
           <div className={styles.pickerHeaderInfo}>
-            {oldLang('FolderLinkHeaderAlready')}
+            {lang('FolderLinkHeaderAlready')}
           </div>
         </div>
         <PeerPicker
@@ -114,10 +115,10 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
         onClick={handleButtonClick}
       >
         <div className={styles.buttonText}>
-          {!selectedPeerIds.length && oldLang('OK')}
+          {!selectedPeerIds.length && lang('OK')}
           {Boolean(selectedPeerIds.length) && (
             <>
-              {oldLang('FolderLinkButtonJoinPlural', selectedPeerIds.length, 'i')}
+              {lang('FolderLinkButtonJoinPlural', undefined, { pluralValue: selectedPeerIds.length })}
               <Badge className={styles.buttonBadge} text={badgeText} isAlternateColor />
             </>
           )}

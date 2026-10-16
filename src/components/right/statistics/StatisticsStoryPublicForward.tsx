@@ -8,8 +8,8 @@ import type {
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 
@@ -22,8 +22,9 @@ export type OwnProps = {
 };
 
 function StatisticsMessagePublicForward({ data, chatsById, usersById }: OwnProps) {
-  const lang = useOldLang();
   const { openChat } = getActions();
+
+  const lang = useLang();
   const user = usersById[data.peerId];
   const chat = chatsById[data.peerId];
 
@@ -37,11 +38,13 @@ function StatisticsMessagePublicForward({ data, chatsById, usersById }: OwnProps
 
       <div>
         <div className={styles.title}>
-          {user ? getUserFullName(user) : getChatTitle(lang, chat)}
+          {user ? getUserFullName(lang, user) : getChatTitle(lang, chat)}
         </div>
 
         <div className={styles.views}>
-          {data.viewsCount ? lang('ChannelStats.ViewsCount', data.viewsCount, 'i') : lang('NoViews')}
+          {data.viewsCount ? lang('ChannelStatsViewsCount', {
+            count: lang.number(data.viewsCount),
+          }, { pluralValue: data.viewsCount }) : lang('NoViews')}
         </div>
       </div>
     </div>

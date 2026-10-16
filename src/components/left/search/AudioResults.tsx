@@ -9,14 +9,15 @@ import { LoadMoreDirection } from '../../../types';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading } from '../../../global/helpers';
 import { selectMessageDownloadableMedia } from '../../../global/selectors/media';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dates/oldDateFormat';
+import { toYearMonth } from '../../../util/dates/dateMath';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { getSenderName } from './helpers/getSenderName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Audio from '../../common/Audio';
@@ -50,7 +51,7 @@ const AudioResults = ({
     openAudioPlayer,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const currentType = isVoice ? 'voice' : 'audio';
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (direction === LoadMoreDirection.Backwards) {
@@ -103,7 +104,7 @@ const AudioResults = ({
               key={message.date}
               dir={lang.isRtl ? 'rtl' : undefined}
             >
-              {formatMonthAndYear(lang, new Date(message.date * 1000))}
+              {formatDateTime(lang, secondsToDate(message.date), { date: 'long', includeDay: false })}
             </p>
           )}
           <div
@@ -148,8 +149,8 @@ const AudioResults = ({
         {canRenderContents && (!foundIds || foundIds.length === 0) && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={lang('ChatListSearchNoResults')}
+            description={lang('ChatListSearchNoResultsDescription')}
           />
         )}
         {canRenderContents && foundIds && foundIds.length > 0 && (

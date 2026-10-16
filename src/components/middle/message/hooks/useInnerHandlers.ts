@@ -1,7 +1,6 @@
 import { getActions } from '../../../../global';
 
 import type { ApiMessage, ApiPeer, ApiStory, ApiWebPage } from '../../../../api/types';
-import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
@@ -13,7 +12,6 @@ import { tryParseDeepLink } from '../../../../util/deepLinkParser';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 export default function useInnerHandlers({
-  lang,
   selectMessage,
   message,
   webPage,
@@ -33,7 +31,6 @@ export default function useInnerHandlers({
   isSavedMessages,
   lastPlaybackTimestamp,
 }: {
-  lang: OldLangFn;
   selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void;
   message: ApiMessage;
   webPage?: ApiWebPage;
@@ -70,7 +67,12 @@ export default function useInnerHandlers({
 
   const handleSenderClick = useLastCallback(() => {
     if (!senderPeer) {
-      showNotification({ message: lang('HidAccount') });
+      showNotification({
+        message: {
+          key: 'HidAccount',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
+      });
 
       return;
     }
@@ -108,7 +110,10 @@ export default function useInnerHandlers({
   const handleReplyClick = useLastCallback((): void => {
     if (!replyToMsgId || isReplyPrivate) {
       showNotification({
-        message: isQuote ? lang('QuotePrivate') : lang('ReplyPrivate'),
+        message: {
+          key: isQuote ? 'QuotePrivate' : 'ReplyPrivate',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
       });
       return;
     }

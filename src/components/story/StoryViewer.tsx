@@ -19,8 +19,8 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import useSlideSizes from './hooks/useSlideSizes';
@@ -60,7 +60,7 @@ function StoryViewer({
 }: StateProps) {
   const { closeStoryViewer, closeStoryPrivacyEditor, reportStory } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [storyToDelete, setStoryToDelete] = useState<ApiTypeStory | undefined>(undefined);
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
 

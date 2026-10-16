@@ -6,7 +6,7 @@ import type { ThemeKey } from '../types';
 import type { UiLoaderPage } from './common/UiLoader';
 
 import {
-  DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE, PAGE_TITLE_TAURI,
+  DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR, PAGE_TITLE, PAGE_TITLE_TAURI,
 } from '../config';
 import { forceMutation } from '../lib/fasterdom/stricterdom.ts';
 import {
@@ -29,6 +29,7 @@ import useAppLayout from '../hooks/useAppLayout';
 import useFileHoverOpen, {
   FILE_HOVER_OPEN_SELECTOR, hasFiles,
 } from '../hooks/useFileHoverOpen';
+import useLang from '../hooks/useLang';
 import usePrevious from '../hooks/usePrevious';
 import { useSignalEffect } from '../hooks/useSignalEffect';
 import { getIsInBackground } from '../hooks/window/useBackgroundMode';
@@ -65,7 +66,6 @@ enum AppScreens {
 
 const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
 const ACTIVE_PAGE_TITLE = IS_TAURI ? PAGE_TITLE_TAURI : PAGE_TITLE;
-const INACTIVE_PAGE_TITLE = `${ACTIVE_PAGE_TITLE} ${INACTIVE_MARKER}`;
 
 const App = ({
   authState,
@@ -78,6 +78,8 @@ const App = ({
   customBackgroundColor,
   actionMessageBg,
 }: StateProps) => {
+  const lang = useLang();
+
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
@@ -200,11 +202,11 @@ const App = ({
 
   useEffect(() => {
     if (inactiveReason) {
-      document.title = INACTIVE_PAGE_TITLE;
+      document.title = `${ACTIVE_PAGE_TITLE} ${lang('PageTitleInactive')}`;
     } else {
       document.title = ACTIVE_PAGE_TITLE;
     }
-  }, [inactiveReason]);
+  }, [inactiveReason, lang]);
 
   const prevActiveKey = usePrevious(activeKey);
 
@@ -269,7 +271,7 @@ const App = ({
       >
         {renderContent}
       </Transition>
-      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">Test server</div>}
+      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">{lang('TestServer')}</div>}
       <Notifications />
     </UiLoader>
   );

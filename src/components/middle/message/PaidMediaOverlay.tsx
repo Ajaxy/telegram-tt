@@ -5,12 +5,10 @@ import type { ApiPaidMedia } from '../../../api/types';
 
 import { STARS_ICON_PLACEHOLDER } from '../../../config';
 import { formatStarsAsIcon } from '../../../util/localization/format';
-import { replaceWithTeact } from '../../../util/replaceWithTeact';
 import stopEvent from '../../../util/stopEvent';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
 import Button from '../../ui/Button';
@@ -34,18 +32,18 @@ const PaidMediaOverlay = ({
   children,
 }: OwnProps) => {
   const { openInvoice } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   const isClickable = !paidMedia.isBought;
 
-  const buttonText = useMemo(() => {
-    const value = oldLang('UnlockPaidContent', paidMedia.starsAmount);
-
-    return replaceWithTeact(
-      value, STARS_ICON_PLACEHOLDER, <StarIcon className={styles.star} type="gold" size="adaptive" />,
-    );
-  }, [oldLang, paidMedia]);
+  const buttonText = useMemo(() => lang('UnlockPaidContent', { count: paidMedia.starsAmount }, {
+    pluralValue: paidMedia.starsAmount,
+    withNodes: true,
+    specialReplacement: {
+      [STARS_ICON_PLACEHOLDER]: <StarIcon className={styles.star} type="gold" size="adaptive" />,
+    },
+  }), [lang, paidMedia]);
 
   const handleClick = useLastCallback((e: React.MouseEvent) => {
     openInvoice({
@@ -77,7 +75,7 @@ const PaidMediaOverlay = ({
         <MediaBadge className="message-paid-media-status" position="right">
           {isOutgoing
             ? formatStarsAsIcon(lang, paidMedia.starsAmount)
-            : oldLang('Chat.PaidMedia.Purchased')}
+            : lang('ChatPaidMediaPurchased')}
         </MediaBadge>
       )}
     </div>

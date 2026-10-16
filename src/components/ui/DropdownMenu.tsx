@@ -5,6 +5,7 @@ import {
 
 import type { IAnchorPosition } from '../../types';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from './Button';
@@ -32,7 +33,7 @@ type OwnProps = {
   autoClose?: boolean;
 };
 
-const DropdownMenu: FC<OwnProps> = ({
+const DropdownMenu = ({
   trigger,
   className,
   bubbleClassName,
@@ -50,7 +51,9 @@ const DropdownMenu: FC<OwnProps> = ({
   onMouseEnterBackdrop,
   onHide,
   autoClose = true,
-}) => {
+}: OwnProps) => {
+  const lang = useLang();
+
   const menuRef = useRef<HTMLDivElement>();
   const triggerRef = useRef<HTMLDivElement>();
   const [isOpen, setIsOpen] = useState(false);
@@ -102,10 +105,10 @@ const DropdownMenu: FC<OwnProps> = ({
         className={isMenuOpen ? 'active' : ''}
         iconName="more"
         onClick={onTrigger}
-        ariaLabel="More actions"
+        ariaLabel={lang('AccDescrMoreOptions')}
       />
     );
-  }, [trigger]);
+  }, [trigger, lang]);
 
   const getTriggerElement = useLastCallback(() => triggerRef.current);
   const getRootElement = useLastCallback(() => document.body);

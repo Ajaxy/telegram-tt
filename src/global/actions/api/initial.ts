@@ -3,7 +3,6 @@ import { ManagementProgress } from '../../../types';
 
 import {
   IS_SCREEN_LOCKED_CACHE_KEY,
-  LANG_CACHE_NAME,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
@@ -285,12 +284,6 @@ addActionHandler('reset', async (global, actions): Promise<void> => {
     await clearPasscodeStore();
     localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
     await clearWallpaperBlobs();
-  }
-
-  const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
-  const langCacheVersion = Number((LANG_CACHE_NAME.match(/\d+$/) || ['0'])[0]);
-  for (let i = 0; i < langCacheVersion; i++) {
-    void cacheApi.clear(`${langCachePrefix}${i === 0 ? '' : i}`);
   }
 
   updateAppBadge(0);

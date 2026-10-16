@@ -11,8 +11,8 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
-import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
@@ -34,7 +34,7 @@ function StoryPreview({
   peer, peerStories, lastViewedId, storyIdsForViewer, origin,
 }: OwnProps & StateProps) {
   const { openStoryViewer, loadPeerSkippedStories } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const story = useMemo<ApiTypeStory | undefined>(() => {
     if (!peerStories) {

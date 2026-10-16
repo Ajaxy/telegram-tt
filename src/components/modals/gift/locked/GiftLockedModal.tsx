@@ -3,7 +3,7 @@ import { getActions } from '../../../../global';
 
 import type { TabState } from '../../../../global/types';
 
-import { formatShortDuration } from '../../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../../util/dates/duration';
 import { getServerTime } from '../../../../util/serverTime';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 

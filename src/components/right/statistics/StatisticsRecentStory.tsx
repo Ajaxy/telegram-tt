@@ -6,15 +6,15 @@ import type {
   ApiTypeStory,
   StatisticsStoryInteractionCounter,
 } from '../../../api/types';
-import type { OldLangFn } from '../../../hooks/useOldLang';
+import type { LangFn } from '../../../util/localization';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
@@ -28,8 +28,9 @@ export type OwnProps = {
 };
 
 function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
-  const lang = useOldLang();
   const { toggleStoryStatistics } = getActions();
+
+  const lang = useLang();
   const isLoaded = story && 'content' in story;
 
   const video = isLoaded ? story.content.video : undefined;
@@ -51,13 +52,16 @@ function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
           {renderSummary(lang, chat, imgBlobUrl || mediaThumbnail)}
         </div>
         <div className={styles.meta}>
-          {lang('ChannelStats.ViewsCount', postStatistic.viewsCount, 'i')}
+          {lang('ChannelStatsViewsCount', {
+            count: lang.number(postStatistic.viewsCount),
+          }, { pluralValue: postStatistic.viewsCount })}
         </div>
       </div>
 
       <div className={styles.info}>
         <div className={styles.date}>
-          {isLoaded && Boolean(story.date) && formatDateTimeToString(story.date * 1000, lang.code)}
+          {isLoaded && Boolean(story.date)
+            && formatDateTime(lang, secondsToDate(story.date), { date: 'short', time: 'short' })}
         </div>
         <StatisticsRecentPostMeta postStatistic={postStatistic} />
       </div>
@@ -65,7 +69,7 @@ function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
   );
 }
 
-function renderSummary(lang: OldLangFn, chat: ApiChat, blobUrl?: string) {
+function renderSummary(lang: LangFn, chat: ApiChat, blobUrl?: string) {
   return (
     <span>
       {blobUrl ? (
@@ -87,7 +91,7 @@ function renderSummary(lang: OldLangFn, chat: ApiChat, blobUrl?: string) {
         />
       )}
 
-      {lang('Story')}
+      {lang('AttachStory')}
     </span>
   );
 }

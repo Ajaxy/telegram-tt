@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -13,7 +12,6 @@ import buildClassName from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -44,7 +42,7 @@ const SHIFT_HEIGHT_MINUS = 1;
 const BEFORE_ITEMS_COUNT = 2;
 const BEFORE_USER_INFO_HEIGHT = 96;
 
-const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
+const ManageGroupUserPermissions = ({
   chat,
   selectedChatMemberId,
   hasFullInfo,
@@ -53,7 +51,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   isFormFullyDisabled,
   onClose,
   isActive,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateChatMemberBannedRights } = getActions();
 
   const selectedChatMember = useMemo(() => {
@@ -69,7 +67,6 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   } = useManagePermissions(selectedChatMember?.bannedRights || chat?.defaultBannedRights);
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
   const lang = useLang();
-  const oldLang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -139,7 +136,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
             <PrivateChatInfo userId={selectedChatMember.userId} forceShowSelf />
           </ListItem>
 
-          <IslandTitle className="mt-4" dir="auto">{oldLang('UserRestrictionsCanDo')}</IslandTitle>
+          <IslandTitle className="mt-4" dir="auto">{lang('UserRestrictionsCanDo')}</IslandTitle>
           <PermissionCheckboxList
             chatId={chat?.id}
             isMediaDropdownOpen={isMediaDropdownOpen}
@@ -164,7 +161,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
             )}
           >
             <ListItem icon="delete-user" ripple destructive onClick={openBanConfirmationDialog}>
-              {oldLang('UserRestrictionsBlock')}
+              {lang('UserRestrictionsBlock')}
             </ListItem>
           </Island>
         )}
@@ -173,7 +170,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
       <FloatingActionButton
         isShown={havePermissionChanged}
         onClick={handleSavePermissions}
-        ariaLabel={oldLang('Save')}
+        ariaLabel={lang('Save')}
         disabled={isLoading}
         iconName="check"
         isLoading={isLoading}
@@ -183,7 +180,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         isOpen={isBanConfirmationDialogOpen}
         onClose={closeBanConfirmationDialog}
         text={lang('GroupManagementBanUserConfirm')}
-        confirmLabel="Remove"
+        confirmLabel={lang('BoxRemove')}
         confirmHandler={handleBanFromGroup}
         confirmIsDestructive
       />

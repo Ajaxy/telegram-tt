@@ -1,17 +1,17 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo,
   useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { RegularLangKey } from '../../../types/language';
 import { ChatCreationProgress } from '../../../types';
 
 import { getUserFirstOrLastName } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import AvatarEditable from '../../ui/AvatarEditable';
@@ -29,13 +29,17 @@ export type OwnProps = {
 
 type StateProps = {
   creationProgress?: ChatCreationProgress;
-  creationError?: string;
+  creationError?: RegularLangKey;
   maxGroupSize?: number;
 };
 
 const MAX_MEMBERS_FOR_GENERATE_CHAT_NAME = 4;
 
-const NewChatStep2: FC<OwnProps & StateProps> = ({
+const CHAT_TITLE_EMPTY_ERROR = 'NewChatTitleEmptyError';
+const CHANNEL_TITLE_EMPTY_ERROR = 'NewChannelTitleEmptyError';
+const CHAT_TOO_MANY_USERS_ERROR = 'NewChatTooManyUsers';
+
+const NewChatStep2 = ({
   isChannel,
   isActive,
   memberIds,
@@ -43,13 +47,13 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
   creationProgress,
   creationError,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     createGroupChat,
     createChannel,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -59,11 +63,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');
   const [photo, setPhoto] = useState<File | undefined>();
-  const [error, setError] = useState<string | undefined>();
-
-  const chatTitleEmptyError = 'Chat title can\'t be empty';
-  const channelTitleEmptyError = 'Channel title can\'t be empty';
-  const chatTooManyUsersError = 'Sorry, creating supergroups is not yet supported';
+  const [error, setError] = useState<RegularLangKey | undefined>();
 
   const isLoading = creationProgress === ChatCreationProgress.InProgress;
 
@@ -78,11 +78,9 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
     const global = getGlobal();
     const usersById = global.users.byId;
     const memberFirstNames = [global.currentUserId!, ...memberIds]
-      .map((userId) => getUserFirstOrLastName(usersById[userId]))
+      .map((userId) => getUserFirstOrLastName(lang, usersById[userId]))
       .filter(Boolean);
-    const generatedChatName = memberFirstNames.slice(0, -1).join(', ')
-      + lang('CreateGroup.PeersTitleLastDelimeter')
-      + memberFirstNames[memberFirstNames.length - 1];
+    const generatedChatName = lang.conjunction(memberFirstNames);
     setTitle(generatedChatName);
   }, [isChannel, memberIds, lang]);
 
@@ -103,12 +101,12 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
 
   const handleCreateGroup = useCallback(() => {
     if (!title.length) {
-      setError(chatTitleEmptyError);
+      setError(CHAT_TITLE_EMPTY_ERROR);
       return;
     }
 
     if (maxGroupSize && memberIds.length >= maxGroupSize) {
-      setError(chatTooManyUsersError);
+      setError(CHAT_TOO_MANY_USERS_ERROR);
       return;
     }
 
@@ -121,7 +119,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
 
   const handleCreateChannel = useCallback(() => {
     if (!title.length) {
-      setError(channelTitleEmptyError);
+      setError(CHANNEL_TITLE_EMPTY_ERROR);
       return;
     }
 
@@ -132,7 +130,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
       memberIds,
       isChannel: true,
     });
-  }, [title, createChannel, about, photo, memberIds, channelTitleEmptyError]);
+  }, [title, createChannel, about, photo, memberIds]);
 
   useEffect(() => {
     if (creationProgress === ChatCreationProgress.Complete) {
@@ -141,8 +139,8 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
   }, [creationProgress, onReset]);
 
   const renderedError = (creationError && lang(creationError)) || (
-    error !== chatTitleEmptyError && error !== channelTitleEmptyError
-      ? error
+    error !== CHAT_TITLE_EMPTY_ERROR && error !== CHANNEL_TITLE_EMPTY_ERROR
+      ? error && lang(error)
       : undefined
   );
 
@@ -154,7 +152,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
           size="smaller"
           color="translucent"
           onClick={() => onReset()}
-          ariaLabel="Return to member selection"
+          ariaLabel={lang('NewChatReturnBackAria')}
           iconName="arrow-left"
         />
         <h3>{lang(isChannel ? 'NewChannel' : 'NewGroup')}</h3>
@@ -168,7 +166,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
           value={title}
           onChange={handleTitleChange}
           label={lang(isChannel ? 'EnterChannelName' : 'GroupName')}
-          error={error === chatTitleEmptyError || error === channelTitleEmptyError ? error : undefined}
+          error={error === CHAT_TITLE_EMPTY_ERROR || error === CHANNEL_TITLE_EMPTY_ERROR ? lang(error) : undefined}
         />
         {isChannel && (
           <>
@@ -187,7 +185,11 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
 
         {memberIds.length > 0 && (
           <>
-            <h3 className="chat-members-heading">{lang('GroupInfo.ParticipantCount', memberIds.length, 'i')}</h3>
+            <h3 className="chat-members-heading">
+              {lang('GroupInfoParticipantCount', {
+                count: lang.number(memberIds.length),
+              }, { pluralValue: memberIds.length })}
+            </h3>
 
             <div className="chat-members-list custom-scroll">
               {memberIds.map((id) => (
@@ -204,7 +206,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
         isShown={title.length !== 0}
         onClick={isChannel ? handleCreateChannel : handleCreateGroup}
         disabled={isLoading}
-        ariaLabel={isChannel ? lang('ChannelIntro.CreateChannel') : 'Create Group'}
+        ariaLabel={lang(isChannel ? 'ChannelIntroCreateChannel' : 'AriaCreateGroup')}
         iconName="arrow-right"
         isLoading={isLoading}
       />

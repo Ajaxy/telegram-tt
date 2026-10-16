@@ -13,8 +13,8 @@ import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
 import useAsync from './useAsync';
+import useLang from './useLang';
 import useMedia from './useMedia';
-import useOldLang from './useOldLang';
 
 import telegramLogoPath from '../assets/telegram-logo-filled.svg';
 
@@ -25,10 +25,10 @@ const MINIMAL_SIZE = 115; // spec says 100, but on Chrome 93 it's not showing
 const useMessageMediaMetadata = (
   message?: ApiMessage, sender?: ApiPeer, chat?: ApiChat,
 ): MediaMetadata | undefined => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { audio, voice } = message ? getMessageContent(message) : {} satisfies MediaContent;
-  const title = audio ? (audio.title || audio.fileName) : voice ? 'Voice message' : '';
+  const title = audio ? (audio.title || audio.fileName) : voice ? lang('AttachAudio') : '';
   const artist = audio?.performer || (sender && getPeerTitle(lang, sender));
   const album = (chat && getChatTitle(lang, chat)) || 'Telegram';
 

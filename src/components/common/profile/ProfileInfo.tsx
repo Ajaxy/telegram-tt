@@ -53,7 +53,6 @@ import { useVtn } from '../../../hooks/animations/useVtn';
 import useIntervalForceUpdate from '../../../hooks/schedulers/useIntervalForceUpdate';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useCustomEmoji from '../hooks/useCustomEmoji';
 import usePhotosPreload from '../hooks/usePhotosPreload';
@@ -154,7 +153,6 @@ const ProfileInfo = ({
 
   const savedMusic = userFullInfo?.savedMusic;
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   useIntervalForceUpdate(user ? STATUS_UPDATE_INTERVAL : undefined);
@@ -347,7 +345,9 @@ const ProfileInfo = ({
         />
         <h3 className={styles.topicTitle} dir={lang.isRtl ? 'rtl' : undefined}>{renderText(topic!.title)}</h3>
         <p className={styles.topicMessagesCounter}>
-          {messagesCount ? oldLang('Chat.Title.Topic', messagesCount, 'i') : oldLang('lng_forum_no_messages')}
+          {messagesCount ? lang('Messages', {
+            count: lang.number(messagesCount),
+          }, { pluralValue: messagesCount }) : lang('ForumNoMessages')}
         </p>
       </div>
     );
@@ -457,11 +457,11 @@ const ProfileInfo = ({
         >
           {renderUserRating()}
           <span className={styles.userStatus} dir="auto">
-            {getUserStatus(oldLang, user, userStatus)}
+            {getUserStatus(lang, user, userStatus)}
           </span>
           {userStatus?.isReadDateRestrictedByMe && !isSystemAccount && (
             <span className={styles.getStatus} onClick={handleOpenGetReadDateModal}>
-              <span>{oldLang('StatusHiddenShow')}</span>
+              <span>{lang('StatusHiddenShow')}</span>
             </span>
           )}
         </div>
@@ -476,8 +476,12 @@ const ProfileInfo = ({
       >
         {
           isChatChannel(chat!)
-            ? oldLang('Subscribers', chat!.membersCount ?? 0, 'i')
-            : oldLang('Members', chat!.membersCount ?? 0, 'i')
+            ? lang('Subscribers', {
+              count: lang.number(chat!.membersCount ?? 0),
+            }, { pluralValue: chat!.membersCount ?? 0 })
+            : lang('NMembers', {
+              count: lang.number(chat!.membersCount ?? 0),
+            }, { pluralValue: chat!.membersCount ?? 0 })
         }
       </span>
     );
@@ -533,7 +537,7 @@ const ProfileInfo = ({
             )}
             >
               <div className={styles.fallbackPhotoContents}>
-                {oldLang(profilePhotos.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+                {lang(profilePhotos.personalPhoto.isVideo ? 'UserInfoCustomVideo' : 'UserInfoCustomPhoto')}
               </div>
             </div>
           )}
@@ -551,7 +555,7 @@ const ProfileInfo = ({
                     size="mini"
                   />
                 )}
-                {oldLang(profilePhotos.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+                {lang(profilePhotos.fallbackPhoto.isVideo ? 'UserInfoPublicVideo' : 'UserInfoPublicPhoto')}
               </div>
             </div>
           )}
@@ -567,7 +571,7 @@ const ProfileInfo = ({
               type="button"
               dir={lang.isRtl ? 'rtl' : undefined}
               className={buildClassName(styles.navigation, styles.navigation_prev)}
-              aria-label={oldLang('AccDescrPrevious')}
+              aria-label={lang('AccDescrPrevious')}
               onClick={selectPreviousMedia}
             />
           )}
@@ -576,7 +580,7 @@ const ProfileInfo = ({
               type="button"
               dir={lang.isRtl ? 'rtl' : undefined}
               className={buildClassName(styles.navigation, styles.navigation_next)}
-              aria-label={oldLang('Next')}
+              aria-label={lang('Next')}
               onClick={selectNextMedia}
             />
           )}

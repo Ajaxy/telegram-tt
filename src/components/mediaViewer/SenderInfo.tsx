@@ -1,5 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
-import { useMemo } from '../../lib/teact/teact';
+import { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiPeer } from '../../api/types';
@@ -12,13 +11,13 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectSender,
 } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
+import { formatCalendarDate, secondsToDate } from '../../util/localization/dateFormat';
 import renderText from '../common/helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 
@@ -35,16 +34,17 @@ type StateProps = {
 const BULLET = '\u2022';
 const ANIMATION_DURATION = 350;
 
-const SenderInfo: FC<OwnProps & StateProps> = ({
+const SenderInfo = ({
   owner,
   item,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeMediaViewer,
     focusMessage,
     toggleChatInfo,
   } = getActions();
 
+  const lang = useLang();
   const { isMobile } = useAppLayout();
 
   const handleFocusMessage = useLastCallback(() => {
@@ -64,8 +64,6 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const lang = useOldLang();
-
   const subtitle = useMemo(() => {
     if (!item || item.type === 'standalone') return undefined;
 
@@ -77,11 +75,11 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     const date = item.type === 'message' ? item.message.date : avatar?.date;
     if (!date) return undefined;
 
-    const formattedDate = formatMediaDateTime(lang, date * 1000, true);
+    const formattedDate = formatCalendarDate(lang, secondsToDate(date), { isShort: true, withTime: true });
     const count = profilePhotos?.count
       && (profilePhotos.count + (profilePhotos?.fallbackPhoto ? 1 : 0));
     const currentIndex = item.mediaIndex! + 1 + (profilePhotos?.personalPhoto ? -1 : 0);
-    const countText = count && lang('Of', [currentIndex, count]);
+    const countText = count && lang('MediaCounter', { current: currentIndex, total: count });
 
     const parts: string[] = [];
     if (avatar) {
@@ -89,10 +87,10 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
       const isChannel = chat && isChatChannel(chat);
       const isGroup = chat && isChatGroup(chat);
       parts.push(lang(
-        isPersonalAvatar ? 'lng_mediaview_profile_photo_by_you'
-          : isFallbackAvatar ? 'lng_mediaview_profile_public_photo'
-            : isChannel ? 'lng_mediaview_channel_photo'
-              : isGroup ? 'lng_mediaview_group_photo' : 'lng_mediaview_profile_photo',
+        isPersonalAvatar ? 'MediaviewProfilePhotoByYou'
+          : isFallbackAvatar ? 'MediaviewProfilePublicPhoto'
+            : isChannel ? 'MediaviewChannelPhoto'
+              : isGroup ? 'MediaviewGroupPhoto' : 'MediaviewProfilePhoto',
       ));
     }
 
@@ -126,7 +124,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default withGlobal<OwnProps>(
+export default memo(withGlobal<OwnProps>(
   (global, { item }): Complete<StateProps> => {
     const message = item?.type === 'message' ? item.message : undefined;
     const messageSender = message && selectSender(global, message);
@@ -137,4 +135,4 @@ export default withGlobal<OwnProps>(
       owner,
     };
   },
-)(SenderInfo);
+)(SenderInfo));

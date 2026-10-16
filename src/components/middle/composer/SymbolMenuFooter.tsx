@@ -1,9 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
+
+import type { RegularLangKey } from '../../../types/language';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 
@@ -21,10 +22,10 @@ export enum SymbolMenuTabs {
   GIFs,
 }
 
-export const SYMBOL_MENU_TAB_TITLES: Record<SymbolMenuTabs, string> = {
+export const SYMBOL_MENU_TAB_TITLES: Record<SymbolMenuTabs, RegularLangKey> = {
   [SymbolMenuTabs.Emoji]: 'Emoji',
   [SymbolMenuTabs.Stickers]: 'AccDescrStickers',
-  [SymbolMenuTabs.GIFs]: 'GifsTab',
+  [SymbolMenuTabs.GIFs]: 'GifsTab2',
 };
 
 const SYMBOL_MENU_TAB_ICONS = {
@@ -33,10 +34,10 @@ const SYMBOL_MENU_TAB_ICONS = {
   [SymbolMenuTabs.GIFs]: 'icon-gifs',
 };
 
-const SymbolMenuFooter: FC<OwnProps> = ({
+const SymbolMenuFooter = ({
   activeTab, onSwitchTab, onRemoveSymbol, isAttachmentModal, canSendPlainText,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   function renderTabButton(tab: SymbolMenuTabs) {
     return (
@@ -68,7 +69,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
         <Button
           className="symbol-delete-button"
           onClick={onRemoveSymbol}
-          ariaLabel="Remove Symbol"
+          ariaLabel={lang('RemoveSymbol')}
           round
           faded
           color="translucent"

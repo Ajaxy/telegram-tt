@@ -11,15 +11,15 @@ import { selectIsMonoforumAdmin, selectMonoforumChannel,
   selectReplyMessage,
   selectSender } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatScheduledDateTime, formatShortDuration } from '../../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../../util/dates/duration';
 import { convertTonFromNanos } from '../../../../util/formatCurrency';
+import { formatCalendarDate, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
 import renderText from '../../../common/helpers/renderText';
 import { renderPeerLink, translateWithYou } from '../helpers/messageActions';
 
 import useLang from '../../../../hooks/useLang';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import styles from '../ActionMessage.module.scss';
 
@@ -48,7 +48,7 @@ const SuggestedPostApproval = ({
   onClick,
 }: OwnProps & StateProps) => {
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const { scheduleDate, amount } = action;
 
   const chatTitle = chat && getPeerFullTitle(lang, chat);
@@ -58,7 +58,7 @@ const SuggestedPostApproval = ({
   const originalSenderLink = renderPeerLink(originalSender?.id, originalSenderTitle || lang('ActionFallbackUser'));
 
   const publishDate = scheduleDate
-    ? formatScheduledDateTime(scheduleDate, lang, oldLang)
+    ? formatCalendarDate(lang, secondsToDate(scheduleDate), { isShort: true, withTime: true })
     : lang('SuggestMessageAnytime');
 
   const isPostPublished = scheduleDate ? scheduleDate <= getServerTime() : false;

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect,
   useMemo, useState,
@@ -22,7 +21,6 @@ import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PaidMessagePrice from '../../common/paidMessage/PaidMessagePrice';
@@ -74,7 +72,7 @@ function getLangKeyForBannedRightKey(key: keyof ApiChatBannedRights) {
     case 'pinMessages':
       return 'UserRestrictionsPinMessages';
     case 'manageTopics':
-      return 'GroupPermission.NoManageTopics';
+      return 'GroupPermissionNoManageTopics';
     case 'sendPlain':
       return 'UserRestrictionsNoSendText';
     case 'sendDocs':
@@ -94,7 +92,7 @@ function getLangKeyForBannedRightKey(key: keyof ApiChatBannedRights) {
   }
 }
 
-const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
+const ManageGroupPermissions = ({
   onScreenSelect,
   onChatMemberSelect,
   chat,
@@ -107,13 +105,13 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   arePaidMessagesAvailable,
   canChargeForMessages,
   groupPeersPaidStars,
-}) => {
+}: OwnProps & StateProps) => {
   const { updateChatDefaultBannedRights, updatePaidMessagesPrice } = getActions();
 
   const {
     permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
   } = useManagePermissions(chat?.defaultBannedRights);
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   useHistoryBack({
@@ -204,11 +202,11 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         return result;
       }
 
-      const translatedString = oldLang(langKey);
+      const translatedString = lang(langKey);
 
       return `${result}${!result.length ? translatedString : `, ${translatedString}`}`;
     }, '');
-  }, [chat, oldLang]);
+  }, [chat, lang]);
 
   const handleChargeStarsForMessages = useLastCallback(() => {
     setIsPriceForMessagesOpen(!isPriceForMessagesOpen);

@@ -6,7 +6,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import getPointerPosition from '../../util/events/getPointerPosition';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Icon from '../common/icons/Icon';
 
@@ -46,7 +46,7 @@ const Draggable = ({
   knobStyle,
   isDisabled,
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const ref = useRef<HTMLDivElement>();
 
   const [state, setState] = useState<DraggableState>({
@@ -155,7 +155,7 @@ const Draggable = ({
 
       {!isDisabled && (
         <div
-          aria-label={lang('i18n_dragToSort')}
+          aria-label={lang('DragToSortAria')}
           tabIndex={0}
           role="button"
           className={buildClassName(styles.knob, 'div-button', 'draggable-knob')}

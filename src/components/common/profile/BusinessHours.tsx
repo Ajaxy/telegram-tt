@@ -10,10 +10,10 @@ import {
 } from '../../../util/animations/viewTransitionTypes';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatWeekday } from '../../../util/dates/oldDateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
 } from '../../../util/dates/workHours';
+import { formatDateTime, formatWeekday } from '../../../util/localization/dateFormat';
 
 import { useViewTransition } from '../../../hooks/animations/useViewTransition';
 import { useVtn } from '../../../hooks/animations/useVtn';
@@ -22,8 +22,8 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import Icon from '../icons/Icon';
@@ -43,7 +43,7 @@ const BusinessHours = ({
 }: OwnProps) => {
   const [isExpanded, expand, collapse] = useFlag(false);
   const [isMyTime, showInMyTime, showInLocalTime] = useFlag(false);
-  const oldLang = useOldLang();
+  const lang = useLang();
   const forceUpdate = useForceUpdate();
 
   const { startViewTransition } = useViewTransition();
@@ -69,20 +69,20 @@ const BusinessHours = ({
     DAYS.forEach((day) => {
       const segments = days[day];
       if (!segments) {
-        result[day] = [oldLang('BusinessHoursDayClosed')];
+        result[day] = [lang('BusinessHoursDayClosed')];
         return;
       }
 
       result[day] = segments.map(({ startMinute, endMinute }) => {
-        if (endMinute - startMinute === 24 * 60) return oldLang('BusinessHoursDayFullOpened');
-        const start = formatTime(oldLang, weekStart + startMinute * 60 * 1000);
-        const end = formatTime(oldLang, weekStart + endMinute * 60 * 1000);
+        if (endMinute - startMinute === 24 * 60) return lang('BusinessHoursDayFullOpened');
+        const start = formatDateTime(lang, new Date(weekStart + startMinute * 60 * 1000), { time: 'short' });
+        const end = formatDateTime(lang, new Date(weekStart + endMinute * 60 * 1000), { time: 'short' });
         return `${start} – ${end}`;
       });
     });
 
     return result;
-  }, [businessHours.workHours, isMyTime, oldLang, timezoneMinuteDifference]);
+  }, [businessHours.workHours, isMyTime, lang, timezoneMinuteDifference]);
 
   const isBusinessOpen = useMemo(() => {
     const localTimeHours = shiftTimeRanges(businessHours.workHours, timezoneMinuteDifference);
@@ -137,11 +137,11 @@ const BusinessHours = ({
     >
       <div className={styles.top}>
         <div className={styles.left}>
-          <div>{oldLang('BusinessHoursProfile')}</div>
+          <div>{lang('BusinessHoursProfile')}</div>
           <div
             className={buildClassName(styles.status, isBusinessOpen && styles.statusOpen)}
           >
-            {isBusinessOpen ? oldLang('BusinessHoursProfileNowOpen') : oldLang('BusinessHoursProfileNowClosed')}
+            {isBusinessOpen ? lang('BusinessHoursProfileNowOpen') : lang('BusinessHoursProfileNowClosed')}
           </div>
         </div>
         <Icon className={styles.arrow} style={createVtnStyle('expandArrow', true)} name={isExpanded ? 'up' : 'down'} />
@@ -156,14 +156,14 @@ const BusinessHours = ({
             onMouseDown={!IS_TOUCH_ENV ? handleTriggerOffset : undefined}
             onClick={IS_TOUCH_ENV ? handleTriggerOffset : undefined}
           >
-            {oldLang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
+            {lang(isMyTime ? 'BusinessHoursProfileSwitchMy' : 'BusinessHoursProfileSwitchLocal')}
           </div>
         )}
         <dl className={styles.timetable}>
           {DAYS.map((day) => (
             <>
               <dt className={buildClassName(styles.weekday, day === currentDay && styles.currentDay)}>
-                {formatWeekday(oldLang, day === 6 ? 0 : day + 1)}
+                {formatWeekday(lang, day === 6 ? 0 : day + 1)}
               </dt>
               <dd className={styles.schedule}>
                 {workHours[day].map((segment) => (

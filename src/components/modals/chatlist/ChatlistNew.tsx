@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -9,7 +8,6 @@ import type { ApiChatlistInviteNew } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
@@ -21,11 +19,11 @@ type OwnProps = {
   invite: ApiChatlistInviteNew;
 };
 
-const ChatlistNew: FC<OwnProps> = ({ invite }) => {
+const ChatlistNew = ({ invite }: OwnProps) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.peerIds);
 
   const joinedIds = useMemo(() => {
@@ -59,7 +57,7 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
       <div className={buildClassName(styles.pickerWrapper, 'custom-scroll')}>
         <div className={styles.pickerHeader}>
           <div className={styles.pickerHeaderInfo}>
-            {oldLang('FolderLinkHeaderChatsJoin', selectedCount, 'i')}
+            {lang('FolderLinkHeaderChatsJoin', { count: lang.number(selectedCount) }, { pluralValue: selectedCount })}
           </div>
           <div
             className={styles.selectionToggle}
@@ -67,7 +65,7 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
             tabIndex={0}
             onClick={handleSelectionToggle}
           >
-            {selectedPeerIds.length === invite.peerIds.length ? oldLang('DeselectAll') : oldLang('SelectAll')}
+            {selectedPeerIds.length === invite.peerIds.length ? lang('DeselectAll') : lang('ContextMenuItemSelectAll')}
           </div>
         </div>
         <PeerPicker

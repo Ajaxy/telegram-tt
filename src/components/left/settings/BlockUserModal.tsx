@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback,
   useMemo, useState,
@@ -28,14 +27,14 @@ type StateProps = {
   currentUserId?: string;
 };
 
-const BlockUserModal: FC<OwnProps & StateProps> = ({
+const BlockUserModal = ({
   usersById,
   blockedIds,
   contactIds,
   currentUserId,
   isOpen,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const { blockUser } = getActions();
 
   const lang = useLang();
@@ -56,12 +55,12 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
 
     return filterPeersByQuery({ ids: availableContactIds, query: search, type: 'user' })
       .sort((firstId, secondId) => {
-        const firstName = getUserFullName(usersById[firstId]) || '';
-        const secondName = getUserFullName(usersById[secondId]) || '';
+        const firstName = getUserFullName(lang, usersById[firstId]) || '';
+        const secondName = getUserFullName(lang, usersById[secondId]) || '';
 
         return firstName.localeCompare(secondName);
       });
-  }, [blockedIds, contactIds, currentUserId, search, relevantFoundIds, usersById]);
+  }, [blockedIds, contactIds, currentUserId, search, relevantFoundIds, usersById, lang]);
 
   const handleRemoveUser = useCallback((userId: string) => {
     blockUser({ userId });

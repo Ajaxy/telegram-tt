@@ -10,6 +10,7 @@ import type {
 } from '../../api/types';
 import type { IDimensions } from '../../types';
 import type { IconName } from '../../types/icons';
+import type { AdvancedLangFnOptions, AdvancedLangFnParameters } from '../../util/localization/types';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -31,9 +32,10 @@ import {
 import { IS_SAFARI } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
 import download from '../../util/download';
 import { isUserId } from '../../util/entities/ids';
+import { formatRecentTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
@@ -51,7 +53,6 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
-import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import { useStreaming } from '../../hooks/useStreaming';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
@@ -113,6 +114,11 @@ const VIDEO_MIN_READY_STATE = IS_SAFARI ? 4 : 3;
 const SPACEBAR_CODE = 32;
 
 const STEALTH_MODE_NOTIFICATION_DURATION = 4000;
+const NOTIFICATION_OPTIONS = {
+  withNodes: true,
+  withMarkdown: true,
+  renderTextFilters: ['br', 'links'],
+} satisfies AdvancedLangFnOptions;
 
 function Story({
   peerId,
@@ -161,7 +167,6 @@ function Story({
   } = getActions();
   const serverTime = getServerTime();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const { isMobile } = useAppLayout();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
@@ -504,17 +509,17 @@ function Story({
       ? undefined
       : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'nobody');
 
-    let message;
-    const myName = getPeerTitle(lang, peer);
+    const variables = { user: getPeerTitle(lang, peer) };
+    let message: AdvancedLangFnParameters;
     switch (visibility) {
       case 'nobody':
-        message = oldLang('StorySelectedContactsHint', myName);
+        message = { key: 'StorySelectedContactsHint', variables, options: NOTIFICATION_OPTIONS };
         break;
       case 'contacts':
-        message = oldLang('StoryContactsHint', myName);
+        message = { key: 'StoryContactsHint', variables, options: NOTIFICATION_OPTIONS };
         break;
       case 'closeFriends':
-        message = oldLang('StoryCloseFriendsHint', myName);
+        message = { key: 'StoryCloseFriendsHint', variables, options: NOTIFICATION_OPTIONS };
         break;
       default:
         return;
@@ -525,7 +530,7 @@ function Story({
   const handleVolumeMuted = useLastCallback(() => {
     if (noSound) {
       showNotification({
-        message: oldLang('Story.TooltipVideoHasNoSound'),
+        message: { key: 'StoryTooltipVideoHasNoSound', options: NOTIFICATION_OPTIONS },
       });
       return;
     }
@@ -538,8 +543,12 @@ function Story({
     if (stealthMode.activeUntil && getServerTime() < stealthMode.activeUntil) {
       const diff = stealthMode.activeUntil - getServerTime();
       showNotification({
-        title: lang('StealthModeOnTitle'),
-        message: lang('StealthModeOnHint', { time: formatMediaDuration(diff) }),
+        title: { key: 'StealthModeOnTitle' },
+        message: {
+          key: 'StealthModeOnHint',
+          variables: { time: formatMediaDuration(diff) },
+          options: NOTIFICATION_OPTIONS,
+        },
         duration: STEALTH_MODE_NOTIFICATION_DURATION,
       });
       return;
@@ -557,9 +566,9 @@ function Story({
     if (!isDeletedStory) return;
 
     showNotification({
-      message: oldLang('StoryNotFound'),
+      message: { key: 'StoryNotFound', options: NOTIFICATION_OPTIONS },
     });
-  }, [oldLang, isDeletedStory]);
+  }, [isDeletedStory]);
 
   const MenuButton = useMemo(() => {
     return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => {
@@ -685,10 +694,12 @@ function Story({
               </span>
             )}
             {story && 'date' in story && (
-              <span className={styles.storyMeta}>{formatRelativePastTime(oldLang, serverTime, story.date)}</span>
+              <span className={styles.storyMeta}>
+                {formatRecentTimestamp(lang, secondsToDate(story.date), { anchorDate: secondsToDate(serverTime) })}
+              </span>
             )}
             {isLoadedStory && story.isEdited && (
-              <span className={styles.storyMeta}>{oldLang('Story.HeaderEdited')}</span>
+              <span className={styles.storyMeta}>{lang('StoryHeaderEdited')}</span>
             )}
           </div>
         </div>
@@ -714,7 +725,7 @@ function Story({
               color="translucent-white"
               disabled={!hasFullData}
               onClick={handleVolumeMuted}
-              ariaLabel={oldLang('Volume')}
+              ariaLabel={lang('AudioVolume')}
               iconName={(isMuted || noSound) ? 'speaker-muted-story' : 'speaker-story'}
             />
           )}
@@ -725,35 +736,35 @@ function Story({
             onOpen={handleDropdownMenuOpen}
             onClose={handleDropdownMenuClose}
           >
-            {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{oldLang('CopyLink')}</MenuItem>}
+            {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>}
             {canPinToProfile && (
               <MenuItem icon="save-story" onClick={handlePinClick}>
-                {oldLang(isUserStory ? 'StorySave' : 'SaveToPosts')}
+                {lang(isUserStory ? 'StorySave' : 'SaveToPosts')}
               </MenuItem>
             )}
             {canUnpinFromProfile && (
               <MenuItem icon="delete" onClick={handleUnpinClick}>
-                {oldLang(isUserStory ? 'ArchiveStory' : 'RemoveFromPosts')}
+                {lang(isUserStory ? 'ArchiveStory' : 'RemoveFromPosts')}
               </MenuItem>
             )}
             {canDownload && (
               <MenuItem icon="download" disabled={!downloadMediaData} onClick={handleDownload}>
-                {oldLang('lng_media_download')}
+                {lang('MediaDownload')}
               </MenuItem>
             )}
             {!isOut && isUserStory && (
               <MenuItem icon="eye-crossed-outline" onClick={handleOpenStealthModal}>
-                {oldLang('StealthMode')}
+                {lang('StealthModeTitle')}
               </MenuItem>
             )}
-            {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{oldLang('lng_report_story')}</MenuItem>}
+            {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('ReportStory')}</MenuItem>}
             {isOut && (
               <MenuItem
                 icon="delete"
                 destructive
                 onClick={handleDeleteStoryClick}
               >
-                {oldLang('Delete')}
+                {lang('Delete')}
               </MenuItem>
             )}
           </DropdownMenu>
@@ -762,7 +773,7 @@ function Story({
             round
             size="tiny"
             color="translucent-white"
-            ariaLabel={oldLang('Close')}
+            ariaLabel={lang('Close')}
             onClick={onClose}
             iconName="close"
           />
@@ -777,7 +788,7 @@ function Story({
     }, {
       withNodes: true,
     })
-    : oldLang(isChatStory ? 'ReplyToGroupStory' : 'ReplyPrivately');
+    : lang(isChatStory ? 'ReplyToGroupStory' : 'ReplyPrivately');
 
   return (
     <div
@@ -853,13 +864,13 @@ function Story({
               type="button"
               className={buildClassName(styles.navigate, styles.prev)}
               onClick={handleOpenPrevStory}
-              aria-label={oldLang('Previous')}
+              aria-label={lang('AccDescrPrevious')}
             />
             <button
               type="button"
               className={buildClassName(styles.navigate, styles.next)}
               onClick={handleOpenNextStory}
-              aria-label={oldLang('Next')}
+              aria-label={lang('Next')}
             />
           </>
         )}
@@ -894,7 +905,7 @@ function Story({
           role="button"
           className={buildClassName(styles.captionBackdrop, captionBackdropTransitionClassNames)}
           onClick={() => foldCaption()}
-          aria-label={oldLang('Close')}
+          aria-label={lang('Close')}
         />
       )}
       {hasText && <div className={buildClassName(styles.captionGradient, captionAppearanceAnimationClassNames)} />}

@@ -43,17 +43,6 @@ export interface ApiLanguage {
   translationsUrl: string;
 }
 
-export type ApiOldLangString = string | {
-  zeroValue?: string;
-  oneValue?: string;
-  twoValue?: string;
-  fewValue?: string;
-  manyValue?: string;
-  otherValue?: string;
-};
-
-export type ApiOldLangPack = Record<string, ApiOldLangString | undefined>;
-
 export type LangPack = {
   langCode: string;
   version: number;

@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
@@ -10,7 +9,7 @@ import { selectAnimatedEmoji, selectTabState } from '../../../../global/selector
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useOldLang from '../../../../hooks/useOldLang';
+import useLang from '../../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Island from '../../../gili/layout/Island';
@@ -34,7 +33,7 @@ type StateProps = {
 
 const ICON_SIZE = 160;
 
-const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
+const SettingsTwoFaEmailCode = ({
   animatedEmoji,
   codeLength,
   isLoading,
@@ -44,7 +43,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
   isActive,
   onReset,
   recoveryEmail,
-}) => {
+}: OwnProps & StateProps) => {
   const inputRef = useRef<HTMLInputElement>();
 
   const [value, setValue] = useState<string>('');
@@ -55,7 +54,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
     }
   }, [isActive]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -83,7 +82,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
         <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} className="settings-content-icon" />
         {recoveryEmail && (
           <p className="settings-item-description mb-3" dir="auto">
-            {lang('TwoStepAuth.ConfirmEmailDescription', recoveryEmail)}
+            {lang('TwoStepAuthConfirmEmailDescription', { recoveryEmail })}
           </p>
         )}
       </div>

@@ -8,8 +8,8 @@ import { selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Audio from '../../common/Audio';
@@ -29,7 +29,7 @@ const OneTimeMediaModal = ({
     closeOneTimeMediaModal,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const message = useCurrentOrPrev(modal?.message, true);
 
   const {
@@ -51,7 +51,7 @@ const OneTimeMediaModal = ({
 
   const isOwn = isOwnMessage(message);
   const theme = selectTheme(getGlobal());
-  const closeBtnTitle = isOwn ? lang('Chat.Voice.Single.Close') : lang('Chat.Voice.Single.DeleteAndClose');
+  const closeBtnTitle = isOwn ? lang('Close') : lang('ChatVoiceSingleDeleteAndClose');
 
   function renderMedia() {
     if (!message?.content) {

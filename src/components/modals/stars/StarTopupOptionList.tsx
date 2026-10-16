@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
@@ -12,7 +11,6 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
@@ -32,7 +30,7 @@ type OwnProps = {
   onClick: (option: ApiStarTopupOption | ApiStarGiveawayOption) => void;
 };
 
-const StarTopupOptionList: FC<OwnProps> = ({
+const StarTopupOptionList = ({
   isActive,
   className,
   options,
@@ -40,8 +38,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
   selectedStarCount,
   starsNeeded,
   onClick,
-}) => {
-  const oldLang = useOldLang();
+}: OwnProps) => {
   const lang = useLang();
 
   const [areOptionsExtended, markOptionsExtended, unmarkOptionsExtended] = useFlag();
@@ -119,7 +116,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
               && Boolean(perUserStarCount) && (
               <div className={styles.optionBottom}>
                 <div className={styles.perUserStars}>
-                  {renderText(oldLang('BoostGift.Stars.PerUser', formatInteger(perUserStarCount)))}
+                  {renderText(lang('BoostGiftStarsPerUser', { count: formatInteger(perUserStarCount) }))}
                 </div>
               </div>
             )}
@@ -128,7 +125,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
       })}
       {!areOptionsExtended && canExtend && (
         <Button className={styles.moreOptions} isText noForcedUpperCase onClick={markOptionsExtended}>
-          {oldLang('Stars.Purchase.ShowMore')}
+          {lang('StarsPurchaseShowMore')}
           <Icon className={styles.iconDown} name="down" />
         </Button>
       )}

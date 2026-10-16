@@ -4,7 +4,7 @@ import { getActions } from '../../../global';
 import type { TabState } from '../../../global/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -37,7 +37,7 @@ const StarGiftPriceDecreaseInfoModal = ({ modal }: OwnProps) => {
     if (!renderingModal) return undefined;
     const { prices } = renderingModal;
     return prices.map((price): TableData[number] => [
-      formatDateTimeToString(price.date * 1000, lang.code, true, undefined, true),
+      formatDateTime(lang, secondsToDate(price.date), { date: 'short', time: 'short', includeYear: false }),
       formatStarsAsIcon(lang, price.upgradeStars, { containerClassName: styles.starIconContainer }),
     ]);
   }, [lang, renderingModal]);

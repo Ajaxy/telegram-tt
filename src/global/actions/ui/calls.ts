@@ -10,7 +10,6 @@ import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/oldLangProvider';
 import safePlay from '../../../util/safePlay';
 import { callApi } from '../../../api/gramjs';
 import { getMainUsername } from '../../helpers';
@@ -197,7 +196,10 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promis
   const chat = await fetchChatByUsername(global, username);
 
   if (!chat) {
-    actions.showNotification({ message: langProvider.oldTranslate('NoUsernameFound'), tabId });
+    actions.showNotification({ message: {
+      key: 'NoUsernameFound',
+      options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+    }, tabId });
     return;
   }
 
@@ -237,7 +239,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 
   if (!ARE_CALLS_SUPPORTED) {
     actions.showNotification({
-      message: 'Sorry, your browser doesn\'t support group calls',
+      message: { key: 'GroupCallsUnsupported' },
       tabId,
     });
     return;
@@ -440,7 +442,10 @@ export function checkNavigatorUserMediaPermissions<T extends GlobalState>(
       .then((stream) => {
         if (stream.getVideoTracks().length === 0) {
           actions.showNotification({
-            message: langProvider.oldTranslate('Call.Camera.Error'),
+            message: {
+              key: 'CallCameraAccessNeeded',
+              options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+            },
             tabId,
           });
         } else {
@@ -450,7 +455,10 @@ export function checkNavigatorUserMediaPermissions<T extends GlobalState>(
       })
       .catch(() => {
         actions.showNotification({
-          message: langProvider.oldTranslate('Call.Camera.Error'),
+          message: {
+            key: 'CallCameraAccessNeeded',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
           tabId,
         });
       });
@@ -466,7 +474,10 @@ function checkMicrophonePermission<T extends GlobalState>(
     .then((stream) => {
       if (stream.getAudioTracks().length === 0) {
         actions.showNotification({
-          message: langProvider.oldTranslate('RequestAcces.Error.HaveNotAccess.Call'),
+          message: {
+            key: 'CallMicrophoneAccessNeeded',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
           tabId,
         });
       } else {
@@ -475,7 +486,10 @@ function checkMicrophonePermission<T extends GlobalState>(
     })
     .catch(() => {
       actions.showNotification({
-        message: langProvider.oldTranslate('RequestAcces.Error.HaveNotAccess.Call'),
+        message: {
+          key: 'CallMicrophoneAccessNeeded',
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
         tabId,
       });
     });

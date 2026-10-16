@@ -10,7 +10,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import GroupChatInfo from '../../common/GroupChatInfo';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -44,7 +44,7 @@ const ManageChatRemovedUsers = ({
 }: OwnProps & StateProps) => {
   const { updateChatMemberBannedRights } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
   useHistoryBack({
@@ -62,7 +62,7 @@ const ManageChatRemovedUsers = ({
       return undefined;
     }
 
-    return lang('UserRemovedBy', getUserFullName(kickedByUser));
+    return lang('UserRemovedBy', { user: getUserFullName(lang, kickedByUser) });
   }, [lang, usersById]);
 
   const getContextActions = useCallback((member: ApiChatMember): MenuItemContextAction[] | undefined => {
@@ -116,7 +116,7 @@ const ManageChatRemovedUsers = ({
         <FloatingActionButton
           isShown
           onClick={openRemoveUserModal}
-          ariaLabel={lang('Channel.EditAdmin.Permission.BanUsers')}
+          ariaLabel={lang('ChannelEditAdminPermissionBanUsers')}
           iconName="add-user-filled"
         />
       )}

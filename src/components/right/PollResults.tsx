@@ -9,7 +9,7 @@ import {
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import { IslandOutside } from '../gili/layout/Island';
 import Loading from '../ui/Loading';
@@ -35,7 +35,7 @@ const PollResults = ({
   poll,
   onClose,
 }: OwnProps & StateProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,

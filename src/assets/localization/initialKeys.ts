@@ -1,6 +1,12 @@
 import type { LangKey } from '../../types/language';
 
 const INITIAL_KEYS: LangKey[] = [
+  'TestServer',
+  'PageTitleInactive',
+  'AuthTitle',
+  'AuthKeepSignedIn',
+  'Code',
+  'Next',
   'WrongNumber',
   'SentAppCode',
   'LoginJustSentSms',
@@ -12,7 +18,6 @@ const INITIAL_KEYS: LangKey[] = [
   'LoginQRLogin',
   'LoginQRTitle',
   'LoginQRHelp1',
-  'LoginQRHelp2',
   'LoginQRHelp2',
   'LoginQRHelp3',
   'LoginQRCancel',

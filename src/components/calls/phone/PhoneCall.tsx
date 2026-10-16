@@ -18,7 +18,7 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
 } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
@@ -27,7 +27,7 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
@@ -50,10 +50,10 @@ const PhoneCall = ({
   phoneCall,
   isCallPanelVisible,
 }: StateProps) => {
-  const lang = useOldLang();
   const {
     hangUp, requestMasterAndAcceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,
   } = getActions();
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
 
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
@@ -155,19 +155,19 @@ const PhoneCall = ({
   const callStatus = useMemo(() => {
     const state = phoneCall?.state;
     if (isHangingUp) {
-      return lang('lng_call_status_hanging');
+      return lang('CallStatusHanging');
     }
     if (isBusy) return 'busy';
     if (state === 'requesting') {
-      return lang('lng_call_status_requesting');
+      return lang('CallStatusRequesting');
     } else if (state === 'requested') {
-      return isOutgoing ? lang('lng_call_status_ringing') : lang('lng_call_status_incoming');
+      return isOutgoing ? lang('CallStatusRinging') : lang('CallStatusIncoming');
     } else if (state === 'waiting') {
-      return lang('lng_call_status_waiting');
+      return lang('CallStatusWaiting');
     } else if (state === 'active' && isConnected) {
       return undefined;
     } else {
-      return lang('lng_call_status_exchanging');
+      return lang('CallStatusExchanging');
     }
   }, [isBusy, isConnected, isHangingUp, isOutgoing, lang, phoneCall?.state]);
 
@@ -311,7 +311,7 @@ const PhoneCall = ({
           {phoneCall?.isConnected && phoneCall?.emojis && renderText(phoneCall.emojis, ['emoji'])}
         </div>
         <div className={buildClassName(styles.emojiTooltip, isEmojiOpen && styles.open)}>
-          {lang('CallEmojiKeyTooltip', user?.firstName).replace('%%', '%')}
+          {lang('CallEmojiKeyTooltip', { user: user?.firstName })}
         </div>
       </div>
       <div className={styles.userInfo}>
@@ -324,14 +324,14 @@ const PhoneCall = ({
           icon="microphone"
           isDisabled={!isActive}
           isActive={hasOwnAudio}
-          label={lang(hasOwnAudio ? 'lng_call_mute_audio' : 'lng_call_unmute_audio')}
+          label={lang(hasOwnAudio ? 'CallMuteAudio' : 'CallUnmuteAudio')}
         />
         <PhoneCallButton
           onClick={handleToggleVideo}
           icon="video"
           isDisabled={!isActive}
           isActive={hasOwnVideo}
-          label={lang(hasOwnVideo ? 'lng_call_stop_video' : 'lng_call_start_video')}
+          label={lang(hasOwnVideo ? 'CallStopVideo' : 'CallStartVideo')}
         />
         {hasOwnVideo && (IS_ANDROID || IS_IOS) && (
           <PhoneCallButton
@@ -353,7 +353,7 @@ const PhoneCall = ({
             icon="share-screen"
             isDisabled={!isActive}
             isActive={hasOwnPresentation}
-            label={lang('lng_call_screencast')}
+            label={lang('CallScreencast')}
           />
         )}
         {isIncomingRequested && (
@@ -361,7 +361,7 @@ const PhoneCall = ({
             onClick={requestMasterAndAcceptCall}
             icon="phone-discard"
             isDisabled={isDiscarded}
-            label={lang('lng_call_accept')}
+            label={lang('CallAccept')}
             className={styles.accept}
             iconClassName={styles.acceptIcon}
           />
@@ -370,7 +370,7 @@ const PhoneCall = ({
           onClick={handleHangUp}
           icon="phone-discard"
           isDisabled={isDiscarded}
-          label={lang(isIncomingRequested ? 'lng_call_decline' : 'lng_call_end_call')}
+          label={lang(isIncomingRequested ? 'CallDecline' : 'CallEndCall')}
           className={styles.leave}
         />
       </div>

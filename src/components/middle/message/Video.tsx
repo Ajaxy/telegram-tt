@@ -9,7 +9,7 @@ import {
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 import * as mediaLoader from '../../../util/mediaLoader';
 
 import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';

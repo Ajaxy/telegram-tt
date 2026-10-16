@@ -2,7 +2,7 @@ import type { ActionReturnType } from '../../types';
 import { ManagementProgress } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import * as langProvider from '../../../util/oldLangProvider';
+import { getTranslationFn } from '../../../util/localization';
 import { callApi } from '../../../api/gramjs';
 import { getUserFirstOrLastName } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -466,7 +466,13 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
 
   if (file && !isSuggest) {
     actions.showNotification({
-      message: langProvider.oldTranslate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
+      message: {
+        key: 'UserInfoSetCustomPhotoSuccessPhotoText',
+        variables: {
+          user: getUserFirstOrLastName(getTranslationFn(), user),
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
       tabId,
     });
   }

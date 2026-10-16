@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
@@ -15,8 +14,8 @@ import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import PeerPicker from '../../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
@@ -35,7 +34,7 @@ type OwnProps = {
   onSaveFilter: VoidFunction;
 };
 
-const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
+const SettingsFoldersChatFilters = ({
   mode,
   state,
   dispatch,
@@ -43,8 +42,8 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
   onReset,
   onSaveFilter,
   maxChats,
-}) => {
-  const lang = useOldLang();
+}: OwnProps & StateProps) => {
+  const lang = useLang();
 
   const { openLimitReachedModal } = getActions();
 

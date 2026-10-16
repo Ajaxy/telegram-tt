@@ -1,4 +1,3 @@
-import type { FC } from '@teact';
 import {
   memo, useEffect, useLayoutEffect, useRef, useState,
 } from '@teact';
@@ -17,8 +16,8 @@ import buildClassName from '../../../util/buildClassName';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 
 import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Button from '../../ui/Button';
@@ -74,7 +73,7 @@ type StateProps = {
 
 let isActivated = false;
 
-const SymbolMenu: FC<OwnProps & StateProps> = ({
+const SymbolMenu = ({
   chatId,
   threadId,
   isOpen,
@@ -101,7 +100,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onMouseEnter,
   onMouseLeave,
   ...menuPositionOptions
-}) => {
+}: OwnProps & StateProps) => {
   const { loadEmojiSearchGroups, loadEmojiStickerGroups } = getActions();
 
   const [activeTab, setActiveTab] = useState<SymbolMenuTabs>(SymbolMenuTabs.Emoji);
@@ -111,7 +110,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
 
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, onClose, false, false);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   if (!isActivated && isOpen) {
     isActivated = true;

@@ -26,7 +26,6 @@ import renderText from './helpers/renderText';
 import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import RippleEffect from '../ui/RippleEffect';
 import Transition from '../ui/Transition';
@@ -141,7 +140,6 @@ const PrivateChatInfo = ({
     loadMoreProfilePhotos,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const isTopic = Boolean(user?.isBotForum && topic);
@@ -197,7 +195,7 @@ const PrivateChatInfo = ({
     if (customPeer?.subtitleKey) {
       return (
         <span className="status" dir="auto">
-          <span className="user-status" dir="auto">{oldLang(customPeer.subtitleKey)}</span>
+          <span className="user-status" dir="auto">{lang(customPeer.subtitleKey)}</span>
         </span>
       );
     }
@@ -233,7 +231,7 @@ const PrivateChatInfo = ({
       return undefined;
     }
 
-    const translatedStatus = noUserStatus ? undefined : getUserStatus(oldLang, user, userStatus);
+    const translatedStatus = noUserStatus ? undefined : getUserStatus(lang, user, userStatus);
     const mainUserNameClassName = buildClassName('handle', translatedStatus && 'withStatus');
     return (
       <span className={buildClassName('status', !noUserStatus && isUserOnline(user, userStatus, true) && 'online')}>

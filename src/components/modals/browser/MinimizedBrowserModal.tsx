@@ -14,7 +14,6 @@ import { unique } from '../../../util/iteratees';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
 import Icon from '../../common/icons/Icon';
@@ -37,7 +36,6 @@ const MinimizedBrowserModal = ({
     closeBrowserModal,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const ref = useRef<HTMLDivElement>();
 
@@ -105,7 +103,7 @@ const MinimizedBrowserModal = ({
         size="tiny"
         iconName="close"
         iconClassName={styles.icon}
-        ariaLabel={oldLang('Close')}
+        ariaLabel={lang('Close')}
         onClick={handleCloseClick}
       />
       {peers.length ? (

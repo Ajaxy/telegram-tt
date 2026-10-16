@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -18,7 +17,7 @@ import { unique } from '../../util/iteratees';
 import sortChatIds from '../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import usePeerSearch, { userGlobalSearch } from '../../hooks/usePeerSearch';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
@@ -42,7 +41,7 @@ type StateProps = {
   isLoading: boolean;
 };
 
-const AddChatMembers: FC<OwnProps & StateProps> = ({
+const AddChatMembers = ({
   isChannel,
   members,
   onNextStep,
@@ -51,8 +50,8 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
   isLoading,
   onClose,
   isActive,
-}) => {
-  const lang = useOldLang();
+}: OwnProps & StateProps) => {
+  const lang = useLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { result: foundIds, currentResultsQuery, isSearching } = usePeerSearch({
@@ -115,7 +114,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           itemIds={displayedIds}
           selectedIds={selectedMemberIds}
           filterValue={searchQuery}
-          filterPlaceholder={lang('lng_channel_add_users')}
+          filterPlaceholder={lang('ChannelAddUsers')}
           searchInputId="new-members-picker-search"
           isLoading={isSearching}
           onSelectedIdsChange={setSelectedMemberIds}
@@ -132,7 +131,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown={Boolean(selectedMemberIds.length)}
           disabled={isLoading}
-          ariaLabel={lang('lng_channel_add_users')}
+          ariaLabel={lang('ChannelAddUsers')}
           onClick={handleNextStep}
           iconName="arrow-right"
           isLoading={isLoading}

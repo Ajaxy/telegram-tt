@@ -10,7 +10,6 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import { isBetween } from '../../util/math';
 
 import useLang from '../../hooks/useLang';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Island, { IslandDescription, IslandTitle } from '../gili/layout/Island';
@@ -46,7 +45,7 @@ const ManageUsernames = ({
     sortUsernames,
     sortChatUsernames,
   } = getActions();
-  const oldLang = useOldLang();
+
   const lang = useLang();
   const [usernameForConfirm, setUsernameForConfirm] = useState<ApiUsername | undefined>();
 
@@ -73,9 +72,9 @@ const ManageUsernames = ({
   const handleCopyUsername = useCallback((value: string) => {
     copyTextToClipboard(`@${value}`);
     showNotification({
-      message: oldLang('UsernameCopied'),
+      message: lang('UsernameCopied'),
     });
-  }, [oldLang, showNotification]);
+  }, [lang, showNotification]);
 
   const handleUsernameClick = useCallback((data: ApiUsername) => {
     if (data.isEditable) {
@@ -148,7 +147,7 @@ const ManageUsernames = ({
   return (
     <>
       <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
-        {oldLang('lng_usernames_subtitle')}
+        {lang('UsernamesSubtitle')}
       </IslandTitle>
       <Island className={styles.container}>
         <div className={styles.sortableContainer} style={`height: ${(usernames.length) * USERNAME_HEIGHT_PX}px`}>
@@ -157,8 +156,8 @@ const ManageUsernames = ({
             const draggedTop = (state.orderedUsernames?.indexOf(usernameData.username) ?? 0) * USERNAME_HEIGHT_PX;
             const top = (state.dragOrderUsernames?.indexOf(usernameData.username) ?? 0) * USERNAME_HEIGHT_PX;
             const subtitle = usernameData.isEditable
-              ? 'lng_usernames_edit'
-              : (usernameData.isActive ? 'lng_usernames_active' : 'lng_usernames_non_active');
+              ? 'UsernamesEdit'
+              : (usernameData.isActive ? 'UsernamesActive' : 'UsernamesNonActive');
 
             return (
               <Draggable
@@ -182,7 +181,7 @@ const ManageUsernames = ({
                       handler: () => {
                         handleCopyUsername(usernameData.username);
                       },
-                      title: oldLang('Copy'),
+                      title: lang('Copy'),
                       icon: 'copy',
                     },
                   ]}
@@ -195,7 +194,7 @@ const ManageUsernames = ({
                     @
                     {usernameData.username}
                   </span>
-                  <span className="subtitle list-item-ellipsis">{oldLang(subtitle)}</span>
+                  <span className="subtitle list-item-ellipsis">{lang(subtitle)}</span>
                 </ListItem>
               </Draggable>
             );
@@ -203,16 +202,14 @@ const ManageUsernames = ({
         </div>
       </Island>
       <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
-        {oldLang('lng_usernames_description')}
+        {lang('UsernamesDescription')}
       </IslandDescription>
       <ConfirmDialog
         isOpen={Boolean(usernameForConfirm)}
         onClose={closeConfirmUsernameDialog}
-        title={oldLang(usernameForConfirm?.isActive ? 'Username.DeactivateAlertTitle' : 'Username.ActivateAlertTitle')}
-        text={oldLang(usernameForConfirm?.isActive ? 'Username.DeactivateAlertText' : 'Username.ActivateAlertText')}
-        confirmLabel={oldLang(usernameForConfirm?.isActive
-          ? 'Username.DeactivateAlertHide'
-          : 'Username.ActivateAlertShow')}
+        title={lang(usernameForConfirm?.isActive ? 'UsernameDeactivateAlertTitle' : 'UsernameActivateAlertTitle')}
+        text={lang(usernameForConfirm?.isActive ? 'UsernameDeactivateAlertText' : 'UsernameActivateAlertText')}
+        confirmLabel={lang(usernameForConfirm?.isActive ? 'UsernameDeactivateAlertHide' : 'UsernameActivateAlertShow')}
         confirmHandler={handleUsernameToggle}
         confirmIsDestructive={!usernameForConfirm?.isActive}
       />

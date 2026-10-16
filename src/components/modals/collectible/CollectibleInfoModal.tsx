@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo,
   useMemo,
@@ -9,15 +8,15 @@ import type { ApiCountryCode } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import PeerChip from '../../common/PeerChip';
@@ -36,17 +35,17 @@ type StateProps = {
 
 const TOP_ICON_SIZE = 60;
 
-const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
+const CollectibleInfoModal = ({
   modal,
   phoneCodeList,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     closeCollectibleInfoModal,
     openChat,
     openUrl,
     showNotification,
   } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const isUsername = modal?.type === 'username';
 
@@ -71,28 +70,36 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
       : formatPhoneNumberWithCode(phoneCodeList, modal!.collectible);
     copyTextToClipboard(text);
     showNotification({
-      message: lang(isUsername ? 'UsernameCopied' : 'PhoneCopied'),
+      message: {
+        key: isUsername ? 'UsernameCopied' : 'PhoneCopied',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
     });
     handleClose();
   });
 
   const title = useMemo(() => {
     if (!modal) return undefined;
-    const key = isUsername ? 'FragmentUsernameTitle' : 'FragmentPhoneTitle';
     const formattedCollectible = isUsername
       ? formatUsername(modal.collectible)
       : formatPhoneNumberWithCode(phoneCodeList, modal.collectible);
-    return lang(key, formattedCollectible);
+    return isUsername
+      ? lang('FragmentUsernameTitle', { username: formattedCollectible })
+      : lang('FragmentPhoneTitle', { phone: formattedCollectible });
   }, [modal, isUsername, phoneCodeList, lang]);
 
   const description = useMemo(() => {
     if (!modal) return undefined;
     const key = isUsername ? 'FragmentUsernameMessage' : 'FragmentPhoneMessage';
-    const date = formatDateAtTime(lang, modal.purchaseDate * 1000);
+    const date = formatCalendarDate(
+      lang,
+      secondsToDate(modal.purchaseDate),
+      { variant: 'date', isShort: true, withTime: true },
+    );
     const currency = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
     const cryptoCurrency = formatCurrencyAsString(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
     const paid = `${cryptoCurrency} (${currency})`;
-    return lang(key, [date, paid]);
+    return lang(key, { date, amount: paid, details: '' });
   }, [modal, isUsername, lang]);
 
   return (
@@ -127,7 +134,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
           {lang('FragmentUsernameOpen')}
         </Button>
         <Button isText className="confirm-dialog-button" onClick={handleCopy}>
-          {lang(isUsername ? 'FragmentUsernameCopy' : 'FragmentPhoneCopy')}
+          {lang(isUsername ? 'CopyLink' : 'ProfileCopyPhone')}
         </Button>
       </div>
     </Modal>

@@ -7,7 +7,6 @@ import type { ActionReturnType, GlobalState } from '../../types';
 import { BIRTHDAY_NUMBERS_SET, RESTRICTED_EMOJI_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import * as langProvider from '../../../util/oldLangProvider';
 import { pause, throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -460,10 +459,24 @@ addActionHandler('saveGif', async (global, actions, payload): Promise<void> => {
 
   if (!shouldUnsave && length && length >= limit) {
     actions.showNotification({
-      title: langProvider.oldTranslate('LimitReachedFavoriteGifs', limit.toString()),
-      message: isPremium ? langProvider.oldTranslate('LimitReachedFavoriteGifsSubtitlePremium')
-        : langProvider.oldTranslate('LimitReachedFavoriteGifsSubtitle',
-          premiumLimit.toString()),
+      title: {
+        key: 'LimitReachedFavoriteGifs',
+        variables: {
+          count: limit.toString(),
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      message: isPremium ? {
+        key: 'LimitReachedFavoriteGifsSubtitlePremium',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }
+        : {
+          key: 'LimitReachedFavoriteGifsSubtitle',
+          variables: {
+            count: premiumLimit.toString(),
+          },
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
       ...(!isPremium && {
         action: {
           action: 'openPremiumModal',
@@ -506,10 +519,24 @@ addActionHandler('faveSticker', (global, actions, payload): ActionReturnType => 
 
   if (current >= limit) {
     actions.showNotification({
-      title: langProvider.oldTranslate('LimitReachedFavoriteStickers', limit.toString()),
-      message: isPremium ? langProvider.oldTranslate('LimitReachedFavoriteStickersSubtitlePremium')
-        : langProvider.oldTranslate('LimitReachedFavoriteStickersSubtitle',
-          premiumLimit.toString()),
+      title: {
+        key: 'LimitReachedFavoriteStickers',
+        variables: {
+          count: limit.toString(),
+        },
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      message: isPremium ? {
+        key: 'LimitReachedFavoriteStickersSubtitlePremium',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      }
+        : {
+          key: 'LimitReachedFavoriteStickersSubtitle',
+          variables: {
+            count: premiumLimit.toString(),
+          },
+          options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+        },
       ...(!isPremium && {
         action: {
           action: 'openPremiumModal',
@@ -732,7 +759,10 @@ async function loadStickers<T extends GlobalState>(
     if ((error as ApiError).message === 'STICKERSET_INVALID') {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         actions.showNotification({
-          message: langProvider.oldTranslate('StickerPack.ErrorNotFound'),
+          message: {
+            key: 'StickerPackErrorNotFound',
+            options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+          },
           tabId,
         });
 

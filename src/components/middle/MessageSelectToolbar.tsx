@@ -24,7 +24,6 @@ import useFlag from '../../hooks/useFlag';
 import useFrozenProps from '../../hooks/useFrozenProps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
@@ -85,7 +84,6 @@ const MessageSelectToolbar = ({
     setSharedSettingOption,
   } = getActions();
   const lang = useLang();
-  const oldLang = useOldLang();
 
   useCopySelectedMessages(Boolean(isActive && !reportContext));
 
@@ -243,7 +241,7 @@ const MessageSelectToolbar = ({
           ) : (
             <>
               {Boolean(rendering.selectedMessagesCount) && rendering.canDeleteMessages && (
-                renderButton('delete', oldLang('EditAdminGroupDeleteMessages'), handleDelete, true)
+                renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
               )}
               <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
                 {formattedMessagesCount}
@@ -252,17 +250,17 @@ const MessageSelectToolbar = ({
               {Boolean(rendering.selectedMessagesCount) && (
                 <div className="MessageSelectToolbar-actions">
                   {rendering.canReportMessages && (
-                    renderButton('flag', oldLang('Conversation.ReportMessages'), openMessageReport)
+                    renderButton('flag', lang('ConversationReportMessages'), openMessageReport)
                   )}
                   {rendering.canDownloadMessages && !rendering.hasProtectedMessage && (
-                    renderButton('download', oldLang('lng_media_download'), handleMessageDownload)
+                    renderButton('download', lang('AccActionDownload'), handleMessageDownload)
                   )}
                   {!rendering.hasProtectedMessage && (
-                    renderButton('copy', oldLang('lng_context_copy_selected_items'), handleCopy)
+                    renderButton('copy', lang('ContextCopySelectedItems'), handleCopy)
                   )}
                   {rendering.messageListType !== 'scheduled' && rendering.canForwardMessages && (
                     renderButton(
-                      'forward', oldLang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages,
+                      'forward', lang('ChatForwardActionHeader'), openForwardMenuForSelectedMessages,
                     )
                   )}
                 </div>
@@ -276,11 +274,11 @@ const MessageSelectToolbar = ({
         onClose={closeFileIpDialog}
         confirmHandler={handleFileIpConfirm}
       >
-        {oldLang('lng_launch_svg_warning')}
+        {lang('LaunchSvgWarning')}
         <Checkbox
           className="dialog-checkbox"
           checked={shouldNotWarnAboutFiles}
-          label={oldLang('lng_launch_exe_dont_ask')}
+          label={lang('LaunchExeDontAsk')}
           onCheck={setShouldNotWarnAboutFiles}
         />
       </ConfirmDialog>

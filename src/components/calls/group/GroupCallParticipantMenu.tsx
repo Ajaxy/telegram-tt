@@ -1,4 +1,4 @@
-import type { ElementRef, FC } from '../../../lib/teact/teact';
+import type { ElementRef } from '../../../lib/teact/teact';
 import { memo, useEffect, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -10,8 +10,8 @@ import { selectActiveGroupCall, selectIsAdminInActiveGroupCall } from '../../../
 import buildClassName from '../../../util/buildClassName';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useRunThrottled from '../../../hooks/useRunThrottled';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -47,7 +47,7 @@ const VOLUME_CHANGE_THROTTLE = 500;
 
 const SPEAKER_ICON_SIZE = 24;
 
-const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
+const GroupCallParticipantMenu = ({
   participant,
   onCloseAnimationEnd,
   onClose,
@@ -56,7 +56,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
   chatId,
   menuRef,
   ...menuPositionOptions
-}) => {
+}: OwnProps & StateProps) => {
   const {
     toggleGroupCallMute,
     setGroupCallParticipantVolume,
@@ -66,7 +66,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     openDeleteMemberModal,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const id = participant?.id;
   const {

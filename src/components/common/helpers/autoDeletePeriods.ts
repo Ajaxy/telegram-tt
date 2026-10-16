@@ -1,6 +1,6 @@
 import type { LangFn } from '../../../util/localization';
 
-import { formatCountdown } from '../../../util/dates/oldDateFormat';
+import { formatCountdown } from '../../../util/dates/duration';
 import {
   DAY, HOUR, MINUTE, MONTH, WEEK, YEAR,
 } from '../../../util/dates/units';

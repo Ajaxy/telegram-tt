@@ -1014,6 +1014,8 @@ export type ApiUpdateLangPackTooLong = {
 
 export type ApiUpdateLangPack = {
   '@type': 'updateLangPack';
+  langCode: string;
+  fromVersion: number;
   version: number;
   strings: Record<string, LangPackStringValue>;
   keysToRemove: string[];

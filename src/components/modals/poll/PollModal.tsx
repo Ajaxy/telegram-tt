@@ -26,9 +26,10 @@ import {
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString, formatShortDuration } from '../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../util/dates/duration';
 import { DAY, HOUR } from '../../../util/dates/units';
 import { generateUniqueNumberId } from '../../../util/generateUniqueId';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { getServerTime } from '../../../util/serverTime';
 
@@ -292,7 +293,7 @@ const PollModal = ({
 
   const hasLimitedDuration = closePeriod !== undefined || closeDate !== undefined;
   const closeDateLabel = closeDate !== undefined
-    ? formatDateTimeToString(closeDate * 1000, lang.code, true)
+    ? formatDateTime(lang, secondsToDate(closeDate), { date: 'short', time: 'short' })
     : closePeriod !== undefined
       ? formatShortDuration(lang, closePeriod)
       : lang('PollSelectCloseDate');
@@ -439,7 +440,16 @@ const PollModal = ({
 
   const handleCountrySelectionLimit = useLastCallback((selectionLimit: number) => {
     showNotification({
-      message: lang('PollCountriesLimit', { count: selectionLimit }, { pluralValue: selectionLimit }),
+      message: {
+        key: 'PollCountriesLimit',
+        variables: { count: selectionLimit },
+        options: {
+          pluralValue: selectionLimit,
+          withNodes: true,
+          withMarkdown: true,
+          renderTextFilters: ['br', 'links'],
+        },
+      },
     });
   });
 

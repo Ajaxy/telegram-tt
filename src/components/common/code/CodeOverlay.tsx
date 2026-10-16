@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -8,7 +7,7 @@ import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { areLinesWrapping } from '../helpers/renderText';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import Icon from '../icons/Icon';
@@ -22,13 +21,13 @@ export type OwnProps = {
   onWordWrapToggle?: (wrap: boolean) => void;
 };
 
-const CodeOverlay: FC<OwnProps> = ({
+const CodeOverlay = ({
   text, className, noCopy, onWordWrapToggle,
-}) => {
+}: OwnProps) => {
   const { showNotification } = getActions();
   const ref = useRef<HTMLDivElement>();
   const windowSize = useWindowSize();
-  const lang = useOldLang();
+  const lang = useLang();
   const [isWordWrap, setIsWordWrap] = useState(true);
   const [withWordWrapButton, setWithWordWrapButton] = useState(false);
 
@@ -63,7 +62,7 @@ const CodeOverlay: FC<OwnProps> = ({
     <div className={overlayClass} ref={ref}>
       <div className={contentClass}>
         {withWordWrapButton && (
-          <div className={wrapClass} onClick={handleWordWrapClick} title="Word Wrap">
+          <div className={wrapClass} onClick={handleWordWrapClick} title={lang('AriaCodeWordWrap')}>
             <Icon name="word-wrap" />
           </div>
         )}

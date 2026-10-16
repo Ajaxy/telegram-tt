@@ -1,27 +1,21 @@
-import type { FC } from '../../lib/teact/teact';
-
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Button from './Button';
 
 import './ShowMoreButton.scss';
 
 type OwnProps = {
-  count: number;
-  itemName: string;
-  itemPluralName?: string;
+  text: string;
   isLoading?: boolean;
   onClick: () => void;
 };
 
-const ShowMoreButton: FC<OwnProps> = ({
-  count,
-  itemName,
-  itemPluralName,
+const ShowMoreButton = ({
+  text,
   isLoading,
   onClick,
-}) => {
-  const lang = useOldLang();
+}: OwnProps) => {
+  const lang = useLang();
 
   return (
     <Button
@@ -33,13 +27,7 @@ const ShowMoreButton: FC<OwnProps> = ({
       onClick={onClick}
       iconName="down"
     >
-      Show
-      {' '}
-      {count}
-      {' '}
-      more
-      {' '}
-      {count > 1 ? itemPluralName || `${itemName}s` : itemName}
+      {text}
     </Button>
   );
 };

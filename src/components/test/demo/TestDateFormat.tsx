@@ -1,7 +1,14 @@
 import type { FormatDateTimeOptions } from '../../../util/localization/dateFormat';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTime, formatMessageListDate } from '../../../util/localization/dateFormat';
+import {
+  formatCalendarDate,
+  formatCompactTimestamp,
+  formatDateTime,
+  formatMessageListDate,
+  formatRecentTimestamp,
+  formatRelativeAge,
+} from '../../../util/localization/dateFormat';
 
 import useLang from '../../../hooks/useLang';
 
@@ -14,6 +21,8 @@ type Row = {
 
 const ANCHOR_DATE = new Date(2026, 2, 16, 12, 34, 56);
 const ANCHOR_TIMESTAMP = ANCHOR_DATE.getTime();
+const MILLISECONDS_IN_SECOND = 1000;
+const POLICY_AGES = [59, 60, 3599, 3600, 43199, 43200, 86400, 30 * 86400, 365 * 86400];
 
 const ABSOLUTE_CASES: Array<{ label: string; options: FormatDateTimeOptions }> = [
   { label: 'default', options: {} },
@@ -141,6 +150,24 @@ const DateFormatTest = () => {
     { label: 'anchorDate.toISOString()', value: ANCHOR_DATE.toISOString() },
     { label: 'anchorDate.getTime()', value: String(ANCHOR_TIMESTAMP) },
   ];
+  const policyRows: Row[] = POLICY_AGES.flatMap((seconds) => {
+    const date = new Date(ANCHOR_TIMESTAMP - seconds * MILLISECONDS_IN_SECOND);
+    const options = { anchorDate: ANCHOR_DATE };
+    return [
+      { label: `Account age: ${seconds}s`, value: formatRelativeAge(lang, date, options) },
+      { label: `Story age: ${seconds}s`, value: formatRecentTimestamp(lang, date, options) },
+      {
+        label: `Last seen: ${seconds}s`,
+        value: formatRecentTimestamp(lang, date, { ...options, context: 'lastSeen' }),
+      },
+      {
+        label: `Location updated: ${seconds}s`,
+        value: formatRecentTimestamp(lang, date, { ...options, context: 'location' }),
+      },
+      { label: `Chat timestamp: ${seconds}s`, value: formatCompactTimestamp(lang, date, options) },
+      { label: `Calendar date: ${seconds}s`, value: formatCalendarDate(lang, date, options) },
+    ];
+  });
 
   return (
     <div className={buildClassName(styles.root, 'full-height', 'custom-scroll')}>
@@ -158,6 +185,9 @@ const DateFormatTest = () => {
 
       <h3>Message List Date Formatting</h3>
       <DebugTable rows={messageListRows} />
+
+      <h3>Shared Date Policies</h3>
+      <DebugTable rows={policyRows} />
     </div>
   );
 };

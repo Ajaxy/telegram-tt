@@ -14,7 +14,7 @@ import {
   selectPeer, selectPeerPaidMessagesStars, selectTabState, selectUserFullInfo,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdown } from '../../../util/dates/oldDateFormat';
+import { formatCountdown } from '../../../util/dates/duration';
 import { HOUR } from '../../../util/dates/units';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsIcon, NEXT_ARROW_REPLACEMENT } from '../../../util/localization/format';

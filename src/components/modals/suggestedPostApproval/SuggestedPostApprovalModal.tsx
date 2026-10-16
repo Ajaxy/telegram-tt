@@ -10,8 +10,9 @@ import {
 } from '../../../config';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { selectChatMessage, selectIsMonoforumAdmin, selectSender } from '../../../global/selectors';
-import { formatScheduledDateTime, formatShortDuration } from '../../../util/dates/oldDateFormat';
+import { formatShortDuration } from '../../../util/dates/duration';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
@@ -19,7 +20,6 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import CalendarModal from '../../common/CalendarModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -60,7 +60,7 @@ const SuggestedPostApprovalModal = ({
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
+
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
 
   const now = getServerTime();
@@ -114,7 +114,7 @@ const SuggestedPostApprovalModal = ({
     return undefined;
   }
 
-  const senderName = sender ? getPeerFullTitle(oldLang, sender) : '';
+  const senderName = sender ? getPeerFullTitle(lang, sender) : '';
 
   const renderContent = () => {
     const price = message?.suggestedPostInfo?.price;
@@ -143,7 +143,7 @@ const SuggestedPostApprovalModal = ({
     const duration = formatShortDuration(lang, ageMinSeconds, true);
 
     if (scheduleDate) {
-      const time = formatScheduledDateTime(scheduleDate, lang, oldLang);
+      const time = formatCalendarDate(lang, secondsToDate(scheduleDate), { isShort: true, withTime: true });
 
       const key
         = isAdmin ? 'SuggestedPostConfirmDetailsWithTimeAdmin' : 'SuggestedPostConfirmDetailsWithTimeUser';
@@ -206,7 +206,7 @@ const SuggestedPostApprovalModal = ({
         onDateChange={handleCalendarDateChange}
         selectedAt={selectedScheduleDate * 1000}
         submitButtonLabel={lang('ButtonPublishAtTime', {
-          time: formatScheduledDateTime(selectedScheduleDate, lang, oldLang),
+          time: formatCalendarDate(lang, secondsToDate(selectedScheduleDate), { isShort: true, withTime: true }),
         })}
         secondButtonLabel={lang('PublishNow')}
         onSecondButtonClick={handlePublishNow}

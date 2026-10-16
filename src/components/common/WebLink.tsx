@@ -13,7 +13,7 @@ import {
 import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
-import { formatPastTimeShort } from '../../util/dates/oldDateFormat';
+import { formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';
@@ -21,7 +21,6 @@ import renderText from './helpers/renderText';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Link from '../ui/Link';
 import Menu from '../ui/Menu';
@@ -57,7 +56,6 @@ const WebLink = ({
   const ref = useRef<HTMLDivElement>();
   const menuRef = useRef<HTMLDivElement>();
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const handleMessageClick = useLastCallback(() => {
     onMessageClick(message);
@@ -190,7 +188,7 @@ const WebLink = ({
             onClick={handleMessageClick}
             isRtl={lang.isRtl}
           >
-            {formatPastTimeShort(oldLang, message.date * 1000)}
+            {formatCompactTimestamp(lang, secondsToDate(message.date))}
           </Link>
         </div>
       )}

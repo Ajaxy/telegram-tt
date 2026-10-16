@@ -8,14 +8,13 @@ import type {
   ApiUpdateSession,
   ApiUpdateUserAlreadyAuthorized,
 } from '../../../api/types';
-import type { LangCode } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
+import { retryLocalization } from '../../../util/localization';
 import { getAccountsInfo, getAccountSlotUrl } from '../../../util/multiaccount';
-import { oldSetLanguage } from '../../../util/oldLangProvider';
 import { setServerTimeOffset } from '../../../util/serverTime';
 import { updateSessionUserId } from '../../../util/sessions';
 import { finishWebLogin, rejectWebLogin } from '../../../util/webLogin';
@@ -130,7 +129,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 });
 
 function onUpdateApiReady<T extends GlobalState>(global: T) {
-  void oldSetLanguage(selectSharedSettings(global).language as LangCode);
+  void retryLocalization(selectSharedSettings(global).language);
 }
 
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {

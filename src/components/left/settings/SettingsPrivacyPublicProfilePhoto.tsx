@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
@@ -7,7 +6,7 @@ import { getActions } from '../../../global';
 import type { ApiPhoto } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import Island, { IslandDescription } from '../../gili/layout/Island';
@@ -23,16 +22,16 @@ type OwnProps = {
   currentUserFallbackPhoto?: ApiPhoto;
 };
 
-const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
+const SettingsPrivacyPublicProfilePhoto = ({
   currentUserId,
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
-}) => {
+}: OwnProps) => {
   const {
     loadFullUser, uploadProfilePhoto, deleteProfilePhoto, showNotification,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [isDeleteFallbackPhotoModalOpen, openDeleteFallbackPhotoModal, closeDeleteFallbackPhotoModal] = useFlag(false);
 
@@ -50,7 +49,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
       isFallback: true,
     });
     showNotification({
-      message: lang('Privacy.ProfilePhoto.PublicPhotoSuccess'),
+      message: lang('PrivacyProfilePhotoPublicPhotoSuccess'),
     });
   }, [lang, showNotification, uploadProfilePhoto]);
 
@@ -76,8 +75,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
             inputRef={inputRef}
           />
           {lang(currentUserFallbackPhoto
-            ? 'Privacy.ProfilePhoto.UpdatePublicPhoto'
-            : 'Privacy.ProfilePhoto.SetPublicPhoto')}
+            ? 'PrivacyProfilePhotoUpdatePublicPhoto' : 'PrivacyProfilePhotoSetPublicPhoto')}
         </ListItem>
         {currentUserFallbackPhoto && (
           <ListItem
@@ -87,12 +85,11 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
             destructive
           >
             {lang(currentUserFallbackPhoto.isVideo
-              ? 'Privacy.ProfilePhoto.RemovePublicVideo'
-              : 'Privacy.ProfilePhoto.RemovePublicPhoto')}
+              ? 'PrivacyProfilePhotoRemovePublicVideo' : 'PrivacyProfilePhotoRemovePublicPhoto')}
             <ConfirmDialog
               isOpen={isDeleteFallbackPhotoModalOpen}
               onClose={closeDeleteFallbackPhotoModal}
-              text={lang('Privacy.ResetPhoto.Confirm')}
+              text={lang('PrivacyResetPhotoConfirm')}
               confirmLabel={lang('Delete')}
               confirmHandler={handleConfirmDelete}
               confirmIsDestructive
@@ -101,7 +98,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
         )}
       </Island>
       <IslandDescription dir={lang.isRtl ? 'rtl' : undefined}>
-        {lang('Privacy.ProfilePhoto.PublicPhotoInfo')}
+        {lang('PrivacyProfilePhotoPublicPhotoInfo')}
       </IslandDescription>
     </>
   );

@@ -10,7 +10,6 @@ import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Island, { IslandDescription, IslandTitle } from '../../../gili/layout/Island';
@@ -50,7 +49,6 @@ const SettingsPasscodeEnabled = ({
     setPasscodeKeepBackground,
   } = getActions();
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   useHistoryBack({ isActive, onBack: onReset });
@@ -96,14 +94,14 @@ const SettingsPasscodeEnabled = ({
 
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeChangePasscodeCurrent })}
         >
-          {oldLang('Passcode.Change')}
+          {lang('PasscodeChange')}
         </ListItem>
         <ListItem
           icon="lock-crossed"
 
           onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeTurnOff })}
         >
-          {oldLang('Passcode.TurnOff')}
+          {lang('PasscodeTurnOff')}
         </ListItem>
       </Island>
 

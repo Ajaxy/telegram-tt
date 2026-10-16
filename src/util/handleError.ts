@@ -1,6 +1,8 @@
-import { DEBUG, DEBUG_ALERT_MSG } from '../config';
+import { DEBUG } from '../config';
 import { isCurrentTabMaster } from './establishMultitabRole';
 import { throttle } from './schedulers';
+
+const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 
 let showError = true;
 let error: Error | undefined;

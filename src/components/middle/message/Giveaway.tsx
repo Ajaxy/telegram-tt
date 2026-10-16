@@ -1,3 +1,4 @@
+import type { TeactNode } from '../../../lib/teact/teact';
 import {
   memo, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -18,15 +19,15 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime, formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { isoToEmoji } from '../../../util/emoji/emoji';
+import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
@@ -60,11 +61,11 @@ const Giveaway = ({
   giftSticker,
 }: OwnProps & StateProps) => {
   const { openChat } = getActions();
+  const lang = useLang();
 
   const isLoadingInfoRef = useRef(false);
   const [giveawayInfo, setGiveawayInfo] = useState<ApiGiveawayInfo | undefined>();
 
-  const lang = useOldLang();
   const { giveaway, giveawayResults } = message.content;
   const isResults = Boolean(giveawayResults);
   const {
@@ -73,17 +74,16 @@ const Giveaway = ({
 
   const isOwn = isOwnMessage(message);
 
-  const quantity = isResults ? giveawayResults.winnersCount : giveaway!.quantity;
+  const quantity = isResults ? giveawayResults.winnersCount! : giveaway!.quantity;
 
   const hasEnded = getServerTime() > untilDate;
 
   const countryList = useMemo(() => {
-    if (isResults) return undefined;
-    const translatedNames = new Intl.DisplayNames([lang.code!, 'en'].filter(Boolean), { type: 'region' });
-    return giveaway?.countries?.map((countryCode) => (
-      `${isoToEmoji(countryCode)}${NBSP}${translatedNames.of(countryCode)}`
-    )).join(', ');
-  }, [giveaway, isResults, lang.code]);
+    if (isResults || !giveaway?.countries) return undefined;
+    return lang.conjunction(giveaway.countries.map((countryCode) => (
+      `${isoToEmoji(countryCode)}${NBSP}${lang.region(countryCode)}`
+    )));
+  }, [giveaway, isResults, lang]);
 
   const handlePeerClick = useLastCallback((channelId: string) => {
     openChat({ id: channelId });
@@ -116,47 +116,52 @@ const Giveaway = ({
       <>
         <div className={styles.section}>
           <strong className={styles.title}>
-            {renderText(lang('BoostingGiveawayPrizes'), ['simple_markdown'])}
+            {lang('BoostingGiveawayPrizes', undefined, { withNodes: true, withMarkdown: true })}
           </strong>
           {prizeDescription && (
             <>
               <p className={styles.description}>
-                {renderText(
-                  lang('BoostingGiveawayMsgPrizes', [quantity, prizeDescription], undefined, quantity),
-                  ['simple_markdown'],
-                )}
+                {lang('BoostingGiveawayMsgPrizes', { quantity, prize: prizeDescription }, {
+                  pluralValue: quantity, withNodes: true, withMarkdown: true,
+                })}
               </p>
               <Separator>{lang('BoostingGiveawayMsgWithDivider')}</Separator>
             </>
           )}
           <p className={styles.description}>
-            {message?.content?.giveaway?.stars ? (
-              <>
-                {renderText(
-                  lang('Chat.Giveaway.Message.Stars.PrizeText', lang('Stars', message?.content?.giveaway?.stars)),
-                  ['simple_markdown'],
-                )}
-                <br />
-                {renderText(lang('AmongWinners', quantity), ['simple_markdown'])}
-              </>
+            {stars ? (
+              lang('ChatGiveawayMessageStarsPrizeText', {
+                stars: lang('StarsAmountText', { amount: stars }, { pluralValue: stars }),
+                winners: (
+                  <>
+                    <br />
+                    {lang('AmongWinners', { count: quantity }, {
+                      pluralValue: quantity, withNodes: true, withMarkdown: true,
+                    })}
+                  </>
+                ),
+              }, { withNodes: true, withMarkdown: true })
             ) : (
               <>
-                {renderText(lang('Chat.Giveaway.Info.Subscriptions', quantity), ['simple_markdown'])}
+                {lang('ChatGiveawayInfoSubscriptions', { count: quantity }, {
+                  pluralValue: quantity, withNodes: true, withMarkdown: true,
+                })}
                 <br />
-                {renderText(lang(
-                  'ActionGiftPremiumSubtitle',
-                  lang('Chat.Giveaway.Info.Months', months),
-                ), ['simple_markdown'])}
+                {lang('ActionGiftPremiumDuration', {
+                  duration: lang('Months', { count: months! }, { pluralValue: months! }),
+                }, { withNodes: true, withMarkdown: true })}
               </>
             )}
           </p>
         </div>
         <div className={styles.section}>
           <strong className={styles.title}>
-            {renderText(lang('BoostingGiveawayMsgParticipants'), ['simple_markdown'])}
+            {lang('BoostingGiveawayMsgParticipants', undefined, { withNodes: true, withMarkdown: true })}
           </strong>
           <p className={styles.description}>
-            {renderText(lang('BoostingGiveawayMsgAllSubsPlural', channelIds.length), ['simple_markdown'])}
+            {lang('BoostingGiveawayMsgAllSubsPlural', undefined, {
+              pluralValue: channelIds.length, withNodes: true, withMarkdown: true,
+            })}
           </p>
           <div className={styles.peers}>
             {channelIds.map((peerId) => (
@@ -171,15 +176,15 @@ const Giveaway = ({
             ))}
           </div>
           {countryList && (
-            <span>{renderText(lang('Chat.Giveaway.Message.CountriesFrom', countryList))}</span>
+            <span>{lang('ChatGiveawayMessageCountriesFrom', { countries: countryList }, { withNodes: true })}</span>
           )}
         </div>
         <div className={styles.section}>
           <strong className={styles.title}>
-            {renderText(lang('BoostingWinnersDate'), ['simple_markdown'])}
+            {lang('BoostingWinnersDate', undefined, { withNodes: true, withMarkdown: true })}
           </strong>
           <p className={styles.description}>
-            {formatDateTimeToString(untilDate * 1000, lang.code, true)}
+            {formatDateTime(lang, secondsToDate(untilDate), { date: 'short', time: 'short' })}
           </p>
         </div>
       </>
@@ -192,13 +197,15 @@ const Giveaway = ({
       <>
         <div className={styles.section}>
           <strong className={styles.title}>
-            {renderText(lang('BoostingGiveawayResultsMsgWinnersSelected'), ['simple_markdown'])}
+            {lang('BoostingGiveawayResultsMsgWinnersSelected', undefined, { withNodes: true, withMarkdown: true })}
           </strong>
           <p className={styles.description}>
-            {renderText(lang('BoostingGiveawayResultsMsgWinnersTitle', winnerIds.length), ['simple_markdown'])}
+            {lang('BoostingGiveawayResultsMsgWinnersTitle', { count: winnerIds.length }, {
+              pluralValue: winnerIds.length, withNodes: true, withMarkdown: true,
+            })}
           </p>
           <strong className={styles.title}>
-            {lang('lng_prizes_results_winners')}
+            {lang('PrizesResultsWinners')}
           </strong>
           <div className={styles.peers}>
             {winnerIds.map((peerId) => (
@@ -226,30 +233,45 @@ const Giveaway = ({
     if (!sender || !giveawayInfo) return undefined;
     const isResultsInfo = giveawayInfo.type === 'results';
 
-    const chatTitle = isApiPeerChat(sender) ? getChatTitle(lang, sender) : getUserFullName(sender);
-    const endDate = formatDateAtTime(lang, untilDate * 1000);
+    const chatTitle = isApiPeerChat(sender) ? getChatTitle(lang, sender) : getUserFullName(lang, sender);
+    const endDate = formatCalendarDate(lang, secondsToDate(untilDate), {
+      variant: 'date', isShort: true, withTime: true,
+    });
     const otherChannelsCount = giveaway?.channelIds ? giveaway.channelIds.length - 1 : 0;
-    const otherChannelsString = lang('Chat.Giveaway.Info.OtherChannels', otherChannelsCount);
+    const otherChannelsString = lang('ChatGiveawayInfoOtherChannels', { count: otherChannelsCount }, {
+      pluralValue: otherChannelsCount, withNodes: true, withMarkdown: true,
+    });
     const isSeveral = otherChannelsCount > 0;
 
-    const firstKey = isResultsInfo ? 'BoostingGiveawayHowItWorksTextEnd' : 'BoostingGiveawayHowItWorksText';
-    const giveawayDuration = isResultsInfo ? lang('Chat.Giveaway.Info.Months', months) : lang('Stars', stars, 'i');
-    const firstParagraph = lang(firstKey, [chatTitle, quantity, giveawayDuration], undefined, quantity);
+    const firstParagraph = stars
+      ? lang(isResultsInfo ? 'BoostingStarsGiveawayHowItWorksTextEnd' : 'BoostingStarsGiveawayHowItWorksText', {
+        count: stars, chat: chatTitle,
+      }, { pluralValue: stars, withNodes: true, withMarkdown: true })
+      : lang(isResultsInfo ? 'BoostingGiveawayHowItWorksTextEnd' : 'BoostingGiveawayHowItWorksText', {
+        chat: chatTitle,
+        quantity,
+        duration: lang('Months', { count: months! }, { pluralValue: months! }),
+      }, { pluralValue: quantity, withNodes: true, withMarkdown: true });
 
     const additionalPrizes = prizeDescription
-      ? lang('BoostingGiveawayHowItWorksIncludeText', [chatTitle, quantity, prizeDescription], undefined, quantity)
+      ? lang('BoostingGiveawayHowItWorksIncludeText', { chat: chatTitle, quantity, prize: prizeDescription }, {
+        pluralValue: quantity, withNodes: true, withMarkdown: true,
+      })
       : undefined;
 
-    let secondKey;
-    if (isResultsInfo) {
-      secondKey = isSeveral ? 'BoostingGiveawayHowItWorksSubTextSeveralEnd' : 'BoostingGiveawayHowItWorksSubTextEnd';
-    } else {
-      secondKey = isSeveral ? 'BoostingGiveawayHowItWorksSubTextSeveral' : 'BoostingGiveawayHowItWorksSubText';
-    }
-    let secondParagraph = lang(secondKey, [endDate, quantity, chatTitle, otherChannelsCount], undefined, quantity);
-    if (isResultsInfo && giveawayInfo.activatedCount) {
-      secondParagraph += ` ${lang('BoostingGiveawayUsedLinksPlural', giveawayInfo.activatedCount)}`;
-    }
+    const secondParagraph = isSeveral
+      ? lang(isResultsInfo
+        ? 'BoostingGiveawayHowItWorksSubTextSeveralEnd1' : 'BoostingGiveawayHowItWorksSubTextSeveral1', {
+        date: endDate,
+        quantity,
+        chat: chatTitle,
+        otherChannels: lang('BoostingGiveawayHowItWorksSubTextSeveral2', { count: otherChannelsCount }, {
+          pluralValue: otherChannelsCount, withNodes: true, withMarkdown: true,
+        }),
+      }, { pluralValue: quantity, withNodes: true, withMarkdown: true })
+      : lang(isResultsInfo ? 'BoostingGiveawayHowItWorksSubTextEnd' : 'BoostingGiveawayHowItWorksSubText', {
+        date: endDate, quantity, chat: chatTitle,
+      }, { pluralValue: quantity, withNodes: true, withMarkdown: true });
 
     let result = '';
 
@@ -261,28 +283,40 @@ const Giveaway = ({
       }
     }
 
-    let lastParagraph = '';
+    let lastParagraph: TeactNode;
     if (isResultsInfo) {
       // Nothing
     } else if (giveawayInfo.disallowedCountry) {
-      lastParagraph = lang('BoostingGiveawayNotEligibleCountry');
+      lastParagraph = lang('BoostingGiveawayNotEligibleCountry', undefined, { withNodes: true, withMarkdown: true });
     } else if (giveawayInfo.adminDisallowedChatId) {
       // Since rerenders are not expected, we can use the global state directly
       const chatsById = getGlobal().chats.byId;
       const disallowedChat = chatsById[giveawayInfo.adminDisallowedChatId];
       const disallowedChatTitle = disallowedChat && getChatTitle(lang, disallowedChat);
-      lastParagraph = lang('BoostingGiveawayNotEligibleAdmin', disallowedChatTitle);
+      lastParagraph = lang('BoostingGiveawayNotEligibleAdmin', { chat: disallowedChatTitle }, {
+        withNodes: true, withMarkdown: true,
+      });
     } else if (giveawayInfo.joinedTooEarlyDate) {
-      const joinedTooEarlyDate = formatDateAtTime(lang, giveawayInfo.joinedTooEarlyDate * 1000);
-      lastParagraph = lang('BoostingGiveawayNotEligible', joinedTooEarlyDate);
+      const joinedTooEarlyDate = formatCalendarDate(lang, secondsToDate(giveawayInfo.joinedTooEarlyDate), {
+        variant: 'date', isShort: true, withTime: true,
+      });
+      lastParagraph = lang('BoostingGiveawayNotEligible', { date: joinedTooEarlyDate }, {
+        withNodes: true, withMarkdown: true,
+      });
     } else if (giveawayInfo.isParticipating) {
       lastParagraph = isSeveral
-        ? lang('Chat.Giveaway.Info.ParticipatingMany', [chatTitle, otherChannelsCount])
-        : lang('Chat.Giveaway.Info.Participating', chatTitle);
+        ? lang('ChatGiveawayInfoParticipatingMany', { chat: chatTitle, otherChannels: otherChannelsString }, {
+          withNodes: true, withMarkdown: true,
+        })
+        : lang('ChatGiveawayInfoParticipating', { chat: chatTitle }, { withNodes: true, withMarkdown: true });
     } else {
       lastParagraph = isSeveral
-        ? lang('Chat.Giveaway.Info.NotQualifiedMany', [chatTitle, otherChannelsString, endDate])
-        : lang('Chat.Giveaway.Info.NotQualified', [chatTitle, endDate]);
+        ? lang('ChatGiveawayInfoNotQualifiedMany', {
+          chat: chatTitle, otherChannels: otherChannelsString, date: endDate,
+        }, { withNodes: true, withMarkdown: true })
+        : lang('ChatGiveawayInfoNotQualified', { chat: chatTitle, date: endDate }, {
+          withNodes: true, withMarkdown: true,
+        });
     }
 
     return (
@@ -293,19 +327,27 @@ const Giveaway = ({
           </p>
         )}
         <p>
-          {renderText(firstParagraph, ['simple_markdown'])}
+          {firstParagraph}
         </p>
-        {additionalPrizes && (
+        {Boolean(additionalPrizes) && (
           <p>
-            {renderText(additionalPrizes, ['simple_markdown'])}
+            {additionalPrizes}
           </p>
         )}
         <p>
-          {renderText(secondParagraph, ['simple_markdown'])}
+          {secondParagraph}
+          {isResultsInfo && Boolean(giveawayInfo.activatedCount) && (
+            <>
+              {' '}
+              {lang('BoostingGiveawayUsedLinksPlural', { count: giveawayInfo.activatedCount }, {
+                pluralValue: giveawayInfo.activatedCount, withNodes: true, withMarkdown: true,
+              })}
+            </>
+          )}
         </p>
-        {lastParagraph && (
+        {Boolean(lastParagraph) && (
           <p>
-            {renderText(lastParagraph, ['simple_markdown'])}
+            {lastParagraph}
           </p>
         )}
       </>
@@ -341,7 +383,7 @@ const Giveaway = ({
         color="adaptive"
         onClick={handleShowInfoClick}
       >
-        {lang('BoostingHowItWork')}
+        {lang('GiftInfoValueLinkMore')}
       </Button>
       <ConfirmDialog
         isOpen={Boolean(giveawayInfo)}

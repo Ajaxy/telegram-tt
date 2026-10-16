@@ -47,7 +47,6 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useScrollableHint from '../../../hooks/useScrollableHint';
 import { useStateRef } from '../../../hooks/useStateRef';
 
@@ -169,7 +168,6 @@ const MessageInput = ({
   const scrollerRef = useRef<HTMLDivElement>();
   const updateRafRef = useRef<number>();
 
-  const oldLang = useOldLang();
   const lang = useLang();
   const onBlurRef = useStateRef(onBlur);
   const onFocusRef = useStateRef(onFocus);
@@ -843,7 +841,7 @@ const MessageInput = ({
                 {placeholder}
                 {isStoryInput && isNeedPremium && (
                   <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
-                    {oldLang('StoryRepliesLockedButton')}
+                    {lang('StoryRepliesLockedButton')}
                   </Button>
                 )}
               </span>

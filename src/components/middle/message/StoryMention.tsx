@@ -17,9 +17,9 @@ import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
 import useEnsureStory from '../../../hooks/useEnsureStory';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 interface OwnProps {
   message: ApiMessage;
@@ -37,7 +37,7 @@ function StoryMention({
 }: OwnProps & StateProps) {
   const { openStoryViewer } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { storyData } = message.content;
 
@@ -64,13 +64,13 @@ function StoryMention({
   function getTitle() {
     if (peer && 'isSelf' in peer && peer.isSelf) {
       return isDeleted
-        ? lang('ExpiredStoryMentioned', getUserFirstOrLastName(targetUser))
-        : lang('StoryYouMentionedTitle', getUserFirstOrLastName(targetUser));
+        ? lang('ExpiredStoryMentioned', { user: getUserFirstOrLastName(lang, targetUser) })
+        : lang('StoryYouMentionedTitle', { user: getUserFirstOrLastName(lang, targetUser) });
     }
 
     return isDeleted
       ? lang('ExpiredStoryMention')
-      : lang('StoryMentionedTitle', getPeerTitle(lang, peer!));
+      : lang('StoryMentionedTitle', { peer: getPeerTitle(lang, peer!) });
   }
 
   return (

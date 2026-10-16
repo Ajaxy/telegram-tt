@@ -23,8 +23,8 @@ import {
 } from '../../../global/selectors';
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
+import { formatCompactTimestamp, secondsToDate } from '../../../util/localization/dateFormat';
 import { REM } from '../../common/helpers/mediaDimensions';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 import renderText from '../../common/helpers/renderText';
@@ -35,7 +35,6 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
@@ -88,7 +87,6 @@ const ChatMessage = ({
   });
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const buttonRef = useSelectWithEnter(handleClick);
 
@@ -135,7 +133,7 @@ const ChatMessage = ({
           )}
           <div className="message-date">
             <Link className="date">
-              {formatPastTimeShort(oldLang, message.date * 1000)}
+              {formatCompactTimestamp(lang, secondsToDate(message.date))}
             </Link>
           </div>
 

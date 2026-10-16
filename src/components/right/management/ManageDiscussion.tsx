@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
@@ -15,8 +14,8 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Avatar from '../../common/Avatar';
@@ -42,7 +41,7 @@ type StateProps = {
   isChannel?: boolean;
 };
 
-const ManageDiscussion: FC<OwnProps & StateProps> = ({
+const ManageDiscussion = ({
   chat,
   onClose,
   isActive,
@@ -52,7 +51,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   forDiscussionIds,
   isChannel,
   onScreenSelect,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     loadGroupsForDiscussion,
     linkDiscussionGroup,
@@ -66,7 +65,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
   const [isJoinToSend, setIsJoinToSend] = useState(Boolean(linkedChat?.isJoinToSend));
   const [isJoinRequest, setIsJoinRequest] = useState(Boolean(linkedChat?.isJoinRequest));
-  const lang = useOldLang();
+  const lang = useLang();
   const linkedChatId = linkedChat?.id;
 
   useHistoryBack({
@@ -142,7 +141,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           peer={linkedGroup}
         />
         <div className="modal-title">
-          {lang('Channel.DiscussionGroup.LinkGroup')}
+          {lang('ChannelDiscussionGroupLinkGroup')}
         </div>
       </div>
     );
@@ -153,17 +152,20 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     const linkedGroup = chatsByIds[linkedGroupId];
     if (!linkedGroup) return undefined;
 
-    if (isChatPublic(linkedGroup)) {
-      return renderText(
-        `Do you want to make **${linkedGroup.title}** the discussion board for **${chat?.title}**?`,
-        ['br', 'simple_markdown'],
-      );
-    }
+    const confirmation = lang('ChannelManagementLinkDiscussion', {
+      group: linkedGroup.title,
+      channel: chat?.title,
+    }, { withNodes: true, withMarkdown: true });
 
-    return renderText(
-      // eslint-disable-next-line @stylistic/max-len
-      `Do you want to make **${linkedGroup.title}** the discussion board for **${chat?.title}**?\n\nAnyone from the channel will be able to see messages in this group.`,
-      ['br', 'simple_markdown'],
+    if (isChatPublic(linkedGroup)) return confirmation;
+
+    return (
+      <>
+        {confirmation}
+        <br />
+        <br />
+        {lang('ChannelManagementLinkPrivate')}
+      </>
     );
   }
 
@@ -191,7 +193,9 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           onClose={closeConfirmUnlinkGroupDialog}
           header={renderUnlinkGroupHeader()}
           textParts={renderText(
-            lang(isChannel ? 'DiscussionUnlinkChannelAlert' : 'DiscussionUnlinkGroupAlert', linkedChat?.title),
+            isChannel
+              ? lang('DiscussionUnlinkChannelAlert', { chat: linkedChat?.title })
+              : lang('DiscussionUnlinkGroupAlert', { channel: linkedChat?.title }),
             ['br', 'simple_markdown'],
           )}
           confirmLabel={lang(isChannel ? 'DiscussionUnlinkGroup' : 'DiscussionUnlinkChannel')}
@@ -237,7 +241,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
               </ListItem>
             ))
           ) : (
-            <NothingFound key="nothing-found" teactOrderKey={0} text="No discussion groups found" />
+            <NothingFound key="nothing-found" teactOrderKey={0} text={lang('NoDiscussionsLinked')} />
           )}
         </div>
         <IslandDescription className="mt-4 mb-0" dir="auto">{lang('DiscussionChannelHelp2')}</IslandDescription>

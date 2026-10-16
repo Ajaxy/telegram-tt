@@ -9,12 +9,11 @@ import type {
 
 import { DEFAULT_STATUS_ICON_ID, STARS_CURRENCY_CODE } from '../../../config';
 import { selectTabState, selectUser } from '../../../global/selectors';
-import { formatDateAtTime } from '../../../util/dates/oldDateFormat';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 
@@ -45,7 +44,6 @@ const UniqueGiftManageButtons = ({
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const gift = savedGift?.gift;
   const isGiftUnique = gift?.type === 'starGiftUnique';
@@ -75,7 +73,11 @@ const UniqueGiftManageButtons = ({
       showNotification({
         message: {
           key: 'NotificationGiftCanTransferAt',
-          variables: { date: formatDateAtTime(oldLang, savedGift.canTransferAt * 1000) },
+          variables: { date: formatCalendarDate(
+            lang,
+            secondsToDate(savedGift.canTransferAt),
+            { variant: 'date', isShort: true, withTime: true },
+          ) },
         },
       });
       return;
@@ -100,7 +102,11 @@ const UniqueGiftManageButtons = ({
       showNotification({
         message: {
           key: 'NotificationGiftCanResellAt',
-          variables: { date: formatDateAtTime(oldLang, savedGift.canResellAt * 1000) },
+          variables: { date: formatCalendarDate(
+            lang,
+            secondsToDate(savedGift.canResellAt),
+            { variant: 'date', isShort: true, withTime: true },
+          ) },
         },
       });
       return;

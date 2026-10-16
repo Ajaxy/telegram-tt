@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -7,10 +6,9 @@ import type { ApiUser } from '../../../api/types';
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
 import { createClassNameBuilder } from '../../../util/buildClassName';
-import { formatHumanDate, formatTime, isToday } from '../../../util/dates/oldDateFormat';
-import { getServerTime } from '../../../util/serverTime';
+import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
@@ -29,25 +27,21 @@ type StateProps = {
   user?: ApiUser;
 };
 
-const JoinRequest: FC<OwnProps & StateProps> = ({
+const JoinRequest = ({
   userId,
   chatId,
   about,
   date,
   isChannel,
   user,
-}) => {
+}: OwnProps & StateProps) => {
   const { openChat, hideChatJoinRequest } = getActions();
 
   const buildClassName = createClassNameBuilder('JoinRequest');
-  const lang = useOldLang();
+  const lang = useLang();
 
-  const fullName = getUserFullName(user);
-  // eslint-disable-next-line @eslint-react/purity
-  const fixedDate = (date - getServerTime()) * 1000 + Date.now();
-
-  const dateString = isToday(new Date(fixedDate))
-    ? formatTime(lang, fixedDate) : formatHumanDate(lang, fixedDate, true, false, true);
+  const fullName = getUserFullName(lang, user);
+  const dateString = formatCalendarDate(lang, secondsToDate(date), { variant: 'joinRequest', isShort: true });
 
   const handleUserClick = () => {
     openChat({ id: userId });

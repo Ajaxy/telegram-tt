@@ -11,6 +11,7 @@ import type {
   ApiMessage,
   ApiTypeStory,
 } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 
 import ensureLovelyChart from '../../../lib/lovelyChartWithStyles';
 import {
@@ -25,7 +26,7 @@ import { callApi } from '../../../api/gramjs';
 import { isGraph } from './helpers/isGraph';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Island from '../../gili/layout/Island';
 import Loading from '../../ui/Loading';
@@ -35,28 +36,28 @@ import StatisticsRecentStory from './StatisticsRecentStory';
 
 import styles from './Statistics.module.scss';
 
-const CHANNEL_GRAPHS_TITLES = {
-  growthGraph: 'ChannelStats.Graph.Growth',
-  followersGraph: 'ChannelStats.Graph.Followers',
-  muteGraph: 'ChannelStats.Graph.Notifications',
-  topHoursGraph: 'ChannelStats.Graph.ViewsByHours',
-  viewsBySourceGraph: 'ChannelStats.Graph.ViewsBySource',
-  newFollowersBySourceGraph: 'ChannelStats.Graph.NewFollowersBySource',
-  languagesGraph: 'ChannelStats.Graph.Language',
-  interactionsGraph: 'ChannelStats.Graph.Interactions',
-  reactionsByEmotionGraph: 'ChannelStats.Graph.Reactions',
-  storyInteractionsGraph: 'ChannelStats.Graph.Stories',
-  storyReactionsByEmotionGraph: 'ChannelStats.Graph.StoriesReactions',
+const CHANNEL_GRAPHS_TITLES: Record<string, RegularLangKey> = {
+  growthGraph: 'ChannelStatsGraphGrowth',
+  followersGraph: 'ChannelStatsGraphFollowers',
+  muteGraph: 'ChannelStatsGraphNotifications',
+  topHoursGraph: 'ChannelStatsGraphViewsByHours',
+  viewsBySourceGraph: 'ChannelStatsGraphViewsBySource',
+  newFollowersBySourceGraph: 'ChannelStatsGraphNewFollowersBySource',
+  languagesGraph: 'ChannelStatsGraphLanguage',
+  interactionsGraph: 'ChannelStatsGraphInteractions',
+  reactionsByEmotionGraph: 'ChannelStatsGraphReactions',
+  storyInteractionsGraph: 'ChannelStatsGraphStories',
+  storyReactionsByEmotionGraph: 'ChannelStatsGraphStoriesReactions',
 };
 const CHANNEL_GRAPHS = Object.keys(CHANNEL_GRAPHS_TITLES) as (keyof ApiChannelStatistics)[];
 
-const GROUP_GRAPHS_TITLES = {
-  growthGraph: 'Stats.GroupGrowthTitle',
-  membersGraph: 'Stats.GroupMembersTitle',
-  languagesGraph: 'Stats.GroupLanguagesTitle',
-  messagesGraph: 'Stats.GroupMessagesTitle',
-  actionsGraph: 'Stats.GroupActionsTitle',
-  topHoursGraph: 'Stats.GroupTopHoursTitle',
+const GROUP_GRAPHS_TITLES: Record<string, RegularLangKey> = {
+  growthGraph: 'StatsGroupGrowthTitle',
+  membersGraph: 'StatsGroupMembersTitle',
+  languagesGraph: 'StatsGroupLanguagesTitle',
+  messagesGraph: 'StatsGroupMessagesTitle',
+  actionsGraph: 'StatsGroupActionsTitle',
+  topHoursGraph: 'StatsGroupTopHoursTitle',
 };
 const GROUP_GRAPHS = Object.keys(GROUP_GRAPHS_TITLES) as (keyof ApiGroupStatistics)[];
 
@@ -82,7 +83,7 @@ const Statistics = ({
   messagesById,
   storiesById,
 }: OwnProps & StateProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
   const [isReady, setIsReady] = useState(false);
   const loadedChartsRef = useRef<Set<string>>(new Set());
@@ -165,11 +166,11 @@ const Statistics = ({
 
         new LovelyChart(containerRef.current!.children[index] as HTMLElement, {
           ...graph,
-          title: lang((graphTitles as Record<string, string>)[name]),
+          title: lang(graphTitles[name]),
           onZoom: zoomToken
             ? (x: number) => callApi('fetchStatisticsAsyncGraph', { token: zoomToken, x, dcId })
             : undefined,
-          zoomOutLabel: zoomToken ? lang('Graph.ZoomOut') : undefined,
+          zoomOutLabel: zoomToken ? lang('GraphZoomOut') : undefined,
         });
 
         loadedChartsRef.current.add(name);
@@ -208,7 +209,7 @@ const Statistics = ({
 
       {Boolean((statistics as ApiChannelStatistics)?.recentPosts?.length) && (
         <Island className={styles.messages}>
-          <h2 className={styles.messagesTitle}>{lang('ChannelStats.Recent.Header')}</h2>
+          <h2 className={styles.messagesTitle}>{lang('ChannelStatsRecentHeader')}</h2>
 
           {(statistics as ApiChannelStatistics).recentPosts.map((postStatistic) => {
             if ('msgId' in postStatistic) {

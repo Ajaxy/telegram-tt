@@ -1,5 +1,3 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -22,9 +20,9 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Island, { IslandDescription } from '../../gili/layout/Island';
 import AvatarEditable from '../../ui/AvatarEditable';
@@ -50,9 +48,9 @@ type StateProps = {
   maxBioLength: number;
 };
 
-const ERROR_NAME_MISSING = 'Please provide name';
+const ERROR_NAME_MISSING = 'BotNameRequired';
 
-const ManageBot: FC<OwnProps & StateProps> = ({
+const ManageBot = ({
   userId,
   user,
   progress,
@@ -60,7 +58,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   isActive,
   maxBioLength,
   onClose,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setBotInfo,
     uploadProfilePhoto,
@@ -71,7 +69,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   const [isFieldTouched, markFieldTouched, unmarkProfileTouched] = useFlag(false);
   const [isAvatarTouched, markAvatarTouched, unmarkAvatarTouched] = useFlag(false);
   const [error, setError] = useState<string | undefined>();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const username = useMemo(() => (user ? getMainUsername(user) : undefined), [user]);
 
@@ -80,7 +78,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const currentName = user ? getUserFirstOrLastName(user) : '';
+  const currentName = user ? getUserFirstOrLastName(lang, user) : '';
 
   const [photo, setPhoto] = useState<File | undefined>();
   const [name, setName] = useState(currentName || '');
@@ -111,7 +109,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
     }
   }, [progress]);
 
-  const handleNameChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleNameChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
     markFieldTouched();
 
@@ -120,7 +118,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const handleBioChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleBioChange = useLastCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setBio(e.target.value);
     markFieldTouched();
   });
@@ -196,7 +194,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
             label={lang('PaymentCheckoutName')}
             onChange={handleNameChange}
             value={name}
-            error={error === ERROR_NAME_MISSING ? error : undefined}
+            error={error === ERROR_NAME_MISSING ? lang(ERROR_NAME_MISSING) : undefined}
             teactExperimentControlled
           />
           <TextArea

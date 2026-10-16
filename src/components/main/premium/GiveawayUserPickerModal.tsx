@@ -14,8 +14,8 @@ import { selectChatFullInfo } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import PeerPicker from '../../common/pickers/PeerPicker';
 import PickerModal from '../../common/pickers/PickerModal';
@@ -45,7 +45,7 @@ const GiveawayUserPickerModal = ({
   onClose,
 }: OwnProps & StateProps) => {
   const { showNotification } = getActions();
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
@@ -90,7 +90,16 @@ const GiveawayUserPickerModal = ({
   const handleSelectedMemberIdsChange = useLastCallback((newSelectedIds: string[]) => {
     if (newSelectedIds.length > selectionLimit) {
       showNotification({
-        message: lang('BoostingSelectUpToWarningUsers', selectionLimit),
+        message: {
+          key: 'GiveawayUserSelectionLimit',
+          variables: { count: selectionLimit },
+          options: {
+            pluralValue: selectionLimit,
+            withNodes: true,
+            withMarkdown: true,
+            renderTextFilters: ['br', 'links'],
+          },
+        },
       });
       return;
     }

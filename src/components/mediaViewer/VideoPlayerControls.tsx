@@ -11,14 +11,14 @@ import type { IconName } from '../../types/icons';
 
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../util/dates/duration';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useControlsSignal, { isMouseInsideControls, registerControlsElement } from './hooks/useControlsSignal';
 
 import AnimatedFileSize from '../common/AnimatedFileSize';
@@ -94,6 +94,7 @@ const VideoPlayerControls = ({
   onSeek,
   onSeekingChange,
 }: OwnProps) => {
+  const lang = useLang();
   const [isPlaybackMenuOpen, openPlaybackMenu, closePlaybackMenu] = useFlag();
   const [getCurrentTime] = useCurrentTimeSignal();
   const currentTime = useDerivedState(() => Math.trunc(getCurrentTime()), [getCurrentTime]);
@@ -150,8 +151,6 @@ const VideoPlayerControls = ({
     }
   }, [closePlaybackMenu, isVisible]);
 
-  const lang = useOldLang();
-
   const handleSeek = useLastCallback((position: number) => {
     setIsSeeking(false);
     onSeek(position);
@@ -199,7 +198,7 @@ const VideoPlayerControls = ({
           iconName={isPlaying ? 'pause' : 'play'}
         />
         <Button
-          ariaLabel="Volume"
+          ariaLabel={lang('PlayerVolume')}
           size="tiny"
           color="translucent-white"
           className="volume"
@@ -218,7 +217,7 @@ const VideoPlayerControls = ({
         )}
         <div className="spacer" />
         <Button
-          ariaLabel="Playback rate"
+          ariaLabel={lang('PlayerPlaybackRate')}
           size="tiny"
           color="translucent-white"
           className="playback-rate"
@@ -229,7 +228,7 @@ const VideoPlayerControls = ({
         </Button>
         {isPictureInPictureSupported && (
           <Button
-            ariaLabel="Picture in picture"
+            ariaLabel={lang('VideoPlayerPictureInPicture')}
             size="tiny"
             color="translucent-white"
             className="fullscreen"
@@ -240,7 +239,7 @@ const VideoPlayerControls = ({
         )}
         {isFullscreenSupported && (
           <Button
-            ariaLabel="Fullscreen"
+            ariaLabel={lang('VideoPlayerFullscreen')}
             size="tiny"
             color="translucent-white"
             className="fullscreen"

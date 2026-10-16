@@ -11,7 +11,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiChatFolder, ApiLimitTypeWithModal, ApiStarGiftAuctionState, ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
 
-import { BASE_EMOJI_KEYWORD_LANG, DEBUG, FOLDERS_POSITION_LEFT, INACTIVE_MARKER } from '../../config';
+import { BASE_EMOJI_KEYWORD_LANG, DEBUG, FOLDERS_POSITION_LEFT } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectAreFoldersPresent,
@@ -581,9 +581,7 @@ const Main = ({
   const handleFocus = useLastCallback(() => {
     onTabFocusChange({ isBlurred: false });
 
-    if (!document.title.includes(INACTIVE_MARKER)) {
-      updatePageTitle();
-    }
+    updatePageTitle();
 
     updateIcon(false);
   });

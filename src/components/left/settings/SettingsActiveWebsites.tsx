@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
@@ -7,11 +6,11 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/dates/oldDateFormat';
+import { formatCompactTimestamp, secondsToDate } from '../../../util/localization/dateFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -32,18 +31,18 @@ type StateProps = {
   orderedHashes: string[];
 };
 
-const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
+const SettingsActiveWebsites = ({
   isActive,
   byHash,
   orderedHashes,
   onReset,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     terminateWebAuthorization,
     terminateAllWebAuthorizations,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedWebsiteHash, setOpenedWebsiteHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
@@ -116,7 +115,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         <div className="multiline-item full-size" dir="auto">
           <div className="title title-with-date">
             {bot && <FullNameTitle className={styles.title} peer={bot} />}
-            <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
+            <span className="date">{formatCompactTimestamp(lang, secondsToDate(session.dateActive))}</span>
           </div>
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>
             {session.domain}
@@ -147,7 +146,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
           narrow
           onClick={openConfirmTerminateAllDialog}
         >
-          {lang('AuthSessions.LogOutApplications')}
+          {lang('AuthSessionsLogOutApplications')}
         </ListItem>
       </Island>
       <IslandDescription className={styles.clearHelp}>
@@ -157,7 +156,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isConfirmTerminateAllDialogOpen}
         onClose={closeConfirmTerminateAllDialog}
-        title={lang('AuthSessions.LogOutApplications')}
+        title={lang('AuthSessionsLogOutApplications')}
         text={lang('AreYouSureWebSessions')}
         confirmHandler={handleTerminateAllAuth}
         confirmIsDestructive

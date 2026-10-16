@@ -1,7 +1,7 @@
 import { memo, useState } from '../../../lib/teact/teact';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
@@ -32,7 +32,7 @@ const PromptDialog = ({
   onClose,
   onSubmit,
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const [text, setText] = useState(initialValue);
 

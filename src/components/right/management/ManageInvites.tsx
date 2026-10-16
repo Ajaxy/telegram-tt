@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -11,7 +10,8 @@ import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { getMainUsername, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dates/oldDateFormat';
+import { MILLISECONDS_IN_DAY } from '../../../util/dates/dateMath';
+import { formatCountdown } from '../../../util/dates/duration';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
@@ -20,7 +20,6 @@ import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
@@ -54,7 +53,7 @@ function inviteComparator(i1: ApiExportedInvite, i2: ApiExportedInvite) {
   return i2Date - i1Date;
 }
 
-const ManageInvites: FC<OwnProps & StateProps> = ({
+const ManageInvites = ({
   chatId,
   chat,
   exportedInvites,
@@ -63,7 +62,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   isChannel,
   onClose,
   onScreenSelect,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     setEditingExportedInvite,
     showNotification,
@@ -74,7 +73,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   const [isDeleteRevokeAllDialogOpen, openDeleteRevokeAllDialog, closeDeleteRevokeAllDialog] = useFlag();
   const [isRevokeDialogOpen, openRevokeDialog, closeRevokeDialog] = useFlag();
@@ -176,9 +174,9 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const copyLink = useCallback((link: string) => {
     copyTextToClipboard(link);
     showNotification({
-      message: oldLang('LinkCopied'),
+      message: lang('LinkCopied'),
     });
-  }, [oldLang, showNotification]);
+  }, [lang, showNotification]);
 
   const prepareUsageText = (invite: ApiExportedInvite) => {
     const {
@@ -186,34 +184,34 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     } = invite;
     let text;
     if (!isRevoked && usageLimit && usage < usageLimit) {
-      text = oldLang('CanJoin', usageLimit - usage);
+      text = lang('CanJoin', { count: usageLimit - usage }, { pluralValue: usageLimit - usage });
     } else if (usage) {
-      text = oldLang('PeopleJoined', usage);
+      text = lang('PeopleJoined', { count: usage }, { pluralValue: usage });
     } else {
-      text = oldLang('NoOneJoined');
+      text = lang('NoOneJoined');
     }
 
     if (isRevoked) {
-      text += ` ${BULLET} ${oldLang('Revoked')}`;
+      text += ` ${BULLET} ${lang('Revoked')}`;
       return text;
     }
 
     if (requested) {
-      text += ` ${BULLET} ${oldLang('JoinRequests', requested)}`;
+      text += ` ${BULLET} ${lang('JoinRequests', { count: requested }, { pluralValue: requested })}`;
     }
 
     if (usageLimit !== undefined && usage === usageLimit) {
-      text += ` ${BULLET} ${oldLang('LinkLimitReached')}`;
+      text += ` ${BULLET} ${lang('LinkLimitReached')}`;
     } else if (expireDate) {
       const diff = expireDate - getServerTime();
       text += ` ${BULLET} `;
       if (diff > 0) {
-        text += oldLang('InviteLink.ExpiresIn', formatCountdown(lang, diff));
+        text += lang('InviteLinkExpiresIn', { time: formatCountdown(lang, diff) });
       } else {
-        text += oldLang('InviteLink.Expired');
+        text += lang('InviteLinkExpired');
       }
     } else if (isPermanent) {
-      text += ` ${BULLET} ${oldLang('Permanent')}`;
+      text += ` ${BULLET} ${lang('CreatePermanentLinkTitle')}`;
     }
 
     if (isRequestNeeded) {
@@ -245,14 +243,14 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const prepareContextActions = (invite: ApiExportedInvite) => {
     const actions: MenuItemContextAction[] = [];
     actions.push({
-      title: oldLang('Copy'),
+      title: lang('Copy'),
       icon: 'copy',
       handler: () => copyLink(invite.link),
     });
 
     if (!invite.isPermanent && !invite.isRevoked) {
       actions.push({
-        title: oldLang('Edit'),
+        title: lang('Edit'),
         icon: 'edit',
         handler: () => editInvite(invite),
       });
@@ -260,14 +258,14 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
 
     if (!invite.isRevoked) {
       actions.push({
-        title: oldLang('RevokeButton'),
+        title: lang('RevokeButton'),
         icon: 'delete',
         handler: () => askToRevoke(invite),
         destructive: true,
       });
     } else {
       actions.push({
-        title: oldLang('DeleteLink'),
+        title: lang('DeleteLink'),
         icon: 'delete',
         handler: () => askToDelete(invite),
         destructive: true,
@@ -286,13 +284,13 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             className="section-icon"
           />
           <IslandDescription>
-            {isChannel ? oldLang('PrimaryLinkHelpChannel') : oldLang('PrimaryLinkHelp')}
+            {isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}
           </IslandDescription>
         </Island>
         {primaryInviteLink && (
           <>
             <IslandTitle>
-              {chat?.usernames ? oldLang('PublicLink') : oldLang('lng_create_permanent_link_title')}
+              {chat?.usernames ? lang('PublicLink') : lang('CreatePermanentLinkTitle')}
             </IslandTitle>
             <Island>
               <LinkField
@@ -307,9 +305,9 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         )}
         <Island teactFastList>
           <ListItem icon="add" withPrimaryColor key="create" className="create-item" onClick={handleCreateNewClick}>
-            {oldLang('CreateNewLink')}
+            {lang('CreateNewLink')}
           </ListItem>
-          {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
+          {(!temporalInvites || !temporalInvites.length) && <NothingFound text={lang('NoLinksFound')} key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem
               leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
@@ -327,17 +325,17 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             </ListItem>
           ))}
         </Island>
-        <IslandDescription>{oldLang('ManageLinksInfoHelp')}</IslandDescription>
+        <IslandDescription>{lang('ManageLinksInfoHelp')}</IslandDescription>
         {revokedExportedInvites && Boolean(revokedExportedInvites.length) && (
           <Island teactFastList>
-            <IslandDescription key="title">{oldLang('RevokedLinks')}</IslandDescription>
+            <IslandDescription key="title">{lang('RevokedLinks')}</IslandDescription>
             <ListItem
               icon="delete"
               destructive
               key="delete"
               onClick={openDeleteRevokeAllDialog}
             >
-              <span className="title">{oldLang('DeleteAllRevokedLinks')}</span>
+              <span className="title">{lang('DeleteAllRevokedLinks')}</span>
             </ListItem>
             {revokedExportedInvites?.map((invite) => (
               <ListItem
@@ -361,28 +359,28 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isDeleteRevokeAllDialogOpen}
         onClose={closeDeleteRevokeAllDialog}
-        title={oldLang('DeleteAllRevokedLinks')}
-        text={oldLang('DeleteAllRevokedLinkHelp')}
+        title={lang('DeleteAllRevokedLinks')}
+        text={lang('DeleteAllRevokedLinkHelp')}
         confirmIsDestructive
-        confirmLabel={oldLang('DeleteAll')}
+        confirmLabel={lang('DeleteAll')}
         confirmHandler={handleDeleteAllRevoked}
       />
       <ConfirmDialog
         isOpen={isRevokeDialogOpen}
         onClose={closeRevokeDialog}
-        title={oldLang('RevokeLink')}
-        text={oldLang('RevokeAlert')}
+        title={lang('RevokeLink')}
+        text={lang('RevokeAlert')}
         confirmIsDestructive
-        confirmLabel={oldLang('RevokeButton')}
+        confirmLabel={lang('RevokeButton')}
         confirmHandler={handleRevoke}
       />
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
-        title={oldLang('DeleteLink')}
-        text={oldLang('DeleteLinkHelp')}
+        title={lang('DeleteLink')}
+        text={lang('DeleteLinkHelp')}
         confirmIsDestructive
-        confirmLabel={oldLang('Delete')}
+        confirmLabel={lang('Delete')}
         confirmHandler={handleDelete}
       />
     </div>

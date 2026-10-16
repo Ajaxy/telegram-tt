@@ -3,8 +3,8 @@ import type { TeactNode } from '../../../lib/teact/teact';
 import type { ApiPeer, ApiStarGiftAttributeOriginalDetails } from '../../../api/types';
 
 import { getPeerTitle } from '../../../global/helpers/peers';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { type LangFn } from '../../../util/localization';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { renderTextWithEntities } from './renderTextWithEntities';
 
 import Link from '../../ui/Link';
@@ -26,7 +26,7 @@ export function renderGiftOriginalInfo({
 }: GiftOriginalInfoOptions): TeactNode | undefined {
   const { recipientId, senderId, date, message } = originalDetails;
 
-  const formattedDate = formatDateTimeToString(date * 1000, lang.code, true);
+  const formattedDate = formatDateTime(lang, secondsToDate(date), { date: 'short', time: 'short' });
   const recipientLink = (
     <Link onClick={() => onOpenChat(recipientId)} isPrimary>
       {getPeerTitle(lang, recipient)}

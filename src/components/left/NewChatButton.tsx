@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
@@ -6,7 +5,7 @@ import { getActions } from '../../global';
 
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
@@ -23,13 +22,13 @@ type OwnProps = {
   isAccountFrozen?: boolean;
 };
 
-const NewChatButton: FC<OwnProps> = ({
+const NewChatButton = ({
   isShown,
   onNewPrivateChat,
   onNewChannel,
   onNewGroup,
   isAccountFrozen,
-}) => {
+}: OwnProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openFrozenAccountModal } = getActions();
 
@@ -41,7 +40,7 @@ const NewChatButton: FC<OwnProps> = ({
     }
   }, [shouldRender]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const fabClassName = buildClassName(
     'NewChatButton',

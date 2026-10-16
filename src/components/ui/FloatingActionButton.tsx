@@ -3,7 +3,7 @@ import type { OwnProps as ButtonProps } from './Button';
 
 import buildClassName from '../../util/buildClassName';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import IconWithSpinner from '../common/IconWithSpinner';
 import Button from './Button';
@@ -33,7 +33,7 @@ const FloatingActionButton = ({
   isLoading,
   onClick,
 }: OwnProps) => {
-  const lang = useOldLang();
+  const lang = useLang();
 
   const buttonClassName = buildClassName(
     'FloatingActionButton',

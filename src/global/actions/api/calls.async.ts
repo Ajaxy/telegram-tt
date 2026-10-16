@@ -199,7 +199,7 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
   if (!groupCall) return;
 
   if (groupCall.connectionState === 'discarded') {
-    actions.showNotification({ message: 'This voice chat is not active', tabId });
+    actions.showNotification({ message: { key: 'VoiceChatInactive' }, tabId });
     return;
   }
 
@@ -221,8 +221,7 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
   const params = await joinGroupCall(localParticipantId, audioContext, audioElement, actions.apiUpdate);
   if (!params) {
     actions.showNotification({
-      // TODO[lang] Localize error message
-      message: 'Failed to join voice chat',
+      message: { key: 'VoiceChatJoinFailed' },
       tabId,
     });
     actions.leaveGroupCall({ tabId });
@@ -240,8 +239,7 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
 
   if (!result) {
     actions.showNotification({
-      // TODO[lang] Localize error message
-      message: 'Failed to join voice chat',
+      message: { key: 'VoiceChatJoinFailed' },
       tabId,
     });
     actions.leaveGroupCall({ tabId });

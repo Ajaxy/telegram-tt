@@ -2,7 +2,7 @@ import { memo, useLayoutEffect, useRef } from '../../../lib/teact/teact';
 
 import type { Signal } from '../../../util/signals';
 
-import { formatMediaDuration } from '../../../util/dates/oldDateFormat';
+import { formatMediaDuration } from '../../../util/dates/duration';
 import { clamp } from '../../../util/math';
 
 type OwnProps = {

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -7,7 +6,7 @@ import type { ApiMessagePublicForward } from '../../../api/types';
 import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 
@@ -17,9 +16,11 @@ export type OwnProps = {
   data: ApiMessagePublicForward;
 };
 
-const StatisticsMessagePublicForward: FC<OwnProps> = ({ data }) => {
-  const lang = useOldLang();
+const StatisticsMessagePublicForward = ({ data }: OwnProps) => {
   const { openChatByUsername } = getActions();
+
+  const lang = useLang();
+  const viewsCount = data.views ?? 0;
 
   const username = useMemo(() => (data.chat ? getMainUsername(data.chat) : undefined), [data.chat]);
   const handleClick = useCallback(() => {
@@ -36,7 +37,7 @@ const StatisticsMessagePublicForward: FC<OwnProps> = ({ data }) => {
         </div>
 
         <div className={styles.views}>
-          {lang('ChannelStats.ViewsCount', data.views, 'i')}
+          {lang('ChannelStatsViewsCount', { count: lang.number(viewsCount) }, { pluralValue: viewsCount })}
         </div>
       </div>
     </div>

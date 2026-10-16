@@ -38,7 +38,6 @@ import useDraggable from '../../../hooks/useDraggable';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
@@ -253,7 +252,6 @@ const BrowserModal = ({
     }
   }, [currentHeight, currentWidth, isResizing, setMaximizedStateSize]);
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const openTabsCount = openedTabs ? Object.values(openedTabs).length : 0;
@@ -398,7 +396,12 @@ const BrowserModal = ({
     if (!activeInstantViewUrl) return;
 
     copyTextToClipboard(activeInstantViewUrl);
-    showNotification({ message: lang('LinkCopied') });
+    showNotification(
+      { message: {
+        key: 'LinkCopied',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      } },
+    );
     handleContextMenuClose();
   });
 
@@ -445,12 +448,12 @@ const BrowserModal = ({
     return (
       <>
         {chat && bot && chat.id !== bot.id && (
-          <MenuItem icon="bots" onClick={openBotChat}>{oldLang('BotWebViewOpenBot')}</MenuItem>
+          <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
         )}
-        <MenuItem icon="reload" onClick={handleRefreshClick}>{oldLang('WebApp.ReloadPage')}</MenuItem>
+        <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebAppReloadPage')}</MenuItem>
         {isSettingsButtonVisible && (
           <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
-            {oldLang('Settings')}
+            {lang('Settings')}
           </MenuItem>
         )}
         {bot?.isAttachBot && (
@@ -459,7 +462,7 @@ const BrowserModal = ({
             onClick={handleToggleClick}
             destructive={Boolean(attachBot)}
           >
-            {oldLang(attachBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
+            {lang(attachBot ? 'WebAppRemoveBot' : 'WebAppAddToAttachmentAdd')}
           </MenuItem>
         )}
       </>
@@ -502,7 +505,7 @@ const BrowserModal = ({
           {lang('CopyLink')}
         </MenuItem>
         <MenuItem icon="close" onClick={handleInstantViewTabClose}>
-          {oldLang('Close')}
+          {lang('Close')}
         </MenuItem>
       </>
     );
@@ -625,7 +628,7 @@ const BrowserModal = ({
             size="tiny"
             iconName="close"
             iconClassName={styles.tabCloseIcon}
-            ariaLabel={oldLang('Close')}
+            ariaLabel={lang('Close')}
             onClick={handleTabClose}
           />
         </div>
@@ -655,7 +658,7 @@ const BrowserModal = ({
             size="tiny"
             iconName="close"
             iconClassName={styles.tabCloseIcon}
-            ariaLabel={oldLang('Close')}
+            ariaLabel={lang('Close')}
             onClick={handleCloseMoreAppsTab}
           />
         </div>
@@ -745,7 +748,7 @@ const BrowserModal = ({
           round
           color="translucent"
           size="tiny"
-          ariaLabel={oldLang(isBackButtonVisible ? 'Back' : 'Close')}
+          ariaLabel={lang(isBackButtonVisible ? 'Back' : 'Close')}
           onClick={handleBackClick}
         >
           <div className={backButtonClassName} />
@@ -802,7 +805,7 @@ const BrowserModal = ({
           round
           color="translucent"
           size="smaller"
-          ariaLabel={oldLang(isBackButtonVisible ? 'Back' : 'Close')}
+          ariaLabel={lang(isBackButtonVisible ? 'Back' : 'Close')}
           onClick={handleBackClick}
         >
           <div className={backButtonClassName} />

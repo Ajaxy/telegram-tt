@@ -1,4 +1,3 @@
-import type { ChangeEvent } from 'react';
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -12,6 +11,7 @@ import type {
   ApiStarGiveawayOption,
   ApiTypePrepaidGiveaway,
 } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 import type { IconBackdropColor } from '../../gili/primitives/IconBackdrop';
 
 import {
@@ -27,13 +27,13 @@ import {
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/oldDateFormat';
 import { unique } from '../../../util/iteratees';
+import { formatDateTime } from '../../../util/localization/dateFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import BadgeButton from '../../common/BadgeButton';
 import CalendarModal from '../../common/CalendarModal';
@@ -84,8 +84,8 @@ type ApiGiveawayType = 'premium_giveaway' | 'stars_giveaway';
 type SubscribersType = 'all' | 'new';
 
 interface TypeOption {
-  name: string;
-  text: string;
+  name: RegularLangKey;
+  text: RegularLangKey;
   value: ApiGiveawayType;
   actions?: GiveawayAction;
   isLink: boolean;
@@ -122,7 +122,7 @@ const GiveawayModal = ({
     launchPrepaidGiveaway, launchPrepaidStarsGiveaway, showNotification,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const dialogRef = useRef<HTMLDivElement>();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isCountryPickerModalOpen, openCountryPickerModal, closeCountryPickerModal] = useFlag();
@@ -131,7 +131,7 @@ const GiveawayModal = ({
   const [isChannelPickerModalOpen, openChannelPickerModal, closeChannelPickerModal] = useFlag();
 
   const TYPE_OPTIONS: TypeOption[] = [{
-    name: 'Premium.Title',
+    name: 'TelegramPremium',
     text: 'BoostingWinnersRandomly',
     value: 'premium_giveaway',
     actions: 'createPremiumGiveaway',
@@ -181,19 +181,28 @@ const GiveawayModal = ({
       value: 'all',
       label: lang(isChannel ? 'BoostingAllSubscribers' : 'BoostingAllMembers'),
       subLabel: selectedCountryIds && selectedCountryIds.length > 0
-        ? lang('Giveaway.ReceiverType.Countries', selectedCountryIds.length)
+        ? lang(
+          'GiveawayReceiverTypeCountries',
+          { count: selectedCountryIds.length },
+          { pluralValue: selectedCountryIds.length },
+        )
         : lang('BoostingFromAllCountries'),
     },
     {
       value: 'new',
       label: lang(isChannel ? 'BoostingNewSubscribers' : 'BoostingNewMembers'),
       subLabel: selectedCountryIds && selectedCountryIds.length > 0
-        ? lang('Giveaway.ReceiverType.Countries', selectedCountryIds.length)
+        ? lang(
+          'GiveawayReceiverTypeCountries',
+          { count: selectedCountryIds.length },
+          { pluralValue: selectedCountryIds.length },
+        )
         : lang('BoostingFromAllCountries'),
     },
   ], [isChannel, lang, selectedCountryIds]);
 
-  const monthQuantity = lang('Months', selectedMonthOption);
+  const monthQuantity = selectedMonthOption === undefined
+    ? '' : lang('Months', { count: selectedMonthOption }, { pluralValue: selectedMonthOption });
   const isStarsPrepaidGiveaway = prepaidGiveaway?.type === 'starsGiveaway';
   const isPremiumPrepaidGiveaway = prepaidGiveaway?.type === 'giveaway';
 
@@ -371,14 +380,14 @@ const GiveawayModal = ({
     setSelectedRandomUserCount(newValue);
   });
 
-  const handlePrizeDescriptionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handlePrizeDescriptionChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPrizeDescription(e.target.value);
   });
 
   const userNames = useMemo(() => {
     const usersById = getGlobal().users.byId;
-    return selectedUserIds?.map((userId) => getUserFullName(usersById[userId])).join(', ');
-  }, [selectedUserIds]);
+    return selectedUserIds?.map((userId) => getUserFullName(lang, usersById[userId])).join(', ');
+  }, [selectedUserIds, lang]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
@@ -407,7 +416,16 @@ const GiveawayModal = ({
 
   const handleCountrySelectionLimit = useLastCallback((selectionLimit: number) => {
     showNotification({
-      message: lang('BoostingSelectUpToWarningCountries', selectionLimit),
+      message: {
+        key: 'GiveawayCountryLimit',
+        variables: { count: selectionLimit },
+        options: {
+          pluralValue: selectionLimit,
+          withNodes: true,
+          withMarkdown: true,
+          renderTextFilters: ['br', 'links'],
+        },
+      },
     });
   });
 
@@ -487,18 +505,11 @@ const GiveawayModal = ({
   }
 
   function renderPremiumFeaturesLink() {
-    const info = lang('GiftPremiumListFeaturesAndTerms');
-    const parts = info.match(/([^*]*)\*([^*]+)\*(.*)/);
-
-    if (!parts || parts.length < 4) {
-      return undefined;
-    }
-
     return (
       <p className={styles.premiumFeatures}>
-        {parts[1]}
-        <Link isPrimary onClick={handlePremiumClick}>{parts[2]}</Link>
-        {parts[3]}
+        {lang('GiftPremiumFeaturesTerms', {
+          link: <Link isPrimary onClick={handlePremiumClick}>{lang('GiftPremiumFeaturesTermsLink')}</Link>,
+        }, { withNodes: true })}
       </p>
     );
   }
@@ -534,8 +545,9 @@ const GiveawayModal = ({
           >
             <GroupChatInfo
               chatId={chatId!}
-              status={lang(isChannel ? 'BoostingChannelWillReceiveBoost'
-                : 'BoostingGroupWillReceiveBoost', boostQuantity || boostStarsQuantity, 'i')}
+              status={lang(isChannel ? 'BoostingChannelWillReceiveBoost' : 'BoostingGroupWillReceiveBoost', {
+                count: boostQuantity || boostStarsQuantity || 0,
+              }, { pluralValue: boostQuantity || boostStarsQuantity || 0 })}
             />
           </ListItem>
 
@@ -578,7 +590,7 @@ const GiveawayModal = ({
         </div>
 
         <div className={styles.subscription}>
-          {renderText(lang(isChannel ? 'BoostGift.LimitSubscribersInfo' : 'lng_giveaway_users_about_group'))}
+          {renderText(lang(isChannel ? 'BoostGiftLimitSubscribersInfo' : 'GiveawayUsersAboutGroup'))}
         </div>
 
         <div className={styles.section}>
@@ -612,17 +624,15 @@ const GiveawayModal = ({
         {shouldShowPrizes ? (
           !isStarsGiveaway && !isStarsPrepaidGiveaway ? (
             <div className={styles.subscription}>
-              {prizeDescription?.length ? renderText(lang('BoostingGiveawayAdditionPrizeCountNameHint',
-                dataPrepaidGiveaway
-                  ? [dataPrepaidGiveaway.quantity, prizeDescription, monthQuantity]
-                  : [selectedUserCount, prizeDescription, monthQuantity],
-                undefined,
-                selectedMonthOption), ['simple_markdown']) : renderText(lang('BoostingGiveawayAdditionPrizeCountHint',
-                dataPrepaidGiveaway
-                  ? [dataPrepaidGiveaway.quantity, monthQuantity]
-                  : [selectedUserCount, monthQuantity],
-                undefined,
-                selectedMonthOption), ['simple_markdown'])}
+              {prizeDescription?.length ? lang('BoostingGiveawayAdditionPrizeCountNameHint', {
+                count: dataPrepaidGiveaway?.quantity ?? selectedUserCount,
+                prize: prizeDescription,
+                duration: monthQuantity,
+              }, { pluralValue: selectedMonthOption ?? 0, withNodes: true, withMarkdown: true })
+                : lang('BoostingGiveawayAdditionPrizeCountHint', {
+                  count: dataPrepaidGiveaway?.quantity ?? selectedUserCount,
+                  duration: monthQuantity,
+                }, { pluralValue: selectedMonthOption ?? 0, withNodes: true, withMarkdown: true })}
             </div>
           ) : undefined
         ) : (
@@ -657,15 +667,15 @@ const GiveawayModal = ({
           </h2>
 
           <Button
-            ariaLabel={lang('BoostGift.DateEnds')}
+            ariaLabel={lang('BoostGiftDateEnds')}
             className={buildClassName(styles.dateButton, 'expire-limit')}
             isText
             onClick={openCalendar}
           >
             <h3 className={styles.title}>
-              {lang('BoostGift.DateEnds')}
+              {lang('BoostGiftDateEnds')}
             </h3>
-            {formatDateTimeToString(customExpireDate, lang.code)}
+            {formatDateTime(lang, new Date(customExpireDate), { date: 'short', time: 'long' })}
           </Button>
         </div>
       </>
@@ -712,12 +722,24 @@ const GiveawayModal = ({
             )}
           >
             <span className="title list-item-ellipsis">
-              {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Title', dataStarsPrepaidGiveaway.stars)
-                : lang('BoostingTelegramPremiumCountPlural', dataPrepaidGiveaway!.quantity)}
+              {dataStarsPrepaidGiveaway ? lang('GiveawayStarsPrepaidTitle', { count: dataStarsPrepaidGiveaway.stars })
+                : lang(
+                  'BoostingTelegramPremiumCountPlural',
+                  { count: dataPrepaidGiveaway!.quantity },
+                  { pluralValue: dataPrepaidGiveaway!.quantity },
+                )}
             </span>
             <span className="subtitle">
-              {dataStarsPrepaidGiveaway ? lang('Giveaway.Stars.Prepaid.Desc', dataStarsPrepaidGiveaway.quantity)
-                : lang('PrepaidGiveawayMonths', dataPrepaidGiveaway!.months)}
+              {dataStarsPrepaidGiveaway ? lang(
+                'GiveawayStarsPrepaidDesc',
+                { count: dataStarsPrepaidGiveaway.quantity },
+                { pluralValue: dataStarsPrepaidGiveaway.quantity },
+              )
+                : lang(
+                  'PrepaidGiveawayMonths',
+                  { count: dataPrepaidGiveaway!.months },
+                  { pluralValue: dataPrepaidGiveaway!.months },
+                )}
             </span>
           </ListItem>
         ) : (
@@ -781,7 +803,7 @@ const GiveawayModal = ({
                 </div>
 
                 <div className={buildClassName(styles.subscription, styles.starSubscription)}>
-                  {renderText(lang('BoostGift.Stars.Info'))}
+                  {renderText(lang('BoostGiftStarsInfo'))}
                 </div>
 
                 <div className={styles.section}>

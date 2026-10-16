@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
@@ -9,7 +8,7 @@ import type { TabState } from '../../../global/types';
 import { MINI_APP_TOS_URL } from '../../../config';
 import renderText from '../../common/helpers/renderText';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -18,15 +17,15 @@ export type OwnProps = {
   modal: TabState['requestedAttachBotInstall'];
 };
 
-const AttachBotInstallModal: FC<OwnProps> = ({
+const AttachBotInstallModal = ({
   modal,
-}) => {
+}: OwnProps) => {
   const { confirmAttachBotInstall, cancelAttachBotInstall } = getActions();
   const bot = modal?.bot;
 
   const [isTosAccepted, setIsTosAccepted] = useState(false);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const handleConfirm = useCallback(() => {
     confirmAttachBotInstall({
@@ -42,32 +41,31 @@ const AttachBotInstallModal: FC<OwnProps> = ({
   }, [bot]);
 
   const tosLabel = useMemo(() => {
-    const base = lang('lng_mini_apps_disclaimer_button');
-    const split = base.split('{link}');
-    const linkText = lang('lng_mini_apps_disclaimer_link');
-    return [
-      split[0],
-      <a href={MINI_APP_TOS_URL} target="_blank" rel="noopener noreferrer">{linkText}</a>,
-      split[1],
-    ];
+    return lang('MiniAppsDisclaimerButton', {
+      link: (
+        <a href={MINI_APP_TOS_URL} target="_blank" rel="noopener noreferrer">
+          {lang('MiniAppsDisclaimerLink')}
+        </a>
+      ),
+    }, { withNodes: true });
   }, [lang]);
 
   return (
     <ConfirmDialog
       isOpen={Boolean(bot)}
       onClose={cancelAttachBotInstall}
-      title={lang('lng_mini_apps_disclaimer_title')}
+      title={lang('MiniAppsDisclaimerTitle')}
       confirmHandler={handleConfirm}
       isConfirmDisabled={!isTosAccepted}
     >
-      {renderText(lang('lng_mini_apps_disclaimer_text', bot?.shortName), ['simple_markdown'])}
+      {renderText(lang('MiniAppsDisclaimerText'), ['simple_markdown'])}
       <Checkbox
         className="dialog-checkbox"
         checked={isTosAccepted}
         label={tosLabel}
         onCheck={setIsTosAccepted}
       />
-      {renderText(lang('WebBot.Account.Desclaimer.Desc', bot?.shortName), ['simple_markdown'])}
+      {renderText(lang('WebBotAccountDesclaimerDesc', { bot: bot?.shortName }), ['simple_markdown'])}
     </ConfirmDialog>
   );
 };

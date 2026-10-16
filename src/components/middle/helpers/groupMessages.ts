@@ -3,7 +3,7 @@ import type { IAlbum, IDocumentGroup } from '../../../types';
 
 import { getMessageOriginalId, isActionMessage } from '../../../global/helpers';
 import { getMessageForumTopicId } from '../../../global/helpers/replies';
-import { getDayStartAt } from '../../../util/dates/oldDateFormat';
+import { getDayStartAt } from '../../../util/dates/dateMath';
 
 type SenderGroup = (ApiMessage | IAlbum | IDocumentGroup)[];
 

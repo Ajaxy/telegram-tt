@@ -1,5 +1,3 @@
-import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
@@ -24,7 +22,6 @@ import { DEFAULT_MAX_NOTE_LENGTH } from '../../../limits';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -56,9 +53,9 @@ type StateProps = {
   hasBirthday?: boolean;
 };
 
-const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
+const ERROR_FIRST_NAME_MISSING = 'ContactFirstNameRequired';
 
-const ManageUser: FC<OwnProps & StateProps> = ({
+const ManageUser = ({
   userId,
   user,
   progress,
@@ -70,7 +67,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   noteText,
   contactNoteLimit,
   hasBirthday,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     updateContact,
     updateContactNote,
@@ -86,7 +83,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   const [isProfileFieldsTouched, markProfileFieldsTouched, unmarkProfileFieldsTouched] = useFlag();
   const [error, setError] = useState<string | undefined>();
   const [isNotificationsTouched, markNotificationsTouched, unmarkNotificationsTouched] = useFlag();
-  const oldLang = useOldLang();
+
   const lang = useLang();
 
   useHistoryBack({
@@ -127,7 +124,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     }
   }, [closeDeleteDialog, progress]);
 
-  const handleFirstNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleFirstNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFirstName(e.target.value);
     markProfileFieldsTouched();
 
@@ -136,17 +133,17 @@ const ManageUser: FC<OwnProps & StateProps> = ({
     }
   }, [error]);
 
-  const handleLastNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleLastNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setLastName(e.target.value);
     markProfileFieldsTouched();
   }, []);
 
-  const handleNoteChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNote(e.target.value);
     markProfileFieldsTouched();
   }, []);
 
-  const handleNotificationChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleNotificationChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setIsNotificationsEnabled(e.target.checked);
     markNotificationsTouched();
     markProfileFieldsTouched();
@@ -248,15 +245,15 @@ const ManageUser: FC<OwnProps & StateProps> = ({
             <InputText
               ref={firstNameRef}
               id="user-first-name"
-              label={oldLang('UserInfo.FirstNamePlaceholder')}
+              label={lang('UserInfoFirstNamePlaceholder')}
               onChange={handleFirstNameChange}
               value={firstName}
-              error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
+              error={error === ERROR_FIRST_NAME_MISSING ? lang(ERROR_FIRST_NAME_MISSING) : undefined}
             />
             <InputText
               ref={lastNameRef}
               id="user-last-name"
-              label={oldLang('UserInfo.LastNamePlaceholder')}
+              label={lang('UserInfoLastNamePlaceholder')}
               onChange={handleLastNameChange}
               value={lastName}
             />
@@ -277,10 +274,8 @@ const ManageUser: FC<OwnProps & StateProps> = ({
           <div className="ListItem narrow">
             <Checkbox
               checked={isNotificationsEnabled}
-              label={oldLang('Notifications')}
-              subLabel={oldLang(isNotificationsEnabled
-                ? 'UserInfo.NotificationsEnabled'
-                : 'UserInfo.NotificationsDisabled')}
+              label={lang('Notifications')}
+              subLabel={lang(isNotificationsEnabled ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
               onChange={handleNotificationChange}
             />
           </div>
@@ -289,10 +284,10 @@ const ManageUser: FC<OwnProps & StateProps> = ({
           <>
             <Island>
               <ListItem icon="camera-add" ripple onClick={handleSuggestPhoto}>
-                <span className="list-item-ellipsis">{oldLang('UserInfo.SuggestPhoto', user.firstName)}</span>
+                <span className="list-item-ellipsis">{lang('UserInfoSuggestPhoto', { user: user.firstName })}</span>
               </ListItem>
               <ListItem icon="camera-add" ripple onClick={handleSetPersonalPhoto}>
-                <span className="list-item-ellipsis">{oldLang('UserInfo.SetCustomPhoto', user.firstName)}</span>
+                <span className="list-item-ellipsis">{lang('UserInfoSetCustomPhoto', { user: user.firstName })}</span>
               </ListItem>
               {personalPhoto && (
                 <ListItem
@@ -308,11 +303,13 @@ const ManageUser: FC<OwnProps & StateProps> = ({
                   ripple
                   onClick={openResetPersonalPhotoDialog}
                 >
-                  {oldLang('UserInfo.ResetCustomPhoto')}
+                  {lang('UserInfoResetCustomPhoto')}
                 </ListItem>
               )}
             </Island>
-            <IslandDescription dir="auto">{oldLang('UserInfo.CustomPhotoInfo', user.firstName)}</IslandDescription>
+            <IslandDescription dir="auto">
+              {lang('UserInfoCustomPhotoInfo', { user: user.firstName })}
+            </IslandDescription>
           </>
         )}
         {canSuggestBirthday && (
@@ -324,7 +321,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
         )}
         <Island>
           <ListItem icon="delete" ripple destructive onClick={openDeleteDialog}>
-            {oldLang('DeleteContact')}
+            {lang('DeleteContact')}
           </ListItem>
         </Island>
       </div>
@@ -332,23 +329,23 @@ const ManageUser: FC<OwnProps & StateProps> = ({
         isShown={isProfileFieldsTouched}
         onClick={handleProfileSave}
         disabled={isLoading}
-        ariaLabel={oldLang('Save')}
+        ariaLabel={lang('Save')}
         iconName="check"
         isLoading={isLoading}
       />
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
-        text={oldLang('AreYouSureDeleteContact')}
-        confirmLabel={oldLang('DeleteContact')}
+        text={lang('AreYouSureDeleteContact')}
+        confirmLabel={lang('DeleteContact')}
         confirmHandler={handleDeleteContact}
         confirmIsDestructive
       />
       <ConfirmDialog
         isOpen={isResetPersonalPhotoDialogOpen}
         onClose={closeResetPersonalPhotoDialog}
-        text={oldLang('UserInfo.ResetToOriginalAlertText', user.firstName)}
-        confirmLabel={oldLang('Reset')}
+        text={lang('UserInfoResetToOriginalAlertText', { user: user.firstName })}
+        confirmLabel={lang('Reset')}
         confirmHandler={handleResetPersonalAvatar}
         confirmIsDestructive
       />

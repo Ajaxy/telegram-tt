@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -9,15 +8,16 @@ import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dates/oldDateFormat';
+import { toYearMonth } from '../../../util/dates/dateMath';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
+import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { getSenderName } from './helpers/getSenderName';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import NothingFound from '../../common/NothingFound';
@@ -36,7 +36,7 @@ const INTERSECTION_THROTTLE = 500;
 
 const runThrottled = throttle((cb) => cb(), 500, true);
 
-const LinkResults: FC<OwnProps & StateProps> = ({
+const LinkResults = ({
   searchQuery,
   isLoading,
   chatsById,
@@ -44,7 +44,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   foundIds,
   isChatProtected,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     searchMessagesGlobal,
     focusMessage,
@@ -52,7 +52,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
 
   const containerRef = useRef<HTMLDivElement>();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
@@ -99,7 +99,7 @@ const LinkResults: FC<OwnProps & StateProps> = ({
               key={message.date}
               dir={lang.isRtl ? 'rtl' : undefined}
             >
-              {formatMonthAndYear(lang, new Date(message.date * 1000))}
+              {formatDateTime(lang, secondsToDate(message.date), { date: 'long', includeDay: false })}
             </p>
           )}
           <div
@@ -141,8 +141,8 @@ const LinkResults: FC<OwnProps & StateProps> = ({
         {canRenderContents && (!foundIds || foundIds.length === 0) && (
           <NothingFound
             withSticker
-            text={lang('ChatList.Search.NoResults')}
-            description={lang('ChatList.Search.NoResultsDescription')}
+            text={lang('ChatListSearchNoResults')}
+            description={lang('ChatListSearchNoResultsDescription')}
           />
         )}
         {canRenderContents && foundIds && foundIds.length > 0 && (

@@ -233,7 +233,7 @@ function useWebAppFrame(
 
       if (eventType === 'web_app_open_scan_qr_popup') {
         showNotification({
-          message: 'Scanning QR code is not supported in this client yet',
+          message: { key: 'MiniAppQrScanUnsupported' },
         });
       }
 
