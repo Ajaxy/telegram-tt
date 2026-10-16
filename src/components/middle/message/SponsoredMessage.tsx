@@ -222,7 +222,8 @@ const SponsoredMessage = ({
     >
       <div
         className={buildClassName(
-          'message-content media has-adaptive-width has-shadow has-solid-background has-appendix',
+          'message-content media has-shadow has-solid-background has-appendix',
+          hasMedia && 'has-adaptive-width',
           hasWideMedia && 'with-wide-media',
         )}
         dir="auto"
