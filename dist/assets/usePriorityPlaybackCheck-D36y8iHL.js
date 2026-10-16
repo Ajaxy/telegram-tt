@@ -1,0 +1,2 @@
+import{tn as e}from"./fasterdom-DRWpgxOM.js";import{v as t}from"./teact-CCLgdY42.js";import{i as n}from"./useBackgroundMode-Dg7U25_X.js";var r=e(),i=e(),a,o=!1,s=(e,a,s=!1)=>{let c=n(e),l=n(a);t(()=>{if(!s)return o&&c(),r.addCallback(c),i.addCallback(l),()=>{i.removeCallback(l),r.removeCallback(c)}},[s,c,l])};function c(){return o}function l(){o||(o=!0,r.runCallbacks()),a&&=(clearTimeout(a),void 0);function e(){a&&=(clearTimeout(a),void 0),o=!1,i.runCallbacks()}return e}export{c as n,s as r,l as t};
+//# sourceMappingURL=usePriorityPlaybackCheck-D36y8iHL.js.map

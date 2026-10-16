@@ -1,0 +1,2 @@
+import e from"./typescript-Da0fK7fQ.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/typescript" instead of "highlight.js/lib/languages/typescript.js"`))}t();var n=e;export{n as default};
+//# sourceMappingURL=typescript.js-BcsioVa4.js.map

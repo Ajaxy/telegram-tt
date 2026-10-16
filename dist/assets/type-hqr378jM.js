@@ -1,0 +1,2 @@
+var e={video:1,audio:2,complex:3,logo:4,subtitle:17,button:18,control:32,metadata:33},t={[e.video]:`video`,[e.audio]:`audio`,[e.complex]:`complex`,[e.logo]:`logo`,[e.subtitle]:`subtitle`,[e.button]:`button`,[e.control]:`control`,[e.metadata]:`metadata`};export{t as n,e as t};
+//# sourceMappingURL=type-hqr378jM.js.map
