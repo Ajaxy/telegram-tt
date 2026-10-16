@@ -22,6 +22,7 @@ import {
   mountComponent,
   MountState,
   renderComponent,
+  requestAfterRender,
   unmountComponent,
   VirtualType,
 } from './teact';
@@ -57,11 +58,13 @@ const MAPPED_ATTRIBUTES: Partial<Record<string, string>> = {
   srcDoc: 'srcdoc',
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
-const SELECTION_STATE_ATTRIBUTE = '__teactSelectionState';
 
 const headsByElement = new WeakMap<Element, VirtualDomHead>();
 const extraClasses = new WeakMap<Element, Set<string>>();
 const extraStyles = new WeakMap<Element, Record<string, string>>();
+const controlledInputProps = new WeakMap<Element, AnyLiteral>();
+const composingInputs = new WeakSet<Element>();
+const selectionStates = new WeakMap<Element, SelectionState>();
 
 const uniqueChildKeysCache = new WeakMap<VirtualElementChildren, (keyof any)[]>();
 
@@ -369,7 +372,7 @@ function createNode($element: VirtualElementReal, currentContext: CurrentContext
   const { tag, props, children } = $element;
   const element = document.createElementNS(namespace, tag) as DOMElement;
 
-  processControlled(tag, props);
+  processControlled(element, props);
 
   for (const key in props) {
     if (!props.hasOwnProperty(key)) continue;
@@ -436,6 +439,9 @@ function unmountRealTree($element: VirtualElement) {
   } else {
     if ($element.type === VirtualType.Tag) {
       extraClasses.delete($element.target!);
+      controlledInputProps.delete($element.target!);
+      composingInputs.delete($element.target!);
+      selectionStates.delete($element.target!);
       setElementRef($element, undefined);
       removeAllDelegatedListeners($element.target!);
     }
@@ -708,52 +714,78 @@ function setElementRef($element: VirtualElementTag, element: DOMElement | undefi
   }
 }
 
-function processControlled(tag: string, props: AnyLiteral) {
+function processControlled(element: DOMElement, props: AnyLiteral) {
   // TODO Remove after tests
-  if (!props.teactExperimentControlled) {
-    return;
-  }
-
   const isValueControlled = props.value !== undefined;
   const isCheckedControlled = props.checked !== undefined;
-  const isControlled = (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(tag.toUpperCase());
+  const isControlled = props.teactExperimentControlled
+    && (isValueControlled || isCheckedControlled) && CONTROLLABLE_TAGS.includes(element.tagName);
   if (!isControlled) {
+    controlledInputProps.delete(element);
+    composingInputs.delete(element);
+    selectionStates.delete(element);
     return;
   }
 
+  controlledInputProps.set(element, props);
+
   const {
-    value, checked, onInput, onChange, onBlur,
+    onInput, onChange, onBlur, onCompositionStart, onCompositionEnd,
   } = props;
 
+  props.onCompositionStart = (e: React.CompositionEvent<HTMLInputElement>) => {
+    composingInputs.add(element);
+    selectionStates.delete(element);
+    onCompositionStart?.(e);
+  };
+  props.onCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    if (isValueControlled) {
+      saveInputSelection(e.currentTarget);
+    }
+
+    composingInputs.delete(element);
+    onCompositionEnd?.(e);
+
+    requestAfterRender(() => reconcileControlledInput(element));
+  };
   props.onChange = undefined;
-  props.onInput = (e: ChangeEvent<HTMLInputElement>) => {
+  props.onInput = (e: ChangeEvent<HTMLInputElement> & InputEvent) => {
     onInput?.(e);
     onChange?.(e);
 
-    if (value !== undefined && value !== e.currentTarget.value) {
-      const { selectionStart, selectionEnd } = e.currentTarget;
-      const isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === e.currentTarget.value.length;
+    if (e.isComposing || composingInputs.has(element)) return;
 
-      e.currentTarget.value = value;
-
-      if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
-        e.currentTarget.setSelectionRange(selectionStart, selectionEnd);
-
-        const selectionState: SelectionState = { selectionStart, selectionEnd, isCaretAtEnd };
-
-        e.currentTarget.dataset[SELECTION_STATE_ATTRIBUTE] = JSON.stringify(selectionState);
-      }
+    if (isValueControlled) {
+      saveInputSelection(e.currentTarget);
     }
 
-    if (checked !== undefined) {
-      e.currentTarget.checked = checked;
-    }
+    requestAfterRender(() => reconcileControlledInput(element));
   };
   props.onBlur = (e: FocusEvent<HTMLInputElement>) => {
-    delete e.currentTarget.dataset[SELECTION_STATE_ATTRIBUTE];
+    selectionStates.delete(element);
 
     onBlur?.(e);
   };
+}
+
+function saveInputSelection(element: HTMLInputElement) {
+  const { selectionStart, selectionEnd } = element;
+  if (typeof selectionStart !== 'number' || typeof selectionEnd !== 'number') return;
+
+  const isCaretAtEnd = selectionStart === selectionEnd && selectionEnd === element.value.length;
+  selectionStates.set(element, { selectionStart, selectionEnd, isCaretAtEnd });
+}
+
+function reconcileControlledInput(element: DOMElement) {
+  const props = controlledInputProps.get(element);
+  if (!props) return;
+
+  if (props.value !== undefined) {
+    setAttribute(element, 'value', props.value);
+  }
+  if (props.checked !== undefined && (element as HTMLInputElement).checked !== props.checked) {
+    setAttribute(element, 'checked', props.checked);
+  }
 }
 
 function processUncontrolledOnMount(element: DOMElement, props: AnyLiteral) {
@@ -773,7 +805,7 @@ function processUncontrolledOnMount(element: DOMElement, props: AnyLiteral) {
 function updateAttributes(
   $current: VirtualElementTag, $new: VirtualElementTag, element: DOMElement, namespace?: string,
 ) {
-  processControlled(element.tagName, $new.props);
+  processControlled(element, $new.props);
 
   const currentEntries = Object.entries($current.props);
   const newEntries = Object.entries($new.props);
@@ -795,7 +827,10 @@ function updateAttributes(
   for (const [key, newValue] of newEntries) {
     const currentValue = $current.props[key];
 
-    if (newValue !== undefined && newValue !== currentValue) {
+    if (
+      newValue !== undefined
+      && (newValue !== currentValue || (key === 'value' && $new.props.teactExperimentControlled))
+    ) {
       setAttribute(element, key, newValue, namespace);
     }
   }
@@ -807,12 +842,16 @@ function setAttribute(element: DOMElement, key: string, value: any, namespace?: 
   } else if (key === 'value') {
     const inputEl = element as HTMLInputElement;
 
+    if (composingInputs.has(inputEl)) {
+      return;
+    }
+
     if (inputEl.value !== value) {
       inputEl.value = value;
 
-      const selectionStateJson = inputEl.dataset[SELECTION_STATE_ATTRIBUTE];
-      if (selectionStateJson) {
-        const { selectionStart, selectionEnd, isCaretAtEnd } = JSON.parse(selectionStateJson) as SelectionState;
+      const selectionState = selectionStates.get(element);
+      if (selectionState) {
+        const { selectionStart, selectionEnd, isCaretAtEnd } = selectionState;
 
         if (isCaretAtEnd) {
           const length = inputEl.value.length;
