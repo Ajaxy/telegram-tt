@@ -564,7 +564,7 @@
 "AutoDeleteNever" = "Never";
 "AutoDeleteConfirm" = "Confirm";
 "AutoDeleteSetInfo" = "Messages in this chat are automatically deleted {time} after they are sent.";
-"AutoDeleteIn" = "auto-delete in {time}";
+"AutoDeleteIn" = "Auto-deletes in {time}";
 "AutoDeleteGlobalActionFromYou" = "You set a self-destruct timer for all chats.\nAll new messages in this chat will be automatically deleted {time} after they were sent.";
 "AutoDeleteGlobalAction" = "{from} uses a self-destruct timer for all chats.\nAll new messages in this chat will be automatically deleted {time} after they are sent.";
 "ActionTTLYouChanged" = "You set messages to auto-delete in {time}";
@@ -1571,8 +1571,8 @@
 "SettingsFolderCreate" = "Create folder";
 "SettingsFoldersEmpty" = "You have no folders yet";
 "SettingsPasscodeSuccess" = "Congratulations!\nNow you can lock the app with a passcode so that others can't open it.";
-"SettingsPasscodeStart1" = "When a passcode is set, a lock icon appears above your chat list. Tap it to lock your Telegram.";
-"SettingsPasscodeStart2" = "Note: if you forget your local passcode, you'll need to log out.";
+"SettingsPasscodeStart1" = "When you set up an additional passcode, a lock icon will appear on the chats page.\nTap it to lock and unlock your Telegram Web A.";
+"SettingsPasscodeStart2" = "Note: if you forget your local passcode, you'll need to log out of Telegram Web A and log in again.";
 "PasscodeTooManyAttempts" = "Too many attempts. Please try again later.";
 "PasscodeUsePasskey" = "Unlock with Passkey";
 "PasscodePasskeyTitle" = "Passkey";
@@ -1759,10 +1759,10 @@
 "RichEditorTableStriped" = "Striped rows";
 "RichEditorTableBorderless" = "Borderless";
 "AriaComposerCloseRichInput" = "Collapse editor";
-"RichEditorFormula" = "Equation";
-"RichEditorFormulaPrompt" = "Enter equation...";
-"RichEditorFormulaToBlock" = "Convert to block equation";
-"RichEditorFormulaToInline" = "Convert to inline equation";
+"RichEditorFormula" = "Formula";
+"RichEditorFormulaPrompt" = "Enter formula...";
+"RichEditorFormulaToBlock" = "Convert to block formula";
+"RichEditorFormulaToInline" = "Convert to inline formula";
 "FormattingLinkUrl" = "URL";
 "FormattingEnterUrl" = "Enter URL...";
 "FormattedDateModalTitle" = "Format Date";
@@ -2495,7 +2495,7 @@
 "GramAmount" = "💎{amount}";
 "GramAmountIconLast" = "{amount}💎";
 "GramAmountText_one" = "{amount} Gram";
-"GramAmountText_other" = "{amount} Grams";
+"GramAmountText_other" = "{amount} Gram";
 "ActionGiftCostCrypto" = "{cryptoPrice} ({price})";
 "ActionBoostApplyYou_one" = "You boosted the group";
 "ActionBoostApplyYou_other" = "You boosted the group {count} times";
@@ -3089,7 +3089,7 @@
 "UnconfirmedAuthLocationRegion" = "{deviceModel}, {region}, {country}";
 "UnconfirmedAuthLocationCountry" = "{deviceModel}, {country}";
 "SuggestionBirthdaySetupTitle" = "Add your birthday! 🎂";
-"SuggestionBirthdaySetupMessage" = "Let your contacts know when you’re celebrating";
+"SuggestionBirthdaySetupMessage" = "Let your contacts know when to celebrate.";
 "BirthdaySetupTitle" = "Date of Birth";
 "BirthdayInputDay" = "Day";
 "BirthdayInputMonth" = "Month";
@@ -3332,7 +3332,7 @@
 "WalletReceiveTitle" = "Add Funds";
 "WalletReceiveCopyHint" = "Click to copy address";
 "WalletReceiveNetworkNote" = "Share your address or QR code to receive GRAM.";
-"WalletReceiveBuy" = "Buy with card or crypto";
+"WalletReceiveBuy" = "Buy with cash or crypto";
 "WalletBuyTitle" = "Buy Grams";
 "WalletBuyPayWith" = "Pay with";
 "WalletBuyCurrency" = "Currency";
@@ -3387,7 +3387,7 @@
 "WalletFeatureNoFeesText" = "First 5 transfers each day are free, the rest cost almost nothing.";
 "WalletFeatureVerifiedTitle" = "Blockchain Verified";
 "WalletFeatureVerifiedText" = "All transactions are recorded and verifiable on a public ledger.";
-"WalletTermsNotice" = "By using Wallet you agree to {link}.";
+"WalletTermsNotice" = "By using this service you agree to its {link}.";
 "WalletTermsLink" = "Terms of Service";
 "WalletTransactionTitle" = "Transaction";
 "WalletTransactionSender" = "Sender";
@@ -3460,7 +3460,7 @@
 "WalletReleaseKeyTitle" = "Wallet Key";
 "WalletReleaseKeyText" = "Your Gram wallet keys are protected by the app passcode and go with it. Make sure the backup is on or the recovery phrases are written down before turning it off.";
 "WalletReleaseKeyRemove" = "Remove Keys";
-"WalletLogoutWarning" = "The recovery phrases saved on this device for your Gram wallets will be deleted when you log out. Make sure each phrase has a cloud backup or a written copy first.";
+"WalletLogoutWarning" = "The Secret Phrases saved on this device for your wallets will be deleted when you log out. Make sure each phrase has a cloud backup or a written copy first.";
 "WalletAppPasscodePlaceholder" = "Passcode";
 "WalletAppPasscodeDescription" = "Enter your passcode to continue.";
 "PasscodeWalletKeyOtherAccounts" = "Wallet keys in another Telegram account are protected by this passcode. Switch to each account and remove its wallet keys before turning off the app passcode.";
@@ -3471,7 +3471,7 @@
 "WalletBackupHint" = "Your encrypted key backup is split into three parts and stored across three continents.\n\nIt can only be reassembled on your devices, so no one — not even Telegram — can access your key.";
 "WalletBackupTitle" = "Encrypted Backup";
 "WalletExistingWaltBalance" = "You also have funds in Walt";
-"WalletProtectBanner" = "Protect your wallet";
+"WalletProtectBanner" = "Protect your Money";
 "WalletProtectAccountBanner" = "Protect your account";
 "WalletBackupEnabledTitle" = "Backup Enabled";
 "WalletBackupEnabledText" = "Your keys are now stored encrypted across Telegram's datacenters.";
@@ -3495,7 +3495,7 @@
 "WalletUnsupportedWallet" = "This wallet is not supported yet.";
 "WalletRecoveryPhraseTitle" = "Recovery Phrase";
 "WalletSettingsTitle" = "Settings";
-"WalletWhatIsWallet" = "What is Wallet?";
+"WalletWhatIsWallet" = "What is Money?";
 "WalletWhatIsGram" = "What is Gram?";
 "WalletViewInExplorer" = "View in Explorer";
 "WalletCopyAddress" = "Copy Address";
@@ -3512,7 +3512,7 @@
 "WalletPhraseInfoSupport" = "Telegram Support **will never ask you** for your Recovery Phrase.";
 "WalletDeleteWallet" = "Delete Wallet";
 "WalletDeleteTitle" = "Delete Wallet?";
-"WalletDeleteText" = "You'll lose access to your funds unless you've saved your recovery phrase.";
+"WalletDeleteText" = "You'll lose access to your funds unless you've saved your Secret Phrase.";
 "WalletDeleteSave" = "Save this wallet on this device";
 "WalletDeleteAnyway" = "Delete anyway";
 "WalletReplaceTitle" = "How do you want to replace the old wallet?";
@@ -3562,7 +3562,7 @@
 "WalletConnectActive" = "Active connections";
 "WalletConnectEmpty" = "No connected apps";
 "WalletConnectApp" = "Connected app";
-"WalletConnectTitle" = "Connect Wallet";
+"WalletConnectTitle" = "Connect Money";
 "WalletConnectSuccess" = "Connected to {name}";
 "WalletConnect" = "Connect";
 "WalletDisconnect" = "Disconnect";
@@ -3575,7 +3575,7 @@
 "WalletConnectDisconnectedAll" = "All apps disconnected";
 "WalletConnectAppAccess" = "This app can see your wallet address, balance and activity. It can't move funds without your approval.";
 "WalletConnectProofAccess" = "The app will be able to view your wallet address, balance and activity, and request a signature to sign you in. This is not a transfer.";
-"WalletConnectToApp" = "Connect wallet to {name}";
+"WalletConnectToApp" = "Connect Money to {name}";
 "WalletConnectPermissionInfo" = "The app won't be able to move funds without permission.";
 "WalletConnectRequest" = "Wallet request";
 "WalletConnectRequestTitle" = "{name} requests a transfer";
@@ -3640,9 +3640,9 @@
 "RichButtonInvalidUrl" = "Enter a valid URL.";
 "RichButtonStyle" = "Style";
 "RichButtonDefault" = "Default";
-"RichButtonPrimary" = "Primary";
-"RichButtonDanger" = "Danger";
-"RichButtonSuccess" = "Success";
+"RichButtonPrimary" = "Blue";
+"RichButtonDanger" = "Red";
+"RichButtonSuccess" = "Green";
 "RichButtonAlign" = "Alignment";
 "RichButtonStretch" = "Stretch";
 "RichButtonLeft" = "Left";
