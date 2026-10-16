@@ -79,6 +79,7 @@
 
 #auth-registration-form,
 #auth-phone-number-form,
+#auth-session-string-form,
 #auth-code-form,
 #auth-password-form,
 #auth-qr-form {
@@ -89,6 +90,15 @@
 #auth-phone-number-form {
   .form {
     min-height: 26.25rem;
+  }
+}
+
+#auth-session-string-form {
+  .auth-session-string {
+    textarea {
+      overflow-y: auto;
+      max-height: 7.5rem;
+    }
   }
 }
 

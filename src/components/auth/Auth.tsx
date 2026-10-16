@@ -9,6 +9,7 @@ import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_MAC_OS, PLATFORM_ENV } from '../../util/browser/windowEnvironment';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useFlag from '../../hooks/useFlag';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Transition from '../ui/Transition';
@@ -17,6 +18,7 @@ import AuthPassword from './AuthPassword.async';
 import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthQrCode from './AuthQrCode';
 import AuthRegister from './AuthRegister.async';
+import AuthSessionString from './AuthSessionString';
 
 import './Auth.scss';
 
@@ -33,6 +35,8 @@ const Auth = ({
 
   const isMobile = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
+  const [isSessionStringMode, markSessionStringMode, unmarkSessionStringMode] = useFlag();
+
   const handleChangeAuthorizationMethod = () => {
     if (!isMobile) {
       goToAuthQrCode();
@@ -42,9 +46,17 @@ const Auth = ({
   };
 
   useHistoryBack({
-    isActive: (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
+    isActive: isSessionStringMode
+      || (!isMobile && authState === 'authorizationStateWaitPhoneNumber')
       || (isMobile && authState === 'authorizationStateWaitQrCode'),
-    onBack: handleChangeAuthorizationMethod,
+    onBack: () => {
+      if (isSessionStringMode) {
+        unmarkSessionStringMode();
+        return;
+      }
+
+      handleChangeAuthorizationMethod();
+    },
   });
 
   // For animation purposes
@@ -54,6 +66,10 @@ const Auth = ({
   );
 
   function getScreen() {
+    if (isSessionStringMode) {
+      return <AuthSessionString onBack={unmarkSessionStringMode} />;
+    }
+
     switch (renderingAuthState) {
       case 'authorizationStateWaitCode':
         return <AuthCode />;
@@ -62,15 +78,21 @@ const Auth = ({
       case 'authorizationStateWaitRegistration':
         return <AuthRegister />;
       case 'authorizationStateWaitPhoneNumber':
-        return <AuthPhoneNumber />;
+        return <AuthPhoneNumber onGoToSessionString={markSessionStringMode} />;
       case 'authorizationStateWaitQrCode':
-        return <AuthQrCode />;
+        return <AuthQrCode onGoToSessionString={markSessionStringMode} />;
       default:
-        return isMobile ? <AuthPhoneNumber /> : <AuthQrCode />;
+        return isMobile
+          ? <AuthPhoneNumber onGoToSessionString={markSessionStringMode} />
+          : <AuthQrCode onGoToSessionString={markSessionStringMode} />;
     }
   }
 
   function getActiveKey() {
+    if (isSessionStringMode) {
+      return 5;
+    }
+
     switch (renderingAuthState) {
       case 'authorizationStateWaitCode':
         return 0;
