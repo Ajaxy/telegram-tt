@@ -1050,6 +1050,7 @@ export function updater(update: Update) {
     sendApiUpdate({
       '@type': 'updateGroupCall',
       call: buildApiGroupCall(update.call),
+      chatId: update.peer ? getApiChatIdFromMtpPeer(update.peer) : undefined,
     });
   } else if (update instanceof GramJs.UpdateGroupCallConnection) {
     sendApiUpdate({
