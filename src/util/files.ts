@@ -124,14 +124,21 @@ export function validateFiles(files: File[] | FileList | null): File[] | undefin
   if (!files?.length) {
     return undefined;
   }
-  return Array.from(files).map(fixMovMime).filter((file) => file.size);
+  return Array.from(files).map(fixMimeType).filter((file) => file.size);
 }
 
-// .mov MIME type not reported sometimes https://developer.mozilla.org/en-US/docs/Web/API/File/type#sect1
-function fixMovMime(file: File) {
-  const ext = file.name.split('.').pop()!;
-  if (!file.type && ext.toLowerCase() === 'mov') {
-    return new File([file], file.name, { type: 'video/quicktime' });
+const MIME_TYPE_BY_EXTENSION: Record<string, string> = {
+  mov: 'video/quicktime',
+  flac: 'audio/flac',
+};
+
+// Browsers may omit the type or take a non-standard one from the OS (e.g. Firefox reports `audio/x-flac` on Windows)
+// https://developer.mozilla.org/en-US/docs/Web/API/File/type#sect1
+function fixMimeType(file: File) {
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  const expectedType = ext && MIME_TYPE_BY_EXTENSION[ext];
+  if (!expectedType || file.type === expectedType) {
+    return file;
   }
-  return file;
+  return new File([file], file.name, { type: expectedType });
 }

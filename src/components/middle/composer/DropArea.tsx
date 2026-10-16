@@ -7,6 +7,7 @@ import { canReplaceMessageMedia } from '../../../global/helpers';
 import { revokeAttachmentUrls } from '../../../util/attachments';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { validateFiles } from '../../../util/files';
 import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
@@ -49,7 +50,7 @@ const DropArea = ({
     let files: File[] = [];
 
     if (dt.files && dt.files.length > 0 && (!dt.items || !dt.items.length)) {
-      files = files.concat(Array.from(dt.files));
+      files = files.concat(validateFiles(dt.files) ?? []);
     } else if (dt.items && dt.items.length > 0) {
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
       if (folderFiles?.length) {
@@ -67,8 +68,8 @@ const DropArea = ({
   const handleQuickFilesDrop = useLastCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
 
-    if (dt.files && dt.files.length > 0) {
-      const files = Array.from(dt.files);
+    const files = validateFiles(dt.files);
+    if (files?.length) {
       if (!await validateReplacement(files)) return;
 
       onHide();

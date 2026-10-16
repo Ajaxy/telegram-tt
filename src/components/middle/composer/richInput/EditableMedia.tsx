@@ -14,6 +14,7 @@ import type { RichEditorMediaEditHandler, RichEditorMediaFilesHandler } from '..
 import { getRichTextPlainText } from '../../../../global/helpers/richMessage';
 import { selectTheme } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
+import { validateFiles } from '../../../../util/files';
 import { openSystemFilesDialog } from '../../../../util/systemFilesDialog';
 import { NodeViewContent, TeactNodeViewRenderer } from '../../../../util/tiptap';
 import { MEDIA_NODE_NAME } from '../../../../util/tiptap/constants';
@@ -165,8 +166,8 @@ const EditableMedia = ({
     if (typeof position !== 'number') return;
 
     openSystemFilesDialog(MEDIA_FILE_TYPES, (event) => {
-      const files = Array.from((event.target as HTMLInputElement).files || []);
-      if (files.length) {
+      const files = validateFiles((event.target as HTMLInputElement).files);
+      if (files?.length) {
         (extension.options.onMediaFiles as RichEditorMediaFilesHandler)(files, position, true);
       }
     });

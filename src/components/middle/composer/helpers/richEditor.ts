@@ -41,6 +41,7 @@ import type { RichEditorTooltipsConfig } from '../../../common/tooltips/types';
 import type { RichEditorMediaEditHandler, RichEditorMediaFilesHandler } from '../richEditorTypes';
 
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import { validateFiles } from '../../../../util/files';
 import { CODE_HIGHLIGHTING_CHANGED_META, lowlight } from '../../../../util/highlightCode';
 import { addLocalizationCallback, getTranslationFn } from '../../../../util/localization';
 import {
@@ -599,8 +600,12 @@ function handleRichEditorDrop(
   getIsRichInputExpanded: () => boolean,
   onMediaFiles: RichEditorMediaFilesHandler,
 ) {
-  const files = Array.from(event.dataTransfer?.files || []);
-  if (!getIsRichInputExpanded() || !files.length) {
+  if (!event.dataTransfer || !getIsRichInputExpanded()) {
+    return false;
+  }
+
+  const files = validateFiles(event.dataTransfer.files);
+  if (!files?.length) {
     return false;
   }
 
