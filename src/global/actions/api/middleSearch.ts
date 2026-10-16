@@ -13,11 +13,13 @@ import {
   PLAYLIST_OLDEST_ANCHOR_ID,
   SHARED_MEDIA_SLICE,
 } from '../../../config';
+import { tryParseDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, isInsideSortedArrayRange } from '../../../util/iteratees';
 import { getSearchResultKey } from '../../../util/keys/searchResultKey';
 import { callApi } from '../../../api/gramjs';
 import { getIsSavedDialog, getMessageContentIds, isSameReaction } from '../../helpers';
+import { isApiPeerChat } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -36,13 +38,16 @@ import {
 } from '../../reducers';
 import {
   selectChat,
+  selectChatByUsername,
   selectChatMediaSearch,
+  selectChatMessage,
   selectCurrentMessageList,
   selectCurrentMiddleSearch,
   selectCurrentSharedMediaSearch,
   selectPeer,
 } from '../../selectors';
 import { selectPlaybackSource } from '../../selectors/audioPlayer';
+import { selectThreadIdFromMessage } from '../../selectors/threads';
 
 addActionHandler('performMiddleSearch', async (global, actions, payload): Promise<void> => {
   const {
@@ -106,6 +111,26 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
       savedTag,
       fromPeer,
     });
+
+    if (result && query && !isHashtag && !isSavedDialog && isApiPeerChat(peer)) {
+      global = getGlobal();
+      const link = tryParseDeepLink(query.trim());
+      if ((link?.type === 'privateMessageLink' && link.channelId === peer.id)
+        || (link?.type === 'publicMessageLink' && selectChatByUsername(global, link.username)?.id === peer.id)) {
+        let message = selectChatMessage(global, peer.id, link.messageId);
+        if (!message) {
+          const messageResult = await callApi('fetchMessage', { chat: peer, messageId: link.messageId });
+          message = messageResult !== 'MESSAGE_DELETED' ? messageResult?.message : undefined;
+        }
+
+        global = getGlobal();
+        result.messages = message && (!fromPeerId || message.senderId === fromPeerId)
+          && (threadId === MAIN_THREAD_ID || selectThreadIdFromMessage(global, message) === threadId)
+          ? [message] : [];
+        result.totalCount = result.messages.length;
+        result.nextOffsetId = undefined;
+      }
+    }
   }
 
   if (type === 'myChats') {

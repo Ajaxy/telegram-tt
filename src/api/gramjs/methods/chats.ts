@@ -95,7 +95,7 @@ import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {
   applyState, updateChannelState,
 } from '../updates/updateManager';
-import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
+import { dispatchErrorUpdate, handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 import { getPassword } from './twoFaSettings';
 
 type FullChatData = {
@@ -470,7 +470,21 @@ export async function fetchPeerSettings(peer: ApiPeer) {
 }
 
 export async function searchChats({ query }: { query: string }) {
-  const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit: GLOBAL_SEARCH_CONTACTS_LIMIT }));
+  const request = new GramJs.contacts.Search({ q: query, limit: GLOBAL_SEARCH_CONTACTS_LIMIT });
+  let result;
+  try {
+    result = await invokeRequest(request, { shouldThrow: true });
+  } catch (err: any) {
+    // TDLib treats this error as empty search results:
+    // https://github.com/tdlib/td/blob/c15d3f5a5de6e3ba5839822c451152e5e18bb700/td/telegram/DialogManager.cpp#L191-L198
+    if (err instanceof RPCError && err.errorMessage === 'QUERY_TOO_SHORT') {
+      return { accountResultIds: [], globalResultIds: [] };
+    }
+
+    dispatchErrorUpdate(err, request);
+    return undefined;
+  }
+
   if (!result) {
     return undefined;
   }
