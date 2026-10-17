@@ -3321,6 +3321,9 @@ export interface LangPair {
   'GroupCallsUnsupported': undefined;
   'MiniAppQrScanUnsupported': undefined;
   'PageTitleInactive': undefined;
+  'WishLabel': undefined;
+  'WishSupport': undefined;
+  'WishManage': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -5518,6 +5521,10 @@ export interface LangPairWithVariables<V = LangVariable> {
   'PeerPickerUnknownPeer': {
     'id': V;
   };
+  'WishAmount': {
+    'raised': V;
+    'target': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -6252,6 +6259,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PageTitleNotifications': {
+    'count': V;
+  };
+  'WishSupporters': {
     'count': V;
   };
 }

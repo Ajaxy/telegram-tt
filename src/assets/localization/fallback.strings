@@ -4439,3 +4439,9 @@
 "PageTitleInactive" = "[Inactive]";
 "PageTitleNotifications_one" = "{count} notification";
 "PageTitleNotifications_other" = "{count} notifications";
+"WishLabel" = "Wish";
+"WishAmount" = "{raised} / {target} GRAM";
+"WishSupporters_one" = "{count} supporter";
+"WishSupporters_other" = "{count} supporters";
+"WishSupport" = "Support this wish";
+"WishManage" = "Manage wish";
