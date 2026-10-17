@@ -29,6 +29,10 @@
   color: var(--color-text-secondary);
 }
 
+.supportersCount {
+  white-space: nowrap;
+}
+
 .chevron {
   margin-inline-start: auto;
   font-size: 1.25rem;

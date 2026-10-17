@@ -1,7 +1,7 @@
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
@@ -50,6 +50,8 @@ const WishRow = ({
   const lang = useLang();
 
   const crystalRef = useRef<HTMLDivElement>();
+  // The transferred amount until the first particle lands and applies it
+  const pendingSupportGramRef = useRef(0);
   const [burstBaseline, setBurstBaseline] = useState<{ id: number; raisedGram: number }>();
   const [arrivedGram, setArrivedGram] = useState(0);
   const [flashCount, setFlashCount] = useState(0);
@@ -62,18 +64,33 @@ const WishRow = ({
 
   // The raised amount grows with each arriving particle, counted from the amount before the transfer
   useEffect(() => {
-    if (!activeBurst || !wish) return;
+    if (!activeBurst || !wish) return undefined;
 
+    const { id, amountGram } = activeBurst;
     if (IS_REDUCED_MOTION) {
-      supportWish({ ownerId, amountGram: activeBurst.amountGram });
+      supportWish({ ownerId, amountGram });
       finishWishBurst();
-      return;
+      return undefined;
     }
 
+    pendingSupportGramRef.current = amountGram;
     setArrivedGram(0);
-    setBurstBaseline({ id: activeBurst.id, raisedGram: wish.raisedGram });
+    setBurstBaseline({ id, raisedGram: wish.raisedGram });
+
+    // Leaving the profile mid-flight still delivers the support and clears the burst
+    return () => {
+      applyPendingSupport();
+      if (selectTabState(getGlobal()).wishBurst?.id === id) finishWishBurst();
+    };
     // Only a new burst starts the count over
   }, [activeBurst?.id]); // eslint-disable-line react-hooks-static-deps/exhaustive-deps
+
+  function applyPendingSupport() {
+    if (!pendingSupportGramRef.current) return;
+
+    supportWish({ ownerId, amountGram: pendingSupportGramRef.current });
+    pendingSupportGramRef.current = 0;
+  }
 
   const handleOpenDetails = useLastCallback(() => {
     openWishModal({ ownerId });
@@ -89,7 +106,7 @@ const WishRow = ({
 
   const handleParticleArrive = useLastCallback((valueGram: number, isFirst: boolean) => {
     // The sender joins the supporters list as the first particle lands
-    if (isFirst) supportWish({ ownerId, amountGram: activeBurst!.amountGram });
+    if (isFirst) applyPendingSupport();
     setArrivedGram((prev) => prev + valueGram);
     setFlashCount((prev) => prev + 1);
   });
@@ -151,7 +168,9 @@ const WishRow = ({
           {shouldShowFacepile && Boolean(recentSupporters?.length) && (
             <AvatarList size={FACEPILE_AVATAR_SIZE} peers={recentSupporters} limit={FACEPILE_LIMIT} />
           )}
-          {lang('WishSupporters', { count: supporters.length }, { pluralValue: supporters.length })}
+          <span className={styles.supportersCount}>
+            {lang('WishSupporters', { count: supporters.length }, { pluralValue: supporters.length })}
+          </span>
           <Icon name="next" className={styles.chevron} />
         </span>
         <span className="subtitle">{lang('WishLabel')}</span>

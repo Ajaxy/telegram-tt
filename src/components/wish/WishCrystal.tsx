@@ -1,8 +1,10 @@
 import type { ElementRef } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
+import { selectTheme } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
+import useSelector from '../../hooks/data/useSelector';
 import { useStateRef } from '../../hooks/useStateRef';
 
 import styles from './WishCrystal.module.scss';
@@ -34,6 +36,7 @@ type CrystalState = {
   hue: number;
   flash: number;
   time: number;
+  isDark?: boolean;
   dragX?: number;
   dragY?: number;
 };
@@ -70,6 +73,9 @@ const HIGHLIGHT_LIGHT = 0.8;
 // The pavilion narrows to a point, so the level rises faster than the share to look as full as it is
 const FILL_HEIGHT_EXPONENT = 0.6;
 const EDGE_WIDTH = 0.75;
+// Empty glass needs darker edges to stay visible on a light background
+const GLASS_DARK = { fill: '150, 180, 225', edge: '190, 215, 255' };
+const GLASS_LIGHT = { fill: '90, 135, 200', edge: '70, 120, 190' };
 const SURFACE_WIDTH = 1.25;
 const SURFACE_GLOW = 4;
 const FRAME_TIME_STEP = 1 / 60;
@@ -116,6 +122,7 @@ const WishCrystal = ({
     flash: 0,
     time: 0,
   });
+  const isDark = useSelector(selectTheme) === 'dark';
   const progressRef = useStateRef(progress);
   const isCompleteRef = useStateRef(isComplete);
 
@@ -156,6 +163,10 @@ const WishCrystal = ({
       stop();
     };
   }, [isCompleteRef, progressRef]);
+
+  useEffect(() => {
+    stateRef.current.isDark = isDark;
+  }, [isDark]);
 
   useEffect(() => {
     if (!flashCount) return;
@@ -231,8 +242,9 @@ function advanceState(state: CrystalState, progress: number, isComplete?: boolea
 
 function drawCrystal(ctx: CanvasRenderingContext2D, state: CrystalState) {
   const {
-    yaw, pitch, shownProgress, hue, flash, time,
+    yaw, pitch, shownProgress, hue, flash, time, isDark,
   } = state;
+  const glass = isDark ? GLASS_DARK : GLASS_LIGHT;
   const scale = SIZE * SCALE;
   const centerX = SIZE / 2;
   const centerY = SIZE / 2;
@@ -281,9 +293,9 @@ function drawCrystal(ctx: CanvasRenderingContext2D, state: CrystalState) {
   faces.forEach(({ vertexIndexes, normal, light }) => {
     const isFront = normal[2] > 0;
     traceFace(vertexIndexes);
-    ctx.fillStyle = `rgba(150, 180, 225, ${isFront ? 0.1 + light * 0.18 : 0.05})`;
+    ctx.fillStyle = `rgba(${glass.fill}, ${isFront ? 0.1 + light * 0.18 : 0.05})`;
     ctx.fill();
-    ctx.strokeStyle = `rgba(190, 215, 255, ${isFront ? 0.3 + light * 0.35 : 0.12})`;
+    ctx.strokeStyle = `rgba(${glass.edge}, ${isFront ? 0.3 + light * 0.35 : 0.12})`;
     ctx.stroke();
   });
 
