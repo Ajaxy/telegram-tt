@@ -129,6 +129,7 @@ import type {
 import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
 import type { ClipboardTextFormat, MessageCopyRequest } from '../../types/messageCopy';
 import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
+import type { WishUpdate } from '../../types/wish';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
@@ -3648,6 +3649,19 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   resetMessageMediaEditorRequest: WithTabId | undefined;
+
+  // Wish
+  loadWish: {
+    ownerId: string;
+  };
+  updateWish: {
+    ownerId: string;
+    update: WishUpdate;
+  };
+  supportWish: {
+    ownerId: string;
+    amountGram: number;
+  };
 }
 
 export interface RequiredActionPayloads {

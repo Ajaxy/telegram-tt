@@ -18,6 +18,7 @@ import './api/payments';
 import './api/passcode';
 import './api/stars';
 import './api/wallet';
+import './api/wish';
 import './api/tonConnect';
 import './api/reactions';
 import './api/statistics';
