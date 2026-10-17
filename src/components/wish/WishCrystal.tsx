@@ -29,6 +29,7 @@ type CrystalState = {
   shownProgress: number;
   hue: number;
   flash: number;
+  time: number;
   dragX?: number;
   dragY?: number;
 };
@@ -53,8 +54,32 @@ const HUE_COMPLETE = 45;
 
 const SCALE = 0.34;
 const LIGHT: Vector = [-0.45, 0.75, 0.5];
+// A cooler rim light from below keeps the pavilion from going flat
+const RIM_LIGHT: Vector = [0.6, -0.45, 0.65];
+const KEY_LIGHT_SHARE = 0.75;
+const RIM_LIGHT_SHARE = 0.4;
+const AMBIENT_LIGHT = 0.08;
+// Neighbouring facets alternate slightly in brightness, like the fire of a cut stone
+const FACET_CONTRAST = 0.07;
 const HIGHLIGHT_LIGHT = 0.8;
-const LEVEL_LINE_HALF_HEIGHT = 6;
+// The pavilion narrows to a point, so the level rises faster than the share to look as full as it is
+const FILL_HEIGHT_EXPONENT = 0.6;
+const EDGE_WIDTH = 0.75;
+const SURFACE_WIDTH = 1.25;
+const SURFACE_GLOW = 4;
+const FRAME_TIME_STEP = 1 / 60;
+const WAVE_AMPLITUDE = 1.8;
+const WAVE_FREQUENCY = 0.16;
+const WAVE_SPEED = 2.2;
+const WAVE_HARMONIC = 2.3;
+const WAVE_HARMONIC_SHARE = 0.4;
+const WAVE_STEP = 2;
+const WAVE_EDGE_DAMPING = 12;
+const SPARKLE_RADIUS = 5;
+const SPARKLE_SPEED = 1.3;
+const SPARKLE_PHASE_STEP = 2.4;
+const SPARKLE_SHARPNESS = 12;
+const SPARKLE_MIN_INTENSITY = 0.02;
 const GLOW_INNER_RADIUS = 2;
 
 // Octagonal table, eight-sided girdle, culet and the body center used to orient normals outwards
@@ -66,6 +91,9 @@ const CENTER_Y = -0.1;
 const SIDES = 8;
 const CULET_INDEX = SIDES * 2;
 const CENTER_INDEX = CULET_INDEX + 1;
+
+// Every other table corner and every third girdle corner can glint
+const SPARKLE_VERTEX_INDEXES = [0, 2, 4, 6, 8, 11, 14];
 
 const VERTICES = buildVertices();
 const FACES = buildFaces();
@@ -79,6 +107,7 @@ const WishCrystal = ({ progress, isComplete, className }: OwnProps) => {
     shownProgress: progress,
     hue: isComplete ? HUE_COMPLETE : HUE_IN_PROGRESS,
     flash: 0,
+    time: 0,
   });
   const progressRef = useStateRef(progress);
   const isCompleteRef = useStateRef(isComplete);
@@ -182,13 +211,14 @@ function advanceState(state: CrystalState, progress: number, isComplete?: boolea
   } else {
     state.shownProgress += (progress - state.shownProgress) * PROGRESS_EASING;
     state.hue += (targetHue - state.hue) * HUE_EASING;
+    state.time += FRAME_TIME_STEP;
   }
   state.flash *= FLASH_DECAY;
 }
 
 function drawCrystal(ctx: CanvasRenderingContext2D, state: CrystalState) {
   const {
-    yaw, pitch, shownProgress, hue, flash,
+    yaw, pitch, shownProgress, hue, flash, time,
   } = state;
   const scale = SIZE * SCALE;
   const centerX = SIZE / 2;
@@ -206,49 +236,85 @@ function drawCrystal(ctx: CanvasRenderingContext2D, state: CrystalState) {
     bottom = Math.max(bottom, toY(i));
   }
   const fill = Math.min(1, Math.max(0, shownProgress));
-  const level = bottom - (bottom - top) * fill;
+  const level = bottom - (bottom - top) * fill ** FILL_HEIGHT_EXPONENT;
+  // The surface calms down as the gem gets empty or full
+  const waveAmplitude = WAVE_AMPLITUDE * Math.min(1, fill * WAVE_EDGE_DAMPING, (1 - fill) * WAVE_EDGE_DAMPING);
+  const getSurfaceY = (x: number) => level
+    + Math.sin(x * WAVE_FREQUENCY + time * WAVE_SPEED) * waveAmplitude
+    + Math.sin(x * WAVE_FREQUENCY * WAVE_HARMONIC - time * WAVE_SPEED) * waveAmplitude * WAVE_HARMONIC_SHARE;
 
-  function drawFaces(isFilled: boolean) {
-    faces.forEach(({ vertexIndexes, normal, light }) => {
-      const isFront = normal[2] > 0;
-      ctx.beginPath();
-      vertexIndexes.forEach((index, i) => {
-        if (i) ctx.lineTo(toX(index), toY(index));
-        else ctx.moveTo(toX(index), toY(index));
-      });
-      ctx.closePath();
-
-      ctx.fillStyle = isFilled
-        ? `hsla(${hue}, 95%, ${24 + light * 52}%, ${isFront ? 0.95 : 0.35})`
-        : `rgba(130, 160, 200, ${isFront ? 0.14 + light * 0.16 : 0.06})`;
-      ctx.fill();
-      ctx.strokeStyle = isFilled ? 'rgba(255, 255, 255, 0.45)' : 'rgba(150, 180, 220, 0.4)';
-      ctx.stroke();
-
-      if (isFilled && isFront && light > HIGHLIGHT_LIGHT) {
-        ctx.fillStyle = `rgba(255, 255, 255, ${(light - HIGHLIGHT_LIGHT) * 2})`;
-        ctx.fill();
-      }
+  function traceFace(vertexIndexes: number[]) {
+    ctx.beginPath();
+    vertexIndexes.forEach((index, i) => {
+      if (i) ctx.lineTo(toX(index), toY(index));
+      else ctx.moveTo(toX(index), toY(index));
     });
+    ctx.closePath();
+  }
+
+  function traceSurface() {
+    ctx.beginPath();
+    ctx.moveTo(0, getSurfaceY(0));
+    for (let x = WAVE_STEP; x <= SIZE; x += WAVE_STEP) {
+      ctx.lineTo(x, getSurfaceY(x));
+    }
   }
 
   ctx.clearRect(0, 0, SIZE, SIZE);
-  drawFaces(false);
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = EDGE_WIDTH;
+
+  // Empty glass: back faces barely visible, front faces catch a little light
+  faces.forEach(({ vertexIndexes, normal, light }) => {
+    const isFront = normal[2] > 0;
+    traceFace(vertexIndexes);
+    ctx.fillStyle = `rgba(150, 180, 225, ${isFront ? 0.1 + light * 0.18 : 0.05})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(190, 215, 255, ${isFront ? 0.3 + light * 0.35 : 0.12})`;
+    ctx.stroke();
+  });
+
+  // Liquid below the wavy surface, lit per facet
   ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, level, SIZE, SIZE);
+  traceSurface();
+  ctx.lineTo(SIZE, SIZE);
+  ctx.lineTo(0, SIZE);
+  ctx.closePath();
   ctx.clip();
-  drawFaces(true);
+  faces.forEach(({ vertexIndexes, normal, light }) => {
+    const isFront = normal[2] > 0;
+    traceFace(vertexIndexes);
+    ctx.fillStyle = `hsla(${hue}, 92%, ${22 + light * 50}%, ${isFront ? 0.94 : 0.4})`;
+    ctx.fill();
+    ctx.strokeStyle = `hsla(${hue}, 100%, 88%, ${isFront ? 0.25 + light * 0.45 : 0.15})`;
+    ctx.stroke();
+    if (isFront && light > HIGHLIGHT_LIGHT) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${(light - HIGHLIGHT_LIGHT) * 1.6})`;
+      ctx.fill();
+    }
+  });
+
+  // The liquid is brighter near its surface and deeper towards the culet
+  ctx.globalCompositeOperation = 'source-atop';
+  const depth = ctx.createLinearGradient(0, level, 0, bottom);
+  depth.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+  depth.addColorStop(0.35, 'rgba(255, 255, 255, 0)');
+  depth.addColorStop(1, `hsla(${hue}, 90%, 12%, 0.35)`);
+  ctx.fillStyle = depth;
+  ctx.fillRect(0, level - WAVE_AMPLITUDE * 2, SIZE, SIZE);
   ctx.restore();
 
-  // Highlight line and flash stay within the gem's painted pixels
+  // Surface line and flash stay within the gem's painted pixels
   ctx.globalCompositeOperation = 'source-atop';
-  const line = ctx.createLinearGradient(0, level - LEVEL_LINE_HALF_HEIGHT, 0, level + LEVEL_LINE_HALF_HEIGHT);
-  line.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  line.addColorStop(0.5, 'rgba(255, 255, 255, 0.55)');
-  line.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = line;
-  ctx.fillRect(0, level - LEVEL_LINE_HALF_HEIGHT, SIZE, LEVEL_LINE_HALF_HEIGHT * 2);
+  if (fill > 0 && fill < 1) {
+    traceSurface();
+    ctx.lineWidth = SURFACE_WIDTH;
+    ctx.strokeStyle = `hsla(${hue}, 100%, 92%, 0.85)`;
+    ctx.shadowColor = `hsla(${hue}, 100%, 75%, 0.9)`;
+    ctx.shadowBlur = SURFACE_GLOW;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
   if (flash > 0.01) {
     ctx.fillStyle = `rgba(255, 255, 255, ${flash * 0.5})`;
     ctx.fillRect(0, 0, SIZE, SIZE);
@@ -257,11 +323,47 @@ function drawCrystal(ctx: CanvasRenderingContext2D, state: CrystalState) {
   // The glow fades to zero at the canvas edge, so it never shows a hard cut-off
   ctx.globalCompositeOperation = 'destination-over';
   const glow = ctx.createRadialGradient(centerX, centerY, GLOW_INNER_RADIUS, centerX, centerY, SIZE / 2);
-  glow.addColorStop(0, `hsla(${hue}, 95%, 60%, ${0.1 + fill * 0.25 + flash * 0.35})`);
+  glow.addColorStop(0, `hsla(${hue}, 95%, 60%, ${0.12 + fill * 0.28 + flash * 0.35})`);
+  glow.addColorStop(0.55, `hsla(${hue}, 95%, 60%, ${0.04 + fill * 0.08 + flash * 0.1})`);
   glow.addColorStop(1, `hsla(${hue}, 95%, 60%, 0)`);
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, SIZE, SIZE);
   ctx.globalCompositeOperation = 'source-over';
+
+  if (!IS_REDUCED_MOTION) {
+    drawSparkles(ctx, points, toX, toY, time);
+  }
+}
+
+// Short-lived four-point glints on the front corners of the table and girdle
+function drawSparkles(
+  ctx: CanvasRenderingContext2D,
+  points: Vector[],
+  toX: (index: number) => number,
+  toY: (index: number) => number,
+  time: number,
+) {
+  SPARKLE_VERTEX_INDEXES.forEach((index, i) => {
+    if (points[index][2] < 0) return;
+
+    const intensity = Math.max(0, Math.sin(time * SPARKLE_SPEED + i * SPARKLE_PHASE_STEP)) ** SPARKLE_SHARPNESS;
+    if (intensity < SPARKLE_MIN_INTENSITY) return;
+
+    const x = toX(index);
+    const y = toY(index);
+    const radius = SPARKLE_RADIUS * intensity;
+    const glint = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    glint.addColorStop(0, `rgba(255, 255, 255, ${intensity})`);
+    glint.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = glint;
+    ctx.beginPath();
+    ctx.moveTo(x, y - radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.quadraticCurveTo(x, y, x, y + radius);
+    ctx.quadraticCurveTo(x, y, x - radius, y);
+    ctx.quadraticCurveTo(x, y, x, y - radius);
+    ctx.fill();
+  });
 }
 
 function rotateVertices(yaw: number, pitch: number): Vector[] {
@@ -281,7 +383,7 @@ function rotateVertices(yaw: number, pitch: number): Vector[] {
 function buildLitFaces(points: Vector[]): Face[] {
   const center = points[CENTER_INDEX];
 
-  return FACES.map((vertexIndexes) => {
+  return FACES.map((vertexIndexes, faceIndex) => {
     const [a, b, c] = vertexIndexes.map((i) => points[i]);
     const u = subtract(b, a);
     const v = subtract(c, a);
@@ -297,7 +399,10 @@ function buildLitFaces(points: Vector[]): Face[] {
       vertexIndexes,
       normal,
       depth: faceCenter[2],
-      light: Math.max(0, dot(normal, LIGHT)),
+      light: Math.max(0, Math.min(1, AMBIENT_LIGHT
+      + Math.max(0, dot(normal, LIGHT)) * KEY_LIGHT_SHARE
+      + Math.max(0, dot(normal, RIM_LIGHT)) * RIM_LIGHT_SHARE
+      + (faceIndex % 2 ? FACET_CONTRAST : -FACET_CONTRAST))),
     };
   }).sort((a, b) => a.depth - b.depth);
 }
