@@ -10,16 +10,18 @@ import type { Wish } from '../../types/wish';
 import { selectTabState, selectWish } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { roundGram } from '../../api/wish/mockWishApi';
+import { getSupporterView } from './helpers/getSupporterView';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
-import AvatarList from '../common/AvatarList';
+import Avatar from '../common/Avatar';
 import Icon from '../common/icons/Icon';
 import ListItem from '../ui/ListItem';
 import WishCrystal from './WishCrystal';
 import WishParticles from './WishParticles';
 
+import avatarListStyles from '../common/AvatarList.module.scss';
 import styles from './WishRow.module.scss';
 
 type OwnProps = {
@@ -123,9 +125,9 @@ const WishRow = ({
     return [...wish.supporters]
       .sort((a, b) => b.lastSupportAt - a.lastSupportAt)
       .slice(0, FACEPILE_LIMIT)
-      .map(({ userId }) => usersById[userId])
+      .map(({ userId }) => getSupporterView(lang, userId, usersById))
       .filter(Boolean);
-  }, [wish, usersById]);
+  }, [wish, usersById, lang]);
 
   if (!wish) return undefined;
 
@@ -166,7 +168,22 @@ const WishRow = ({
         </span>
         <span className={styles.supporters}>
           {shouldShowFacepile && Boolean(recentSupporters?.length) && (
-            <AvatarList size={FACEPILE_AVATAR_SIZE} peers={recentSupporters} limit={FACEPILE_LIMIT} />
+            // Same overlap as `AvatarList`, which takes only real peers
+            <div
+              className={avatarListStyles.root}
+              style={`--_size: ${FACEPILE_AVATAR_SIZE}px;`}
+              dir={lang.isRtl ? 'rtl' : 'ltr'}
+            >
+              {recentSupporters.map(({ peer, previewUrl }, i) => (
+                <Avatar
+                  key={i}
+                  peer={peer}
+                  previewUrl={previewUrl}
+                  size={FACEPILE_AVATAR_SIZE}
+                  className={avatarListStyles.avatar}
+                />
+              ))}
+            </div>
           )}
           <span className={styles.supportersCount}>
             {lang('WishSupporters', { count: supporters.length }, { pluralValue: supporters.length })}

@@ -1,5 +1,7 @@
 import type { Wish, WishUpdate } from '../../types/wish';
 
+import { getDemoPeopleIds } from './demoPeople';
+
 // In-memory stand-in for a wish backend with the same async surface a real API would have.
 // No wallet transfer happens here: balances and amounts are demo values.
 
@@ -15,10 +17,10 @@ const GRAM_FRACTION_FACTOR = 100;
 const wishesByOwnerId = new Map<string, Wish>();
 let demoBalanceGram = DEMO_BALANCE_GRAM;
 
-export function fetchWish({ ownerId, supporterIds }: { ownerId: string; supporterIds: string[] }) {
+export function fetchWish({ ownerId }: { ownerId: string }) {
   let wish = wishesByOwnerId.get(ownerId);
   if (!wish) {
-    wish = buildDemoWish(ownerId, supporterIds);
+    wish = buildDemoWish(ownerId);
     wishesByOwnerId.set(ownerId, wish);
   }
 
@@ -74,10 +76,10 @@ export function roundGram(value: number) {
   return Math.round(value * GRAM_FRACTION_FACTOR) / GRAM_FRACTION_FACTOR;
 }
 
-function buildDemoWish(ownerId: string, supporterIds: string[]): Wish {
+function buildDemoWish(ownerId: string): Wish {
   const seed = getIdSeed(ownerId);
   const now = Math.floor(Date.now() / 1000);
-  const supporters = supporterIds.slice(0, DEMO_SUPPORT_AMOUNTS_GRAM.length).map((userId, i) => ({
+  const supporters = getDemoPeopleIds().slice(0, DEMO_SUPPORT_AMOUNTS_GRAM.length).map((userId, i) => ({
     userId,
     amountGram: DEMO_SUPPORT_AMOUNTS_GRAM[i],
     lastSupportAt: now - DEMO_SUPPORT_AGES_MIN[i] * SECONDS_IN_MINUTE,

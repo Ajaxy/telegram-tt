@@ -1,21 +1,14 @@
-import { isUserId } from '../../../util/entities/ids';
 import * as wishApi from '../../../api/wish/mockWishApi';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateWish, updateWishDemoBalance } from '../../reducers';
 import { selectCanHaveWish, selectWish } from '../../selectors';
 
-const DEMO_SUPPORTERS_LIMIT = 6;
-
 addActionHandler('loadWish', async (global, actions, payload): Promise<void> => {
   const { ownerId } = payload;
   if (!selectCanHaveWish(global, ownerId)) return;
 
-  const supporterIds = (global.chats.listIds.active ?? []).filter((id) => (
-    isUserId(id) && id !== ownerId && id !== global.currentUserId && selectCanHaveWish(global, id)
-  )).slice(0, DEMO_SUPPORTERS_LIMIT);
-
   const [wish, demoBalanceGram] = await Promise.all([
-    wishApi.fetchWish({ ownerId, supporterIds }),
+    wishApi.fetchWish({ ownerId }),
     wishApi.fetchDemoBalance(),
   ]);
 

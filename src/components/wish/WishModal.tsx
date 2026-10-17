@@ -6,9 +6,9 @@ import type { TabState } from '../../global/types';
 import type { Wish, WishSettings, WishSupporter } from '../../types/wish';
 import type { LangFn } from '../../util/localization';
 
-import { getPeerTitle } from '../../global/helpers/peers';
 import { selectWish } from '../../global/selectors';
 import { getServerTime } from '../../util/serverTime';
+import { getSupporterView } from './helpers/getSupporterView';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -142,12 +142,20 @@ const WishModal = ({
   );
 
   function renderSupporter({ userId, amountGram, lastSupportAt }: WishSupporter) {
-    const user = usersById[userId];
+    const supporter = getSupporterView(lang, userId, usersById);
+    if (!supporter) return undefined;
 
     return (
       <ListItem
         key={userId}
-        leftElement={<Avatar peer={user} size={SUPPORTER_AVATAR_SIZE} className={styles.avatar} />}
+        leftElement={(
+          <Avatar
+            peer={supporter.peer}
+            previewUrl={supporter.previewUrl}
+            size={SUPPORTER_AVATAR_SIZE}
+            className={styles.avatar}
+          />
+        )}
         rightElement={(
           <span className={styles.supportAmount}>
             {areAmountsHidden ? HIDDEN_AMOUNT : lang('WishSupportAmount', { amount: lang.number(amountGram) })}
@@ -157,7 +165,7 @@ const WishModal = ({
         narrow
         isStatic
       >
-        <span className="title" dir="auto">{user ? getPeerTitle(lang, user) : userId}</span>
+        <span className="title" dir="auto">{supporter.name}</span>
         <span className="subtitle">{formatSupportTime(lang, lastSupportAt)}</span>
       </ListItem>
     );

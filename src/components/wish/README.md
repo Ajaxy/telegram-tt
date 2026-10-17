@@ -15,7 +15,9 @@ A user can attach one **wish** to their profile, such as "Trip to Tokyo, 120 / 5
 Where to see it:
 
 - **Owner view**: open Settings (or *My Profile*). A wish row sits under the username, with **Manage wish** below it.
-- **Visitor view**: open the profile of anyone in a private chat. Every regular user gets a demo wish, with supporters taken from your recent chats. Tap **Support this wish**.
+- **Visitor view**: open the profile of anyone in a private chat. Every regular user gets a demo wish. Tap **Support this wish**.
+
+The demo supporters are fictional people (`src/api/wish/demoPeople.ts`) with generated illustrated avatars, so no real accounts show up in the demo. The only real person in the list is the sender, after they support a wish. Easter egg: Dmitriy.
 
 ## What's in it
 
