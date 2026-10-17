@@ -1,0 +1,25 @@
+.root {
+  position: relative;
+  flex-shrink: 0;
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.canvas,
+.hit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+// Only a touch that starts on the gem's silhouette rotates it; elsewhere the page keeps scrolling
+.hit {
+  touch-action: none;
+  cursor: grab;
+  clip-path: polygon(30% 24%, 70% 24%, 90% 42%, 50% 90%, 10% 42%);
+
+  &:active {
+    cursor: grabbing;
+  }
+}

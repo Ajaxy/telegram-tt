@@ -12,6 +12,7 @@ import useLang from '../../hooks/useLang';
 import AvatarList from '../common/AvatarList';
 import Icon from '../common/icons/Icon';
 import ListItem from '../ui/ListItem';
+import WishCrystal from './WishCrystal';
 
 import styles from './WishRow.module.scss';
 
@@ -68,6 +69,13 @@ const WishRow = ({
         multiline
         narrow
         ripple
+        rightElement={(
+          <WishCrystal
+            progress={raisedGram / targetGram}
+            isComplete={raisedGram >= targetGram}
+            className={styles.crystal}
+          />
+        )}
       >
         <span className="title" dir="auto">{title}</span>
         <span className={styles.amount}>
