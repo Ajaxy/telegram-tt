@@ -1,0 +1,17 @@
+.wishChip {
+  align-self: center;
+
+  margin-top: -0.75rem;
+  padding: 0.3125rem 0.75rem;
+  border-radius: 1rem;
+
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+
+  background-color: var(--color-background-secondary);
+}
+
+.wishChipTitle {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}

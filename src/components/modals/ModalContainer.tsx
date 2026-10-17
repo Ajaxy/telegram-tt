@@ -14,6 +14,7 @@ import BrowserCloseConfirmationModal from '../main/BrowserCloseConfirmationModal
 import SafeLinkModal from '../main/SafeLinkModal.async';
 import AiMessageEditorModal from '../middle/composer/AiMessageEditorModal/AiMessageEditorModal.async';
 import WishModal from '../wish/WishModal.async';
+import WishSendModal from '../wish/WishSendModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AgeVerificationModal from './ageVerification/AgeVerificationModal.async';
 import AiTonePreviewModal from './aiTonePreview/AiTonePreviewModal.async';
@@ -103,6 +104,7 @@ type ModalKey = keyof Pick<TabState,
   'safeLinkModalUrl' |
   'mapModal' |
   'wishModal' |
+  'wishSendModal' |
   'oneTimeMediaModal' |
   'inviteViaLinkModal' |
   'requestedAttachBotInstall' |
@@ -180,7 +182,7 @@ type ModalKey = keyof Pick<TabState,
   'autoDeleteTimerModal'
 >;
 type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal'
-  | 'wishModal';
+  | 'wishModal' | 'wishSendModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -212,6 +214,7 @@ const WRAPPED_MODAL_CLOSE_DURATIONS: Record<WrappedModalKey, number> = {
   safeLinkModalUrl: WRAPPED_MODAL_CLOSE_DURATION,
   autoDeleteTimerModal: WRAPPED_MODAL_CLOSE_DURATION,
   wishModal: WRAPPED_MODAL_CLOSE_DURATION,
+  wishSendModal: WRAPPED_MODAL_CLOSE_DURATION,
 };
 
 type WrappedModalBoundaryProps<T> = {
@@ -332,6 +335,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   safeLinkModalUrl: SafeLinkModal,
   autoDeleteTimerModal: AutoDeleteTimerModal,
   wishModal: WishModal,
+  wishSendModal: WishSendModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];

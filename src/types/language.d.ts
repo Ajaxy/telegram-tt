@@ -3340,6 +3340,7 @@ export interface LangPair {
   'WishUpdated': undefined;
   'WishTimeJustNow': undefined;
   'WishTimeYesterday': undefined;
+  'WishDemoBalance': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -5558,6 +5559,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'WishTimeDaysAgo': {
     'count': V;
+  };
+  'WishSendFor': {
+    'title': V;
+  };
+  'WishSent': {
+    'amount': V;
   };
 }
 

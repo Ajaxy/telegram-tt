@@ -3666,6 +3666,15 @@ export interface ActionPayloads {
     ownerId: string;
   } & WithTabId;
   closeWishModal: WithTabId | undefined;
+  openWishSendModal: {
+    ownerId: string;
+  } & WithTabId;
+  closeWishSendModal: WithTabId | undefined;
+  startWishBurst: {
+    ownerId: string;
+    amountGram: number;
+  } & WithTabId;
+  finishWishBurst: WithTabId | undefined;
 }
 
 export interface RequiredActionPayloads {

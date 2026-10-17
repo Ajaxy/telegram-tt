@@ -1,11 +1,15 @@
-import { memo, useEffect, useMemo } from '../../lib/teact/teact';
+import {
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
+import type { TabState } from '../../global/types';
 import type { Wish } from '../../types/wish';
 
-import { selectWish } from '../../global/selectors';
+import { selectTabState, selectWish } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { roundGram } from '../../api/wish/mockWishApi';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -14,6 +18,7 @@ import AvatarList from '../common/AvatarList';
 import Icon from '../common/icons/Icon';
 import ListItem from '../ui/ListItem';
 import WishCrystal from './WishCrystal';
+import WishParticles from './WishParticles';
 
 import styles from './WishRow.module.scss';
 
@@ -25,26 +30,74 @@ type StateProps = {
   wish?: Wish;
   isOwner: boolean;
   usersById: Record<string, ApiUser>;
+  burst?: TabState['wishBurst'];
 };
 
 const FACEPILE_AVATAR_SIZE = 22;
 const FACEPILE_LIMIT = 3;
+const IS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const WishRow = ({
   ownerId,
   wish,
   isOwner,
   usersById,
+  burst,
 }: OwnProps & StateProps) => {
-  const { loadWish, openWishModal } = getActions();
+  const {
+    loadWish, openWishModal, openWishSendModal, supportWish, finishWishBurst,
+  } = getActions();
   const lang = useLang();
+
+  const crystalRef = useRef<HTMLDivElement>();
+  const [burstBaseline, setBurstBaseline] = useState<{ id: number; raisedGram: number }>();
+  const [arrivedGram, setArrivedGram] = useState(0);
+  const [flashCount, setFlashCount] = useState(0);
+
+  const activeBurst = burst?.ownerId === ownerId ? burst : undefined;
 
   useEffect(() => {
     loadWish({ ownerId });
   }, [ownerId]);
 
+  // The raised amount grows with each arriving particle, counted from the amount before the transfer
+  useEffect(() => {
+    if (!activeBurst || !wish) return;
+
+    if (IS_REDUCED_MOTION) {
+      supportWish({ ownerId, amountGram: activeBurst.amountGram });
+      finishWishBurst();
+      return;
+    }
+
+    setArrivedGram(0);
+    setBurstBaseline({ id: activeBurst.id, raisedGram: wish.raisedGram });
+    // Only a new burst starts the count over
+  }, [activeBurst?.id]); // eslint-disable-line react-hooks-static-deps/exhaustive-deps
+
   const handleOpenDetails = useLastCallback(() => {
     openWishModal({ ownerId });
+  });
+
+  const handleAction = useLastCallback(() => {
+    if (isOwner) {
+      openWishModal({ ownerId });
+    } else {
+      openWishSendModal({ ownerId });
+    }
+  });
+
+  const handleParticleArrive = useLastCallback((valueGram: number, isFirst: boolean) => {
+    // The sender joins the supporters list as the first particle lands
+    if (isFirst) supportWish({ ownerId, amountGram: activeBurst!.amountGram });
+    setArrivedGram((prev) => prev + valueGram);
+    setFlashCount((prev) => prev + 1);
+  });
+
+  const handleParticlesEnd = useLastCallback(() => {
+    finishWishBurst();
+    setBurstBaseline(undefined);
+    setArrivedGram(0);
   });
 
   const recentSupporters = useMemo(() => {
@@ -59,9 +112,11 @@ const WishRow = ({
 
   if (!wish) return undefined;
 
-  const { title, targetGram, raisedGram, settings, supporters } = wish;
+  const { title, targetGram, settings, supporters } = wish;
   if (!isOwner && !settings.shouldShowWish) return undefined;
 
+  const isBurstCounting = activeBurst && burstBaseline?.id === activeBurst.id;
+  const raisedGram = isBurstCounting ? roundGram(burstBaseline.raisedGram + arrivedGram) : wish.raisedGram;
   const isDimmed = isOwner && !settings.shouldShowWish;
   const shouldShowFacepile = isOwner || settings.shouldShowSupporters;
 
@@ -77,8 +132,10 @@ const WishRow = ({
         onClick={handleOpenDetails}
         rightElement={(
           <WishCrystal
+            ref={crystalRef}
             progress={raisedGram / targetGram}
             isComplete={raisedGram >= targetGram}
+            flashCount={flashCount}
             className={styles.crystal}
           />
         )}
@@ -105,10 +162,19 @@ const WishRow = ({
         withPrimaryColor
         narrow
         ripple
-        onClick={handleOpenDetails}
+        onClick={handleAction}
       >
         <span>{lang(isOwner ? 'WishManage' : 'WishSupport')}</span>
       </ListItem>
+      {isBurstCounting && (
+        <WishParticles
+          burstId={activeBurst.id}
+          amountGram={activeBurst.amountGram}
+          targetRef={crystalRef}
+          onArrive={handleParticleArrive}
+          onEnd={handleParticlesEnd}
+        />
+      )}
     </>
   );
 };
@@ -119,6 +185,7 @@ export default memo(withGlobal<OwnProps>(
       wish: selectWish(global, ownerId),
       isOwner: ownerId === global.currentUserId,
       usersById: global.users.byId,
+      burst: selectTabState(global).wishBurst,
     };
   },
 )(WishRow));

@@ -125,3 +125,4 @@ export { default as QuickChatPickerModal } from '../components/modals/quickChatP
 export { default as RequestPeerModal } from '../components/modals/requestPeer/RequestPeerModal';
 export { default as CocoonModal } from '../components/modals/cocoon/CocoonModal';
 export { default as WishModal } from '../components/wish/WishModal';
+export { default as WishSendModal } from '../components/wish/WishSendModal';

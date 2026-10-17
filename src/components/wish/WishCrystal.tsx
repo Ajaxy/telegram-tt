@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -10,6 +11,9 @@ type OwnProps = {
   // Raised amount divided by the target, may exceed 1
   progress: number;
   isComplete?: boolean;
+  // Each increment lights the crystal up for a moment
+  flashCount?: number;
+  ref?: ElementRef<HTMLDivElement>;
   className?: string;
 };
 
@@ -49,6 +53,7 @@ const INITIAL_PITCH = 0.38;
 const PROGRESS_EASING = 0.06;
 const HUE_EASING = 0.04;
 const FLASH_DECAY = 0.92;
+const FLASH_STEP = 0.35;
 const HUE_IN_PROGRESS = 205;
 const HUE_COMPLETE = 45;
 
@@ -98,7 +103,9 @@ const SPARKLE_VERTEX_INDEXES = [0, 2, 4, 6, 8, 11, 14];
 const VERTICES = buildVertices();
 const FACES = buildFaces();
 
-const WishCrystal = ({ progress, isComplete, className }: OwnProps) => {
+const WishCrystal = ({
+  progress, isComplete, flashCount, ref, className,
+}: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
   const stateRef = useRef<CrystalState>({
     yaw: INITIAL_YAW,
@@ -150,6 +157,12 @@ const WishCrystal = ({ progress, isComplete, className }: OwnProps) => {
     };
   }, [isCompleteRef, progressRef]);
 
+  useEffect(() => {
+    if (!flashCount) return;
+
+    stateRef.current.flash = Math.min(1, stateRef.current.flash + FLASH_STEP);
+  }, [flashCount]);
+
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -182,7 +195,7 @@ const WishCrystal = ({ progress, isComplete, className }: OwnProps) => {
   const pixelSize = Math.round(SIZE * Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));
 
   return (
-    <div className={buildClassName(styles.root, className)}>
+    <div ref={ref} className={buildClassName(styles.root, className)}>
       <canvas ref={canvasRef} className={styles.canvas} width={pixelSize} height={pixelSize} />
       <div
         className={styles.hit}

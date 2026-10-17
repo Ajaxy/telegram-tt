@@ -58,7 +58,9 @@ const WishModal = ({
   isOwner,
   usersById,
 }: OwnProps & StateProps) => {
-  const { closeWishModal, updateWish, showNotification } = getActions();
+  const {
+    closeWishModal, openWishSendModal, updateWish, showNotification,
+  } = getActions();
   const lang = useLang();
 
   const [activeTab, setActiveTab] = useState(SupportersTab.Recent);
@@ -81,6 +83,10 @@ const WishModal = ({
 
   const handleClose = useLastCallback(() => {
     closeWishModal();
+  });
+
+  const handleSupport = useLastCallback(() => {
+    openWishSendModal({ ownerId: wish!.ownerId });
   });
 
   const handleBack = useLastCallback(() => {
@@ -221,6 +227,9 @@ const WishModal = ({
       width="regular"
       height={isEditing ? 'auto' : 'tall'}
       ariaLabel={lang('WishTitle')}
+      stickyFooter={!isOwner && !isEditing ? (
+        <Button pill onClick={handleSupport}>{lang('WishSupport')}</Button>
+      ) : undefined}
       onClose={handleClose}
     >
       {isEditing ? renderEditForm() : (

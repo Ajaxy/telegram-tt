@@ -4466,3 +4466,6 @@
 "WishTimeHoursAgo" = "{count}h ago";
 "WishTimeYesterday" = "yesterday";
 "WishTimeDaysAgo" = "{count}d ago";
+"WishSendFor" = "For wish: {title}";
+"WishDemoBalance" = "Demo balance: no real Grams are sent in this concept.";
+"WishSent" = "Sent {amount} GRAM";
