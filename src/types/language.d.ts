@@ -3324,6 +3324,22 @@ export interface LangPair {
   'WishLabel': undefined;
   'WishSupport': undefined;
   'WishManage': undefined;
+  'WishTitle': undefined;
+  'WishTabRecent': undefined;
+  'WishTabTop': undefined;
+  'WishSupportersHidden': undefined;
+  'WishNoSupporters': undefined;
+  'WishVisibleToVisitors': undefined;
+  'WishSettingWish': undefined;
+  'WishSettingSupporters': undefined;
+  'WishSettingAmounts': undefined;
+  'WishEdit': undefined;
+  'WishEditTitle': undefined;
+  'WishTitleLabel': undefined;
+  'WishTargetLabel': undefined;
+  'WishUpdated': undefined;
+  'WishTimeJustNow': undefined;
+  'WishTimeYesterday': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -5524,6 +5540,24 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WishAmount': {
     'raised': V;
     'target': V;
+  };
+  'WishProgress': {
+    'raised': V;
+    'target': V;
+    'percent': V;
+    'supporters': V;
+  };
+  'WishSupportAmount': {
+    'amount': V;
+  };
+  'WishTimeMinutesAgo': {
+    'count': V;
+  };
+  'WishTimeHoursAgo': {
+    'count': V;
+  };
+  'WishTimeDaysAgo': {
+    'count': V;
   };
 }
 

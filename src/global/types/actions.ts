@@ -3662,6 +3662,10 @@ export interface ActionPayloads {
     ownerId: string;
     amountGram: number;
   };
+  openWishModal: {
+    ownerId: string;
+  } & WithTabId;
+  closeWishModal: WithTabId | undefined;
 }
 
 export interface RequiredActionPayloads {

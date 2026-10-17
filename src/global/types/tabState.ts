@@ -1285,6 +1285,10 @@ export type TabState = {
     level: number;
   };
 
+  wishModal?: {
+    ownerId: string;
+  };
+
   monetizationVerificationModal?: {
     chatId: string;
     isLoading?: boolean;

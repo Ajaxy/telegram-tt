@@ -42,6 +42,7 @@ import './ui/audioPlayer';
 import './ui/musicPicker';
 import './ui/stars';
 import './ui/wallet';
+import './ui/wish';
 import './ui/reactions';
 import './ui/stories';
 import './ui/statistics';

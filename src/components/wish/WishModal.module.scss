@@ -1,0 +1,70 @@
+.summary {
+  padding: 1rem;
+}
+
+.island {
+  margin-top: 0.75rem;
+}
+
+.tabs {
+  width: fit-content;
+  margin-bottom: 0.25rem;
+  margin-inline: auto;
+}
+
+.title {
+  font-size: 1.375rem;
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.progressTrack {
+  overflow: hidden;
+
+  height: 0.5rem;
+  margin-block: 0.75rem 0.5rem;
+  border-radius: 0.25rem;
+
+  background-color: var(--color-background-secondary);
+}
+
+.progressFill {
+  transform-origin: left;
+
+  height: 100%;
+  border-radius: inherit;
+
+  background-image: linear-gradient(90deg, var(--color-primary), var(--color-primary-shade));
+
+  transition: transform 0.4s ease-out;
+}
+
+.stats {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.avatar {
+  flex-shrink: 0;
+  margin-inline-end: 0.75rem;
+}
+
+.supportAmount {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  font-weight: var(--font-weight-semibold);
+}
+
+.note {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-block: 0.5rem;
+}

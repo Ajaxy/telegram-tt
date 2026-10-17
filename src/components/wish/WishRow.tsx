@@ -8,6 +8,7 @@ import { selectWish } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import AvatarList from '../common/AvatarList';
 import Icon from '../common/icons/Icon';
@@ -35,12 +36,16 @@ const WishRow = ({
   isOwner,
   usersById,
 }: OwnProps & StateProps) => {
-  const { loadWish } = getActions();
+  const { loadWish, openWishModal } = getActions();
   const lang = useLang();
 
   useEffect(() => {
     loadWish({ ownerId });
   }, [ownerId]);
+
+  const handleOpenDetails = useLastCallback(() => {
+    openWishModal({ ownerId });
+  });
 
   const recentSupporters = useMemo(() => {
     if (!wish) return undefined;
@@ -69,6 +74,7 @@ const WishRow = ({
         multiline
         narrow
         ripple
+        onClick={handleOpenDetails}
         rightElement={(
           <WishCrystal
             progress={raisedGram / targetGram}
@@ -99,6 +105,7 @@ const WishRow = ({
         withPrimaryColor
         narrow
         ripple
+        onClick={handleOpenDetails}
       >
         <span>{lang(isOwner ? 'WishManage' : 'WishSupport')}</span>
       </ListItem>
