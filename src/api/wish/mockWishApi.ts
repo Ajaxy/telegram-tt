@@ -6,8 +6,8 @@ import { getDemoPeopleIds } from './demoPeople';
 // No wallet transfer happens here: balances and amounts are demo values.
 
 const DEMO_BALANCE_GRAM = 48;
-const DEMO_TITLES = ['Trip to Tokyo', 'New camera', 'Guitar lessons', 'Mountain bike', 'Coffee machine'];
-const DEMO_TARGETS_GRAM = [500, 300, 250, 400, 150];
+const DEMO_TITLE = 'Trip to Tokyo';
+const DEMO_TARGET_GRAM = 500;
 const DEMO_SUPPORT_AMOUNTS_GRAM = [15, 40, 20, 30, 10, 5];
 // Minutes ago, matching the prototype's "1h ago" / "yesterday" / "3d ago" spread
 const DEMO_SUPPORT_AGES_MIN = [60, 180, 1700, 2900, 4400, 7300];
@@ -77,7 +77,6 @@ export function roundGram(value: number) {
 }
 
 function buildDemoWish(ownerId: string): Wish {
-  const seed = getIdSeed(ownerId);
   const now = Math.floor(Date.now() / 1000);
   const supporters = getDemoPeopleIds().slice(0, DEMO_SUPPORT_AMOUNTS_GRAM.length).map((userId, i) => ({
     userId,
@@ -88,14 +87,10 @@ function buildDemoWish(ownerId: string): Wish {
   return {
     id: `wish-${ownerId}`,
     ownerId,
-    title: DEMO_TITLES[seed % DEMO_TITLES.length],
-    targetGram: DEMO_TARGETS_GRAM[seed % DEMO_TARGETS_GRAM.length],
+    title: DEMO_TITLE,
+    targetGram: DEMO_TARGET_GRAM,
     raisedGram: roundGram(supporters.reduce((sum, { amountGram }) => sum + amountGram, 0)),
     settings: { shouldShowWish: true, shouldShowSupporters: true, shouldShowAmounts: true },
     supporters,
   };
-}
-
-function getIdSeed(id: string) {
-  return Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
