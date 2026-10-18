@@ -1,0 +1,44 @@
+.root {
+  :global(.title) {
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+.dimmed {
+  opacity: 0.5;
+}
+
+.amount {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.raised {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+}
+
+.supporters {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  margin-block: 0.375rem 0.125rem;
+
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.supportersCount {
+  white-space: nowrap;
+}
+
+.chevron {
+  margin-inline-start: auto;
+  font-size: 1.25rem;
+}
+
+.crystal {
+  margin-block: -0.375rem;
+  margin-inline-start: 0.5rem;
+}

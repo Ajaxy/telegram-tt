@@ -1285,6 +1285,21 @@ export type TabState = {
     level: number;
   };
 
+  wishModal?: {
+    ownerId: string;
+  };
+
+  wishSendModal?: {
+    ownerId: string;
+  };
+
+  // Particles flying into the wish crystal after a demo transfer
+  wishBurst?: {
+    id: number;
+    ownerId: string;
+    amountGram: number;
+  };
+
   monetizationVerificationModal?: {
     chatId: string;
     isLoading?: boolean;

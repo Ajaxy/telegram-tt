@@ -19,3 +19,4 @@ export * from './topics';
 export * from './gifts';
 export * from './wallet';
 export * from './musicPicker';
+export * from './wish';

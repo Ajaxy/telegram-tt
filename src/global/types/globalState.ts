@@ -91,6 +91,7 @@ import type {
   TopicsInfo,
   WebPageMediaSize,
 } from '../../types';
+import type { Wish } from '../../types/wish';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { SharedState } from './sharedState';
 import type { TabState } from './tabState';
@@ -567,6 +568,12 @@ export type GlobalState = {
   // Against USD
   currencyRates?: Record<string, number>;
   walletCurrency?: string;
+
+  // Demo data from `mockWishApi`, kept out of the cache
+  wishes?: {
+    byOwnerId: Record<string, Wish>;
+    demoBalanceGram?: number;
+  };
 };
 
 export type RequiredGlobalState = GlobalState & { _: never };

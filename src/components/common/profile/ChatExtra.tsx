@@ -62,6 +62,7 @@ import Switch from '../../gili/primitives/Switch';
 import Chat from '../../left/main/Chat';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
+import WishRow from '../../wish/WishRow';
 import CompactMapPreview from '../CompactMapPreview';
 import CustomEmoji from '../CustomEmoji';
 import Icon from '../icons/Icon';
@@ -446,6 +447,7 @@ const ChatExtra = ({
           </ListItem>
         )}
         {activeUsernames && renderUsernames(activeUsernames)}
+        {userId && <WishRow ownerId={userId} />}
         {description && Boolean(description.length) && (
           <ListItem
             icon="info-filled"
