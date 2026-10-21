@@ -51,3 +51,9 @@
   width: auto;
   height: 1.5rem;
 }
+
+:global(.MenuItem).lateEdit {
+  margin-top: -0.25rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-edit-radar-text);
+}

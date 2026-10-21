@@ -842,3 +842,14 @@
 .media-inner {
   overflow: hidden;
 }
+
+// Edit Radar: amber outline on a message reached from the radar pane
+.Message.late-edit-focused .message-content {
+  box-shadow: 0 0 0 0.125rem var(--color-edit-radar-border);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body:not(.no-page-transitions) .Message.late-edit-focused .message-content {
+    transition: background-color var(--select-transition), box-shadow 350ms ease-out;
+  }
+}

@@ -135,6 +135,7 @@ import { IS_TAURI } from '../../../util/browser/globalEnvironment';
 import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { isLateEdit } from '../../../util/editRadar';
 import { isUserId } from '../../../util/entities/ids';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
@@ -829,6 +830,7 @@ const Message = ({
     hasMessageReply && 'has-reply',
     isContextMenuOpen && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
+    isFocused && !noFocusHighlight && isLateEdit(message) && 'late-edit-focused',
     isForwarding && 'is-forwarding',
     isPlayingDeleteAnimation && 'is-deleting',
     isPlayingSnapAnimation && 'is-dissolving',

@@ -29,6 +29,7 @@ import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import BotAdPane from './panes/BotAdPane';
 import BotVerificationPane from './panes/BotVerificationPane';
 import ChatReportPane from './panes/ChatReportPane';
+import EditRadarPane from './panes/EditRadarPane';
 import HeaderPinnedMessage from './panes/HeaderPinnedMessage';
 import PaidMessageChargePane from './panes/PaidMessageChargePane';
 
@@ -105,13 +106,14 @@ const MiddleHeaderPanesIsland = ({
   const [getBotAdState, setBotAdState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getBotVerificationState, setBotVerificationState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getPaidMessageChargeState, setPaidMessageChargeState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
+  const [getEditRadarState, setEditRadarState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isGroupCallShown = threadId === MAIN_THREAD_ID && !chat?.isForum;
 
   const paneStateGetters = [
     isGroupCallShown ? getGroupCallState : getFallbackPaneState,
     getChatReportState, getBotVerificationState,
-    getPinnedState, getBotAdState, getPaidMessageChargeState,
+    getEditRadarState, getPinnedState, getBotAdState, getPaidMessageChargeState,
   ];
   const expectedReportCount = paneStateGetters.filter((getter) => getter !== getFallbackPaneState).length;
   const expectedReportCountRef = useRef(expectedReportCount);
@@ -375,7 +377,7 @@ const MiddleHeaderPanesIsland = ({
     settleRef.current = settle;
     settle();
   }, [cacheKey, getGroupCallState, getPinnedState,
-    getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState]);
+    getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState, getEditRadarState]);
 
   if (!shouldRender) return undefined;
 
@@ -407,6 +409,11 @@ const MiddleHeaderPanesIsland = ({
       <BotVerificationPane
         peerId={chatId}
         onPaneStateChange={setBotVerificationState}
+      />
+      <EditRadarPane
+        chatId={chatId}
+        threadId={threadId}
+        onPaneStateChange={setEditRadarState}
       />
       <HeaderPinnedMessage
         chatId={chatId}

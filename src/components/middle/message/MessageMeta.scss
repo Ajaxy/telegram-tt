@@ -46,6 +46,17 @@
     margin-right: 0.25rem;
   }
 
+  .message-late-edit {
+    margin-inline-end: 0.25rem;
+    padding: 0.0625rem 0.3125rem;
+    border-radius: 0.5rem;
+
+    font-weight: var(--font-weight-medium);
+    color: var(--color-edit-radar-text);
+
+    background: var(--color-edit-radar-background);
+  }
+
   .message-views {
     margin-inline-start: 0.125rem;
   }

@@ -779,6 +779,8 @@ export interface LangPair {
   'EditAdminGroupDeleteMessages': undefined;
   'Reminders': undefined;
   'MessageMetaEdited': undefined;
+  'EditRadarPaneShow': undefined;
+  'EditRadarPaneDismiss': undefined;
   'MessageMetaApproximate': undefined;
   'MessageMetaImported': undefined;
   'ImportedInfo': undefined;
@@ -3628,6 +3630,15 @@ export interface LangPairWithVariables<V = LangVariable> {
     'date': V;
     'time': V;
   };
+  'EditRadarEditedLater': {
+    'delay': V;
+  };
+  'EditRadarSentDate': {
+    'date': V;
+  };
+  'EditRadarPaneTitle': {
+    'delay': V;
+  };
   'EmptyGroupInfoLine1': {
     'count': V;
   };
@@ -5636,6 +5647,21 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'MessageTooltipReplies': {
+    'count': V;
+  };
+  'EditRadarYears': {
+    'count': V;
+  };
+  'EditRadarMonths': {
+    'count': V;
+  };
+  'EditRadarDays': {
+    'count': V;
+  };
+  'EditRadarHours': {
+    'count': V;
+  };
+  'EditRadarPaneTitleMany': {
     'count': V;
   };
   'DeleteReactionTitle': {

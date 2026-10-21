@@ -8,6 +8,7 @@ import type {
 import type { LangFn } from '../../../util/localization';
 
 import buildClassName from '../../../util/buildClassName';
+import { formatEditDelay, getEditDelay, isLateEdit } from '../../../util/editRadar';
 import {
   formatCalendarDate, formatCompactTimestamp, formatDateTime, isSameLocalDay, secondsToDate,
 } from '../../../util/localization/dateFormat';
@@ -106,6 +107,9 @@ const MessageMeta = ({
     if (editDateTime) {
       text += '\n';
       text += lang('MessageTooltipEditedDate', { date: editDateTime });
+      if (isLateEdit(message)) {
+        text += ` (${lang('EditRadarEditedLater', { delay: formatEditDelay(lang, getEditDelay(message)!) })})`;
+      }
     }
     if (forwardedDateTime) {
       text += '\n';
@@ -137,6 +141,11 @@ const MessageMeta = ({
   }, [lang, repliesThreadInfo]);
 
   const shouldShowPrimaryEditedDate = Boolean(message.isEdited && isMessagePrimaryEditedDateEnabled);
+
+  const lateEditLabel = useMemo(() => {
+    if (!isLateEdit(message)) return undefined;
+    return lang('EditRadarEditedLater', { delay: formatEditDelay(lang, getEditDelay(message)!) });
+  }, [lang, message]);
 
   const date = useMemo(() => {
     if (shouldShowPrimaryEditedDate) {
@@ -220,7 +229,8 @@ const MessageMeta = ({
             <span className="message-imported" onClick={handleImportedClick}>{lang('MessageMetaImported')}</span>
           </>
         )}
-        {message.isEdited && !shouldShowPrimaryEditedDate && `${lang('MessageMetaEdited')} `}
+        {lateEditLabel && <span className="message-late-edit">{lateEditLabel}</span>}
+        {message.isEdited && !lateEditLabel && !shouldShowPrimaryEditedDate && `${lang('MessageMetaEdited')} `}
         {message.isVideoProcessingPending && !shouldShowPrimaryEditedDate && `${lang('MessageMetaApproximate')} `}
         {date}
       </span>
