@@ -14,6 +14,7 @@ import useLastCallback from './useLastCallback';
 type OwnArgs = {
   trackKey?: TrackKey;
   mediaType: PlaybackMediaType;
+  isVideo?: boolean;
   capabilities: PlaybackCapabilities;
   src?: string;
   originalDuration: number;
@@ -32,6 +33,7 @@ const EVENTS = [
 export default function useAudioPlayback({
   trackKey,
   mediaType,
+  isVideo,
   capabilities,
   src,
   originalDuration,
@@ -45,7 +47,7 @@ export default function useAudioPlayback({
   const [isPlaying, setIsPlaying] = useState(() => (
     Boolean(trackKey) && playbackController.isTrackAudiblyPlaying(trackKey)
   ));
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | undefined>(() => (
+  const [audioElement, setAudioElement] = useState<HTMLMediaElement | undefined>(() => (
     trackKey ? peek(trackKey) : undefined
   ));
   const [playProgress, setPlayProgress] = useState(0);
@@ -77,7 +79,7 @@ export default function useAudioPlayback({
   const duration = elementDuration || originalDuration;
 
   const handleElementEvent = useLastCallback((e: Event) => {
-    const element = e.currentTarget as HTMLAudioElement;
+    const element = e.currentTarget as HTMLMediaElement;
     if (isSafariPatchInProgress(element) && e.type !== 'error') return;
 
     switch (e.type) {
@@ -107,6 +109,10 @@ export default function useAudioPlayback({
     }
   });
 
+  const initializeElementProgress = useLastCallback((element: HTMLMediaElement) => {
+    if (!noProgressUpdates) updatePlayProgress(getElementProgress(element, originalDuration));
+  });
+
   useEffect(() => {
     if (!trackKey) return undefined;
 
@@ -116,6 +122,7 @@ export default function useAudioPlayback({
       setAudioElement(element);
       setIsPlaying(!element.paused);
       setElementDuration(Number.isFinite(element.duration) ? element.duration : 0);
+      initializeElementProgress(element);
       EVENTS.forEach((event) => element.addEventListener(event, handleElementEvent));
     };
     const detachFromElement = () => {
@@ -140,7 +147,7 @@ export default function useAudioPlayback({
       detachFromElement();
       release(trackKey);
     };
-  }, [trackKey, handleElementEvent]);
+  }, [trackKey]);
 
   const isProgressShared = isCurrent && capabilities.mediaSession !== 'keep';
 
@@ -175,6 +182,7 @@ export default function useAudioPlayback({
 
     playbackController.playTrack(trackKey, src, {
       mediaType,
+      isVideo,
       duration: originalDuration,
       metadata,
       capabilities,
@@ -251,7 +259,7 @@ export default function useAudioPlayback({
   };
 }
 
-function getElementProgress(element: HTMLAudioElement, fallbackDuration: number) {
+function getElementProgress(element: HTMLMediaElement, fallbackDuration: number) {
   const duration = Number.isFinite(element.duration) ? element.duration : fallbackDuration;
 
   return duration ? element.currentTime / duration : 0;

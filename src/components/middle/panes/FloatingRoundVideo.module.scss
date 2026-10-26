@@ -1,0 +1,97 @@
+.floating {
+  touch-action: none;
+
+  position: fixed;
+  z-index: var(--z-drop-area);
+  top: 0;
+  left: 0;
+  transform: translate(var(--round-video-x, calc(100vw - 100% - 1rem)), var(--round-video-y, 5.5rem));
+
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+
+  visibility: hidden;
+  opacity: 0;
+  box-shadow: 0 0.125rem 0.75rem #0006;
+
+  transition: opacity 150ms;
+
+  &.shown {
+    visibility: visible;
+    opacity: 1;
+  }
+}
+
+.surface {
+  pointer-events: none;
+
+  position: absolute;
+
+  overflow: hidden;
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  background: #000;
+}
+
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.progress {
+  pointer-events: none;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+}
+
+.progressCircle {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-opacity: 0.5;
+  stroke-width: 1.5;
+}
+
+.playbackButton {
+  --button-background-color: rgba(0, 0, 0, 0.35);
+  --button-active-background-color: rgba(0, 0, 0, 0.45);
+  --button-no-ripple-background-color: rgba(0, 0, 0, 0.45);
+
+  // Pointer gestures pass through to the player; the button retains keyboard activation
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  opacity: 0;
+
+  .floating:hover &,
+  &:focus-visible,
+  &.paused {
+    opacity: 1;
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+}

@@ -2146,6 +2146,9 @@ export interface ActionPayloads {
     timestamp?: number;
   } & WithTabId;
   closeAudioPlayer: WithTabId | undefined;
+  handleAudioPlaybackEnded: {
+    withAutoAdvance?: boolean;
+  } & WithTabId;
   setAudioPlayerVolume: {
     volume: number;
   } & WithTabId;

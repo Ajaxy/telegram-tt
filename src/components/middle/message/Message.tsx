@@ -1389,6 +1389,8 @@ const Message = ({
         {!isAlbum && isRoundVideo && !withVoiceTranscription && (
           <RoundVideo
             message={message}
+            threadId={threadId}
+            isInScheduled={isScheduled}
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
@@ -1407,6 +1409,7 @@ const Message = ({
             message={message}
             variant="inline"
             threadId={threadId}
+            isInScheduled={isScheduled}
             noPlaylist={isScheduled}
             uploadProgress={uploadProgress}
             isSelectable={isInDocumentGroup}

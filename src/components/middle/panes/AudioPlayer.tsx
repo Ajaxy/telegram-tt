@@ -208,6 +208,7 @@ const AudioPlayer = ({
   const audio = renderingMedia?.mediaType === 'audio' ? renderingMedia : undefined;
   const isLocalMessage = Boolean(message && isMessageLocal(message));
   const isVoice = renderingMedia?.mediaType === 'voice' || renderingMedia?.mediaType === 'video';
+  const voiceTitle = lang(renderingMedia?.mediaType === 'video' ? 'AttachVideoMessage' : 'AttachAudio');
   const isMusicSaved = Boolean(audio && savedMusicById?.[audio.id]);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
   const senderName = renderingSender ? getPeerTitle(lang, renderingSender) : undefined;
@@ -244,8 +245,9 @@ const AudioPlayer = ({
   useEffect(() => {
     if (!nextTrackKey || !nextTrackMediaData) return undefined;
 
-    return prefetchTrack(nextTrackKey, nextTrackMediaData);
-  }, [nextTrackKey, nextTrackMediaData]);
+    const isNextVideo = nextTrackMedia?.mediaType === 'video' && nextTrackMedia.isRound;
+    return prefetchTrack(nextTrackKey, nextTrackMediaData, isNextVideo);
+  }, [nextTrackKey, nextTrackMediaData, nextTrackMedia]);
 
   const {
     playPause,
@@ -259,8 +261,9 @@ const AudioPlayer = ({
   } = useAudioPlayback({
     trackKey: currentTrackKey,
     mediaType: isVoice ? 'voice' : 'audio',
+    isVideo: renderingMedia?.mediaType === 'video' && renderingMedia.isRound,
     capabilities: capabilities!,
-    src: mediaData,
+    src: renderingMedia?.mediaType === 'video' ? renderingMedia.blobUrl || mediaData : mediaData,
     originalDuration: mediaDuration || 0,
     metadata: mediaMetadata,
     shouldPlay: true,
@@ -353,7 +356,10 @@ const AudioPlayer = ({
     }
 
     const { chatId, id } = renderingMessage;
-    focusMessage({ chatId, threadId, messageId: id });
+    focusMessage({
+      chatId, threadId, messageId: id,
+      messageListType: renderingItem?.type === 'message' && renderingItem.isScheduled ? 'scheduled' : undefined,
+    });
   });
 
   const withPlaylistNav = Boolean(playbackSource && playbackSource.type !== 'single');
@@ -535,7 +541,7 @@ const AudioPlayer = ({
           />
         </Button>
         <div className={styles.content} {...contentClickableProps}>
-          {audio ? renderAudio(audio, timeNode) : renderVoice(lang('AttachAudio'), senderName)}
+          {audio ? renderAudio(audio, timeNode) : renderVoice(voiceTitle, senderName)}
           <RippleEffect />
         </div>
         <Button
@@ -612,7 +618,7 @@ const AudioPlayer = ({
       )}
 
       <div className={styles.content} {...contentClickableProps}>
-        {audio ? renderAudio(audio, timeNode) : renderVoice(lang('AttachAudio'), senderName)}
+        {audio ? renderAudio(audio, timeNode) : renderVoice(voiceTitle, senderName)}
         <RippleEffect />
       </div>
 

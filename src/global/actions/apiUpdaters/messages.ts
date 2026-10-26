@@ -12,7 +12,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import { makeMessageTrackKey } from '../../../util/audioPlayback/mediaPool';
+import { makeMessageTrackKey, makeScheduledMessageTrackKey } from '../../../util/audioPlayback/mediaPool';
 import * as playbackController from '../../../util/audioPlayback/playbackController';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -38,6 +38,7 @@ import {
   isMessageLocal,
   isUserBot,
   pickMatchingTypingDraftMessage,
+  runForAllTabs,
   WINDOWED_MEDIA_SEARCH_TYPES,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
@@ -799,7 +800,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const { activeItem, source } = selectTabState(global, tabId).audioPlayer;
-        if (activeItem?.type !== 'message' || activeItem.chatId !== chatId || activeItem.messageId !== localId) return;
+        if (activeItem?.type !== 'message' || activeItem.isScheduled
+          || activeItem.chatId !== chatId || activeItem.messageId !== localId) return;
 
         if (tabId === getCurrentTabId()) {
           playbackController.renameTrack(
@@ -890,6 +892,26 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
         isDeleting: undefined,
+      });
+
+      runForAllTabs(global, (tabId) => {
+        const { audioPlayer } = selectTabState(global, tabId);
+        const { activeItem } = audioPlayer;
+        if (activeItem?.type !== 'message' || !activeItem.isScheduled
+          || activeItem.chatId !== chatId || activeItem.messageId !== localId) return;
+
+        if (tabId === getCurrentTabId()) {
+          playbackController.renameTrack(
+            makeScheduledMessageTrackKey(chatId, localId, activeItem.documentId),
+            makeScheduledMessageTrackKey(chatId, message.id, activeItem.documentId),
+          );
+        }
+        global = updateTabState(global, {
+          audioPlayer: {
+            ...audioPlayer,
+            activeItem: { ...activeItem, messageId: message.id },
+          },
+        }, tabId);
       });
 
       if (poll) {
@@ -1672,7 +1694,8 @@ export function deleteMessages<T extends GlobalState>(
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
       const { activeItem, source } = selectTabState(global, tabId).audioPlayer;
-      if (activeItem?.type === 'message' && activeItem.chatId === chatId && idsSet.has(activeItem.messageId)) {
+      if (activeItem?.type === 'message' && !activeItem.isScheduled
+        && activeItem.chatId === chatId && idsSet.has(activeItem.messageId)) {
         actions.closeAudioPlayer({ tabId });
       }
 
@@ -1750,7 +1773,8 @@ export function deleteMessages<T extends GlobalState>(
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const { activeItem, source } = selectTabState(global, tabId).audioPlayer;
-        if (activeItem?.type === 'message' && activeItem.chatId === commonBoxChatId && activeItem.messageId === id) {
+        if (activeItem?.type === 'message' && !activeItem.isScheduled
+          && activeItem.chatId === commonBoxChatId && activeItem.messageId === id) {
           actions.closeAudioPlayer({ tabId });
         }
 
@@ -1849,6 +1873,15 @@ function deleteScheduledMessages<T extends GlobalState>(
   });
 
   setGlobal(global);
+
+  const idsSet = new Set(ids);
+  runForAllTabs(global, (tabId) => {
+    const { activeItem } = selectTabState(global, tabId).audioPlayer;
+    if (activeItem?.type === 'message' && activeItem.isScheduled
+      && activeItem.chatId === chatId && idsSet.has(activeItem.messageId)) {
+      actions.closeAudioPlayer({ tabId });
+    }
+  });
 
   const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
 

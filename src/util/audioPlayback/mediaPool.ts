@@ -1,19 +1,21 @@
 export type TrackKey =
   | `msg:${string}:${number}`
   | `msg:${string}:${number}:${string}`
+  | `scheduled:${string}:${number}`
+  | `scheduled:${string}:${number}:${string}`
   | `savedMusic:${string}:${string}`
   | `musicSearch:${string}`
   | `iv:${string}:${string}`
   | `draft:${string}`;
 
 type PoolEntry = {
-  element: HTMLAudioElement;
+  element: HTMLMediaElement;
   consumerCount: number;
 };
 
 const pool = new Map<TrackKey, PoolEntry>();
 const keyAliases = new Map<TrackKey, TrackKey>();
-const destroyListeners = new Set<(element: HTMLAudioElement) => void>();
+const destroyListeners = new Set<(element: HTMLMediaElement) => void>();
 
 let pinnedKey: TrackKey | undefined;
 
@@ -22,8 +24,7 @@ export function acquire(key: TrackKey) {
   let entry = pool.get(key);
 
   if (!entry) {
-    const element = new Audio();
-    element.preload = 'none';
+    const element = createAudioElement();
     entry = { element, consumerCount: 0 };
     pool.set(key, entry);
   }
@@ -31,6 +32,20 @@ export function acquire(key: TrackKey) {
   entry.consumerCount++;
 
   return entry.element;
+}
+
+export function ensureVideo(key: TrackKey) {
+  key = resolveKey(key);
+  const previousEntry = pool.get(key);
+  if (previousEntry?.element instanceof HTMLVideoElement) return previousEntry.element;
+
+  const element = document.createElement('video');
+  element.playsInline = true;
+  element.disablePictureInPicture = true;
+  pool.set(key, { element, consumerCount: previousEntry?.consumerCount || 0 });
+  if (previousEntry) destroyElement(previousEntry.element);
+
+  return element;
 }
 
 export function release(key: TrackKey) {
@@ -55,7 +70,7 @@ function resolveKey(key: TrackKey) {
   return resolved;
 }
 
-export function onElementDestroy(listener: (element: HTMLAudioElement) => void) {
+export function onElementDestroy(listener: (element: HTMLMediaElement) => void) {
   destroyListeners.add(listener);
 
   return () => destroyListeners.delete(listener);
@@ -103,15 +118,26 @@ function destroyIfUnused(key: TrackKey) {
   });
 }
 
-function destroyElement(element: HTMLAudioElement) {
+function destroyElement(element: HTMLMediaElement) {
   element.pause();
   element.removeAttribute('src');
   element.load();
+  element.remove();
   destroyListeners.forEach((listener) => listener(element));
+}
+
+function createAudioElement() {
+  const element = new Audio();
+  element.preload = 'none';
+  return element;
 }
 
 export function makeMessageTrackKey(chatId: string, messageId: number, documentId?: string): TrackKey {
   return documentId ? `msg:${chatId}:${messageId}:${documentId}` : `msg:${chatId}:${messageId}`;
+}
+
+export function makeScheduledMessageTrackKey(chatId: string, messageId: number, documentId?: string): TrackKey {
+  return documentId ? `scheduled:${chatId}:${messageId}:${documentId}` : `scheduled:${chatId}:${messageId}`;
 }
 
 export function makeSavedMusicTrackKey(peerId: string, audioId: string): TrackKey {

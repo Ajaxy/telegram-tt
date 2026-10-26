@@ -4,7 +4,10 @@ import type { PlaybackCapabilities, PlaybackMediaType } from '../../types';
 import type { TrackKey } from './mediaPool';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../config';
-import { selectCanGoNext, selectCanGoPrev, selectCurrentTrackKey } from '../../global/selectors/audioPlayer';
+import { hasMessageTtl, isMessageLocal } from '../../global/helpers/messages';
+import {
+  selectCanGoNext, selectCanGoPrev, selectCurrentTrackKey, selectPlaybackItem, selectPlaybackMessage,
+} from '../../global/selectors/audioPlayer';
 import { selectTabState } from '../../global/selectors/tabs';
 import { animate } from '../animation';
 import { IS_SAFARI } from '../browser/windowEnvironment';
@@ -17,7 +20,7 @@ import safePlay from '../safePlay';
 import { fastRaf } from '../schedulers';
 import { createSignal } from '../signals';
 import {
-  acquire, peek, pin, reassignKey, release,
+  acquire, ensureVideo, peek, pin, reassignKey, release,
 } from './mediaPool';
 
 const SEEK_OFFSET = 10;
@@ -46,7 +49,7 @@ let mediaSessionOwner: {
   capabilities: PlaybackCapabilities;
   metadata?: MediaMetadata;
 } | undefined;
-const elementKeys = new WeakMap<HTMLAudioElement, TrackKey>();
+const elementKeys = new WeakMap<HTMLMediaElement, TrackKey>();
 let isProgressLoopActive = false;
 
 export function getProgressSignal() {
@@ -67,12 +70,13 @@ export function subscribe(listener: (nextState: PlaybackControllerState) => void
 
 export function playTrack(key: TrackKey, src: string, options: {
   mediaType: PlaybackMediaType;
+  isVideo?: boolean;
   duration: number;
   metadata?: MediaMetadata;
   capabilities: PlaybackCapabilities;
 }) {
   const {
-    mediaType, duration, metadata, capabilities,
+    mediaType, isVideo, duration, metadata, capabilities,
   } = options;
 
   if (state.trackKey && state.trackKey !== key) {
@@ -83,6 +87,7 @@ export function playTrack(key: TrackKey, src: string, options: {
     }
   }
 
+  if (isVideo) ensureVideo(key);
   const element = acquire(key);
   if (capabilities.mediaSession === 'keep') {
     release(key);
@@ -100,7 +105,7 @@ export function playTrack(key: TrackKey, src: string, options: {
     element.preload = 'auto';
   }
 
-  if (isProgressiveInSafari(src)) {
+  if (!(element instanceof HTMLVideoElement) && isProgressiveInSafari(src)) {
     delete element.dataset.preventPlayAfterPatch;
     patchSafariProgressiveAudio(element);
   }
@@ -167,14 +172,15 @@ export function renameTrack(oldKey: TrackKey, newKey: TrackKey) {
   }
 }
 
-export function prefetchTrack(key: TrackKey, src: string) {
+export function prefetchTrack(key: TrackKey, src: string, isVideo?: boolean) {
+  if (isVideo) ensureVideo(key);
   const element = acquire(key);
 
   if (element.getAttribute('src') !== src) {
     element.preload = 'auto';
     element.src = src;
 
-    if (isProgressiveInSafari(src)) {
+    if (!(element instanceof HTMLVideoElement) && isProgressiveInSafari(src)) {
       element.dataset.preventPlayAfterPatch = 'true';
       patchSafariProgressiveAudio(element);
     }
@@ -241,16 +247,21 @@ export function stopCurrentAudio() {
   getCurrentElement()?.pause();
 }
 
-export function prepareTrackSwitch(nextKey?: TrackKey) {
+export function prepareTrackSwitch(nextKey?: TrackKey, isVideo?: boolean) {
   if (nextKey && state.trackKey === nextKey) return;
 
   const outgoingKey = state.trackKey;
 
   if (nextKey) {
-    updateState({ trackKey: nextKey });
+    if (isVideo) ensureVideo(nextKey);
     const nextElement = peek(nextKey);
-    if (nextElement) nextElement.currentTime = 0;
     if (outgoingKey) resetElement(outgoingKey);
+    // Keep the incoming element alive while prefetch consumers release it during the switch
+    pin(nextKey);
+    if (nextElement) nextElement.currentTime = 0;
+    updateState({
+      trackKey: nextKey, isPlaying: false, duration: nextElement ? getDuration(nextElement) : 0,
+    });
   } else {
     pause();
   }
@@ -326,7 +337,7 @@ function getCurrentElement() {
   return state.trackKey ? peek(state.trackKey) : undefined;
 }
 
-function applyUserPlaybackParams(element: HTMLAudioElement) {
+function applyUserPlaybackParams(element: HTMLMediaElement) {
   const global = getGlobal();
   const tabAudioPlayer = selectTabState(global).audioPlayer;
 
@@ -339,7 +350,7 @@ function applyUserPlaybackParams(element: HTMLAudioElement) {
   }
 }
 
-function applyPlaybackRate(element: HTMLAudioElement) {
+function applyPlaybackRate(element: HTMLMediaElement) {
   const tabAudioPlayer = selectTabState(getGlobal()).audioPlayer;
   const duration = getDuration(element) || originalDuration;
   const canApplyRate = state.mediaType === 'voice' || duration > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
@@ -347,7 +358,7 @@ function applyPlaybackRate(element: HTMLAudioElement) {
   element.playbackRate = canApplyRate && tabAudioPlayer.isPlaybackRateActive ? tabAudioPlayer.playbackRate : 1;
 }
 
-function getDuration(element: HTMLAudioElement) {
+function getDuration(element: HTMLMediaElement) {
   return Number.isFinite(element.duration) ? element.duration : 0;
 }
 
@@ -364,7 +375,7 @@ function stopElement(key: TrackKey) {
 
 function unloadElement(key: TrackKey) {
   const element = peek(key);
-  if (!element) return;
+  if (!element || element instanceof HTMLVideoElement) return;
 
   element.removeAttribute('src');
   element.load();
@@ -383,7 +394,7 @@ function updateState(patch: Partial<PlaybackControllerState>) {
   listeners.runCallbacks(state);
 }
 
-const boundElements = new WeakSet<HTMLAudioElement>();
+const boundElements = new WeakSet<HTMLMediaElement>();
 
 export function cancelPlaybackIntent(key: TrackKey) {
   if (state.trackKey !== key) return;
@@ -392,22 +403,23 @@ export function cancelPlaybackIntent(key: TrackKey) {
   if (mediaSessionOwner?.key === key) setPlaybackState('paused');
 }
 
-function playElement(key: TrackKey, element: HTMLAudioElement) {
+function playElement(key: TrackKey, element: HTMLMediaElement) {
   element.play().catch(() => {
     cancelPlaybackIntent(key);
   });
 }
 
-function isCurrent(element: HTMLAudioElement) {
+function isCurrent(element: HTMLMediaElement) {
   const key = elementKeys.get(element);
-  return key !== undefined && state.trackKey === key;
+  return key !== undefined && state.trackKey === key && peek(key) === element;
 }
 
-function ownsMediaSession(element: HTMLAudioElement) {
-  return elementKeys.get(element) === mediaSessionOwner?.key;
+function ownsMediaSession(element: HTMLMediaElement) {
+  const key = elementKeys.get(element);
+  return key !== undefined && key === mediaSessionOwner?.key && peek(key) === element;
 }
 
-function syncPositionState(element: HTMLAudioElement) {
+function syncPositionState(element: HTMLMediaElement) {
   if (!ownsMediaSession(element)) return;
 
   setPositionState({
@@ -417,19 +429,20 @@ function syncPositionState(element: HTMLAudioElement) {
   });
 }
 
-function bindElement(element: HTMLAudioElement) {
+function bindElement(element: HTMLMediaElement) {
   if (boundElements.has(element)) return;
   boundElements.add(element);
 
   element.addEventListener('error', () => {
     const key = elementKeys.get(element);
-    if (key !== undefined) cancelPlaybackIntent(key);
+    if (key !== undefined && isCurrent(element)) cancelPlaybackIntent(key);
   });
 
   element.addEventListener('play', () => {
     if (!isCurrent(element)) return;
     updateState({ isPlaying: true, duration: getDuration(element) });
     startProgressLoop();
+    if (state.mediaType === 'voice') markCurrentMessageRead();
     if (!ownsMediaSession(element)) return;
     registerMediaSession(currentMetadata, buildMediaSessionHandlers());
     setPlaybackState('playing');
@@ -482,10 +495,23 @@ function bindElement(element: HTMLAudioElement) {
   element.addEventListener('ended', () => {
     if (!isCurrent(element) || isSafariPatchInProgress(element)) return;
     if (ownsMediaSession(element)) setPlaybackState('paused');
-    if (!currentCapabilities.withAutoAdvance) return;
     if (selectCurrentTrackKey(getGlobal()) !== elementKeys.get(element)) return;
-    getActions().playNextTrack({ isAuto: true });
+    getActions().handleAudioPlaybackEnded({ withAutoAdvance: currentCapabilities.withAutoAdvance });
   });
+}
+
+function markCurrentMessageRead() {
+  const global = getGlobal();
+  if (selectCurrentTrackKey(global) !== state.trackKey) return;
+
+  const item = selectPlaybackItem(global);
+  const message = selectPlaybackMessage(global, item);
+  if (!message?.isMediaUnread || message.isEphemeral || message.isScheduled
+    || (item?.type === 'message' && item.isScheduled)
+    || isMessageLocal(message) || hasMessageTtl(message)) return;
+  if (message.isOutgoing && message.chatId !== global.currentUserId) return;
+
+  getActions().markMessagesRead({ chatId: message.chatId, messageIds: [message.id] });
 }
 
 function startProgressLoop() {
@@ -504,7 +530,7 @@ function startProgressLoop() {
   }, fastRaf);
 }
 
-function syncPlayingProgress(element: HTMLAudioElement, isFrame?: boolean) {
+function syncPlayingProgress(element: HTMLMediaElement, isFrame?: boolean) {
   if (!isCurrent(element) || isSafariPatchInProgress(element)) return;
   if (element.paused) return;
   if (currentCapabilities.mediaSession === 'keep') return;

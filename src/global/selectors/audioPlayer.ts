@@ -10,12 +10,14 @@ import { LoadMoreDirection } from '../../types';
 import { MEDIA_PRELOAD_OFFSET } from '../../config';
 import {
   makeInstantViewTrackKey, makeMessageTrackKey, makeMusicSearchTrackKey, makeSavedMusicTrackKey,
+  makeScheduledMessageTrackKey,
 } from '../../util/audioPlayback/mediaPool';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { buildSearchResultKey, isSearchResultKey, parseSearchResultKey } from '../../util/keys/searchResultKey';
 import { getRichMessageAudios, getWebPageAudio } from '../helpers/messageMedia';
+import { hasMessageTtl } from '../helpers/messages';
 import {
-  selectChatMessage, selectChatMessageOrEphemeral, selectFullWebPage, selectWebPageFromMessage,
+  selectChatMessageOrEphemeral, selectFullWebPage, selectScheduledMessage, selectWebPageFromMessage,
 } from './messages';
 import { selectChatMediaSearch } from './middleSearch';
 import { selectMusicSearchAudio } from './musicPicker';
@@ -45,13 +47,16 @@ export function selectPlaybackItem<T extends GlobalState>(
 export function selectPlaybackMessage<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
   if (itemRef?.type !== 'message') return undefined;
 
-  return selectChatMessageOrEphemeral(global, itemRef.chatId, itemRef.messageId);
+  return itemRef.isScheduled
+    ? selectScheduledMessage(global, itemRef.chatId, itemRef.messageId)
+    : selectChatMessageOrEphemeral(global, itemRef.chatId, itemRef.messageId);
 }
 
 export function selectPlaybackMedia<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
   switch (itemRef?.type) {
     case 'message':
-      return selectMessagePlaybackMedia(global, itemRef.chatId, itemRef.messageId, itemRef.documentId);
+      return selectMessagePlaybackMedia(global, itemRef.chatId, itemRef.messageId,
+        itemRef.documentId, itemRef.isScheduled);
     case 'savedMusic':
       return selectSavedMusicAudio(global, itemRef.peerId, itemRef.audioId);
     case 'instantView':
@@ -73,9 +78,11 @@ function selectSavedMusicAudio<T extends GlobalState>(global: T, peerId: string,
 }
 
 function selectMessagePlaybackMedia<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, documentId?: string,
+  global: T, chatId: string, messageId: number, documentId?: string, isScheduled?: boolean,
 ) {
-  const message = selectChatMessageOrEphemeral(global, chatId, messageId);
+  const message = isScheduled
+    ? selectScheduledMessage(global, chatId, messageId)
+    : selectChatMessageOrEphemeral(global, chatId, messageId);
   if (!message) return undefined;
 
   if (documentId) {
@@ -95,14 +102,18 @@ function selectInstantViewAudio<T extends GlobalState>(global: T, webPageId: str
   return selectFullWebPage(global, webPageId)?.cachedPageAudioById?.[documentId];
 }
 
-export function makeMessageTrackKeyFrom(message: ApiMessage) {
-  return makeMessageTrackKey(message.chatId, message.id);
+export function makeMessageTrackKeyFrom(message: ApiMessage, isScheduled = message.isScheduled) {
+  return isScheduled
+    ? makeScheduledMessageTrackKey(message.chatId, message.id)
+    : makeMessageTrackKey(message.chatId, message.id);
 }
 
 export function makeTrackKeyFromItem(itemRef: PlaybackItemRef): TrackKey {
   switch (itemRef.type) {
     case 'message':
-      return makeMessageTrackKey(itemRef.chatId, itemRef.messageId, itemRef.documentId);
+      return itemRef.isScheduled
+        ? makeScheduledMessageTrackKey(itemRef.chatId, itemRef.messageId, itemRef.documentId)
+        : makeMessageTrackKey(itemRef.chatId, itemRef.messageId, itemRef.documentId);
     case 'savedMusic':
       return makeSavedMusicTrackKey(itemRef.peerId, itemRef.audioId);
     case 'instantView':
@@ -227,10 +238,8 @@ function selectStepIndex<T extends GlobalState>(global: T, isForward: boolean, t
   if (!delta) return -1;
 
   const step = isForward ? delta : -delta;
-  let nextIndex = index + step;
-  while (nextIndex >= 0 && nextIndex < keys.length) {
+  for (let nextIndex = index + step; nextIndex >= 0 && nextIndex < keys.length; nextIndex += step) {
     if (!selectIsSkippedInPlaylist(global, keys[nextIndex], tabId)) return nextIndex;
-    nextIndex += step;
   }
 
   return -1;
@@ -317,22 +326,42 @@ export function selectPlaylistWrapKey<T extends GlobalState>(
       if (!segment) return undefined;
 
       const { foundIds } = segment;
-      for (let i = 0; i < foundIds.length; i++) {
-        const key = isPastStart ? foundIds[foundIds.length - 1 - i] : foundIds[i];
-        if (!selectIsSkippedInPlaylist(global, key, tabId)) return key;
-      }
-
-      return undefined;
+      return selectPlayablePlaylistEdgeKey(global, foundIds, isPastStart, tabId);
     }
     case 'savedMusic':
     case 'globalSearch':
     case 'richMessage':
-      if (!isPastStart) return keys[0];
+      if (!isPastStart) return selectPlayablePlaylistEdgeKey(global, keys, false, tabId);
 
-      return selectIsPlaylistEdgeLoaded(global, false, tabId) ? keys[keys.length - 1] : undefined;
+      return selectIsPlaylistEdgeLoaded(global, false, tabId)
+        ? selectPlayablePlaylistEdgeKey(global, keys, true, tabId) : undefined;
     default:
       return undefined;
   }
+}
+
+function selectPlayablePlaylistEdgeKey<T extends GlobalState>(
+  global: T, keys: readonly PlaylistKey[], isLast: boolean, tabId: number,
+) {
+  const step = isLast ? -1 : 1;
+  for (let index = isLast ? keys.length - 1 : 0; index >= 0 && index < keys.length; index += step) {
+    if (!selectIsSkippedInPlaylist(global, keys[index], tabId)) return keys[index];
+  }
+
+  return undefined;
+}
+
+function selectIsSkippedInPlaylist<T extends GlobalState>(global: T, key: PlaylistKey, tabId: number) {
+  const source = selectPlaybackSource(global, tabId);
+  let message: ApiMessage | undefined;
+  if (source?.type === 'chat' && typeof key === 'number') {
+    message = selectChatMessageOrEphemeral(global, source.chatId, key);
+  } else if (source?.type === 'globalSearch' && isSearchResultKey(key)) {
+    const [chatId, messageId] = parseSearchResultKey(key);
+    message = selectChatMessageOrEphemeral(global, chatId, messageId);
+  }
+
+  return Boolean(message && hasMessageTtl(message));
 }
 
 export function selectIsWrapTargetMissing<T extends GlobalState>(
@@ -341,13 +370,6 @@ export function selectIsWrapTargetMissing<T extends GlobalState>(
   const keys = selectPlaylistKeys(global, tabId);
 
   return Boolean(keys && keys.length > 1) && selectPlaylistWrapKey(global, isForward, tabId) === undefined;
-}
-
-function selectIsSkippedInPlaylist<T extends GlobalState>(global: T, key: PlaylistKey, tabId: number) {
-  const source = selectPlaybackSource(global, tabId);
-  if (source?.type !== 'chat' || source.mediaType !== 'voice' || typeof key !== 'number') return false;
-
-  return Boolean(selectChatMessage(global, source.chatId, key)?.content.video?.isRound);
 }
 
 function selectIsPlaylistEdgeLoaded<T extends GlobalState>(global: T, isStartEdge: boolean, tabId: number) {

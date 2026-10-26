@@ -1,4 +1,4 @@
-import type { PlaylistKey } from '../../../types';
+import type { PlaybackItemRef, PlaylistKey } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -14,10 +14,10 @@ import {
   SHUFFLE_PRELOAD_THRESHOLD,
 } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import { makeMessageTrackKey, makeSavedMusicTrackKey } from '../../../util/audioPlayback/mediaPool';
 import * as playbackController from '../../../util/audioPlayback/playbackController';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { isSearchResultKey, parseSearchResultKey } from '../../../util/keys/searchResultKey';
+import { hasMessageTtl } from '../../helpers/messages';
 import { addActionHandler } from '../../index';
 import {
   appendShufflePlaylist,
@@ -29,8 +29,10 @@ import {
 } from '../../reducers/audioPlayer';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  makeTrackKeyFromItem,
   selectCanWrapPlaylist,
   selectCurrentPlaylistKey,
+  selectCurrentTrackKey,
   selectIsPlaylistFullyLoaded,
   selectIsPlaylistOrphan,
   selectIsShuffling,
@@ -38,6 +40,8 @@ import {
   selectIsStepWrapping,
   selectIsWrapTargetMissing,
   selectNextTrackKey,
+  selectPlaybackItem,
+  selectPlaybackMessage,
   selectPlaybackSource,
   selectPlaylistKeys,
   selectPlaylistLoadDirection,
@@ -67,11 +71,22 @@ addActionHandler('setAudioPlaybackSource', (global, actions, payload): ActionRet
   return global;
 });
 
+addActionHandler('handleAudioPlaybackEnded', (global, actions, payload): ActionReturnType => {
+  const { withAutoAdvance, tabId = getCurrentTabId() } = payload;
+  if (selectCurrentTrackKey(global, tabId) !== playbackController.getState().trackKey) return;
+
+  if (withAutoAdvance) {
+    actions.playNextTrack({ isAuto: true, tabId });
+  } else if (selectPlaybackMessage(global, selectPlaybackItem(global, tabId))?.content.video?.isRound) {
+    finishPlayback(global, actions, tabId);
+  }
+});
+
 addActionHandler('playNextTrack', (global, actions, payload): ActionReturnType => {
   const { isAuto, tabId = getCurrentTabId() } = payload || {};
 
   if (selectIsPlaylistOrphan(global, tabId)) {
-    if (isAuto) playbackController.finish();
+    if (isAuto) finishPlayback(global, actions, tabId);
     return undefined;
   }
 
@@ -87,21 +102,24 @@ addActionHandler('playNextTrack', (global, actions, payload): ActionReturnType =
     const isEdgeLoaded = selectIsStepEdgeLoaded(global, true, tabId);
     if (!isEdgeLoaded || selectIsWrapTargetMissing(global, true, tabId)) {
       if (isEdgeLoaded && selectPlaybackSource(global, tabId)?.type === 'globalSearch') {
-        if (isAuto) finishOrRestart(global, tabId);
+        if (isAuto) finishOrRestart(global, actions, tabId);
         return undefined;
       }
       return requestPendingStep(global, actions, 'next', isAuto, tabId);
     }
-    if (isAuto) finishOrRestart(global, tabId);
+    if (isAuto) finishOrRestart(global, actions, tabId);
     return undefined;
   }
 
   if (selectIsStepWrapping(global, true, tabId) && !selectCanWrapPlaylist(global, tabId)) {
-    if (isAuto) playbackController.finish();
+    if (isAuto) finishPlayback(global, actions, tabId);
     return undefined;
   }
 
-  openTrack(global, actions, nextKey, tabId);
+  if (!openTrack(global, actions, nextKey, tabId)) {
+    if (isAuto) finishPlayback(global, actions, tabId);
+    return undefined;
+  }
   loadMorePlaylistIfNeeded(global, actions, true, tabId);
 
   return undefined;
@@ -214,6 +232,8 @@ addActionHandler('settlePendingPlaylistStep', (global, actions, payload): Action
     } else {
       actions.playPreviousTrack({ tabId });
     }
+  } else if (pendingStep.isAuto) {
+    finishPlayback(global, actions, tabId);
   }
 
   return global;
@@ -238,65 +258,70 @@ function openTrack<T extends GlobalState>(
   tabId: number,
 ) {
   const source = selectPlaybackSource(global, tabId);
+  let item: PlaybackItemRef;
 
   switch (source?.type) {
     case 'chat':
-      if (typeof key !== 'number') return;
-      playbackController.prepareTrackSwitch(makeMessageTrackKey(source.chatId, key));
-      actions.openAudioPlayer({
-        item: {
-          type: 'message', chatId: source.chatId, threadId: source.threadId, messageId: key,
-        },
-        tabId,
-      });
+      if (typeof key !== 'number') return false;
+      item = {
+        type: 'message', chatId: source.chatId, threadId: source.threadId, messageId: key,
+      };
       break;
     case 'globalSearch': {
-      if (!isSearchResultKey(key)) return;
+      if (!isSearchResultKey(key)) return false;
       const [nextChatId, nextMessageId] = parseSearchResultKey(key);
-      playbackController.prepareTrackSwitch(makeMessageTrackKey(nextChatId, nextMessageId));
-      actions.openAudioPlayer({
-        item: {
-          type: 'message', chatId: nextChatId, threadId: MAIN_THREAD_ID, messageId: nextMessageId,
-        },
-        tabId,
-      });
+      item = {
+        type: 'message', chatId: nextChatId, threadId: MAIN_THREAD_ID, messageId: nextMessageId,
+      };
       break;
     }
     case 'savedMusic':
-      if (typeof key !== 'string') return;
-      playbackController.prepareTrackSwitch(makeSavedMusicTrackKey(source.peerId, key));
-      actions.openAudioPlayer({
-        item: { type: 'savedMusic', peerId: source.peerId, audioId: key },
-        tabId,
-      });
+      if (typeof key !== 'string') return false;
+      item = { type: 'savedMusic', peerId: source.peerId, audioId: key };
       break;
     case 'richMessage':
-      if (typeof key !== 'string') return;
-      playbackController.prepareTrackSwitch(makeMessageTrackKey(source.chatId, source.messageId, key));
-      actions.openAudioPlayer({
-        item: {
-          type: 'message',
-          chatId: source.chatId,
-          threadId: source.threadId,
-          messageId: source.messageId,
-          documentId: key,
-        },
-        tabId,
-      });
+      if (typeof key !== 'string') return false;
+      item = {
+        type: 'message',
+        chatId: source.chatId,
+        threadId: source.threadId,
+        messageId: source.messageId,
+        documentId: key,
+      };
       break;
     default:
-      break;
+      return false;
   }
+
+  const message = selectPlaybackMessage(global, item);
+  // View-once media requires an explicit click in its message
+  if (message && hasMessageTtl(message)) return false;
+
+  playbackController.prepareTrackSwitch(makeTrackKeyFromItem(item), message?.content.video?.isRound);
+  actions.openAudioPlayer({ item, tabId });
+  return true;
 }
 
-function finishOrRestart<T extends GlobalState>(global: T, tabId: number) {
+function finishOrRestart<T extends GlobalState>(global: T, actions: RequiredGlobalActions, tabId: number) {
   if (!selectCanWrapPlaylist(global, tabId)) {
-    playbackController.finish();
+    finishPlayback(global, actions, tabId);
     return;
   }
 
   playbackController.seek(0);
   playbackController.resume();
+}
+
+function finishPlayback<T extends GlobalState>(global: T, actions: RequiredGlobalActions, tabId: number) {
+  const source = selectPlaybackSource(global, tabId);
+  const message = selectPlaybackMessage(global, selectPlaybackItem(global, tabId));
+  if (message?.content.video?.isRound
+    || ((source?.type === 'chat' || source?.type === 'globalSearch') && source.mediaType === 'voice')) {
+    actions.closeAudioPlayer({ tabId });
+    return;
+  }
+
+  playbackController.finish();
 }
 
 function requestPendingStep<T extends GlobalState>(
@@ -456,7 +481,7 @@ function playNextShuffled<T extends GlobalState>(
 
   const shuffle = selectShuffleState(global, tabId);
   if (!shuffle?.nonPlayedKeys.length) {
-    if (isAuto) finishOrRestart(global, tabId);
+    if (isAuto) finishOrRestart(global, actions, tabId);
     return global;
   }
 

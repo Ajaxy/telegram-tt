@@ -73,6 +73,7 @@ import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import AudioPlayer from '../middle/panes/AudioPlayer';
+import FloatingRoundVideo from '../middle/panes/FloatingRoundVideo';
 import ModalContainer from '../modals/ModalContainer';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
@@ -645,6 +646,7 @@ const Main = ({
       <DraftRecipientPicker requestedDraft={requestedDraft} />
       <Dialogs />
       <AudioPlayer noUi />
+      <FloatingRoundVideo />
       <ModalContainer />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal

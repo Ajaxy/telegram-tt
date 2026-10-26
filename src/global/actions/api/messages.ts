@@ -1705,14 +1705,27 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
   return global;
 });
 
-addActionHandler('markMessagesRead', (global, actions, payload): ActionReturnType => {
+const pendingMediaReadIdsByChat = new Map<string, Set<number>>();
+
+addActionHandler('markMessagesRead', async (global, actions, payload): Promise<void> => {
   const { chatId, messageIds } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  void callApi('markMessagesRead', { chat, messageIds });
+  const pendingIds = pendingMediaReadIdsByChat.get(chatId) || new Set<number>();
+  const unreadIds = messageIds.filter((id) => !pendingIds.has(id));
+  if (!unreadIds.length) return;
+
+  pendingMediaReadIdsByChat.set(chatId, pendingIds);
+  unreadIds.forEach((id) => pendingIds.add(id));
+  try {
+    await callApi('markMessagesRead', { chat, messageIds: unreadIds });
+  } finally {
+    unreadIds.forEach((id) => pendingIds.delete(id));
+    if (!pendingIds.size) pendingMediaReadIdsByChat.delete(chatId);
+  }
 });
 
 addActionHandler('loadWebPagePreview', async (global, actions, payload): Promise<void> => {

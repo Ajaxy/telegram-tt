@@ -10,11 +10,11 @@ import {
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
-  selectActiveDownloads, selectCanForwardMessage, selectChatMessageOrEphemeral, selectIsMessageProtected, selectSender,
+  selectActiveDownloads, selectCanForwardMessage, selectIsMessageProtected, selectSender,
   selectTabState,
 } from '../../../global/selectors';
 import {
-  selectCanGoNext, selectCanGoPrev, selectPlaybackMedia, selectPlaybackSource,
+  selectCanGoNext, selectCanGoPrev, selectPlaybackMedia, selectPlaybackMessage, selectPlaybackSource,
 } from '../../../global/selectors/audioPlayer';
 import { getProgressSignal } from '../../../util/audioPlayback/playbackController';
 import buildClassName from '../../../util/buildClassName';
@@ -348,8 +348,7 @@ const PlaylistControls = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const { activeItem } = selectTabState(global).audioPlayer;
-    const message = activeItem?.type === 'message'
-      ? selectChatMessageOrEphemeral(global, activeItem.chatId, activeItem.messageId) : undefined;
+    const message = selectPlaybackMessage(global, activeItem);
     const playbackMedia = selectPlaybackMedia(global, activeItem);
     const audio = playbackMedia?.mediaType === 'audio' ? playbackMedia : undefined;
     const source = selectPlaybackSource(global);

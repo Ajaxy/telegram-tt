@@ -414,7 +414,10 @@ export type PlaybackMedia = ApiAudio | ApiVoice | ApiVideo;
 
 export type PlaybackItemRef =
   // `documentId` targets an audio block inside a rich message
-  | { type: 'message'; chatId: string; threadId: ThreadId; messageId: number; documentId?: string }
+  | {
+    type: 'message'; chatId: string; threadId: ThreadId; messageId: number;
+    documentId?: string; isScheduled?: boolean;
+  }
   | { type: 'savedMusic'; peerId: string; audioId: string }
   | { type: 'instantView'; webPageId: string; documentId: string }
   | { type: 'musicSearch'; audioId: string };

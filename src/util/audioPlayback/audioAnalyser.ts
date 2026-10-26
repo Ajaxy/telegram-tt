@@ -33,7 +33,8 @@ export function getCurrentTrackAnalyser() {
   if (!trackKey) return undefined;
 
   const element = peek(trackKey);
-  if (!element) return undefined;
+  // Inline videos are reused after release and keep their own audio output
+  if (!element || element instanceof HTMLVideoElement) return undefined;
 
   let analyser = analyserByElement.get(element);
   if (!analyser) {

@@ -193,7 +193,7 @@ export default function useInnerHandlers({
   const handleAudioPlay = useLastCallback((): void => {
     openAudioPlayer({
       item: {
-        type: 'message', chatId, threadId, messageId,
+        type: 'message', chatId, threadId, messageId, isScheduled,
       },
     });
   });

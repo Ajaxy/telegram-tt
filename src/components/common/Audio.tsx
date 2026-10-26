@@ -34,6 +34,7 @@ type OwnProps = {
   uploadProgress?: number;
   variant: AudioVariant;
   threadId?: ThreadId;
+  isInScheduled?: boolean;
   playbackSource?: PlaybackSource;
   noPlaylist?: boolean;
   noProgress?: boolean;
@@ -76,6 +77,7 @@ const Audio = ({
   uploadProgress,
   variant,
   threadId,
+  isInScheduled,
   playbackSource,
   noPlaylist,
   noProgress,
@@ -121,10 +123,12 @@ const Audio = ({
   const isInOneTimeModal = variant === 'oneTimeModal';
   const mediaType: PlaybackMediaType = isVoice ? 'voice' : 'audio';
   const isOwn = isOwnMessage(message);
+  const isScheduled = isInScheduled || message.isScheduled;
+  const trackKey = makeMessageTrackKeyFrom(message, isScheduled);
 
   const source = useMemo<PlaybackSource>(() => {
     if (playbackSource) return playbackSource;
-    if (noPlaylist || hasTtl || variant === 'oneTimeModal' || isMessageLocal(message)) {
+    if (noPlaylist || hasTtl || isScheduled || variant === 'oneTimeModal' || isMessageLocal(message)) {
       return SINGLE_SOURCE;
     }
 
@@ -135,7 +139,7 @@ const Audio = ({
     return {
       type: 'chat', chatId: message.chatId, threadId: threadId ?? MAIN_THREAD_ID, mediaType,
     };
-  }, [playbackSource, noPlaylist, hasTtl, variant, message, threadId, mediaType]);
+  }, [playbackSource, noPlaylist, hasTtl, isScheduled, variant, message, threadId, mediaType]);
 
   const capabilities = useMemo(
     () => getPlaybackCapabilities('message', { isViewOnce: hasTtl, isSingle: source.type === 'single' }),
@@ -158,7 +162,7 @@ const Audio = ({
   );
 
   const handleBeforePlay = useLastCallback(() => {
-    if (source.type === 'globalSearch') prepareTrackSwitch(makeMessageTrackKeyFrom(message));
+    if (source.type === 'globalSearch') prepareTrackSwitch(trackKey);
     setAudioPlaybackSource({ source });
     onPlay?.(message.id, message.chatId);
   });
@@ -196,7 +200,7 @@ const Audio = ({
       className={className}
       audio={audio}
       mediaSource={mediaSource}
-      trackKey={makeMessageTrackKeyFrom(message)}
+      trackKey={trackKey}
       mediaType={mediaType}
       capabilities={capabilities}
       src={mediaData}
@@ -231,7 +235,7 @@ const Audio = ({
       onDateClick={onDateClick ? handleDateClick : undefined}
       onTranscribe={canTranscribe ? handleTranscribe : undefined}
       onHideTranscription={onHideTranscription}
-      onListened={onReadMedia}
+      onListened={hasTtl ? onReadMedia : undefined}
       onWaveformGenerated={handleWaveformGenerated}
     />
   );

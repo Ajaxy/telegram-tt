@@ -33,13 +33,13 @@ import {
 } from '../../reducers/threads';
 import {
   selectChat,
-  selectChatMessage,
   selectChatMessages,
   selectCurrentMessageList,
   selectTabState,
   selectTopics,
   selectViewportIds,
 } from '../../selectors';
+import { selectPlaybackMessage } from '../../selectors/audioPlayer';
 import {
   selectThreadInfo,
   selectThreadReadState,
@@ -277,7 +277,7 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
   Object.values(global.byTabId).forEach(({ id: tabId }) => {
     const { activeItem } = selectTabState(global, tabId).audioPlayer;
-    if (activeItem?.type === 'message' && !selectChatMessage(global, activeItem.chatId, activeItem.messageId)) {
+    if (activeItem?.type === 'message' && !selectPlaybackMessage(global, activeItem)) {
       actions.closeAudioPlayer({ tabId });
     }
   });

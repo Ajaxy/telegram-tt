@@ -175,6 +175,7 @@ const TrackRow = ({
   } = useAudioPlayback({
     trackKey,
     mediaType,
+    isVideo: mediaSource?.mediaType === 'video' && mediaSource.isRound,
     capabilities,
     src,
     originalDuration,
