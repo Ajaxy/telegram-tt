@@ -1,5 +1,5 @@
 import type {
-  ApiTonConnectConnectRequest, ApiTonConnectResult, ApiTonConnectSentTransfer, ExportSecretPhraseError,
+  ApiTonConnectResult, ApiTonConnectSentTransfer, ExportSecretPhraseError,
 } from '../../../api/types';
 import type { RegularLangFnParameters } from '../../../util/localization';
 import type { RequiredGlobalActions } from '../../index';
@@ -9,7 +9,6 @@ import {
   TON_CONNECT_BAD_REQUEST_ERROR_CODE, TON_CONNECT_UNKNOWN_APP_ERROR_CODE, TON_CONNECT_UNSUPPORTED_METHOD_ERROR_CODE,
   TON_CONNECT_USER_DECLINED_ERROR_CODE,
 } from '../../../config';
-import { bufferFromBase64, bufferToUtf8 } from '../../../util/encoding/buffer';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
@@ -82,41 +81,6 @@ addActionHandler('openWalletTonConnect', async (global, actions, payload): Promi
     session: result.session,
     error: result.session.isClosed || result.session.isClosing ? 'SESSION_CLOSED' : undefined,
   });
-});
-
-// The dApp's `ConnectRequest` is looked for among the pending requests; without it only the address is shared
-addActionHandler('openWalletTonConnectSession', async (global, actions, payload): Promise<void> => {
-  const { session, tabId = getCurrentTabId() } = payload;
-  const tab = selectTabState(global, tabId);
-
-  // The update for a session created from a link lands while `createSession` is on its way
-  if (tab.walletTonConnect && tab.walletTonConnect.status !== 'done' && tab.walletTonConnect.status !== 'error') {
-    return;
-  }
-
-  const pending: Flow = { status: 'pending', ownAddress: selectWalletAddress(global), session };
-  global = updateTabState(global, { walletTonConnect: pending }, tabId);
-  setGlobal(global);
-  actions.openWalletModal({ shouldOpenTonConnect: true, tabId });
-
-  const result = await callApi('fetchTonConnectPending', {
-    dappClientId: session.dappClientId, currentUserId: global.currentUserId!,
-  });
-
-  if (!result || 'error' in result) {
-    finishTonConnect(tabId, pending, { status: 'error', error: result?.error || 'TONCONNECT_FAILED' });
-    return;
-  }
-
-  const manifest = result.session.manifest;
-
-  if (!manifest || result.session.isClosed || result.session.isClosing) {
-    finishTonConnect(tabId, pending, { status: 'error', error: 'SESSION_CLOSED', session: result.session });
-    return;
-  }
-
-  const connectRequest = await findConnectRequest(result.requests, manifest.url);
-  finishTonConnect(tabId, pending, { status: 'ready', session: result.session, connectRequest });
 });
 
 addActionHandler('openWalletTonConnectRequest', async (global, actions, payload): Promise<void> => {
@@ -492,23 +456,6 @@ addActionHandler('finishWalletTonConnectDisconnects', async (global, actions, pa
 
   actions.loadWalletTonConnectSessions();
 });
-
-// A connect request is listed as plain JSON; any other body is an encrypted app request
-async function findConnectRequest(
-  requests: { body: string }[], manifestUrl: string,
-): Promise<ApiTonConnectConnectRequest> {
-  const { parseTonConnectConnectRequest } = await import('../../../lib/ton/connectRequest');
-
-  for (const { body } of requests) {
-    try {
-      return parseTonConnectConnectRequest(JSON.parse(bufferToUtf8(bufferFromBase64(body))));
-    } catch {
-      // Not a connect request
-    }
-  }
-
-  return { manifestUrl, items: [{ name: 'ton_addr' }] };
-}
 
 // A refusal settles the request as an approval does, so only an answer that failed stays on the screen
 function finishTonConnectResponse(

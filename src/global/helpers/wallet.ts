@@ -70,7 +70,7 @@ export const WALLET_ERROR_LANG_KEYS: Record<WalletFlowError, RegularLangKey> = {
   TONCONNECT_FAILED: 'WalletConnectError',
   TONCONNECT_BUSY: 'WalletConnectBusyError',
   DAPP_CLIENT_ID_INVALID: 'WalletConnectInvalid',
-  MANIFEST_URL_INVALID: 'WalletConnectManifestError',
+  MANIFEST_URL_INVALID: 'WalletConnectManifestInvalid',
   MANIFEST_TIMEOUT: 'WalletConnectManifestError',
   SESSION_NOT_FOUND: 'WalletConnectSessionClosed',
   SESSION_CLOSED: 'WalletConnectSessionClosed',

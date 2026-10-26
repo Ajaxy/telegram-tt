@@ -66,7 +66,6 @@ import type {
   ApiThemeParameters,
   ApiTodoItem,
   ApiTonConnectConnectRequest,
-  ApiTonConnectSession,
   ApiTopPeerCategory,
   ApiTypeCurrencyAmount,
   ApiTypePrepaidGiveaway,
@@ -1465,9 +1464,6 @@ export interface ActionPayloads {
     dappClientId: string;
     connectRequest: ApiTonConnectConnectRequest;
     traceId?: string;
-  } & WithTabId;
-  openWalletTonConnectSession: {
-    session: ApiTonConnectSession;
   } & WithTabId;
   openWalletTonConnectRequest: {
     sessionId: string;

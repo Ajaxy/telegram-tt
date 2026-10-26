@@ -74,7 +74,9 @@
   display: inline-flex;
   gap: 0.1875rem;
   align-items: center;
+
   font-weight: var(--font-weight-medium);
+  overflow-wrap: anywhere;
 }
 
 .hostIcon {

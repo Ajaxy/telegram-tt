@@ -3426,6 +3426,7 @@
 "WalletConnectInvalid" = "This wallet request is invalid.";
 "WalletConnectError" = "Couldn't complete the wallet request. Please try again.";
 "WalletConnectManifestError" = "Couldn't load valid information about this app. Try connecting again.";
+"WalletConnectManifestInvalid" = "Information about this app is invalid or belongs to another domain.";
 "WalletConnectSessionClosed" = "This connection is no longer active.";
 "WalletConnectSessionChanged" = "The wallet or the TON Connect session has changed. Open the request again.";
 "WalletConnectRequestMissing" = "This request is no longer available.";

@@ -3,6 +3,7 @@ import { getActions } from '../../../global';
 
 import type { TabState } from '../../../global/types';
 
+import { TON_CONNECT_MANIFEST_CONTENT_ERROR_CODE } from '../../../config';
 import { WALLET_ERROR_LANG_KEYS } from '../../../global/helpers/wallet';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -62,6 +63,8 @@ const WalletTonConnectScreen = ({
   const isClosed = session?.isClosed || session?.isClosing;
   const manifest = session?.manifest;
   const name = manifest?.name || lang('WalletConnectApp');
+  // A connection shows the host the manifest came from, since the manifest's own `url` is whatever the dApp wrote
+  const appUrl = connectRequest?.manifestUrl ?? manifest?.url;
   const hasManifestError = Boolean(session?.manifestError);
 
   // Without the simulation the fee is unknown, and a failed one usually means the transfer would fail on the chain
@@ -73,9 +76,10 @@ const WalletTonConnectScreen = ({
   const canSignMessage = isSignMessage && Boolean(preview.transaction);
   const canConfirm = !isClosed && !isExpired && !hasManifestError
     && (Boolean(connectRequest && manifest) || isSimulated || Boolean(signData) || canSignMessage);
-  const errorKey = hasManifestError ? 'WalletConnectManifestError'
-    : isClosed ? 'WalletConnectSessionClosed'
-      : isExpired ? 'WalletConnectExpired' : error ? WALLET_ERROR_LANG_KEYS[error] : undefined;
+  const errorKey = session?.manifestError === TON_CONNECT_MANIFEST_CONTENT_ERROR_CODE ? 'WalletConnectManifestInvalid'
+    : hasManifestError ? 'WalletConnectManifestError'
+      : isClosed ? 'WalletConnectSessionClosed'
+        : isExpired ? 'WalletConnectExpired' : error ? WALLET_ERROR_LANG_KEYS[error] : undefined;
   const blindData = signData?.type === 'binary' ? signData.bytes
     : signData?.type === 'cell' ? signData.cell : undefined;
 
@@ -105,7 +109,7 @@ const WalletTonConnectScreen = ({
             : manifest ? lang('WalletConnectRequestTitle', { name }) : lang('WalletConnectRequest')}
       subtitle={isManifestLoading
         ? <Skeleton variant="rounded-rect" animation="fast-wave" className={styles.hostSkeleton} />
-        : <AppHost url={manifest?.url} />}
+        : <AppHost url={appUrl} />}
       text={connectRequest ? lang(accessKey) : previewNotice}
       heroKey={isManifestLoading ? 0 : 1}
     >

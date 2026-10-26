@@ -81,8 +81,7 @@ type TonConnectRespondParams = TonConnectRequestParams & {
   pendingValidUntil?: number;
 };
 
-type TonConnectPendingLookup = { currentUserId: string }
-  & ({ dappClientId: string; sessionId?: never } | { sessionId: string; dappClientId?: never });
+type TonConnectPendingLookup = { currentUserId: string; sessionId: string };
 
 type TonConnectResponse = { success: true; responseError?: number; sentTransfer?: ApiTonConnectSentTransfer };
 
@@ -177,13 +176,7 @@ export async function respondTonConnectConnection({
         throw new TonConnectError('MANIFEST_URL_INVALID');
       }
 
-      // The proof is signed for the host named by the manifest's own `url`. A manifest served from another host
-      // must not name it, or the dApp would get a proof for a domain it does not own.
-      const domain = getTonConnectDomain(pending.session.manifest.url);
-
-      if (domain !== getTonConnectDomain(parsedConnectRequest.manifestUrl)) {
-        throw new TonConnectError('MANIFEST_URL_INVALID');
-      }
+      const domain = validateManifestDomain(pending.session.manifest.url, parsedConnectRequest.manifestUrl);
 
       if (pending.session.nonce !== session.nonce || pending.session.dappClientId !== session.dappClientId
         || pending.session.manifest.url !== session.manifest?.url
@@ -873,7 +866,13 @@ async function buildTonConnectTransferMessages(transaction: ApiTonConnectTransac
 export function createTonConnectSession(params: {
   dappClientId: string; manifestUrl: string;
 }): Promise<ApiTonConnectResult<{ session: ApiTonConnectSession }>> {
-  return runTonConnect(async () => ({ session: await invokeTonConnectCreateSession(params) }));
+  return runTonConnect(async () => {
+    const session = await invokeTonConnectCreateSession(params);
+    // The sheet shows the host the manifest names, so a foreign one is refused before the user sees it
+    if (session.manifest) validateManifestDomain(session.manifest.url, params.manifestUrl);
+
+    return { session };
+  });
 }
 
 export function fetchTonConnectPending(lookup: TonConnectPendingLookup): Promise<ApiTonConnectResult<{
@@ -900,14 +899,14 @@ async function invokeTonConnectCreateSession({ dappClientId, manifestUrl }: {
   return buildApiTonConnectSession(result!);
 }
 
-async function invokeTonConnectGetPending({ currentUserId, dappClientId, sessionId }: TonConnectPendingLookup) {
+async function invokeTonConnectGetPending({ currentUserId, sessionId }: TonConnectPendingLookup) {
   // An answer made before a reload is published first, or the server would list its request again
   // as one still waiting for the user
   await republishTonConnectResponses(currentUserId);
 
-  const result = await invokeRequest(new GramJs.wallet.TonConnectGetPending({
-    dappClientId, sessionId: sessionId ? BigInt(sessionId) : undefined,
-  }), { shouldThrow: true });
+  const result = await invokeRequest(new GramJs.wallet.TonConnectGetPending({ sessionId: BigInt(sessionId) }), {
+    shouldThrow: true,
+  });
 
   return {
     session: buildApiTonConnectSession(result!.session), requests: result!.requests.map(buildApiTonConnectRequest),
@@ -985,6 +984,20 @@ function parseEventId(eventId: bigint) {
   if (!Number.isSafeInteger(id)) throw new TonConnectError('BAD_REQUEST_ID');
 
   return id;
+}
+
+// The proof is signed for the host the manifest's own `url` names. A manifest served from another host
+// must not name it, or the dApp would get a proof for a domain it does not own. `fetchedFrom` is the link's
+// `manifestUrl` the session was created with.
+function validateManifestDomain(manifestUrl: string, fetchedFrom: string) {
+  try {
+    const domain = getTonConnectDomain(manifestUrl);
+    if (domain === getTonConnectDomain(fetchedFrom)) return domain;
+  } catch {
+    // A malformed, non-HTTPS or reserved host is refused like a foreign one
+  }
+
+  throw new TonConnectError('MANIFEST_URL_INVALID');
 }
 
 async function runTonConnect<T>(callback: () => Promise<T>): Promise<ApiTonConnectResult<T>> {

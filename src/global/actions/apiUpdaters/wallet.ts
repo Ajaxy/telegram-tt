@@ -95,17 +95,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateWalletGaslessInfo':
       return updateWallet(global, { gaslessInfo: update.gaslessInfo });
 
-    case 'updateWalletTonConnectSession': {
-      const { session } = update;
-      const isConnectPrompt = session.isPending && session.manifest && !session.manifestError
-        && !session.isClosed && !session.isClosing;
-
-      if (isConnectPrompt) {
-        actions.openWalletTonConnectSession({ session, tabId: getCurrentTabId() });
-      }
-
-      return updateWalletTonConnectSession(global, session);
-    }
+    // A connection is approved only from the link it starts with, which names the host the manifest came from
+    case 'updateWalletTonConnectSession':
+      return updateWalletTonConnectSession(global, update.session);
 
     case 'updateWalletTonConnectPendingDisconnect': {
       actions.finishWalletTonConnectDisconnects({ sessionIds: update.sessionIds });

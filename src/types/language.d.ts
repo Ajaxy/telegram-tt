@@ -2548,6 +2548,7 @@ export interface LangPair {
   'WalletConnectInvalid': undefined;
   'WalletConnectError': undefined;
   'WalletConnectManifestError': undefined;
+  'WalletConnectManifestInvalid': undefined;
   'WalletConnectSessionClosed': undefined;
   'WalletConnectSessionChanged': undefined;
   'WalletConnectRequestMissing': undefined;
