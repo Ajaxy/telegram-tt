@@ -56,6 +56,12 @@ export default class MemorySession extends Session {
 
   setAuthKey(authKey: AuthKey, dcId?: number) {}
 
+  getTempAuthKey(): AuthKey | undefined {
+    return undefined;
+  }
+
+  setTempAuthKey(authKey?: AuthKey) {}
+
   async load(): Promise<void> { }
 
   save() {}

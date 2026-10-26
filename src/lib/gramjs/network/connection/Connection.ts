@@ -12,6 +12,7 @@ interface ConnectionInterfaceParams {
   loggers: Logger;
   isPremium?: boolean;
   isTestServer?: boolean;
+  isMediaDc?: boolean;
 }
 
 /**
@@ -58,14 +59,17 @@ export class Connection {
 
   public _isTestServer?: boolean;
 
+  readonly isMediaDc?: boolean;
+
   constructor({
-    ip, port, dcId, loggers, isPremium, isTestServer,
+    ip, port, dcId, loggers, isPremium, isTestServer, isMediaDc,
   }: ConnectionInterfaceParams) {
     this._ip = ip;
     this._port = port;
     this._dcId = dcId;
     this._log = loggers;
     this._isTestServer = isTestServer;
+    this.isMediaDc = isMediaDc;
 
     this._isPremium = isPremium;
     this._connected = false;

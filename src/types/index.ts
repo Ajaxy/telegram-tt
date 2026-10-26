@@ -32,6 +32,7 @@ import type {
   ApiReaction,
   ApiReactionWithPaid,
   ApiRichMessage,
+  ApiSessionData,
   ApiStarGiftAttributeIdBackdrop,
   ApiStarGiftAttributeIdPattern,
   ApiStarGiftRegular,
@@ -72,6 +73,8 @@ export type SessionUserInfo = {
 export type SharedSessionData = {
   date?: number;
   dcId: number;
+  authKeyCreatedAt?: ApiSessionData['authKeyCreatedAt'];
+  tempAuthKey?: ApiSessionData['tempAuthKey'];
   isTest?: true;
 } & Partial<Record<`dc${DcId}_${'auth_key' | 'server_salt'}`, string>> & SessionUserInfo;
 

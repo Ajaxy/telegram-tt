@@ -45,13 +45,15 @@ export function hasStoredSession() {
 export function storeSession(sessionData: ApiSessionData) {
   return updateSessionStorage(() => {
     const {
-      mainDcId, keys, isTest,
+      mainDcId, keys, authKeyCreatedAt, tempAuthKey, isTest,
     } = sessionData;
 
     const currentSlotData = loadSlotSession(ACCOUNT_SLOT);
     const newSlotData: SharedSessionData = {
       ...currentSlotData,
       dcId: mainDcId,
+      authKeyCreatedAt,
+      tempAuthKey,
       isTest,
     };
 
@@ -139,6 +141,8 @@ export function loadStoredSession(): ApiSessionData | undefined {
       }
       return acc;
     }, {} as Record<number, string>),
+    authKeyCreatedAt: slotData.authKeyCreatedAt,
+    tempAuthKey: slotData.tempAuthKey,
     isTest: slotData.isTest || undefined,
   };
 

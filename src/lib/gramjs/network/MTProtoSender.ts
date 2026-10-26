@@ -14,7 +14,7 @@ import { UpdateConnectionState, UpdateServerTimeOffset, UpdateSessionGap } from 
 import { type Update } from '../client/TelegramClient';
 import { AuthKey } from '../crypto/AuthKey';
 import {
-  BadMessageError, InvalidBufferError, SecurityError, TypeNotFoundError,
+  BadMessageError, InvalidBufferError, PermAuthKeyInvalidError, SecurityError, TypeNotFoundError,
 } from '../errors/Common';
 import { HttpStreamError } from '../extensions/HttpStream';
 import PendingState from '../extensions/PendingState';
@@ -27,7 +27,7 @@ import {
   MAX_FUTURE_SERVER_SALTS,
 } from './MTProtoConstants';
 import MtProtoPlainSender from './MTProtoPlainSender';
-import MTProtoState from './MTProtoState';
+import MTProtoState, { encryptBindAuthKeyInner } from './MTProtoState';
 import RequestState, { type CallableRequest } from './RequestState';
 
 const LONGPOLL_MAX_WAIT = 3000;
@@ -50,6 +50,12 @@ const TRANSPORT_CODE_LENGTH = 4;
 const MESSAGE_ID_TOO_HIGH_ERROR_CODE = 17;
 const ACK_FLUSH_DELAY = 10000;
 const ACK_FLUSH_THRESHOLD = 16;
+const TEMP_AUTH_KEY_EXPIRES_IN = 86400;
+const TEMP_AUTH_KEY_EXPIRY_MARGIN = 120;
+const PERM_AUTH_KEY_BIND_GRACE = 60;
+const AUTHENTICATION_TIMEOUT = 30000;
+const MAX_CONNECT_REQUEST_ATTEMPTS = 3;
+const AUTH_KEY_NOT_FOUND_ERROR_CODE = 404;
 
 type SentMessage = {
   msgId: bigint;
@@ -79,6 +85,11 @@ interface DefaultOptions {
   shouldAllowHttpTransport: boolean;
   connectTimeout: number;
   authKeyCallback: any;
+  getTempAuthKey: (
+    clusterId: number, create: () => Promise<AuthKey>, isUsable: (authKey: AuthKey) => boolean,
+  ) => Promise<AuthKey>;
+  dropTempAuthKey: (clusterId: number, keyId: bigint) => void;
+  initConnection: (query: Api.AnyRequest) => Api.InvokeWithLayer;
   updateCallback?: any;
   autoReconnectCallback?: any;
   isMainSender?: boolean;
@@ -201,9 +212,17 @@ export default class MTProtoSender {
 
   private futureServerSaltRequest?: Promise<Api.TypeFutureSalts | undefined>;
 
-  private hasHandledHttpAuthKeyError = false;
-
   readonly authKey: AuthKey;
+
+  readonly tempAuthKey = new AuthKey();
+
+  private tempAuthKeyClusterId?: number;
+
+  private readonly getTempAuthKey: DefaultOptions['getTempAuthKey'];
+
+  private readonly dropTempAuthKey: DefaultOptions['dropTempAuthKey'];
+
+  private readonly initConnection: DefaultOptions['initConnection'];
 
   private readonly _state: MTProtoState;
 
@@ -237,6 +256,9 @@ export default class MTProtoSender {
     this._delay = args.delay;
     this._retryMainConnectionDelay = args.retryMainConnectionDelay;
     this._authKeyCallback = args.authKeyCallback;
+    this.getTempAuthKey = args.getTempAuthKey;
+    this.dropTempAuthKey = args.dropTempAuthKey;
+    this.initConnection = args.initConnection;
     this._updateCallback = args.updateCallback;
     this._autoReconnectCallback = args.autoReconnectCallback;
     this._isMainSender = Boolean(args.isMainSender);
@@ -274,7 +296,7 @@ export default class MTProtoSender {
      * Preserving the references of the AuthKey and state is important
      */
     this.authKey = authKey || new AuthKey();
-    this._state = new MTProtoState(this.authKey, this._log);
+    this._state = new MTProtoState(this.tempAuthKey, this._log);
     this._state.timeOffset = args.timeOffset ?? 0;
 
     /**
@@ -379,7 +401,6 @@ export default class MTProtoSender {
     let connectionError: unknown;
 
     for (let attempt = 0; attempt < this._retries + this._retriesToFallback; attempt++) {
-      const hasAuthKey = Boolean(this.authKey.getKey());
       try {
         if (attempt >= this._retriesToFallback && this._shouldAllowHttpTransport) {
           // Attempts alternate between HTTP and WebSocket, so a socket that failed only for a moment is retried
@@ -400,10 +421,11 @@ export default class MTProtoSender {
         break;
       } catch (err) {
         connectionError = err;
-        if (this.shouldResetHttpAuthKey(err, hasAuthKey)) {
+        if (err instanceof PermAuthKeyInvalidError) {
           if (!this._isExported) this._handleBadAuthKey();
           break;
         }
+        if (isAuthKeyNotFoundError(err)) this.resetTempAuthKey();
         if (!this._isExported && attempt === 0) {
           this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.disconnected));
         }
@@ -621,7 +643,6 @@ export default class MTProtoSender {
    */
   async _connect(connection: Connection) {
     const wasReconnecting = this.isReconnecting;
-    const shouldCheckHttpConnection = connection instanceof HttpConnection && Boolean(this.authKey.getKey());
 
     if (!connection.isConnected()) {
       this._log.info('Connecting to {0}...'.replace('{0}', connection._ip));
@@ -629,61 +650,66 @@ export default class MTProtoSender {
       this._log.debug('Connection success!');
     }
 
-    if (!this.authKey.getKey()) {
-      const plain = new MtProtoPlainSender(connection, this._log);
-      this._log.debug('New auth_key attempt ...');
-      const res = await doAuthentication(plain, this._log, connection._dcId, connection._isTestServer);
-      this._log.debug('Generated new auth_key successfully');
-      await this.authKey.setKey(res.authKey);
+    const authTimeout = setTimeout(() => connection.disconnect(), AUTHENTICATION_TIMEOUT);
+    try {
+      if (!this.authKey.getKey()) {
+        const plain = new MtProtoPlainSender(connection, this._log);
+        this._log.debug('New auth_key attempt ...');
+        const res = await doAuthentication(plain, this._log, connection._dcId, connection._isTestServer);
+        this._log.debug('Generated new auth_key successfully');
+        this.updateTimeOffset(res.timeOffset);
+        res.authKey.createdAt = this._state.getServerTime();
+        await this.authKey.setKey(res.authKey);
 
-      this._state.resetForNewAuthKey();
-      this._state.timeOffset = res.timeOffset;
-      this._state.setServerSalt(res.serverSalt);
-
-      if (!this._isExported) {
-        this._updateCallback?.(new UpdateServerTimeOffset(this._state.timeOffset));
-      }
-
-      /**
-       * This is *EXTREMELY* important since we don't control
-       * external references to the authorization key, we must
-       * notify whenever we change it. This is crucial when we
-       * switch to different data centers.
-       */
-      if (this._authKeyCallback) {
-        await this._authKeyCallback(this.authKey, this._dcId);
-      }
-    } else {
-      this._authenticated = true;
-      this._log.debug('Already have an auth key ...');
-    }
-
-    if (shouldCheckHttpConnection) {
-      const httpConnectionCheck = new RequestState(new Api.Ping({ pingId: generateRandomLong() }));
-      const resolveHttpConnectionCheck = httpConnectionCheck.resolve!;
-      let hasReceivedPong = false;
-      httpConnectionCheck.resolve = (pong) => {
-        hasReceivedPong = true;
-        resolveHttpConnectionCheck(pong);
-      };
-      const pingData = this._sendQueue.getBeacon(httpConnectionCheck)!;
-      this._rememberSentMessage(httpConnectionCheck);
-
-      try {
-        await connection.send(await this._state.encryptMessageData(pingData));
-        const response = await connection.recv();
-        const message = await this.decryptMessageData(response);
-        this._pendingState.set(httpConnectionCheck.msgId!, httpConnectionCheck);
-        await this._processMessage(message);
-        if (message.obj instanceof Api.Pong && !hasReceivedPong) {
-          throw new Error('HTTP connection check did not receive a matching pong');
+        /**
+         * This is *EXTREMELY* important since we don't control
+         * external references to the authorization key, we must
+         * notify whenever we change it. This is crucial when we
+         * switch to different data centers.
+         */
+        if (this._authKeyCallback) {
+          await this._authKeyCallback(this.authKey, this._dcId);
         }
-      } catch (err) {
-        this._pendingState.delete(httpConnectionCheck.msgId!);
-        this._deleteSentMessage(httpConnectionCheck.msgId!);
-        connection.disconnect();
-        throw err;
+      } else {
+        this._authenticated = true;
+        this._log.debug('Already have an auth key ...');
       }
+
+      const isTempAuthKeyCreated = await this.ensureTempAuthKey(connection);
+
+      if (connection instanceof HttpConnection && !isTempAuthKeyCreated) {
+        const httpConnectionCheck = new RequestState(new Api.Ping({ pingId: generateRandomLong() }));
+        const resolveHttpConnectionCheck = httpConnectionCheck.resolve!;
+        let hasReceivedPong = false;
+        httpConnectionCheck.resolve = (pong) => {
+          hasReceivedPong = true;
+          resolveHttpConnectionCheck(pong);
+        };
+        const pingData = this._sendQueue.getBeacon(httpConnectionCheck)!;
+        this._rememberSentMessage(httpConnectionCheck);
+
+        try {
+          await connection.send(await this._state.encryptMessageData(pingData));
+          const response = await connection.recv();
+          const message = await this.decryptMessageData(response);
+          this._pendingState.set(httpConnectionCheck.msgId!, httpConnectionCheck);
+          await this._processMessage(message);
+          if (message.obj instanceof Api.Pong && !hasReceivedPong) {
+            throw new Error('HTTP connection check did not receive a matching pong');
+          }
+        } catch (err) {
+          this._pendingState.delete(httpConnectionCheck.msgId!);
+          this._deleteSentMessage(httpConnectionCheck.msgId!);
+          throw err;
+        }
+      }
+
+      if (!connection.isConnected()) throw new Error('Connection closed during authentication');
+    } catch (err) {
+      connection.disconnect();
+      throw err;
+    } finally {
+      clearTimeout(authTimeout);
     }
 
     this._userConnected = true;
@@ -713,6 +739,141 @@ export default class MTProtoSender {
     // as failing to reconnect or any unexpected error.
 
     this._log.info('Connection to %s complete!'.replace('%s', connection.toString()));
+  }
+
+  private async ensureTempAuthKey(connection: Connection) {
+    const clusterId = connection.isMediaDc ? -connection._dcId : connection._dcId;
+    if (clusterId !== this.tempAuthKeyClusterId) {
+      this.tempAuthKeyClusterId = clusterId;
+      await this.tempAuthKey.setKey(undefined);
+    }
+    if (this.isTempAuthKeyUsable(this.tempAuthKey)) return false;
+
+    let isCreated = false;
+    const tempAuthKey = await this.getTempAuthKey(clusterId, () => {
+      isCreated = true;
+      return this.createTempAuthKey(connection);
+    }, this.isTempAuthKeyUsable.bind(this));
+    if (isCreated) return true;
+
+    await this.tempAuthKey.setKey(tempAuthKey);
+    this._state.resetForNewAuthKey();
+    return false;
+  }
+
+  private async createTempAuthKey(connection: Connection) {
+    const plain = new MtProtoPlainSender(connection, this._log);
+    const res = await doAuthentication(plain, this._log, connection._dcId, connection._isTestServer, {
+      expiresIn: TEMP_AUTH_KEY_EXPIRES_IN,
+      isMedia: connection.isMediaDc,
+    });
+    this.updateTimeOffset(res.timeOffset);
+    const serverTime = this._state.getServerTime();
+    // Keys without a stored timestamp get the full binding grace period
+    this.authKey.createdAt ??= serverTime;
+    res.authKey.expiresAt = serverTime + TEMP_AUTH_KEY_EXPIRES_IN;
+    await this.tempAuthKey.setKey(res.authKey);
+    this._state.resetForNewAuthKey();
+    this._state.setServerSalt(res.serverSalt);
+
+    try {
+      const isBound = await this.invokeDuringConnect(
+        connection, (msgId) => this.buildBindTempAuthKeyRequest(msgId),
+      );
+      if (!isBound) throw new Error('Temporary auth key binding failed');
+
+      await this.invokeDuringConnect(connection, () => this.initConnection(new Api.help.GetNearestDc()));
+    } catch (err) {
+      await this.tempAuthKey.setKey(undefined);
+      const { createdAt } = this.authKey;
+      if (err instanceof RPCError && err.errorMessage === 'ENCRYPTED_MESSAGE_INVALID'
+        && this._state.getServerTime() - createdAt > PERM_AUTH_KEY_BIND_GRACE) {
+        throw new PermAuthKeyInvalidError();
+      }
+      throw err;
+    }
+
+    return res.authKey;
+  }
+
+  private async buildBindTempAuthKeyRequest(msgId: bigint) {
+    const nonce = generateRandomLong();
+    const permAuthKeyId = this.authKey.keyId!;
+    const expiresAt = this.tempAuthKey.expiresAt!;
+    const encryptedMessage = await encryptBindAuthKeyInner(this.authKey, msgId, new Api.BindAuthKeyInner({
+      nonce,
+      tempAuthKeyId: this.tempAuthKey.keyId!,
+      permAuthKeyId,
+      tempSessionId: this._state.getSessionId(),
+      expiresAt,
+    }).getBytes());
+
+    return new Api.auth.BindTempAuthKey({
+      permAuthKeyId, nonce, expiresAt, encryptedMessage,
+    });
+  }
+
+  private async invokeDuringConnect<T extends CallableRequest>(
+    connection: Connection, buildRequest: (msgId: bigint) => T | Promise<T>,
+  ) {
+    for (let attempt = 0; attempt < MAX_CONNECT_REQUEST_ATTEMPTS; attempt++) {
+      const msgId = this._state._getNewMsgId();
+      const state = new RequestState(await buildRequest(msgId));
+      let isSettled = false;
+      const markSettled = () => {
+        isSettled = true;
+      };
+      void state.promise!.then(markSettled, markSettled);
+
+      const data = this._sendQueue.getBeacon(state, msgId)!;
+      this._rememberSentMessage(state);
+      this._pendingState.set(msgId, state);
+      try {
+        await connection.send(await this._state.encryptMessageData(data));
+
+        let isResent = false;
+        while (!isSettled && !isResent) {
+          const message = await this.decryptMessageData(await connection.recv());
+          await this._processMessage(message).catch((err: unknown) => {
+            if (!(err instanceof RPCError)) throw err;
+          });
+          isResent = this._sendQueue.remove(state);
+
+          if (!isSettled && !isResent && connection.shouldLongPoll) {
+            const httpWait = new RequestState(new Api.HttpWait({
+              maxDelay: 0, waitAfter: 0, maxWait: LONGPOLL_MAX_WAIT,
+            }));
+            await connection.send(await this._state.encryptMessageData(this._sendQueue.getBeacon(httpWait)!));
+          }
+        }
+
+        if (!isResent) return state.promise;
+      } finally {
+        this._pendingState.delete(msgId);
+        this._deleteSentMessage(msgId);
+        this._sendQueue.remove(state);
+      }
+    }
+
+    throw new Error('Request was resent too many times while connecting');
+  }
+
+  private resetTempAuthKey() {
+    const { keyId } = this.tempAuthKey;
+    if (keyId === undefined) return;
+
+    this.dropTempAuthKey(this.tempAuthKeyClusterId!, keyId);
+    void this.tempAuthKey.setKey(undefined);
+  }
+
+  private isTempAuthKeyUsable(authKey: AuthKey) {
+    return authKey.keyId !== undefined
+      && authKey.expiresAt! - TEMP_AUTH_KEY_EXPIRY_MARGIN > this._state.getServerTime();
+  }
+
+  private updateTimeOffset(timeOffset: number) {
+    this._state.timeOffset = timeOffset;
+    if (!this._isExported) this._updateCallback?.(new UpdateServerTimeOffset(timeOffset));
   }
 
   private async decryptMessageData(body: Uint8Array) {
@@ -1024,9 +1185,9 @@ export default class MTProtoSender {
           this._recvLoopHandle = undefined;
           return;
         } else if (e instanceof InvalidBufferError) {
-          // 404 means that the server has "forgotten" our auth key and we need to create a new one.
-          if (e.code === 404) {
-            this._handleBadAuthKey();
+          if (isAuthKeyNotFoundError(e)) {
+            this.resetTempAuthKey();
+            this.reconnect();
           } else {
             // this happens sometimes when telegram is having some internal issues.
             // reconnecting should be enough usually
@@ -1085,20 +1246,8 @@ export default class MTProtoSender {
   }
 
   private handleConnectionError(error: unknown) {
-    if (!this.shouldResetHttpAuthKey(error)) {
-      this.reconnect();
-      return;
-    }
-
-    if (this.hasHandledHttpAuthKeyError) return;
-    this.hasHandledHttpAuthKeyError = true;
-    this._handleBadAuthKey();
-  }
-
-  private shouldResetHttpAuthKey(error: unknown, hadAuthKey?: boolean) {
-    return error instanceof HttpStreamError && error.status === 404
-      && (hadAuthKey ?? Boolean(this.authKey.getKey()))
-      && (this._isExported ? Boolean(this._onConnectionBreak) : this._isMainSender);
+    if (isAuthKeyNotFoundError(error)) this.resetTempAuthKey();
+    this.reconnect();
   }
 
   _handleBadAuthKey(shouldSkipForMain?: boolean) {
@@ -1348,6 +1497,13 @@ export default class MTProtoSender {
     }
 
     this._forgetSentMessage(result.reqMsgId, false);
+
+    if (result.error?.errorMessage === 'AUTH_KEY_PERM_EMPTY' && this._userConnected && !this.isConnecting) {
+      this._pendingState.set(result.reqMsgId, state);
+      this.resetTempAuthKey();
+      this.reconnect();
+      return;
+    }
 
     if (result.error) {
       const error = RPCMessageToError(result.error, state.request);
@@ -1797,6 +1953,7 @@ export default class MTProtoSender {
       loggers: currentConnection._log,
       isTestServer: currentConnection._isTestServer,
       isPremium: currentConnection._isPremium,
+      isMediaDc: currentConnection.isMediaDc,
     });
     // @ts-expect-error -- Hacky way to create new class instance
     const newFallbackConnection = new this._fallbackConnection.constructor({
@@ -1806,6 +1963,7 @@ export default class MTProtoSender {
       loggers: currentConnection._log,
       isTestServer: currentConnection._isTestServer,
       isPremium: currentConnection._isPremium,
+      isMediaDc: currentConnection.isMediaDc,
     });
     try {
       await this.connect(newConnection, true, newFallbackConnection, shouldUseFallback);
@@ -1839,4 +1997,9 @@ export default class MTProtoSender {
     this._lastSessionFirstMsgId = undefined;
     this._lastSessionUniqueId = undefined;
   }
+}
+
+function isAuthKeyNotFoundError(err: unknown) {
+  return (err instanceof InvalidBufferError && err.code === AUTH_KEY_NOT_FOUND_ERROR_CODE)
+    || (err instanceof HttpStreamError && err.status === AUTH_KEY_NOT_FOUND_ERROR_CODE);
 }

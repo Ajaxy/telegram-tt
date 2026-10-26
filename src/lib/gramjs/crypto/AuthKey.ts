@@ -18,6 +18,10 @@ export class AuthKey {
 
   keyId?: bigint;
 
+  expiresAt?: number;
+
+  createdAt?: number;
+
   constructor(value?: Uint8Array<ArrayBuffer>, hash?: Uint8Array<ArrayBuffer>) {
     if (!hash || !value) {
       return;
@@ -31,6 +35,8 @@ export class AuthKey {
   }
 
   async setKey(value?: Uint8Array<ArrayBuffer> | AuthKey) {
+    this.expiresAt = undefined;
+    this.createdAt = undefined;
     if (!value) {
       this._key = undefined;
       this.auxHash = undefined;
@@ -43,6 +49,8 @@ export class AuthKey {
       this.auxHash = value.auxHash;
       this.keyId = value.keyId;
       this._hash = value._hash;
+      this.expiresAt = value.expiresAt;
+      this.createdAt = value.createdAt;
       return;
     }
     this._key = value;

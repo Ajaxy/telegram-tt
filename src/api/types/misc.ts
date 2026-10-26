@@ -150,6 +150,11 @@ export interface ApiWebSession {
 export interface ApiSessionData {
   mainDcId: number;
   keys: Record<number, string>;
+  authKeyCreatedAt?: Record<number, number>;
+  tempAuthKey?: {
+    key: string;
+    expiresAt: number;
+  };
   isTest?: true;
 }
 

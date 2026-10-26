@@ -20,5 +20,10 @@ export type EntityLike =
 export interface SessionData {
   mainDcId: number;
   keys: Record<number, string>;
+  authKeyCreatedAt?: Record<number, number>;
+  tempAuthKey?: {
+    key: string;
+    expiresAt: number;
+  };
   isTest?: true;
 }

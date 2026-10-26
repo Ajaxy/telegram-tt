@@ -15,6 +15,10 @@ export default abstract class Session {
 
   abstract setAuthKey(authKey: AuthKey | undefined, dcId?: number): void;
 
+  abstract getTempAuthKey(): AuthKey | undefined;
+
+  abstract setTempAuthKey(authKey?: AuthKey): void;
+
   abstract save(): void;
 
   abstract load(): Promise<void>;

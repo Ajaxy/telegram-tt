@@ -15,6 +15,7 @@ import {
   mod,
   readBigIntFromBuffer,
   readBufferFromBigInt,
+  sha1,
   sha256,
   toSignedLittleBuffer,
 } from '../Helpers';
@@ -163,6 +164,10 @@ export default class MTProtoState {
     return Math.floor(Date.now() / 1000) + this.timeOffset;
   }
 
+  getSessionId() {
+    return this.id;
+  }
+
   getIncomingMessageState(msgId: bigint, isAcknowledged: boolean) {
     if ((msgId & 1n) !== SERVER_MSG_ID_PARITY) return MESSAGE_STATE_UNKNOWN;
 
@@ -297,8 +302,8 @@ export default class MTProtoState {
    */
   writeDataAsMessage(
     buffer: BinaryWriter, data: Uint8Array, contentRelated: boolean, afterId?: bigint,
+    msgId = this._getNewMsgId(),
   ): { msgId: bigint; seqNo: number } {
-    const msgId = this._getNewMsgId();
     const seqNo = this._getSeqNo(contentRelated);
     let body;
     if (afterId === undefined) {
@@ -869,4 +874,23 @@ export default class MTProtoState {
       return this._sequence * 2;
     }
   }
+}
+
+// https://core.telegram.org/method/auth.bindTempAuthKey#binding-message-contents
+export async function encryptBindAuthKeyInner(permAuthKey: AuthKey, msgId: bigint, data: Uint8Array) {
+  const authKey = permAuthKey.getKey()!;
+  const seqNoAndLength = new Uint8Array(8);
+  writeInt32LE(seqNoAndLength, data.length, 4);
+  const plaintext = concat(generateRandomBytes(16), toSignedLittleBuffer(msgId, 8), seqNoAndLength, data);
+  const msgKey = (await sha1(plaintext)).slice(4, 20);
+  const [sha1A, sha1B, sha1C, sha1D] = await Promise.all([
+    sha1(concat(msgKey, authKey.slice(0, 32))),
+    sha1(concat(authKey.slice(32, 48), msgKey, authKey.slice(48, 64))),
+    sha1(concat(authKey.slice(64, 96), msgKey)),
+    sha1(concat(msgKey, authKey.slice(96, 128))),
+  ]);
+  const key = concat(sha1A.slice(0, 8), sha1B.slice(8, 20), sha1C.slice(4, 16));
+  const iv = concat(sha1A.slice(8, 20), sha1B.slice(0, 8), sha1C.slice(16, 20), sha1D.slice(0, 8));
+
+  return concat(readBufferFromBigInt(permAuthKey.keyId!, 8), msgKey, new IGE(key, iv).encryptIge(plaintext));
 }

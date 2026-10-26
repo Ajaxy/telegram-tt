@@ -37,11 +37,17 @@ const MAX_PQ_BYTES = 8;
 const MAX_PQ = 0x7FFFFFFFFFFFFFFFn;
 const MAX_DH_GEN_ATTEMPTS = 5;
 
+type TempAuthKeyParams = {
+  expiresIn: number;
+  isMedia?: boolean;
+};
+
 export async function doAuthentication(
   sender: MTProtoPlainSender,
   log: any,
   dcId: number,
   isTestServer?: boolean,
+  tempAuthKeyParams?: TempAuthKeyParams,
 ) {
   // Step 1 sending: PQ Request, endianness doesn't matter since it's random
   let bytes = generateRandomBytes(16);
@@ -92,15 +98,19 @@ export async function doAuthentication(
 
   bytes = generateRandomBytes(32);
   const newNonce = readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new Api.PQInnerDataDc({
+  const pqInnerDataParams = {
     pq: getByteArray(pq), // unsigned
     p: pBuffer,
     q: qBuffer,
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     newNonce,
-    dc: buildAuthDcId(dcId, isTestServer),
-  }).getBytes();
+    dc: buildAuthDcId(dcId, isTestServer, tempAuthKeyParams?.isMedia),
+  };
+  const pqInnerData = (tempAuthKeyParams
+    ? new Api.PQInnerDataTempDc({ ...pqInnerDataParams, expiresIn: tempAuthKeyParams.expiresIn })
+    : new Api.PQInnerDataDc(pqInnerDataParams)
+  ).getBytes();
   if (pqInnerData.length > 144) {
     throw new SecurityError('Step 1 invalid nonce from server');
   }
@@ -302,6 +312,7 @@ export async function doAuthentication(
   throw new SecurityError('Step 3 DH retry limit exceeded');
 }
 
-function buildAuthDcId(dcId: number, isTestServer?: boolean) {
-  return isTestServer ? dcId + 10000 : dcId;
+function buildAuthDcId(dcId: number, isTestServer?: boolean, isMedia?: boolean) {
+  const authDcId = isTestServer ? dcId + 10000 : dcId;
+  return isMedia ? -authDcId : authDcId;
 }

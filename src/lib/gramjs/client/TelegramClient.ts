@@ -45,7 +45,7 @@ import { authFlow, checkAuthorization } from './auth';
 import { downloadFile } from './downloadFile';
 import { uploadFile } from './uploadFile';
 
-import { HttpStreamError } from '../extensions/HttpStream';
+import { PermAuthKeyInvalidError } from '../errors/Common';
 import { generateRandomBigInt, sleep } from '../Helpers';
 import RequestState from '../network/RequestState';
 import Session from '../sessions/Abstract';
@@ -201,6 +201,9 @@ class TelegramClient {
   private _exportedSenderPromises: Record<number, Record<number, Promise<MTProtoSender> | undefined>> = {};
   private _exportedSenderRefCounter: Record<number, Record<number, number>> = {};
   private _waitingForAuthKey: Record<number, Promise<void> | undefined> = {};
+  // Keyed by `dcId` for regular hosts and `-dcId` for media hosts, which only accept temporary keys created for them
+  private _tempAuthKeys: Record<number, AuthKey | undefined> = {};
+  private _tempAuthKeyPromises: Record<number, Promise<AuthKey> | undefined> = {};
   private _exportedSenderReleaseTimeouts: Record<number, Record<number, TimeoutId | undefined>> = {};
   private _loopStarted = false;
   private _isSwitchingDc = false;
@@ -310,6 +313,9 @@ class TelegramClient {
         autoReconnect: this._autoReconnect,
         connectTimeout: this._timeout,
         authKeyCallback: this._authKeyCallback.bind(this),
+        getTempAuthKey: this._getTempAuthKey.bind(this),
+        dropTempAuthKey: this._dropTempAuthKey.bind(this),
+        initConnection: this._initWith,
         updateCallback: this._handleUpdate.bind(this),
         getShouldDebugExportedSenders: this.getShouldDebugExportedSenders.bind(this),
         isMainSender: true,
@@ -368,6 +374,13 @@ class TelegramClient {
       this.session.setDC(
         this.defaultDcId, DC.ipAddress, this._args.useWSS ? 443 : 80, this._args.isTestServerRequested,
       );
+    }
+
+    const { dcId } = this.session;
+    if (dcId in this._tempAuthKeys) {
+      this.session.setTempAuthKey(this._tempAuthKeys[dcId]);
+    } else {
+      this._tempAuthKeys[dcId] = this.session.getTempAuthKey();
     }
   }
 
@@ -535,7 +548,7 @@ class TelegramClient {
     // authKey's are associated with a server, which has now changed
     // so it's not valid anymore. Set to None to force recreating it.
     await this._sender.authKey.setKey(undefined);
-    this.session.setAuthKey(undefined);
+    this._resetAuthKey(newDc);
     this._isSwitchingDc = true;
     this.disconnect();
     this._sender = undefined;
@@ -546,12 +559,59 @@ class TelegramClient {
     this.session.setAuthKey(authKey, dcId);
   }
 
+  _resetAuthKey(dcId: number) {
+    this.session.setAuthKey(undefined, dcId);
+    this._tempAuthKeyPromises[dcId] = undefined;
+    this._tempAuthKeyPromises[-dcId] = undefined;
+    this._setTempAuthKey(dcId, undefined);
+    this._setTempAuthKey(-dcId, undefined);
+  }
+
+  _getTempAuthKey(clusterId: number, create: () => Promise<AuthKey>, isUsable: (authKey: AuthKey) => boolean) {
+    const pendingAuthKey = this._tempAuthKeyPromises[clusterId];
+    if (pendingAuthKey) return pendingAuthKey;
+
+    const authKey = this._tempAuthKeys[clusterId];
+    if (authKey && isUsable(authKey)) return Promise.resolve(authKey);
+
+    let isReset = false;
+    const creationPromise = create();
+    const promise = creationPromise
+      .then((newAuthKey) => {
+        if (this._tempAuthKeyPromises[clusterId] !== promise) {
+          isReset = true;
+          throw new Error('Temporary auth key was reset');
+        }
+
+        this._setTempAuthKey(clusterId, newAuthKey);
+        return newAuthKey;
+      })
+      .finally(() => {
+        if (this._tempAuthKeyPromises[clusterId] === promise) this._tempAuthKeyPromises[clusterId] = undefined;
+      });
+    this._tempAuthKeyPromises[clusterId] = promise;
+    // The creator's bound key remains usable when a reset invalidates the shared promise
+    return promise.catch((err: unknown) => {
+      if (isReset) return creationPromise;
+      throw err;
+    });
+  }
+
+  _dropTempAuthKey(clusterId: number, keyId: bigint) {
+    if (this._tempAuthKeys[clusterId]?.keyId === keyId) this._setTempAuthKey(clusterId, undefined);
+  }
+
+  _setTempAuthKey(clusterId: number, authKey?: AuthKey) {
+    this._tempAuthKeys[clusterId] = authKey;
+    if (clusterId === this.session.dcId) this.session.setTempAuthKey(authKey);
+  }
+
   // endregion
   // export region
 
   async _cleanupExportedSender(dcId: number, index: number) {
     if (this.session.dcId !== dcId) {
-      this.session.setAuthKey(undefined, dcId);
+      this._resetAuthKey(dcId);
     }
     // eslint-disable-next-line no-console
     if (this._shouldDebugExportedSenders) console.log(`🧹 Cleanup idx=${index} dcId=${dcId}`);
@@ -573,11 +633,10 @@ class TelegramClient {
         await this._waitingForAuthKey[dcId];
 
         const authKey = this.session.getAuthKey(dcId);
-        const replacementKey = authKey?.getKey();
 
-        hasAuthKey = Boolean(replacementKey);
+        hasAuthKey = Boolean(authKey?.getKey());
         if (hasAuthKey) {
-          await sender.authKey.setKey(replacementKey);
+          await sender.authKey.setKey(authKey);
         }
       } else {
         this._waitingForAuthKey[dcId] = new Promise((resolve) => {
@@ -597,6 +656,7 @@ class TelegramClient {
           isTestServer: this.session.isTestServer,
           // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
           isPremium: hasAuthKey ? isPremium : false,
+          isMediaDc: hasAuthKey,
         }), false, new this._fallbackConnection({
           ip: dc.ipAddress,
           port: dc.port,
@@ -604,6 +664,7 @@ class TelegramClient {
           loggers: this._log,
           isTestServer: this.session.isTestServer,
           isPremium: hasAuthKey ? isPremium : false,
+          isMediaDc: hasAuthKey,
         }));
 
         if (this.session.dcId !== dcId && !sender._authenticated) {
@@ -639,14 +700,13 @@ class TelegramClient {
 
         return sender;
       } catch (err: any) {
-        if (err instanceof HttpStreamError && err.status === 404 && this.session.dcId !== dcId) {
+        if (err instanceof PermAuthKeyInvalidError && this.session.dcId !== dcId) {
           const pendingAuthKey = this._waitingForAuthKey[dcId];
           if (pendingAuthKey && !firstConnectResolver) {
             await pendingAuthKey;
             const authKey = this.session.getAuthKey(dcId);
-            const replacementKey = authKey?.getKey();
-            if (replacementKey && authKey !== sender.authKey) {
-              await sender.authKey.setKey(replacementKey);
+            if (authKey?.getKey() && authKey !== sender.authKey) {
+              await sender.authKey.setKey(authKey);
             }
             hasAuthKey = Boolean(sender.authKey.getKey());
           } else if (sender.authKey.getKey()) {
@@ -657,7 +717,7 @@ class TelegramClient {
             }
 
             await sender.authKey.setKey(undefined);
-            this.session.setAuthKey(undefined, dcId);
+            this._resetAuthKey(dcId);
             sender._authenticated = false;
             hasAuthKey = false;
           }
@@ -683,7 +743,7 @@ class TelegramClient {
 
         await sleep(1000);
         sender.disconnect();
-        if (err instanceof HttpStreamError && err.status === 404 && this.session.dcId === dcId && hasAuthKey) {
+        if (err instanceof PermAuthKeyInvalidError && this.session.dcId === dcId) {
           throw err;
         }
       }
@@ -814,6 +874,9 @@ class TelegramClient {
       autoReconnect: this._autoReconnect,
       connectTimeout: this._timeout,
       authKeyCallback: this._authKeyCallback.bind(this),
+      getTempAuthKey: this._getTempAuthKey.bind(this),
+      dropTempAuthKey: this._dropTempAuthKey.bind(this),
+      initConnection: this._initWith,
       isMainSender: dcId === this.session.dcId,
       isExported: true,
       updateCallback: this._handleUpdate.bind(this),

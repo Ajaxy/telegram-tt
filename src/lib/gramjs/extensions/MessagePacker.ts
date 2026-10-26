@@ -105,7 +105,15 @@ export default class MessagePacker {
     this.setReady?.(true);
   }
 
-  getBeacon(state: RequestState) {
+  remove(state: RequestState) {
+    const index = this._queue.indexOf(state);
+    if (index === -1) return false;
+
+    this._queue.splice(index, 1);
+    return true;
+  }
+
+  getBeacon(state: RequestState, presetMsgId?: bigint) {
     const buffer = new BinaryWriter(new Uint8Array(0));
     const size = state.data.length + TLMessage.SIZE_OVERHEAD;
     if (size <= MessageContainer.MAXIMUM_SIZE) {
@@ -114,7 +122,7 @@ export default class MessagePacker {
         afterId = state.after.msgId;
       }
       const { msgId, seqNo } = this._state.writeDataAsMessage(
-        buffer, state.data, state.isContentRelated, afterId,
+        buffer, state.data, state.isContentRelated, afterId, presetMsgId,
       );
       state.msgId = msgId;
       state.seqNo = seqNo;

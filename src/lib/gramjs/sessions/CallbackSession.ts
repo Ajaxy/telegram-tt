@@ -13,6 +13,8 @@ export default class CallbackSession extends MemorySession {
 
   private _authKeys: Record<number, AuthKey>;
 
+  private _tempAuthKey?: AuthKey;
+
   constructor(sessionData: SessionData | undefined, callback: (session?: SessionData) => void) {
     super();
 
@@ -30,6 +32,8 @@ export default class CallbackSession extends MemorySession {
     const {
       mainDcId,
       keys,
+      authKeyCreatedAt,
+      tempAuthKey,
       isTest,
     } = this._sessionData;
     const {
@@ -46,7 +50,14 @@ export default class CallbackSession extends MemorySession {
 
         this._authKeys[dcId] = new AuthKey();
         await this._authKeys[dcId].setKey(key);
+        this._authKeys[dcId].createdAt = authKeyCreatedAt?.[dcId];
       }));
+
+    if (tempAuthKey) {
+      this._tempAuthKey = new AuthKey();
+      await this._tempAuthKey.setKey(bufferFromHex(tempAuthKey.key));
+      this._tempAuthKey.expiresAt = tempAuthKey.expiresAt;
+    }
   }
 
   setDC(dcId: number, serverAddress: string, port: number, isTestServer?: boolean, skipOnUpdate = false) {
@@ -72,10 +83,25 @@ export default class CallbackSession extends MemorySession {
     void this._onUpdate();
   }
 
+  getTempAuthKey() {
+    return this._tempAuthKey;
+  }
+
+  setTempAuthKey(authKey?: AuthKey) {
+    this._tempAuthKey = authKey;
+
+    void this._onUpdate();
+  }
+
   getSessionData() {
+    const tempAuthKey = this._tempAuthKey?._key;
     const sessionData: SessionData = {
       mainDcId: this._dcId,
       keys: {},
+      authKeyCreatedAt: {},
+      tempAuthKey: tempAuthKey
+        ? { key: bufferToHex(tempAuthKey), expiresAt: this._tempAuthKey!.expiresAt! }
+        : undefined,
       isTest: this._isTestServer || undefined,
     };
 
@@ -87,6 +113,7 @@ export default class CallbackSession extends MemorySession {
         if (!authKey?._key) return;
 
         sessionData.keys[dcId] = bufferToHex(authKey._key);
+        if (authKey.createdAt !== undefined) sessionData.authKeyCreatedAt![dcId] = authKey.createdAt;
       });
 
     return sessionData;
