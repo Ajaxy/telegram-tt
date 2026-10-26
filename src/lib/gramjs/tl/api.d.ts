@@ -67,7 +67,7 @@ namespace Api {
   export type TypeChatPhoto = ChatPhotoEmpty | ChatPhoto;
   export type TypeMessage = MessageEmpty | Message | MessageService;
   export type TypeMessageMedia = MessageMediaEmpty | MessageMediaPhoto | MessageMediaGeo | MessageMediaContact | MessageMediaUnsupported | MessageMediaDocument | MessageMediaWebPage | MessageMediaVenue | MessageMediaGame | MessageMediaInvoice | MessageMediaGeoLive | MessageMediaPoll | MessageMediaDice | MessageMediaStory | MessageMediaGiveaway | MessageMediaGiveawayResults | MessageMediaPaidMedia | MessageMediaToDo | MessageMediaVideoStream;
-  export type TypeMessageAction = MessageActionEmpty | MessageActionChatCreate | MessageActionChatEditTitle | MessageActionChatEditPhoto | MessageActionChatDeletePhoto | MessageActionChatAddUser | MessageActionChatDeleteUser | MessageActionChatJoinedByLink | MessageActionChannelCreate | MessageActionChatMigrateTo | MessageActionChannelMigrateFrom | MessageActionPinMessage | MessageActionHistoryClear | MessageActionGameScore | MessageActionPaymentSentMe | MessageActionPaymentSent | MessageActionPhoneCall | MessageActionScreenshotTaken | MessageActionCustomAction | MessageActionBotAllowed | MessageActionSecureValuesSentMe | MessageActionSecureValuesSent | MessageActionContactSignUp | MessageActionGeoProximityReached | MessageActionGroupCall | MessageActionInviteToGroupCall | MessageActionSetMessagesTTL | MessageActionGroupCallScheduled | MessageActionSetChatTheme | MessageActionChatJoinedByRequest | MessageActionWebViewDataSentMe | MessageActionWebViewDataSent | MessageActionGiftPremium | MessageActionTopicCreate | MessageActionTopicEdit | MessageActionSuggestProfilePhoto | MessageActionRequestedPeer | MessageActionSetChatWallPaper | MessageActionGiftCode | MessageActionGiveawayLaunch | MessageActionGiveawayResults | MessageActionBoostApply | MessageActionRequestedPeerSentMe | MessageActionPaymentRefunded | MessageActionGiftStars | MessageActionPrizeStars | MessageActionStarGift | MessageActionStarGiftUnique | MessageActionPaidMessagesRefunded | MessageActionPaidMessagesPrice | MessageActionConferenceCall | MessageActionTodoCompletions | MessageActionTodoAppendTasks | MessageActionSuggestedPostApproval | MessageActionSuggestedPostSuccess | MessageActionSuggestedPostRefund | MessageActionGiftTon | MessageActionSuggestBirthday | MessageActionStarGiftPurchaseOffer | MessageActionStarGiftPurchaseOfferDeclined | MessageActionNewCreatorPending | MessageActionChangeCreator | MessageActionNoForwardsToggle | MessageActionNoForwardsRequest | MessageActionPollAppendAnswer | MessageActionPollDeleteAnswer | MessageActionManagedBotCreated | MessageActionChangeCommunity | MessageActionChatJoinedViaCommunity | MessageActionGramTransfer | MessageActionWalletTonConnectRequest;
+  export type TypeMessageAction = MessageActionEmpty | MessageActionChatCreate | MessageActionChatEditTitle | MessageActionChatEditPhoto | MessageActionChatDeletePhoto | MessageActionChatAddUser | MessageActionChatDeleteUser | MessageActionChatJoinedByLink | MessageActionChannelCreate | MessageActionChatMigrateTo | MessageActionChannelMigrateFrom | MessageActionPinMessage | MessageActionHistoryClear | MessageActionGameScore | MessageActionPaymentSentMe | MessageActionPaymentSent | MessageActionPhoneCall | MessageActionScreenshotTaken | MessageActionCustomAction | MessageActionBotAllowed | MessageActionSecureValuesSentMe | MessageActionSecureValuesSent | MessageActionContactSignUp | MessageActionGeoProximityReached | MessageActionGroupCall | MessageActionInviteToGroupCall | MessageActionSetMessagesTTL | MessageActionGroupCallScheduled | MessageActionSetChatTheme | MessageActionChatJoinedByRequest | MessageActionWebViewDataSentMe | MessageActionWebViewDataSent | MessageActionGiftPremium | MessageActionTopicCreate | MessageActionTopicEdit | MessageActionSuggestProfilePhoto | MessageActionRequestedPeer | MessageActionSetChatWallPaper | MessageActionGiftCode | MessageActionGiveawayLaunch | MessageActionGiveawayResults | MessageActionBoostApply | MessageActionRequestedPeerSentMe | MessageActionPaymentRefunded | MessageActionGiftStars | MessageActionPrizeStars | MessageActionStarGift | MessageActionStarGiftUnique | MessageActionPaidMessagesRefunded | MessageActionPaidMessagesPrice | MessageActionConferenceCall | MessageActionTodoCompletions | MessageActionTodoAppendTasks | MessageActionSuggestedPostApproval | MessageActionSuggestedPostSuccess | MessageActionSuggestedPostRefund | MessageActionGiftTon | MessageActionSuggestBirthday | MessageActionStarGiftPurchaseOffer | MessageActionStarGiftPurchaseOfferDeclined | MessageActionNewCreatorPending | MessageActionChangeCreator | MessageActionNoForwardsToggle | MessageActionNoForwardsRequest | MessageActionPollAppendAnswer | MessageActionPollDeleteAnswer | MessageActionManagedBotCreated | MessageActionChangeCommunity | MessageActionChatJoinedViaCommunity | MessageActionGramTransfer | MessageActionWalletTonConnectRequest | MessageActionNoPaidMessagesTokenUsed;
   export type TypeDialog = Dialog | DialogFolder | DialogCommunity;
   export type TypePhoto = PhotoEmpty | Photo;
   export type TypePhotoSize = PhotoSizeEmpty | PhotoSize | PhotoCachedSize | PhotoStrippedSize | PhotoSizeProgressive | PhotoPathSize;
@@ -446,7 +446,7 @@ namespace Api {
   export type TypeOnrampSession = OnrampSession;
   export type TypeWalletState = WalletStateEmpty | WalletState;
   export type TypeWalletUserAddress = WalletUserAddress;
-  export type TypeWalletTransactionPeer = WalletTransactionPeerUser | WalletTransactionPeerAddress | WalletTransactionPeerOnramp | WalletTransactionPeerUnsupported;
+  export type TypeWalletTransactionPeer = WalletTransactionPeerUser | WalletTransactionPeerAddress | WalletTransactionPeerOnramp | WalletTransactionPeerUnsupported | WalletTransactionPeerChannel | WalletTransactionPeerTelegramGift;
   export type TypeWalletTransaction = WalletTransaction;
   export type TypeWalletOwnershipProof = WalletOwnershipProof;
   export type TypeInputWalletReplacement = InputWalletNew | InputWalletImported;
@@ -455,6 +455,11 @@ namespace Api {
   export type TypeTonConnectNextEventId = TonConnectNextEventId;
   export type TypeTonConnectRequest = TonConnectRequest;
   export type TypeInputTonConnectOauthSession = InputTonConnectOauthSession;
+  export type TypeExportedNoPaidMessagesToken = ExportedNoPaidMessagesToken;
+  export type TypeShareTheme = ShareThemeDefault | ShareThemeEmojiBackdrop | ShareThemeGift | InputShareThemeGift;
+  export type TypeShareThemeBackdropOption = ShareThemeBackdropOption;
+  export type TypeShareThemeBackdrops = ShareThemeBackdropsNotModified | ShareThemeBackdrops;
+  export type TypeInputWalletCardSticker = InputWalletCardSticker;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -692,6 +697,7 @@ namespace Api {
     export type TypeStarGiftActiveAuctions = payments.StarGiftActiveAuctionsNotModified | payments.StarGiftActiveAuctions;
     export type TypeStarGiftUpgradeAttributes = payments.StarGiftUpgradeAttributes;
     export type TypeCurrencyRates = payments.CurrencyRates;
+    export type TypeStarGiftDepositPayload = payments.StarGiftDepositPayload;
   }
 
   export namespace phone {
@@ -799,6 +805,8 @@ namespace Api {
     export type TypeNftAttribute = wallet.NftAttribute;
     export type TypeNftItem = wallet.NftItem;
     export type TypeNftItems = wallet.NftItems;
+    export type TypeCardSticker = wallet.CardSticker;
+    export type TypeCard = wallet.Card;
   }
 
   export class InputPeerEmpty extends VirtualClass<void> {
@@ -1885,6 +1893,7 @@ namespace Api {
     broadcastMessagesAllowed?: true;
     monoforum?: true;
     forumTabs?: true;
+    inNews?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -1907,6 +1916,7 @@ namespace Api {
     sendPaidMessagesStars?: long;
     linkedMonoforumId?: long;
     linkedCommunityId?: long;
+    pinnedMsgId?: int;
   }> {
     // flags: Api.Type;
     creator?: true;
@@ -1938,6 +1948,7 @@ namespace Api {
     broadcastMessagesAllowed?: true;
     monoforum?: true;
     forumTabs?: true;
+    inNews?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -1960,7 +1971,8 @@ namespace Api {
     sendPaidMessagesStars?: long;
     linkedMonoforumId?: long;
     linkedCommunityId?: long;
-    CONSTRUCTOR_ID: 3567203526;
+    pinnedMsgId?: int;
+    CONSTRUCTOR_ID: 2060538432;
     SUBCLASS_OF_ID: 3316604308;
     className: 'Channel';
 
@@ -2163,6 +2175,7 @@ namespace Api {
     sendPaidMessagesStars?: long;
     mainTab?: Api.TypeProfileTab;
     guardBotId?: long;
+    shareTheme?: Api.TypeShareTheme;
   }> {
     // flags: Api.Type;
     canViewParticipants?: true;
@@ -2234,7 +2247,8 @@ namespace Api {
     sendPaidMessagesStars?: long;
     mainTab?: Api.TypeProfileTab;
     guardBotId?: long;
-    CONSTRUCTOR_ID: 2689502522;
+    shareTheme?: Api.TypeShareTheme;
+    CONSTRUCTOR_ID: 3301236032;
     SUBCLASS_OF_ID: 3566872215;
     className: 'ChannelFull';
 
@@ -3910,6 +3924,13 @@ namespace Api {
 
     static fromReader(reader: Reader): MessageActionWalletTonConnectRequest;
   }
+  export class MessageActionNoPaidMessagesTokenUsed extends VirtualClass<void> {
+    CONSTRUCTOR_ID: 3251827142;
+    SUBCLASS_OF_ID: 2256589094;
+    className: 'MessageActionNoPaidMessagesTokenUsed';
+
+    static fromReader(reader: Reader): MessageActionNoPaidMessagesTokenUsed;
+  }
   export class Dialog extends VirtualClass<{
     // flags: Api.Type;
     pinned?: true;
@@ -4475,6 +4496,8 @@ namespace Api {
     savedMusic?: Api.TypeDocument;
     note?: Api.TypeTextWithEntities;
     botManagerId?: long;
+    walletCard?: wallet.TypeCard;
+    shareTheme?: Api.TypeShareTheme;
   }> {
     // flags: Api.Type;
     blocked?: true;
@@ -4536,7 +4559,9 @@ namespace Api {
     savedMusic?: Api.TypeDocument;
     note?: Api.TypeTextWithEntities;
     botManagerId?: long;
-    CONSTRUCTOR_ID: 114026053;
+    walletCard?: wallet.TypeCard;
+    shareTheme?: Api.TypeShareTheme;
+    CONSTRUCTOR_ID: 3104582397;
     SUBCLASS_OF_ID: 524706233;
     className: 'UserFull';
 
@@ -14805,6 +14830,7 @@ namespace Api {
     quoteOffset?: int;
     todoItemId?: int;
     pollOption?: bytes;
+    quoteRich?: Api.TypeRichText[];
   } | void> {
     // flags: Api.Type;
     replyToScheduled?: true;
@@ -14821,7 +14847,8 @@ namespace Api {
     quoteOffset?: int;
     todoItemId?: int;
     pollOption?: bytes;
-    CONSTRUCTOR_ID: 462937446;
+    quoteRich?: Api.TypeRichText[];
+    CONSTRUCTOR_ID: 3719670645;
     SUBCLASS_OF_ID: 1531810151;
     className: 'MessageReplyHeader';
 
@@ -16860,6 +16887,7 @@ namespace Api {
     monoforumPeerId?: Api.TypeInputPeer;
     todoItemId?: int;
     pollOption?: bytes;
+    quoteRich?: Api.TypeRichText[];
   }> {
     // flags: Api.Type;
     replyToMsgId: int;
@@ -16871,7 +16899,8 @@ namespace Api {
     monoforumPeerId?: Api.TypeInputPeer;
     todoItemId?: int;
     pollOption?: bytes;
-    CONSTRUCTOR_ID: 1003796418;
+    quoteRich?: Api.TypeRichText[];
+    CONSTRUCTOR_ID: 1975627120;
     SUBCLASS_OF_ID: 2356220701;
     className: 'InputReplyToMessage';
 
@@ -20517,6 +20546,34 @@ namespace Api {
 
     static fromReader(reader: Reader): WalletTransactionPeerUnsupported;
   }
+  export class WalletTransactionPeerChannel extends VirtualClass<{
+    // flags: Api.Type;
+    channelId: long;
+    address: string;
+    domain?: string;
+  }> {
+    // flags: Api.Type;
+    channelId: long;
+    address: string;
+    domain?: string;
+    CONSTRUCTOR_ID: 1424428081;
+    SUBCLASS_OF_ID: 3389222725;
+    className: 'WalletTransactionPeerChannel';
+
+    static fromReader(reader: Reader): WalletTransactionPeerChannel;
+  }
+  export class WalletTransactionPeerTelegramGift extends VirtualClass<{
+    // flags: Api.Type;
+    ownProfile?: true;
+  } | void> {
+    // flags: Api.Type;
+    ownProfile?: true;
+    CONSTRUCTOR_ID: 4101149849;
+    SUBCLASS_OF_ID: 3389222725;
+    className: 'WalletTransactionPeerTelegramGift';
+
+    static fromReader(reader: Reader): WalletTransactionPeerTelegramGift;
+  }
   export class WalletTransaction extends VirtualClass<{
     // flags: Api.Type;
     incoming?: true;
@@ -20681,6 +20738,114 @@ namespace Api {
     className: 'InputTonConnectOauthSession';
 
     static fromReader(reader: Reader): InputTonConnectOauthSession;
+  }
+  export class ExportedNoPaidMessagesToken extends VirtualClass<{
+    // flags: Api.Type;
+    token: string;
+    url: string;
+    expires?: int;
+  }> {
+    // flags: Api.Type;
+    token: string;
+    url: string;
+    expires?: int;
+    CONSTRUCTOR_ID: 1767755842;
+    SUBCLASS_OF_ID: 2704446704;
+    className: 'ExportedNoPaidMessagesToken';
+
+    static fromReader(reader: Reader): ExportedNoPaidMessagesToken;
+  }
+  export class ShareThemeDefault extends VirtualClass<void> {
+    CONSTRUCTOR_ID: 2511136847;
+    SUBCLASS_OF_ID: 4178294366;
+    className: 'ShareThemeDefault';
+
+    static fromReader(reader: Reader): ShareThemeDefault;
+  }
+  export class ShareThemeEmojiBackdrop extends VirtualClass<{
+    // flags: Api.Type;
+    backdropId?: int;
+    emojis?: Api.TypeReaction[];
+  } | void> {
+    // flags: Api.Type;
+    backdropId?: int;
+    emojis?: Api.TypeReaction[];
+    CONSTRUCTOR_ID: 1689466081;
+    SUBCLASS_OF_ID: 4178294366;
+    className: 'ShareThemeEmojiBackdrop';
+
+    static fromReader(reader: Reader): ShareThemeEmojiBackdrop;
+  }
+  export class ShareThemeGift extends VirtualClass<{
+    stargift: Api.TypeStarGift;
+  }> {
+    stargift: Api.TypeStarGift;
+    CONSTRUCTOR_ID: 3958171245;
+    SUBCLASS_OF_ID: 4178294366;
+    className: 'ShareThemeGift';
+
+    static fromReader(reader: Reader): ShareThemeGift;
+  }
+  export class InputShareThemeGift extends VirtualClass<{
+    stargift: Api.TypeInputSavedStarGift;
+  }> {
+    stargift: Api.TypeInputSavedStarGift;
+    CONSTRUCTOR_ID: 1069099867;
+    SUBCLASS_OF_ID: 4178294366;
+    className: 'InputShareThemeGift';
+
+    static fromReader(reader: Reader): InputShareThemeGift;
+  }
+  export class ShareThemeBackdropOption extends VirtualClass<{
+    backdropId: int;
+    name: string;
+    centerColor: int;
+    edgeColor: int;
+    patternColor: int;
+    textColor: int;
+  }> {
+    backdropId: int;
+    name: string;
+    centerColor: int;
+    edgeColor: int;
+    patternColor: int;
+    textColor: int;
+    CONSTRUCTOR_ID: 1170331218;
+    SUBCLASS_OF_ID: 3914865563;
+    className: 'ShareThemeBackdropOption';
+
+    static fromReader(reader: Reader): ShareThemeBackdropOption;
+  }
+  export class ShareThemeBackdropsNotModified extends VirtualClass<void> {
+    CONSTRUCTOR_ID: 2050977279;
+    SUBCLASS_OF_ID: 1089340403;
+    className: 'ShareThemeBackdropsNotModified';
+
+    static fromReader(reader: Reader): ShareThemeBackdropsNotModified;
+  }
+  export class ShareThemeBackdrops extends VirtualClass<{
+    hash: int;
+    backdrops: Api.TypeShareThemeBackdropOption[];
+  }> {
+    hash: int;
+    backdrops: Api.TypeShareThemeBackdropOption[];
+    CONSTRUCTOR_ID: 2867518688;
+    SUBCLASS_OF_ID: 1089340403;
+    className: 'ShareThemeBackdrops';
+
+    static fromReader(reader: Reader): ShareThemeBackdrops;
+  }
+  export class InputWalletCardSticker extends VirtualClass<{
+    coordinates: Api.TypeMediaAreaCoordinates;
+    nftAddress: string;
+  }> {
+    coordinates: Api.TypeMediaAreaCoordinates;
+    nftAddress: string;
+    CONSTRUCTOR_ID: 1474250151;
+    SUBCLASS_OF_ID: 2033463864;
+    className: 'InputWalletCardSticker';
+
+    static fromReader(reader: Reader): InputWalletCardSticker;
   }
   export class ResPQ extends VirtualClass<{
     nonce: int128;
@@ -25090,6 +25255,20 @@ namespace Api {
 
       static fromReader(reader: Reader): CurrencyRates;
     }
+    export class StarGiftDepositPayload extends VirtualClass<{
+      nftAddress: string;
+      payload: bytes;
+      amount: long;
+    }> {
+      nftAddress: string;
+      payload: bytes;
+      amount: long;
+      CONSTRUCTOR_ID: 1918612715;
+      SUBCLASS_OF_ID: 2297491385;
+      className: 'StarGiftDepositPayload';
+
+      static fromReader(reader: Reader): StarGiftDepositPayload;
+    }
   }
 
   export namespace phone {
@@ -26168,6 +26347,7 @@ namespace Api {
       lottie?: Api.TypeWebDocument;
       attributes?: wallet.TypeNftAttribute[];
       extra?: Api.TypeDataJSON;
+      gift?: Api.TypeStarGift;
     }> {
       // flags: Api.Type;
       collectionAddress?: string;
@@ -26182,7 +26362,8 @@ namespace Api {
       lottie?: Api.TypeWebDocument;
       attributes?: wallet.TypeNftAttribute[];
       extra?: Api.TypeDataJSON;
-      CONSTRUCTOR_ID: 876739868;
+      gift?: Api.TypeStarGift;
+      CONSTRUCTOR_ID: 389937907;
       SUBCLASS_OF_ID: 3560020534;
       className: 'NftItem';
 
@@ -26201,6 +26382,36 @@ namespace Api {
       className: 'NftItems';
 
       static fromReader(reader: Reader): NftItems;
+    }
+    export class CardSticker extends VirtualClass<{
+      coordinates: Api.TypeMediaAreaCoordinates;
+      nft: wallet.TypeNftItem;
+    }> {
+      coordinates: Api.TypeMediaAreaCoordinates;
+      nft: wallet.TypeNftItem;
+      CONSTRUCTOR_ID: 4076932282;
+      SUBCLASS_OF_ID: 2277674873;
+      className: 'CardSticker';
+
+      static fromReader(reader: Reader): CardSticker;
+    }
+    export class Card extends VirtualClass<{
+      // flags: Api.Type;
+      stickers?: wallet.TypeCardSticker[];
+      bgNftItem?: wallet.TypeNftItem;
+      address: string;
+      balance: long;
+    }> {
+      // flags: Api.Type;
+      stickers?: wallet.TypeCardSticker[];
+      bgNftItem?: wallet.TypeNftItem;
+      address: string;
+      balance: long;
+      CONSTRUCTOR_ID: 2396013489;
+      SUBCLASS_OF_ID: 520489879;
+      className: 'Card';
+
+      static fromReader(reader: Reader): Card;
     }
   }
 
@@ -27657,6 +27868,22 @@ namespace Api {
     }, Bool> {
       id: Api.TypeInputUser;
       note: Api.TypeTextWithEntities;
+    }
+    export class ExportNoPaidMessagesToken extends Request<{
+      // flags: Api.Type;
+      revoke?: true;
+      temporary?: true;
+    } | void, Api.TypeExportedNoPaidMessagesToken> {
+      // flags: Api.Type;
+      revoke?: true;
+      temporary?: true;
+    }
+    export class ImportNoPaidMessagesToken extends Request<{
+      userId: Api.TypeInputUser;
+      token: string;
+    }, Api.TypeUser> {
+      userId: Api.TypeInputUser;
+      token: string;
     }
   }
 
@@ -30328,6 +30555,18 @@ namespace Api {
       themeParams?: Api.TypeDataJSON;
       platform: string;
     }
+    export class SetShareTheme extends Request<{
+      peer: Api.TypeInputPeer;
+      theme: Api.TypeShareTheme;
+    }, Bool> {
+      peer: Api.TypeInputPeer;
+      theme: Api.TypeShareTheme;
+    }
+    export class GetShareThemeBackdrops extends Request<{
+      hash: int;
+    }, Api.TypeShareThemeBackdrops> {
+      hash: int;
+    }
   }
 
   export namespace updates {
@@ -31785,11 +32024,13 @@ namespace Api {
       stargift: Api.TypeInputSavedStarGift[];
     }
     export class GetStarGiftWithdrawalUrl extends Request<{
+      // flags: Api.Type;
       stargift: Api.TypeInputSavedStarGift;
-      password: Api.TypeInputCheckPasswordSRP;
+      tmpPassword: bytes;
     }, payments.TypeStarGiftWithdrawalUrl> {
+      // flags: Api.Type;
       stargift: Api.TypeInputSavedStarGift;
-      password: Api.TypeInputCheckPasswordSRP;
+      tmpPassword: bytes;
     }
     export class ToggleChatStarGiftNotifications extends Request<{
       // flags: Api.Type;
@@ -32043,6 +32284,42 @@ namespace Api {
       successReturnUrl?: string;
       failReturnUrl?: string;
       cryptoAmount?: string;
+    }
+    export class WithdrawStarGift extends Request<{
+      // flags: Api.Type;
+      keepOnProfile?: true;
+      stargift: Api.TypeInputSavedStarGift;
+      tmpPassword: bytes;
+    }, Bool> {
+      // flags: Api.Type;
+      keepOnProfile?: true;
+      stargift: Api.TypeInputSavedStarGift;
+      tmpPassword: bytes;
+    }
+    export class DepositStarGift extends Request<{
+      // flags: Api.Type;
+      hideSender?: true;
+      peer: Api.TypeInputPeer;
+      slug: string;
+    }, payments.TypeStarGiftDepositPayload> {
+      // flags: Api.Type;
+      hideSender?: true;
+      peer: Api.TypeInputPeer;
+      slug: string;
+    }
+    export class DisplayStarGift extends Request<{
+      // flags: Api.Type;
+      peer?: Api.TypeInputPeer;
+      slug: string;
+    }, Bool> {
+      // flags: Api.Type;
+      peer?: Api.TypeInputPeer;
+      slug: string;
+    }
+    export class DeleteStarGift extends Request<{
+      stargift: Api.TypeInputSavedStarGift;
+    }, Bool> {
+      stargift: Api.TypeInputSavedStarGift;
     }
   }
 
@@ -33655,21 +33932,30 @@ namespace Api {
       body?: bytes;
     }
     export class TonConnectGetSessions extends Request<void, wallet.TypeTonConnectSessions> {}
+    export class SetCardStickers extends Request<{
+      // flags: Api.Type;
+      stickers: Api.TypeInputWalletCardSticker[];
+      bgNftAddress?: string;
+    }, wallet.TypeCard> {
+      // flags: Api.Type;
+      stickers: Api.TypeInputWalletCardSticker[];
+      bgNftAddress?: string;
+    }
   }
 
   export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | InvokeWithReCaptcha | ReqPq | ReqPqMulti | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
     | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail | auth.ReportMissingCode | auth.CheckPaidAuth | auth.InitPasskeyLogin | auth.FinishPasskeyLogin | auth.CancelWebTokenAuthorization | auth.InitFirebasePnvLogin | auth.FinishFirebasePnvLogin | auth.FirebasePnvSignUp
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis | account.UpdateBusinessWorkHours | account.UpdateBusinessLocation | account.UpdateBusinessGreetingMessage | account.UpdateBusinessAwayMessage | account.UpdateConnectedBot | account.GetConnectedBots | account.GetBotBusinessConnection | account.UpdateBusinessIntro | account.ToggleConnectedBotPaused | account.DisablePeerConnectedBot | account.UpdateBirthday | account.CreateBusinessChatLink | account.EditBusinessChatLink | account.DeleteBusinessChatLink | account.GetBusinessChatLinks | account.ResolveBusinessChatLink | account.UpdatePersonalChannel | account.ToggleSponsoredMessages | account.GetReactionsNotifySettings | account.SetReactionsNotifySettings | account.GetCollectibleEmojiStatuses | account.GetPaidMessagesRevenue | account.ToggleNoPaidMessagesException | account.SetMainProfileTab | account.SaveMusic | account.GetSavedMusicIds | account.GetUniqueGiftChatThemes | account.InitPasskeyRegistration | account.RegisterPasskey | account.GetPasskeys | account.DeletePasskey | account.ConfirmBotConnection | account.GetWebBrowserSettings | account.UpdateWebBrowserSettings | account.ToggleWebBrowserSettingsException | account.DeleteWebBrowserSettingsExceptions
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetRequirementsToContact | users.GetSavedMusic | users.GetSavedMusicByID | users.SuggestBirthday
-    | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.SetBlocked | contacts.GetBirthdays | contacts.GetSponsoredPeers | contacts.UpdateContactNote
-    | messages.GetMessages | messages.GetDialogs | messages.GetHistory | messages.Search | messages.ReadHistory | messages.DeleteHistory | messages.DeleteMessages | messages.ReceivedMessages | messages.SetTyping | messages.SendMessage | messages.SendMedia | messages.ForwardMessages | messages.ReportSpam | messages.GetPeerSettings | messages.Report | messages.GetChats | messages.GetFullChat | messages.EditChatTitle | messages.EditChatPhoto | messages.AddChatUser | messages.DeleteChatUser | messages.CreateChat | messages.GetDhConfig | messages.RequestEncryption | messages.AcceptEncryption | messages.DiscardEncryption | messages.SetEncryptedTyping | messages.ReadEncryptedHistory | messages.SendEncrypted | messages.SendEncryptedFile | messages.SendEncryptedService | messages.ReceivedQueue | messages.ReportEncryptedSpam | messages.ReadMessageContents | messages.GetStickers | messages.GetAllStickers | messages.GetWebPagePreview | messages.ExportChatInvite | messages.CheckChatInvite | messages.ImportChatInvite | messages.GetStickerSet | messages.InstallStickerSet | messages.UninstallStickerSet | messages.StartBot | messages.GetMessagesViews | messages.EditChatAdmin | messages.MigrateChat | messages.SearchGlobal | messages.ReorderStickerSets | messages.GetDocumentByHash | messages.GetSavedGifs | messages.SaveGif | messages.GetInlineBotResults | messages.SetInlineBotResults | messages.SendInlineBotResult | messages.GetMessageEditData | messages.EditMessage | messages.EditInlineBotMessage | messages.GetBotCallbackAnswer | messages.SetBotCallbackAnswer | messages.GetPeerDialogs | messages.SaveDraft | messages.GetAllDrafts | messages.GetFeaturedStickers | messages.ReadFeaturedStickers | messages.GetRecentStickers | messages.SaveRecentSticker | messages.ClearRecentStickers | messages.GetArchivedStickers | messages.GetMaskStickers | messages.GetAttachedStickers | messages.SetGameScore | messages.SetInlineGameScore | messages.GetGameHighScores | messages.GetInlineGameHighScores | messages.GetCommonChats | messages.GetWebPage | messages.ToggleDialogPin | messages.ReorderPinnedDialogs | messages.GetPinnedDialogs | messages.SetBotShippingResults | messages.SetBotPrecheckoutResults | messages.UploadMedia | messages.SendScreenshotNotification | messages.GetFavedStickers | messages.FaveSticker | messages.GetUnreadMentions | messages.ReadMentions | messages.GetRecentLocations | messages.SendMultiMedia | messages.UploadEncryptedFile | messages.SearchStickerSets | messages.GetSplitRanges | messages.MarkDialogUnread | messages.GetDialogUnreadMarks | messages.ClearAllDrafts | messages.UpdatePinnedMessage | messages.SendVote | messages.GetPollResults | messages.GetOnlines | messages.EditChatAbout | messages.EditChatDefaultBannedRights | messages.GetEmojiKeywords | messages.GetEmojiKeywordsDifference | messages.GetEmojiKeywordsLanguages | messages.GetEmojiURL | messages.GetSearchCounters | messages.RequestUrlAuth | messages.AcceptUrlAuth | messages.HidePeerSettingsBar | messages.GetScheduledHistory | messages.GetScheduledMessages | messages.SendScheduledMessages | messages.DeleteScheduledMessages | messages.GetPollVotes | messages.ToggleStickerSets | messages.GetDialogFilters | messages.GetSuggestedDialogFilters | messages.UpdateDialogFilter | messages.UpdateDialogFiltersOrder | messages.GetOldFeaturedStickers | messages.GetReplies | messages.GetDiscussionMessage | messages.ReadDiscussion | messages.UnpinAllMessages | messages.DeleteChat | messages.DeletePhoneCallHistory | messages.CheckHistoryImport | messages.InitHistoryImport | messages.UploadImportedMedia | messages.StartHistoryImport | messages.GetExportedChatInvites | messages.GetExportedChatInvite | messages.EditExportedChatInvite | messages.DeleteRevokedExportedChatInvites | messages.DeleteExportedChatInvite | messages.GetAdminsWithInvites | messages.GetChatInviteImporters | messages.SetHistoryTTL | messages.CheckHistoryImportPeer | messages.SetChatTheme | messages.GetMessageReadParticipants | messages.GetSearchResultsCalendar | messages.GetSearchResultsPositions | messages.HideChatJoinRequest | messages.HideAllChatJoinRequests | messages.ToggleNoForwards | messages.SaveDefaultSendAs | messages.SendReaction | messages.GetMessagesReactions | messages.GetMessageReactionsList | messages.SetChatAvailableReactions | messages.GetAvailableReactions | messages.SetDefaultReaction | messages.TranslateText | messages.GetUnreadReactions | messages.ReadReactions | messages.SearchSentMedia | messages.GetAttachMenuBots | messages.GetAttachMenuBot | messages.ToggleBotInAttachMenu | messages.RequestWebView | messages.ProlongWebView | messages.RequestSimpleWebView | messages.SendWebViewResultMessage | messages.SendWebViewData | messages.TranscribeAudio | messages.RateTranscribedAudio | messages.GetCustomEmojiDocuments | messages.GetEmojiStickers | messages.GetFeaturedEmojiStickers | messages.ReportReaction | messages.GetTopReactions | messages.GetRecentReactions | messages.ClearRecentReactions | messages.GetExtendedMedia | messages.SetDefaultHistoryTTL | messages.GetDefaultHistoryTTL | messages.SendBotRequestedPeer | messages.GetEmojiGroups | messages.GetEmojiStatusGroups | messages.GetEmojiProfilePhotoGroups | messages.SearchCustomEmoji | messages.TogglePeerTranslations | messages.GetBotApp | messages.RequestAppWebView | messages.SetChatWallPaper | messages.SearchEmojiStickerSets | messages.GetSavedDialogs | messages.GetSavedHistory | messages.DeleteSavedHistory | messages.GetPinnedSavedDialogs | messages.ToggleSavedDialogPin | messages.ReorderPinnedSavedDialogs | messages.GetSavedReactionTags | messages.UpdateSavedReactionTag | messages.GetDefaultTagReactions | messages.GetOutboxReadDate | messages.GetQuickReplies | messages.ReorderQuickReplies | messages.CheckQuickReplyShortcut | messages.EditQuickReplyShortcut | messages.DeleteQuickReplyShortcut | messages.GetQuickReplyMessages | messages.SendQuickReplyMessages | messages.DeleteQuickReplyMessages | messages.ToggleDialogFilterTags | messages.GetMyStickers | messages.GetEmojiStickerGroups | messages.GetAvailableEffects | messages.EditFactCheck | messages.DeleteFactCheck | messages.GetFactCheck | messages.RequestMainWebView | messages.SendPaidReaction | messages.TogglePaidReactionPrivacy | messages.GetPaidReactionPrivacy | messages.ViewSponsoredMessage | messages.ClickSponsoredMessage | messages.ReportSponsoredMessage | messages.GetSponsoredMessages | messages.SavePreparedInlineMessage | messages.GetPreparedInlineMessage | messages.SearchStickers | messages.ReportMessagesDelivery | messages.GetSavedDialogsByID | messages.ReadSavedHistory | messages.ToggleTodoCompleted | messages.AppendTodoList | messages.ToggleSuggestedPostApproval | messages.GetForumTopics | messages.GetForumTopicsByID | messages.EditForumTopic | messages.UpdatePinnedForumTopic | messages.ReorderPinnedForumTopics | messages.CreateForumTopic | messages.DeleteTopicHistory | messages.GetEmojiGameInfo | messages.SummarizeText | messages.EditChatCreator | messages.GetFutureChatCreatorAfterLeave | messages.EditChatParticipantRank | messages.DeclineUrlAuth | messages.CheckUrlAuthMatchCode | messages.ComposeMessageWithAI | messages.ReportReadMetrics | messages.ReportMusicListen | messages.AddPollAnswer | messages.DeletePollAnswer | messages.GetUnreadPollVotes | messages.ReadPollVotes | messages.SetBotGuestChatResult | messages.DeleteParticipantReactions | messages.DeleteParticipantReaction | messages.GetPersonalChannelHistory | messages.GetRichMessage | messages.TranslateRichMessage | messages.ComposeRichMessageWithAI | messages.RequestChatJoinWebView
+    | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.SetBlocked | contacts.GetBirthdays | contacts.GetSponsoredPeers | contacts.UpdateContactNote | contacts.ExportNoPaidMessagesToken | contacts.ImportNoPaidMessagesToken
+    | messages.GetMessages | messages.GetDialogs | messages.GetHistory | messages.Search | messages.ReadHistory | messages.DeleteHistory | messages.DeleteMessages | messages.ReceivedMessages | messages.SetTyping | messages.SendMessage | messages.SendMedia | messages.ForwardMessages | messages.ReportSpam | messages.GetPeerSettings | messages.Report | messages.GetChats | messages.GetFullChat | messages.EditChatTitle | messages.EditChatPhoto | messages.AddChatUser | messages.DeleteChatUser | messages.CreateChat | messages.GetDhConfig | messages.RequestEncryption | messages.AcceptEncryption | messages.DiscardEncryption | messages.SetEncryptedTyping | messages.ReadEncryptedHistory | messages.SendEncrypted | messages.SendEncryptedFile | messages.SendEncryptedService | messages.ReceivedQueue | messages.ReportEncryptedSpam | messages.ReadMessageContents | messages.GetStickers | messages.GetAllStickers | messages.GetWebPagePreview | messages.ExportChatInvite | messages.CheckChatInvite | messages.ImportChatInvite | messages.GetStickerSet | messages.InstallStickerSet | messages.UninstallStickerSet | messages.StartBot | messages.GetMessagesViews | messages.EditChatAdmin | messages.MigrateChat | messages.SearchGlobal | messages.ReorderStickerSets | messages.GetDocumentByHash | messages.GetSavedGifs | messages.SaveGif | messages.GetInlineBotResults | messages.SetInlineBotResults | messages.SendInlineBotResult | messages.GetMessageEditData | messages.EditMessage | messages.EditInlineBotMessage | messages.GetBotCallbackAnswer | messages.SetBotCallbackAnswer | messages.GetPeerDialogs | messages.SaveDraft | messages.GetAllDrafts | messages.GetFeaturedStickers | messages.ReadFeaturedStickers | messages.GetRecentStickers | messages.SaveRecentSticker | messages.ClearRecentStickers | messages.GetArchivedStickers | messages.GetMaskStickers | messages.GetAttachedStickers | messages.SetGameScore | messages.SetInlineGameScore | messages.GetGameHighScores | messages.GetInlineGameHighScores | messages.GetCommonChats | messages.GetWebPage | messages.ToggleDialogPin | messages.ReorderPinnedDialogs | messages.GetPinnedDialogs | messages.SetBotShippingResults | messages.SetBotPrecheckoutResults | messages.UploadMedia | messages.SendScreenshotNotification | messages.GetFavedStickers | messages.FaveSticker | messages.GetUnreadMentions | messages.ReadMentions | messages.GetRecentLocations | messages.SendMultiMedia | messages.UploadEncryptedFile | messages.SearchStickerSets | messages.GetSplitRanges | messages.MarkDialogUnread | messages.GetDialogUnreadMarks | messages.ClearAllDrafts | messages.UpdatePinnedMessage | messages.SendVote | messages.GetPollResults | messages.GetOnlines | messages.EditChatAbout | messages.EditChatDefaultBannedRights | messages.GetEmojiKeywords | messages.GetEmojiKeywordsDifference | messages.GetEmojiKeywordsLanguages | messages.GetEmojiURL | messages.GetSearchCounters | messages.RequestUrlAuth | messages.AcceptUrlAuth | messages.HidePeerSettingsBar | messages.GetScheduledHistory | messages.GetScheduledMessages | messages.SendScheduledMessages | messages.DeleteScheduledMessages | messages.GetPollVotes | messages.ToggleStickerSets | messages.GetDialogFilters | messages.GetSuggestedDialogFilters | messages.UpdateDialogFilter | messages.UpdateDialogFiltersOrder | messages.GetOldFeaturedStickers | messages.GetReplies | messages.GetDiscussionMessage | messages.ReadDiscussion | messages.UnpinAllMessages | messages.DeleteChat | messages.DeletePhoneCallHistory | messages.CheckHistoryImport | messages.InitHistoryImport | messages.UploadImportedMedia | messages.StartHistoryImport | messages.GetExportedChatInvites | messages.GetExportedChatInvite | messages.EditExportedChatInvite | messages.DeleteRevokedExportedChatInvites | messages.DeleteExportedChatInvite | messages.GetAdminsWithInvites | messages.GetChatInviteImporters | messages.SetHistoryTTL | messages.CheckHistoryImportPeer | messages.SetChatTheme | messages.GetMessageReadParticipants | messages.GetSearchResultsCalendar | messages.GetSearchResultsPositions | messages.HideChatJoinRequest | messages.HideAllChatJoinRequests | messages.ToggleNoForwards | messages.SaveDefaultSendAs | messages.SendReaction | messages.GetMessagesReactions | messages.GetMessageReactionsList | messages.SetChatAvailableReactions | messages.GetAvailableReactions | messages.SetDefaultReaction | messages.TranslateText | messages.GetUnreadReactions | messages.ReadReactions | messages.SearchSentMedia | messages.GetAttachMenuBots | messages.GetAttachMenuBot | messages.ToggleBotInAttachMenu | messages.RequestWebView | messages.ProlongWebView | messages.RequestSimpleWebView | messages.SendWebViewResultMessage | messages.SendWebViewData | messages.TranscribeAudio | messages.RateTranscribedAudio | messages.GetCustomEmojiDocuments | messages.GetEmojiStickers | messages.GetFeaturedEmojiStickers | messages.ReportReaction | messages.GetTopReactions | messages.GetRecentReactions | messages.ClearRecentReactions | messages.GetExtendedMedia | messages.SetDefaultHistoryTTL | messages.GetDefaultHistoryTTL | messages.SendBotRequestedPeer | messages.GetEmojiGroups | messages.GetEmojiStatusGroups | messages.GetEmojiProfilePhotoGroups | messages.SearchCustomEmoji | messages.TogglePeerTranslations | messages.GetBotApp | messages.RequestAppWebView | messages.SetChatWallPaper | messages.SearchEmojiStickerSets | messages.GetSavedDialogs | messages.GetSavedHistory | messages.DeleteSavedHistory | messages.GetPinnedSavedDialogs | messages.ToggleSavedDialogPin | messages.ReorderPinnedSavedDialogs | messages.GetSavedReactionTags | messages.UpdateSavedReactionTag | messages.GetDefaultTagReactions | messages.GetOutboxReadDate | messages.GetQuickReplies | messages.ReorderQuickReplies | messages.CheckQuickReplyShortcut | messages.EditQuickReplyShortcut | messages.DeleteQuickReplyShortcut | messages.GetQuickReplyMessages | messages.SendQuickReplyMessages | messages.DeleteQuickReplyMessages | messages.ToggleDialogFilterTags | messages.GetMyStickers | messages.GetEmojiStickerGroups | messages.GetAvailableEffects | messages.EditFactCheck | messages.DeleteFactCheck | messages.GetFactCheck | messages.RequestMainWebView | messages.SendPaidReaction | messages.TogglePaidReactionPrivacy | messages.GetPaidReactionPrivacy | messages.ViewSponsoredMessage | messages.ClickSponsoredMessage | messages.ReportSponsoredMessage | messages.GetSponsoredMessages | messages.SavePreparedInlineMessage | messages.GetPreparedInlineMessage | messages.SearchStickers | messages.ReportMessagesDelivery | messages.GetSavedDialogsByID | messages.ReadSavedHistory | messages.ToggleTodoCompleted | messages.AppendTodoList | messages.ToggleSuggestedPostApproval | messages.GetForumTopics | messages.GetForumTopicsByID | messages.EditForumTopic | messages.UpdatePinnedForumTopic | messages.ReorderPinnedForumTopics | messages.CreateForumTopic | messages.DeleteTopicHistory | messages.GetEmojiGameInfo | messages.SummarizeText | messages.EditChatCreator | messages.GetFutureChatCreatorAfterLeave | messages.EditChatParticipantRank | messages.DeclineUrlAuth | messages.CheckUrlAuthMatchCode | messages.ComposeMessageWithAI | messages.ReportReadMetrics | messages.ReportMusicListen | messages.AddPollAnswer | messages.DeletePollAnswer | messages.GetUnreadPollVotes | messages.ReadPollVotes | messages.SetBotGuestChatResult | messages.DeleteParticipantReactions | messages.DeleteParticipantReaction | messages.GetPersonalChannelHistory | messages.GetRichMessage | messages.TranslateRichMessage | messages.ComposeRichMessageWithAI | messages.RequestChatJoinWebView | messages.SetShareTheme | messages.GetShareThemeBackdrops
     | updates.GetState | updates.GetDifference | updates.GetChannelDifference
     | photos.UpdateProfilePhoto | photos.UploadProfilePhoto | photos.DeletePhotos | photos.GetUserPhotos | photos.UploadContactProfilePhoto
     | upload.SaveFilePart | upload.GetFile | upload.SaveBigFilePart | upload.GetWebFile | upload.GetCdnFile | upload.ReuploadCdnFile | upload.GetCdnFileHashes | upload.GetFileHashes
     | help.GetConfig | help.GetNearestDc | help.GetAppUpdate | help.GetInviteText | help.GetSupport | help.SetBotUpdatesStatus | help.GetCdnConfig | help.GetRecentMeUrls | help.GetTermsOfServiceUpdate | help.AcceptTermsOfService | help.GetDeepLinkInfo | help.GetAppConfig | help.SaveAppLog | help.GetPassportConfig | help.GetSupportName | help.GetUserInfo | help.EditUserInfo | help.GetPromoData | help.HidePromoData | help.DismissSuggestion | help.GetCountriesList | help.GetPremiumPromo | help.GetPeerColors | help.GetPeerProfileColors | help.GetTimezonesList
     | channels.ReadHistory | channels.DeleteMessages | channels.ReportSpam | channels.GetMessages | channels.GetParticipants | channels.GetParticipant | channels.GetChannels | channels.GetFullChannel | channels.CreateChannel | channels.EditAdmin | channels.EditTitle | channels.EditPhoto | channels.CheckUsername | channels.UpdateUsername | channels.JoinChannel | channels.LeaveChannel | channels.InviteToChannel | channels.DeleteChannel | channels.ExportMessageLink | channels.ToggleSignatures | channels.GetAdminedPublicChannels | channels.EditBanned | channels.GetAdminLog | channels.SetStickers | channels.ReadMessageContents | channels.DeleteHistory | channels.TogglePreHistoryHidden | channels.GetLeftChannels | channels.GetGroupsForDiscussion | channels.SetDiscussionGroup | channels.EditLocation | channels.ToggleSlowMode | channels.GetInactiveChannels | channels.ConvertToGigagroup | channels.GetSendAs | channels.DeleteParticipantHistory | channels.ToggleJoinToSend | channels.ToggleJoinRequest | channels.ReorderUsernames | channels.ToggleUsername | channels.DeactivateAllUsernames | channels.ToggleForum | channels.ToggleAntiSpam | channels.ReportAntiSpamFalsePositive | channels.ToggleParticipantsHidden | channels.UpdateColor | channels.ToggleViewForumAsMessages | channels.GetChannelRecommendations | channels.UpdateEmojiStatus | channels.SetBoostsToUnblockRestrictions | channels.SetEmojiStickers | channels.RestrictSponsoredMessages | channels.SearchPosts | channels.UpdatePaidMessagesPrice | channels.ToggleAutotranslation | channels.GetMessageAuthor | channels.CheckSearchPostsFlood | channels.SetMainProfileTab
     | bots.SendCustomRequest | bots.AnswerWebhookJSONQuery | bots.SetBotCommands | bots.ResetBotCommands | bots.GetBotCommands | bots.SetBotMenuButton | bots.GetBotMenuButton | bots.SetBotBroadcastDefaultAdminRights | bots.SetBotGroupDefaultAdminRights | bots.SetBotInfo | bots.GetBotInfo | bots.ReorderUsernames | bots.ToggleUsername | bots.CanSendMessage | bots.AllowSendMessage | bots.InvokeWebViewCustomMethod | bots.GetPopularAppBots | bots.AddPreviewMedia | bots.EditPreviewMedia | bots.DeletePreviewMedia | bots.ReorderPreviewMedias | bots.GetPreviewInfo | bots.GetPreviewMedias | bots.UpdateUserEmojiStatus | bots.ToggleUserEmojiStatusPermission | bots.CheckDownloadFileParams | bots.GetAdminedBots | bots.UpdateStarRefProgram | bots.SetCustomVerification | bots.GetBotRecommendations | bots.CheckUsername | bots.CreateBot | bots.ExportBotToken | bots.RequestWebViewButton | bots.GetRequestedWebViewButton | bots.GetAccessSettings | bots.EditAccessSettings | bots.SetJoinChatResults | bots.AddUsername | bots.RemoveUsername
-    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUniqueStarGift | payments.GetSavedStarGifts | payments.GetSavedStarGift | payments.GetStarGiftWithdrawalUrl | payments.ToggleChatStarGiftNotifications | payments.ToggleStarGiftsPinnedToTop | payments.CanPurchaseStore | payments.GetResaleStarGifts | payments.UpdateStarGiftPrice | payments.CreateStarGiftCollection | payments.UpdateStarGiftCollection | payments.ReorderStarGiftCollections | payments.DeleteStarGiftCollection | payments.GetStarGiftCollections | payments.GetUniqueStarGiftValueInfo | payments.CheckCanSendGift | payments.GetStarGiftAuctionState | payments.GetStarGiftAuctionAcquiredGifts | payments.GetStarGiftActiveAuctions | payments.ResolveStarGiftOffer | payments.SendStarGiftOffer | payments.GetStarGiftUpgradeAttributes | payments.GetCraftStarGifts | payments.CraftStarGift | payments.GetCurrencyRates | payments.GetOnrampProviders | payments.GetOnrampBaseCurrencies | payments.GetOnrampAvailability | payments.GetOnrampLimits | payments.GetOnrampQuote | payments.CreateOnrampSession
+    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUniqueStarGift | payments.GetSavedStarGifts | payments.GetSavedStarGift | payments.GetStarGiftWithdrawalUrl | payments.ToggleChatStarGiftNotifications | payments.ToggleStarGiftsPinnedToTop | payments.CanPurchaseStore | payments.GetResaleStarGifts | payments.UpdateStarGiftPrice | payments.CreateStarGiftCollection | payments.UpdateStarGiftCollection | payments.ReorderStarGiftCollections | payments.DeleteStarGiftCollection | payments.GetStarGiftCollections | payments.GetUniqueStarGiftValueInfo | payments.CheckCanSendGift | payments.GetStarGiftAuctionState | payments.GetStarGiftAuctionAcquiredGifts | payments.GetStarGiftActiveAuctions | payments.ResolveStarGiftOffer | payments.SendStarGiftOffer | payments.GetStarGiftUpgradeAttributes | payments.GetCraftStarGifts | payments.CraftStarGift | payments.GetCurrencyRates | payments.GetOnrampProviders | payments.GetOnrampBaseCurrencies | payments.GetOnrampAvailability | payments.GetOnrampLimits | payments.GetOnrampQuote | payments.CreateOnrampSession | payments.WithdrawStarGift | payments.DepositStarGift | payments.DisplayStarGift | payments.DeleteStarGift
     | stickers.CreateStickerSet | stickers.RemoveStickerFromSet | stickers.ChangeStickerPosition | stickers.AddStickerToSet | stickers.SetStickerSetThumb | stickers.CheckShortName | stickers.SuggestShortName | stickers.ChangeSticker | stickers.RenameStickerSet | stickers.DeleteStickerSet | stickers.ReplaceSticker
     | phone.GetCallConfig | phone.RequestCall | phone.AcceptCall | phone.ConfirmCall | phone.ReceivedCall | phone.DiscardCall | phone.SetCallRating | phone.SaveCallDebug | phone.SendSignalingData | phone.CreateGroupCall | phone.JoinGroupCall | phone.LeaveGroupCall | phone.InviteToGroupCall | phone.DiscardGroupCall | phone.ToggleGroupCallSettings | phone.GetGroupCall | phone.GetGroupParticipants | phone.CheckGroupCall | phone.ToggleGroupCallRecord | phone.EditGroupCallParticipant | phone.EditGroupCallTitle | phone.GetGroupCallJoinAs | phone.ExportGroupCallInvite | phone.ToggleGroupCallStartSubscription | phone.StartScheduledGroupCall | phone.SaveDefaultGroupCallJoinAs | phone.JoinGroupCallPresentation | phone.LeaveGroupCallPresentation | phone.GetGroupCallStreamChannels | phone.GetGroupCallStreamRtmpUrl | phone.SaveCallLog | phone.CreateConferenceCall | phone.DeleteConferenceCallParticipants | phone.SendConferenceCallBroadcast | phone.InviteConferenceCallParticipant | phone.DeclineConferenceCallInvite | phone.GetGroupCallChainBlocks | phone.SendGroupCallMessage | phone.SendGroupCallEncryptedMessage | phone.DeleteGroupCallMessages | phone.DeleteGroupCallParticipantMessages | phone.GetGroupCallStars | phone.SaveDefaultSendAs
     | langpack.GetLangPack | langpack.GetStrings | langpack.GetDifference | langpack.GetLanguages | langpack.GetLanguage
@@ -33684,6 +33970,6 @@ namespace Api {
     | communities.Create | communities.TogglePeerLink | communities.GetJoinedCommunities | communities.ToggleCommunityCollapsedInDialogs | communities.GetPeerLinkRequests | communities.TogglePeerLinkRequestApproval | communities.ToggleAllPeerLinkRequestApproval | communities.ToggleParticipantBanned | communities.GetParticipantJoinedChats
     | ephemeral.SendMessage | ephemeral.DeleteMessage | ephemeral.ReportMessage | ephemeral.GetCallbackAnswer | ephemeral.EditMessage | ephemeral.DeleteWelcomeMessage | ephemeral.DeleteAllWelcomeMessages | ephemeral.GetWelcomeMessages
     | toncenter.PerformApiRequest | toncenter.GetStreamingUrl
-    | wallet.GetState | wallet.GetUserAddresses | wallet.GetTransactions | wallet.GetTransactionsByIDs | wallet.GetTransactionsByMsgHash | wallet.ExportSecretPhrase | wallet.FetchEncryptedSecretPhrasePart | wallet.ReplaceWallet | wallet.DisableBackup | wallet.GetBackupHolderDcs | wallet.EnableBackup | wallet.GetProofChallenge | wallet.SendTransfer | wallet.GetGaslessInfo | wallet.GetExistingWaltBalance | wallet.GetNfts | wallet.TonConnectCreateSession | wallet.TonConnectRegisterKey | wallet.TonConnectSubmitConnectResult | wallet.TonConnectGetPending | wallet.TonConnectClaimRequest | wallet.TonConnectSubmitResponse | wallet.TonConnectNextEventId | wallet.TonConnectCloseSession | wallet.TonConnectGetSessions;
+    | wallet.GetState | wallet.GetUserAddresses | wallet.GetTransactions | wallet.GetTransactionsByIDs | wallet.GetTransactionsByMsgHash | wallet.ExportSecretPhrase | wallet.FetchEncryptedSecretPhrasePart | wallet.ReplaceWallet | wallet.DisableBackup | wallet.GetBackupHolderDcs | wallet.EnableBackup | wallet.GetProofChallenge | wallet.SendTransfer | wallet.GetGaslessInfo | wallet.GetExistingWaltBalance | wallet.GetNfts | wallet.TonConnectCreateSession | wallet.TonConnectRegisterKey | wallet.TonConnectSubmitConnectResult | wallet.TonConnectGetPending | wallet.TonConnectClaimRequest | wallet.TonConnectSubmitResponse | wallet.TonConnectNextEventId | wallet.TonConnectCloseSession | wallet.TonConnectGetSessions | wallet.SetCardStickers;
 
 }

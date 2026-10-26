@@ -44,7 +44,7 @@ import {
   DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
-import { getPassword } from './twoFaSettings';
+import { getTemporaryPaymentPassword } from './twoFaSettings';
 
 export async function fetchCheckCanSendGift({ giftId }: { giftId: string }) {
   const result = await invokeRequest(new GramJs.payments.CheckCanSendGift({
@@ -566,19 +566,19 @@ export async function fetchStarGiftWithdrawalUrl({
   password: string;
 }) {
   try {
-    const passwordCheck = await getPassword(password);
+    const tmpPasswordResult = await getTemporaryPaymentPassword(password);
 
-    if (!passwordCheck) {
+    if (!tmpPasswordResult) {
       return undefined;
     }
 
-    if ('error' in passwordCheck) {
-      return passwordCheck;
+    if ('error' in tmpPasswordResult) {
+      return tmpPasswordResult;
     }
 
     const result = await invokeRequest(new GramJs.payments.GetStarGiftWithdrawalUrl({
       stargift: buildInputSavedStarGift(inputGift),
-      password: passwordCheck,
+      tmpPassword: tmpPasswordResult.tmpPassword,
     }), {
       shouldThrow: true,
     });
