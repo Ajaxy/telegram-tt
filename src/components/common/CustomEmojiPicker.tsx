@@ -27,7 +27,7 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
 } from '../../global/selectors';
-import { selectSharedSettings } from '../../global/selectors/sharedState';
+import { selectLanguageCode } from '../../global/selectors/settings';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -639,7 +639,7 @@ export default memo(withGlobal<OwnProps>(
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
     const collectibleStatuses = global.collectibleEmojiStatuses?.statuses;
-    const { language } = selectSharedSettings(global);
+    const language = selectLanguageCode(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
 

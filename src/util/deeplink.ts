@@ -61,6 +61,9 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
   const parsedLink = tryParseDeepLink(url);
   if (parsedLink) {
     switch (parsedLink.type) {
+      case 'languageLink':
+        actions.openLanguageModal({ langCode: parsedLink.langCode });
+        return true;
       case 'privateMessageLink':
         actions.openPrivateChannel({
           id: parsedLink.channelId,

@@ -317,6 +317,12 @@
   margin-top: 1rem;
 }
 
+.settings-custom-language {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
 .settings-picker {
   padding-block: 0;
 }

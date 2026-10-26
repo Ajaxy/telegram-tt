@@ -51,6 +51,7 @@ export type LangPack = {
 
 export type CachedLangData = {
   langPack: LangPack;
+  baseLangPack?: LangPack;
   language: ApiLanguage;
 };
 

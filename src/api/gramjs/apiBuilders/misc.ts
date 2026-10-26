@@ -321,12 +321,14 @@ export function buildLangStrings(strings: GramJs.TypeLangPackString[]) {
 
 export function buildApiLanguage(lang: GramJs.TypeLangPackLanguage): ApiLanguage {
   const {
-    name, nativeName, langCode, pluralCode, rtl, stringsCount, translatedCount, translationsUrl, beta, official,
+    name, nativeName, langCode, baseLangCode, pluralCode, rtl, stringsCount, translatedCount,
+    translationsUrl, beta, official,
   } = lang;
   return {
     name,
     nativeName,
     langCode,
+    baseLangCode,
     pluralCode,
     isRtl: rtl,
     isBeta: beta,

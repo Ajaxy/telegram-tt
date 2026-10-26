@@ -26,7 +26,7 @@ import {
   selectIsCurrentUserPremium,
   selectIsSetPremium,
 } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { selectLanguageCode } from '../../../global/selectors/settings';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -659,7 +659,7 @@ const EmojiPicker = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): Complete<StateProps> => {
-    const { language } = selectSharedSettings(global);
+    const language = selectLanguageCode(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;

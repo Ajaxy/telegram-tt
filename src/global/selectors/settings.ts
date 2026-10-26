@@ -26,7 +26,10 @@ export function selectNotifyException<T extends GlobalState>(global: T, chatId: 
 }
 
 export function selectLanguageCode<T extends GlobalState>(global: T) {
-  return selectSharedSettings(global).language.replace('-raw', '');
+  const { language, languages, customLanguages } = selectSharedSettings(global);
+  const languageInfo = customLanguages?.find(({ langCode }) => langCode === language)
+    || languages?.find(({ langCode }) => langCode === language);
+  return languageInfo?.pluralCode || language.replace('-raw', '');
 }
 
 export function selectCanSetPasscode<T extends GlobalState>(global: T) {

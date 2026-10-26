@@ -212,6 +212,8 @@ class TelegramClient {
   private pingCallback?: () => Promise<void>;
 
   private _initWith: (x: unknown) => Api.InvokeWithLayer;
+  private _languageAnnouncementPromise = Promise.resolve();
+  private _announcedLangCode?: string;
 
   isPremium = false;
   private _lastRequest = Date.now();
@@ -289,6 +291,18 @@ class TelegramClient {
 
   // region Connecting
 
+  setLanguageCode(langCode: string) {
+    this._args.langCode = langCode;
+    this._languageAnnouncementPromise = this._languageAnnouncementPromise.catch(() => undefined).then(async () => {
+      await this._connectedDeferred.promise;
+      if (this._args.langCode !== langCode || this._announcedLangCode === langCode) return;
+
+      await this._sender!.send(this._initWith(new Api.help.GetConfig()));
+      this._announcedLangCode = langCode;
+    });
+    return this._languageAnnouncementPromise;
+  }
+
   /**
      * Connects to the Telegram servers, executing authentication if required.
      * Note that authenticating to the Telegram servers is not the same as authenticating
@@ -349,9 +363,11 @@ class TelegramClient {
 
     this.session.setAuthKey(this._sender.authKey);
     // `_initWith` is used to announce our API layer to the server
+    const langCode = this._args.langCode;
     await this._sender.send(this._initWith(
       new Api.help.GetConfig(),
     ));
+    this._announcedLangCode = langCode;
 
     if (!this._loopStarted) {
       this._updateLoop();

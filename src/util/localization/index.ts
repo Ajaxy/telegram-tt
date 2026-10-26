@@ -55,6 +55,7 @@ let language: ApiLanguage | undefined;
 let formatters: LangFormatters;
 
 let langPack: LangPack | undefined;
+let baseLangPack: LangPack | undefined;
 let fallbackLangPack: LangPack | undefined;
 let currentTimeFormat: TimeFormat = '24h';
 let languageRequestId = 0;
@@ -96,7 +97,16 @@ async function cacheLangData(data: CachedLangData) {
   let cachedData = data;
   try {
     await MAIN_IDB_STORE.update<CachedLangData>(`${LANGPACK_STORE_PREFIX}${data.language.langCode}`, (previousData) => {
-      if (previousData && previousData.langPack.version > data.langPack.version) cachedData = previousData;
+      if (previousData) {
+        cachedData = {
+          language: data.language,
+          langPack: previousData.langPack.version > data.langPack.version ? previousData.langPack : data.langPack,
+          baseLangPack: previousData.baseLangPack && data.baseLangPack
+            && previousData.baseLangPack.langCode === data.baseLangPack.langCode
+            && previousData.baseLangPack.version > data.baseLangPack.version
+            ? previousData.baseLangPack : data.baseLangPack,
+        };
+      }
       return cachedData;
     });
     notifyLangpackUpdate(data.language.langCode);
@@ -130,11 +140,13 @@ function loadFallbackPack() {
   return fallbackLoadPromise;
 }
 
-async function fetchDifference() {
+async function fetchDifference(langCode = langPack?.langCode) {
   await initialEstablishmentPromise;
-  if (!isCurrentTabMaster() || !langPack || !language) return;
+  if (!isCurrentTabMaster() || !langCode || !language) return;
 
-  const { langCode, version: fromVersion } = langPack;
+  const pack = getActiveLangPack(langCode);
+  if (!pack) return;
+  const { version: fromVersion } = pack;
   const requestId = languageRequestId;
 
   try {
@@ -143,9 +155,10 @@ async function fetchDifference() {
       langCode,
       fromVersion,
     });
-    if (!result || requestId !== languageRequestId || langPack.langCode !== langCode) return;
-    if (langPack.version !== fromVersion) {
-      if (result.langCode === langCode && result.version > langPack.version) void fetchDifference();
+    const currentPack = getActiveLangPack(langCode);
+    if (!result || result.langCode !== langCode || requestId !== languageRequestId || !currentPack) return;
+    if (currentPack.version !== fromVersion) {
+      if (result.version > currentPack.version) void fetchDifference(langCode);
       return;
     }
 
@@ -159,32 +172,41 @@ async function fetchDifference() {
 export function applyLangPackDifference({
   langCode, fromVersion, version, strings, keysToRemove,
 }: Omit<ApiUpdateLangPack, '@type'>) {
-  if (!langPack || !language || langCode !== language.langCode || version <= langPack.version) return;
+  const pack = getActiveLangPack(langCode);
+  if (!pack || !langPack || !language || version <= pack.version) return;
 
-  if (fromVersion !== langPack.version) {
-    void fetchDifference();
+  if (fromVersion !== pack.version) {
+    void fetchDifference(langCode);
     return;
   }
 
   const newLangPack = {
-    ...langPack,
+    ...pack,
     version,
     strings: {
-      ...omit(langPack.strings, keysToRemove),
+      ...omit(pack.strings, keysToRemove),
       ...strings,
     },
   };
-  updateLangPack(newLangPack);
+  updateLangPack(langCode === langPack.langCode ? newLangPack : langPack,
+    langCode === baseLangPack?.langCode ? newLangPack : baseLangPack);
 
   void cacheLangData({
-    langPack: newLangPack,
+    langPack,
+    baseLangPack,
     language,
   });
 }
 
+function getActiveLangPack(langCode: string) {
+  if (langPack?.langCode === langCode) return langPack;
+  if (baseLangPack?.langCode === langCode) return baseLangPack;
+  return undefined;
+}
+
 function updateLanguage(newLang: ApiLanguage) {
   language = newLang;
-  document.documentElement.lang = newLang.baseLangCode || newLang.langCode;
+  document.documentElement.lang = newLang.pluralCode;
 
   createFormatters();
 
@@ -234,8 +256,9 @@ function createFormatters() {
   resetDateFormatCache();
 }
 
-function updateLangPack(newLangPack: LangPack | undefined) {
+function updateLangPack(newLangPack: LangPack | undefined, newBaseLangPack?: LangPack) {
   langPack = newLangPack;
+  baseLangPack = newBaseLangPack;
 
   TRANSLATION_CACHE.clear();
   translationFn = createTranslationFn();
@@ -257,10 +280,8 @@ async function initializeLocalization(langCode: string, canLoadFromServer?: bool
 
   const cachedData = await cachedDataPromise;
   if (requestId !== languageRequestId) return;
-  if (cachedData) {
-    updateLangPack(cachedData.langPack);
-    updateLanguage(cachedData.language);
-    void fetchDifference();
+  if (cachedData && hasRequiredPacks(cachedData)) {
+    activateLanguage(cachedData);
   } else if (canLoadFromServer) {
     void loadAndChangeLanguage(langCode);
   }
@@ -272,9 +293,13 @@ export async function refreshFromCache(langCode: string) {
   const requestId = languageRequestId;
   const cachedData = await loadCachedLangData(langCode);
   if (!cachedData || requestId !== languageRequestId || language.langCode !== langCode
-    || (langPack && cachedData.langPack.version <= langPack.version)) return;
+    || !hasRequiredPacks(cachedData)) return;
 
-  updateLangPack(cachedData.langPack);
+  const newLangPack = langPack && langPack.version >= cachedData.langPack.version ? langPack : cachedData.langPack;
+  const newBaseLangPack = baseLangPack && cachedData.baseLangPack
+    && baseLangPack.langCode === cachedData.baseLangPack.langCode
+    && baseLangPack.version >= cachedData.baseLangPack.version ? baseLangPack : cachedData.baseLangPack;
+  updateLangPack(newLangPack, newBaseLangPack);
   updateLanguage(cachedData.language);
 }
 
@@ -286,15 +311,15 @@ export function retryLocalization(langCode: string): Promise<boolean> {
   void loadFallbackPack();
   if (selectionPromise) return selectionPromise;
   if (langPack && language?.langCode === langCode) {
-    void fetchDifference();
+    requestActivePackDifferences();
     return Promise.resolve(true);
   }
   return loadAndChangeLanguage(langCode);
 }
 
 export function requestLangPackDifference(langCode: string) {
-  if (language?.langCode !== langCode) return;
-  void fetchDifference();
+  if (!getActiveLangPack(langCode)) return;
+  void fetchDifference(langCode);
 }
 
 export function changeLanguage(newLanguage: ApiLanguage): Promise<boolean> {
@@ -314,12 +339,15 @@ function selectLanguage(langCode: string, newLanguage?: ApiLanguage): Promise<bo
 async function loadLanguage(langCode: string, requestId: number, newLanguage?: ApiLanguage): Promise<boolean> {
   if (langPack && language?.langCode === langCode) return true;
 
-  const cachedData = await loadCachedLangData(langCode);
+  let cachedData = await loadCachedLangData(langCode);
   if (requestId !== languageRequestId) return false;
-  if (cachedData) {
-    updateLangPack(cachedData.langPack);
-    updateLanguage(cachedData.language);
-    void fetchDifference();
+  if (cachedData && newLanguage) cachedData = { ...cachedData, language: newLanguage };
+  if (cachedData && hasRequiredPacks(cachedData)) {
+    if (newLanguage) {
+      cachedData = await cacheLangData(cachedData);
+      if (requestId !== languageRequestId) return false;
+    }
+    activateLanguage(cachedData);
     return true;
   }
 
@@ -327,13 +355,19 @@ async function loadLanguage(langCode: string, requestId: number, newLanguage?: A
   if (requestId !== languageRequestId) return false;
 
   try {
-    const remoteLanguage = newLanguage || await callApi('fetchLanguage', { langPack: LANG_PACK, langCode });
+    const remoteLanguage = newLanguage || cachedData?.language
+      || await callApi('fetchLanguage', { langPack: LANG_PACK, langCode });
     if (requestId !== languageRequestId) return false;
     if (!remoteLanguage || remoteLanguage.langCode !== langCode) return activateFallbackLanguage(langCode, requestId);
 
-    const remoteLangPack = await callApi('fetchLangPack', { langPack: LANG_PACK, langCode });
+    const baseLangCode = getBaseLangCode(remoteLanguage);
+    const [remoteLangPack, remoteBaseLangPack] = await Promise.all([
+      cachedData?.langPack || callApi('fetchLangPack', { langPack: LANG_PACK, langCode }),
+      baseLangCode ? callApi('fetchLangPack', { langPack: LANG_PACK, langCode: baseLangCode }) : undefined,
+    ]);
     if (requestId !== languageRequestId) return false;
     if (!remoteLangPack || remoteLangPack.langCode !== langCode) return activateFallbackLanguage(langCode, requestId);
+    if (baseLangCode && remoteBaseLangPack?.langCode !== baseLangCode) return false;
 
     const data: CachedLangData = {
       language: remoteLanguage,
@@ -342,19 +376,44 @@ async function loadLanguage(langCode: string, requestId: number, newLanguage?: A
         version: remoteLangPack.version,
         strings: remoteLangPack.strings,
       },
+      baseLangPack: remoteBaseLangPack ? {
+        langCode: remoteBaseLangPack.langCode,
+        version: remoteBaseLangPack.version,
+        strings: remoteBaseLangPack.strings,
+      } : undefined,
     };
     const cachedRemoteData = await cacheLangData(data);
     if (requestId !== languageRequestId) return false;
     if (langPack?.langCode === langCode && langPack.version > cachedRemoteData.langPack.version) return true;
 
-    updateLangPack(cachedRemoteData.langPack);
-    updateLanguage(cachedRemoteData.language);
+    activateLanguage(cachedRemoteData);
     return true;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn('Failed to change language:', err);
     return activateFallbackLanguage(langCode, requestId);
   }
+}
+
+function getBaseLangCode(languageInfo: ApiLanguage) {
+  const { baseLangCode, langCode } = languageInfo;
+  return baseLangCode && baseLangCode !== langCode ? baseLangCode : undefined;
+}
+
+function hasRequiredPacks(data: CachedLangData) {
+  const baseLangCode = getBaseLangCode(data.language);
+  return !baseLangCode || data.baseLangPack?.langCode === baseLangCode;
+}
+
+function activateLanguage(data: CachedLangData) {
+  updateLangPack(data.langPack, data.baseLangPack);
+  updateLanguage(data.language);
+  requestActivePackDifferences();
+}
+
+function requestActivePackDifferences() {
+  void fetchDifference();
+  if (baseLangPack) void fetchDifference(baseLangPack.langCode);
 }
 
 async function activateFallbackLanguage(langCode: string, requestId: number): Promise<boolean> {
@@ -429,21 +488,23 @@ function getString(langKey: LangKey, count: number) {
   const shouldForceFallback = FORCE_FALLBACK_LANG && language?.langCode === FALLBACK_LANG_CODE;
   let langPackStringValue = !shouldForceFallback ? langPack?.strings[langKey] : undefined;
   if (langPackStringValue && isDeletedLangString(langPackStringValue)) langPackStringValue = undefined;
-  const shouldUseFallback = !langPackStringValue;
+  langPackStringValue ??= !shouldForceFallback ? baseLangPack?.strings[langKey] : undefined;
+  if (langPackStringValue && isDeletedLangString(langPackStringValue)) langPackStringValue = undefined;
+  const shouldUseFallback = langPackStringValue === undefined;
 
-  if (!langPackStringValue && !fallbackLangPack) {
+  if (shouldUseFallback && !fallbackLangPack) {
     loadFallbackPack();
   }
 
-  langPackStringValue ||= fallbackLangPack?.strings[langKey];
-  langPackStringValue ||= initialStrings[langKey];
+  langPackStringValue ??= fallbackLangPack?.strings[langKey];
+  langPackStringValue ??= initialStrings[langKey];
 
-  if (!langPackStringValue || isDeletedLangString(langPackStringValue)) return undefined;
+  if (langPackStringValue === undefined || isDeletedLangString(langPackStringValue)) return undefined;
 
   const pluralSuffix = (shouldUseFallback ? FALLBACK_PLURAL_RULES : formatters.pluralRules).select(count);
 
   const string = isPluralLangString(langPackStringValue)
-    ? (langPackStringValue[pluralSuffix] || langPackStringValue.other)
+    ? (langPackStringValue[pluralSuffix] ?? langPackStringValue.other)
     : langPackStringValue;
 
   return string;
@@ -465,7 +526,7 @@ function processTranslation(
   const pluralValue = options && 'pluralValue' in options ? Number(options.pluralValue) : 0;
   const string = getString(langKey, pluralValue);
 
-  if (!string) return langKey;
+  if (string === undefined) return langKey;
 
   const variableEntries = variables ? Object.entries(variables) : [];
   const finalString = variableEntries.reduce((result, [key, value]) => {
@@ -492,7 +553,7 @@ function processTranslationAdvanced(
 ): TeactNode {
   const pluralValue = options && 'pluralValue' in options ? Number(options.pluralValue) : 0;
   const string = getString(langKey, pluralValue);
-  if (!string) return langKey;
+  if (string === undefined) return langKey;
 
   const variableEntries = variables ? Object.entries(variables) : [];
 

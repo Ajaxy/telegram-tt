@@ -78,6 +78,7 @@ export { default as AiToneEmojiPickerModal }
   from '../components/middle/composer/AiMessageEditorModal/AiToneEmojiPickerModal';
 export { default as AiTonePreviewModal }
   from '../components/modals/aiTonePreview/AiTonePreviewModal';
+export { default as LanguageModal } from '../components/modals/language/LanguageModal';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as MediaEditor } from '../components/ui/mediaEditor/MediaEditor';

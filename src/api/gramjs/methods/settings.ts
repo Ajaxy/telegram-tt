@@ -502,7 +502,7 @@ export async function fetchLanguage({
   const result = await invokeRequest(new GramJs.langpack.GetLanguage({
     langPack,
     langCode,
-  }));
+  }), { shouldThrow: true });
   if (!result) {
     return undefined;
   }

@@ -438,6 +438,11 @@ export interface LangPair {
   'DataSettings': undefined;
   'PrivacySettings': undefined;
   'Language': undefined;
+  'LanguageTitle': undefined;
+  'LanguageNotFound': undefined;
+  'LanguageLoadFailed': undefined;
+  'LanguageApply': undefined;
+  'LanguageTranslateLink': undefined;
   'SettingsExperimental': undefined;
   'PrivacyPhone': undefined;
   'PrivacyLastSeen': undefined;
@@ -3554,6 +3559,25 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AutodownloadSizeLimitUpTo': {
     'limit': V;
+  };
+  'LanguageAlert': {
+    'language': V;
+    'percent': V;
+    'link': V;
+    'settings': V;
+  };
+  'LanguageCustomAlert': {
+    'language': V;
+    'percent': V;
+    'link': V;
+    'settings': V;
+  };
+  'LanguageUnknownCustomAlert': {
+    'language': V;
+    'link': V;
+  };
+  'LanguageAlready': {
+    'settings': V;
   };
   'AutoDeleteSetInfo': {
     'time': V;

@@ -3,7 +3,7 @@ import { getGlobal } from '../../../../global';
 
 import type { ApiSticker, ApiStickerSet } from '../../../../api/types';
 
-import { selectSharedSettings } from '../../../../global/selectors/sharedState';
+import { selectLanguageCode } from '../../../../global/selectors/settings';
 import { throttle } from '../../../../util/schedulers';
 import searchWords from '../../../../util/searchWords';
 import { callApi } from '../../../../api/gramjs';
@@ -55,7 +55,7 @@ export default function useStickerSearch({
         return;
       }
 
-      const langCode = selectSharedSettings(getGlobal()).language;
+      const langCode = selectLanguageCode(getGlobal());
       const [setsResult, globalResult] = await Promise.all([
         noPacks ? undefined : callApi('searchStickers', { query }),
         noPacks
@@ -108,7 +108,7 @@ export default function useStickerSearch({
 
     void (async () => {
       try {
-        const langCode = selectSharedSettings(getGlobal()).language;
+        const langCode = selectLanguageCode(getGlobal());
         const globalResult = await callApi('searchStickersGlobal', {
           query: currentResults.key,
           langCode,

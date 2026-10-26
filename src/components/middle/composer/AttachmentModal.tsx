@@ -22,7 +22,7 @@ import {
   selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectTabState,
 } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { selectLanguageCode } from '../../../global/selectors/settings';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import calcTextLineHeightAndCount from '../../../util/element/calcTextLineHeightAndCount';
@@ -933,7 +933,7 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = selectChatFullInfo(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { shouldSuggestCustomEmoji } = global.settings.byKey;
-    const { language } = selectSharedSettings(global);
+    const language = selectLanguageCode(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
 

@@ -28,6 +28,7 @@ import type {
   ApiInputSavedStarGift,
   ApiInputSuggestedPostInfo,
   ApiKeyboardButton,
+  ApiLanguage,
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMessageEntity,
@@ -280,6 +281,10 @@ export interface ActionPayloads {
     notificationSoundVolume?: number;
   };
   loadLanguages: undefined;
+  openLanguageModal: { langCode: string } & WithTabId;
+  closeLanguageModal: WithTabId | undefined;
+  applyLanguage: { language: ApiLanguage } & WithTabId;
+  removeCustomLanguage: { langCode: string };
 
   loadPasskeys: undefined;
   startPasskeyRegistration: WithTabId | undefined;

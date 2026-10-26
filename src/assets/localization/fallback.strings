@@ -539,6 +539,15 @@
 "DataSettings" = "Data and Storage";
 "PrivacySettings" = "Privacy and Security";
 "Language" = "Language";
+"LanguageTitle" = "Change language?";
+"LanguageAlert" = "You are about to apply a language pack ({language}) that is {percent}% complete.\n\nThis will translate the entire interface. You can suggest corrections via the {link}.\n\nYou can change your language back at any time in {settings}.";
+"LanguageCustomAlert" = "You are about to apply a custom language pack ({language}) that is {percent}% complete.\n\nThis will translate the entire interface. You can suggest corrections via the {link}.\n\nYou can change your language back at any time in {settings}.";
+"LanguageUnknownCustomAlert" = "Unfortunately, this language pack ({language}) doesn't contain data for Telegram Web A. You can contribute to this language pack using the {link}.";
+"LanguageAlready" = "You're already using this language pack. You can change your language back at any time in {settings}.";
+"LanguageNotFound" = "Sorry, this language pack doesn't exist.";
+"LanguageLoadFailed" = "Couldn't load this language pack. Please try again.";
+"LanguageApply" = "Apply Language";
+"LanguageTranslateLink" = "translation platform";
 "SettingsExperimental" = "Experimental settings";
 "PrivacyPhone" = "Phone Number";
 "PrivacyLastSeen" = "Last Seen & Online";

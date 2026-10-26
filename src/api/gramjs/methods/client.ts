@@ -89,6 +89,10 @@ const ABORT_CONTROLLERS = new Map<string, AbortController>();
 let client: TelegramClient;
 let currentUserId: string | undefined;
 
+export function setLanguageCode({ langCode }: { langCode: string }) {
+  return client.setLanguageCode(langCode);
+}
+
 export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoidFunction) {
   if (DEBUG) {
     // eslint-disable-next-line no-console

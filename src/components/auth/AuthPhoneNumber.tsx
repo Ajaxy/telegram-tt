@@ -111,9 +111,9 @@ const AuthPhoneNumber = ({
 
   useEffect(() => {
     if (isConnected) {
-      loadCountryList({ langCode: language });
+      loadCountryList({ langCode: lang.code });
     }
-  }, [isConnected, language]);
+  }, [isConnected, lang.code]);
 
   useEffect(() => {
     if (nearestCountry && phoneCodeList && !country && !isTouched) {

@@ -66,6 +66,7 @@ import {
   selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsTrustedBot,
+  selectLanguageCode,
   selectMessageReplyInfo,
   selectPeer,
   selectSendAs,
@@ -76,7 +77,6 @@ import {
   selectWebApp,
 } from '../../selectors';
 import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
-import { selectSharedSettings } from '../../selectors/sharedState';
 import { selectDraft } from '../../selectors/threads.ts';
 import { fetchChatByUsername } from './chats';
 import { getPeerStarsForMessage, sendEphemeralMessages } from './messages';
@@ -1666,7 +1666,7 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
   } = payload;
 
   let { langCode } = payload;
-  if (!langCode) langCode = selectSharedSettings(global).language;
+  if (!langCode) langCode = selectLanguageCode(global);
 
   const { currentUserId } = global;
   if (!currentUserId || !bot) {

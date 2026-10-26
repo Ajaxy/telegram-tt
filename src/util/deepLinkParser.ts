@@ -53,6 +53,11 @@ interface LoginCodeLink {
   code: string;
 }
 
+interface LanguageLink {
+  type: 'languageLink';
+  langCode: string;
+}
+
 interface TelegramPassportLink {
   type: 'telegramPassportLink';
   botId: number;
@@ -152,6 +157,7 @@ interface NewBotLink {
 }
 
 type DeepLink =
+  LanguageLink |
   TelegramPassportLink |
   LoginCodeLink |
   PublicMessageLink |
@@ -253,6 +259,8 @@ function parseTgLink(url: URL) {
 
   const deepLinkType = getTgDeepLinkType(queryParams, pathParams, method);
   switch (deepLinkType) {
+    case 'languageLink':
+      return buildLanguageLink({ langCode: queryParams.lang });
     case 'publicMessageLink': {
       const {
         domain, post, single, thread, comment, t,
@@ -362,6 +370,8 @@ function parseHttpLink(url: URL) {
 
   const deepLinkType = getHttpDeepLinkType(queryParams, pathParams);
   switch (deepLinkType) {
+    case 'languageLink':
+      return buildLanguageLink({ langCode: pathParams[1] });
     case 'publicMessageLink': {
       const {
         single, comment, t,
@@ -489,6 +499,7 @@ function getHttpDeepLinkType(
 ): DeepLinkType {
   const len = pathParams.length;
   const method = pathParams[0];
+  if (method === 'setlanguage') return len === 2 ? 'languageLink' : 'unknown';
   if (len === 1) {
     if (method === 'share') return 'shareLink';
 
@@ -538,6 +549,8 @@ function getTgDeepLinkType(
   method: DeepLinkMethod,
 ): DeepLinkType {
   switch (method) {
+    case 'setlanguage':
+      return 'languageLink';
     case 'resolve': {
       const {
         domain, post, bot_id, scope, public_key, nonce, startapp,
@@ -700,6 +713,13 @@ function buildLoginCodeLink(params: BuilderParams<LoginCodeLink>): BuilderReturn
     type: 'loginCodeLink',
     code,
   };
+}
+
+function buildLanguageLink(params: BuilderParams<LanguageLink>): BuilderReturnType<LanguageLink> {
+  const { langCode } = params;
+  if (!langCode?.trim()) return undefined;
+
+  return { type: 'languageLink', langCode };
 }
 
 function buildTelegramPassportLink(

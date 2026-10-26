@@ -58,7 +58,15 @@ addCallback((global: GlobalState) => {
   }
 
   if (sharedSettings.language !== oldSharedSettings.language) {
-    void loadAndChangeLanguage(sharedSettings.language);
+    const langCode = sharedSettings.language;
+    void loadAndChangeLanguage(langCode).then((hasChanged) => {
+      global = getGlobal();
+      if (!hasChanged || selectSharedSettings(global).language !== langCode) return undefined;
+      return callApi('setLanguageCode', { langCode });
+    }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to announce language:', err);
+    });
   }
 
   if (sharedSettings.timeFormat !== oldSharedSettings.timeFormat) {
@@ -296,3 +304,14 @@ addActionHandler('openPasskeyModal', (global, actions, payload): ActionReturnTyp
 });
 
 addTabStateResetterAction('closePasskeyModal', 'isPasskeyModalOpen');
+addTabStateResetterAction('closeLanguageModal', 'languageModal');
+
+addActionHandler('removeCustomLanguage', (global, actions, payload): ActionReturnType => {
+  const { langCode } = payload;
+  const { language, customLanguages } = selectSharedSettings(global);
+  if (language === langCode) return undefined;
+
+  return updateSharedSettings(global, {
+    customLanguages: customLanguages?.filter((customLanguage) => customLanguage.langCode !== langCode),
+  });
+});

@@ -6,7 +6,7 @@ import { getActions, getGlobal } from '../../../../global';
 import type { ApiEmojiGroup, ApiSticker, ApiStickerSet } from '../../../../api/types';
 
 import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
-import { selectSharedSettings } from '../../../../global/selectors/sharedState';
+import { selectLanguageCode } from '../../../../global/selectors/settings';
 import {
   ensureEmojiData, prepareEmojiLibraryMemo, searchEmojiLibraryMemo,
 } from '../../../../util/emoji/emojiSearch';
@@ -143,7 +143,7 @@ export default function useEmojiSearch({
         return;
       }
 
-      const langCode = selectSharedSettings(getGlobal()).language;
+      const langCode = selectLanguageCode(getGlobal());
       const [setsResult, globalResult] = await Promise.all([
         callApi('searchEmojiStickerSets', { query: preparedQuery }),
         callApi('searchStickersGlobal', {
@@ -193,7 +193,7 @@ export default function useEmojiSearch({
 
     void (async () => {
       try {
-        const langCode = selectSharedSettings(getGlobal()).language;
+        const langCode = selectLanguageCode(getGlobal());
         const globalResult = await callApi('searchStickersGlobal', {
           query: results.key,
           emoticon: results.emoticon,

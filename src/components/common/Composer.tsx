@@ -104,6 +104,7 @@ import {
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
   selectIsRightColumnShown,
+  selectLanguageCode,
   selectNewestMessageWithBotKeyboardButtons,
   selectNotifyDefaults,
   selectNotifyException,
@@ -3362,7 +3363,8 @@ export default memo(withGlobal<OwnProps>(
       shouldSuggestStickers, shouldSuggestCustomEmoji, shouldUpdateStickerSetOrder, shouldPaidMessageAutoApprove,
       lastRecordMessageMode,
     } = global.settings.byKey;
-    const { language, shouldCollectDebugLogs } = selectSharedSettings(global);
+    const { shouldCollectDebugLogs } = selectSharedSettings(global);
+    const language = selectLanguageCode(global);
     const {
       forwardMessages: { messageIds: forwardMessageIds },
       messageMediaEditorRequest,

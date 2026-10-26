@@ -22,6 +22,7 @@ import type {
   ApiInputAiComposeTone,
   ApiInputInvoice,
   ApiInputRichMessage,
+  ApiLanguage,
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMissingInvitedUser,
@@ -818,6 +819,15 @@ export type TabState = {
     example?: ApiAiComposeToneExample;
     isAlreadyAdded?: boolean;
     hasExampleError?: boolean;
+  };
+
+  languageModal?: {
+    requestId: number;
+    langCode: string;
+    language?: ApiLanguage;
+    isLoading?: boolean;
+    isApplying?: boolean;
+    error?: 'unsupported' | 'failed';
   };
 
   aiMessageEditorPendingResult?: {

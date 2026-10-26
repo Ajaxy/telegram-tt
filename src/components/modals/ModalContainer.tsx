@@ -59,6 +59,7 @@ import GiftInfoValueModal from './gift/value/GiftInfoValueModal.async';
 import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
+import LanguageModal from './language/LanguageModal.async';
 import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
 import MapModal from './map/MapModal.async';
@@ -176,6 +177,7 @@ type ModalKey = keyof Pick<TabState,
   'editRankModal' |
   'rankModal' |
   'aiTonePreviewModal' |
+  'languageModal' |
   'autoDeleteTimerModal' |
   'botCreationModal'
 >;
@@ -314,6 +316,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   editRankModal: EditRankModal,
   rankModal: RankModal,
   aiTonePreviewModal: AiTonePreviewModal,
+  languageModal: LanguageModal,
 };
 const WRAPPED_MODALS: WrappedModalRegistry = {
   pollModal: PollModal,

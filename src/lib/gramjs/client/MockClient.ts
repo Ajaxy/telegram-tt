@@ -417,6 +417,8 @@ class TelegramClient {
 
   public setShouldDebugExportedSenders() {}
 
+  public setLanguageCode() {}
+
   public isConnected() {
     return true;
   }

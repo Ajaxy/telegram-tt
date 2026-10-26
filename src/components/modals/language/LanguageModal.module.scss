@@ -1,0 +1,21 @@
+.name {
+  font-weight: var(--font-weight-medium);
+}
+
+.englishName {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.description {
+  white-space: pre-line;
+}
+
+.footer {
+  margin-top: 0;
+  padding: 0 1rem 1rem;
+}
+
+.link {
+  color: var(--color-primary);
+}
