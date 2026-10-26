@@ -3,6 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, getPromiseActions } from '../../../global';
 
+import type { Signal } from '../../../util/signals';
 import { SettingsScreens } from '../../../types';
 
 import {
@@ -23,6 +24,7 @@ import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
+import SettingsSearchInput from './search/SettingsSearchInput';
 
 const WALLET_CHECK_TIMEOUT = 10000;
 
@@ -30,14 +32,26 @@ type OwnProps = {
   currentScreen: SettingsScreens;
   editedFolderId?: number;
   hasProfileBackground?: boolean;
+  isMenuForcedOpen?: boolean;
+  searchSessionId: number;
+  getSearchQuery: Signal<string>;
   onReset: () => void;
+  onSearchOpen: NoneToVoidFunction;
+  onSearchQueryChange: (query: string) => void;
+  onMenuClose: NoneToVoidFunction;
 };
 
 const SettingsHeader = ({
   currentScreen,
   editedFolderId,
   hasProfileBackground,
+  isMenuForcedOpen,
+  searchSessionId,
+  getSearchQuery,
   onReset,
+  onSearchOpen,
+  onSearchQueryChange,
+  onMenuClose,
 }: OwnProps) => {
   const {
     signOut,
@@ -121,6 +135,14 @@ const SettingsHeader = ({
 
   function renderHeaderContent() {
     switch (currentScreen) {
+      case SettingsScreens.Search:
+        return (
+          <SettingsSearchInput
+            key={searchSessionId}
+            getQuery={getSearchQuery}
+            onChange={onSearchQueryChange}
+          />
+        );
       case SettingsScreens.EditProfile:
         return <h3>{lang('SettingsInformation')}</h3>;
       case SettingsScreens.General:
@@ -317,6 +339,15 @@ const SettingsHeader = ({
               ripple={!isMobile}
               size="smaller"
               color="translucent"
+              onClick={onSearchOpen}
+              ariaLabel={lang('Search')}
+              iconName="search"
+            />
+            <Button
+              round
+              ripple={!isMobile}
+              size="smaller"
+              color="translucent"
               onClick={() => openSettingsScreen({ screen: SettingsScreens.EditProfile })}
               ariaLabel={lang('SettingsInformation')}
               iconName="edit"
@@ -325,6 +356,8 @@ const SettingsHeader = ({
               className="settings-more-menu"
               trigger={SettingsMenuButton}
               positionX="right"
+              forceOpen={isMenuForcedOpen}
+              onClose={onMenuClose}
             >
               <MenuItem icon="logout" onClick={openSignOutConfirmation}>{lang('LogOutTitle')}</MenuItem>
             </DropdownMenu>

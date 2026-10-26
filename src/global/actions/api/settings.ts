@@ -1,6 +1,7 @@
 import type { ApiPrivacySettings, ApiUsername } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import {
+  LeftColumnContent,
   ProfileEditProgress,
   SettingsScreens,
   UPLOADING_WALLPAPER_SLUG,
@@ -18,6 +19,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
+import { resolveSettingsLink } from '../../../util/settingsLinks';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
@@ -1069,4 +1071,44 @@ addActionHandler('deletePasskey', async (global, actions, payload): Promise<void
   if (isDeleted) signalUnknownPasskey(id);
 
   actions.loadPasskeys();
+});
+
+addActionHandler('loadNestedSettingsData', async (global): Promise<void> => {
+  const {
+    loadPasswordInfo, loadBlockedUsers, loadWebAuthorizations, loadPasskeys, loadDefaultHistoryTtl,
+    loadGlobalPrivacySettings,
+  } = getPromiseActions();
+
+  const requests = [loadPasswordInfo()];
+  if (!selectIsCurrentUserFrozen(global)) {
+    requests.push(
+      loadBlockedUsers(), loadWebAuthorizations(), loadPasskeys(), loadDefaultHistoryTtl(),
+      loadGlobalPrivacySettings(),
+    );
+  }
+
+  await Promise.all(requests);
+});
+
+addActionHandler('openSettingsLink', async (global, actions, payload): Promise<void> => {
+  const { path, tabId = getCurrentTabId() } = payload;
+
+  const target = resolveSettingsLink(global, path);
+  const openedScreen = target ? target.screen : selectTabState(global, tabId).leftColumn.settingsScreen;
+  if (target) {
+    actions.openSettingsScreen({ ...target, tabId });
+  } else {
+    actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings, tabId });
+  }
+
+  await getPromiseActions().loadNestedSettingsData();
+
+  global = getGlobal();
+  const { contentKey, settingsScreen } = selectTabState(global, tabId).leftColumn;
+  if (contentKey !== LeftColumnContent.Settings || settingsScreen !== openedScreen) return;
+
+  const loadedTarget = resolveSettingsLink(global, path);
+  if (!loadedTarget || loadedTarget.screen === openedScreen) return;
+
+  actions.openSettingsScreen({ ...loadedTarget, tabId });
 });

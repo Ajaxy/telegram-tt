@@ -2,6 +2,8 @@
   cursor: var(--custom-cursor, pointer);
 
   :global(.Chat) {
+    --background-color: transparent;
+
     pointer-events: none;
   }
 

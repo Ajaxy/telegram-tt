@@ -22,6 +22,8 @@ import { updateTabState } from '../../reducers/tabs';
 import { selectCanAnimateInterface, selectChatFolder, selectTabState } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 
+const MAX_RECENTLY_FOUND_SETTINGS = 5;
+
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
@@ -187,7 +189,7 @@ addActionHandler('openLeftColumnContent', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('openSettingsScreen', (global, actions, payload): ActionReturnType => {
-  const { screen, tabId = getCurrentTabId() } = payload;
+  const { screen, highlight, tabId = getCurrentTabId() } = payload;
   const tabState = selectTabState(global, tabId);
 
   actions.loadPrivacySettings({ skipIfCached: true });
@@ -197,8 +199,41 @@ addActionHandler('openSettingsScreen', (global, actions, payload): ActionReturnT
     leftColumn: {
       ...tabState.leftColumn,
       settingsScreen: screen || SettingsScreens.Main,
+      settingsHighlight: highlight,
     },
   }, tabId);
+});
+
+addActionHandler('clearSettingsHighlight', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.leftColumn.settingsHighlight) return undefined;
+
+  return updateTabState(global, {
+    leftColumn: {
+      ...tabState.leftColumn,
+      settingsHighlight: undefined,
+    },
+  }, tabId);
+});
+
+addActionHandler('addRecentlyFoundSettingId', (global, actions, payload): ActionReturnType => {
+  const { id } = payload;
+  const otherIds = global.recentlyFoundSettingIds?.filter((recentId) => recentId !== id) || [];
+
+  return {
+    ...global,
+    recentlyFoundSettingIds: [id, ...otherIds].slice(0, MAX_RECENTLY_FOUND_SETTINGS),
+  };
+});
+
+addActionHandler('removeRecentlyFoundSettingId', (global, actions, payload): ActionReturnType => {
+  const { id } = payload;
+
+  return {
+    ...global,
+    recentlyFoundSettingIds: global.recentlyFoundSettingIds?.filter((recentId) => recentId !== id),
+  };
 });
 
 addActionHandler('openEditChatFolder', (global, actions, payload): ActionReturnType => {

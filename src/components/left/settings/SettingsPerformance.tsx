@@ -1,9 +1,11 @@
 import {
-  memo, useCallback, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { AnimationLevel, PerformanceType, PerformanceTypeKey } from '../../../types';
+import type {
+  AnimationLevel, PerformanceType, PerformanceTypeKey, SettingsHighlight,
+} from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
 
 import {
@@ -14,7 +16,7 @@ import {
   INITIAL_PERFORMANCE_STATE_MED,
   INITIAL_PERFORMANCE_STATE_MIN,
 } from '../../../global/initialState';
-import { selectPerformanceSettings } from '../../../global/selectors';
+import { selectPerformanceSettings, selectTabState } from '../../../global/selectors';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { IS_BACKDROP_BLUR_SUPPORTED, IS_SNAP_EFFECT_SUPPORTED } from '../../../util/browser/windowEnvironment';
 
@@ -39,6 +41,7 @@ type OwnProps = {
 
 type StateProps = {
   performanceSettings: PerformanceType;
+  highlight?: SettingsHighlight;
 };
 
 const ANIMATION_LEVEL_OPTIONS: RegularLangKey[] = [
@@ -80,6 +83,7 @@ const PERFORMANCE_OPTIONS: PerformanceSection[] = [
 function SettingsPerformance({
   isActive,
   performanceSettings,
+  highlight,
   onReset,
 }: OwnProps & StateProps) {
   const {
@@ -94,6 +98,15 @@ function SettingsPerformance({
 
   const lang = useLang();
   const [sectionExpandedStates, setSectionExpandedStates] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    const sectionIndex = PERFORMANCE_OPTIONS.findIndex(([, options]) => (
+      options.some(({ label }) => label === highlight?.langKey)
+    ));
+    if (sectionIndex === -1) return;
+
+    setSectionExpandedStates((prev) => ({ ...prev, [sectionIndex]: true }));
+  }, [highlight]);
 
   const sectionCheckedStates = useMemo(() => {
     return PERFORMANCE_OPTIONS.reduce((acc, [, options], index) => {
@@ -228,5 +241,6 @@ function SettingsPerformance({
 export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
   return {
     performanceSettings: selectPerformanceSettings(global),
+    highlight: selectTabState(global).leftColumn.settingsHighlight,
   };
 })(SettingsPerformance));

@@ -3321,6 +3321,29 @@ export interface LangPair {
   'GroupCallsUnsupported': undefined;
   'MiniAppQrScanUnsupported': undefined;
   'PageTitleInactive': undefined;
+  'SettingsKeywordsChatBackground': undefined;
+  'SettingsKeywordsTheme': undefined;
+  'SettingsKeywordsTextSize': undefined;
+  'SettingsKeywordsPerformance': undefined;
+  'SettingsKeywordsTimeFormat': undefined;
+  'SettingsKeywordsNotifications': undefined;
+  'SettingsKeywordsPrivateChats': undefined;
+  'SettingsKeywordsGroups': undefined;
+  'SettingsKeywordsChannels': undefined;
+  'SettingsKeywordsArchiveAndMute': undefined;
+  'SettingsKeywordsBlockedUsers': undefined;
+  'SettingsKeywordsTwoStep': undefined;
+  'SettingsKeywordsPasscode': undefined;
+  'SettingsKeywordsAutoDelete': undefined;
+  'SettingsKeywordsPasskeys': undefined;
+  'SettingsKeywordsSessions': undefined;
+  'SettingsKeywordsDataStorage': undefined;
+  'SettingsKeywordsStickers': undefined;
+  'SettingsKeywordsFolders': undefined;
+  'SettingsKeywordsLanguage': undefined;
+  'SettingsKeywordsLastSeen': undefined;
+  'SettingsKeywordsLogOut': undefined;
+  'SettingsSearchEmpty': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {

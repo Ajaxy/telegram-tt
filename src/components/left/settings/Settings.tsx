@@ -1,8 +1,11 @@
-import { memo, useRef, useState } from '@teact';
+import {
+  memo, useRef, useSignal, useState,
+} from '@teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
-import type { AnimationLevel } from '../../../types';
+import type { AnimationLevel, SettingsHighlight } from '../../../types';
+import type { SettingsSearchItem } from './search/searchSettings';
 import { SettingsScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
@@ -11,11 +14,14 @@ import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useScrollNotch from '../../../hooks/useScrollNotch';
+import useSyncEffect from '../../../hooks/useSyncEffect';
+import useSettingsHighlight from './hooks/useSettingsHighlight';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
 import SettingsPasscode from './passcode/SettingsPasscode';
 import PrivacyMessages from './PrivacyMessages';
+import SettingsSearch from './search/SettingsSearch';
 import SettingsActiveSessions from './SettingsActiveSessions';
 import SettingsActiveWebsites from './SettingsActiveWebsites';
 import SettingsAutoDeleteMessages from './SettingsAutoDeleteMessages';
@@ -157,27 +163,45 @@ const PRIVACY_MESSAGES_SCREENS = [
 export type OwnProps = {
   isActive: boolean;
   currentScreen: SettingsScreens;
+  highlight?: SettingsHighlight;
   foldersState: FoldersState;
   foldersDispatch: FolderEditDispatch;
   animationLevel: AnimationLevel;
   shouldSkipTransition?: boolean;
   hasProfileBackground?: boolean;
+  searchSessionId: number;
   onReset: (forceReturnToChatList?: true | Event) => void;
 };
 
 const Settings = ({
   isActive,
   currentScreen,
+  highlight,
   foldersState,
   foldersDispatch,
   onReset,
   animationLevel,
   shouldSkipTransition,
   hasProfileBackground,
+  searchSessionId,
 }: OwnProps) => {
-  const { closeShareChatFolderModal, openSettingsScreen } = getActions();
+  const {
+    closeShareChatFolderModal,
+    openSettingsScreen,
+    addRecentlyFoundSettingId,
+    loadNestedSettingsData,
+    clearSettingsHighlight,
+  } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
+
+  const [getSearchQuery, setSearchQuery] = useSignal('');
+
+  useSyncEffect(() => {
+    setSearchQuery('');
+  }, [searchSessionId, setSearchQuery]);
+
+  useSettingsHighlight(containerRef, highlight);
 
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
@@ -226,6 +250,18 @@ const Settings = ({
     onReset();
   });
 
+  const handleSearchOpen = useLastCallback(() => {
+    loadNestedSettingsData();
+    openSettingsScreen({ screen: SettingsScreens.Search });
+  });
+
+  const handleSearchResultSelect = useLastCallback((item: SettingsSearchItem) => {
+    if (currentScreen !== SettingsScreens.Search) return;
+
+    addRecentlyFoundSettingId({ id: item.id });
+    openSettingsScreen({ screen: item.screen, highlight: item.highlight });
+  });
+
   function renderCurrentSectionContent(isScreenActive: boolean, activeScreen: SettingsScreens) {
     const privacyAllowScreens: Record<number, boolean> = {
       [SettingsScreens.PrivacyPhoneNumber]: PRIVACY_PHONE_NUMBER_SCREENS.includes(activeScreen),
@@ -256,6 +292,16 @@ const Settings = ({
       case SettingsScreens.Main:
         return (
           <SettingsMain isActive={isActive} onReset={handleReset} />
+        );
+      case SettingsScreens.Search:
+        return (
+          <SettingsSearch
+            key={searchSessionId}
+            isActive={isScreenActive}
+            getQuery={getSearchQuery}
+            onSelect={handleSearchResultSelect}
+            onReset={handleReset}
+          />
         );
       case SettingsScreens.EditProfile:
         return (
@@ -536,6 +582,12 @@ const Settings = ({
           onReset={handleReset}
           editedFolderId={foldersState.folderId}
           hasProfileBackground={hasProfileBackground}
+          isMenuForcedOpen={highlight?.isInHeaderMenu}
+          searchSessionId={searchSessionId}
+          getSearchQuery={getSearchQuery}
+          onSearchOpen={handleSearchOpen}
+          onSearchQueryChange={setSearchQuery}
+          onMenuClose={clearSettingsHighlight}
         />
         {renderCurrentSectionContent(isScreenActive, activeKey)}
       </>

@@ -205,8 +205,14 @@ export interface ShippingOption {
   prices: ApiLabeledPrice[];
 }
 
+export type SettingsHighlight = {
+  langKey: RegularLangKey;
+  isInHeaderMenu?: boolean;
+};
+
 export enum SettingsScreens {
   Main,
+  Search,
   EditProfile,
   Notifications,
   DataStorage,

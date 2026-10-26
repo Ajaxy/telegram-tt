@@ -53,6 +53,28 @@
   justify-content: space-between;
 }
 
+.settings-highlight {
+  border-radius: var(--border-radius-default);
+  animation: settings-highlight 1.6s ease-in-out 0.2s;
+
+  body.no-page-transitions & {
+    background-color: var(--color-primary-opacity);
+    animation: none;
+  }
+}
+
+@keyframes settings-highlight {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+
+  15%,
+  70% {
+    background-color: var(--color-primary-opacity);
+  }
+}
+
 .settings-more-menu {
   .bubble {
     width: auto;

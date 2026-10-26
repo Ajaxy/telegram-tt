@@ -94,6 +94,12 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - Use `{ withNodes: true }` for JSX replacements and add `withMarkdown: true` for Markdown. Reuse `lang.number`, `lang.region`, and conjunction/disjunction helpers where appropriate.
 - Outside components, prefer translation objects supported by actions, such as `showNotification({ key: 'LangKey' })`, over calling `getTranslationFn()`.
 
+## Settings search
+
+- Settings are searchable only through `src/components/left/settings/search/registry.ts`. When adding, removing, renaming, or moving a settings screen or row, update the registry in the same change.
+- A registry entry is located on its screen by the visible text of its `titleKey`, so use the lang key the screen renders. For a row whose text depends on state, add `data-settings-anchor="<titleKey>"` to its element.
+- `tg://settings/<path>` links are mapped in `src/util/settingsLinks.ts`. Add a path only when native clients support it and it targets an existing screen or registry entry.
+
 ## Telegram API
 
 - GramJS runs in a web worker; UI and global state use plain `Api*` objects from `src/api/types`.

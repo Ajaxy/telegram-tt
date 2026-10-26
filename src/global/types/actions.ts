@@ -115,6 +115,7 @@ import type {
   ResaleGiftsFilterOptions,
   ScrollTargetPosition,
   SendMessageParams,
+  SettingsHighlight,
   SettingsScreens,
   SharedMediaType,
   Size,
@@ -2977,7 +2978,19 @@ export interface ActionPayloads {
   } & WithTabId;
   openSettingsScreen: {
     screen?: SettingsScreens;
+    highlight?: SettingsHighlight;
   } & WithTabId;
+  loadNestedSettingsData: undefined;
+  openSettingsLink: {
+    path: string;
+  } & WithTabId;
+  clearSettingsHighlight: WithTabId | undefined;
+  addRecentlyFoundSettingId: {
+    id: string;
+  };
+  removeRecentlyFoundSettingId: {
+    id: string;
+  };
   requestNextFoldersAction: {
     foldersAction?: ReducerAction<FoldersActions>;
   } & WithTabId;

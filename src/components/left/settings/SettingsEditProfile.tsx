@@ -431,7 +431,11 @@ const SettingsEditProfile = ({
 
         <Island>
           {personalChannel ? (
-            <div className={styles.personalChannelItem} onClick={handlePersonalChannelPickerOpen}>
+            <div
+              className={styles.personalChannelItem}
+              data-settings-anchor="PersonalChannelTitle"
+              onClick={handlePersonalChannelPickerOpen}
+            >
               <Chat
                 chatId={personalChannel.id}
                 orderDiff={0}

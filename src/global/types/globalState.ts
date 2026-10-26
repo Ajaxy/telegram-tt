@@ -141,6 +141,7 @@ export type GlobalState = {
   };
 
   recentlyFoundChatIds?: string[];
+  recentlyFoundSettingIds?: string[];
 
   twoFaSettings: {
     hint?: string;

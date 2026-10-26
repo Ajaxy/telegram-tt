@@ -111,6 +111,7 @@ import type {
   ProfileTabType,
   ResaleGiftsFilterOptions,
   ScrollTargetPosition,
+  SettingsHighlight,
   SettingsScreens,
   SharedMediaType,
   ShippingOption,
@@ -350,6 +351,7 @@ export type TabState = {
   leftColumn: {
     contentKey: LeftColumnContent;
     settingsScreen: SettingsScreens;
+    settingsHighlight?: SettingsHighlight;
   };
 
   globalSearch: {

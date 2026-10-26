@@ -1,14 +1,16 @@
 import type {
   ElementRef } from '@teact';
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
-import { type AnimationLevel, LeftColumnContent, SettingsScreens } from '../../types';
+import {
+  type AnimationLevel, LeftColumnContent, type SettingsHighlight, SettingsScreens,
+} from '../../types';
 
 import {
   selectCurrentChat, selectIsChatListPanelOpen, selectIsCurrentUserFrozen, selectIsForumPanelOpen,
@@ -29,6 +31,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps';
 
 import Transition from '../ui/Transition';
 import ArchivedChats from './ArchivedChats.async';
@@ -46,6 +49,7 @@ interface OwnProps {
 type StateProps = {
   contentKey: LeftColumnContent;
   settingsScreen: SettingsScreens;
+  settingsHighlight?: SettingsHighlight;
   searchQuery?: string;
   searchDate?: number;
   isFirstChatFolderActive: boolean;
@@ -85,6 +89,7 @@ function LeftColumn({
   ref,
   contentKey,
   settingsScreen,
+  settingsHighlight,
   searchQuery,
   searchDate,
   isFirstChatFolderActive,
@@ -143,6 +148,21 @@ function LeftColumn({
       break;
   }
 
+  const settingsSearchOriginRef = useRef<SettingsScreens>();
+  const settingsSearchSessionIdRef = useRef(0);
+
+  useSyncEffectWithPrevDeps(([prevSettingsScreen]) => {
+    if (settingsScreen === SettingsScreens.Search && prevSettingsScreen !== settingsSearchOriginRef.current) {
+      settingsSearchSessionIdRef.current += 1;
+    }
+
+    if (prevSettingsScreen === SettingsScreens.Search && settingsScreen !== SettingsScreens.Main) {
+      settingsSearchOriginRef.current = settingsScreen;
+    } else if (settingsScreen === SettingsScreens.Search || settingsScreen === SettingsScreens.Main) {
+      settingsSearchOriginRef.current = undefined;
+    }
+  }, [settingsScreen]);
+
   const handleReset = useLastCallback((forceReturnToChatList?: true | Event) => {
     function fullReset() {
       openLeftColumnContent({ contentKey: undefined });
@@ -182,7 +202,13 @@ function LeftColumn({
     }
 
     if (contentKey === LeftColumnContent.Settings) {
+      if (settingsScreen === settingsSearchOriginRef.current) {
+        openSettingsScreen({ screen: SettingsScreens.Search });
+        return;
+      }
+
       switch (settingsScreen) {
+        case SettingsScreens.Search:
         case SettingsScreens.EditProfile:
         case SettingsScreens.Folders:
         case SettingsScreens.General:
@@ -523,11 +549,13 @@ function LeftColumn({
           <Settings
             isActive={isActive}
             currentScreen={settingsScreen}
+            highlight={settingsHighlight}
             foldersState={foldersState}
             foldersDispatch={foldersDispatch}
             animationLevel={animationLevel}
             shouldSkipTransition={shouldSkipHistoryAnimations}
             hasProfileBackground={hasProfileBackground}
+            searchSessionId={settingsSearchSessionIdRef.current}
             onReset={handleReset}
           />
         );
@@ -647,6 +675,7 @@ export default memo(withGlobal<OwnProps>(
         ? selectPeerHasProfileBackground(global, currentUserId) : undefined,
       contentKey: leftColumn.contentKey,
       settingsScreen: leftColumn.settingsScreen,
+      settingsHighlight: leftColumn.settingsHighlight,
     };
   },
 )(LeftColumn));

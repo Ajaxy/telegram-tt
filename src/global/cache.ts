@@ -552,6 +552,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'shouldShowContextMenuHint',
       'trustedBotIds',
       'recentlyFoundChatIds',
+      'recentlyFoundSettingIds',
       'peerColors',
       'savedReactionTags',
       'timezones',

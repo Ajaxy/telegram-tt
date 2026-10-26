@@ -136,7 +136,7 @@ interface SendGramsLink {
 
 interface SettingsScreenLink {
   type: 'settings';
-  screen?: 'devices' | 'folders' | 'language' | 'privacy' | 'editProfile' | 'theme';
+  path?: string;
 }
 
 interface OAuthLink {
@@ -330,7 +330,7 @@ function parseTgLink(url: URL) {
         startApp: queryParams.startapp,
       });
     case 'settings':
-      return buildSettingsScreenLink({ screen: pathParams.length === 1 ? pathParams[0] : undefined });
+      return { type: 'settings', path: pathParams.join('/').toLowerCase() || undefined } satisfies SettingsScreenLink;
     case 'oauth':
       return buildOAuthLink({ url: url.toString() });
     default:
@@ -825,37 +825,6 @@ function buildGiftAuctionLink(params: BuilderParams<GiftAuctionLink>): BuilderRe
   return {
     type: 'giftAuctionLink',
     slug,
-  };
-}
-
-function buildSettingsScreen(screenParam: string) {
-  switch (screenParam) {
-    case 'devices':
-      return 'devices';
-    case 'folders':
-      return 'folders';
-    case 'language':
-      return 'language';
-    case 'privacy':
-      return 'privacy';
-    case 'edit_profile':
-      return 'editProfile';
-    case 'theme':
-      return 'theme';
-    default:
-      break;
-  }
-  return undefined;
-}
-
-function buildSettingsScreenLink(params: BuilderParams<SettingsScreenLink>): BuilderReturnType<SettingsScreenLink> {
-  const {
-    screen,
-  } = params;
-
-  return {
-    type: 'settings',
-    screen: screen ? buildSettingsScreen(screen) : undefined,
   };
 }
 
