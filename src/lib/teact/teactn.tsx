@@ -37,7 +37,7 @@ export interface ActionOptions {
   forceOutdated?: boolean;
 }
 
-type Actions = Record<ActionNames, (payload?: ActionPayload, options?: ActionOptions) => void>;
+type Actions = Record<ActionNames, (payload?: ActionPayload, options?: ActionOptions) => Promise<void>>;
 
 type ActionHandler = (
   global: GlobalState,
@@ -131,12 +131,14 @@ export function forceOnHeavyAnimationOnce() {
   forceOnHeavyAnimation = true;
 }
 
+const pendingActions: NoneToVoidFunction[] = [];
 let actionQueue: NoneToVoidFunction[] = [];
 let afterActionQueue: NoneToVoidFunction[] = [];
+let isDrainingActions = false;
 
 function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions): Promise<void> {
   const deferred = new Deferred<void>();
-  actionQueue.push(() => {
+  const runAction = () => {
     actionHandlers[name]?.forEach((handler) => {
       const result = handler(DEBUG ? getUntypedGlobal() : currentGlobal, actions, payload);
       if (!result) {
@@ -154,27 +156,46 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
       setUntypedGlobal(result, options);
       deferred.resolve();
     });
-  });
+  };
 
-  // Important: Keep 1 as start requirement to avoid immediate nested action calls
-  // Do not remove element from array before it is executed for the same reason
-  if (actionQueue.length === 1) {
-    try {
-      while (actionQueue.length) {
-        actionQueue[0]();
-        actionQueue.shift();
-      }
-      while (afterActionQueue.length) {
-        afterActionQueue[0]();
-        afterActionQueue.shift();
-      }
-    } finally {
-      actionQueue = [];
-      afterActionQueue = [];
+  // Nested actions run after the current one, and other dispatches start in a microtask.
+  // This lets a caller, including an async action resumed after `await`, finish its synchronous work
+  // before the dispatched action changes global state.
+  if (isDrainingActions) {
+    actionQueue.push(runAction);
+    return deferred.promise;
+  }
+
+  pendingActions.push(runAction);
+  if (options?.forceSyncOnIOs) {
+    while (pendingActions.length) {
+      drainActions(pendingActions.shift()!);
     }
+  } else {
+    queueMicrotask(drainNextPendingAction);
   }
 
   return deferred.promise;
+}
+
+function drainNextPendingAction() {
+  const action = pendingActions.shift();
+  if (action) drainActions(action);
+}
+
+function drainActions(firstAction: NoneToVoidFunction) {
+  isDrainingActions = true;
+  actionQueue.push(firstAction);
+  try {
+    // Actions dispatched by after-action callbacks run before the next callback
+    while (actionQueue.length || afterActionQueue.length) {
+      (actionQueue.shift() ?? afterActionQueue.shift())!();
+    }
+  } finally {
+    actionQueue = [];
+    afterActionQueue = [];
+    isDrainingActions = false;
+  }
 }
 
 /**
