@@ -2347,6 +2347,9 @@ export interface LangPair {
   'WalletSendTitle': undefined;
   'WalletSendRecipient': undefined;
   'WalletSendRecent': undefined;
+  'WalletSendUnlinkedWallet': undefined;
+  'WalletSendSwitchCurrency': undefined;
+  'WalletRecipientGramWallet': undefined;
   'WalletSendAmount': undefined;
   'WalletSendFeeUnavailable': undefined;
   'WalletNetworkFeesTitle': undefined;
@@ -2407,6 +2410,7 @@ export interface LangPair {
   'WalletSendSuccess': undefined;
   'WalletSendSuccessGasless': undefined;
   'WalletSendError': undefined;
+  'WalletSendPending': undefined;
   'WalletExportError': undefined;
   'WalletBackupDisabledError': undefined;
   'WalletBackupFailedError': undefined;
@@ -5168,6 +5172,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WalletSendAddressLinked': {
     'name': V;
   };
+  'WalletSendRecipientWallet': {
+    'name': V;
+  };
   'WalletSendBalance': {
     'amount': V;
   };
@@ -5175,6 +5182,9 @@ export interface LangPairWithVariables<V = LangVariable> {
     'amount': V;
   };
   'WalletSendMinAmount': {
+    'amount': V;
+  };
+  'WalletSendAmountButton': {
     'amount': V;
   };
   'WalletTermsNotice': {

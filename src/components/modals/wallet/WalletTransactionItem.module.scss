@@ -1,13 +1,15 @@
 .root {
   cursor: var(--custom-cursor, pointer);
 
+  position: relative;
+
   display: flex;
   gap: 0.75rem;
 
   padding: 0.5rem 0.75rem 0.4375rem 0.5rem;
   border-radius: 0.5rem;
 
-  transition: background-color 0.25s ease-out;
+  transition: background-color 0.25s ease-out, box-shadow 0.35s ease-out;
 
   &:hover {
     background-color: var(--color-chat-hover);
@@ -19,14 +21,92 @@
   box-shadow: 0 0.125rem 0.5rem var(--color-default-shadow);
 }
 
+$sheen-cycle: 2.5s;
+$sheen-lead: -0.2s;
+
+.sheen {
+  --sheen-light: 92, 204, 255;
+  --sheen-deep: 48, 161, 245;
+
+  pointer-events: none;
+
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius: inherit;
+
+  animation: sheen-fade $sheen-cycle linear $sheen-lead infinite;
+
+  &::before {
+    background-image:
+      linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(var(--sheen-light), 0.07) 46%,
+        rgba(var(--sheen-deep), 0.12) 50%,
+        rgba(var(--sheen-light), 0.07) 54%,
+        transparent 60%
+      );
+  }
+}
+
+.sheenRing {
+  position: absolute;
+  inset: 0;
+
+  padding: 0.0625rem;
+  border-radius: inherit;
+
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+
+  &::before {
+    background-image: linear-gradient(105deg, transparent 42%, rgba(var(--sheen-deep), 0.85) 50%, transparent 58%);
+  }
+}
+
+// The bands move by `transform`, which the compositor animates. With `background-position` Safari restyles and repaints
+// the page in every frame while the transfer is pending.
+.sheen::before,
+.sheenRing::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+
+  width: 250%;
+
+  animation: sheen-pass $sheen-cycle ease-in-out $sheen-lead infinite;
+}
+
 .pendingDiamond {
   margin: -0.5rem 0 -0.5rem 0.125rem;
 }
 
 .preview {
+  position: relative;
   flex-shrink: 0;
   width: 2.625rem;
   height: 2.625rem;
+}
+
+.pendingBadge {
+  position: absolute;
+  z-index: 1;
+  right: -0.1875rem;
+  bottom: -0.1875rem;
+
+  border-radius: 50%;
+
+  font-size: 1.0625rem;
+  color: var(--color-primary);
+
+  background-color: var(--color-background);
 }
 
 .direction {
@@ -170,6 +250,15 @@
   color: var(--color-error);
 }
 
+.gramIconBox {
+  display: flex;
+}
+
+// Pops out of the diamond as it would shrink into the badge
+.gramIconPop {
+  animation: gram-icon-appear 0.45s cubic-bezier(0.34, 1.9, 0.5, 1) 0.32s both;
+}
+
 .gramIcon {
   height: 0.875rem;
   margin: 0.0625rem 0 0 0.125rem;
@@ -182,4 +271,39 @@
 
 .negative {
   color: var(--color-text);
+}
+
+@keyframes gram-icon-appear {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes sheen-pass {
+  from {
+    transform: translateX(-60%);
+  }
+
+  60%,
+  to {
+    transform: none;
+  }
+}
+
+@keyframes sheen-fade {
+  from,
+  60%,
+  to {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+  }
 }

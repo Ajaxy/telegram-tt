@@ -1,18 +1,20 @@
-import type { DiamondDrawState, DiamondScene, DiamondViewport } from './scene';
+import type { GpuCanvas, GpuDrawGroup, GpuRenderer } from './gpu';
+import type { DiamondDrawState } from './model';
+import type { GpuDiamondTarget } from './sceneGpu';
 
 import { timingFunctions } from '../../util/animation';
 import { getOpenModalCount } from '../../util/openModals';
-import { getIsHeavyAnimating, onFullyIdle } from '../teact/teact';
+import { requestMutation } from '../fasterdom/fasterdom';
+import { getIsHeavyAnimating } from '../teact/teact';
 import {
-  createFrameWatchdog, createGpuTimer, getIsDiamond3dDegraded, markDiamond3dDegraded,
-} from './performance';
-import { createDiamondScene, getFrameTime, TURN_DURATION } from './scene';
+  addGpuDrawGroup, beginGpuPass, createGpuCanvas, createGpuFrame, getCanUseGpu, removeGpuDrawGroup,
+  requestGpuRenderer, updateGpuPlayback,
+} from './gpu';
+import { TURN_DURATION } from './model';
+import { getIsDiamond3dDegraded } from './performance';
 
-import { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
-import { getIsInBackground } from '../../hooks/window/useBackgroundMode';
-
-// One renderer draws the frame and every transfer card copies it, so all diamonds in a chat turn in step and
-// there is one WebGL context. A held diamond gets a larger frame of its own in a second area.
+// The diamond icons of the chats, drawn with WebGPU straight into their canvases: all turn in step on one clock, and a
+// held one gets a larger frame of its own. Without WebGPU, or when it cannot start, an icon falls back to Lottie.
 
 type Interaction = {
   yaw: number;
@@ -27,28 +29,15 @@ type Interaction = {
 };
 
 type Subscriber = {
-  context: CanvasRenderingContext2D;
+  renderer: GpuRenderer;
+  gpu: GpuCanvas;
   size: number;
+  drawState: DiamondDrawState;
   isReady: boolean;
   isInDialog: boolean;
   interaction?: Interaction;
   onReady: NoneToVoidFunction;
   onFallback: NoneToVoidFunction;
-};
-
-type Renderer = {
-  canvas: HTMLCanvasElement;
-  iconSize: number;
-  scene?: DiamondScene;
-  gpuTimer?: ReturnType<typeof createGpuTimer>;
-  watchdog: ReturnType<typeof createFrameWatchdog>;
-  drawState: DiamondDrawState;
-  spinDrawState: DiamondDrawState;
-  frameId?: number;
-  lastFrameTime?: number;
-  time: number;
-  hasFrame: boolean;
-  destroy: NoneToVoidFunction;
 };
 
 const DIAMOND_ICON_ZOOM = 3;
@@ -67,72 +56,108 @@ const RELEASE_DURATION = 350;
 const SPIN_SPEED = (300 * Math.PI) / 180;
 const SPIN_SWAY = (9 * Math.PI) / 180;
 const SPIN_SWAY_DURATION = 8;
-// A device that needs more GPU time per frame is too slow for the chat
-const MAX_GPU_FRAME_DURATION = 4;
-const RELEASE_DELAY = 30000;
 
 const subscribers = new Map<HTMLCanvasElement, Subscriber>();
+// The canvases waiting for the device, with their fallbacks
+const pending = new Map<HTMLCanvasElement, NoneToVoidFunction>();
 const visibleCanvases = new Set<HTMLCanvasElement>();
-const heldCanvases = new Set<HTMLCanvasElement>();
+// Kept apart from the subscribers: the spin is set right after subscribing, while the canvas still waits for the device
 const spinningCanvases = new Set<HTMLCanvasElement>();
 let observer: IntersectionObserver | undefined;
-let renderer: Renderer | undefined;
-let releaseTimeout: number | undefined;
+// Seconds of the common clock
+let time = 0;
+// The icons that turn in step share one pose and, per canvas size, one frame that is drawn once and copied into each
+type Common = {
+  renderer: GpuRenderer;
+  state: DiamondDrawState;
+  frames: Map<number, { target: GpuDiamondTarget; texture: GPUTexture }>;
+};
+
+let common: Common | undefined;
+
+// Like animated stickers: the icons stop during heavy animations
+const group: GpuDrawGroup = {
+  getMinInterval: getMinFrameInterval,
+  getIsPlaying: getIsAnyIconDrawn,
+  draw: drawIcons,
+};
 
 getIsDiamond3dDegraded.subscribe(() => {
   if (!getIsDiamond3dDegraded()) return;
 
-  destroyRenderer();
-  subscribers.forEach(({ onFallback }) => onFallback());
+  pending.forEach((onFallback) => onFallback());
+  pending.clear();
+
+  // A card already drawn keeps its last frame, so the diamond does not change under the eye
+  subscribers.forEach(({ isReady, onFallback }) => {
+    if (!isReady) onFallback();
+  });
+  subscribers.clear();
+  visibleCanvases.clear();
+  observer?.disconnect();
+  common = undefined;
+  removeGpuDrawGroup(group);
 });
-getIsInBackground.subscribe(updatePlayback);
-getIsHeavyAnimating.subscribe(updatePlayback);
-getOpenModalCount.subscribe(updatePlayback);
+getIsHeavyAnimating.subscribe(updateGpuPlayback);
+getOpenModalCount.subscribe(updateGpuPlayback);
 
 export function subscribeDiamondIcon(
   canvas: HTMLCanvasElement,
   onReady: NoneToVoidFunction,
   onFallback: NoneToVoidFunction,
 ) {
-  const context = canvas.getContext('2d');
-
-  if (getIsDiamond3dDegraded() || !context) {
+  if (!getCanUseGpu()) {
     onFallback();
 
     return undefined;
   }
 
-  subscribers.set(canvas, {
-    context,
-    size: canvas.width,
-    isReady: false,
-    isInDialog: Boolean(canvas.closest(DIALOG_SELECTOR)),
-    onReady,
-    onFallback,
+  pending.set(canvas, onFallback);
+
+  void requestGpuRenderer().then((renderer) => {
+    // The card may be gone already, or have fallen back with the others
+    if (pending.get(canvas) !== onFallback) return;
+
+    pending.delete(canvas);
+
+    const gpu = renderer && createGpuCanvas(renderer, canvas, 'icon');
+    if (!renderer || !gpu) {
+      onFallback();
+      return;
+    }
+
+    subscribers.set(canvas, {
+      renderer,
+      gpu,
+      size: canvas.width,
+      drawState: {},
+      isReady: false,
+      isInDialog: Boolean(canvas.closest(DIALOG_SELECTOR)),
+      onReady,
+      onFallback,
+    });
+    if (subscribers.size === 1) addGpuDrawGroup(group);
+    getObserver().observe(canvas);
+    updateGpuPlayback();
   });
 
-  getObserver().observe(canvas);
-  window.clearTimeout(releaseTimeout);
-  releaseTimeout = undefined;
-  renderer ??= createRenderer(canvas.width);
-
   return () => {
+    spinningCanvases.delete(canvas);
+    if (pending.delete(canvas)) return;
+
+    const subscriber = subscribers.get(canvas);
+    if (!subscriber) return;
+
     subscribers.delete(canvas);
     visibleCanvases.delete(canvas);
-    heldCanvases.delete(canvas);
-    spinningCanvases.delete(canvas);
     observer?.unobserve(canvas);
-    updatePlayback();
-
-    if (!subscribers.size) {
-      releaseTimeout = window.setTimeout(destroyRenderer, RELEASE_DELAY);
-    }
+    subscriber.gpu.destroy();
+    if (!subscribers.size) removeGpuDrawGroup(group);
+    updateGpuPlayback();
   };
 }
 
 export function setDiamondIconSpin(canvas: HTMLCanvasElement, isSpinning: boolean) {
-  if (!subscribers.has(canvas)) return;
-
   if (isSpinning) {
     spinningCanvases.add(canvas);
   } else {
@@ -142,21 +167,25 @@ export function setDiamondIconSpin(canvas: HTMLCanvasElement, isSpinning: boolea
 
 export function holdDiamondIcon(canvas: HTMLCanvasElement) {
   const subscriber = subscribers.get(canvas);
-  if (!subscriber || !renderer?.hasFrame) return false;
+  if (!subscriber?.isReady) return false;
 
   if (subscriber.interaction) {
     subscriber.interaction.release = undefined;
   } else {
-    subscriber.interaction = { yaw: getCommonYaw(renderer), pitch: 0, drawState: {} };
-    canvas.width = subscriber.size * DIAMOND_ICON_ZOOM;
-    canvas.height = subscriber.size * DIAMOND_ICON_ZOOM;
+    const interaction: Interaction = { yaw: getCommonYaw(), pitch: 0, drawState: {} };
+    subscriber.interaction = interaction;
 
-    // The common frame, scaled up, stands in until the held one is drawn
-    copyFrame(canvas);
+    requestMutation(() => {
+      if (subscriber.interaction !== interaction) return;
+
+      canvas.width = subscriber.size * DIAMOND_ICON_ZOOM;
+      canvas.height = subscriber.size * DIAMOND_ICON_ZOOM;
+      // The resized canvas is blank until its next frame, so the held one is drawn at once
+      drawNow(canvas, subscriber, interaction.drawState, interaction.yaw, interaction.pitch);
+    });
   }
 
-  heldCanvases.add(canvas);
-  updatePlayback();
+  updateGpuPlayback();
 
   return true;
 }
@@ -171,13 +200,12 @@ export function turnDiamondIcon(canvas: HTMLCanvasElement, deltaX: number, delta
 
 export function releaseDiamondIcon(canvas: HTMLCanvasElement, onEnd: NoneToVoidFunction) {
   const interaction = subscribers.get(canvas)?.interaction;
-
-  if (!interaction || !renderer) {
+  if (!interaction) {
     onEnd();
     return;
   }
 
-  const yawOffset = interaction.yaw - getCommonYaw(renderer);
+  const yawOffset = interaction.yaw - getCommonYaw();
 
   interaction.release = {
     startTime: performance.now(),
@@ -187,175 +215,70 @@ export function releaseDiamondIcon(canvas: HTMLCanvasElement, onEnd: NoneToVoidF
   };
 }
 
-function createRenderer(iconSize: number): Renderer {
-  // The held frame fills the left square, the common frame takes the bottom right corner
-  const canvas = document.createElement('canvas');
-  canvas.width = iconSize * (DIAMOND_ICON_ZOOM + 1);
-  canvas.height = iconSize * DIAMOND_ICON_ZOOM;
+function drawIcons(encoder: GPUCommandEncoder, frameTime: number, now: number) {
+  time += frameTime;
 
-  let isDestroyed = false;
-  const current: Renderer = {
-    canvas,
-    iconSize,
-    watchdog: createFrameWatchdog(),
-    drawState: {},
-    spinDrawState: {},
-    time: 0,
-    hasFrame: false,
-    destroy: () => {
-      isDestroyed = true;
-    },
-  };
+  const spinYaw = time * SPIN_SPEED;
+  const spinPitch = SPIN_SWAY * Math.sin((2 * Math.PI * time) / SPIN_SWAY_DURATION);
+  const commonCanvases: HTMLCanvasElement[] = [];
 
-  // Creating a WebGL context blocks the main thread until the GPU process responds, so it waits for idle
-  onFullyIdle(() => {
-    if (isDestroyed) return;
-
-    // The frame is copied into cards after drawing and when a card scrolls into view, so the buffer must persist
-    const gl = canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: true, preserveDrawingBuffer: true });
-
-    if (!gl) {
-      markDiamond3dDegraded('no hardware WebGL 2');
+  subscribers.forEach((subscriber, canvas) => {
+    if (subscriber.interaction) {
+      drawHeld(encoder, canvas, subscriber, now, frameTime);
       return;
     }
 
-    const handleContextLost = () => markDiamond3dDegraded('WebGL context lost');
-    canvas.addEventListener('webglcontextlost', handleContextLost);
+    if (!visibleCanvases.has(canvas) || getIsCovered(subscriber)) return;
 
-    current.destroy = () => {
-      isDestroyed = true;
-      canvas.removeEventListener('webglcontextlost', handleContextLost);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
-    };
+    if (!spinningCanvases.has(canvas)) {
+      commonCanvases.push(canvas);
+      return;
+    }
 
-    createDiamondScene(gl, 'icon')
-      .then((scene) => {
-        if (isDestroyed) return;
-
-        current.scene = scene;
-        current.gpuTimer = createGpuTimer(gl, MAX_GPU_FRAME_DURATION);
-        updatePlayback();
-      })
-      .catch(() => {
-        if (!isDestroyed) markDiamond3dDegraded('cannot load the model');
-      });
+    drawCanvas(encoder, canvas, subscriber, subscriber.drawState, spinYaw, spinPitch, frameTime);
+    markReady(subscriber);
   });
 
-  return current;
+  if (commonCanvases.length) drawCommon(encoder, commonCanvases, frameTime);
 }
 
-function destroyRenderer() {
-  if (!renderer) return;
+// The common pose is solved once a frame and drawn once per canvas size; every icon only takes a copy of its frame
+function drawCommon(encoder: GPUCommandEncoder, canvases: HTMLCanvasElement[], frameTime: number) {
+  const { renderer } = subscribers.get(canvases[0])!;
+  const { scene } = renderer;
 
-  pause(renderer);
-  renderer.destroy();
-  renderer = undefined;
-  heldCanvases.clear();
-  spinningCanvases.clear();
+  if (common?.renderer !== renderer) {
+    common = { renderer, state: {}, frames: new Map() };
+  }
 
-  subscribers.forEach((subscriber) => {
-    subscriber.interaction = undefined;
+  const { frames } = common;
+  const pose = scene.solve(common.state, time, frameTime, getCommonYaw(), 0);
+  const sizes = new Set(canvases.map((canvas) => canvas.width));
+
+  sizes.forEach((size) => {
+    let frame = frames.get(size);
+    if (!frame) {
+      frame = { target: scene.createTarget('icon'), texture: createGpuFrame(renderer, size) };
+      frames.set(size, frame);
+    }
+
+    const viewport = { x: 0, y: 0, size };
+    scene.writeTarget(frame.target, pose, viewport, time);
+    const pass = beginGpuPass(renderer, encoder, frame.texture);
+    scene.encode(pass, frame.target, viewport);
+    pass.end();
   });
 
-  window.clearTimeout(releaseTimeout);
-  releaseTimeout = undefined;
-}
-
-// Like animated stickers: stops in a background window, during heavy animations and while nothing shows it
-function updatePlayback() {
-  if (!renderer?.scene) return;
-
-  const isShown = [...visibleCanvases, ...heldCanvases].some((canvas) => !getIsCovered(canvas));
-
-  if (isShown && !getIsInBackground() && !getIsHeavyAnimating()) {
-    resume(renderer);
-  } else {
-    pause(renderer);
-  }
-}
-
-// Dialogs open in portals, so a canvas sits in one at most, and only the dialogs above it cover it
-function getIsCovered(canvas: HTMLCanvasElement) {
-  return getOpenModalCount() > (subscribers.get(canvas)!.isInDialog ? 1 : 0);
-}
-
-function resume(current: Renderer) {
-  if (current.frameId !== undefined) return;
-
-  current.lastFrameTime = undefined;
-  current.watchdog.reset();
-  current.frameId = requestAnimationFrame(renderFrame);
-}
-
-function pause(current: Renderer) {
-  if (current.frameId === undefined) return;
-
-  cancelAnimationFrame(current.frameId);
-  current.frameId = undefined;
-}
-
-function renderFrame(now: number) {
-  const current = renderer!;
-  current.frameId = requestAnimationFrame(renderFrame);
-
-  if (isPriorityPlaybackActive()) {
-    current.watchdog.reset();
-    return;
-  }
-
-  current.watchdog.track(now);
-
-  // The watchdog may have given up on the diamond, which destroys this renderer
-  if (renderer !== current) return;
-
-  const minInterval = heldCanvases.size || spinningCanvases.size ? HELD_FRAME_INTERVAL : MIN_FRAME_INTERVAL;
-  if (current.lastFrameTime !== undefined && now - current.lastFrameTime < minInterval) return;
-
-  const frameTime = getFrameTime(now, current.lastFrameTime);
-  current.lastFrameTime = now;
-  current.time += frameTime;
-
-  const {
-    scene, gpuTimer, time, drawState,
-  } = current;
-  const commonYaw = getCommonYaw(current);
-  const draw = () => scene!.draw(drawState, getCommonViewport(current), time, frameTime, commonYaw, 0);
-
-  if (gpuTimer) {
-    gpuTimer.measure(draw);
-
-    if (renderer !== current) return;
-  } else {
-    draw();
-  }
-
-  current.hasFrame = true;
-
-  if (spinningCanvases.size) drawSpinningFrame(current, frameTime);
-
-  visibleCanvases.forEach((canvas) => {
-    if (heldCanvases.has(canvas) || getIsCovered(canvas)) return;
-
-    copyFrame(canvas, spinningCanvases.has(canvas));
+  canvases.forEach((canvas) => {
+    const subscriber = subscribers.get(canvas)!;
+    subscriber.gpu.copyFrom(encoder, frames.get(canvas.width)!.texture);
+    markReady(subscriber);
   });
-
-  heldCanvases.forEach((canvas) => drawHeldFrame(current, canvas, now, frameTime));
 }
 
-function drawSpinningFrame(current: Renderer, frameTime: number) {
-  const { time, iconSize, canvas } = current;
-  const yaw = time * SPIN_SPEED;
-  const pitch = SPIN_SWAY * Math.sin((2 * Math.PI * time) / SPIN_SWAY_DURATION);
-
-  current.scene!.draw(
-    current.spinDrawState,
-    { x: canvas.width - iconSize, y: iconSize, size: iconSize },
-    time, frameTime, yaw, pitch,
-  );
-}
-
-function drawHeldFrame(current: Renderer, canvas: HTMLCanvasElement, now: number, frameTime: number) {
-  const subscriber = subscribers.get(canvas)!;
+function drawHeld(
+  encoder: GPUCommandEncoder, canvas: HTMLCanvasElement, subscriber: Subscriber, now: number, frameTime: number,
+) {
   const interaction = subscriber.interaction!;
   const { release } = interaction;
 
@@ -363,78 +286,98 @@ function drawHeldFrame(current: Renderer, canvas: HTMLCanvasElement, now: number
     const progress = Math.min(1, (now - release.startTime) / RELEASE_DURATION);
 
     if (progress >= 1) {
-      finishInteraction(canvas, subscriber, release.onEnd);
+      subscriber.interaction = undefined;
+
+      requestMutation(() => {
+        if (!subscribers.has(canvas) || subscriber.interaction) return;
+
+        canvas.width = subscriber.size;
+        canvas.height = subscriber.size;
+        drawNow(canvas, subscriber, subscriber.drawState, getCommonYaw(), 0);
+        release.onEnd();
+      });
       return;
     }
 
     const remaining = 1 - timingFunctions.easeOutQuint(progress);
-    interaction.yaw = getCommonYaw(current) + release.yawOffset * remaining;
+    interaction.yaw = getCommonYaw() + release.yawOffset * remaining;
     interaction.pitch = release.pitchOffset * remaining;
   }
 
-  const size = current.iconSize * DIAMOND_ICON_ZOOM;
-
-  current.scene!.draw(interaction.drawState, { x: 0, y: 0, size }, current.time, frameTime, interaction.yaw,
-    interaction.pitch);
-
-  subscriber.context.clearRect(0, 0, canvas.width, canvas.height);
-  subscriber.context.drawImage(current.canvas, 0, 0, size, size, 0, 0, canvas.width, canvas.height);
+  drawCanvas(encoder, canvas, subscriber, interaction.drawState, interaction.yaw, interaction.pitch, frameTime);
 }
 
-function finishInteraction(canvas: HTMLCanvasElement, subscriber: Subscriber, onEnd: NoneToVoidFunction) {
-  subscriber.interaction = undefined;
-  heldCanvases.delete(canvas);
-  canvas.width = subscriber.size;
-  canvas.height = subscriber.size;
-  copyFrame(canvas);
-  onEnd();
-}
-
-function copyFrame(canvas: HTMLCanvasElement, isSpinning?: boolean) {
-  const subscriber = subscribers.get(canvas);
-  if (!subscriber || !renderer) return;
-
-  const { context } = subscriber;
-  const { canvas: source, iconSize } = renderer;
-
-  // The buffer counts rows from the bottom; the spinning frame sits one square above the common one
-  const sourceY = source.height - iconSize * (isSpinning ? 2 : 1);
-  context.clearRect(0, 0, canvas.width, canvas.height);
-
-  context.drawImage(
-    source, source.width - iconSize, sourceY, iconSize, iconSize, 0, 0, canvas.width, canvas.height,
+function drawCanvas(
+  encoder: GPUCommandEncoder, canvas: HTMLCanvasElement, subscriber: Subscriber, state: DiamondDrawState,
+  yaw: number, pitch: number, frameTime: number,
+) {
+  const pass = subscriber.gpu.beginPass(encoder);
+  subscriber.renderer.scene.draw(
+    pass, subscriber.gpu.sceneTarget, state, { x: 0, y: 0, size: canvas.width }, time, frameTime, yaw, pitch,
   );
+  pass.end();
+}
 
-  if (!subscriber.isReady) {
-    subscriber.isReady = true;
-    subscriber.onReady();
+// A frame outside the loop, with the step of a frame at rest
+function drawNow(
+  canvas: HTMLCanvasElement, subscriber: Subscriber, state: DiamondDrawState, yaw: number, pitch: number,
+) {
+  const { device } = subscriber.renderer;
+  const encoder = device.createCommandEncoder();
+  drawCanvas(encoder, canvas, subscriber, state, yaw, pitch, MIN_FRAME_INTERVAL / 1000);
+  device.queue.submit([encoder.finish()]);
+}
+
+function markReady(subscriber: Subscriber) {
+  if (subscriber.isReady) return;
+
+  subscriber.isReady = true;
+  subscriber.onReady();
+}
+
+// Loops rather than arrays: both run on every animation frame
+function getMinFrameInterval() {
+  for (const [canvas, { interaction }] of subscribers) {
+    if (interaction || spinningCanvases.has(canvas)) return HELD_FRAME_INTERVAL;
   }
+
+  return MIN_FRAME_INTERVAL;
 }
 
-function getCommonViewport({ canvas, iconSize }: Renderer): DiamondViewport {
-  return { x: canvas.width - iconSize, y: 0, size: iconSize };
+function getIsAnyIconDrawn() {
+  if (getIsHeavyAnimating()) return false;
+
+  for (const [canvas, subscriber] of subscribers) {
+    if (subscriber.interaction || (visibleCanvases.has(canvas) && !getIsCovered(subscriber))) return true;
+  }
+
+  return false;
 }
 
-function getCommonYaw({ time }: Renderer) {
+// Dialogs open in portals, so a canvas sits in one at most, and only the dialogs above it cover it
+function getIsCovered({ isInDialog }: Subscriber) {
+  return getOpenModalCount() > (isInDialog ? 1 : 0);
+}
+
+function getCommonYaw() {
   return time * TURN_SPEED;
 }
 
+// A card scrolled away is clipped by the list and a slide left behind by `Transition` is hidden, so neither intersects
+// the viewport
 function getObserver() {
-  observer ??= new IntersectionObserver((entries) => {
-    entries.forEach(({ target, isIntersecting }) => {
+  observer ??= new IntersectionObserver((observed) => {
+    observed.forEach(({ target, isIntersecting }) => {
       const canvas = target as HTMLCanvasElement;
 
-      if (!isIntersecting) {
+      if (isIntersecting) {
+        visibleCanvases.add(canvas);
+      } else {
         visibleCanvases.delete(canvas);
-        return;
       }
-
-      visibleCanvases.add(canvas);
-
-      if (renderer?.hasFrame && !heldCanvases.has(canvas)) copyFrame(canvas);
     });
 
-    updatePlayback();
+    updateGpuPlayback();
   });
 
   return observer;

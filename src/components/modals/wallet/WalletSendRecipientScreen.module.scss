@@ -1,0 +1,41 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  @include mixins.scrollable-padding(0.75rem);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0.75rem;
+}
+
+.recipientField {
+  position: relative;
+}
+
+.recipientSpinner {
+  --spinner-size: 1.25rem;
+
+  position: absolute;
+  inset-inline-end: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.paste {
+  position: absolute;
+  inset-inline-end: 1.0625rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: auto;
+}
+
+.continue {
+  margin-top: auto;
+}

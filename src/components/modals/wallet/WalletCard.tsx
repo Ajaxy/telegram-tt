@@ -5,6 +5,7 @@ import { selectCanAnimateInterface } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonInFiat } from '../../../util/formatCurrency';
 import { splitAddressInHalves } from '../../../util/tonAddress';
+import renderText from '../../common/helpers/renderText';
 import useCardTilt from './useCardTilt';
 
 import useSelector from '../../../hooks/data/useSelector';
@@ -114,7 +115,7 @@ const WalletCard = ({
             </div>
           </div>
           {fiatAmount && <AnimatedCounter text={fiatAmount} className={styles.fiat} />}
-          <div className={styles.ownerName}>{ownerName}</div>
+          <div className={styles.ownerName}>{ownerName && renderText(ownerName)}</div>
           <div className={styles.address} aria-hidden>
             <div className={styles.addressRotator}>
               <span className={styles.addressLine}>{addressStart}</span>

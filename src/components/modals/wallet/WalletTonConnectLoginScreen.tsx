@@ -47,7 +47,7 @@ const WalletTonConnectLoginScreen = ({
   return (
     <WalletNoticeScreen
       sticker={<Avatar peer={bot} size={AVATAR_SIZE} className={styles.avatar} />}
-      title={lang('WalletConnectToApp', { name: botName || oauth!.domain })}
+      title={lang('WalletConnectToApp', { name: botName || oauth!.domain }, { withNodes: true })}
       subtitle={<AppHost url={`https://${oauth!.domain}`} />}
       text={lang('WalletConnectProofAccess')}
     >

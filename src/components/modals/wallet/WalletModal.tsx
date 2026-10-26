@@ -1,39 +1,40 @@
 import {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, onFullyIdle, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiTonConnectSession, ApiWalletCollectible, ApiWalletTransaction } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
-import type { WalletTransferPayload } from './WalletSendScreen';
 import { SettingsScreens } from '../../../types';
 import { WalletScreen } from './types';
 
 import { TON_CURRENCY_CODE, WALLET_FIRST_TRANSFER_SUGGESTION } from '../../../config';
-import { WALLET_ERROR_LANG_KEYS } from '../../../global/helpers';
+import { getIsWalletTransferSubmitted, WALLET_ERROR_LANG_KEYS } from '../../../global/helpers';
 import {
-  selectCanExportWalletPhrase, selectIsWalletKeyMissing, selectTabState, selectTonExplorerUrl, selectWalletAddress,
-  selectWalletPublicKey,
+  selectCanExportWalletPhrase, selectIsWalletKeyMissing, selectShouldLoopStickers, selectTabState,
+  selectTonExplorerUrl, selectWalletAddress, selectWalletPublicKey, selectWalletTransactions,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
-import { formatTonFromNanos } from '../../../util/formatCurrency';
+import { formatTonShortFromNanos } from '../../../util/formatCurrency';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { getAddressGroupSeparator, splitAddressIntoGroups } from '../../../util/tonAddress';
-import { loadCurrentUserAddress } from './helpers/loadCurrentUserAddress';
 import useWalletCredentials from './useWalletCredentials';
 import useWalletKeyFlows from './useWalletKeyFlows';
 import useWalletNavigation from './useWalletNavigation';
+import useWalletSendFlow from './useWalletSendFlow';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSyncEffect from '../../../hooks/useSyncEffect';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 
+import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -53,7 +54,7 @@ import WalletDisableBackupScreen from './WalletDisableBackupScreen';
 import WalletEnterPhraseScreen from './WalletEnterPhraseScreen';
 import WalletHowItWorksModal from './WalletHowItWorksModal';
 import WalletIntroScreen from './WalletIntroScreen';
-import WalletMainScreen from './WalletMainScreen';
+import WalletMainScreen, { TRANSACTIONS_TAB_INDEX } from './WalletMainScreen';
 import WalletPasscodeRequiredScreen from './WalletPasscodeRequiredScreen';
 import WalletPasswordScreen from './WalletPasswordScreen';
 import WalletPhraseInfoScreen from './WalletPhraseInfoScreen';
@@ -61,7 +62,9 @@ import WalletPhraseScreen from './WalletPhraseScreen';
 import WalletReceiveScreen from './WalletReceiveScreen';
 import WalletReleaseKeyScreen from './WalletReleaseKeyScreen';
 import WalletReplaceScreen from './WalletReplaceScreen';
-import WalletSendScreen, { EMPTY_SEND_DRAFT } from './WalletSendScreen';
+import WalletSendAmountScreen from './WalletSendAmountScreen';
+import WalletSendFlight from './WalletSendFlight';
+import WalletSendRecipientScreen from './WalletSendRecipientScreen';
 import WalletSettingsScreen from './WalletSettingsScreen';
 import WalletSlide from './WalletSlide';
 import WalletTonConnectLoginScreen from './WalletTonConnectLoginScreen';
@@ -85,6 +88,7 @@ type StateProps = {
   hasAppPasscode?: boolean;
   address?: string;
   publicKey?: string;
+  balance?: bigint;
   tonExplorerUrl: string;
   transactions?: ApiWalletTransaction[];
   loadedTransactions?: Record<string, ApiWalletTransaction>;
@@ -109,6 +113,7 @@ const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
   [WalletScreen.BuyAmount]: 'WalletBuyTitle',
   [WalletScreen.Currency]: 'WalletBuyCurrency',
   [WalletScreen.Send]: 'WalletSendTitle',
+  [WalletScreen.SendAmount]: 'WalletSendTitle',
   [WalletScreen.Transaction]: 'WalletTransactionTitle',
   [WalletScreen.Collectible]: 'WalletCollectibleTitle',
   [WalletScreen.Settings]: 'WalletSettingsTitle',
@@ -122,22 +127,30 @@ const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
 const POLL_INTERVAL = 30000;
 
 const WalletModal = ({
-  modal, canExportPhrase, isKeyMissing, hasLocalSecret, hasAppPasscode, address, publicKey, tonExplorerUrl,
+  modal, canExportPhrase, isKeyMissing, hasLocalSecret, hasAppPasscode, address, publicKey, balance, tonExplorerUrl,
   transactions, loadedTransactions, collectibles, walletTransfer, walletMnemonic, walletBackup, walletReplace,
   walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel,
 }: OwnProps & StateProps) => {
   const {
-    openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions, sendWalletTransfer,
-    clearWalletTransfer, loadWalletBuyContext, clearWalletBuy, clearWalletTransferFee, decryptWalletComment,
-    clearWalletCommentDecryption, loadWalletGaslessInfo, dropWalletVaultSecrets, openSettingsScreen, openUrl,
+    openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions,
+    loadWalletBuyContext, clearWalletBuy, decryptWalletComment,
+    clearWalletCommentDecryption, dropWalletVaultSecrets, openSettingsScreen, openUrl,
     watchWalletActivity, unwatchWalletActivity, openStarsBalanceModal, loadWalletCollectibles,
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
     clearWalletTonConnect, closeUrlAuthModal,
     disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion,
-    showNotification,
   } = getActions();
 
   const lang = useLang();
+
+  // The diamonds share one model; it is fetched while the user looks at the balance, before any screen draws one
+  useEffectOnce(() => {
+    onFullyIdle(() => {
+      if (!selectShouldLoopStickers(getGlobal())) return;
+
+      void import('../../../lib/diamond/model').then(({ loadModel }) => loadModel()).catch(() => undefined);
+    });
+  });
 
   // Kept through the closing animation, or the slide would swing to the main screen as the dialog fades out
   const rootScreen = useCurrentOrPrev(
@@ -191,11 +204,27 @@ const WalletModal = ({
   const [selectedSessionId, setSelectedSessionId] = useState<string | undefined>();
   const [activeTab, setActiveTab] = useState(0);
 
-  // The send screen unmounts when another slides over it, so its draft lives here
-  const [sendDraft, setSendDraft] = useState(EMPTY_SEND_DRAFT);
+  const [isSendFlightReady, setIsSendFlightReady] = useState(false);
 
-  // A link fills the form once, so a wallet swapped in from another tab does not become the sender
-  const appliedLinkRef = useRef<string>();
+  // The collectibles tab hides the row the diamond lands in
+  const handleSendFlightStart = useLastCallback(() => {
+    setActiveTab(TRANSACTIONS_TAB_INDEX);
+  });
+
+  const sendFlow = useWalletSendFlow({
+    modal,
+    navigation,
+    credentials,
+    isKeyMissing,
+    address,
+    balance,
+    collectibles,
+    walletTransfer,
+    isFlightReady: isSendFlightReady,
+    onKeyMissing: handleImportOwnWallet,
+    onFlightStart: handleSendFlightStart,
+  });
+  const { draft: sendDraft, isSendScreen } = sendFlow;
 
   const isOpen = Boolean(modal);
 
@@ -232,11 +261,6 @@ const WalletModal = ({
   }, [isOpen, address, reset]);
 
   // Keyed on the values, so a new `modal` object with the same ones does not run the effect again
-  const initialRecipient = modal?.initialRecipient;
-  const initialAmount = modal?.initialAmount;
-  const initialComment = modal?.initialComment;
-  const isInitialCommentEncrypted = modal?.isInitialCommentEncrypted;
-  const shouldCloseAfterSend = modal?.shouldCloseAfterSend;
   const shouldReleaseKey = modal?.shouldReleaseKey;
   const initialTransactionId = modal?.initialTransactionId;
 
@@ -255,48 +279,8 @@ const WalletModal = ({
       return;
     }
 
-    if (initialTransactionId) {
-      setSelectedTransactionId(initialTransactionRecordId);
-      return;
-    }
-
-    if (initialRecipient === undefined) {
-      appliedLinkRef.current = undefined;
-      return;
-    }
-
-    if (!address) return;
-
-    // Storage can report a missing phrase after the form opened; the phrase screen must not cover the filled form then
-    const linkKey = `${initialRecipient}:${initialAmount}:${initialComment}:${isInitialCommentEncrypted}`;
-    if (appliedLinkRef.current === linkKey) return;
-
-    if (isKeyMissing) {
-      handleImportOwnWallet();
-      return;
-    }
-
-    appliedLinkRef.current = linkKey;
-
-    // A comment from a link stays readable to its issuer, e.g. an exchange matching a deposit
-    setSendDraft({
-      ...EMPTY_SEND_DRAFT,
-      fromAddress: address,
-      recipient: initialRecipient,
-      amount: initialAmount === undefined ? '' : formatTonFromNanos(initialAmount),
-      comment: initialComment ?? '',
-      isCommentPublic: initialComment !== undefined && !isInitialCommentEncrypted,
-    });
-
-    clearWalletTransfer();
-    loadWalletGaslessInfo();
-    // The form opens along with the wallet, and a slide would show the main screen first
-    push(WalletScreen.Send, true);
-  }, [
-    initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldReleaseKey,
-    initialTransactionId,
-    initialTransactionRecordId, address, isKeyMissing, push, handleImportOwnWallet,
-  ]);
+    if (initialTransactionId) setSelectedTransactionId(initialTransactionRecordId);
+  }, [shouldReleaseKey, initialTransactionId, initialTransactionRecordId, push]);
 
   const handleCloseAnimationEnd = useLastCallback(() => {
     reset();
@@ -306,10 +290,9 @@ const WalletModal = ({
     setSelectedTransactionId(undefined);
     setSelectedCollectibleAddress(undefined);
     setSelectedSessionId(undefined);
-    setSendDraft(EMPTY_SEND_DRAFT);
+    sendFlow.reset();
     setActiveTab(0);
     clearWalletBuy();
-    clearWalletTransferFee();
 
     // An abandoned login sends nothing: the site's session expires on the server
     if (walletTonConnect?.oauth && walletTonConnect.status !== 'done') {
@@ -347,21 +330,8 @@ const WalletModal = ({
       clearWalletBuy();
     }
 
-    if (screen === WalletScreen.Send) {
-      setSendDraft(EMPTY_SEND_DRAFT);
-      clearWalletTransferFee();
-    }
-
+    sendFlow.handleBack();
     back();
-  });
-
-  const handleSendSubmit = useLastCallback((payload: WalletTransferPayload) => {
-    clearWalletTransfer();
-
-    credentials.ask({
-      intent: 'send',
-      run: (entered) => sendWalletTransfer({ ...payload, ...entered, fromAddress: sendDraft.fromAddress! }),
-    });
   });
 
   const handleOpenSettings = useLastCallback(() => {
@@ -502,8 +472,8 @@ const WalletModal = ({
   const selectedTransaction = useMemo(() => {
     if (!selectedTransactionId) return undefined;
 
-    const isSelected = ({ id, msgHash }: ApiWalletTransaction) => (
-      id === selectedTransactionId || msgHash === selectedTransactionId
+    const isSelected = ({ id, msgHash, localId }: ApiWalletTransaction) => (
+      id === selectedTransactionId || msgHash === selectedTransactionId || localId === selectedTransactionId
     );
 
     return transactions?.find(isSelected) || Object.values(loadedTransactions || {}).find(isSelected);
@@ -529,30 +499,8 @@ const WalletModal = ({
     back();
   }, [decryptedComment, screen, credentialIntent, dropCredentials, back]);
 
-  // Leaving the form of the transfer the wallet was opened for gives the flag up
-  const shouldCloseAfterSendRef = useRef(false);
-
-  useSyncEffect(() => {
-    if (shouldCloseAfterSend && screen === WalletScreen.Send) shouldCloseAfterSendRef.current = true;
-
-    if (screen === WalletScreen.Main) shouldCloseAfterSendRef.current = false;
-  }, [shouldCloseAfterSend, screen]);
-
-  // A transfer started from a chat closes the wallet, leaving the chat where the message appears
-  useEffect(() => {
-    const isShownInChat = walletTransfer?.isShownInChat && shouldCloseAfterSendRef.current;
-    if (walletTransfer?.status !== 'sent' && !isShownInChat) return;
-
-    clearWalletTransfer();
-    setSendDraft(EMPTY_SEND_DRAFT);
-    dropCredentials();
-
-    if (shouldCloseAfterSendRef.current) {
-      closeWalletModal();
-    } else {
-      reset();
-    }
-  }, [walletTransfer?.status, walletTransfer?.isShownInChat, dropCredentials, reset]);
+  const headerBalanceRef = useRef<HTMLButtonElement>();
+  const [headerBalanceWidth, setHeaderBalanceWidth] = useState(0);
 
   const handleOpenInExplorer = useLastCallback(() => {
     const url = `${tonExplorerUrl}transaction/${encodeURIComponent(selectedTransaction!.txHash!)}`;
@@ -577,7 +525,7 @@ const WalletModal = ({
   });
 
   const handleOpenTransaction = useLastCallback((transaction: ApiWalletTransaction) => {
-    setSelectedTransactionId(transaction.id);
+    setSelectedTransactionId(transaction.localId ?? transaction.id);
     push(WalletScreen.Transaction);
   });
 
@@ -608,52 +556,6 @@ const WalletModal = ({
     push(WalletScreen.BuyAmount);
   });
 
-  const handleOpenSend = useLastCallback(() => {
-    if (isKeyMissing) {
-      handleImportOwnWallet();
-      return;
-    }
-
-    clearWalletTransfer();
-    loadWalletGaslessInfo();
-    setSendDraft({ ...EMPTY_SEND_DRAFT, fromAddress: address });
-    push(WalletScreen.Send);
-  });
-
-  const handleSendTo = useLastCallback(async (recipient: string, userId?: string) => {
-    if (isKeyMissing) {
-      handleImportOwnWallet();
-      return;
-    }
-
-    // A record holds the address of its day, and the user may have replaced the wallet since
-    const currentAddress = userId ? await loadCurrentUserAddress(userId) : recipient;
-    if (currentAddress === '') showNotification({ message: { key: 'WalletLinkNoWallet' } });
-    if (!currentAddress) return;
-
-    clearWalletTransfer();
-    loadWalletGaslessInfo();
-    setSendDraft({ ...EMPTY_SEND_DRAFT, fromAddress: address, recipient: currentAddress });
-    push(WalletScreen.Send);
-  });
-
-  const handleOpenCollectibleTransfer = useLastCallback((collectible: ApiWalletCollectible) => {
-    if (isKeyMissing) {
-      handleImportOwnWallet();
-      return;
-    }
-
-    clearWalletTransfer();
-    loadWalletGaslessInfo();
-    setSendDraft({ ...EMPTY_SEND_DRAFT, fromAddress: address, collectibleAddress: collectible.address });
-    push(WalletScreen.Send);
-  });
-
-  const sendCollectible = useMemo(
-    () => collectibles?.find(({ address: itemAddress }) => itemAddress === sendDraft.collectibleAddress),
-    [collectibles, sendDraft.collectibleAddress],
-  );
-
   const wrongPhraseGroups = wrongPhrase?.address ? splitAddressIntoGroups(wrongPhrase.address) : undefined;
 
   // Memoized: the phrase screen is a memo component, and a new node each render would re-render it while the user types
@@ -666,29 +568,46 @@ const WalletModal = ({
       : lang(pendingReplace ? 'WalletImportPhraseSubtitle' : 'WalletEnterPhraseSubtitle')
   ), [isOwnPhraseExpected, pendingReplace, lang, openPhraseWhy]);
 
-  const screenTitleKey = screen === WalletScreen.Send && sendDraft.collectibleAddress
+  const screenTitleKey = isSendScreen && sendDraft.collectibleAddress
     ? 'WalletSendCollectibleTitle' : SCREEN_TITLE_KEYS[screen];
   const transitionName = resolveTransitionName('layers', animationLevel, isInstant);
+
+  const hasHeaderBalance = screen === WalletScreen.SendAmount && !sendDraft.collectibleAddress && balance !== undefined;
+  const isSendSubmitted = getIsWalletTransferSubmitted(walletTransfer);
+  useResizeObserver(headerBalanceRef, (entry) => {
+    setHeaderBalanceWidth(entry.borderBoxSize[0].inlineSize);
+  }, !hasHeaderBalance);
 
   const header = (
     <ModalHeader
       className={buildClassName(
         styles.header,
         ACCENT_SCREENS.has(screen) && styles.headerOnAccent,
+        screen === WalletScreen.SendAmount && styles.headerOnSurface,
         isScrolled && !ACCENT_SCREENS.has(screen) && styles.headerScrolled,
       )}
       noMask
     >
       <ModalCloseButton className={styles.headerButton} onBack={stack.length > 1 ? handleBack : undefined} />
       <ModalTitle>
-        <Transition
-          name={isInstant ? 'none' : 'slideVerticalFade'}
-          activeKey={screen}
-          direction={direction}
-          className={styles.headerTitle}
+        <div
+          className={buildClassName(
+            styles.headerTitleBox,
+            // The balance is measured after its first frame, and the title would cover it there
+            hasHeaderBalance && !headerBalanceWidth && styles.headerTitleBoxUnmeasured,
+          )}
+          style={hasHeaderBalance ? `--header-action-width: ${headerBalanceWidth}px` : undefined}
         >
-          {screenTitleKey ? lang(screenTitleKey) : ' '}
-        </Transition>
+          <Transition
+            name={isInstant ? 'none' : 'slideVerticalFade'}
+            // Both send screens have the same title, which must not slide out and back in
+            activeKey={isSendScreen ? WalletScreen.Send : screen}
+            direction={direction}
+            className={styles.headerTitle}
+          >
+            {screenTitleKey ? <span className={styles.headerTitleText}>{lang(screenTitleKey)}</span> : ' '}
+          </Transition>
+        </div>
       </ModalTitle>
       {screen === WalletScreen.Main && hasWallet && (
         <ModalHeaderAction>
@@ -701,6 +620,23 @@ const WalletModal = ({
           >
             <Icon name="settings" />
           </Button>
+        </ModalHeaderAction>
+      )}
+      {hasHeaderBalance && (
+        <ModalHeaderAction>
+          <button
+            ref={headerBalanceRef}
+            type="button"
+            className={styles.headerBalance}
+            title={lang('WalletSendMax')}
+            onClick={isSendSubmitted ? undefined : sendFlow.handleSendMax}
+          >
+            <span className={styles.headerBalanceLabel}>{lang('StarsBalance')}</span>
+            <span className={styles.headerBalanceAmount}>
+              <GramIcon />
+              {formatTonShortFromNanos(balance)}
+            </span>
+          </button>
         </ModalHeaderAction>
       )}
       {screen === WalletScreen.Transaction && (
@@ -721,7 +657,12 @@ const WalletModal = ({
       <WalletSlide
         isRoot={key === rootScreen}
         isActive={isActive}
-        className={buildClassName(styles.slide, 'custom-scroll', ACCENT_SCREENS.has(key) && styles.slideAccent)}
+        className={buildClassName(
+          styles.slide,
+          'custom-scroll',
+          ACCENT_SCREENS.has(key) && styles.slideAccent,
+          key === WalletScreen.SendAmount && styles.slideSurface,
+        )}
         contentClassName={styles.slideContent}
         onBack={handleBack}
         onScrolledChange={handleSlideScrolledChange}
@@ -745,12 +686,21 @@ const WalletModal = ({
         return <WalletCurrencyScreen onSelect={handleBack} />;
       case WalletScreen.Send:
         return (
-          <WalletSendScreen
+          <WalletSendRecipientScreen
             isActive={isActive}
             draft={sendDraft}
-            collectible={sendCollectible}
-            onSubmit={handleSendSubmit}
-            onDraftChange={setSendDraft}
+            onDraftChange={sendFlow.setDraft}
+            onContinue={sendFlow.handleRecipientContinue}
+          />
+        );
+      case WalletScreen.SendAmount:
+        return (
+          <WalletSendAmountScreen
+            isActive={isActive}
+            draft={sendDraft}
+            collectible={sendFlow.collectible}
+            onSubmit={sendFlow.handleSubmit}
+            onDraftChange={sendFlow.setDraft}
             onBuy={handleOpenBuy}
           />
         );
@@ -760,7 +710,7 @@ const WalletModal = ({
             transaction={selectedTransaction}
             isRoot={isTransactionRoot}
             onDecryptComment={handleDecryptComment}
-            onSend={address ? handleSendTo : undefined}
+            onSend={address ? sendFlow.handleSendTo : undefined}
             onDone={handleTransactionDone}
           />
         ) : (
@@ -773,7 +723,7 @@ const WalletModal = ({
         return selectedCollectible ? (
           <WalletCollectibleScreen
             collectible={selectedCollectible}
-            onTransfer={handleOpenCollectibleTransfer}
+            onTransfer={sendFlow.handleOpenCollectibleTransfer}
             onDone={handleBack}
           />
         ) : (
@@ -923,7 +873,7 @@ const WalletModal = ({
             onOpenSettings={handleOpenSettings}
             onOpenEarnings={handleOpenEarnings}
             onReceive={handleOpenReceive}
-            onSend={handleOpenSend}
+            onSend={sendFlow.handleOpenSend}
             onSwitchTab={setActiveTab}
             onTransactionClick={handleOpenTransaction}
             onCollectibleClick={handleOpenCollectible}
@@ -954,6 +904,7 @@ const WalletModal = ({
       >
         {renderScreen}
       </Transition>
+      <WalletSendFlight canLaunch={screen === WalletScreen.SendAmount} onReadyChange={setIsSendFlightReady} />
       <WalletHowItWorksModal isOpen={isHowItWorksOpen} onClose={closeHowItWorks} />
       <ConfirmDialog
         isOpen={isPhraseWhyOpen}
@@ -1016,8 +967,9 @@ export default memo(withGlobal<OwnProps>(
       hasAppPasscode: global.passcode.hasPasscode,
       address: selectWalletAddress(global),
       publicKey: selectWalletPublicKey(global),
+      balance: global.wallet?.state?.balance,
       tonExplorerUrl: selectTonExplorerUrl(global),
-      transactions: global.wallet?.transactions,
+      transactions: selectWalletTransactions(global),
       loadedTransactions: global.wallet?.loadedTransactions,
       collectibles: global.wallet?.collectibles,
       walletTransfer: tabState.walletTransfer,

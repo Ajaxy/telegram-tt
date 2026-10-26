@@ -1,0 +1,27 @@
+.address {
+  cursor: var(--custom-cursor, pointer);
+
+  display: block;
+
+  width: 100%;
+  padding: 1rem 1rem 0.8125rem;
+  border: none;
+  border-radius: 0.875rem;
+
+  font-family: var(--font-family-monospace);
+  font-size: 1.125rem;
+  line-height: 1.375rem;
+  color: var(--color-text);
+  text-align: center;
+  white-space: pre;
+
+  background-color: var(--color-background-secondary);
+
+  &:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}
+
+.addressGroupMuted {
+  color: var(--color-text-secondary);
+}

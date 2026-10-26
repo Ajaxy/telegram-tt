@@ -1,11 +1,12 @@
-import type { DiamondDrawState, DiamondPalette, DiamondScene } from './scene';
+import type { DiamondDrawState, DiamondPalette, DiamondViewport } from './model';
 
 import { timingFunctions } from '../../util/animation';
 import { lerp } from '../../util/math';
 import { getOpenModalCount } from '../../util/openModals';
 import { getIsHeavyAnimating, onFullyIdle } from '../teact/teact';
+import { createGpuCanvas, requestGpuRenderer } from './gpu';
+import { getFrameTime, TURN_DURATION } from './model';
 import { createFrameWatchdog, getIsDiamond3dDegraded } from './performance';
-import { createDiamondScene, getFrameTime, TURN_DURATION } from './scene';
 
 import { getIsInBackground } from '../../hooks/window/useBackgroundMode';
 
@@ -16,6 +17,11 @@ export type DiamondOptions = {
   // A small diamond that only turns needs fewer frames than one in the hand
   restFrameInterval?: number;
 };
+
+// Angles are in radians, times in seconds of the diamond clock
+type DrawDiamond = (
+  state: DiamondDrawState, viewport: DiamondViewport, time: number, frameTime: number, yaw: number, pitch: number,
+) => void;
 
 type Animation = {
   startTime: number;
@@ -61,7 +67,7 @@ export function setupDiamond(
     if (getIsDiamond3dDegraded()) onError();
   });
 
-  // Creating a WebGL context blocks until the GPU process answers, which the opening animation keeps busy
+  // The device starts and compiles its pipelines in the GPU process, which the opening animation keeps busy
   onFullyIdle(() => {
     if (isDestroyed) return;
 
@@ -75,47 +81,46 @@ export function setupDiamond(
   };
 }
 
+// The diamond draws straight into its canvas on the device the other diamonds share
 function createRenderer(
   canvas: HTMLCanvasElement,
   onReady: NoneToVoidFunction,
   onError: NoneToVoidFunction,
   options: DiamondOptions,
 ) {
-  // Without a usable GPU the browser renders WebGL on the CPU, far too slow for these shaders
-  const gl = canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: true });
-
-  if (!gl) {
-    onError();
-
-    return undefined;
-  }
-
   let isDestroyed = false;
   let stop: NoneToVoidFunction | undefined;
+  let teardown: NoneToVoidFunction | undefined;
 
-  createDiamondScene(gl, options.palette ?? 'regular')
-    .then((scene) => {
-      if (isDestroyed) return;
+  void requestGpuRenderer().then((gpu) => {
+    if (isDestroyed) return;
 
-      stop = startRendering(canvas, scene, onReady, options);
-    })
-    .catch(() => {
-      if (!isDestroyed) onError();
-    });
+    const gpuCanvas = gpu && createGpuCanvas(gpu, canvas, options.palette ?? 'regular');
+    if (!gpu || !gpuCanvas) {
+      onError();
+      return;
+    }
 
-  canvas.addEventListener('webglcontextlost', onError);
+    teardown = gpuCanvas.destroy;
+    stop = startRendering(canvas, (state, viewport, time, frameTime, yaw, pitch) => {
+      const encoder = gpu.device.createCommandEncoder();
+      const pass = gpuCanvas.beginPass(encoder);
+      gpu.scene.draw(pass, gpuCanvas.sceneTarget, state, viewport, time, frameTime, yaw, pitch);
+      pass.end();
+      gpu.device.queue.submit([encoder.finish()]);
+    }, onReady, options);
+  });
 
   return () => {
     isDestroyed = true;
     stop?.();
-    canvas.removeEventListener('webglcontextlost', onError);
-    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    teardown?.();
   };
 }
 
 function startRendering(
   canvas: HTMLCanvasElement,
-  scene: DiamondScene,
+  draw: DrawDiamond,
   onReady: NoneToVoidFunction,
   { turnDuration = TURN_DURATION, restFrameInterval = MIN_FRAME_INTERVAL }: DiamondOptions,
 ) {
@@ -164,7 +169,7 @@ function startRendering(
     }
 
     updateAnimation();
-    scene.draw(drawState, viewport, time, frameTime, convertToRadians(yaw), convertToRadians(pitch));
+    draw(drawState, viewport, time, frameTime, convertToRadians(yaw), convertToRadians(pitch));
 
     if (!isReady) {
       isReady = true;

@@ -46,10 +46,18 @@
   transition: opacity 0.22s linear;
 }
 
-// The canvas takes the pointer only once it shows the diamond, so a click on the still opens the transfer.
-// A drag on the canvas turns the diamond instead of scrolling the chat.
 .ready {
+  opacity: 1;
+}
+
+// The canvas takes the pointer only while the diamond turns, so a click on the still opens the transfer.
+// A drag on the canvas turns the diamond instead of scrolling the chat.
+.interactive {
   pointer-events: auto;
   touch-action: none;
-  opacity: 1;
+  cursor: var(--custom-cursor, grab);
+}
+
+.held .interactive {
+  cursor: var(--custom-cursor, grabbing);
 }

@@ -2,7 +2,6 @@ import type {
   ApiOnrampProvider,
   ApiWalletCollectible,
   ApiWalletTransaction,
-  ApiWalletTransactionPeer,
   DecryptWalletCommentError,
   DecryptWalletCommentResult,
   ExportSecretPhraseError,
@@ -14,13 +13,15 @@ import type {
   SendTonTransferResult,
   WalletBackupResult,
 } from '../../../api/types';
-import type { ActionReturnType, GlobalState } from '../../types';
+import type { RequiredGlobalActions } from '../../index';
+import type { ActionReturnType, GlobalState, TabState } from '../../types';
 
 import { DEBUG, NFT_TRANSFER_FORWARD_NANOS, WALLET_FIRST_TRANSFER_SUGGESTION } from '../../../config';
 import { toNonBounceableAddress } from '../../../lib/ton/address';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import generateUniqueId from '../../../util/generateUniqueId';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { ACCOUNT_SLOT } from '../../../util/multiaccount';
 import {
@@ -44,6 +45,7 @@ import { addUsers } from '../../reducers/users';
 import {
   addPendingWalletTransaction,
   clearWalletRecords,
+  markWalletTransactionFailed,
   replacePendingWalletTransaction,
   updateWallet,
   updateWalletServerState,
@@ -54,7 +56,7 @@ import { selectTheme } from '../../selectors/ui';
 import { selectUser } from '../../selectors/users';
 import {
   selectOnrampProvider, selectWalletAddress, selectWalletCurrency, selectWalletPublicKey,
-  selectWalletTransferInFlight,
+  selectWalletTransactions, selectWalletTransferInFlight,
 } from '../../selectors/wallet';
 import { fetchChatByUsername } from './chats';
 import { verifyPasscodeWithLimit } from './passcode';
@@ -422,7 +424,7 @@ addActionHandler('openWalletTransaction', async (global, actions, payload): Prom
   const ownAddress = selectWalletAddress(global);
 
   const isKnown = Boolean(global.wallet?.loadedTransactions?.[transactionId])
-    || Boolean(global.wallet?.transactions?.some(({ id }) => id === transactionId));
+    || Boolean(selectWalletTransactions(global)?.some(({ id }) => id === transactionId));
 
   if (isKnown) {
     // Otherwise a transaction still being fetched would open the modal again, over this one
@@ -527,12 +529,13 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
   if (!shouldRefresh && global.wallet?.nextOffset !== offset) return;
 
-  const current = global.wallet?.transactions || [];
-  const knownPeers = new Map(current.map(({ id, peer }) => [id, peer]));
+  const current = selectWalletTransactions(global) || [];
+  const known = new Map(current.map((item) => [item.id, item]));
   const page = result.transactions.map((transaction) => {
-    const peer = keepRecipientUser(transaction.peer, knownPeers.get(transaction.id));
+    const { peer: knownPeer, localId } = known.get(transaction.id) || {};
+    const peer = keepRecipientUser(transaction.peer, knownPeer);
 
-    return peer === transaction.peer ? transaction : { ...transaction, peer };
+    return peer === transaction.peer && !localId ? transaction : { ...transaction, peer, localId };
   });
   const freshIds = new Set(page.map(({ id }) => id));
   let transactions: ApiWalletTransaction[];
@@ -541,9 +544,14 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   if (shouldRefresh) {
     // Loaded pages are kept while the fresh page still overlaps them, so a refresh does not reset the scroll
     const isTailKept = global.wallet?.nextOffset !== ''
-      && current.some(({ id, msgHash }) => !msgHash && freshIds.has(id));
-    const tail = isTailKept ? current.filter(({ id, msgHash }) => !msgHash && !freshIds.has(id)) : [];
+      && current.some((item) => !getIsLocalTransaction(item) && freshIds.has(item.id));
+    const tail = isTailKept ? current.filter((item) => !getIsLocalTransaction(item) && !freshIds.has(item.id)) : [];
     transactions = mergeLocalTransactions(current, page).concat(tail);
+
+    const kept = new Set(transactions);
+    current.forEach((item) => {
+      if (item.bodyHashes && !kept.has(item)) deleteUnansweredCard(actions, item);
+    });
 
     if (isTailKept) nextOffset = global.wallet!.nextOffset;
   } else {
@@ -555,11 +563,17 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
   if (!shouldRefresh) return;
 
-  // A local record the fresh page does not list is resolved by its message hash
-  const unresolved = transactions.filter(({ id, isPending, msgHash }) => isPending && msgHash && !freshIds.has(id));
+  // For a local row that the fresh page does not list, the transaction is looked up by the message hash, or by the body
+  // hashes when there is no message hash
+  const unresolved = transactions.filter(({ id, isPending, msgHash, bodyHashes }) => (
+    isPending && (msgHash || bodyHashes) && !freshIds.has(id)
+  ));
 
-  for (const { id, msgHash } of unresolved) {
-    const confirmed = await lookupSentTransaction(msgHash!);
+  for (const transaction of unresolved) {
+    const { id, msgHash: knownMsgHash, bodyHashes } = transaction;
+    const msgHash = knownMsgHash
+      ?? await callApi('fetchWalletMsgHashByBody', { ownAddress: ownAddress!, bodyHashes: bodyHashes! });
+    const confirmed = msgHash && await lookupSentTransaction(msgHash);
     if (!confirmed) continue;
 
     global = getGlobal();
@@ -568,8 +582,19 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
     global = replacePendingWalletTransaction(global, id, { ...confirmed, msgHash });
     setGlobal(global);
+
+    if (bodyHashes) deleteUnansweredCard(actions, transaction);
   }
 });
+
+// Without an answer from the server, nothing replaces the chat card of the transfer, so it stays in the sending state.
+// When the transfer is found or its row expires, this card is deleted. The message from the server, if there is one,
+// stays as the card.
+function deleteUnansweredCard(actions: RequiredGlobalActions, { localMessageId, peer }: ApiWalletTransaction) {
+  if (localMessageId === undefined || peer.type !== 'user') return;
+
+  actions.apiUpdate({ '@type': 'deleteMessages', ids: [localMessageId], chatId: peer.userId });
+}
 
 // An item already listed is updated in place; new ones keep the server's order
 function mergeCollectibles(list: ApiWalletCollectible[], page: ApiWalletCollectible[]) {
@@ -1004,7 +1029,7 @@ const lastFeeRequestIdByTab: Record<number, number> = {};
 
 addActionHandler('loadWalletTransferFee', async (global, actions, payload): Promise<void> => {
   const {
-    toAddress, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress, tabId = getCurrentTabId(),
+    toAddress, comment, shouldEncryptComment, collectibleAddress, tabId = getCurrentTabId(),
   } = payload;
 
   const state = global.wallet?.state;
@@ -1020,10 +1045,9 @@ addActionHandler('loadWalletTransferFee', async (global, actions, payload): Prom
     ownAddress: state.address,
     publicKey: state.publicKey,
     toAddress,
-    amount,
+    amount: 0n,
     comment,
     shouldEncryptComment,
-    shouldSendAll,
     collectibleAddress,
   });
 
@@ -1324,7 +1348,7 @@ addActionHandler('loadWalletKeyRotationFee', async (global): Promise<void> => {
 addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise<void> => {
   const {
     fromAddress, toAddress, toUserId, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
-    isGasless, password, passcode, tabId = getCurrentTabId(),
+    isGasless, isAnimated, password, passcode, tabId = getCurrentTabId(),
   } = payload;
 
   const ownAddress = selectWalletAddress(global);
@@ -1346,11 +1370,29 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
     ? selectChat(global, toUserId)
     : undefined;
 
-  global = updateTabState(global, { walletTransfer: { status: 'pending' } }, tabId);
+  // The answer belongs to this request only while the form still waits for it
+  const pending: NonNullable<TabState['walletTransfer']> = { status: 'pending' };
+  global = updateTabState(global, { walletTransfer: pending }, tabId);
   setGlobal(global);
 
+  const localId = `local-${generateUniqueId()}`;
+  let queuedRecord: ApiWalletTransaction = {
+    id: localId,
+    localId,
+    isIncoming: false,
+    isPending: true,
+    peer: toUserId ? { type: 'user', userId: toUserId, address: toAddress } : { type: 'address', address: toAddress },
+    // The server lists a collectible transfer with a zero amount as well
+    amount: collectibleAddress ? 0n : amount,
+    comment: shouldEncryptComment && !collectibleAddress ? undefined : comment,
+    timestamp: getServerTime(),
+    collectible: collectibleAddress
+      ? global.wallet?.collectibles?.find(({ address }) => address === collectibleAddress)
+      : undefined,
+  };
+  let isQueued = false;
+
   let result: SendTonTransferResult | undefined;
-  let isShownInChat = false;
 
   try {
     const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
@@ -1374,13 +1416,20 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         pendingValidUntil: inFlight?.validUntil,
         words: secret.words,
         password,
-      }, () => {
-        isShownInChat = true;
+      }, (localMessageId?: number) => {
+        isQueued = true;
+        queuedRecord = { ...queuedRecord, localMessageId };
 
+        // The transfer waits for its turn in the history, and the form is done with it
         global = getGlobal();
-        if (selectTabState(global, tabId).walletTransfer?.status !== 'pending') return;
+        if (selectWalletAddress(global) === ownAddress) {
+          global = addPendingWalletTransaction(global, queuedRecord);
+        }
 
-        global = updateTabState(global, { walletTransfer: { status: 'pending', isShownInChat } }, tabId);
+        if (selectTabState(global, tabId).walletTransfer === pending) {
+          global = updateTabState(global, { walletTransfer: { status: 'queued' } }, tabId);
+        }
+
         setGlobal(global);
       });
   } catch (err: unknown) {
@@ -1394,19 +1443,31 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
 
   global = getGlobal();
 
-  // A cancelled flow still sent the transfer, so its record and the fresh balance apply
-  const isCancelled = selectTabState(global, tabId).walletTransfer?.status !== 'pending';
-
   // A wallet swapped meanwhile has a balance and history of its own
   const isSameWallet = selectWalletAddress(global) === ownAddress;
 
   if (!result || 'error' in result) {
-    // The chat already shows the transfer, so the reason it failed is reported even after the wallet has closed
-    if (isCancelled && !isShownInChat) return;
-
     const error: SendTonTransferError = result ? result.error : 'SEND_FAILED';
 
-    if (!isCancelled) {
+    // A transfer without an answer may still execute, so its row stays pending and a dialog warns against sending it
+    // again, as in the iOS app
+    if (result?.isSent) {
+      if (isSameWallet) {
+        global = replacePendingWalletTransaction(global, localId, { ...queuedRecord, bodyHashes: result.bodyHashes });
+        setGlobal(global);
+      }
+
+      actions.showDialog({ data: { type: 'localized', text: { key: 'WalletSendPending' } }, tabId });
+      return;
+    }
+
+    // A queued transfer has left the form, so its row and the notification tell of the failure, as in the native apps
+    if (isQueued) {
+      global = markWalletTransactionFailed(global, localId);
+      setGlobal(global);
+    } else {
+      if (selectTabState(global, tabId).walletTransfer !== pending) return;
+
       global = updateTabState(global, { walletTransfer: { status: 'error', error } }, tabId);
       setGlobal(global);
     }
@@ -1422,19 +1483,12 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
     return;
   }
 
-  if (!isCancelled) {
-    global = updateTabState(global, { walletTransfer: { status: 'sent' } }, tabId);
-  }
-
   // The server learns about the transfer with a delay, so the amount is deducted now; `staleBalance` marks its view.
   // The item contract returns most of what a collectible transfer attaches, so only the forwarded part is deducted.
   // A self-transfer only costs the fees, so its balance is left for the server to update.
   const spentAmount = collectibleAddress ? NFT_TRANSFER_FORWARD_NANOS : amount;
   const isSelfTransfer = toNonBounceableAddress(toAddress) === toNonBounceableAddress(ownAddress);
   const walletState = isSameWallet && !isSelfTransfer ? global.wallet?.state : undefined;
-  const collectible = collectibleAddress
-    ? global.wallet?.collectibles?.find(({ address }) => address === collectibleAddress)
-    : undefined;
 
   // The server lists the item until it indexes the transfer
   if (collectibleAddress && isSameWallet && !isSelfTransfer && global.wallet?.collectibles) {
@@ -1457,43 +1511,34 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
   }
 
   if (isSameWallet) {
-    const recipientPeer: ApiWalletTransactionPeer = toUserId
-      ? { type: 'user', userId: toUserId, address: toAddress }
-      : { type: 'address', address: toAddress };
-
-    if (result.transaction) {
-      global = replacePendingWalletTransaction(global, result.msgHash, {
-        ...result.transaction, peer: keepRecipientUser(result.transaction.peer, recipientPeer), msgHash: result.msgHash,
-      });
-    } else {
-      global = addPendingWalletTransaction(global, {
-        id: result.msgHash,
-        msgHash: result.msgHash,
-        seqno: result.seqno,
-        validUntil: result.validUntil,
-        isIncoming: false,
-        isPending: true,
-        peer: recipientPeer,
-        // The server lists a collectible transfer with a zero amount as well
-        amount: collectibleAddress ? 0n : amount,
-        // The cache keeps pending records, so a private comment is held only encrypted, as the server lists it
-        comment: result.encryptedComment ? undefined : comment,
-        encryptedComment: result.encryptedComment,
-        timestamp: getServerTime(),
-        collectible,
-      });
-    }
+    global = replacePendingWalletTransaction(global, localId, result.transaction ? {
+      ...result.transaction,
+      peer: keepRecipientUser(result.transaction.peer, queuedRecord.peer),
+      msgHash: result.msgHash,
+    } : {
+      ...queuedRecord,
+      id: result.msgHash,
+      msgHash: result.msgHash,
+      seqno: result.seqno,
+      validUntil: result.validUntil,
+      timestamp: getServerTime(),
+      // The cache keeps pending records, so a private comment is held only encrypted, as the server lists it
+      comment: result.encryptedComment ? undefined : comment,
+      encryptedComment: result.encryptedComment,
+    });
   }
 
   setGlobal(global);
 
-  actions.showNotification({
-    message: {
-      key: collectibleAddress ? 'WalletSendCollectibleSuccess'
-        : result.isGasless ? 'WalletSendSuccessGasless' : 'WalletSendSuccess',
-    },
-    tabId,
-  });
+  if (!isAnimated || !selectTabState(global, tabId).walletModal) {
+    actions.showNotification({
+      message: {
+        key: collectibleAddress ? 'WalletSendCollectibleSuccess'
+          : result.isGasless ? 'WalletSendSuccessGasless' : 'WalletSendSuccess',
+      },
+      tabId,
+    });
+  }
 
   actions.loadWalletState();
 
@@ -1517,7 +1562,7 @@ addActionHandler('decryptWalletComment', async (global, actions, payload): Promi
   } = payload;
 
   const ownAddress = selectWalletAddress(global);
-  const transaction = global.wallet?.transactions?.find(({ id }) => id === transactionId)
+  const transaction = selectWalletTransactions(global)?.find(({ id }) => id === transactionId)
     || Object.values(global.wallet?.loadedTransactions || {}).find(({ id }) => id === transactionId);
   if (!ownAddress || !transaction?.encryptedComment || transaction.peer.type === 'unsupported') return;
 
@@ -1584,18 +1629,25 @@ addActionHandler('dropWalletVaultSecrets', (global, actions, payload): ActionRet
   actions.clearPasscode({ shouldDropWalletKeys: true });
 });
 
-// Local records with a message hash stay on top until the server lists them or they expire
+// Local records stay on top until the server lists them or they expire
 function mergeLocalTransactions(
   current: ApiWalletTransaction[] | undefined, confirmed: ApiWalletTransaction[],
 ): ApiWalletTransaction[] {
   const now = getServerTime();
   const confirmedIds = new Set(confirmed.map(({ id }) => id));
 
-  const stillLocal = (current || []).filter(({ id, msgHash, timestamp }) => (
-    msgHash && timestamp > now - PENDING_TTL_SECONDS && !confirmedIds.has(id)
+  // A queued transfer expires as well, as its answer is lost if the tab running the worker closes. An answer that
+  // comes later brings the row back.
+  const stillLocal = (current || []).filter((item) => (
+    getIsLocalTransaction(item) && !confirmedIds.has(item.id) && item.timestamp > now - PENDING_TTL_SECONDS
   ));
 
   return stillLocal.concat(confirmed);
+}
+
+// A queued transfer has only its local id, and one the server took has its message hash
+function getIsLocalTransaction({ id, msgHash, localId }: ApiWalletTransaction) {
+  return Boolean(msgHash) || id === localId;
 }
 
 async function fetchSentTransaction(msgHash: string): Promise<ApiWalletTransaction | undefined> {

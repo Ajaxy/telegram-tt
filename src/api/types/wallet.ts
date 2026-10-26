@@ -108,6 +108,13 @@ export interface ApiWalletTransaction {
   id: string;
   // Set for a transfer sent from this device, see `ApiWalletSentTransfer`
   msgHash?: string;
+  // Set instead of `msgHash` for a transfer that the server did not answer, see `SendTonTransferResult`
+  bodyHashes?: string[];
+  // The local id of the chat card sent with the transfer. The card finds this row by it.
+  localMessageId?: number;
+  // A transfer sent from this device keeps it from the moment it is queued, while `id` changes as the server
+  // takes it and the chain confirms it
+  localId?: string;
   seqno?: number;
   validUntil?: number;
   isIncoming: boolean;
@@ -281,4 +288,7 @@ export type SendTonTransferError =
   | 'NFT_NOT_OWNED' | 'NFT_ON_SALE' | 'NFT_NOT_INITIALIZED' | 'NFT_UNAVAILABLE'
   // The key was changed elsewhere since the transfer was signed
   | 'KEY_MISMATCH' | ExportSecretPhraseError;
-export type SendTonTransferResult = ApiWalletSentTransfer | { error: SendTonTransferError };
+// `isSent` means the error happened after the transfer was sent, so the transfer may still go through. The chain then
+// shows it under one of `bodyHashes`: base64 hashes of the message bodies that the server may have sent.
+export type SendTonTransferResult = ApiWalletSentTransfer
+  | { error: SendTonTransferError; isSent?: true; bodyHashes?: string[] };

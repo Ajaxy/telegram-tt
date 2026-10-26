@@ -5,6 +5,7 @@ import type { ApiUser, ApiUserStatus } from '../../../api/types';
 
 import { getMainUsername, getUserFullName, getUserStatus } from '../../../global/helpers';
 import { selectUser, selectUserStatus } from '../../../global/selectors';
+import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -40,6 +41,7 @@ const WalletRecentRecipient = ({
   if (!user) return undefined;
 
   const username = withUsername ? getMainUsername(user) : undefined;
+  const name = getUserFullName(lang, user);
 
   return (
     <Interactive className={className} clickable ripple onClick={handleClick}>
@@ -47,10 +49,10 @@ const WalletRecentRecipient = ({
         <ControlBefore>
           <Avatar peer={user} size="medium" />
         </ControlBefore>
-        <ControlLabel>{getUserFullName(lang, user)}</ControlLabel>
+        <ControlLabel>{renderText(name)}</ControlLabel>
         <ControlDescription>
           {isLinkedAddress
-            ? lang('WalletSendAddressLinked', { name: getUserFullName(lang, user) }, {
+            ? lang('WalletSendAddressLinked', { name }, {
               withNodes: true, withMarkdown: true,
             })
             : username ? `@${username}` : getUserStatus(lang, user, userStatus)}

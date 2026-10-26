@@ -1,0 +1,44 @@
+.root {
+  position: relative;
+  display: flex;
+}
+
+.cells {
+  display: flex;
+  align-items: baseline;
+}
+
+.cell {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+}
+
+.fraction {
+  font-size: 2rem;
+}
+
+.glyph,
+.ghost {
+  transform-origin: 50% 85%;
+  display: inline-block;
+}
+
+.ghost {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.measurer {
+  pointer-events: none;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: flex;
+
+  visibility: hidden;
+}

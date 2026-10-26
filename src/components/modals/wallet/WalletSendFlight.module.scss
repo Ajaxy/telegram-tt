@@ -1,0 +1,17 @@
+.layer {
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+}
+
+.gem {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  display: grid;
+  place-items: center;
+
+  visibility: hidden;
+}

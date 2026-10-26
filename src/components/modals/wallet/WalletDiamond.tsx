@@ -29,7 +29,7 @@ const WalletDiamond = ({ size }: OwnProps) => {
     let teardown: NoneToVoidFunction | undefined;
     let isCancelled = false;
 
-    // The WebGL scene and its shaders are loaded only once a diamond is shown
+    // The 3D scene and its shaders are loaded only once a diamond is shown
     import('../../../lib/diamond').then(({ setupDiamond }) => {
       if (isCancelled) return;
 
@@ -42,12 +42,16 @@ const WalletDiamond = ({ size }: OwnProps) => {
     };
   }, [is3d]);
 
+  // With looped stickers off, the Lottie stays still like the 3D diamond, which is off then too, and a click has
+  // nothing to replay
   if (!is3d) {
     return (
       <AnimatedIconWithPreview
         tgsUrl={LOCAL_TGS_URLS.BlueDiamond}
         previewUrl={LOCAL_TGS_PREVIEW_URLS.BlueDiamond}
         size={size}
+        play={shouldLoop}
+        nonInteractive={!shouldLoop}
       />
     );
   }

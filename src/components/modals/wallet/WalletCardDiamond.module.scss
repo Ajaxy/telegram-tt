@@ -36,15 +36,18 @@ $rest-size: 150%;
 }
 
 .canvas {
-  touch-action: none;
-  cursor: var(--custom-cursor, grab);
+  pointer-events: none;
   opacity: 0;
   transition:
     opacity 0.22s linear,
     scale 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+// The canvas takes the pointer only once it shows the diamond; until then the card tilts under it as under the still
 .ready {
+  pointer-events: auto;
+  touch-action: none;
+  cursor: var(--custom-cursor, grab);
   opacity: 1;
 }
 

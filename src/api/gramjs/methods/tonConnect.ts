@@ -56,7 +56,8 @@ import { deserializeBytes, serializeBytes } from '../helpers/misc';
 import { invokeRequest } from './client';
 import {
   checkIsAddressActive, deriveWalletSeeds, estimateFee, exportWalletSecretPhrase, fetchToncenterWalletState,
-  forgetRefusedTransfer, isTransferPending, loadSentTransfer, rememberSentTransfer, runWalletSend, sendTransferData,
+  forgetRefusedTransfer, isTransferPending, loadSentTransfer, markSentTransferAccepted, rememberSentTransfer,
+  runWalletSend, sendTransferData,
 } from './wallet';
 
 type TonConnectCredentials = {
@@ -645,6 +646,7 @@ async function processTonConnectRequest({
         const sent = buildApiWalletSentTransfer(updates, { seqno: current.seqno, validUntil });
 
         if (sent) {
+          await markSentTransferAccepted(credentials.ownAddress, current.seqno);
           sentTransfer = {
             msgHash: sent.msgHash, seqno: current.seqno, validUntil, amount: total, toAddress: firstMessage.address,
           };

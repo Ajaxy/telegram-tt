@@ -1,27 +1,45 @@
 import type {
-  ApiTonConnectError, ApiWalletTransactionPeer, DecryptWalletCommentError, ReplaceWalletError, SendTonTransferError,
-  WalletBackupError,
+  ApiTonConnectError, ApiWalletCollectible, ApiWalletTransaction, ApiWalletTransactionPeer, DecryptWalletCommentError,
+  ReplaceWalletError, SendTonTransferError, WalletBackupError,
 } from '../../api/types';
 import type { RegularLangKey } from '../../types/language';
+import type { TabState } from '../types';
 
 import { toNonBounceableAddress } from '../../lib/ton/address';
 
 export type WalletFlowError = SendTonTransferError | WalletBackupError | DecryptWalletCommentError | ReplaceWalletError
   | ApiTonConnectError;
 
+// The amount is left out: the fee hardly depends on it, so one estimate serves every amount, as in the mobile apps
 export function buildWalletTransferFeeKey({
-  toAddress, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
+  toAddress, comment, shouldEncryptComment, collectibleAddress,
 }: {
   toAddress: string;
-  amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
-  shouldSendAll?: boolean;
   collectibleAddress?: string;
 }) {
-  return [
-    toAddress, amount, comment ?? '', Boolean(shouldEncryptComment), Boolean(shouldSendAll), collectibleAddress ?? '',
-  ].join(':');
+  return [toAddress, comment ?? '', Boolean(shouldEncryptComment), collectibleAddress ?? ''].join(':');
+}
+
+export function getIsWalletTransferSubmitted(walletTransfer?: TabState['walletTransfer']) {
+  return walletTransfer?.status === 'pending' || walletTransfer?.status === 'queued';
+}
+
+export function getHasPendingWalletTransfer(transactions: ApiWalletTransaction[] | undefined, localMessageId: number) {
+  return Boolean(transactions?.some((item) => item.isPending && item.localMessageId === localMessageId));
+}
+
+// Hides items whose transfer is still pending, so the user cannot send them again. The toncenter list of owners is
+// updated with a delay, so a second transfer would pass the ownership check and lose its fees. When the transfer fails
+// or its row expires, the item shows again.
+export function filterUnsentCollectibles(
+  collectibles: ApiWalletCollectible[] | undefined, transactions: ApiWalletTransaction[] | undefined,
+) {
+  const sendingAddresses = new Set(transactions?.filter(({ isPending }) => isPending)
+    .map(({ collectible }) => collectible?.address));
+
+  return collectibles?.filter(({ address }) => !sendingAddresses.has(address));
 }
 
 // The server lists a transfer to a user under the user's address, so the user it was sent to is kept, as the Android

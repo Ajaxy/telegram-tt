@@ -80,6 +80,13 @@ type TransferParams = SignedTransferParams & {
   shouldDeploy?: boolean;
 };
 
+type SignedTransfer = {
+  boc: Uint8Array<ArrayBuffer>;
+  // Toncenter finds the incoming message by this hash, both for a normal external message and for one sent through the
+  // relayer
+  bodyHash: Uint8Array<ArrayBuffer>;
+};
+
 type KeyRotationBodyParams = {
   ownAddress: TonAddress;
   seqno: number;
@@ -168,11 +175,11 @@ export async function deriveWalletAddress(publicKey: Uint8Array): Promise<string
 
 export async function buildSignedTransfer({
   ownAddress, publicKey, shouldDeploy, secretSeed, ...bodyParams
-}: TransferParams): Promise<Uint8Array<ArrayBuffer>> {
+}: TransferParams): Promise<SignedTransfer> {
   const body = await buildSignedTransferBody(bodyParams, secretSeed);
   const stateInit = shouldDeploy ? await buildWalletStateInit(publicKey) : undefined;
 
-  return serializeBoc(await buildExternalMessage(ownAddress, body, stateInit));
+  return { boc: serializeBoc(await buildExternalMessage(ownAddress, body, stateInit)), bodyHash: body.hash };
 }
 
 export function buildSignedBatchTransfer({ secretSeed, ...params }: WalletBatchTransferParams) {
@@ -400,12 +407,11 @@ async function buildKeyRotationProof(ownAddress: TonAddress): Promise<Uint8Array
 
 export async function buildSignedGaslessTransfer({
   secretSeed, ownAddress, ...bodyParams
-}: GaslessTransferParams): Promise<Uint8Array<ArrayBuffer>> {
+}: GaslessTransferParams): Promise<SignedTransfer> {
   const body = await buildSignedTransferBody({ ...bodyParams, isGasless: true }, secretSeed);
+  const message = await buildInternalMessage({ ...ownAddress, isBounceable: false }, 0n, undefined, undefined, body);
 
-  return serializeBoc(await buildInternalMessage(
-    { ...ownAddress, isBounceable: false }, 0n, undefined, undefined, body,
-  ));
+  return { boc: serializeBoc(message), bodyHash: body.hash };
 }
 
 export async function buildUnsignedTransferBodyBoc(params: TransferBodyParams): Promise<string> {

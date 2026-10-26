@@ -1034,10 +1034,10 @@ export type TabState = {
     shouldReleaseKey?: boolean;
   };
 
+  // The form's request until the transfer is queued; its record in the history follows it from then on
   walletTransfer?: {
-    status: 'pending' | 'sent' | 'error';
+    status: 'pending' | 'queued' | 'error';
     error?: SendTonTransferError;
-    isShownInChat?: boolean;
   };
 
   // Decrypted requests only live in the open tab, never in the persistent wallet cache

@@ -9,6 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatTonFromNanos } from '../../../util/formatCurrency';
 import { getServerTime } from '../../../util/serverTime';
+import renderText from '../../common/helpers/renderText';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useLang from '../../../hooks/useLang';
@@ -105,8 +106,10 @@ const WalletTonConnectScreen = ({
       title={isManifestLoading
         ? <Skeleton variant="rounded-rect" animation="fast-wave" className={styles.titleSkeleton} />
         : connectRequest ? lang('WalletConnectTitle')
-          : signData ? lang('WalletConnectSignTitle', { name })
-            : manifest ? lang('WalletConnectRequestTitle', { name }) : lang('WalletConnectRequest')}
+          : signData ? lang('WalletConnectSignTitle', { name }, { withNodes: true })
+            : manifest
+              ? lang('WalletConnectRequestTitle', { name }, { withNodes: true })
+              : lang('WalletConnectRequest')}
       subtitle={isManifestLoading
         ? <Skeleton variant="rounded-rect" animation="fast-wave" className={styles.hostSkeleton} />
         : <AppHost url={appUrl} />}
@@ -132,7 +135,7 @@ const WalletTonConnectScreen = ({
               {message.comment !== undefined && (
                 <Control>
                   <ControlLabel>{lang('WalletTransactionComment')}</ControlLabel>
-                  <ControlDescription className={styles.comment}>{message.comment}</ControlDescription>
+                  <ControlDescription className={styles.comment}>{renderText(message.comment)}</ControlDescription>
                 </Control>
               )}
               {message.payload && message.comment === undefined && (

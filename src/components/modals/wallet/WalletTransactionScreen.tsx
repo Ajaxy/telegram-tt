@@ -12,6 +12,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { convertTonFromNanos, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatAddressInGroups } from '../../../util/tonAddress';
+import renderText from '../../common/helpers/renderText';
 
 import useClickable from '../../../hooks/useClickable';
 import useFlag from '../../../hooks/useFlag';
@@ -107,7 +108,7 @@ const WalletTransactionScreen = ({
         peerLabel,
         <span className={styles.peer}>
           <Avatar peer={user} size="small" />
-          <span className={styles.peerText}>{getUserFullName(lang, user)}</span>
+          <span className={styles.peerText}>{renderText(getUserFullName(lang, user))}</span>
           {sendToAddress && sendButton(sendToAddress, peer.type === 'user' ? peer.userId : undefined)}
         </span>,
       ]);
@@ -175,7 +176,7 @@ const WalletTransactionScreen = ({
     const commentText = decryptedComment ?? comment;
 
     if (commentText) {
-      rows.push([lang('WalletTransactionComment'), commentText]);
+      rows.push([lang('WalletTransactionComment'), renderText(commentText)]);
     } else if (encryptedComment) {
       rows.push([
         lang('WalletTransactionComment'),

@@ -20,16 +20,20 @@
 }
 
 .canvas {
-  touch-action: none;
-  cursor: var(--custom-cursor, pointer);
-
+  pointer-events: none;
   position: relative;
-
   opacity: 0;
-
   transition: opacity 0.22s linear;
 }
 
+// The canvas takes the pointer only once it shows the diamond
 .ready {
+  pointer-events: auto;
+  touch-action: none;
+  cursor: var(--custom-cursor, grab);
   opacity: 1;
+
+  &:active {
+    cursor: var(--custom-cursor, grabbing);
+  }
 }

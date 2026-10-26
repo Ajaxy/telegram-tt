@@ -20,9 +20,13 @@ export function selectWalletTonConnectSessions<T extends GlobalState>(global: T)
   return global.wallet?.tonConnectSessions;
 }
 
+export function selectWalletTransactions<T extends GlobalState>(global: T) {
+  return global.wallet?.transactions;
+}
+
 // Its seqno keeps a second transfer from going out on the same one
 export function selectWalletTransferInFlight<T extends GlobalState>(global: T) {
-  return global.wallet?.transactions?.find(({ isPending, seqno }) => isPending && seqno !== undefined);
+  return selectWalletTransactions(global)?.find(({ isPending, seqno }) => isPending && seqno !== undefined);
 }
 
 // The address is looked up once the item is picked: the server may create the wallet for the user then

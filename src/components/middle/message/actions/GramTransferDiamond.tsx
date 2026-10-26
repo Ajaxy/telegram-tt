@@ -32,13 +32,16 @@ const GramTransferDiamond = ({
   const iconRef = useRef<DiamondIcon>();
   const lastPointRef = useRef<{ x: number; y: number }>();
   const isDegraded = useDerivedState(getIsDiamond3dDegraded);
-  const [isReady, markReady] = useFlag();
+  const [isReady, markReady, unmarkReady] = useFlag();
   const [isFailed, markFailed] = useFlag();
 
   // `isHeld` outlives the press until the diamond has returned to the turn of the others
   const [isZoomed, markZoomed, unmarkZoomed] = useFlag();
   const [isHeld, markHeld, unmarkHeld] = useFlag();
-  const is3d = shouldLoopStickers && !isDegraded && !isFailed;
+  // A diamond already drawn keeps its last frame when 3D gives up, so the card does not change under the eye
+  const is3d = shouldLoopStickers && !isFailed && (!isDegraded || isReady);
+  // A frozen diamond cannot turn, so it lets the pointer through to the card like the still
+  const isInteractive = isReady && !isDegraded;
 
   useEffect(() => {
     if (!is3d) return undefined;
@@ -51,7 +54,7 @@ const GramTransferDiamond = ({
     let unsubscribe: NoneToVoidFunction | undefined;
     let isCancelled = false;
 
-    // The WebGL scene and its shaders are loaded only for a card that draws the diamond
+    // The 3D scene and its shaders are loaded only for a card that draws the diamond
     import('../../../../lib/diamond/icon').then((icon) => {
       if (isCancelled) return;
 
@@ -63,6 +66,7 @@ const GramTransferDiamond = ({
       isCancelled = true;
       canvas.removeEventListener('touchstart', stopPropagation);
       unsubscribe?.();
+      unmarkReady();
     };
   }, [is3d]);
 
@@ -110,6 +114,7 @@ const GramTransferDiamond = ({
     e.stopPropagation();
   });
 
+  // With looped stickers off, the coin stays still like the 3D diamond, which is off then too
   if (!is3d) {
     return (
       <AnimatedIconWithPreview
@@ -117,6 +122,7 @@ const GramTransferDiamond = ({
         previewUrl={LOCAL_TGS_PREVIEW_URLS.Gram}
         size={size}
         className={className}
+        play={Boolean(shouldLoopStickers)}
         noLoop={!isHovered}
         nonInteractive
       />
@@ -141,7 +147,7 @@ const GramTransferDiamond = ({
         {is3d && (
           <canvas
             ref={canvasRef}
-            className={buildClassName(styles.canvas, isReady && styles.ready)}
+            className={buildClassName(styles.canvas, isReady && styles.ready, isInteractive && styles.interactive)}
             width={pixelSize}
             height={pixelSize}
             style={`width: ${size}px; height: ${size}px`}

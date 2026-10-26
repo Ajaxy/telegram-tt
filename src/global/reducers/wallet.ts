@@ -4,6 +4,7 @@ import type { GlobalState, TabState } from '../types';
 import { getServerTime } from '../../util/serverTime';
 import { keepRecipientUser, runForAllTabs } from '../helpers';
 import { selectTabState } from '../selectors/tabs';
+import { selectWalletTransactions } from '../selectors/wallet';
 import { updateTabState } from './tabs';
 
 type TonConnectFlow = NonNullable<TabState['walletTonConnect']>;
@@ -54,7 +55,7 @@ export function clearWalletRecords<T extends GlobalState>(global: T): T {
 export function addPendingWalletTransaction<T extends GlobalState>(
   global: T, transaction: ApiWalletTransaction,
 ): T {
-  const current = global.wallet?.transactions || [];
+  const current = selectWalletTransactions(global) || [];
 
   if (current.some(({ id }) => id === transaction.id)) {
     return global;
@@ -63,20 +64,39 @@ export function addPendingWalletTransaction<T extends GlobalState>(
   return updateWallet(global, { transactions: [transaction, ...current] });
 }
 
+// The record takes the place of the pending one, so its row stays where it is
 export function replacePendingWalletTransaction<T extends GlobalState>(
   global: T, pendingId: string, transaction: ApiWalletTransaction,
 ): T {
-  const current = global.wallet?.transactions || [];
-  const pendingPeer = current.find(({ id }) => id === pendingId)?.peer;
-  const transactions = current
-    .filter(({ id }) => id !== pendingId)
-    .map((item) => (item.id === transaction.id ? { ...item, peer: keepRecipientUser(item.peer, pendingPeer) } : item));
+  const current = selectWalletTransactions(global) || [];
+  const pending = current.find(({ id }) => id === pendingId);
+  const localId = transaction.localId ?? pending?.localId;
+  const isListed = transaction.id !== pendingId && current.some(({ id }) => id === transaction.id);
+  const transactions = current.flatMap((item) => {
+    if (item.id === pendingId) {
+      return isListed ? [] : [{ ...transaction, peer: keepRecipientUser(transaction.peer, pending?.peer), localId }];
+    }
 
-  if (!current.some(({ id }) => id === transaction.id)) {
-    transactions.unshift({ ...transaction, peer: keepRecipientUser(transaction.peer, pendingPeer) });
+    if (item.id === transaction.id) {
+      return [{ ...item, peer: keepRecipientUser(item.peer, pending?.peer), localId: localId ?? item.localId }];
+    }
+
+    return [item];
+  });
+
+  if (!pending && !isListed) {
+    transactions.unshift(transaction);
   }
 
   return updateWallet(global, { transactions });
+}
+
+export function markWalletTransactionFailed<T extends GlobalState>(global: T, transactionId: string): T {
+  return updateWallet(global, {
+    transactions: selectWalletTransactions(global)?.map((item) => (
+      item.id === transactionId ? { ...item, isPending: false, isFailed: true } : item
+    )),
+  });
 }
 
 export function updateWalletTonConnectSession<T extends GlobalState>(global: T, session: ApiTonConnectSession): T {

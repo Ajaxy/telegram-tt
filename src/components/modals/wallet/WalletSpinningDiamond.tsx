@@ -1,6 +1,5 @@
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
-import { setDiamondIconSpin, subscribeDiamondIcon } from '../../../lib/diamond/icon';
 import { getIsDiamond3dDegraded } from '../../../lib/diamond/performance';
 import { selectShouldLoopStickers } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -24,7 +23,7 @@ const WalletSpinningDiamond = ({ size, className }: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
   const shouldLoop = useSelector(selectShouldLoopStickers);
   const isDegraded = useDerivedState(getIsDiamond3dDegraded);
-  const [isReady, markReady] = useFlag();
+  const [isReady, markReady, unmarkReady] = useFlag();
   const [isFailed, markFailed] = useFlag();
   const shouldAnimate = shouldLoop && !isDegraded && !isFailed;
 
@@ -32,10 +31,22 @@ const WalletSpinningDiamond = ({ size, className }: OwnProps) => {
     if (!shouldAnimate) return undefined;
 
     const canvas = canvasRef.current!;
-    const unsubscribe = subscribeDiamondIcon(canvas, markReady, markFailed);
-    setDiamondIconSpin(canvas, true);
+    let unsubscribe: NoneToVoidFunction | undefined;
+    let isCancelled = false;
 
-    return unsubscribe;
+    // The 3D scene and its shaders are loaded only once a diamond mounts
+    import('../../../lib/diamond/icon').then((icon) => {
+      if (isCancelled) return;
+
+      unsubscribe = icon.subscribeDiamondIcon(canvas, markReady, markFailed);
+      icon.setDiamondIconSpin(canvas, true);
+    }, markFailed);
+
+    return () => {
+      isCancelled = true;
+      unsubscribe?.();
+      unmarkReady();
+    };
   }, [shouldAnimate]);
 
   const pixelSize = Math.round(size * Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO));

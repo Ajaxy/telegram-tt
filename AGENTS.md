@@ -38,6 +38,7 @@ Telegram web app using TypeScript and Teact, a custom React-like UI library. Fol
 - Cache a pure function's result when using it more than once in the same scope.
 - When a value is guaranteed at runtime but TypeScript cannot infer it, use `!` instead of a guard that silently skips work. Avoid unnecessary `as` casts; prefer `satisfies` where appropriate.
 - Use `undefined`, not `null`.
+- Compare with server dates (message dates, expiries, `validUntil`) through `getServerTime()` from `src/util/serverTime.ts`, not `Date.now()`: the device clock can be off. Use `Date.now()` or `performance.now()` only for local durations.
 - Avoid conditional object spreads: use `{ field: condition ? value : undefined }` so TypeScript checks the field against the target type.
 - Comments explain complex logic. Start with a capital letter, wrap code entities in backticks, and omit the trailing period for single-sentence comments; punctuate each sentence in multi-sentence comments.
 - Docs and comments assert current behavior in the present tense. Keep bug/change history and comparisons to prior code in Git history. Comparisons with hypothetical alternatives are fine when they explain the current design.

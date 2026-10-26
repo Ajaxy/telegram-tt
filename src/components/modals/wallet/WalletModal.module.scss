@@ -55,18 +55,26 @@
 }
 
 // Laid over the header rather than in its grid: mid-animation both titles leave the flow, and a grid
-// column measured on them collapses. `width` and `height` come from `Transition` itself.
-.header .headerTitle {
+// column measured on them collapses. The sides stay equal, so the title stays centered beside a wide action.
+.headerTitleBox {
   position: absolute;
-  inset: 0 3.5rem;
-  width: auto;
-  height: auto;
+  inset: 0 max(3.5rem, calc(var(--header-action-width, 0px) + 1.25rem));
+}
+
+.headerTitleBoxUnmeasured {
+  visibility: hidden;
 }
 
 .headerTitle :global(.Transition_slide) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.headerTitleText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .headerTitle:global(.Transition-slideVerticalFade) {
@@ -177,6 +185,15 @@
   background-color: var(--color-primary);
 }
 
+.headerOnSurface,
+.slideSurface {
+  --modal-background-color: var(--color-background);
+}
+
+.slideSurface {
+  background-color: var(--color-background);
+}
+
 .loading {
   display: flex;
   align-items: center;
@@ -195,4 +212,40 @@
 
 .wrongPhraseGroupMuted {
   color: var(--color-text-secondary);
+}
+
+.headerBalance {
+  cursor: var(--custom-cursor, pointer);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  // Two lines are taller than the header row, so they reach into its padding
+  margin-block: -0.5625rem;
+  padding: 0.3125rem 0.5rem;
+  border: none;
+  border-radius: 0.75rem;
+
+  line-height: 1.3125rem;
+  color: var(--color-text);
+  white-space: nowrap;
+
+  background: none;
+
+  &:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}
+
+.headerBalanceLabel {
+  margin-bottom: -0.125rem;
+  font-size: 0.875rem;
+}
+
+.headerBalanceAmount {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
 }

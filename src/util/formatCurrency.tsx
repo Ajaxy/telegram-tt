@@ -187,7 +187,7 @@ function getPreciseFractionDigits(price: number, currency: string) {
   return Math.min(Math.max(exp, digits), MAX_FRACTION_DIGITS);
 }
 
-function getCurrencyExp(currency: string) {
+export function getCurrencyExp(currency: string) {
   if (currency === TON_CURRENCY_CODE) {
     return 9;
   }

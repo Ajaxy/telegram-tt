@@ -1585,11 +1585,8 @@ export interface ActionPayloads {
   } & WithTabId;
   loadWalletTransferFee: {
     toAddress: string;
-    // Nanotons
-    amount: bigint;
     comment?: string;
     shouldEncryptComment?: boolean;
-    shouldSendAll?: boolean;
     collectibleAddress?: string;
   } & WithTabId;
   clearWalletTransferFee: WithTabId | undefined;
@@ -1605,6 +1602,8 @@ export interface ActionPayloads {
     shouldSendAll?: boolean;
     collectibleAddress?: string;
     isGasless?: boolean;
+    // The wallet shows the sent transfer flying into its history, which takes the place of the notification
+    isAnimated?: boolean;
     password?: string;
     passcode?: string;
   } & WithTabId;

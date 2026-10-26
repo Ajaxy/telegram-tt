@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { RPCError } from '../../../lib/gramjs/errors';
+import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
@@ -113,6 +113,10 @@ type DnsRecordsResponse = ToncenterError & {
   records?: { domain?: string; dns_wallet?: string }[];
 };
 
+type TransactionsResponse = ToncenterError & {
+  transactions?: { in_msg?: { hash?: string; message_content?: { hash?: string } } }[];
+};
+
 type WalletKeys = { seed: Uint8Array; publicKey: Uint8Array };
 
 type WalletKeyChange = {
@@ -142,6 +146,14 @@ const PUBLIC_KEY_LENGTH = 32;
 // Nanotons: below this balance the chain bounces the rotation for the fee
 const KEY_ROTATION_MIN_BALANCE = 10_000_000n;
 const KEY_ROTATION_POLL_INTERVAL = 3000;
+const PENDING_TRANSFER_POLL_INTERVAL = 1000;
+const MAX_FAILED_PENDING_POLLS = 3;
+// A transfer without an answer is looked up only while its history row exists (up to 5 minutes), so the latest
+// transactions are enough
+const UNANSWERED_TRANSFER_LOOKUP_LIMIT = 20;
+// A transfer waits behind the previous one no longer than a transfer of ours lives, even when a TON Connect request
+// keeps its message valid for minutes: the wallet lock and the queued row should not hang that long
+const MAX_PENDING_TRANSFER_WAIT = TRANSFER_TTL_SECONDS * 1000;
 // Seconds past the request's expiry before it counts as never executed: the indexer and the local clock can lag
 // behind the chain, as the iOS app assumes too
 const KEY_ROTATION_EXPIRY_MARGIN = 120;
@@ -150,7 +162,15 @@ const KEY_CHANGES_PAGE_SIZE = 100;
 const previousSigningKeysCache = new Map<string, WalletKeys[]>();
 // The last transfer broadcast per wallet, until its seqno moves on or it expires. Kept on disk as well:
 // a transfer sent right before a reload is not in the history yet.
-type SentTransfer = { seqno: number; validUntil: number; isKeyRotation?: boolean; replacedRotation?: SentTransfer };
+type SentTransfer = {
+  seqno: number;
+  validUntil: number;
+  isKeyRotation?: boolean;
+  isAccepted?: boolean;
+  // Set when the send got no answer: the transfer may still go through, see `isTransferUnanswered`
+  isUnanswered?: boolean;
+  replacedRotation?: SentTransfer;
+};
 const sentTransfers = new Map<string, SentTransfer>();
 let sentTransfersRestored: Promise<void> | undefined;
 const SEND_LOCK_PREFIX = 'wallet-send:';
@@ -215,6 +235,23 @@ export async function fetchWalletTransactionsByMsgHash({ msgHashes }: { msgHashe
   }
 
   return buildWalletTransactionList(result);
+}
+
+// Returns the hash of the message that brought one of the bodies to the wallet. The server finds the transaction by
+// this hash. The transaction hash does not work: the server history sometimes lists a transfer under an id that
+// toncenter does not know.
+export async function fetchWalletMsgHashByBody({ ownAddress, bodyHashes }: {
+  ownAddress: string;
+  bodyHashes: string[];
+}) {
+  const result = await invokeTonApiRequest<TransactionsResponse>({
+    endpoint: '/api/v3/transactions',
+    query: `account=${encodeURIComponent(ownAddress)}&limit=${UNANSWERED_TRANSFER_LOOKUP_LIMIT}&sort=desc`,
+  });
+
+  return result?.transactions?.find(({ in_msg }) => (
+    in_msg?.message_content?.hash && bodyHashes.includes(in_msg.message_content.hash)
+  ))?.in_msg?.hash;
 }
 
 function buildWalletTransactionList(result: GramJs.wallet.Transactions) {
@@ -780,7 +817,7 @@ async function sendKeyRotation({
       // A lost connection leaves the outcome unknown, so the new phrase must stay on the device
       forgetRefusedTransfer(ownAddress, state.seqno, err);
 
-      return { error: mapWalletRpcError(err, 'BACKUP_FAILED'), isSent: err instanceof RPCError ? undefined : true };
+      return { error: mapWalletRpcError(err, 'BACKUP_FAILED'), isSent: getIsServerRefusal(err) ? undefined : true };
     }
 
     return { now };
@@ -1169,7 +1206,7 @@ export async function sendTonTransfer({
   pendingValidUntil?: number;
   words?: string[];
   password?: string;
-}, onLocalMessage?: NoneToVoidFunction): Promise<SendTonTransferResult | undefined> {
+}, onQueued?: (localMessageId?: number) => void): Promise<SendTonTransferResult | undefined> {
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
   if (collectible) {
@@ -1241,22 +1278,54 @@ export async function sendTonTransfer({
     sendApiUpdate({
       '@type': 'newMessage', id: localMessage.id, chatId: localMessage.chatId, message: localMessage,
     });
-    onLocalMessage?.();
   }
 
-  const sending = runWalletSend<SendTonTransferResult | undefined>(ownAddress, async () => {
-    const state = await fetchToncenterWalletState(ownAddress);
+  onQueued?.(localMessage?.id);
 
-    if (!state) {
+  // The wait is counted from the moment the transfer is queued. Otherwise a transfer that waits for the lock could wait
+  // longer than its pending row stays in the history.
+  const waitUntil = Date.now() + MAX_PENDING_TRANSFER_WAIT;
+  const sending = runWalletSend<SendTonTransferResult | undefined>(ownAddress, async () => {
+    if (Date.now() >= waitUntil) {
+      return { error: 'TRANSFER_PENDING' };
+    }
+
+    let state = await fetchToncenterWalletState(ownAddress);
+    let failedPolls = 0;
+
+    // The previous transfer holds the seqno until the chain takes it or it expires, as in the iOS app
+    while (!state || isTransferPending(ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
+      if (Date.now() >= waitUntil || (state && isTransferUnanswered(ownAddress, state.seqno))) {
+        return { error: 'TRANSFER_PENDING' };
+      }
+
+      failedPolls = state ? 0 : failedPolls + 1;
+      if (failedPolls > MAX_FAILED_PENDING_POLLS) {
+        return undefined;
+      }
+
+      await pause(PENDING_TRANSFER_POLL_INTERVAL);
+      state = await fetchToncenterWalletState(ownAddress);
+    }
+
+    if (isTransferUnanswered(ownAddress, state.seqno)) {
+      return { error: 'TRANSFER_PENDING' };
+    }
+
+    // The user may have replaced the wallet while this transfer waited for the lock or for the previous transfer. The
+    // key of the old wallet must not send it.
+    const current = await fetchWalletState();
+
+    if (!current) {
       return undefined;
+    }
+
+    if (current.state?.address !== ownAddress) {
+      return { error: 'WALLET_CHANGED' };
     }
 
     if (!state.isSupportedContract) {
       return { error: 'UNSUPPORTED_WALLET' };
-    }
-
-    if (isTransferPending(ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
-      return { error: 'TRANSFER_PENDING' };
     }
 
     // Checked under the lock: another tab may have handed the item over meanwhile
@@ -1322,15 +1391,23 @@ export async function sendTonTransfer({
     const dataGasless = state.isDeployed && !collectible && !isSelfTransfer
       ? await buildSignedGaslessTransfer({ ...transfer, ownAddress: own })
       : undefined;
+    const bodyHashes = (dataGasless ? [dataNormal, dataGasless] : [dataNormal])
+      .map(({ bodyHash }) => bufferToBase64(bodyHash));
 
     const validUntil = transfer.now + TRANSFER_TTL_SECONDS;
     await rememberSentTransfer(ownAddress, transfer.seqno, validUntil);
 
     try {
-      const result = await sendTransferData(dataNormal, dataGasless, randomId, toUser, localMessage);
+      const result = await sendTransferData(dataNormal.boc, dataGasless?.boc, randomId, toUser, localMessage);
       const sent = buildApiWalletSentTransfer(result, { seqno: transfer.seqno, validUntil });
+      if (!sent) {
+        await updateSentTransfer(ownAddress, transfer.seqno, { isUnanswered: true });
+        return { error: 'SEND_FAILED', isSent: true, bodyHashes };
+      }
 
-      return sent ? { ...sent, encryptedComment: encryptedCommentBase64 } : { error: 'SEND_FAILED' };
+      await markSentTransferAccepted(ownAddress, transfer.seqno);
+
+      return { ...sent, encryptedComment: encryptedCommentBase64 };
     } catch (err: unknown) {
       if (DEBUG) {
         // eslint-disable-next-line no-console
@@ -1339,7 +1416,7 @@ export async function sendTonTransfer({
 
       forgetRefusedTransfer(ownAddress, transfer.seqno, err);
 
-      if (isGasless && isRelayerRefusal(err, dataGasless)) {
+      if (isGasless && isRelayerRefusal(err, dataGasless?.boc)) {
         return { error: 'GASLESS_UNAVAILABLE' };
       }
 
@@ -1348,7 +1425,7 @@ export async function sendTonTransfer({
         return { error: 'KEY_MISMATCH' };
       }
 
-      return { error: 'SEND_FAILED' };
+      return getIsServerRefusal(err) ? { error: 'SEND_FAILED' } : { error: 'SEND_FAILED', isSent: true, bodyHashes };
     }
   });
 
@@ -1357,7 +1434,8 @@ export async function sendTonTransfer({
   try {
     outcome = await sending;
   } finally {
-    if (localMessage && (!outcome || 'error' in outcome)) {
+    // A transfer that may still execute keeps its message pending, as in the iOS app
+    if (localMessage && (!outcome || ('error' in outcome && !outcome.isSent))) {
       sendApiUpdate({
         '@type': 'updateMessageSendFailed',
         chatId: localMessage.chatId,
@@ -1477,11 +1555,28 @@ export async function rememberSentTransfer(
   await WALLET_IDB_STORE.set(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`, sent).catch(() => undefined);
 }
 
-// Only the server's own refusal means the message never went out; a timeout or a lost connection
-// leaves it unknown, and the record stays until it expires. The refusal says nothing of the rotation
-// the message replaced, so that record comes back.
+export function markSentTransferAccepted(ownAddress: string, seqno: number) {
+  return updateSentTransfer(ownAddress, seqno, { isAccepted: true });
+}
+
+async function updateSentTransfer(ownAddress: string, seqno: number, update: Partial<SentTransfer>) {
+  const rawAddress = toRawAddress(ownAddress)!;
+  const sent = sentTransfers.get(rawAddress);
+  if (sent?.seqno !== seqno) return;
+
+  const updated = { ...sent, ...update };
+  sentTransfers.set(rawAddress, updated);
+  await WALLET_IDB_STORE.set(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`, updated).catch(() => undefined);
+}
+
+// Removes the record only when the server refused the transfer: then the message was never sent. After a timeout or a
+// lost connection nobody knows if it was sent, so the record stays until it expires and blocks the next transfers. A
+// refusal says nothing about the key rotation that this message replaced, so the rotation record is restored.
 export function forgetRefusedTransfer(ownAddress: string, seqno: number, err: unknown) {
-  if (!(err instanceof RPCError)) return;
+  if (!getIsServerRefusal(err)) {
+    void updateSentTransfer(ownAddress, seqno, { isUnanswered: true });
+    return;
+  }
 
   const rawAddress = toRawAddress(ownAddress)!;
   const sent = sentTransfers.get(rawAddress);
@@ -1508,6 +1603,21 @@ export function isTransferPending(
 
   return (seqno === pendingSeqno && pendingValidUntil !== undefined && now < pendingValidUntil)
     || (seqno === sent?.seqno && now < sent.validUntil);
+}
+
+// A transfer without an answer from the server may still go through. If the user repeats a payment that looked lost,
+// the new transfer would pay a second time. So such a transfer blocks the next ones until it expires, even after the
+// seqno moves on: the chain may have already taken it.
+export function isTransferUnanswered(ownAddress: string, seqno: number) {
+  const sent = sentTransfers.get(toRawAddress(ownAddress)!);
+  if (!sent || getServerTime() >= sent.validUntil) return false;
+
+  return sent.isUnanswered || (seqno === sent.seqno && !sent.isAccepted);
+}
+
+// A timeout means the server stopped waiting, not that it refused: the request may still have gone through
+function getIsServerRefusal(err: unknown) {
+  return err instanceof RPCError && !(err instanceof TimedOutError);
 }
 
 // The server broadcasts whichever message of the pair it chooses

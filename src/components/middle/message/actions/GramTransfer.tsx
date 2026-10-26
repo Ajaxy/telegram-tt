@@ -1,12 +1,15 @@
-import { memo, useEffect, useRef } from '../../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef } from '../../../../lib/teact/teact';
 
 import type { ApiMessageActionGramTransfer } from '../../../../api/types/messageActions';
 
+import { getHasPendingWalletTransfer } from '../../../../global/helpers/wallet';
+import { selectWalletTransactions } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
 import { formatTonShortFromNanos } from '../../../../util/formatCurrency';
 import { splitAddressInHalves } from '../../../../util/tonAddress';
 
+import useSelector from '../../../../hooks/data/useSelector';
 import useTimeout from '../../../../hooks/schedulers/useTimeout';
 import useClickable from '../../../../hooks/useClickable';
 import useFlag from '../../../../hooks/useFlag';
@@ -14,15 +17,18 @@ import useLang from '../../../../hooks/useLang';
 import useShowTransition from '../../../../hooks/useShowTransition';
 import useShrinkToFit from '../../../../hooks/useShrinkToFit';
 
-import GiftRibbon from '../../../common/gift/GiftRibbon';
 import Spoiler from '../../../common/spoiler/Spoiler';
+import WalletPendingClock from '../../../modals/wallet/WalletPendingClock';
 import Spinner from '../../../ui/Spinner';
 import GramTransferDiamond from './GramTransferDiamond';
+import GramTransferRibbon from './GramTransferRibbon';
 
 import styles from './GramTransfer.module.scss';
 
 type OwnProps = {
   action: ApiMessageActionGramTransfer;
+  // The id the card had before the server took it, or its own id while it is still local
+  localMessageId?: number;
   peerName?: string;
   isOutgoing?: boolean;
   isSending?: boolean;
@@ -35,15 +41,16 @@ type OwnProps = {
 // The sender key, the message key and a random prefix ahead of the text
 const ENCRYPTED_COMMENT_OVERHEAD = 64;
 const EN_DASH = '\u2013';
-// The Android app's ribbon colors
+// The Android app's ribbon colors; a failed transfer takes the red of the theme there as well
 const RIBBON_COLOR_IN = '#4bb9fe';
 const RIBBON_COLOR_OUT = '#15be00';
+const RIBBON_COLOR_FAILED = 'var(--color-error)';
 const COIN_SIZE = 44;
 const SHINE_MIN_DURATION = 600;
 const SHINE_HIDE_DURATION = 320;
 
 const GramTransfer = ({
-  action, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, onClick,
+  action, localMessageId, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, onClick,
 }: OwnProps) => {
   const lang = useLang();
   const [isHover, markHover, unmarkHover] = useFlag();
@@ -76,6 +83,21 @@ const GramTransfer = ({
   const {
     amount, peerAddress, comment, encryptedComment,
   } = action;
+
+  const walletTransactions = useSelector(selectWalletTransactions);
+  // As in the native apps, a clock replaces the ribbon until the chain confirms the transfer
+  const isAwaitingChain = useMemo(
+    () => localMessageId !== undefined && !isFailed && getHasPendingWalletTransfer(walletTransactions, localMessageId),
+    [isFailed, walletTransactions, localMessageId],
+  );
+  const isInProgress = isSending || isAwaitingChain;
+
+  const { ref: clockRef, shouldRender: shouldRenderClock } = useShowTransition({
+    isOpen: isInProgress, withShouldRender: true, noMountTransition: true,
+  });
+  const { ref: ribbonRef, shouldRender: shouldRenderRibbon } = useShowTransition({
+    isOpen: !isInProgress, withShouldRender: true, noMountTransition: true,
+  });
 
   const [whole, fraction] = formatTonShortFromNanos(amount).split('.');
   const groupedWhole = lang.number(Number(whole));
@@ -131,12 +153,19 @@ const GramTransfer = ({
           </div>
         )}
       </div>
-      <GiftRibbon
-        color={isFailed ? 'red' : isOutgoing ? RIBBON_COLOR_OUT : RIBBON_COLOR_IN}
-        text={lang(ribbonTextKey)}
-        className={styles.ribbon}
-        textClassName={styles.ribbonText}
-      />
+      {shouldRenderClock && (
+        <div ref={clockRef} className={styles.clock}>
+          <WalletPendingClock />
+        </div>
+      )}
+      {shouldRenderRibbon && (
+        <div ref={ribbonRef} className={styles.ribbon}>
+          <GramTransferRibbon
+            color={isFailed ? RIBBON_COLOR_FAILED : isOutgoing ? RIBBON_COLOR_OUT : RIBBON_COLOR_IN}
+            text={lang(ribbonTextKey)}
+          />
+        </div>
+      )}
       {comment && <div className={styles.comment}>{comment}</div>}
       {hiddenLength > 0 && (
         <div className={styles.comment}>

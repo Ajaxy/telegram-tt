@@ -11,6 +11,7 @@ import {
   updateWalletServerState,
   updateWalletTonConnectSession,
 } from '../../reducers/wallet';
+import { selectWalletTransactions } from '../../selectors';
 
 // The server reports each step of a transfer, and a burst of them is one history change
 const HISTORY_REFRESH_THROTTLE_MS = 2000;
@@ -51,7 +52,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         actions.loadSavedWallets();
       } else {
         // A transfer may have taken a collectible with it
-        if (global.wallet?.transactions) {
+        if (selectWalletTransactions(global)) {
           refreshTransactions();
         }
 
@@ -73,7 +74,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateWalletActivity': {
       refreshState();
 
-      if (global.wallet?.transactions) {
+      if (selectWalletTransactions(global)) {
         refreshTransactions();
       }
 
@@ -86,7 +87,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     // The update does not name the sending wallet, so only a local record it confirms is replaced
     case 'updateWalletSentTransaction': {
       const { msgHash, transaction } = update;
-      const isPendingHere = global.wallet?.transactions?.some(({ id, isPending }) => id === msgHash && isPending);
+      const isPendingHere = selectWalletTransactions(global)?.some(({ id, isPending }) => id === msgHash && isPending);
       if (!transaction || !isPendingHere) break;
 
       return replacePendingWalletTransaction(global, msgHash, { ...transaction, msgHash });

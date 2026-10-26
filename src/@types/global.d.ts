@@ -126,7 +126,7 @@ declare module '*.strings?raw' {
   const content: string;
   export default content;
 }
-declare module '*.glsl?raw' {
+declare module '*.wgsl?raw' {
   const content: string;
   export default content;
 }
@@ -228,4 +228,26 @@ interface FileSystemSyncAccessHandle {
 
 type FilesystemReadWriteOptions = {
   at: number;
+};
+
+// WebGPU parts missing from the DOM library of TypeScript
+interface HTMLCanvasElement {
+  getContext(contextId: 'webgpu'): GPUCanvasContext | null;
+}
+
+declare const GPUBufferUsage: {
+  readonly COPY_DST: GPUBufferUsageFlags;
+  readonly VERTEX: GPUBufferUsageFlags;
+  readonly UNIFORM: GPUBufferUsageFlags;
+};
+
+declare const GPUShaderStage: {
+  readonly VERTEX: GPUShaderStageFlags;
+  readonly FRAGMENT: GPUShaderStageFlags;
+};
+
+declare const GPUTextureUsage: {
+  readonly COPY_SRC: GPUTextureUsageFlags;
+  readonly COPY_DST: GPUTextureUsageFlags;
+  readonly RENDER_ATTACHMENT: GPUTextureUsageFlags;
 };

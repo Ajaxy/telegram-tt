@@ -1,0 +1,110 @@
+@use '../../../styles/mixins';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+
+  @include mixins.scrollable-padding(0.75rem);
+}
+
+.collectible {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+
+  padding-block: 1.5rem;
+}
+
+.collectibleImage {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 1.25rem;
+}
+
+.collectibleName {
+  overflow: hidden;
+
+  max-width: 100%;
+
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.launching .commentBlock {
+  transform: scale(0.92);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.commentBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.commentField {
+  position: relative;
+}
+
+.commentInput :global(.form-control.form-control) {
+  padding-inline-end: 3.5rem;
+}
+
+.commentLock {
+  position: absolute;
+  inset-inline-end: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.commentLock :global(.icon) {
+  color: var(--color-text-secondary);
+}
+
+.commentLockClosed :global(.icon) {
+  color: var(--color-primary);
+}
+
+.commentHint {
+  padding-inline: 1rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+}
+
+// Holds its line while empty, so the amount above does not jump
+.status {
+  min-height: 1.25rem;
+  margin-bottom: 0.75rem;
+
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.feeInfoButton {
+  display: inline-flex;
+
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+
+  vertical-align: top;
+}
+
+.feeInfoButton :global(.icon) {
+  font-size: 1rem;
+}

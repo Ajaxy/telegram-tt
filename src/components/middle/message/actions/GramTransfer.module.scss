@@ -24,6 +24,23 @@
   padding-bottom: 0.5rem;
 }
 
+// The wrapper fades the ribbon in and out. It covers the whole card, so the ribbon keeps its usual place.
+.ribbon {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+// The wallet's pending clock, placed as in the iOS app: its ring is about 14px wide and 12px from the card edges
+.clock {
+  position: absolute;
+  top: 0.8125rem;
+  right: 0.8125rem;
+
+  font-size: 1.1875rem;
+  color: var(--color-white);
+}
+
 .card {
   isolation: isolate;
   position: relative;
@@ -92,12 +109,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-// Overhangs the card by 2px, as in the mockup; the outer rounding trims the tip
-.ribbon {
-  top: 0.125rem;
-  right: 0.125rem;
 }
 
 .shine {
@@ -229,13 +240,6 @@
   to {
     opacity: 1;
   }
-}
-
-.ribbonText {
-  font-family: var(--font-family-rounded);
-  font-size: 0.6875rem;
-  text-transform: lowercase;
-  letter-spacing: 0.0357rem;
 }
 
 .icon {

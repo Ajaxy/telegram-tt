@@ -3197,6 +3197,10 @@
 "WalletSendRecipient" = "Address or name";
 "WalletSendRecent" = "Recent";
 "WalletSendAddressLinked" = "This TON Blockchain address is linked to **{name}** on Telegram.";
+"WalletSendRecipientWallet" = "{name}’s wallet";
+"WalletSendUnlinkedWallet" = "Unlinked wallet";
+"WalletSendSwitchCurrency" = "Switch currency";
+"WalletRecipientGramWallet" = "Gram Wallet";
 "WalletSendAmount" = "Amount";
 "WalletSendBalance" = "Balance: {amount}";
 "WalletSendNetworkFee" = "Network fee: {amount}";
@@ -3214,6 +3218,7 @@
 "WalletCommentTooLong" = "Encrypted comment is too long";
 "WalletCommentEncryptionUnavailable" = "This wallet can't receive encrypted comments yet";
 "WalletSendContinue" = "Continue";
+"WalletSendAmountButton" = "Send {amount}";
 "WalletFeatureInstantTitle" = "Send Money Instantly";
 "WalletFeatureInstantText" = "Send Grams in any chat, just like sharing a photo.";
 "WalletFeatureNoFeesTitle" = "No Fees";
@@ -3267,6 +3272,7 @@
 "WalletSendSuccess" = "Grams sent";
 "WalletSendSuccessGasless" = "Grams sent, no fee charged";
 "WalletSendError" = "Failed to send Grams. Please try again.";
+"WalletSendPending" = "The transfer may have been sent. Don’t send it again while its status is being checked.";
 "WalletExportError" = "Failed to export the recovery phrase. Please try again.";
 "WalletBackupDisabledError" = "Backup is disabled for this wallet";
 "WalletBackupFailedError" = "Failed to update the wallet backup";

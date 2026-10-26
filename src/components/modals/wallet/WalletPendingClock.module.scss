@@ -1,0 +1,53 @@
+// The clock uses a grid of 17 units. The hands are HTML boxes, not SVG shapes: Safari repaints the whole page in every
+// frame while SVG shapes animate.
+.root {
+  --unit: calc(1em / 17);
+
+  position: relative;
+  width: 1em;
+  height: 1em;
+
+  &::before {
+    content: "";
+
+    position: absolute;
+    inset: calc(2.25 * var(--unit));
+
+    border: calc(1.3 * var(--unit)) solid currentColor;
+    border-radius: 50%;
+  }
+}
+
+.hand {
+  position: absolute;
+  left: calc(7.85 * var(--unit));
+
+  width: calc(1.3 * var(--unit));
+  border-radius: calc(0.65 * var(--unit));
+
+  background-color: currentColor;
+}
+
+.fastHand {
+  top: calc(8.5 * var(--unit));
+  transform-origin: 50% 0;
+  height: calc(3.6 * var(--unit));
+  animation: clock-hand 1.5s linear infinite;
+}
+
+.slowHand {
+  top: calc(5.95 * var(--unit));
+  transform-origin: 50% calc(2.55 * var(--unit));
+  height: calc(3.2 * var(--unit));
+  animation: clock-hand 18s linear infinite;
+}
+
+@keyframes clock-hand {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

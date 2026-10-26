@@ -40,7 +40,7 @@ import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
 import { getOrderedIds } from '../util/folderManager';
 import {
-  compact, pick, pickTruthy, unique,
+  compact, omit, pick, pickTruthy, unique,
 } from '../util/iteratees';
 import { ACCOUNT_SLOT, getGlobalStateCacheKey, GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
 import { parseJsonWithBigInt, stringifyJsonWithBigInt } from '../util/numbers';
@@ -68,6 +68,7 @@ import {
   selectTopicsInfo,
   selectViewportIds,
   selectVisibleUsers,
+  selectWalletTransactions,
 } from './selectors';
 
 import { getIsMobile } from '../hooks/useAppLayout';
@@ -677,7 +678,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],
     ...global.contactList?.userIds || [],
     // The cached wallet history shows its peers by name
-    ...global.wallet?.transactions?.slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT)
+    ...selectWalletTransactions(global)?.slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT)
       .flatMap(({ peer }) => (peer.type === 'user' ? [peer.userId] : [])) || [],
     ...Object.keys(byId),
   ]).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
@@ -1018,10 +1019,13 @@ function reduceWallet<T extends GlobalState>(global: T): GlobalState['wallet'] {
     state: wallet.state,
     // The logout warning counts their last known balances while the network has not answered
     savedWallets: wallet.savedWallets,
-    // Sent transfers keep their hash and seqno; the cursor is reset to the stale marker
+    // Sent transfers are kept with their hash and seqno, and transfers without an answer with their body hashes. A
+    // transfer that did not reach the server is not kept. The history cursor is reset to the stale marker.
+    // The chat card of a pending transfer is not cached, and after a reload its local id can go to another message
     transactions: wallet.transactions
-      ?.filter(({ isPending, msgHash }) => !isPending || msgHash)
-      .slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT),
+      ?.filter((item) => item.msgHash || item.bodyHashes || (!item.isPending && item.id !== item.localId))
+      .slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT)
+      .map((item) => (item.localMessageId === undefined ? item : omit(item, ['localMessageId']))),
     nextOffset: '',
   };
 }

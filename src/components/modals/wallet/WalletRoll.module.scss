@@ -1,0 +1,35 @@
+.cell {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  white-space: pre;
+}
+
+.strut {
+  visibility: hidden;
+}
+
+.measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  white-space: pre;
+
+  visibility: hidden;
+}
+
+.glyph {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  white-space: pre;
+}
+
+.filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+}

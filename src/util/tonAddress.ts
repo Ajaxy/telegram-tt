@@ -26,12 +26,19 @@ export function splitAddressIntoGroups(address: string): string[] {
   return address.match(ADDRESS_GROUP_REGEX) || [];
 }
 
-export function getAddressGroupSeparator(index: number, total: number): string {
+export function getAddressGroupSeparator(
+  index: number, total: number, groupsPerLine = ADDRESS_GROUPS_PER_LINE,
+): string {
   if (index === total - 1) return '';
 
-  if (index % ADDRESS_GROUPS_PER_LINE === ADDRESS_GROUPS_PER_LINE - 1) return '\n';
+  if (index % groupsPerLine === groupsPerLine - 1) return '\n';
 
   return ' ';
+}
+
+// Neighbouring groups differ in a line and between lines, like a chessboard
+export function getIsAlternateAddressGroup(index: number, groupsPerLine = ADDRESS_GROUPS_PER_LINE) {
+  return (index + Math.floor(index / groupsPerLine)) % 2 === 1;
 }
 
 export function formatAddressInGroups(address: string): string {

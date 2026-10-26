@@ -7,8 +7,9 @@ import type {
 } from '../../../api/types';
 
 import { getUserFullName } from '../../../global/helpers';
+import { filterUnsentCollectibles } from '../../../global/helpers/wallet';
 import {
-  selectUser, selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate,
+  selectUser, selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate, selectWalletTransactions,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonShortFromNanos } from '../../../util/formatCurrency';
@@ -71,7 +72,7 @@ type StateProps = {
   earningsNanos?: bigint;
 };
 
-const TRANSACTIONS_TAB_INDEX = 0;
+export const TRANSACTIONS_TAB_INDEX = 0;
 const COLLECTIBLES_TAB_INDEX = 1;
 // Nanotons. Above it the screen suggests a cloud password and banners money kept elsewhere.
 const NOTABLE_BALANCE_NANOS = 500_000_000n;
@@ -93,7 +94,11 @@ const WalletMainScreen = ({
 
   const lang = useLang();
 
-  const hasCollectibles = Boolean(collectibles?.length);
+  const shownCollectibles = useMemo(
+    () => filterUnsentCollectibles(collectibles, transactions),
+    [collectibles, transactions],
+  );
+  const hasCollectibles = Boolean(shownCollectibles?.length);
   // As in the Android app, the collectibles tab exists only while there are collectibles
   const isCollectiblesTab = hasCollectibles && activeTab === COLLECTIBLES_TAB_INDEX;
   const shouldProtectAccount = hasCloudPassword === false && (balance ?? 0n) > NOTABLE_BALANCE_NANOS;
@@ -105,10 +110,13 @@ const WalletMainScreen = ({
   const hasEarnings = (earningsNanos ?? 0n) > NOTABLE_BALANCE_NANOS;
   const transactionIds = useMemo(() => transactions?.map(({ id }) => id), [transactions]);
   const transactionsById = useMemo(() => transactions && buildCollectionByKey(transactions, 'id'), [transactions]);
-  const collectibleAddresses = useMemo(() => collectibles?.map((collectible) => collectible.address), [collectibles]);
+  const collectibleAddresses = useMemo(
+    () => shownCollectibles?.map((collectible) => collectible.address),
+    [shownCollectibles],
+  );
   const collectiblesByAddress = useMemo(
-    () => collectibles && buildCollectionByKey(collectibles, 'address'),
-    [collectibles],
+    () => shownCollectibles && buildCollectionByKey(shownCollectibles, 'address'),
+    [shownCollectibles],
   );
 
   const handleLoadMoreTransactions = useLastCallback(() => {
@@ -238,7 +246,7 @@ const WalletMainScreen = ({
 
                     return (
                       <WalletTransactionItem
-                        key={id}
+                        key={transaction.localId ?? id}
                         transaction={transaction}
                         user={transaction.peer.type === 'user' ? usersById[transaction.peer.userId] : undefined}
                         className={HISTORY_ITEM_CLASS}
@@ -353,7 +361,7 @@ export default memo(withGlobal<OwnProps>(
       tonUsdRate: global.appConfig.tonUsdRate,
       currency: selectWalletCurrency(global),
       currencyRate: selectWalletCurrencyRate(global),
-      transactions: global.wallet?.transactions,
+      transactions: selectWalletTransactions(global),
       transferMinNanos: global.appConfig.walletTransferMinNanos,
       collectibles: global.wallet?.collectibles,
       usersById: global.users.byId,

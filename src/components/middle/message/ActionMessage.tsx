@@ -577,6 +577,7 @@ const ActionMessage = ({
         return (
           <GramTransfer
             action={action}
+            localMessageId={message.previousLocalId ?? (isLocal ? message.id : undefined)}
             peerName={message.chatId === SERVICE_NOTIFICATIONS_USER_ID ? lang('WalletUnknownUser') : transferPeerName}
             isOutgoing={message.isOutgoing}
             isSending={message.sendingState === 'messageSendingStatePending'}
@@ -664,7 +665,7 @@ const ActionMessage = ({
     }
   }, [
     action, message, observeIntersectionForLoading, sender, observeIntersectionForPlaying, shouldRenderGiftOfferButtons,
-    transferPeerName, isTransferLoading, shouldLoopStickers, lang,
+    transferPeerName, isTransferLoading, shouldLoopStickers, isLocal, lang,
   ]);
 
   if ((isInsideTopic && action.type === 'topicCreate') || action.type === 'phoneCall') {
