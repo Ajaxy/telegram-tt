@@ -33,7 +33,6 @@ export interface UserAuthParams {
   webAuthUserId?: string;
   accountIds?: string[];
   hasPasskeySupport?: boolean;
-  mockScenario?: string;
 }
 
 export interface BotAuthParams {

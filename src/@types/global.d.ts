@@ -11,7 +11,6 @@ declare module 'virtual:git-info' {
 
 interface ImportMetaEnv {
   readonly TG_APP_ENV: string;
-  readonly TG_APP_MOCKED_CLIENT: string;
   readonly TG_APP_NAME?: string;
   readonly TG_APP_TITLE: string;
   readonly TG_PUBLIC_URL: string;

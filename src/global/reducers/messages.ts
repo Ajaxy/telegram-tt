@@ -13,8 +13,7 @@ import type {
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { DEBUG,
-  IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID } from '../../config';
+import { DEBUG, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { addTimestampEntities } from '../../util/dates/timestamp';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -80,7 +79,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
 ): T {
   const { messageLists, aiMessageEditorModal, aiMessageEditorPendingResult } = selectTabState(global, tabId);
   let newMessageLists: MessageList[];
-  if (shouldReplaceHistory || (IS_TEST && !IS_MOCKED_CLIENT)) {
+  if (shouldReplaceHistory || IS_TEST) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
   } else if (chatId) {
     const current = messageLists[messageLists.length - 1];

@@ -16,7 +16,6 @@ export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect
 export const BASE_URL = import.meta.env.TG_PUBLIC_URL;
 export const ACCOUNT_QUERY = 'account';
 
-export const IS_MOCKED_CLIENT = import.meta.env.TG_APP_MOCKED_CLIENT === '1';
 export const IS_TEST = APP_ENV === 'test';
 export const IS_PERF = APP_ENV === 'perf';
 export const IS_BETA = APP_ENV === 'staging';

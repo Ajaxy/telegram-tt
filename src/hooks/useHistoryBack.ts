@@ -1,7 +1,6 @@
 import { useCallback, useRef } from '../lib/teact/teact';
 import { getActions } from '../global';
 
-import { IS_TEST } from '../config';
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../util/browser/windowEnvironment';
 import useEffectOnce from './useEffectOnce';
@@ -53,12 +52,6 @@ let deferredHistoryOperations: HistoryOperation[] = [];
 let deferredPopstateOperations: HistoryOperationState[] = [];
 let isSafariGestureAnimation = false;
 let isHistoryInitialized = false;
-
-// Do not remove: used for history unit tests
-if (IS_TEST) {
-  (window as any).TEST_getHistoryState = () => historyState;
-  (window as any).TEST_getHistoryCursor = () => historyCursor;
-}
 
 function handleTouchStart(event: TouchEvent) {
   const x = event.touches[0].pageX;

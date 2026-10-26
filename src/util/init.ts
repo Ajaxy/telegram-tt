@@ -1,6 +1,6 @@
 import type { GlobalState } from '../global/types';
 
-import { DEBUG, IS_MOCKED_CLIENT, IS_SCREEN_LOCKED_CACHE_KEY } from '../config';
+import { DEBUG, IS_SCREEN_LOCKED_CACHE_KEY } from '../config';
 import {
   loadCache, loadCachedSharedState, migrateCache, migrateSharedCache, removeAllGlobalCaches, setupCaching,
 } from '../global/cache';
@@ -46,7 +46,6 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
   const initial = cloneDeep(INITIAL_GLOBAL_STATE);
   const cache = await loadCache(initial);
   let global = cache || initial;
-  if (IS_MOCKED_CLIENT) global.auth.state = 'authorizationStateReady';
 
   global = await applyPasscodeStateOnBoot(global);
 

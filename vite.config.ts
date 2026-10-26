@@ -77,7 +77,6 @@ export default defineConfig(({ mode }): UserConfig => {
     HTTPS_KEY_PATH: httpsKeyPath = '',
   } = env;
   const appEnv = env.APP_ENV || (mode === 'development' ? 'development' : 'production');
-  const appMockedClient = env.APP_MOCKED_CLIENT || '';
   const defaultAppTitle = `Telegram${appEnv !== 'production' ? ' Beta' : ''}`;
   const baseUrl = env.BASE_URL || PRODUCTION_URL;
   const appTitle = env.APP_TITLE || defaultAppTitle;
@@ -173,7 +172,6 @@ export default defineConfig(({ mode }): UserConfig => {
 
   setViteEnv({
     TG_APP_ENV: appEnv,
-    TG_APP_MOCKED_CLIENT: appMockedClient,
     TG_APP_NAME: env.APP_NAME || '',
     TG_APP_TITLE: appTitle,
     TG_PUBLIC_URL: baseUrl,
@@ -198,12 +196,6 @@ export default defineConfig(({ mode }): UserConfig => {
     },
     resolve: {
       tsconfigPaths: true,
-      alias: [
-        ...(appMockedClient === '1' ? [{
-          find: /^(?:\.\/client|(?:\.\.\/)*lib\/gramjs\/client)\/TelegramClient$/,
-          replacement: resolve(DIR_NAME, 'src/lib/gramjs/client/MockClient.ts'),
-        }] : []),
-      ],
     },
     css: {
       modules: {

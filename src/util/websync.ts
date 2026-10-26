@@ -1,9 +1,6 @@
 import { getGlobal } from '../global';
 
-import {
-  APP_CODE_NAME,
-  DEBUG, IS_MOCKED_CLIENT,
-} from '../config';
+import { APP_CODE_NAME, DEBUG } from '../config';
 import { IS_TAURI } from './browser/globalEnvironment';
 import { hasStoredSession } from './sessions';
 
@@ -31,7 +28,7 @@ const saveSync = (authed: boolean) => {
 let lastTimeout: number | undefined;
 
 export const forceWebsync = (authed: boolean) => {
-  if (IS_MOCKED_CLIENT || IS_TAURI) return undefined;
+  if (IS_TAURI) return undefined;
   const currentTs = getTs();
 
   const { canRedirect, ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');

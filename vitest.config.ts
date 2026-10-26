@@ -1,4 +1,4 @@
-import { configDefaults, defineConfig, mergeConfig } from 'vitest/config';
+import { defineConfig, mergeConfig } from 'vitest/config';
 
 import viteConfig from './vite.config.ts';
 
@@ -11,10 +11,6 @@ export default defineConfig((configEnv) => mergeConfig(
     },
     test: {
       environment: 'jsdom',
-      exclude: [
-        ...configDefaults.exclude,
-        'tests/playwright/**',
-      ],
       setupFiles: ['./tests/init.ts'],
     },
   },

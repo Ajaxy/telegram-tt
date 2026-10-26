@@ -101,7 +101,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
 
   const {
     userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
-    mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
+    shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders, langCode, isTestServerRequested, accountIds,
     hasPasskeySupport, webAuthUserId,
   } = initialArgs;
@@ -159,7 +159,6 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
         webAuthToken,
         webAuthUserId,
         webAuthTokenFailed: onWebAuthTokenFailed,
-        mockScenario,
         accountIds,
         hasPasskeySupport,
       }, onConnected);

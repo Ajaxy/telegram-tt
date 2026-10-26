@@ -25,7 +25,7 @@ import {
 } from '../../../util/passcode';
 import { broadcastPasscodeReset } from '../../../util/passcode/channel';
 import {
-  consumeInvalidWebLogin, getPendingWebLogin, parseInitialLocationHash, resetInitialLocationHash, resetLocationHash,
+  consumeInvalidWebLogin, getPendingWebLogin, resetInitialLocationHash, resetLocationHash,
 } from '../../../util/routing';
 import { pause } from '../../../util/schedulers';
 import {
@@ -77,7 +77,6 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
     // Clearing the token marks it as dispatched so `interruptWebLogin()` rejects interrupted logins and prevents replay
     if (token) request!.token = undefined;
 
-    const initialLocationHash = parseInitialLocationHash();
     const {
       shouldAllowHttpTransport,
       shouldForceHttpTransport,
@@ -104,7 +103,6 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
       webAuthToken: token,
       webAuthUserId: token ? request!.userId : undefined,
       dcId: token ? request!.dcId : undefined,
-      mockScenario: initialLocationHash?.mockScenario,
       shouldAllowHttpTransport,
       shouldForceHttpTransport,
       shouldDebugExportedSenders,
