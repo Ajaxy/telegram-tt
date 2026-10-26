@@ -1519,6 +1519,9 @@ export interface LangPair {
   'GiftInfoTakeOff': undefined;
   'GiftInfoTransfer': undefined;
   'GiftInfoUnlist': undefined;
+  'GiftInfoDelete': undefined;
+  'GiftInfoDeleteDescription': undefined;
+  'GiftInfoDeleteDescription2': undefined;
   'GiftTransferTitle': undefined;
   'GiftTransferTON': undefined;
   'GiftTransferConfirmButtonFree': undefined;
@@ -1844,6 +1847,7 @@ export interface LangPair {
   'ActionPaidMessagePriceFreeYou': undefined;
   'NotificationTitleNotSupportedInFrozenAccount': undefined;
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
+  'NotificationGiftDeleted': undefined;
   'NotificationMessageTextHidden': undefined;
   'GiftRibbonSale': undefined;
   'StarsGiftBought': undefined;

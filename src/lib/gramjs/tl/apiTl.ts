@@ -2128,6 +2128,7 @@ payments.getOnrampAvailability#2ec29951 flags:# provider:string crypto_currency:
 payments.getOnrampLimits#80e851fd flags:# provider:string crypto_currency:string base_currency:string payment_method:flags.0?string = OnrampLimits;
 payments.getOnrampQuote#e06645fa flags:# provider:string crypto_currency:string base_currency:string base_amount:flags.0?string crypto_amount:flags.1?string payment_method:flags.2?string = OnrampQuote;
 payments.createOnrampSession#a2197cf6 flags:# provider:string crypto_currency:string address:string payment_method:flags.0?string base_currency:flags.1?string base_amount:flags.2?string memo:flags.3?string theme:flags.4?string success_return_url:flags.5?string fail_return_url:flags.6?string crypto_amount:flags.7?string = OnrampSession;
+payments.deleteStarGift#3cdaf8aa stargift:InputSavedStarGift = Bool;
 phone.getCallConfig#55451fa9 = DataJSON;
 phone.requestCall#42ff96ed flags:# video:flags.0?true user_id:InputUser random_id:int g_a_hash:bytes protocol:PhoneCallProtocol = phone.PhoneCall;
 phone.acceptCall#3bd2b4a0 peer:InputPhoneCall g_b:bytes protocol:PhoneCallProtocol = phone.PhoneCall;

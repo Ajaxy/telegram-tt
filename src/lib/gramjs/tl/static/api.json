@@ -380,6 +380,7 @@
     "payments.getSavedStarGifts",
     "payments.saveStarGift",
     "payments.convertStarGift",
+    "payments.deleteStarGift",
     "payments.getStarGiftUpgradePreview",
     "payments.upgradeStarGift",
     "payments.transferStarGift",

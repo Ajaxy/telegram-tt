@@ -1150,6 +1150,7 @@ export type TabState = {
     recipientId?: string;
     gift: ApiSavedStarGift | ApiStarGift;
     craftSlotIndex?: number;
+    isFromMessage?: boolean;
   };
 
   giftInfoValueModal?: {

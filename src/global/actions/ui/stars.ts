@@ -263,6 +263,7 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
 
   const peerId = 'peerId' in payload ? payload.peerId : undefined;
   const recipientId = 'recipientId' in payload ? payload.recipientId : undefined;
+  const isFromMessage = 'isFromMessage' in payload ? payload.isFromMessage : undefined;
 
   return updateTabState(global, {
     giftInfoModal: {
@@ -270,6 +271,7 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
       gift,
       recipientId,
       craftSlotIndex,
+      isFromMessage,
     },
   }, tabId);
 });

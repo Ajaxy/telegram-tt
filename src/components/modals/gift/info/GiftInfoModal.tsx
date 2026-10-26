@@ -61,6 +61,7 @@ type StateProps = {
   currentUserId?: string;
   starGiftMaxConvertPeriod?: number;
   hasAdminRights?: boolean;
+  isChatOwner?: boolean;
   currentUserEmojiStatus?: ApiEmojiStatusType;
   collectibleEmojiStatuses?: ApiEmojiStatusType[];
   tonExplorerUrl?: string;
@@ -80,6 +81,7 @@ const GiftInfoModal = ({
   currentUserId,
   starGiftMaxConvertPeriod,
   hasAdminRights,
+  isChatOwner,
   currentUserEmojiStatus,
   collectibleEmojiStatuses,
   tonExplorerUrl,
@@ -92,6 +94,7 @@ const GiftInfoModal = ({
     closeGiftInfoModal,
     changeGiftVisibility,
     convertGiftToStars,
+    deleteSavedGift,
     openChatWithInfo,
     focusMessage,
     openGiftUpgradeModal,
@@ -105,6 +108,7 @@ const GiftInfoModal = ({
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
+  const [isDeleteConfirmOpen, openDeleteConfirm, closeDeleteConfirm] = useFlag();
 
   const lang = useLang();
 
@@ -156,6 +160,9 @@ const GiftInfoModal = ({
         : gift?.ownerId === currentUserId || isSelfUnique
   );
 
+  const canDelete = Boolean(canManage && !renderingModal?.isFromMessage && (!isTargetChat || isChatOwner)
+    && gift?.type === 'starGift' && !gift.isLimited && !gift.isAuction && !savedGift.isRefunded);
+
   function getResalePrice(isInTon?: boolean) {
     if (!isGiftUnique) return undefined;
     const amounts = gift.resellPrice;
@@ -206,6 +213,12 @@ const GiftInfoModal = ({
     const { inputGift } = savedGift!;
     convertGiftToStars({ gift: inputGift! });
     closeConvertConfirm();
+    handleClose();
+  });
+
+  const handleDelete = useLastCallback(() => {
+    deleteSavedGift({ gift: savedGift! });
+    closeDeleteConfirm();
     handleClose();
   });
 
@@ -875,6 +888,7 @@ const GiftInfoModal = ({
       canManage={canManage}
       collectibleEmojiStatuses={collectibleEmojiStatuses}
       currentUserEmojiStatus={currentUserEmojiStatus}
+      onDelete={canDelete ? openDeleteConfirm : undefined}
     />
   );
 
@@ -1022,6 +1036,19 @@ const GiftInfoModal = ({
           <div>{lang('GiftInfoConvertDescription2')}</div>
         </ConfirmDialog>
       )}
+      {canDelete && (
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          onClose={closeDeleteConfirm}
+          confirmHandler={handleDelete}
+          confirmLabel={lang('Delete')}
+          confirmIsDestructive
+          title={lang('GiftInfoDelete')}
+        >
+          <p>{lang('GiftInfoDeleteDescription')}</p>
+          <p>{lang('GiftInfoDeleteDescription2')}</p>
+        </ConfirmDialog>
+      )}
     </>
   );
 };
@@ -1037,6 +1064,7 @@ export default memo(withGlobal<OwnProps>(
     const targetPeer = modal?.peerId ? selectPeer(global, modal.peerId) : undefined;
     const chat = targetPeer && isApiPeerChat(targetPeer) ? targetPeer : undefined;
     const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
+    const isChatOwner = chat?.isOwner;
     const currentUser = selectUser(global, currentUserId!);
     const recipientPeer = modal?.recipientId && currentUserId !== modal.recipientId
       ? selectPeer(global, modal.recipientId) : undefined;
@@ -1055,6 +1083,7 @@ export default memo(withGlobal<OwnProps>(
       starGiftMaxConvertPeriod: global.appConfig.starGiftMaxConvertPeriod,
       tonExplorerUrl: global.appConfig.tonExplorerUrl,
       hasAdminRights,
+      isChatOwner,
       currentUserEmojiStatus,
       collectibleEmojiStatuses,
       currentUser,

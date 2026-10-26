@@ -3294,6 +3294,7 @@ export interface ActionPayloads {
     recipientId?: string;
     gift: ApiSavedStarGift;
     craftSlotIndex?: number;
+    isFromMessage?: boolean;
   } | {
     gift: ApiStarGift;
     craftSlotIndex?: number;
@@ -3491,6 +3492,9 @@ export interface ActionPayloads {
   } & WithTabId;
   convertGiftToStars: {
     gift: ApiInputSavedStarGift;
+  } & WithTabId;
+  deleteSavedGift: {
+    gift: ApiSavedStarGift;
   } & WithTabId;
   toggleSavedGiftPinned: {
     peerId: string;

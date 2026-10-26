@@ -211,6 +211,16 @@ export function convertStarGift({
   }));
 }
 
+export function deleteStarGift({
+  inputSavedGift,
+}: {
+  inputSavedGift: ApiRequestInputSavedStarGift;
+}) {
+  return invokeRequest(new GramJs.payments.DeleteStarGift({
+    stargift: buildInputSavedStarGift(inputSavedGift),
+  }));
+}
+
 export async function fetchStarsGiftOptions({
   chat,
 }: {

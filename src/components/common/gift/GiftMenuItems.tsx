@@ -21,6 +21,7 @@ type OwnProps = {
   gift: ApiSavedStarGift | ApiStarGift;
   currentUserEmojiStatus?: ApiEmojiStatusType;
   collectibleEmojiStatuses?: ApiEmojiStatusType[];
+  onDelete?: NoneToVoidFunction;
 };
 
 const GiftMenuItems = ({
@@ -29,6 +30,7 @@ const GiftMenuItems = ({
   gift: typeGift,
   currentUserEmojiStatus,
   collectibleEmojiStatuses,
+  onDelete,
 }: OwnProps) => {
   const {
     showNotification,
@@ -200,6 +202,11 @@ const GiftMenuItems = ({
       {canTakeOff && (
         <MenuItem icon="crown-take-off-outline" onClick={handleTakeOff}>
           {lang('GiftInfoTakeOff')}
+        </MenuItem>
+      )}
+      {onDelete && (
+        <MenuItem icon="delete" destructive onClick={onDelete}>
+          {lang('GiftInfoDelete')}
         </MenuItem>
       )}
     </>
