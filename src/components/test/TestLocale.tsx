@@ -1,8 +1,8 @@
-import type { LangFnParameters } from '../../util/localization';
+import type { AdvancedLangFnParameters, RegularLangFnParameters } from '../../util/localization';
 
 import useLang from '../../hooks/useLang';
 
-const storedParameter: LangFnParameters = {
+const storedParameter: RegularLangFnParameters = {
   key: 'StickerPackAddStickerCount',
   variables: {
     count: 42,
@@ -12,13 +12,12 @@ const storedParameter: LangFnParameters = {
   },
 };
 
-const storedAdvancedParameter: LangFnParameters = {
+const storedAdvancedParameter: AdvancedLangFnParameters = {
   key: 'VoipPeerIncompatible',
   variables: {
     user: 'Some user',
   },
   options: {
-    withNodes: true,
     withMarkdown: true,
   },
 };
@@ -29,7 +28,7 @@ const TestLocale = () => {
   return (
     <div>
       <h1>{lang('NothingFound')}</h1>
-      <p>{lang.with(storedParameter)}</p>
+      <p>{lang.withRegular(storedParameter)}</p>
       <p>{lang.with(storedAdvancedParameter)}</p>
       <p>
         {lang('LimitReachedChatInFolders', {

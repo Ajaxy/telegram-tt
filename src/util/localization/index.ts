@@ -14,11 +14,12 @@ import {
   type AdvancedLangFnParameters,
   areAdvancedLangFnOptions,
   isDeletedLangString,
+  isLangFnParam,
   isPluralLangString,
   type LangFn,
   type LangFnOptions,
   type LangFnOptionsWithPlural,
-  type LangFnParameters,
+  type LangFnParametersShape,
   type LangFormatters,
   type RegularLangFnParameters,
 } from './types';
@@ -33,7 +34,7 @@ import { notifyLangpackUpdate } from '../browser/multitab';
 import { createCallbackManager } from '../callbacks';
 import readFallbackStrings from '../data/readFallbackStrings';
 import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMultitabRole';
-import { omit, unique } from '../iteratees';
+import { mapValues, omit, unique } from '../iteratees';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
 import { resetDateFormatCache } from './dateFormat';
@@ -430,29 +431,26 @@ async function activateFallbackLanguage(langCode: string, requestId: number): Pr
 function createTranslationFn(): LangFn {
   const fn: LangFn = ((
     key: LangKey,
-    variables: LangFnParameters['variables'],
+    variables: Record<string, TeactNode> | undefined,
     options: LangFnOptions | AdvancedLangFnOptions | undefined,
   ) => {
     if (options && areAdvancedLangFnOptions(options)) {
-      return processTranslationAdvanced(key, variables as Record<string, TeactNode>, options);
+      return processTranslationAdvanced(key, variables, options);
     }
-    return processTranslation(key, variables as Record<string, string | number>, options);
+    return processTranslation(key, variables as Record<string, LangVariable>, options);
   }) as LangFn;
   fn.rawCode = language?.langCode || FORMATTERS_FALLBACK_LANG;
   fn.isRtl = language?.isRtl;
   fn.code = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
   fn.timeFormat = currentTimeFormat;
-  fn.with = ({ key, variables, options }: LangFnParameters) => {
-    if (options && areAdvancedLangFnOptions(options)) {
-      return processTranslationAdvanced(key, variables as Record<string, TeactNode | undefined>, options);
-    }
-    return processTranslation(key, variables as Record<string, LangVariable>, options);
-  };
-  fn.withRegular = ({ key, variables, options }: RegularLangFnParameters) => {
+  fn.withRegular = ({ key, variables, options }: LangFnParametersShape<LangFnOptions>) => {
     return processTranslation(key, variables, options);
   };
-  fn.withAdvanced = ({ key, variables, options }: AdvancedLangFnParameters) => {
-    return processTranslationAdvanced(key, variables, options);
+  fn.with = ({ key, variables, options }: LangFnParametersShape) => {
+    return processTranslationAdvanced(key, variables && mapValues(variables, processVariable), {
+      ...options,
+      withNodes: true,
+    });
   };
   fn.region = (code: string) => formatters?.region.of(code);
   fn.currency = (code: string) => formatters?.currency.of(code);
@@ -510,9 +508,13 @@ function getString(langKey: LangKey, count: number) {
   return string;
 }
 
+function processVariable(value: TeactNode | LangFnParametersShape<LangFnOptions>) {
+  return isLangFnParam(value) ? processTranslation(value.key, value.variables, value.options) : value;
+}
+
 function processTranslation(
   langKey: LangKey,
-  variables?: Record<string, LangVariable | RegularLangFnParameters>,
+  variables?: LangFnParametersShape<LangFnOptions>['variables'],
   options?: LangFnOptions | LangFnOptionsWithPlural,
 ): string {
   const isCacheable = !options?.withNodes;
@@ -529,13 +531,13 @@ function processTranslation(
   if (string === undefined) return langKey;
 
   const variableEntries = variables ? Object.entries(variables) : [];
-  const finalString = variableEntries.reduce((result, [key, value]) => {
-    if (value === undefined) return result;
-    if (typeof value === 'object') { // Allow recursive variables in basic `lang.with`
-      value = processTranslation(value.key, value.variables, value.options);
-    }
+  const finalString = variableEntries.reduce((result, [key, variable]) => {
+    const value = processVariable(variable);
+    if (value === undefined || typeof value === 'object') return result;
 
-    const valueAsString = Number.isFinite(value) ? formatters!.number.format(value as number) : String(value);
+    const valueAsString = typeof value === 'number' && Number.isFinite(value)
+      ? formatters!.number.format(value)
+      : String(value);
     return result.replaceAll(`{${key}}`, () => valueAsString);
   }, string);
 
@@ -609,8 +611,7 @@ export {
 };
 
 export type {
-  LangFn,
-  LangFnParameters,
-  RegularLangFnParameters,
   AdvancedLangFnParameters,
+  LangFn,
+  RegularLangFnParameters,
 };

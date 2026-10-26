@@ -7,7 +7,6 @@ import {
 import { getActions } from '../../global';
 
 import type { ApiNotification } from '../../api/types';
-import { isLangFnParam } from '../../util/localization/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
@@ -64,7 +63,7 @@ const Notification = ({
     containerSelector,
   } = notification;
 
-  const isMessageLangFnParam = isLangFnParam(message);
+  const isMessageLangFnParam = typeof message === 'object';
 
   const [isOpen, setIsOpen] = useState(true);
 
@@ -169,12 +168,11 @@ const Notification = ({
 
   const renderedTitle = useMemo(() => {
     if (!title) return undefined;
-    if (isLangFnParam(title)) {
+    if (typeof title === 'object') {
       return lang.with(title);
     }
 
     return renderText(title, ['simple_markdown', 'emoji', 'br', 'links']);
-  // @ts-expect-error -- Lang Parameters are too complex
   }, [lang, title]);
 
   const renderedMessage = useMemo(() => {
@@ -193,12 +191,11 @@ const Notification = ({
     }
 
     return message;
-  // @ts-expect-error -- Lang Parameters are too complex
   }, [isMessageLangFnParam, lang, message, notification.messageEntities]);
 
   const renderedActionText = useMemo(() => {
     if (!actionText) return undefined;
-    if (isLangFnParam(actionText)) {
+    if (typeof actionText === 'object') {
       return lang.with(actionText);
     }
 

@@ -1,6 +1,6 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
-import type { LangFnParameters, RegularLangFnParameters } from '../../util/localization';
+import type { AdvancedLangFnParameters, RegularLangFnParameters } from '../../util/localization';
 import type {
   ApiContact,
   ApiDocument,
@@ -162,9 +162,9 @@ export type ApiNotification = {
   localId: string;
   containerSelector?: string;
   type?: 'paidMessage' | undefined;
-  title?: string | LangFnParameters;
+  title?: string | AdvancedLangFnParameters;
   cacheBreaker?: string;
-  actionText?: string | RegularLangFnParameters;
+  actionText?: string | AdvancedLangFnParameters;
   action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;
@@ -178,7 +178,7 @@ export type ApiNotification = {
   message: string;
   messageEntities?: ApiMessageEntity[];
 } | {
-  message: LangFnParameters;
+  message: AdvancedLangFnParameters;
   messageEntities?: undefined;
 });
 
@@ -198,7 +198,7 @@ export type ApiDialogContact = {
 
 export type ApiDialogLocalizedMessage = {
   type: 'localized';
-  text: LangFnParameters;
+  text: AdvancedLangFnParameters;
 };
 
 export type ApiDialog = ApiDialogError | ApiDialogMessage | ApiDialogContact | ApiDialogLocalizedMessage;

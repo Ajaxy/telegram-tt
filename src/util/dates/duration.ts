@@ -120,18 +120,18 @@ export function formatClockDuration(duration: number) {
 
 export function formatShortHoursMinutes(lang: LangFn, durationInSeconds: number) {
   if (durationInSeconds <= 0) {
-    return lang('MessageTimerShortMinutes', { count: 0 });
+    return lang('MessageTimerShortMinutes', { count: 0 }, { pluralValue: 0 });
   }
 
   const hours = Math.floor(durationInSeconds / HOUR);
   const minutes = Math.floor((durationInSeconds % HOUR) / MINUTE);
   if (!hours) {
-    return lang('MessageTimerShortMinutes', { count: minutes });
+    return lang('MessageTimerShortMinutes', { count: minutes }, { pluralValue: minutes });
   }
 
   const hoursText = lang('MessageTimerShortHours', { count: hours });
   return minutes ? lang.conjunction([
-    hoursText, lang('MessageTimerShortMinutes', { count: minutes }),
+    hoursText, lang('MessageTimerShortMinutes', { count: minutes }, { pluralValue: minutes }),
   ]) : hoursText;
 }
 

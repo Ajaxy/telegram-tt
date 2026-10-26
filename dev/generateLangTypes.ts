@@ -28,10 +28,17 @@ Object.entries(parsed).forEach(([keyWithSuffix, value]) => {
   acc[key] = previousVariables;
 });
 
+const duplicateKeys = Object.keys(regularKeysWithVars).filter((key) => key in pluralKeysWithVars);
+if (duplicateKeys.length) {
+  throw new Error(`Keys defined as both regular and plural: ${duplicateKeys.join(', ')}`);
+}
+
 const regularTypes = formatKeyWithVariables(false, regularKeysWithVars);
 const pluralTypes = formatKeyWithVariables(true, pluralKeysWithVars);
+const regularGroups = formatKeyGroups(false, regularKeysWithVars);
+const pluralGroups = formatKeyGroups(true, pluralKeysWithVars);
 
-const text = `${TOP_COMMENT}\n${regularTypes}\n${pluralTypes}${LANG_KEY_TYPE}\n`;
+const text = `${TOP_COMMENT}\n${regularTypes}\n${pluralTypes}\n${regularGroups}\n${pluralGroups}\n${LANG_KEY_TYPE}\n`;
 writeFileSync('./src/types/language.d.ts', text, 'utf8');
 
 // eslint-disable-next-line no-console
@@ -68,4 +75,32 @@ function formatKeyWithVariables(isPlural: boolean, keysWithVars: Record<string, 
 
   return `export interface ${typeName} {\n${entries}}\n
 export interface ${typeName}WithVariables<V = LangVariable> {\n${variableEntries}}\n`;
+}
+
+// Keys sharing a variable set form one group, which keeps unions of parameter objects small
+function formatKeyGroups(isPlural: boolean, keysWithVars: Record<string, string[]>) {
+  const groups = new Map<string, { keys: string[]; variables: string[] }>();
+
+  Object.entries(keysWithVars).forEach(([key, variables]) => {
+    if (!variables.length) return;
+
+    const uniqueVariables = Array.from(new Set(variables)).sort();
+    const groupName = uniqueVariables.join(',');
+    const group = groups.get(groupName);
+    if (group) {
+      group.keys.push(key);
+    } else {
+      groups.set(groupName, { keys: [key], variables: uniqueVariables });
+    }
+  });
+
+  const entries = Array.from(groups, ([groupName, { keys, variables }]) => {
+    const keysType = keys.map((key) => `\n      | ${wrapInQuotes(key)}`).join('');
+    const variablesType = variables.map(wrapInQuotes).join(' | ');
+    return `  ${wrapInQuotes(groupName)}: {\n    keys:${keysType};\n    variables: ${variablesType};\n  };\n`;
+  }).join('');
+
+  const typeName = isPlural ? 'LangPluralKeyGroups' : 'LangKeyGroups';
+
+  return `export interface ${typeName} {\n${entries}}\n`;
 }

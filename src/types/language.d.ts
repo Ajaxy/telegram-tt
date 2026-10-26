@@ -5424,9 +5424,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'MessageLockedPremium': {
     'peer': V;
   };
-  'MessageTimerShortMinutes': {
-    'count': V;
-  };
   'MoreSimilarText': {
     'limit': V;
   };
@@ -6353,6 +6350,1856 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
 }
+
+export interface LangKeyGroups {
+  'user': {
+    keys:
+      | 'UserTyping'
+      | 'UserActionRecordVideo'
+      | 'UserActionUploadVideo'
+      | 'UserActionRecordAudio'
+      | 'UserActionUploadAudio'
+      | 'UserActionUploadPhoto'
+      | 'UserActionUploadFile'
+      | 'UserPlayingGame'
+      | 'UserActionRecordRound'
+      | 'UserActionUploadRound'
+      | 'CallEmojiKeyTooltip'
+      | 'ChatListDeleteForEveryone'
+      | 'ConversationPinMessagesFor'
+      | 'WebAppShareMessageInfo'
+      | 'NewContactPhoneHiddenText'
+      | 'AddContactSharedContactExceptionInfo'
+      | 'TelegramPremiumUserDialogTitle'
+      | 'BlockUserTitle'
+      | 'UserInfoBlockConfirmationTitle'
+      | 'NoVoiceMessagesAllowed'
+      | 'VideoMessagesRestrictedByPrivacy'
+      | 'PeerInfoConfirmRemovePeer'
+      | 'EditAdminPromotedBy'
+      | 'UserRemovedBy'
+      | 'EditAdminTransferChannelOwnershipSuccess'
+      | 'EditAdminTransferGroupOwnershipSuccess'
+      | 'VoipPeerIncompatible'
+      | 'StarGiftDescription'
+      | 'GiftPeerUpgradeUniqueDescription'
+      | 'GiftPeerUpgradeTransferableDescription'
+      | 'GiftPeerUpgradeTradeableDescription'
+      | 'GiftUpgradeSentMessage'
+      | 'ActionAddUserYou'
+      | 'ActionKickUserYou'
+      | 'ActionVideoInvitedYou'
+      | 'NoForwardsRequestTitle'
+      | 'ActionGiftUniqueReceived'
+      | 'ActionStarGiftUpgradedUser'
+      | 'ActionStarGiftUpgradedMine'
+      | 'ActionStarGiftTransferred'
+      | 'ActionStarGiftTransferredMine'
+      | 'GiftOfferRejectText'
+      | 'ActionSuggestedPhotoYou'
+      | 'ActionSuggestedPhoto'
+      | 'ActionSuggestedBirthdayYou'
+      | 'ActionSuggestedBirthday'
+      | 'GiftInfoBuyGift'
+      | 'ActionSuggestedPostIncoming'
+      | 'ActionStarGiftPrepaidUpgraded'
+      | 'InviteRestrictedPremiumReasonSingle'
+      | 'BirthdayTitleForPeer'
+      | 'RankEditText'
+      | 'BotRemoveFromMenu'
+      | 'ChatEmptyStateIntroFooter'
+      | 'ChatMessagingRestrictedPlaceholder'
+      | 'ConversationContextMenuSendGiftTo'
+      | 'ConversationShareLinkTooltipChatOne'
+      | 'DeleteAllFrom'
+      | 'DeleteBan'
+      | 'DeleteMessagesOptionAlso'
+      | 'ExpiredStoryMentioned'
+      | 'PremiumLastSeenText1Locked'
+      | 'PremiumLastSeenText2'
+      | 'PremiumReadText1'
+      | 'PremiumReadText2'
+      | 'StarsNeededText'
+      | 'StoryCloseFriendsHint'
+      | 'StoryContactsHint'
+      | 'StoryHideFrom'
+      | 'StoryPrivacyOptionExcludePerson'
+      | 'StorySelectedContactsHint'
+      | 'StorySharedTo'
+      | 'StoryShowBackTo'
+      | 'StoryYouMentionedTitle'
+      | 'TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle'
+      | 'UserInfoCustomPhotoInfo'
+      | 'UserInfoResetToOriginalAlertText'
+      | 'UserInfoSetCustomPhoto'
+      | 'UserInfoSetCustomPhotoSuccessPhotoText'
+      | 'UserInfoSuggestPhoto'
+      | 'WebAppAddToAttachmentAllowMessages';
+    variables: 'user';
+  };
+  'users': {
+    keys:
+      | 'UserTypingSeveral'
+      | 'ActionAddUsersManyYou'
+      | 'ActionVideoInvitedManyYou'
+      | 'ComposerTitleForwardFrom';
+    variables: 'users';
+  };
+  'eyes': {
+    keys:
+      | 'SendActionChooseSticker';
+    variables: 'eyes';
+  };
+  'eyes,user': {
+    keys:
+      | 'UserActionChooseSticker';
+    variables: 'eyes' | 'user';
+  };
+  'emoji': {
+    keys:
+      | 'ActionWatchingAnimations'
+      | 'DiceToast';
+    variables: 'emoji';
+  };
+  'url': {
+    keys:
+      | 'SetUrlAvailable'
+      | 'OpenUrlText'
+      | 'BotAuthTitle'
+      | 'BotAuthSuccessText'
+      | 'BotAuthSuccessTextNoPhone';
+    variables: 'url';
+  };
+  'username': {
+    keys:
+      | 'UsernameAvailable'
+      | 'CocoonFeature1Text'
+      | 'FragmentUsernameTitle';
+    variables: 'username';
+  };
+  'limit,limit2': {
+    keys:
+      | 'LimitReachedChatInFolders'
+      | 'LimitReachedFileSize'
+      | 'LimitReachedFolders'
+      | 'LimitReachedPinDialogs'
+      | 'LimitReachedCommunities'
+      | 'LimitReachedFolderLinks'
+      | 'LimitReachedPinSavedDialogs'
+      | 'LimitReachedSharedFolders';
+    variables: 'limit' | 'limit2';
+  };
+  'limit2': {
+    keys:
+      | 'LimitReachedPublicLinks';
+    variables: 'limit2';
+  };
+  'limit': {
+    keys:
+      | 'LimitReachedChatInFoldersLocked'
+      | 'LimitReachedFileSizeLocked'
+      | 'LimitReachedFoldersLocked'
+      | 'LimitReachedPinDialogsLocked'
+      | 'LimitReachedCommunitiesLocked'
+      | 'LimitReachedChatInFoldersPremium'
+      | 'LimitReachedFileSizePremium'
+      | 'LimitReachedFoldersPremium'
+      | 'LimitReachedPinDialogsPremium'
+      | 'LimitReachedCommunitiesPremium'
+      | 'AutodownloadSizeLimitUpTo'
+      | 'AiToneLimitReachedPremium'
+      | 'LimitReachedFolderLinksLocked'
+      | 'LimitReachedFolderLinksPremium'
+      | 'LimitReachedPinnedTopics'
+      | 'LimitReachedSharedFoldersLocked'
+      | 'LimitReachedSharedFoldersPremium'
+      | 'MoreSimilarText';
+    variables: 'limit';
+  };
+  'limit1,limit2,limit3,limit4,limit5': {
+    keys:
+      | 'PremiumPreviewLimitsDescription';
+    variables: 'limit1' | 'limit2' | 'limit3' | 'limit4' | 'limit5';
+  };
+  'volume': {
+    keys:
+      | 'SpeakingWithVolume';
+    variables: 'volume';
+  };
+  'bot,peer': {
+    keys:
+      | 'ActionRequestedPeer'
+      | 'RequestPeerConfirm'
+      | 'RequestPeerConfirmAddBot';
+    variables: 'bot' | 'peer';
+  };
+  'bot': {
+    keys:
+      | 'ProfileBotManagedBy'
+      | 'ActionManagedBotCreatedYou'
+      | 'CreateBotText'
+      | 'CreateBotCreatedText'
+      | 'CreateBotUnsupported'
+      | 'BotPermissionGameAlert'
+      | 'BotOpenPageMessage'
+      | 'BotAuthAllowMessagesInfo'
+      | 'EphemeralOnlyVisibleToBot'
+      | 'GuardProcessJoinRequestsEnableGroup'
+      | 'GuardProcessJoinRequestsDisableGroup'
+      | 'GuardProcessJoinRequestsEnableChannel'
+      | 'GuardProcessJoinRequestsDisableChannel'
+      | 'ReplaceGuardBotKeep'
+      | 'ReplaceGuardBotUse'
+      | 'GuardManagedBy'
+      | 'AriaMiniApp'
+      | 'BotSuggestedStatus'
+      | 'BotReadTextFromClipboardDescription'
+      | 'WebBotAccountDesclaimerDesc';
+    variables: 'bot';
+  };
+  'bot,from': {
+    keys:
+      | 'ActionManagedBotCreated';
+    variables: 'bot' | 'from';
+  };
+  'bot,peer,rights': {
+    keys:
+      | 'RequestPeerConfirmBotRights';
+    variables: 'bot' | 'peer' | 'rights';
+  };
+  'rights': {
+    keys:
+      | 'RequestPeerReqAdminRights';
+    variables: 'rights';
+  };
+  'premium,suffixes': {
+    keys:
+      | 'CreateBotUsernameHint';
+    variables: 'premium' | 'suffixes';
+  };
+  'link,suffix': {
+    keys:
+      | 'CreateBotUsernamePremium';
+    variables: 'link' | 'suffix';
+  };
+  'name': {
+    keys:
+      | 'CreateBotCreatedTitle'
+      | 'NewDiscussionChatTitle'
+      | 'EmojiStatusAccessText'
+      | 'LocationPermissionText'
+      | 'ContextMenuNoForwardsPeer'
+      | 'RatingReflectsActivity'
+      | 'WalletSendAddressLinked'
+      | 'WalletConnectSuccess'
+      | 'WalletConnectDisconnected'
+      | 'WalletConnectToApp'
+      | 'WalletConnectRequestTitle'
+      | 'WalletConnectRequestAppPending'
+      | 'WalletConnectRequestAppProcessed'
+      | 'WalletConnectRequestAppDeclined'
+      | 'WalletConnectRequestAppExpired'
+      | 'WalletConnectSignTitle';
+    variables: 'name';
+  };
+  'limit,premiumLimit': {
+    keys:
+      | 'CreateBotLimitTextPremium';
+    variables: 'limit' | 'premiumLimit';
+  };
+  'time': {
+    keys:
+      | 'ConversationScheduleMessageSendToday'
+      | 'AutoDeleteSetInfo'
+      | 'AutoDeleteIn'
+      | 'AutoDeleteGlobalActionFromYou'
+      | 'ActionTTLYouChanged'
+      | 'ActionTTLChannelChanged'
+      | 'SlowModeHint'
+      | 'ErrorFloodTime'
+      | 'ErrorPasswordFresh'
+      | 'ErrorSessionFresh'
+      | 'PollEndsTime'
+      | 'PollResultsTime'
+      | 'TimeIn'
+      | 'MessageMetaEditedAtTime'
+      | 'LinkExpiresIn'
+      | 'InviteLinkExpiresIn'
+      | 'LastSeenTodayAt'
+      | 'LastSeenYesterdayAt'
+      | 'LiveLocationUpdatedTodayAt'
+      | 'ActionStarGiftOfferExpires'
+      | 'ButtonPublishAtTime'
+      | 'UnlockTimerPublicPostsSearch'
+      | 'StealthModeOnHint'
+      | 'GiftAuctionTimeLeft'
+      | 'ChannelBoostErrorBoostTooOftenText'
+      | 'LiveLocationUpdatedYesterdayAt';
+    variables: 'time';
+  };
+  'date,time': {
+    keys:
+      | 'ConversationScheduleMessageSendOn'
+      | 'MessageMetaEditedOnDateAtTime'
+      | 'FormatDateAtTime';
+    variables: 'date' | 'time';
+  };
+  'chat': {
+    keys:
+      | 'ChatListDeleteAndLeaveGroupConfirmation'
+      | 'ChannelLeaveAlertWithName'
+      | 'ChatListDeleteChatConfirmation'
+      | 'DiscussionUnlinkChannelAlert'
+      | 'AreYouSureDeleteThisChatWithGroup'
+      | 'ActionMigratedFrom'
+      | 'ActionMigratedTo'
+      | 'BoostingGiveawayNotEligibleAdmin'
+      | 'ChannelBoostYouBoostedChannelText'
+      | 'ChatGiveawayInfoParticipating'
+      | 'ClearHistoryMessageSingle'
+      | 'StarsNeededTextReactions'
+      | 'StarsReactionText';
+    variables: 'chat';
+  };
+  'language,link,percent,settings': {
+    keys:
+      | 'LanguageAlert'
+      | 'LanguageCustomAlert';
+    variables: 'language' | 'link' | 'percent' | 'settings';
+  };
+  'language,link': {
+    keys:
+      | 'LanguageUnknownCustomAlert';
+    variables: 'language' | 'link';
+  };
+  'settings': {
+    keys:
+      | 'LanguageAlready';
+    variables: 'settings';
+  };
+  'from,time': {
+    keys:
+      | 'AutoDeleteGlobalAction'
+      | 'ActionTTLChanged';
+    variables: 'from' | 'time';
+  };
+  'from': {
+    keys:
+      | 'ActionTTLDisabled'
+      | 'ActionPinnedNotFound'
+      | 'ActionGroupCallStartedGroup'
+      | 'ActionAddYou'
+      | 'ActionUserLeft'
+      | 'ActionUserJoined'
+      | 'ActionUserJoinedByLink'
+      | 'ActionJoinedByRequest'
+      | 'ActionUserRegistered'
+      | 'ActionRemovedPhoto'
+      | 'ActionChangedPhoto'
+      | 'ActionScreenshotTaken'
+      | 'ActionSharingDisabled'
+      | 'ActionSharingEnabled'
+      | 'ActionGiveawayStartedGroup'
+      | 'ActionGiveawayStarted'
+      | 'ActionRemovedFromCommunity';
+    variables: 'from';
+  };
+  'peer': {
+    keys:
+      | 'BotSharedToOne'
+      | 'StarGiftDescriptionChannel'
+      | 'GiftInfoPeerDescriptionOutRegular'
+      | 'GiftInfoPeerDescriptionFreeUpgradeOut'
+      | 'GiftPeerUpgradeText'
+      | 'PlaylistTitle'
+      | 'ActionStarGiftTo'
+      | 'ActionStarGiftFrom'
+      | 'ActionStarGiftNoConvertText'
+      | 'ActionStarGiftUpgradeText'
+      | 'ActionStarGiftAuctionFor'
+      | 'ConfirmDialogMessageRemoveFee'
+      | 'ActionPaidMessagePriceFree'
+      | 'ActionMessageChannelFree'
+      | 'ActionMessageChannelDisabled'
+      | 'SuggestedPostRejected'
+      | 'SuggestedPostRejectedWithReason'
+      | 'SuggestedPostConfirmMessage'
+      | 'TitleUserToDoList'
+      | 'UnofficialSecurityRisk'
+      | 'ActionGiftStarsSubtitle'
+      | 'MessageLockedPremium'
+      | 'StarsNeededTextGift'
+      | 'StoryMentionedTitle';
+    variables: 'peer';
+  };
+  'price': {
+    keys:
+      | 'SubscribeToPremium'
+      | 'ForwardForStars';
+    variables: 'price';
+  };
+  'domain,phone': {
+    keys:
+      | 'BotAuthPhoneNumberText';
+    variables: 'domain' | 'phone';
+  };
+  'timer': {
+    keys:
+      | 'SlowModePlaceholder'
+      | 'StealthModeButtonRecharge'
+      | 'StealthModeComposerPlaceholder'
+      | 'StarGiftPriceDecreaseTimer';
+    variables: 'timer';
+  };
+  'channel': {
+    keys:
+      | 'PollSubscriberRestriction'
+      | 'DiscussionUnlinkGroupAlert'
+      | 'ActionStarGiftUpgradedChannelYou'
+      | 'ActionStarGiftTransferredChannelYou'
+      | 'ActionStarGiftTransferredUnknownChannel';
+    variables: 'channel';
+  };
+  'countries': {
+    keys:
+      | 'PollCountryRestriction'
+      | 'ChatGiveawayMessageCountriesFrom';
+    variables: 'countries';
+  };
+  'error': {
+    keys:
+      | 'ErrorUnexpectedMessage';
+    variables: 'error';
+  };
+  'count': {
+    keys:
+      | 'ErrorRichMessageTooDeep'
+      | 'ErrorRichMessageTableTooWide'
+      | 'EmptyGroupInfoLine1'
+      | 'LimitReachedFavoriteGifs'
+      | 'LimitReachedFavoriteGifsSubtitle'
+      | 'LimitReachedFavoriteStickers'
+      | 'LimitReachedFavoriteStickersSubtitle'
+      | 'GroupsAndChannelsLimitSubtitle'
+      | 'PinChatsLimitSubtitle'
+      | 'PublicLinksLimitSubtitle'
+      | 'SavedGifsLimitSubtitle'
+      | 'FavoriteStickersLimitSubtitle'
+      | 'FoldersLimitSubtitle'
+      | 'ChatPerFolderLimitSubtitle'
+      | 'MessageTimerShortHours'
+      | 'MessageTimerShortDays'
+      | 'MediaViewDownloading'
+      | 'GiftSoldCount'
+      | 'GiftLeftCount'
+      | 'GiftAuctionForSaleOnFragment'
+      | 'GiftAuctionForSaleOnTelegram'
+      | 'GiftAuctionInfoBidCarryoverSubtitle'
+      | 'GiftAuctionCustomBidDescription'
+      | 'GiftAuctionBidPlacedMessage'
+      | 'BoostGiftStarsPerUser'
+      | 'ConnectedAccountsLimitSubtitle'
+      | 'GiveawayStarsPrepaidTitle'
+      | 'SimilarChannelsLimitSubtitle';
+    variables: 'count';
+  };
+  'duration,time': {
+    keys:
+      | 'CallMessageWithDuration';
+    variables: 'duration' | 'time';
+  };
+  'answer,percent': {
+    keys:
+      | 'PollResultsAnswerTitle';
+    variables: 'answer' | 'percent';
+  };
+  'date': {
+    keys:
+      | 'MessageScheduledOn'
+      | 'MessageTooltipEditedDate'
+      | 'MessageTooltipForwardedDate'
+      | 'LastSeenAtDate'
+      | 'ChannelPermissionDeniedSendMessagesUntil'
+      | 'ProfileBirthdayValue'
+      | 'ProfileBirthdayTodayValue'
+      | 'ActionGroupCallScheduledChannel'
+      | 'NotificationGiftCanResellAt'
+      | 'NotificationGiftCanTransferAt'
+      | 'SettingsPasskeyUsedAt'
+      | 'BoostExpireOn'
+      | 'BoostingGiveawayNotEligible'
+      | 'BoostingUsedLinkDate'
+      | 'ChatPrivateMessageEditTimestampDate'
+      | 'LiveLocationUpdatedAtDate'
+      | 'MessageReadAt'
+      | 'StarsSubscriptionCancelInfo'
+      | 'StarsSubscriptionExpired'
+      | 'StarsSubscriptionExpiredInfo'
+      | 'StarsSubscriptionExpires'
+      | 'StarsSubscriptionRefulfillInfo'
+      | 'StarsSubscriptionRenews';
+    variables: 'date';
+  };
+  'amount': {
+    keys:
+      | 'CheckoutPayPrice'
+      | 'GiftSend'
+      | 'GiftInfoValueAmount'
+      | 'GiftTransferConfirmButton'
+      | 'RemoveGiftDescriptionButton'
+      | 'GiftUpgradeButton'
+      | 'GiftPayForUpgradeButton'
+      | 'StarsAmount'
+      | 'StarsAmountIconLast'
+      | 'SendPaidReaction'
+      | 'StarsPay'
+      | 'StarsPerMonth'
+      | 'StarsSubscribeBotButtonMonth'
+      | 'ActionPaymentUsedRecurring'
+      | 'ActionGramReceivedPreview'
+      | 'ActionStarGiftConvertTextYou'
+      | 'ActionStarGiftConvertedTextYou'
+      | 'ActionStarGiftChannelText'
+      | 'GiftOfferAcceptReceive'
+      | 'GiftOfferAcceptButton'
+      | 'GramAmount'
+      | 'GramAmountIconLast'
+      | 'ComposerPlaceholderPaidMessage'
+      | 'ComposerPlaceholderPaidReply'
+      | 'MessageSentPaidToastText'
+      | 'ActionPaidOneMessageOutgoing'
+      | 'ConfirmDialogRemoveFeeRefundStars'
+      | 'ActionPaidMessagePriceYou'
+      | 'TitleSuggestedPostAmountForAnyTime'
+      | 'ButtonOfferAmount'
+      | 'SuggestedPostChargedYou'
+      | 'DescriptionSuggestedPostMinimumOffer'
+      | 'GiftAuctionPlaceBidButton'
+      | 'GiftAuctionAddToBid'
+      | 'WalletSendBalance'
+      | 'WalletSendNetworkFee'
+      | 'WalletSendMinAmount'
+      | 'WalletTransactionsHidden'
+      | 'AreYouSureLogoutGrams'
+      | 'WalletAlsoHaveOldWallets'
+      | 'WalletAlsoHaveEarnings'
+      | 'WalletConnectFee'
+      | 'NotificationStarsGiftSentYou'
+      | 'PricePerMonth';
+    variables: 'amount';
+  };
+  'chat,user': {
+    keys:
+      | 'EditAdminTransferOwnershipText';
+    variables: 'chat' | 'user';
+  };
+  'current,new': {
+    keys:
+      | 'ReplaceGuardBotDescription';
+    variables: 'current' | 'new';
+  };
+  'approvalInfo,managedBy': {
+    keys:
+      | 'GuardManagedByDescription';
+    variables: 'approvalInfo' | 'managedBy';
+  };
+  'phone': {
+    keys:
+      | 'UsernameByPhoneNotFound'
+      | 'FragmentPhoneTitle';
+    variables: 'phone';
+  };
+  'query': {
+    keys:
+      | 'NoAudioFoundInfo2'
+      | 'ButtonSearchPublicPosts'
+      | 'NoResultFoundFor';
+    variables: 'query';
+  };
+  'description': {
+    keys:
+      | 'AttachInvoice';
+    variables: 'description';
+  };
+  'count,total': {
+    keys:
+      | 'ChatOutgoingContextMixedReactionCount';
+    variables: 'count' | 'total';
+  };
+  'value': {
+    keys:
+      | 'ScheduleRepeat';
+    variables: 'value';
+  };
+  'logOut': {
+    keys:
+      | 'PasscodeForgotHelp';
+    variables: 'logOut';
+  };
+  'topic': {
+    keys:
+      | 'ComposerPlaceholderTopic'
+      | 'ActionTopicCreated'
+      | 'ActionTopicHidden'
+      | 'ActionTopicUnhidden';
+    variables: 'topic';
+  };
+  'level': {
+    keys:
+      | 'RichEditorHeadingLevel'
+      | 'RatingLevel'
+      | 'BoostsLevel'
+      | 'RevenueSharingAdsInfo3Subtitle';
+    variables: 'level';
+  };
+  'channel,group': {
+    keys:
+      | 'ChannelManagementLinkDiscussion';
+    variables: 'channel' | 'group';
+  };
+  'terms': {
+    keys:
+      | 'ProfileOpenAppAbout';
+    variables: 'terms';
+  };
+  'link': {
+    keys:
+      | 'ChannelEarnLearnCoinAbout'
+      | 'MonetizationBalanceZeroInfo'
+      | 'ChannelEarnAbout'
+      | 'StarsTransactionTOS'
+      | 'GiftInfoSaved'
+      | 'GiftInfoHidden'
+      | 'GiftInfoChannelSaved'
+      | 'GiftInfoChannelHidden'
+      | 'GiftInfoTonText'
+      | 'StarsReactionTerms'
+      | 'StarsSubscribeInfo'
+      | 'SettingsPasskeysFooter'
+      | 'BirthdayPrivacySuggestion'
+      | 'TranslateMenuCocoon'
+      | 'CocoonFeature3Text'
+      | 'CocoonFooterText'
+      | 'AiMessageEditorDailyLimitReached'
+      | 'WalletTermsNotice'
+      | 'GiftPremiumFeaturesTerms'
+      | 'CreditsSummaryOptionsAbout'
+      | 'MiniAppsDisclaimerButton'
+      | 'ReportSponsoredReportedLearn'
+      | 'SubscribeTagAbout'
+      | 'UsernamePurchaseAvailable';
+    variables: 'link';
+  };
+  'link,user': {
+    keys:
+      | 'GiftPremiumDescription'
+      | 'GiftMakeUniqueDescription'
+      | 'PremiumEmojiStatusTitle';
+    variables: 'link' | 'user';
+  };
+  'percent': {
+    keys:
+      | 'GiftDiscount'
+      | 'GiftCraftSuccessChance'
+      | 'PaidMessageTransactionDescription'
+      | 'StarTransactionCommission';
+    variables: 'percent';
+  };
+  'receiver': {
+    keys:
+      | 'GiftHideNameDescription';
+    variables: 'receiver';
+  };
+  'number,title': {
+    keys:
+      | 'GiftUnique';
+    variables: 'number' | 'title';
+  };
+  'amount,peer': {
+    keys:
+      | 'GiftInfoPeerConvertDescription'
+      | 'ActionStarGiftConvertText'
+      | 'ActionStarGiftConvertedText'
+      | 'ActionPaymentRefunded'
+      | 'MessagesPlaceholderPaidUser'
+      | 'MessagesPlaceholderPaidChannel'
+      | 'PaneMessagePaidMessageCharge'
+      | 'ActionPaidMessagePrice';
+    variables: 'amount' | 'peer';
+  };
+  'time,user': {
+    keys:
+      | 'UserUpdatedName'
+      | 'UserUpdatedPhoto';
+    variables: 'time' | 'user';
+  };
+  'giftName': {
+    keys:
+      | 'GiftValueDescription'
+      | 'GiftCraftButton';
+    variables: 'giftName';
+  };
+  'issued,total': {
+    keys:
+      | 'GiftInfoIssued';
+    variables: 'issued' | 'total';
+  };
+  'number': {
+    keys:
+      | 'GiftInfoCollectible'
+      | 'GiftSavedNumber';
+    variables: 'number';
+  };
+  'name,number': {
+    keys:
+      | 'GiftInfoUniqueTitle';
+    variables: 'name' | 'number';
+  };
+  'date,peer': {
+    keys:
+      | 'GiftInfoPeerOriginalInfo'
+      | 'SuggestedPostPublishSchedule'
+      | 'SuggestedPostPublishScheduleYou'
+      | 'SuggestedPostPublished'
+      | 'SuggestedPostPublishedYou';
+    variables: 'date' | 'peer';
+  };
+  'date,peer,sender': {
+    keys:
+      | 'GiftInfoPeerOriginalInfoSender';
+    variables: 'date' | 'peer' | 'sender';
+  };
+  'date,peer,text': {
+    keys:
+      | 'GiftInfoPeerOriginalInfoText';
+    variables: 'date' | 'peer' | 'text';
+  };
+  'date,peer,sender,text': {
+    keys:
+      | 'GiftInfoPeerOriginalInfoTextSender';
+    variables: 'date' | 'peer' | 'sender' | 'text';
+  };
+  'button': {
+    keys:
+      | 'GiftCraftEmptyHint';
+    variables: 'button';
+  };
+  'giftLine': {
+    keys:
+      | 'GiftCraftDescription';
+    variables: 'giftLine';
+  };
+  'amount,gift,peer': {
+    keys:
+      | 'GiftTransferConfirmDescription';
+    variables: 'amount' | 'gift' | 'peer';
+  };
+  'gift,peer': {
+    keys:
+      | 'GiftTransferConfirmDescriptionFree'
+      | 'GiftTransferSuccessMessage';
+    variables: 'gift' | 'peer';
+  };
+  'stars': {
+    keys:
+      | 'GiftMakeUnique'
+      | 'GiftPremiumStarsPrice'
+      | 'GiftPremiumPayWithStars'
+      | 'ButtonBuyGift'
+      | 'ButtonSellGift'
+      | 'DescriptionComposerGiftResalePrice'
+      | 'DescriptionComposerGiftMinimumPrice'
+      | 'ModalStarsBalanceBarDescription'
+      | 'GiftBuyEqualsTo'
+      | 'PublicPostsSearchForStars'
+      | 'NotificationPaidExtraSearch';
+    variables: 'stars';
+  };
+  'link,peer': {
+    keys:
+      | 'GiftMakeUniqueDescriptionChannel';
+    variables: 'link' | 'peer';
+  };
+  'gift': {
+    keys:
+      | 'GiftWithdrawDescription'
+      | 'UniqueStatusWearTitle'
+      | 'NotificationGiftIsSale'
+      | 'NotificationGiftIsUnlist'
+      | 'GiftAuctionWonNotification';
+    variables: 'gift';
+  };
+  'bot,duration': {
+    keys:
+      | 'BotSuggestedStatusFor';
+    variables: 'bot' | 'duration';
+  };
+  'bot,filename': {
+    keys:
+      | 'BotDownloadFileDescription';
+    variables: 'bot' | 'filename';
+  };
+  'gift,icon': {
+    keys:
+      | 'PrivacyDisplayGiftIconInChats';
+    variables: 'gift' | 'icon';
+  };
+  'type': {
+    keys:
+      | 'SearchContextCaption';
+    variables: 'type';
+  };
+  'chats,folder': {
+    keys:
+      | 'FolderLinkTitleDescription';
+    variables: 'chats' | 'folder';
+  };
+  'chats,title': {
+    keys:
+      | 'FolderLinkSubtitleAdd';
+    variables: 'chats' | 'title';
+  };
+  'title': {
+    keys:
+      | 'FolderLinkNotificationDeletedTitle'
+      | 'FolderLinkNotificationAddedTitle'
+      | 'FolderLinkNotificationUpdatedTitle'
+      | 'ActionChangedTitleYou'
+      | 'ActionChangedTitleChannel'
+      | 'ActionCreatedChatYou'
+      | 'AiToneCreated';
+    variables: 'title';
+  };
+  'from,text': {
+    keys:
+      | 'ActionPinnedText';
+    variables: 'from' | 'text';
+  };
+  'text': {
+    keys:
+      | 'ActionPinnedTextYou'
+      | 'ActionWebviewDataDone'
+      | 'ExactTextCopied';
+    variables: 'text';
+  };
+  'from,media': {
+    keys:
+      | 'ActionPinnedMedia';
+    variables: 'from' | 'media';
+  };
+  'media': {
+    keys:
+      | 'ActionPinnedMediaYou';
+    variables: 'media';
+  };
+  'game': {
+    keys:
+      | 'ActionPinnedMediaGame';
+    variables: 'game';
+  };
+  'date,from': {
+    keys:
+      | 'ActionGroupCallScheduledGroup';
+    variables: 'date' | 'from';
+  };
+  'duration': {
+    keys:
+      | 'ActionGroupCallFinishedChannel'
+      | 'ActionGiftPremiumDuration'
+      | 'BoostingTelegramPremiumFor';
+    variables: 'duration';
+  };
+  'duration,from': {
+    keys:
+      | 'ActionGroupCallFinishedGroup';
+    variables: 'duration' | 'from';
+  };
+  'from,user': {
+    keys:
+      | 'ActionAddUser'
+      | 'ActionKickUser'
+      | 'ActionVideoInvited'
+      | 'ActionNewCreatorPending'
+      | 'ActionChangeCreator';
+    variables: 'from' | 'user';
+  };
+  'from,users': {
+    keys:
+      | 'ActionAddUsersMany'
+      | 'ActionVideoInvitedMany';
+    variables: 'from' | 'users';
+  };
+  'from,title': {
+    keys:
+      | 'ActionChangedTitle'
+      | 'ActionCreatedChat';
+    variables: 'from' | 'title';
+  };
+  'amount,user': {
+    keys:
+      | 'ActionPaymentDone'
+      | 'ActionPaymentInitRecurring'
+      | 'ActionPaidOneMessageIncoming'
+      | 'SuggestedPostCharged'
+      | 'DialogTitlePremiumGiftSentTo'
+      | 'DialogTitlePremiumGiftReceivedFrom';
+    variables: 'amount' | 'user';
+  };
+  'amount,invoice,user': {
+    keys:
+      | 'ActionPaymentDoneFor'
+      | 'ActionPaymentInitRecurringFor';
+    variables: 'amount' | 'invoice' | 'user';
+  };
+  'domain': {
+    keys:
+      | 'ActionBotAllowedFromDomain';
+    variables: 'domain';
+  };
+  'app': {
+    keys:
+      | 'ActionBotAllowedFromApp';
+    variables: 'app';
+  };
+  'amount,from,worth': {
+    keys:
+      | 'ActionGramTransferText'
+      | 'ActionGramTransferTextYou';
+    variables: 'amount' | 'from' | 'worth';
+  };
+  'amount,from': {
+    keys:
+      | 'ActionGramTransferPreview'
+      | 'ActionGramTransferPreviewYou'
+      | 'ActionGiveawayStarsStartedGroup'
+      | 'ActionGiveawayStarsStarted';
+    variables: 'amount' | 'from';
+  };
+  'amount,worth': {
+    keys:
+      | 'ActionGramReceivedText';
+    variables: 'amount' | 'worth';
+  };
+  'fiat': {
+    keys:
+      | 'ActionGramTransferWorth';
+    variables: 'fiat';
+  };
+  'cost,from': {
+    keys:
+      | 'ActionGiftTextCost';
+    variables: 'cost' | 'from';
+  };
+  'cost': {
+    keys:
+      | 'ActionGiftTextCostYou'
+      | 'ActionGiftTextCostAnonymous'
+      | 'ActionStarGiftSent'
+      | 'ActionStarGiftReceivedAnonymous'
+      | 'ActionStarGiftSelfBought'
+      | 'ActionStarGiftAuctionWon'
+      | 'ActionStarGiftAuctionBought';
+    variables: 'cost';
+  };
+  'cost,user': {
+    keys:
+      | 'ActionStarGiftReceived';
+    variables: 'cost' | 'user';
+  };
+  'channel,user': {
+    keys:
+      | 'ActionStarGiftUpgradedChannel'
+      | 'ActionStarGiftTransferredChannel';
+    variables: 'channel' | 'user';
+  };
+  'cost,gift,user': {
+    keys:
+      | 'ActionStarGiftSoldFromOffer'
+      | 'ActionStarGiftBoughtFromOffer';
+    variables: 'cost' | 'gift' | 'user';
+  };
+  'channel,cost,user': {
+    keys:
+      | 'ActionStarGiftSentChannel';
+    variables: 'channel' | 'cost' | 'user';
+  };
+  'channel,cost': {
+    keys:
+      | 'ActionStarGiftSentChannelYou';
+    variables: 'channel' | 'cost';
+  };
+  'cost,peer': {
+    keys:
+      | 'ActionStarGiftPrepaidUpgradeYou'
+      | 'ActionStarGiftPrepaidUpgrade';
+    variables: 'cost' | 'peer';
+  };
+  'total': {
+    keys:
+      | 'ActionStarGiftLimitedRibbon';
+    variables: 'total';
+  };
+  'cost,gift,peer': {
+    keys:
+      | 'ActionStarGiftOfferOutgoing'
+      | 'ActionStarGiftOfferIncoming'
+      | 'ActionStarGiftOfferDeclinedOutgoing'
+      | 'ActionStarGiftOfferDeclinedIncoming';
+    variables: 'cost' | 'gift' | 'peer';
+  };
+  'gift,price,user': {
+    keys:
+      | 'GiftOfferAcceptText';
+    variables: 'gift' | 'price' | 'user';
+  };
+  'gift,percent': {
+    keys:
+      | 'GiftOfferPriceLow'
+      | 'GiftOfferPriceHigh';
+    variables: 'gift' | 'percent';
+  };
+  'from,topic': {
+    keys:
+      | 'ActionTopicClosed'
+      | 'ActionTopicReopened';
+    variables: 'from' | 'topic';
+  };
+  'from,link,title': {
+    keys:
+      | 'ActionTopicRenamed';
+    variables: 'from' | 'link' | 'title';
+  };
+  'emoji,from,link': {
+    keys:
+      | 'ActionTopicIconChanged';
+    variables: 'emoji' | 'from' | 'link';
+  };
+  'from,link': {
+    keys:
+      | 'ActionTopicIconRemoved';
+    variables: 'from' | 'link';
+  };
+  'from,link,topic': {
+    keys:
+      | 'ActionTopicIconAndRenamed';
+    variables: 'from' | 'link' | 'topic';
+  };
+  'channel,duration': {
+    keys:
+      | 'ActionGiveawayResultPremiumDuration';
+    variables: 'channel' | 'duration';
+  };
+  'duration,peer': {
+    keys:
+      | 'ActionGiftCodeSubscriptionDuration'
+      | 'ActionGiftCodeSubscriptionDurationYou'
+      | 'SuggestedPostReceiveAmount'
+      | 'SuggestedPostReceiveAmountYou'
+      | 'SuggestedPostRefund'
+      | 'SuggestedPostRefundYou';
+    variables: 'duration' | 'peer';
+  };
+  'cryptoPrice,price': {
+    keys:
+      | 'ActionGiftCostCrypto';
+    variables: 'cryptoPrice' | 'price';
+  };
+  'community,from': {
+    keys:
+      | 'ActionAddedToCommunity'
+      | 'ActionJoinedViaCommunity';
+    variables: 'community' | 'from';
+  };
+  'link,stars': {
+    keys:
+      | 'GiftPremiumDescriptionYourBalance';
+    variables: 'link' | 'stars';
+  };
+  'amount,percent': {
+    keys:
+      | 'SectionDescriptionStarsForForMessages'
+      | 'SetPriceGroupDescription';
+    variables: 'amount' | 'percent';
+  };
+  'chatsSelected,payConfirmation': {
+    keys:
+      | 'ForwardPaidChatsConfirmation';
+    variables: 'chatsSelected' | 'payConfirmation';
+  };
+  'botLink,date': {
+    keys:
+      | 'FrozenAccountAppealSubtitle';
+    variables: 'botLink' | 'date';
+  };
+  'stars,user': {
+    keys:
+      | 'ApiMessageActionPaidMessagesRefundedOutgoing'
+      | 'ApiMessageActionPaidMessagesRefundedIncoming';
+    variables: 'stars' | 'user';
+  };
+  'gift,stars': {
+    keys:
+      | 'ApiMessageMessageActionResaleStarGiftUniqueOutgoing'
+      | 'ApiMessageMessageActionResaleStarGiftUniqueIncoming'
+      | 'GiftBuyConfirmDescription';
+    variables: 'gift' | 'stars';
+  };
+  'gift,peer,stars': {
+    keys:
+      | 'GiftBuyForPeerConfirmDescription';
+    variables: 'gift' | 'peer' | 'stars';
+  };
+  'changes': {
+    keys:
+      | 'ActionSuggestedChangesOutgoing';
+    variables: 'changes';
+  };
+  'changes,user': {
+    keys:
+      | 'ActionSuggestedChangesIncoming';
+    variables: 'changes' | 'user';
+  };
+  'duration,hint': {
+    keys:
+      | 'SuggestMessageTimeDescription';
+    variables: 'duration' | 'hint';
+  };
+  'currency,peer': {
+    keys:
+      | 'SuggestedPostBalanceTooLow';
+    variables: 'currency' | 'peer';
+  };
+  'amount,channel,user': {
+    keys:
+      | 'SuggestedPostRefundedByUser';
+    variables: 'amount' | 'channel' | 'user';
+  };
+  'amount,channel,peer': {
+    keys:
+      | 'SuggestedPostRefundedByChannel';
+    variables: 'amount' | 'channel' | 'peer';
+  };
+  'sender': {
+    keys:
+      | 'DeclinePostDialogQuestion';
+    variables: 'sender';
+  };
+  'comment': {
+    keys:
+      | 'SuggestedPostRejectedComment';
+    variables: 'comment';
+  };
+  'amount,channel': {
+    keys:
+      | 'ActionSuggestedPostSuccess';
+    variables: 'amount' | 'channel';
+  };
+  'amount,commission,duration': {
+    keys:
+      | 'SuggestedPostConfirmDetailsAdmin';
+    variables: 'amount' | 'commission' | 'duration';
+  };
+  'amount,duration': {
+    keys:
+      | 'SuggestedPostConfirmDetailsUser';
+    variables: 'amount' | 'duration';
+  };
+  'amount,commission,duration,time': {
+    keys:
+      | 'SuggestedPostConfirmDetailsWithTimeAdmin';
+    variables: 'amount' | 'commission' | 'duration' | 'time';
+  };
+  'amount,duration,time': {
+    keys:
+      | 'SuggestedPostConfirmDetailsWithTimeUser';
+    variables: 'amount' | 'duration' | 'time';
+  };
+  'count,number': {
+    keys:
+      | 'DescriptionCompletedToDoTasks';
+    variables: 'count' | 'number';
+  };
+  'peer,task': {
+    keys:
+      | 'MessageActionTodoCompletionsAsDone'
+      | 'MessageActionTodoCompletionsAsNotDone';
+    variables: 'peer' | 'task';
+  };
+  'task': {
+    keys:
+      | 'MessageActionTodoCompletionsAsDoneYou'
+      | 'MessageActionTodoCompletionsAsNotDoneYou';
+    variables: 'task';
+  };
+  'list,peer,task': {
+    keys:
+      | 'MessageActionAppendTodo';
+    variables: 'list' | 'peer' | 'task';
+  };
+  'list,task': {
+    keys:
+      | 'MessageActionAppendTodoYou';
+    variables: 'list' | 'task';
+  };
+  'list,peer,tasks': {
+    keys:
+      | 'MessageActionAppendTodoMultiple';
+    variables: 'list' | 'peer' | 'tasks';
+  };
+  'list,tasks': {
+    keys:
+      | 'MessageActionAppendTodoMultipleYou';
+    variables: 'list' | 'tasks';
+  };
+  'option,peer': {
+    keys:
+      | 'MessageActionPollAppendAnswer'
+      | 'MessageActionPollDeleteAnswer';
+    variables: 'option' | 'peer';
+  };
+  'option': {
+    keys:
+      | 'MessageActionPollAppendAnswerYou'
+      | 'MessageActionPollDeleteAnswerYou';
+    variables: 'option';
+  };
+  'years': {
+    keys:
+      | 'TitleSensitiveModal'
+      | 'ButtonSensitiveAlways';
+    variables: 'years';
+  };
+  'newAmount,originalAmount': {
+    keys:
+      | 'PriceChangedText';
+    variables: 'newAmount' | 'originalAmount';
+  };
+  'relativeDate': {
+    keys:
+      | 'GiftLockedMessage';
+    variables: 'relativeDate';
+  };
+  'currentSize,totalSize': {
+    keys:
+      | 'FileTransferProgress';
+    variables: 'currentSize' | 'totalSize';
+  };
+  'list': {
+    keys:
+      | 'InviteRestrictedPremiumReasonMultiple';
+    variables: 'list';
+  };
+  'current,total': {
+    keys:
+      | 'GiftAuctionRoundValue'
+      | 'GiftAuctionListRound'
+      | 'MediaCounter';
+    variables: 'current' | 'total';
+  };
+  'gift,giftNumber,round': {
+    keys:
+      | 'GiftAuctionBoughtGiftHeader';
+    variables: 'gift' | 'giftNumber' | 'round';
+  };
+  'position': {
+    keys:
+      | 'GiftAuctionTopPosition';
+    variables: 'position';
+  };
+  'newPeer,oldPeer': {
+    keys:
+      | 'GiftAuctionChangeRecipientDescription';
+    variables: 'newPeer' | 'oldPeer';
+  };
+  'amount,position': {
+    keys:
+      | 'GiftAuctionBidPosition';
+    variables: 'amount' | 'position';
+  };
+  'location': {
+    keys:
+      | 'UnconfirmedAuthDeniedMessage'
+      | 'UnconfirmedAuthSingle';
+    variables: 'location';
+  };
+  'country,deviceModel,region': {
+    keys:
+      | 'UnconfirmedAuthLocationRegion';
+    variables: 'country' | 'deviceModel' | 'region';
+  };
+  'country,deviceModel': {
+    keys:
+      | 'UnconfirmedAuthLocationCountry';
+    variables: 'country' | 'deviceModel';
+  };
+  'onlineCount,status': {
+    keys:
+      | 'GroupStatusWithOnline';
+    variables: 'onlineCount' | 'status';
+  };
+  'group': {
+    keys:
+      | 'LeaveGroupTitle';
+    variables: 'group';
+  };
+  'group,nextOwner': {
+    keys:
+      | 'LeaveGroupDescription'
+      | 'LeaveBasicGroupDescription';
+    variables: 'group' | 'nextOwner';
+  };
+  'outbidCount,winCount': {
+    keys:
+      | 'ChatListAuctionMixed';
+    variables: 'outbidCount' | 'winCount';
+  };
+  'author,group,tag': {
+    keys:
+      | 'RankModalMemberText'
+      | 'RankModalAdminText'
+      | 'RankModalOwnerText';
+    variables: 'author' | 'group' | 'tag';
+  };
+  'author': {
+    keys:
+      | 'AiTonePreviewCreatedBy';
+    variables: 'author';
+  };
+  'createdBy,usedBy': {
+    keys:
+      | 'AiTonePreviewUsedByCreatedBy';
+    variables: 'createdBy' | 'usedBy';
+  };
+  'language': {
+    keys:
+      | 'SettingsLanguageDesc'
+      | 'AddedToDoNotTranslate'
+      | 'DoNotTranslateLanguage'
+      | 'TranslateToButton';
+    variables: 'language';
+  };
+  'currency': {
+    keys:
+      | 'WalletBuyAmountLabel';
+    variables: 'currency';
+  };
+  'max,min': {
+    keys:
+      | 'WalletBuyMinMax';
+    variables: 'max' | 'min';
+  };
+  'backdrop,model': {
+    keys:
+      | 'WalletCollectibleTraits';
+    variables: 'backdrop' | 'model';
+  };
+  'amount,fiat': {
+    keys:
+      | 'WalletDisableBackupFee';
+    variables: 'amount' | 'fiat';
+  };
+  'why': {
+    keys:
+      | 'WalletSecretPhraseSubtitle';
+    variables: 'why';
+  };
+  'rate': {
+    keys:
+      | 'WalletIntroRate';
+    variables: 'rate';
+  };
+  'address': {
+    keys:
+      | 'WalletSwitchText';
+    variables: 'address';
+  };
+  'seconds': {
+    keys:
+      | 'WalletConnectRemaining';
+    variables: 'seconds';
+  };
+  'chat,moreBoosts': {
+    keys:
+      | 'ChannelBoostMoreBoostsNeededText';
+    variables: 'chat' | 'moreBoosts';
+  };
+  'chat,currentChat': {
+    keys:
+      | 'ChannelBoostReplaceBoost';
+    variables: 'chat' | 'currentChat';
+  };
+  'currentUsername': {
+    keys:
+      | 'ChannelVisibilityConfirmMakePrivateChannel';
+    variables: 'currentUsername';
+  };
+  'chat,date': {
+    keys:
+      | 'ChatGiveawayInfoNotQualified';
+    variables: 'chat' | 'date';
+  };
+  'chat,date,otherChannels': {
+    keys:
+      | 'ChatGiveawayInfoNotQualifiedMany';
+    variables: 'chat' | 'date' | 'otherChannels';
+  };
+  'chat,otherChannels': {
+    keys:
+      | 'ChatGiveawayInfoParticipatingMany';
+    variables: 'chat' | 'otherChannels';
+  };
+  'stars,winners': {
+    keys:
+      | 'ChatGiveawayMessageStarsPrizeText';
+    variables: 'stars' | 'winners';
+  };
+  'types': {
+    keys:
+      | 'ChatSendAllowedContentText';
+    variables: 'types';
+  };
+  'factor': {
+    keys:
+      | 'DownloadSpeedLimitedMessage'
+      | 'UploadSpeedLimitedMessage';
+    variables: 'factor';
+  };
+  'country': {
+    keys:
+      | 'FactCheckFooter';
+    variables: 'country';
+  };
+  'amount,date,details': {
+    keys:
+      | 'FragmentPhoneMessage'
+      | 'FragmentUsernameMessage';
+    variables: 'amount' | 'date' | 'details';
+  };
+  'boostTimes,chat': {
+    keys:
+      | 'GroupBoostBoostToUnrestrict';
+    variables: 'boostTimes' | 'chat';
+  };
+  'pack': {
+    keys:
+      | 'MessageContainsEmojiPack';
+    variables: 'pack';
+  };
+  'bot,link': {
+    keys:
+      | 'PaymentCheckoutAcceptTerms';
+    variables: 'bot' | 'link';
+  };
+  'cardName': {
+    keys:
+      | 'PaymentConfirmationMessage';
+    variables: 'cardName';
+  };
+  'amount,title': {
+    keys:
+      | 'PaymentInfoHint';
+    variables: 'amount' | 'title';
+  };
+  'emoji,summary': {
+    keys:
+      | 'PushReactText';
+    variables: 'emoji' | 'summary';
+  };
+  'senderTitle': {
+    keys:
+      | 'ReplyToQuote';
+    variables: 'senderTitle';
+  };
+  'details': {
+    keys:
+      | 'RevenueSharingAdsInfo4Subtitle2';
+    variables: 'details';
+  };
+  'amount,bot,title': {
+    keys:
+      | 'StarsTransferInfo';
+    variables: 'amount' | 'bot' | 'title';
+  };
+  'amount,chat,media': {
+    keys:
+      | 'StarsTransferUnlockInfo';
+    variables: 'amount' | 'chat' | 'media';
+  };
+  'recoveryEmail': {
+    keys:
+      | 'TwoStepAuthConfirmEmailDescription';
+    variables: 'recoveryEmail';
+  };
+  'usernames': {
+    keys:
+      | 'UsernameAlso';
+    variables: 'usernames';
+  };
+  'id': {
+    keys:
+      | 'PeerPickerUnknownPeer';
+    variables: 'id';
+  };
+}
+
+export interface LangPluralKeyGroups {
+  'count,user': {
+    keys:
+      | 'UserTypingMany';
+    variables: 'count' | 'user';
+  };
+  'count': {
+    keys:
+      | 'Participants'
+      | 'RequestPeerSelectLimit'
+      | 'CreateBotLimitText'
+      | 'OnlineCount'
+      | 'Subscribers'
+      | 'NMembers'
+      | 'ChatUnpinAllMessagesConfirmation'
+      | 'GroupInfoParticipantCount'
+      | 'Weeks'
+      | 'Months'
+      | 'Users'
+      | 'StickerPackStickerCount'
+      | 'PollCountriesCount'
+      | 'PollCountriesLimit'
+      | 'ErrorMessageTooLong'
+      | 'ErrorRichMessageTooManyBlocks'
+      | 'ErrorRichMessageTooManyMedia'
+      | 'Comments'
+      | 'Replies'
+      | 'ChatContextReactionCount'
+      | 'ConversationContextMenuSeen'
+      | 'PollVoteCountButton'
+      | 'PollAnswerCountButton'
+      | 'PollAnsweredCount'
+      | 'VoteCount'
+      | 'VoiceOverChatMessagesSelected'
+      | 'ChatPinnedUnpinAll'
+      | 'CommentsCount'
+      | 'PinnedMessagesCount'
+      | 'Messages'
+      | 'MessageTooltipForwards'
+      | 'MessageTooltipViews'
+      | 'MessageTooltipReplies'
+      | 'DeleteReactionTitle'
+      | 'GuardApplyToInvitesGroup'
+      | 'GuardApplyToInvitesChannel'
+      | 'GuardDisableInvitesGroup'
+      | 'GuardDisableInvitesChannel'
+      | 'Hours'
+      | 'Days'
+      | 'PeopleJoined'
+      | 'PeopleCanJoinViaLinkCount'
+      | 'CanJoin'
+      | 'JoinRequests'
+      | 'ChannelStatsViewsCount'
+      | 'ChatsPlural'
+      | 'LastSeenMinutesAgo'
+      | 'LastSeenHoursAgo'
+      | 'MessageRepeatPeriodEveryMinutes'
+      | 'MessageRepeatPeriodEveryMonths'
+      | 'StickerPackRemoveStickerCount'
+      | 'StickerPackAddStickerCount'
+      | 'StickerPackRemoveEmojiCount'
+      | 'StickerPackAddEmojiCount'
+      | 'ScheduleRepeatEveryMinutes'
+      | 'ScheduleRepeatEveryMonths'
+      | 'Years'
+      | 'LiveLocationUpdatedMinutesAgo'
+      | 'Seconds'
+      | 'Minutes'
+      | 'PreviewForwardedMessage'
+      | 'RichEditorTableDeleteRow'
+      | 'RichEditorTableDeleteColumn'
+      | 'ShowMoreChats'
+      | 'ShowMoreVoters'
+      | 'GiftInfoConvertDescriptionPeriod'
+      | 'GiftCraftSelectMarketGifts'
+      | 'GiftCraftFailedDescription'
+      | 'ChatGroups'
+      | 'FolderLinkTitleDescriptionChats'
+      | 'FolderLinkSubtitleAddCount'
+      | 'FolderLinkNotificationDeletedSubtitle'
+      | 'FolderLinkNotificationAddedSubtitle'
+      | 'FolderLinkNotificationUpdatedSubtitle'
+      | 'MoreSimilarBotsDescription'
+      | 'ActionGameScoreNoGameYou'
+      | 'ActionGiveawayResults'
+      | 'ActionGiveawayResultsStars'
+      | 'ActionBoostApplyYou'
+      | 'CommunityChatsCount'
+      | 'CommunityWithChats'
+      | 'PayForMessage'
+      | 'MessageSentPaidToastTitle'
+      | 'PaidMessageTransaction'
+      | 'HeaderDescriptionResaleGifts'
+      | 'GiftAttributeModelPlural'
+      | 'GiftAttributeBackdropPlural'
+      | 'GiftAttributeSymbolPlural'
+      | 'MessageActionTodoTaskCount'
+      | 'HintTodoListTasksCount2'
+      | 'TextAgeVerificationModal'
+      | 'NotificationGiftsLimit2'
+      | 'DescriptionGiftPremiumRequired2'
+      | 'RemainingPublicPostsSearch'
+      | 'HintPublicPostsSearchQuota'
+      | 'InviteRestrictedUsers'
+      | 'GiftAuctionTopWinners'
+      | 'GiftAuctionInfoTopBiddersTitle'
+      | 'GiftAuctionInfoTopBiddersSubtitle'
+      | 'GiftAuctionBoughtGiftsTitle'
+      | 'GiftAuctionGifts'
+      | 'AttachmentReplacePhoto'
+      | 'AttachmentReplaceVideo'
+      | 'AttachmentReplaceAudio'
+      | 'AttachmentReplaceFile'
+      | 'AttachmentSendPhoto'
+      | 'AttachmentSendVideo'
+      | 'AttachmentSendAudio'
+      | 'AttachmentSendFile'
+      | 'ChatListAuctionTitle'
+      | 'GiftPreviewCountModels'
+      | 'GiftPreviewCountCraftableModels'
+      | 'GiftPreviewCountPatterns'
+      | 'GiftPreviewCountBackdrops'
+      | 'FwdMessagesToChats'
+      | 'AiTonePreviewUsedBy2'
+      | 'PollModalAddMoreText'
+      | 'WalletNetworkFeesInfoShort'
+      | 'WalletConnectExpiresIn'
+      | 'RichMediaSkippedFiles'
+      | 'AmongWinners'
+      | 'BoostingBoostsCount'
+      | 'BoostingChannelWillReceiveBoost'
+      | 'BoostingGiftsCount'
+      | 'BoostingGiveawayHowItWorksSubTextSeveral2'
+      | 'BoostingGiveawayResultsMsgWinnersTitle'
+      | 'BoostingGiveawayUsedLinksPlural'
+      | 'BoostingGroupWillReceiveBoost'
+      | 'BoostingSelectUpToWarningChannelsPlural'
+      | 'GiveawayCountryLimit'
+      | 'GiveawayUserSelectionLimit'
+      | 'BoostingTelegramPremiumCountPlural'
+      | 'Bots'
+      | 'ChannelBoostMoreBoosts'
+      | 'Channels'
+      | 'ChatDeleteMessagesConfirmation'
+      | 'ChatGiveawayInfoOtherChannels'
+      | 'ChatGiveawayInfoSubscriptions'
+      | 'ChatListFilterLinkLabelChatCount'
+      | 'ConversationContextViewReplies'
+      | 'EmojiCount'
+      | 'Files'
+      | 'FolderLinkHeaderChatsJoin'
+      | 'FolderLinkHeaderChatsQuit'
+      | 'GiveawayReceiverTypeCountries'
+      | 'GiveawayStarsPrepaidDesc'
+      | 'GroupBoostBoostToUnrestrictTimes'
+      | 'Languages'
+      | 'LiveLocationUpdatedHoursAgo'
+      | 'Media'
+      | 'MessageContainsEmojiPacks'
+      | 'MessageTimerShortMinutes'
+      | 'MuteForDays'
+      | 'MuteForHours'
+      | 'PeerInfoAllowedReactionsMaxCountValue'
+      | 'PrepaidGiveawayMonths'
+      | 'SetTimeoutForDays'
+      | 'SetTimeoutForHours'
+      | 'ShowVotes'
+      | 'StarsTransferPhotos'
+      | 'StarsTransferVideos'
+      | 'StarsAcquiredInfo'
+      | 'StarsNeededTitle'
+      | 'StarsSentText'
+      | 'StoryKeepInfo'
+      | 'StoryPrivacyOptionExcludePeople'
+      | 'StoryPrivacyOptionPeople'
+      | 'UnlockPaidContent'
+      | 'UserRestrictionsCanDoUsers'
+      | 'Views'
+      | 'Voice'
+      | 'SeenByUsers'
+      | 'PageTitleNotifications';
+    variables: 'count';
+  };
+  'index': {
+    keys:
+      | 'PinnedMessageTitle';
+    variables: 'index';
+  };
+  'age,date': {
+    keys:
+      | 'ProfileBirthdayValueAge'
+      | 'ProfileBirthdayTodayValueAge';
+    variables: 'age' | 'date';
+  };
+  'amount': {
+    keys:
+      | 'GiftInfoDescription'
+      | 'GiftInfoDescriptionUpgrade'
+      | 'GiftInfoDescriptionConverted'
+      | 'GiftInfoConvert'
+      | 'StarsAmountText'
+      | 'ActionGiftStarsTitle'
+      | 'GramAmountText';
+    variables: 'amount';
+  };
+  'amount,peer': {
+    keys:
+      | 'GiftInfoPeerDescriptionOut'
+      | 'GiftInfoPeerDescriptionOutConverted';
+    variables: 'amount' | 'peer';
+  };
+  'count,total': {
+    keys:
+      | 'GiftInfoAvailabilityValue';
+    variables: 'count' | 'total';
+  };
+  'days': {
+    keys:
+      | 'GiftWithdrawWait';
+    variables: 'days';
+  };
+  'count,title': {
+    keys:
+      | 'BrowserMoreTabs';
+    variables: 'count' | 'title';
+  };
+  'amount,chat': {
+    keys:
+      | 'StarsSubscribeText';
+    variables: 'amount' | 'chat';
+  };
+  'amount,bot,name': {
+    keys:
+      | 'StarsSubscribeBotText';
+    variables: 'amount' | 'bot' | 'name';
+  };
+  'count,from,game': {
+    keys:
+      | 'ActionGameScore';
+    variables: 'count' | 'from' | 'game';
+  };
+  'count,game': {
+    keys:
+      | 'ActionGameScoreYou';
+    variables: 'count' | 'game';
+  };
+  'count,from': {
+    keys:
+      | 'ActionGameScoreNoGame'
+      | 'ActionBoostApply';
+    variables: 'count' | 'from';
+  };
+  'amount,channel': {
+    keys:
+      | 'ActionGiveawayResultStarsText'
+      | 'StarsSubscriptionCompletedText';
+    variables: 'amount' | 'channel';
+  };
+  'amount,count,totalAmount,user': {
+    keys:
+      | 'ConfirmationModalPaymentForMessage';
+    variables: 'amount' | 'count' | 'totalAmount' | 'user';
+  };
+  'paidChatsCount': {
+    keys:
+      | 'ForwardPaidChatsSelected';
+    variables: 'paidChatsCount';
+  };
+  'count,totalAmount': {
+    keys:
+      | 'ForwardPaidChatsPayConfirmation';
+    variables: 'count' | 'totalAmount';
+  };
+  'link,points,time': {
+    keys:
+      | 'DescriptionPendingRating'
+      | 'DescriptionFutureRating';
+    variables: 'link' | 'points' | 'time';
+  };
+  'size': {
+    keys:
+      | 'MediaSizeB'
+      | 'MediaSizeKB'
+      | 'MediaSizeMB'
+      | 'MediaSizeGB';
+    variables: 'size';
+  };
+  'count,list': {
+    keys:
+      | 'InviteRestrictedPremiumReasonMultipleMore';
+    variables: 'count' | 'list';
+  };
+  'count,gift,link': {
+    keys:
+      | 'GiftAuctionTopBidders';
+    variables: 'count' | 'gift' | 'link';
+  };
+  'count,link': {
+    keys:
+      | 'GiftAuctionDescription';
+    variables: 'count' | 'link';
+  };
+  'count,gift': {
+    keys:
+      | 'GiftAuctionItemsBought';
+    variables: 'count' | 'gift';
+  };
+  'count,fee': {
+    keys:
+      | 'WalletNetworkFeesInfo';
+    variables: 'count' | 'fee';
+  };
+  'count,duration': {
+    keys:
+      | 'BoostingGiveawayAdditionPrizeCountHint';
+    variables: 'count' | 'duration';
+  };
+  'count,duration,prize': {
+    keys:
+      | 'BoostingGiveawayAdditionPrizeCountNameHint';
+    variables: 'count' | 'duration' | 'prize';
+  };
+  'chat,prize,quantity': {
+    keys:
+      | 'BoostingGiveawayHowItWorksIncludeText';
+    variables: 'chat' | 'prize' | 'quantity';
+  };
+  'chat,date,quantity': {
+    keys:
+      | 'BoostingGiveawayHowItWorksSubText'
+      | 'BoostingGiveawayHowItWorksSubTextEnd';
+    variables: 'chat' | 'date' | 'quantity';
+  };
+  'chat,date,otherChannels,quantity': {
+    keys:
+      | 'BoostingGiveawayHowItWorksSubTextSeveral1'
+      | 'BoostingGiveawayHowItWorksSubTextSeveralEnd1';
+    variables: 'chat' | 'date' | 'otherChannels' | 'quantity';
+  };
+  'chat,duration,quantity': {
+    keys:
+      | 'BoostingGiveawayHowItWorksText'
+      | 'BoostingGiveawayHowItWorksTextEnd';
+    variables: 'chat' | 'duration' | 'quantity';
+  };
+  'prize,quantity': {
+    keys:
+      | 'BoostingGiveawayMsgPrizes';
+    variables: 'prize' | 'quantity';
+  };
+  'chat,count': {
+    keys:
+      | 'BoostingStarsGiveawayHowItWorksText'
+      | 'BoostingStarsGiveawayHowItWorksTextEnd';
+    variables: 'chat' | 'count';
+  };
+}
+
 export type RegularLangKey = keyof LangPair;
 export type RegularLangKeyWithVariables = keyof LangPairWithVariables;
 export type PluralLangKey = keyof LangPairPlural;

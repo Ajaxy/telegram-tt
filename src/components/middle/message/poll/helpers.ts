@@ -1,4 +1,4 @@
-import type { LangFn, LangFnParameters } from '../../../../util/localization';
+import type { AdvancedLangFnParameters, LangFn } from '../../../../util/localization';
 
 export function canVoteInPollAsSubscriber(isRestrictedToSubscribers?: true, isChatNotJoined?: boolean) {
   return !isRestrictedToSubscribers || !isChatNotJoined;
@@ -17,7 +17,7 @@ export function canVoteInPollCountry(phoneCountryIso2?: string, allowedCountryCo
 export function getPollSubscriberRestrictionMessage(
   channel?: string,
   isRestrictedToSubscribers?: true,
-): LangFnParameters | undefined {
+): AdvancedLangFnParameters | undefined {
   return isRestrictedToSubscribers && channel
     ? {
       key: 'PollSubscriberRestriction',
@@ -29,7 +29,7 @@ export function getPollSubscriberRestrictionMessage(
 export function getPollCountryRestrictionMessage(
   lang: LangFn,
   countryCodes?: string[],
-): LangFnParameters | undefined {
+): AdvancedLangFnParameters | undefined {
   const countries = getPollCountryRestrictionCountries(lang, countryCodes);
 
   return countries

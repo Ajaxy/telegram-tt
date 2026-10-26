@@ -10,8 +10,11 @@ import type {
 import type { TextFilter } from '../../components/common/helpers/renderText';
 import type { TimeFormat } from '../../types';
 import type {
+  LangKey,
+  LangKeyGroups,
   LangPairPluralWithVariables,
   LangPairWithVariables,
+  LangPluralKeyGroups,
   LangVariable,
   PluralLangKey,
   PluralLangKeyWithVariables,
@@ -69,79 +72,51 @@ type PrepPluralVariablesType<K extends PluralLangKeyWithVariables, O> =
     ? LangPairPluralWithNodes[K]
     : LangPairPluralWithVariables[K];
 
-type RegularLangFnParametersWithoutVariables = {
-  key: RegularLangKey;
-  variables?: undefined;
-  options?: LangFnOptions;
-};
+// A separate generic alias defers resolving nested parameters, which would otherwise be circular
+type LangFnVariables<V extends string, R = LangVariable | RegularLangFnParameters> = Record<V, R>;
 
-type RegularLangFnParametersWithVariables<T = LangPairWithVariables> = {
-  [K in keyof T]: {
-    key: K;
-    variables: {
-      [key in keyof T[K]]: LangVariable | RegularLangFnParameters;
+type LangFnGroupedVariables<G, R> = [R] extends [never]
+  ? LangFnVariables<G & string>
+  : LangFnVariables<G & string, R>;
+
+// Each key occurs once per rendering mode, keeping TypeScript's discriminant lookup available.
+// Combining the modes repeats keys and loses that lookup, as does adding `variables?: undefined`.
+type LangFnParametersUnion<
+  O,
+  P,
+  R = never,
+> =
+  | { key: RegularLangKey; options?: O }
+  | { key: PluralLangKey; options: P }
+  | {
+    [G in keyof LangKeyGroups]: {
+      key: LangKeyGroups[G]['keys'];
+      variables: LangFnGroupedVariables<LangKeyGroups[G]['variables'], R>;
+      options?: O;
     };
-    options?: LangFnOptions;
-  }
-}[keyof T];
-
-type RegularLangFnPluralParameters = {
-  key: PluralLangKey;
-  variables?: undefined;
-  options: LangFnOptionsWithPlural;
-};
-
-type RegularLangFnPluralParametersWithVariables<T = LangPairPluralWithVariables> = {
-  [K in keyof T]: {
-    key: K;
-    variables: {
-      [key in keyof T[K]]: LangVariable | RegularLangFnParameters;
+  }[keyof LangKeyGroups]
+  | {
+    [G in keyof LangPluralKeyGroups]: {
+      key: LangPluralKeyGroups[G]['keys'];
+      variables: LangFnGroupedVariables<LangPluralKeyGroups[G]['variables'], R>;
+      options: P;
     };
-    options: LangFnOptionsWithPlural;
-  }
-}[keyof T];
+  }[keyof LangPluralKeyGroups];
 
-export type RegularLangFnParameters =
-  | RegularLangFnParametersWithoutVariables
-  | RegularLangFnParametersWithVariables
-  | RegularLangFnPluralParameters
-  | RegularLangFnPluralParametersWithVariables;
+export type RegularLangFnParameters = LangFnParametersUnion<LangFnOptions, LangFnOptionsWithPlural>;
+// `with` selects node rendering; stored options can omit the redundant `withNodes` flag
+type StoredAdvancedLangFnOptions = Omit<AdvancedLangFnOptions, 'withNodes'> & { withNodes?: true };
+export type AdvancedLangFnParameters = LangFnParametersUnion<
+  StoredAdvancedLangFnOptions, StoredAdvancedLangFnOptions & { pluralValue: number },
+  TeactNode | RegularLangFnParameters
+>;
 
-type AdvancedLangFnParametersWithoutVariables = {
-  key: RegularLangKey;
-  variables?: undefined;
-  options: AdvancedLangFnOptions;
+// Common shape of parameter objects for the implementation, which does not need per-key checks
+export type LangFnParametersShape<O = StoredAdvancedLangFnOptions> = {
+  key: LangKey;
+  variables?: Record<string, TeactNode | LangFnParametersShape<LangFnOptions>>;
+  options?: O;
 };
-
-type AdvancedLangFnParametersWithVariables<T = LangPairWithNodes> = {
-  [K in keyof T]: {
-    key: K;
-    variables: T[K];
-    options: AdvancedLangFnOptions;
-  }
-}[keyof T];
-
-type AdvancedLangFnPluralParameters = {
-  key: PluralLangKey;
-  variables?: undefined;
-  options: AdvancedLangFnOptionsWithPlural;
-};
-
-type AdvancedLangFnPluralParametersWithVariables<T = LangPairPluralWithNodes> = {
-  [K in keyof T]: {
-    key: K;
-    variables: T[K];
-    options: AdvancedLangFnOptionsWithPlural;
-  }
-}[keyof T];
-
-export type AdvancedLangFnParameters =
-  | AdvancedLangFnParametersWithoutVariables
-  | AdvancedLangFnParametersWithVariables
-  | AdvancedLangFnPluralParameters
-  | AdvancedLangFnPluralParametersWithVariables;
-
-export type LangFnParameters = RegularLangFnParameters | AdvancedLangFnParameters;
 
 export type LangFn = {
   <K extends PluralLangKeyWithVariables, O extends AnyLangPluralOptions>(
@@ -157,9 +132,8 @@ export type LangFn = {
     key: K, variables?: undefined, options?: StrictLangOptions<O>,
   ): LangFnReturnType<O>;
 
-  with: (params: LangFnParameters) => TeactNode;
   withRegular: (params: RegularLangFnParameters) => string;
-  withAdvanced: (params: AdvancedLangFnParameters) => TeactNode;
+  with: (params: AdvancedLangFnParameters) => TeactNode;
   region: (code: string) => string | undefined;
   currency: (code: string) => string | undefined;
   conjunction: (list: string[]) => string;
@@ -201,12 +175,15 @@ export function isPluralLangString(string: LangPackStringValue): string is LangP
   return !isRegularLangString(string) && !isDeletedLangString(string);
 }
 
-export function isLangFnParam(object: unknown): object is LangFnParameters {
-  return Boolean(object) && typeof object === 'object' && 'key' in object! && !('type' in object);
-}
-
 export function areAdvancedLangFnOptions(
   params: LangFnOptions | AdvancedLangFnOptions,
 ): params is AdvancedLangFnOptions {
   return 'withNodes' in params && Boolean(params.withNodes);
+}
+
+// React/Teact elements are also objects and have a `key`, but they always have `type` as well
+export function isLangFnParam(
+  object: TeactNode | LangFnParametersShape<LangFnOptions>,
+): object is LangFnParametersShape<LangFnOptions> {
+  return Boolean(object) && typeof object === 'object' && 'key' in object && !('type' in object);
 }
