@@ -173,6 +173,7 @@ const StarPaymentModal = ({
       isOpen={isOpen}
       hasAbsoluteCloseButton
       isSlim
+      isNativeDialog
       onClose={closeStarsPaymentModal}
     >
       <BalanceBlock balance={starsBalanceState?.balance} className={styles.modalBalance} />

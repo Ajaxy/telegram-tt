@@ -11,7 +11,6 @@ import VoiceMini from '../../../assets/tgs/calls/VoiceMini.tgs';
 import VoiceMuted from '../../../assets/tgs/calls/VoiceMuted.tgs';
 import VoiceOutlined from '../../../assets/tgs/calls/VoiceOutlined.tgs';
 import CraftProgress from '../../../assets/tgs/CraftProgress.tgs';
-import Diamond from '../../../assets/tgs/Diamond.tgs';
 import DuckNothingFound from '../../../assets/tgs/DuckNothingFound.tgs';
 import Flame from '../../../assets/tgs/general/Flame.tgs';
 import Fragment from '../../../assets/tgs/general/Fragment.tgs';
@@ -116,7 +115,6 @@ export const LOCAL_TGS_URLS = {
   BannedDuck,
   BrokenGift,
   CraftProgress,
-  Diamond,
   Search,
   DuckNothingFound,
   Passkeys,

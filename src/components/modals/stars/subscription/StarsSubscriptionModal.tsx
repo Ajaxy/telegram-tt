@@ -255,6 +255,7 @@ const StarsSubscriptionModal = ({
     <TableInfoModal
       isOpen={Boolean(subscription)}
       className={styles.modal}
+      isNativeDialog
       header={renderingModalData?.header}
       tableData={renderingModalData?.tableData}
       footer={renderingModalData?.footer}

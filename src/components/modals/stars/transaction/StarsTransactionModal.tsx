@@ -354,6 +354,7 @@ const StarsTransactionModal = ({
     <TableInfoModal
       isOpen={Boolean(transaction)}
       className={styles.modal}
+      isNativeDialog
       hasBackdrop={transaction?.starGift?.type === 'starGiftUnique'}
       header={renderingModalData?.header}
       tableData={renderingModalData?.tableData}

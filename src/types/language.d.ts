@@ -1916,7 +1916,6 @@ export interface LangPair {
   'DescriptionAboutGram': undefined;
   'ButtonTopUpViaFragment': undefined;
   'GramEarningsText': undefined;
-  'GramEarningsHint': undefined;
   'GramGiftReceived': undefined;
   'MediaSpoilerSensitive': undefined;
   'TextSensitiveModal': undefined;

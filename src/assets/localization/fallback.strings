@@ -2602,7 +2602,6 @@
 "DescriptionAboutGram" = "Use Grams to buy gifts and suggest posts to channels.";
 "ButtonTopUpViaFragment" = "Top Up Via Fragment";
 "GramEarningsText" = "Your Gram from gifts, ads and Fragment";
-"GramEarningsHint" = "You can withdraw your Grams using Fragment.";
 "GramGiftReceived" = "Gram Top-Up";
 "MediaSpoilerSensitive" = "18+";
 "TitleSensitiveModal" = "{years}+ content";

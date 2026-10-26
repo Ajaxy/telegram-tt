@@ -244,6 +244,7 @@ const PaymentModal = ({
       <Modal
         className="error"
         isOpen={Boolean(error)}
+        isNativeDialog
         onClose={handleErrorModalClose}
       >
         <h4>
@@ -550,6 +551,7 @@ const PaymentModal = ({
       <Modal
         className="error"
         isOpen={isModalOpen}
+        isNativeDialog
         onClose={closeModal}
         onCloseAnimationEnd={handleModalClose}
       >
@@ -574,6 +576,7 @@ const PaymentModal = ({
     <Modal
       className={buildClassName('PaymentModal', invoice?.isRecurring && 'recurring')}
       isOpen={isModalOpen}
+      isNativeDialog
       onClose={closeModal}
       onCloseAnimationEnd={handleModalClose}
     >

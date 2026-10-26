@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from '@teact';
+import { memo, useEffect, useMemo, useState } from '@teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
@@ -6,11 +6,7 @@ import type { GlobalState, TabState } from '../../../global/types';
 import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
 
-import {
-  PAID_MESSAGES_PURPOSE,
-  STARS_CURRENCY_CODE,
-  TON_CURRENCY_CODE,
-} from '../../../config';
+import { PAID_MESSAGES_PURPOSE, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
@@ -18,7 +14,6 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
-import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -30,18 +25,21 @@ import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
-import Modal from '../../ui/Modal';
-import SquareTabList, { type TabWithProperties } from '../../ui/SquareTabList';
+import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ParticlesHeader from '../common/ParticlesHeader.tsx';
 import BalanceBlock from './BalanceBlock';
 import StarTopupOptionList from './StarTopupOptionList';
 import StarsSubscriptionItem from './subscription/StarsSubscriptionItem';
 import StarsTransactionItem from './transaction/StarsTransactionItem';
+import Island, { IslandDescription, IslandTitle } from '@gili/layout/Island';
+import Modal, {
+  ModalCloseButton, ModalHeader, ModalHeaderAction, ModalTitle,
+} from '@gili/modal/Modal';
 
 import styles from './StarsBalanceModal.module.scss';
 
-const HEADER_HEIGHT = 3.5 * REM;
+const HEADER_TITLE_SCROLL_TOP = 150;
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
 const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
   'StarsTransactionsAll',
@@ -59,33 +57,28 @@ type StateProps = {
   starsBalanceState?: GlobalState['stars'];
   tonBalanceState?: GlobalState['ton'];
   canBuyPremium?: boolean;
-  shouldForceHeight?: boolean;
   tonUsdRate?: number;
-  tonTopupUrl: string;
   animationLevel: AnimationLevel;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, tonBalanceState, canBuyPremium, shouldForceHeight, tonUsdRate, tonTopupUrl, animationLevel,
+  modal, starsBalanceState, tonBalanceState, canBuyPremium, tonUsdRate, animationLevel,
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
-    openUrl,
   } = getActions();
 
-  const currency = modal?.currency || STARS_CURRENCY_CODE;
-  const currentState = currency === TON_CURRENCY_CODE ? tonBalanceState : starsBalanceState;
+  const isTon = modal?.currency === TON_CURRENCY_CODE;
+  const currentState = isTon ? tonBalanceState : starsBalanceState;
   const { balance, history } = currentState || {};
-  const { subscriptions } = (currency === STARS_CURRENCY_CODE && starsBalanceState) || {};
+  const { subscriptions } = (!isTon && starsBalanceState) || {};
 
   const lang = useLang();
 
-  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
-  const [areTabsPinned, pinTabs, unpinTabs] = useFlag(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderTitleShown, setIsHeaderTitleShown] = useState(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
-
-  const tabsRef = useRef<HTMLDivElement>();
 
   const isOpen = Boolean(modal && (starsBalanceState || tonBalanceState));
 
@@ -137,22 +130,9 @@ const StarsBalanceModal = ({
     return undefined;
   }, [originReaction, originStarsPayment, originGift, topup?.purpose, lang]);
 
-  const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
+  const hasHistory = Boolean(history?.all?.transactions.length);
+  const shouldShowItems = hasHistory && !shouldOpenOnBuy;
   const shouldSuggestGifting = !shouldOpenOnBuy;
-
-  const modalHeight = useMemo(() => {
-    const transactionCount = history?.all?.transactions.length || 0;
-    if (transactionCount === 1) {
-      return '35.5rem';
-    }
-    if (transactionCount === 2) {
-      return '39.25rem';
-    }
-    if (transactionCount === 3) {
-      return '43rem';
-    }
-    return '45rem';
-  }, [history?.all?.transactions.length]);
 
   const transactionTabs: TabWithProperties[] = useMemo(() => {
     return TRANSACTION_TABS_KEYS.map((key) => ({
@@ -162,10 +142,10 @@ const StarsBalanceModal = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setIsHeaderHidden(true);
+      setIsScrolled(false);
+      setIsHeaderTitleShown(false);
       setSelectedTabIndex(0);
       hideBuyOptions();
-      unpinTabs();
     }
   }, [isOpen]);
 
@@ -200,34 +180,33 @@ const StarsBalanceModal = ({
             ['simple_markdown', 'emoji'],
           )}
           isDisabled={!isOpen}
+          className={styles.particlesHeader}
         />
         {canBuyPremium && !areBuyOptionsShown && (
-          <Button
-            className={styles.starButton}
-            onClick={showBuyOptions}
-            fluid
-          >
+          <Button pill onClick={showBuyOptions}>
             {lang('StarListBuyMoreStars')}
           </Button>
         )}
         {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
           <Button
             isText
-            noForcedUpperCase
-            className={styles.starButton}
-            fluid
+            pill
+            className={styles.giftButton}
             onClick={openStarsGiftingPickerModalHandler}
           >
             {lang('TelegramStarsGift')}
           </Button>
         )}
         {areBuyOptionsShown && starsBalanceState?.topupOptions && (
-          <StarTopupOptionList
-            starsNeeded={starsNeeded}
-            options={starsBalanceState.topupOptions}
-            onClick={handleBuyStars}
-          />
+          <Island>
+            <StarTopupOptionList
+              starsNeeded={starsNeeded}
+              options={starsBalanceState.topupOptions}
+              onClick={handleBuyStars}
+            />
+          </Island>
         )}
+        {areBuyOptionsShown && <IslandDescription>{tosText}</IslandDescription>}
       </>
     );
   };
@@ -237,38 +216,24 @@ const StarsBalanceModal = ({
     return (
       <>
         <ParticlesHeader
-          model="speeding-diamond"
+          model="diamond-3d"
           color="blue"
           title={lang('GramEarnings')}
           description={lang('GramEarningsText')}
           isDisabled={!isOpen}
+          className={styles.particlesHeader}
         />
-        <div className={styles.tonBalanceContainer}>
-          <div className={styles.tonBalance}>
-            <GramIcon className={styles.tonIconBalance} />
-            {convertTonFromNanos(tonNanos)}
-          </div>
-          {Boolean(tonUsdRate) && (
-            <span className={styles.tonInUsd}>
-              {`≈ ${formatCurrencyAsString(
-                convertTonToUsd(tonNanos, tonUsdRate),
-                'USD',
-                lang.code,
-              )}`}
-            </span>
-          )}
+        <div className={styles.tonBalance}>
+          <GramIcon className={styles.tonIconBalance} />
+          {convertTonFromNanos(tonNanos)}
         </div>
-        <Button
-          className={styles.topUpButton}
-          onClick={handleTonTopUp}
-          fluid
-        >
-          {lang('ButtonTopUpViaFragment')}
-        </Button>
-
-        {currency === TON_CURRENCY_CODE && (
-          <div className={styles.hint}>
-            {lang('GramEarningsHint')}
+        {Boolean(tonUsdRate) && (
+          <div className={styles.tonInUsd}>
+            {`≈ ${formatCurrencyAsString(
+              convertTonToUsd(tonNanos, tonUsdRate),
+              'USD',
+              lang.code,
+            )}`}
           </div>
         )}
       </>
@@ -278,24 +243,14 @@ const StarsBalanceModal = ({
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
 
-    setIsHeaderHidden(scrollTop <= 150);
-
-    if (tabsRef.current) {
-      const { top: tabsTop } = tabsRef.current.getBoundingClientRect();
-      const { top: scrollerTop } = e.currentTarget.getBoundingClientRect();
-      const isPinned = tabsTop - scrollerTop <= HEADER_HEIGHT;
-      if (isPinned) {
-        pinTabs();
-      } else {
-        unpinTabs();
-      }
-    }
+    setIsScrolled(scrollTop > 0);
+    setIsHeaderTitleShown(scrollTop > HEADER_TITLE_SCROLL_TOP);
   }
 
   const handleLoadMoreTransactions = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
-      isTon: currency === TON_CURRENCY_CODE,
+      isTon,
     });
   });
 
@@ -304,6 +259,7 @@ const StarsBalanceModal = ({
   });
 
   const openStarsGiftingPickerModalHandler = useLastCallback(() => {
+    closeStarsBalanceModal();
     openStarsGiftingPickerModal({});
   });
 
@@ -338,66 +294,76 @@ const StarsBalanceModal = ({
     });
   });
 
-  const handleTonTopUp = useLastCallback(() => {
-    openUrl({ url: tonTopupUrl });
-  });
+  const header = (
+    <ModalHeader className={buildClassName(styles.header, isScrolled && styles.headerScrolled)} noMask>
+      <ModalCloseButton />
+      <ModalTitle className={buildClassName(styles.headerTitle, isHeaderTitleShown && styles.headerTitleShown)}>
+        {isTon ? lang('GramEarnings') : lang('TelegramStars')}
+      </ModalTitle>
+      {!isTon && (
+        <ModalHeaderAction>
+          <BalanceBlock balance={balance} className={styles.headerBalance} />
+        </ModalHeaderAction>
+      )}
+    </ModalHeader>
+  );
 
   return (
     <Modal
-      className={buildClassName(styles.root, !shouldForceHeight && !areBuyOptionsShown && styles.minimal)}
       isOpen={isOpen}
+      header={header}
+      width="slim"
+      height="auto"
+      dialogClassName={styles.dialog}
+      noContentInlinePadding
+      noScrollable
       onClose={closeStarsBalanceModal}
-      dialogStyle={`--modal-height: ${modalHeight}`}
-      hasAbsoluteCloseButton
     >
-      <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
-        {currency !== TON_CURRENCY_CODE && <BalanceBlock balance={balance} className={styles.modalBalance} />}
-        <div
-          className={buildClassName(
-            styles.header, isHeaderHidden && styles.hiddenHeader, areTabsPinned && styles.noSeparator,
-          )}
-        >
-          <h2 className={styles.starHeaderText}>
-            {lang('TelegramStars')}
-          </h2>
-        </div>
-        <div className={styles.section}>
-          {currency === TON_CURRENCY_CODE ? renderTonHeaderSection() : renderStarsHeaderSection()}
-        </div>
-        {areBuyOptionsShown && (
-          <div className={styles.tos}>
-            {tosText}
-          </div>
+      <div
+        className={buildClassName(
+          styles.main, 'custom-scroll', (hasHistory || areBuyOptionsShown) && styles.fixedHeight,
         )}
-        {shouldShowItems && Boolean(subscriptions?.list.length) && (
-          <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>{lang('StarMySubscriptions')}</h3>
-            <div className={styles.subscriptions}>
-              {subscriptions?.list.map((subscription) => (
-                <StarsSubscriptionItem
-                  key={subscription.id}
-                  subscription={subscription}
-                />
-              ))}
-              {subscriptions?.nextOffset && (
-                <Button
-                  isText
-                  disabled={subscriptions.isLoading}
-                  size="smaller"
-                  noForcedUpperCase
-                  className={styles.loadMore}
-                  onClick={handleLoadMoreSubscriptions}
-                >
-                  <Icon name="down" className={styles.loadMoreIcon} />
-                  {lang('ShowMore')}
-                </Button>
-              )}
+        onScroll={handleScroll}
+      >
+        <div className={styles.content}>
+          <div className={styles.intro}>
+            {isTon ? renderTonHeaderSection() : renderStarsHeaderSection()}
+          </div>
+          {shouldShowItems && Boolean(subscriptions?.list.length) && (
+            <div>
+              <IslandTitle>{lang('StarMySubscriptions')}</IslandTitle>
+              <Island>
+                {subscriptions?.list.map((subscription) => (
+                  <StarsSubscriptionItem
+                    key={subscription.id}
+                    subscription={subscription}
+                  />
+                ))}
+                {subscriptions?.nextOffset && (
+                  <Button
+                    isText
+                    disabled={subscriptions.isLoading}
+                    size="smaller"
+                    noForcedUpperCase
+                    className={styles.loadMore}
+                    onClick={handleLoadMoreSubscriptions}
+                  >
+                    <Icon name="down" className={styles.loadMoreIcon} />
+                    {lang('ShowMore')}
+                  </Button>
+                )}
+              </Island>
             </div>
-          </div>
-        )}
-        {shouldShowItems && (
-          <div className={styles.container}>
-            <div className={styles.lastSection}>
+          )}
+          {shouldShowItems && (
+            <Island className={styles.history}>
+              <TabList
+                className={styles.tabs}
+                activeTab={selectedTabIndex}
+                tabs={transactionTabs}
+                centered
+                onSwitchTab={setSelectedTabIndex}
+              />
               <Transition
                 name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
                 activeKey={selectedTabIndex}
@@ -423,35 +389,21 @@ const StarsBalanceModal = ({
                   ))}
                 </InfiniteScroll>
               </Transition>
-            </div>
-            <SquareTabList
-              ref={tabsRef}
-              className={buildClassName(styles.tabs, areTabsPinned && styles.pinned)}
-              tabClassName={styles.tab}
-              activeTab={selectedTabIndex}
-              tabs={transactionTabs}
-              onSwitchTab={setSelectedTabIndex}
-            />
-          </div>
-        )}
+            </Island>
+          )}
+        </div>
       </div>
     </Modal>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): Complete<StateProps> => {
-    const shouldForceHeight = modal?.currency === TON_CURRENCY_CODE
-      ? Boolean(global.ton?.history?.all?.transactions.length)
-      : Boolean(global.stars?.history?.all?.transactions.length);
-
+  (global): Complete<StateProps> => {
     return {
-      shouldForceHeight,
       starsBalanceState: global.stars,
       tonBalanceState: global.ton,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
       tonUsdRate: global.appConfig.tonUsdRate,
-      tonTopupUrl: global.appConfig.tonTopupUrl,
       animationLevel: selectSharedSettings(global).animationLevel,
     };
   },

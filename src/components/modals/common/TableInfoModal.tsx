@@ -30,6 +30,7 @@ type OwnProps = {
   contentClassName?: string;
   tableClassName?: string;
   hasBackdrop?: boolean;
+  isNativeDialog?: boolean;
   closeButtonColor?: 'translucent' | 'translucent-white';
   moreMenuItems?: TeactNode;
   headerRightToolBar?: TeactNode;
@@ -53,6 +54,7 @@ const TableInfoModal = ({
   contentClassName,
   tableClassName,
   hasBackdrop,
+  isNativeDialog,
   closeButtonColor,
   moreMenuItems,
   headerRightToolBar,
@@ -76,6 +78,7 @@ const TableInfoModal = ({
       hasAbsoluteCloseButton={!title}
       absoluteCloseButtonColor={closeButtonColor || (hasBackdrop ? 'translucent-white' : undefined)}
       isSlim
+      isNativeDialog={isNativeDialog}
       header={modalHeader}
       title={title}
       className={className}
