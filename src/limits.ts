@@ -37,6 +37,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   maxReactions: [1, 3],
   moreAccounts: [3, MULTIACCOUNT_MAX_SLOTS],
   aiComposeToneSaved: [5, 20],
+  botsCreate: [20, 40],
 };
 
 export const DEFAULT_MAX_NOTE_LENGTH = 128;
@@ -62,6 +63,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
     moreAccounts: DEFAULT_LIMITS.moreAccounts,
     maxReactions: DEFAULT_LIMITS.maxReactions,
     aiComposeToneSaved: DEFAULT_LIMITS.aiComposeToneSaved,
+    botsCreate: DEFAULT_LIMITS.botsCreate,
   },
   richMessageLengthLimit: 32768,
   richMessageMaxBlocks: 500,

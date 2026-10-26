@@ -29,7 +29,8 @@ type Limit =
   | 'recommended_channels_limit'
   | 'saved_dialogs_pinned_limit'
   | 'reactions_user_max'
-  | 'aicompose_tone_saved_limit';
+  | 'aicompose_tone_saved_limit'
+  | 'bots_create_limit';
 type LimitKey = `${Limit}_${LimitType}`;
 type LimitsConfig = Record<LimitKey, number>;
 
@@ -150,6 +151,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   aicompose_tone_examples_num?: number;
   aicompose_tone_title_length_max?: number;
   aicompose_tone_prompt_length_max?: number;
+  bot_allowed_suffixes?: string[];
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -237,6 +239,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       maxReactions: getLimit(appConfig, 'reactions_user_max', 'maxReactions'),
       moreAccounts: DEFAULT_LIMITS.moreAccounts,
       aiComposeToneSaved: getLimit(appConfig, 'aicompose_tone_saved_limit', 'aiComposeToneSaved'),
+      botsCreate: getLimit(appConfig, 'bots_create_limit', 'botsCreate'),
     },
     richMessageLengthLimit: appConfig.rich_message_length_limit ?? DEFAULT_APP_CONFIG.richMessageLengthLimit,
     richMessageMaxBlocks: appConfig.rich_message_max_blocks ?? DEFAULT_APP_CONFIG.richMessageMaxBlocks,
@@ -318,6 +321,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     aiComposeToneExamplesNum: appConfig.aicompose_tone_examples_num,
     aiComposeToneTitleLengthMax: appConfig.aicompose_tone_title_length_max,
     aiComposeTonePromptLengthMax: appConfig.aicompose_tone_prompt_length_max,
+    botAllowedSuffixes: appConfig.bot_allowed_suffixes,
   };
 
   return {

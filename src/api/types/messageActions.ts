@@ -128,6 +128,11 @@ export interface ApiMessageActionRequestedPeer extends ActionMediaType {
   peerIds: string[];
 }
 
+export interface ApiMessageActionManagedBotCreated extends ActionMediaType {
+  type: 'managedBotCreated';
+  botId: string;
+}
+
 export interface ApiMessageActionContactSignUp extends ActionMediaType {
   type: 'contactSignUp';
 }
@@ -443,7 +448,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent
-  | ApiMessageActionRequestedPeer
+  | ApiMessageActionRequestedPeer | ApiMessageActionManagedBotCreated
   | ApiMessageActionGroupCall | ApiMessageActionInviteToGroupCall | ApiMessageActionGroupCallScheduled
   | ApiMessageActionChatJoinedByRequest | ApiMessageActionChatJoinedViaCommunity
   | ApiMessageActionWebViewDataSent | ApiMessageActionGiftPremium

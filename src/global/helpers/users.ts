@@ -1,4 +1,5 @@
 import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
+import type { RegularLangKey } from '../../types/language';
 import type { LangFn } from '../../util/localization';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
@@ -7,6 +8,14 @@ import { orderBy } from '../../util/iteratees';
 import { formatRecentTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import { formatPhoneNumber } from '../../util/phoneNumber';
 import { getServerTime } from '../../util/serverTime';
+
+const BOT_STATUS_KEYS: Record<string, RegularLangKey> = {
+  app: 'BotStatusApp',
+  agent: 'BotStatusAgent',
+  ai: 'BotStatusAi',
+  game: 'BotStatusGame',
+  gay: 'BotStatusNonBinary',
+};
 
 export function getUserFirstOrLastName(lang: LangFn, user?: ApiUser) {
   if (!user) {
@@ -80,7 +89,9 @@ export function getUserStatus(
     if (user.botActiveUsers) {
       return lang('Users', { count: lang.number(user.botActiveUsers) }, { pluralValue: user.botActiveUsers });
     }
-    return lang('Bot');
+    const username = getMainUsername(user)?.toLowerCase();
+    const suffix = username && Object.keys(BOT_STATUS_KEYS).find((key) => username.endsWith(key));
+    return lang(suffix ? BOT_STATUS_KEYS[suffix] : 'Bot');
   }
 
   if (!userStatus) {

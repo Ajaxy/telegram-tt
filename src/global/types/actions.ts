@@ -2769,6 +2769,16 @@ export interface ActionPayloads {
     peerType: ApiRequestPeerType;
   } & WithTabId;
   closeRequestPeerModal: WithTabId | undefined;
+  openBotCreationModal: {
+    managerUsername: string;
+    suggestedName?: string;
+    suggestedUsername?: string;
+  } & WithTabId;
+  closeBotCreationModal: WithTabId | undefined;
+  createBot: {
+    name: string;
+    username: string;
+  } & WithTabId;
   sendBotRequestedPeer: {
     chatId: string;
     messageId: number;

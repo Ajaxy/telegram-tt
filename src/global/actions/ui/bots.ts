@@ -3,6 +3,7 @@ import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { selectTabBrowserState } from '../../helpers';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateSharedSettings } from '../../reducers';
 import {
@@ -329,3 +330,5 @@ addActionHandler('closeRequestPeerModal', (global, actions, payload): ActionRetu
     requestPeerModal: undefined,
   }, tabId);
 });
+
+addTabStateResetterAction('closeBotCreationModal', 'botCreationModal');

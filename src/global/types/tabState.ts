@@ -695,6 +695,13 @@ export type TabState = {
     peerType: ApiRequestPeerType;
   };
 
+  botCreationModal?: {
+    managerId: string;
+    suggestedName?: string;
+    suggestedUsername?: string;
+    occupiedUsername?: string;
+  };
+
   sharePreparedMessageModal?: {
     webAppKey: string;
     message: ApiPreparedInlineMessage;

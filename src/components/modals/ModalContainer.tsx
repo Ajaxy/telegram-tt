@@ -21,6 +21,7 @@ import AudioPlaylistModal from './audioPlaylist/AudioPlaylistModal.async';
 import AutoDeleteTimerModal from './autoDeleteTimer/AutoDeleteTimerModal.async';
 import BirthdaySetupModal from './birthday/BirthdaySetupModal.async';
 import BoostModal from './boost/BoostModal.async';
+import BotCreationModal from './botCreation/BotCreationModal.async';
 import BrowserModal from './browser/BrowserModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
@@ -175,9 +176,11 @@ type ModalKey = keyof Pick<TabState,
   'editRankModal' |
   'rankModal' |
   'aiTonePreviewModal' |
-  'autoDeleteTimerModal'
+  'autoDeleteTimerModal' |
+  'botCreationModal'
 >;
-type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal';
+type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal'
+  | 'botCreationModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -202,13 +205,6 @@ type Entries<T> = {
 }[keyof T][];
 
 const WRAPPED_MODAL_CLOSE_DURATION = 200;
-const WRAPPED_MODAL_CLOSE_DURATIONS: Record<WrappedModalKey, number> = {
-  pollModal: WRAPPED_MODAL_CLOSE_DURATION,
-  musicPicker: WRAPPED_MODAL_CLOSE_DURATION,
-  mapModal: WRAPPED_MODAL_CLOSE_DURATION,
-  safeLinkModalUrl: WRAPPED_MODAL_CLOSE_DURATION,
-  autoDeleteTimerModal: WRAPPED_MODAL_CLOSE_DURATION,
-};
 
 type WrappedModalBoundaryProps<T> = {
   modal: T;
@@ -216,14 +212,12 @@ type WrappedModalBoundaryProps<T> = {
     modal: NonNullable<T>;
     isOpen: boolean;
   }>;
-  closeDuration: number;
   shouldAnimateInterface: boolean;
 };
 
 const WrappedModalBoundary = <T,>({
   modal,
   ModalComponent,
-  closeDuration,
   shouldAnimateInterface,
 }: WrappedModalBoundaryProps<T>) => {
   const isOpen = Boolean(modal);
@@ -231,7 +225,7 @@ const WrappedModalBoundary = <T,>({
   const { shouldRender } = useShowTransition({
     isOpen,
     withShouldRender: true,
-    closeDuration,
+    closeDuration: WRAPPED_MODAL_CLOSE_DURATION,
     noCloseTransition: !shouldAnimateInterface,
   });
 
@@ -327,6 +321,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   mapModal: MapModal,
   safeLinkModalUrl: SafeLinkModal,
   autoDeleteTimerModal: AutoDeleteTimerModal,
+  botCreationModal: BotCreationModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];
@@ -347,7 +342,6 @@ function renderWrappedModal<K extends WrappedModalKey>(
       key={key}
       modal={modal}
       ModalComponent={ModalComponent}
-      closeDuration={WRAPPED_MODAL_CLOSE_DURATIONS[key]}
       shouldAnimateInterface={shouldAnimateInterface}
     />
   );

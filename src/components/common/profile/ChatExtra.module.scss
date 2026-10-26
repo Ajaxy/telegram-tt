@@ -56,6 +56,15 @@
   @include mixins.with-vt-type('chatExtra');
 }
 
+.botManager {
+  @include mixins.with-vt-type('chatExtra');
+}
+
+.botManagerIcon {
+  margin-inline-end: 0.25rem;
+  vertical-align: -0.125rem;
+}
+
 .botVerificationIcon {
   --custom-emoji-size: 1rem;
 

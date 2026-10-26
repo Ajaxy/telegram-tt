@@ -123,4 +123,5 @@ export { default as LeaveGroupModal } from '../components/modals/leaveGroup/Leav
 export { default as TwoFaCheckModal } from '../components/modals/twoFaCheck/TwoFaCheckModal';
 export { default as QuickChatPickerModal } from '../components/modals/quickChatPicker/QuickChatPickerModal';
 export { default as RequestPeerModal } from '../components/modals/requestPeer/RequestPeerModal';
+export { default as BotCreationModal } from '../components/modals/botCreation/BotCreationModal';
 export { default as CocoonModal } from '../components/modals/cocoon/CocoonModal';

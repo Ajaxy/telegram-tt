@@ -350,6 +350,8 @@
     "bots.getPreviewMedias",
     "bots.checkDownloadFileParams",
     "bots.toggleUserEmojiStatusPermission",
+    "bots.checkUsername",
+    "bots.createBot",
     "payments.getPaymentForm",
     "payments.getPaymentReceipt",
     "payments.validateRequestedInfo",

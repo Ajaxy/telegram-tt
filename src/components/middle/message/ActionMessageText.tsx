@@ -427,6 +427,12 @@ const ActionMessageText = ({
         }, { withNodes: true });
       }
 
+      case 'managedBotCreated': {
+        const bot = selectPeer(global, action.botId);
+        const botLink = renderPeerLink(action.botId, (bot && getPeerTitle(lang, bot)) || userFallbackText, asPreview);
+        return translateWithYou(lang, 'ActionManagedBotCreated', isOutgoing, { from: senderLink, bot: botLink });
+      }
+
       case 'botAllowed': {
         const {
           app, domain, isAttachMenu, isFromRequest,

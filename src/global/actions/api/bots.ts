@@ -25,6 +25,7 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import {
   getMainUsername,
+  getUserFullName,
   getWebAppKey,
   isChatAdmin,
   isKeyboardButtonUnsupportedForEphemeral,
@@ -63,6 +64,7 @@ import {
   selectCurrentMessageList,
   selectEphemeralMessage,
   selectIsCurrentUserFrozen,
+  selectIsCurrentUserPremium,
   selectIsTrustedBot,
   selectMessageReplyInfo,
   selectPeer,
@@ -73,6 +75,7 @@ import {
   selectUserFullInfo,
   selectWebApp,
 } from '../../selectors';
+import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
 import { selectSharedSettings } from '../../selectors/sharedState';
 import { selectDraft } from '../../selectors/threads.ts';
 import { fetchChatByUsername } from './chats';
@@ -1790,5 +1793,105 @@ addActionHandler('sendBotRequestedPeer', async (global, actions, payload): Promi
     messageId,
     buttonId,
     requestedPeers,
+  });
+});
+
+addActionHandler('openBotCreationModal', async (global, actions, payload): Promise<void> => {
+  const {
+    managerUsername, suggestedName, suggestedUsername, tabId = getCurrentTabId(),
+  } = payload;
+
+  const { user: manager } = await callApi('getChatByUsername', managerUsername) || {};
+  if (!manager) {
+    actions.showNotification({ message: { key: 'NoUsernameFound' }, tabId });
+    return;
+  }
+
+  if (!manager.canManageBots) {
+    actions.showNotification({
+      message: {
+        key: 'CreateBotUnsupported',
+        variables: { bot: `@${managerUsername}` },
+        options: { withNodes: true, withMarkdown: true },
+      },
+      tabId,
+    });
+    return;
+  }
+
+  global = getGlobal();
+  if (selectTabState(global, tabId).botCreationModal) return;
+
+  global = updateUser(global, manager.id, manager);
+  global = updateTabState(global, {
+    botCreationModal: {
+      managerId: manager.id,
+      suggestedName,
+      suggestedUsername,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('createBot', async (global, actions, payload): Promise<void> => {
+  const { name, username, tabId = getCurrentTabId() } = payload;
+
+  const modal = selectTabState(global, tabId).botCreationModal;
+  const manager = modal && selectUser(global, modal.managerId);
+  if (!manager) return;
+
+  const result = await callApi('createBot', {
+    manager, name, username, isViaDeepLink: true,
+  });
+  if (!result) return;
+
+  global = getGlobal();
+  const isSameModal = selectTabState(global, tabId).botCreationModal === modal;
+
+  if ('error' in result) {
+    if (result.errorMessage === 'BOT_CREATE_LIMIT_EXCEEDED') {
+      const limit = selectCurrentLimit(global, 'botsCreate');
+      const isPremium = selectIsCurrentUserPremium(global);
+      actions.showNotification({
+        title: { key: 'CreateBotLimitTitle' },
+        message: isPremium ? {
+          key: 'CreateBotLimitText', variables: { count: limit }, options: { pluralValue: limit },
+        } : {
+          key: 'CreateBotLimitTextPremium',
+          variables: { limit, premiumLimit: selectPremiumLimit(global, 'botsCreate') },
+          options: { withNodes: true, withMarkdown: true },
+        },
+        action: isPremium ? undefined : { action: 'openPremiumModal', payload: { tabId } },
+        actionText: isPremium ? undefined : { key: 'PremiumMore' },
+        tabId,
+      });
+      return;
+    }
+
+    if (result.errorMessage === 'USERNAME_OCCUPIED' && isSameModal) {
+      global = updateTabState(global, { botCreationModal: { ...modal, occupiedUsername: username } }, tabId);
+      setGlobal(global);
+      return;
+    }
+
+    actions.showNotification({ message: result.messageKey, tabId });
+    return;
+  }
+
+  global = updateUser(global, result.id, result);
+  setGlobal(global);
+
+  if (isSameModal) actions.closeBotCreationModal({ tabId });
+  actions.openChat({ id: result.id, tabId });
+
+  const lang = getTranslationFn();
+  actions.showNotification({
+    title: { key: 'CreateBotCreatedTitle', variables: { name: getUserFullName(lang, result) } },
+    message: {
+      key: 'CreateBotCreatedText',
+      variables: { bot: getUserFullName(lang, manager) },
+      options: { withNodes: true, withMarkdown: true },
+    },
+    tabId,
   });
 });

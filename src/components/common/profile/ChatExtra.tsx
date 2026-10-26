@@ -21,6 +21,7 @@ import {
 import {
   getChatLink,
   getHasAdminRight,
+  getMainUsername,
   isChatAdmin,
   isChatChannel,
   isUserRightBanned,
@@ -57,10 +58,11 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Island from '../../gili/layout/Island';
+import Island, { IslandDescription } from '../../gili/layout/Island';
 import Switch from '../../gili/primitives/Switch';
 import Chat from '../../left/main/Chat';
 import Button from '../../ui/Button';
+import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 import CompactMapPreview from '../CompactMapPreview';
 import CustomEmoji from '../CustomEmoji';
@@ -98,6 +100,7 @@ type StateProps = {
   isBotCanManageEmojiStatus?: boolean;
   botAppPermissions?: BotAppPermissions;
   botVerification?: ApiBotVerification;
+  botManager?: ApiUser;
   canViewSubscribers?: boolean;
 };
 
@@ -129,6 +132,7 @@ const ChatExtra = ({
   isBotCanManageEmojiStatus,
   botAppPermissions,
   botVerification,
+  botManager,
   className,
   style,
   isInSettings,
@@ -147,6 +151,7 @@ const ChatExtra = ({
     toggleUserLocationPermission,
     requestNextManagementScreen,
     openQrCodeModal,
+    openChatWithInfo,
   } = getActions();
 
   const {
@@ -313,6 +318,10 @@ const ChatExtra = ({
     stopEvent(e);
     if (!peerId) return;
     openQrCodeModal({ peerId });
+  });
+
+  const handleBotManagerClick = useLastCallback(() => {
+    openChatWithInfo({ id: botManager!.id });
   });
 
   const handleOpenApp = useLastCallback(() => {
@@ -664,8 +673,26 @@ const ChatExtra = ({
           </div>
         )}
       </Island>
+      {botManager && renderBotManager(botManager)}
     </div>
   );
+
+  function renderBotManager(manager: ApiUser) {
+    const username = getMainUsername(manager);
+
+    return (
+      <IslandDescription className={styles.botManager} style={createVtnStyle('botManager')}>
+        <Icon name="code" className={styles.botManagerIcon} />
+        {lang('ProfileBotManagedBy', {
+          bot: (
+            <Link isPrimary onClick={handleBotManagerClick}>
+              {username ? formatUsername(username) : getPeerTitle(lang, manager)}
+            </Link>
+          ),
+        }, { withNodes: true })}
+      </IslandDescription>
+    );
+  }
 };
 
 export default memo(withGlobal<OwnProps>(
@@ -684,6 +711,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = user && selectUserFullInfo(global, user.id);
 
     const botVerification = userFullInfo?.botVerification || chatFullInfo?.botVerification;
+    const botManager = userFullInfo?.botManagerId ? selectUser(global, userFullInfo.botManagerId) : undefined;
 
     const chatInviteLink = chatFullInfo?.inviteLink;
     const description = userFullInfo?.bio || chatFullInfo?.about;
@@ -721,6 +749,7 @@ export default memo(withGlobal<OwnProps>(
       hasMainMiniApp,
       isBotCanManageEmojiStatus: userFullInfo?.isBotCanManageEmojiStatus,
       botVerification,
+      botManager,
       canViewSubscribers,
     };
   },

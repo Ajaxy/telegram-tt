@@ -1,0 +1,57 @@
+.modal {
+  --modal-header-height: 1rem;
+}
+
+.avatar {
+  margin-inline: auto;
+}
+
+.title {
+  margin-top: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.description {
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.island {
+  padding: 0.625rem;
+}
+
+.statusTransition {
+  min-height: 2rem;
+}
+
+.checking {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.available {
+  color: var(--color-primary);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.spinner {
+  --spinner-size: 1rem;
+
+  flex-shrink: 0;
+}
+
+.subscribeIcon {
+  vertical-align: -0.125rem;
+}
+
+.submitButton {
+  margin-top: 0.5rem;
+}

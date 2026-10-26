@@ -22,5 +22,5 @@ export function selectPremiumLimit<T extends GlobalState>(global: T, limit: ApiL
 
   const { limits } = appConfig;
 
-  return limits[limit][1];
+  return limits[limit]?.[1] ?? DEFAULT_LIMITS[limit][1];
 }

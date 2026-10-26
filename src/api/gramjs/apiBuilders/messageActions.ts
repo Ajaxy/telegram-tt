@@ -207,6 +207,13 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       peerIds: action.peers.map(getApiChatIdFromMtpPeer),
     };
   }
+  if (action instanceof GramJs.MessageActionManagedBotCreated) {
+    return {
+      mediaType: 'action',
+      type: 'managedBotCreated',
+      botId: buildApiPeerId(action.botId, 'user'),
+    };
+  }
   if (action instanceof GramJs.MessageActionBoostApply) {
     const { boosts } = action;
     return {

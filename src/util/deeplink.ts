@@ -193,6 +193,13 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
         if (linkContext?.type !== 'inner') return false;
         actions.requestLinkUrlAuth({ url: parsedLink.url });
         return true;
+      case 'newBotLink':
+        actions.openBotCreationModal({
+          managerUsername: parsedLink.managerUsername,
+          suggestedName: parsedLink.name,
+          suggestedUsername: parsedLink.username,
+        });
+        return true;
       default:
         break;
     }

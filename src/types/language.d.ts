@@ -230,6 +230,14 @@ export interface LangPair {
   'RequestPeerReqOwnerChannel': undefined;
   'RequestPeerReqOwnerGroup': undefined;
   'RequestPeerReqBotMember': undefined;
+  'CreateBotTitle': undefined;
+  'CreateBotName': undefined;
+  'CreateBotUsername': undefined;
+  'CreateBotUsernameChecking': undefined;
+  'CreateBotUsernameSuffix': undefined;
+  'CreateBotUsernameSubscribe': undefined;
+  'CreateBotUsernameHelp': undefined;
+  'CreateBotLimitTitle': undefined;
   'SponsoredMessageInfo': undefined;
   'SponsoredMessageInfoDescription1': undefined;
   'SponsoredMessageInfoDescription2': undefined;
@@ -1068,6 +1076,11 @@ export interface LangPair {
   'AttachGiveawayResults': undefined;
   'ServiceNotifications': undefined;
   'Bot': undefined;
+  'BotStatusApp': undefined;
+  'BotStatusAgent': undefined;
+  'BotStatusAi': undefined;
+  'BotStatusGame': undefined;
+  'BotStatusNonBinary': undefined;
   'ALongTimeAgo': undefined;
   'WithinAMonth': undefined;
   'WithinAWeek': undefined;
@@ -3467,6 +3480,16 @@ export interface LangPairWithVariables<V = LangVariable> {
     'peer': V;
     'bot': V;
   };
+  'ProfileBotManagedBy': {
+    'bot': V;
+  };
+  'ActionManagedBotCreated': {
+    'from': V;
+    'bot': V;
+  };
+  'ActionManagedBotCreatedYou': {
+    'bot': V;
+  };
   'RequestPeerConfirm': {
     'peer': V;
     'bot': V;
@@ -3482,6 +3505,30 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'RequestPeerReqAdminRights': {
     'rights': V;
+  };
+  'CreateBotText': {
+    'bot': V;
+  };
+  'CreateBotUsernameHint': {
+    'suffixes': V;
+    'premium': V;
+  };
+  'CreateBotUsernamePremium': {
+    'suffix': V;
+    'link': V;
+  };
+  'CreateBotCreatedTitle': {
+    'name': V;
+  };
+  'CreateBotCreatedText': {
+    'bot': V;
+  };
+  'CreateBotUnsupported': {
+    'bot': V;
+  };
+  'CreateBotLimitTextPremium': {
+    'premiumLimit': V;
+    'limit': V;
   };
   'ConversationScheduleMessageSendToday': {
     'time': V;
@@ -5567,6 +5614,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'RequestPeerSelectLimit': {
+    'count': V;
+  };
+  'CreateBotLimitText': {
     'count': V;
   };
   'OnlineCount': {

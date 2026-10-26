@@ -15,7 +15,7 @@ export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'jo
   'setlanguage' | 'addtheme' | 'addstyle' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' |
   'msg' | 'msg_url' | 'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' |
   'premium_multigift' | 'stars_topup' | 'nft' | 'stars' | 'ton' | 'stargift_auction' | 'premium' | 'oauth' |
-  typeof WALLET_SEND_LINK_DOMAIN;
+  'newbot' | typeof WALLET_SEND_LINK_DOMAIN;
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -144,6 +144,13 @@ interface OAuthLink {
   url: string;
 }
 
+interface NewBotLink {
+  type: 'newBotLink';
+  managerUsername: string;
+  username?: string;
+  name?: string;
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
@@ -163,7 +170,8 @@ type DeepLink =
   TonModalLink |
   SendGramsLink |
   SettingsScreenLink |
-  OAuthLink;
+  OAuthLink |
+  NewBotLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
@@ -333,6 +341,12 @@ function parseTgLink(url: URL) {
       return { type: 'settings', path: pathParams.join('/').toLowerCase() || undefined } satisfies SettingsScreenLink;
     case 'oauth':
       return buildOAuthLink({ url: url.toString() });
+    case 'newBotLink':
+      return buildNewBotLink({
+        managerUsername: queryParams.manager,
+        username: queryParams.username,
+        name: queryParams.name,
+      });
     default:
       break;
   }
@@ -457,6 +471,12 @@ function parseHttpLink(url: URL) {
         encrypted: queryParams.encrypted,
         startApp: queryParams.startapp,
       });
+    case 'newBotLink':
+      return buildNewBotLink({
+        managerUsername: pathParams[1],
+        username: pathParams[2],
+        name: queryParams.name,
+      });
     default:
       break;
   }
@@ -494,6 +514,7 @@ function getHttpDeepLinkType(
     if (isUsernameValid(pathParams[0]) && isNumber(pathParams[1])) {
       return 'publicMessageLink';
     }
+    if (method === 'newbot') return 'newBotLink';
   } else if (len === 3) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
       return 'privateMessageLink';
@@ -502,6 +523,7 @@ function getHttpDeepLinkType(
       return 'publicMessageLink';
     }
     if (method === 'nft') return 'giftUniqueLink';
+    if (method === 'newbot') return 'newBotLink';
   } else if (len === 4) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
       return 'privateMessageLink';
@@ -580,6 +602,8 @@ function getTgDeepLinkType(
     }
     case 'oauth':
       return 'oauth';
+    case 'newbot':
+      return 'newBotLink';
     default:
       break;
   }
@@ -861,6 +885,26 @@ function buildOAuthLink(params: OAuthLinkBuilderParams): BuilderReturnType<OAuth
     url,
   };
 }
+
+function buildNewBotLink(params: BuilderParams<NewBotLink>): BuilderReturnType<NewBotLink> {
+  const {
+    managerUsername,
+    username,
+    name,
+  } = params;
+
+  if (!managerUsername || !isUsernameValid(managerUsername)) {
+    return undefined;
+  }
+
+  return {
+    type: 'newBotLink',
+    managerUsername,
+    username,
+    name,
+  };
+}
+
 function buildPremiumReferrerLink(params: BuilderParams<PremiumReferrerLink>): BuilderReturnType<PremiumReferrerLink> {
   const {
     ref,

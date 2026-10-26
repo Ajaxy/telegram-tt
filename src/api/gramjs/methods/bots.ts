@@ -41,12 +41,15 @@ import {
   addDocumentToLocalDb,
   addInlineBotRepairInfo,
   addPhotoToLocalDb,
+  addUserToLocalDb,
   addWebDocumentToLocalDb,
 } from '../helpers/localDb';
-import { deserializeBytes } from '../helpers/misc';
+import { checkErrorType, deserializeBytes, wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
 import { returnTonConnectOauthSession, takeTonConnectOauthSession } from './tonConnect';
+
+const BOT_USERNAME_ERRORS = new Set(['USERNAME_OCCUPIED', 'USERNAME_INVALID', 'USERNAME_SUFFIX_MISSING']);
 
 export async function answerCallbackButton({
   chatId, accessHash, messageId, data, isGame,
@@ -747,6 +750,51 @@ export async function fetchBotsRecommendations({ user }: { user: ApiChat }) {
     similarBots,
     count: result instanceof GramJs.users.UsersSlice ? result.count : similarBots.length,
   };
+}
+
+export async function checkBotUsername({ username }: { username: string }) {
+  try {
+    const result = await invokeRequest(new GramJs.bots.CheckUsername({ username }), {
+      shouldThrow: true,
+    });
+
+    return { result, error: undefined };
+  } catch (err: unknown) {
+    if (err instanceof RPCError && BOT_USERNAME_ERRORS.has(err.errorMessage)) {
+      return { result: false, error: err.errorMessage };
+    }
+
+    throw err;
+  }
+}
+
+export async function createBot({
+  manager, name, username, isViaDeepLink,
+}: {
+  manager: ApiUser;
+  name: string;
+  username: string;
+  isViaDeepLink?: true;
+}) {
+  try {
+    const result = await invokeRequest(new GramJs.bots.CreateBot({
+      managerId: buildInputUser(manager.id, manager.accessHash),
+      name,
+      username,
+      viaDeeplink: isViaDeepLink,
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!(result instanceof GramJs.User)) return undefined;
+
+    addUserToLocalDb(result);
+
+    return buildApiUser(result);
+  } catch (err) {
+    if (!checkErrorType(err)) return undefined;
+    return wrapError(err);
+  }
 }
 
 async function invokeUrlAuthRequest(
