@@ -1,4 +1,4 @@
-import type { TeactNode } from '../../../lib/teact/teact';
+import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
   createContext,
   memo,
@@ -72,6 +72,7 @@ type ModalSlotProps = {
 };
 
 type ModalHeaderProps = {
+  ref?: ElementRef<HTMLDivElement>;
   noMask?: boolean;
 } & ModalSlotProps;
 
@@ -447,11 +448,14 @@ const Modal = ({
   );
 };
 
-const ModalHeader = ({ noMask, className, children }: ModalHeaderProps) => {
+const ModalHeader = ({
+  ref, noMask, className, children,
+}: ModalHeaderProps) => {
   const modalContext = useModalContext();
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         styles.header,
         modalContext?.hasSubtitle && styles.headerWithSubtitle,

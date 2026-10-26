@@ -1,4 +1,5 @@
-import { memo, useEffect, useMemo, useState } from '@teact';
+import { memo, useEffect, useMemo, useRef, useState } from '@teact';
+import { setExtraStyles, toggleExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
@@ -7,13 +8,16 @@ import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
 
 import { PAID_MESSAGES_PURPOSE, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
+import { clamp } from '../../../util/math';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
+import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -39,7 +43,7 @@ import Modal, {
 
 import styles from './StarsBalanceModal.module.scss';
 
-const HEADER_TITLE_SCROLL_TOP = 150;
+const HEADER_STRIP_FADE_DISTANCE = 1.5 * REM;
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
 const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
   'StarsTransactionsAll',
@@ -76,10 +80,11 @@ const StarsBalanceModal = ({
 
   const lang = useLang();
 
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isHeaderTitleShown, setIsHeaderTitleShown] = useState(false);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
+
+  const headerRef = useRef<HTMLDivElement>();
+  const historyRef = useRef<HTMLDivElement>();
 
   const isOpen = Boolean(modal && (starsBalanceState || tonBalanceState));
 
@@ -96,6 +101,10 @@ const StarsBalanceModal = ({
     || topup?.balanceNeeded;
   const starsBalanceAmount = balance?.currency === STARS_CURRENCY_CODE ? balance.amount : 0;
   const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - starsBalanceAmount : undefined;
+  const starsTitle = starsNeeded
+    ? lang('StarsNeededTitle', { count: ongoingTransactionAmount }, { pluralValue: ongoingTransactionAmount! })
+    : lang('TelegramStars');
+  const title = isTon ? lang('GramEarnings') : starsTitle;
   const starsNeededText = useMemo(() => {
     const global = getGlobal();
 
@@ -143,8 +152,6 @@ const StarsBalanceModal = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setIsScrolled(false);
-      setIsHeaderTitleShown(false);
       setSelectedTabIndex(0);
       hideBuyOptions();
     }
@@ -173,15 +180,14 @@ const StarsBalanceModal = ({
         <ParticlesHeader
           model="swaying-star"
           color="gold"
-          title={starsNeeded
-            ? lang('StarsNeededTitle', { count: ongoingTransactionAmount }, { pluralValue: ongoingTransactionAmount! })
-            : lang('TelegramStars')}
+          title={title}
           description={renderText(
             starsNeededText || lang('TelegramStarsInfo'),
             ['simple_markdown', 'emoji'],
           )}
           isDisabled={!isOpen}
           className={styles.particlesHeader}
+          titleClassName={styles.heroTitle}
         />
         {canBuyPremium && !areBuyOptionsShown && (
           <Button pill onClick={showBuyOptions}>
@@ -219,10 +225,11 @@ const StarsBalanceModal = ({
         <ParticlesHeader
           model="diamond-3d"
           color="blue"
-          title={lang('GramEarnings')}
+          title={title}
           description={lang('GramEarningsText')}
           isDisabled={!isOpen}
           className={styles.particlesHeader}
+          titleClassName={styles.heroTitle}
         />
         <div className={styles.tonBalance}>
           <GramIcon className={styles.tonIconBalance} />
@@ -241,12 +248,23 @@ const StarsBalanceModal = ({
     );
   };
 
-  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
-    const { scrollTop } = e.currentTarget;
+  const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const scroller = e.currentTarget;
+    const { scrollTop } = scroller;
+    const heroTitleElement = scroller.querySelector<HTMLElement>(`.${styles.heroTitle}`)!;
+    const headerElement = headerRef.current!;
+    const distance = getCenterY(heroTitleElement) - getCenterY(headerElement);
+    const progress = clamp(scrollTop / (scrollTop + distance), 0, 1);
+    const stripOpacity = clamp(-distance / HEADER_STRIP_FADE_DISTANCE, 0, 1);
+    const isCollapsed = distance <= 0;
 
-    setIsScrolled(scrollTop > 0);
-    setIsHeaderTitleShown(scrollTop > HEADER_TITLE_SCROLL_TOP);
-  }
+    requestMutation(() => {
+      setExtraStyles(heroTitleElement, { '--hero-title-progress': String(progress) });
+      setExtraStyles(headerElement, { '--header-strip-opacity': String(stripOpacity) });
+      toggleExtraClass(heroTitleElement, styles.heroTitleHidden, isCollapsed);
+      toggleExtraClass(headerElement, styles.headerCollapsed, isCollapsed);
+    });
+  });
 
   // The wallet's native dialog would cover this modal, so the wallet is closed while it is open. When the wallet
   // opened it, leaving reopens the wallet.
@@ -254,6 +272,18 @@ const StarsBalanceModal = ({
     closeStarsBalanceModal();
 
     if (modal?.shouldReturnToWallet) openWalletModal();
+  });
+
+  const handleSwitchTab = useLastCallback((index: number) => {
+    setSelectedTabIndex(index);
+
+    const historyElement = historyRef.current!;
+    const offset = historyElement.getBoundingClientRect().top - headerRef.current!.getBoundingClientRect().bottom;
+    if (offset >= 0) return;
+
+    requestMutation(() => {
+      historyElement.closest(`.${styles.main}`)!.scrollBy({ top: offset, behavior: 'smooth' });
+    });
   });
 
   const handleLoadMoreTransactions = useLastCallback(() => {
@@ -304,10 +334,10 @@ const StarsBalanceModal = ({
   });
 
   const header = (
-    <ModalHeader className={buildClassName(styles.header, isScrolled && styles.headerScrolled)} noMask>
+    <ModalHeader ref={headerRef} className={styles.header} noMask>
       <ModalCloseButton onBack={modal?.shouldReturnToWallet ? handleClose : undefined} />
-      <ModalTitle className={buildClassName(styles.headerTitle, isHeaderTitleShown && styles.headerTitleShown)}>
-        {isTon ? lang('GramEarnings') : lang('TelegramStars')}
+      <ModalTitle>
+        <span className={styles.headerTitle}>{title}</span>
       </ModalTitle>
       {!isTon && (
         <ModalHeaderAction>
@@ -365,46 +395,56 @@ const StarsBalanceModal = ({
             </div>
           )}
           {shouldShowItems && (
-            <Island className={styles.history}>
+            <div ref={historyRef} className={styles.history}>
               <TabList
-                className={styles.tabs}
+                className={styles.tabList}
+                fadeMaskClassName={styles.tabs}
                 activeTab={selectedTabIndex}
                 tabs={transactionTabs}
-                centered
-                onSwitchTab={setSelectedTabIndex}
+                stretched
+                withFadeMask
+                onSwitchTab={handleSwitchTab}
               />
-              <Transition
-                name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
-                activeKey={selectedTabIndex}
-                renderCount={TRANSACTION_TABS_KEYS.length}
-                shouldRestoreHeight
-                className={styles.transition}
-              >
-                <InfiniteScroll
-                  onLoadMore={handleLoadMoreTransactions}
-                  items={history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions}
-                  scrollContainerClosest={`.${styles.main}`}
-                  itemSelector={`.${TRANSACTION_ITEM_CLASS}`}
-                  className={styles.transactions}
-                  noFastList
-                  noScrollRestoreOnTop
+              <Island className={styles.historyIsland}>
+                <Transition
+                  name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}
+                  activeKey={selectedTabIndex}
+                  renderCount={TRANSACTION_TABS_KEYS.length}
+                  shouldRestoreHeight
+                  className={styles.transition}
                 >
-                  {history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions.map((transaction) => (
-                    <StarsTransactionItem
-                      key={`${transaction.id}-${transaction.isRefund}`}
-                      transaction={transaction}
-                      className={TRANSACTION_ITEM_CLASS}
-                    />
-                  ))}
-                </InfiniteScroll>
-              </Transition>
-            </Island>
+                  <InfiniteScroll
+                    onLoadMore={handleLoadMoreTransactions}
+                    items={history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions}
+                    scrollContainerClosest={`.${styles.main}`}
+                    itemSelector={`.${TRANSACTION_ITEM_CLASS}`}
+                    className={styles.transactions}
+                    noFastList
+                    noScrollRestore
+                  >
+                    {history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions.map((transaction) => (
+                      <StarsTransactionItem
+                        key={`${transaction.id}-${transaction.isRefund}`}
+                        transaction={transaction}
+                        className={buildClassName(TRANSACTION_ITEM_CLASS, styles.transactionItem)}
+                      />
+                    ))}
+                  </InfiniteScroll>
+                </Transition>
+              </Island>
+            </div>
           )}
         </div>
       </div>
     </Modal>
   );
 };
+
+function getCenterY(element: HTMLElement) {
+  const { top, height } = element.getBoundingClientRect();
+
+  return top + height / 2;
+}
 
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {

@@ -1,36 +1,57 @@
 @use '../../../styles/mixins';
 
+$header-title-scale: 0.75;
+$content-padding-bottom: 1rem;
+
 .dialog {
   --modal-content-block-padding: 0;
 }
 
 .header {
+  isolation: isolate;
   position: relative;
+  background-color: transparent;
+
+  &::before {
+    pointer-events: none;
+    content: "";
+
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    opacity: var(--header-strip-opacity, 0);
+    background-image:
+      linear-gradient(
+        to bottom,
+        var(--modal-background-color) calc(100% - 1rem),
+        transparent 100%
+      );
+  }
 }
 
-.header::before {
-  content: "";
+.heroTitle {
+  transform: scale(calc(1 - #{1 - $header-title-scale} * var(--hero-title-progress, 0)));
+}
 
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
-  height: 0.0625rem;
-
+.heroTitleHidden {
   opacity: 0;
-  background-color: var(--color-borders);
-
-  transition: opacity 0.2s ease-in-out;
 }
 
+// Set at the size of the `ParticlesHeader` title and scaled down: the system font draws a smaller size with other
+// glyph metrics, which would jump when one title replaces the other
 .headerTitle {
+  transform: scale($header-title-scale);
+
+  display: inline-block;
+
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+
   opacity: 0;
-  transition: opacity 0.2s ease-in-out;
 }
 
-.headerScrolled::before,
-.headerTitleShown {
+.headerCollapsed .headerTitle {
   opacity: 1;
 }
 
@@ -38,23 +59,31 @@
   margin-block: -0.1875rem;
 }
 
+// Without `overflow-anchor: none`, the browser scrolls back to the old offset when a switched tab's list grows
 .main {
+  overflow-anchor: none;
   scrollbar-gutter: stable;
+
+  isolation: isolate;
+
   overflow-y: auto;
-  max-height: calc(var(--modal-max-height) - var(--modal-header-height));
+
+  max-height: var(--modal-max-height);
+  margin-top: calc(-1 * var(--modal-header-height));
 }
 
 .fixedHeight {
-  height: 40rem;
+  --_height: min(calc(40rem + var(--modal-header-height)), var(--modal-max-height));
+
+  height: var(--_height);
 }
 
 .content {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-height: 100%;
 
-  @include mixins.scrollable-padding(0);
+  @include mixins.scrollable-padding(var(--modal-header-height), $bottom: $content-padding-bottom);
 }
 
 .intro {
@@ -71,8 +100,48 @@
   margin-top: 0.5rem;
 }
 
+// Fills the scroller below the header, so the tabs stay stuck when a shorter or still loading list is shown
 .history {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: calc(var(--_height) - var(--modal-header-height) - $content-padding-bottom);
+}
+
+.historyIsland {
   flex: 1;
+}
+
+.tabs {
+  --fade-mask-color: var(--color-background-secondary);
+  --fade-mask-height: calc(50% + 1rem);
+
+  position: sticky;
+  z-index: 2;
+  top: var(--modal-header-height);
+
+  &::before {
+    pointer-events: none;
+    content: "";
+
+    position: absolute;
+    z-index: 9;
+    inset-inline: 0;
+    top: -1rem;
+
+    height: calc(50% + 1rem);
+
+    background-color: var(--color-background-secondary);
+  }
+}
+
+.tabList {
+  box-shadow: var(--shadow-chat-list-panel);
+}
+
+:global(html.theme-dark) .tabList {
+  border: 1px solid var(--color-borders);
+  box-shadow: none;
 }
 
 .transition {
@@ -230,11 +299,18 @@
   width: 100%;
 }
 
-.tabs {
-  width: fit-content;
-  max-width: 100%;
-  margin-bottom: 0.25rem;
-  margin-inline: auto;
+.transactionItem {
+  animation: transaction-item-in 0.2s ease-out;
+}
+
+:global(body.no-page-transitions) .transactionItem {
+  animation: none;
+}
+
+@keyframes transaction-item-in {
+  from {
+    opacity: 0;
+  }
 }
 
 .disclaimer {
