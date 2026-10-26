@@ -24,7 +24,7 @@ const WalletDeleteScreen = ({ canSave, switchToAddress, onConfirm }: OwnProps) =
 
   return (
     <WalletNoticeScreen
-      sticker={isSwitch ? '🔁' : '⚠️'}
+      sticker={isSwitch ? '🔄' : '❗️'}
       title={lang(isSwitch ? 'WalletSwitchTitle' : 'WalletDeleteTitle')}
       text={isSwitch
         ? lang('WalletSwitchText', { address: shortenAddress(switchToAddress) })

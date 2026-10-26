@@ -1,0 +1,54 @@
+@use 'sass:math';
+
+// The iOS card lets the held diamond grow 2.6 times
+$growth: 2.6;
+// The canvas leaves room around the diamond for its sparkles
+$rest-size: 150%;
+
+.root {
+  position: relative;
+}
+
+.raised {
+  z-index: 1;
+}
+
+// Both are drawn at the grown size and scaled down at rest, so the diamond stays sharp in the hand
+.preview,
+.canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  scale: math.div(1, $growth);
+
+  aspect-ratio: 1;
+  width: $rest-size * $growth;
+}
+
+.preview {
+  pointer-events: none;
+  transition: opacity 0.22s linear;
+}
+
+.previewHidden {
+  opacity: 0;
+}
+
+.canvas {
+  touch-action: none;
+  cursor: var(--custom-cursor, grab);
+  opacity: 0;
+  transition:
+    opacity 0.22s linear,
+    scale 0.46s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ready {
+  opacity: 1;
+}
+
+.grown {
+  cursor: var(--custom-cursor, grabbing);
+  scale: 1;
+}

@@ -66,6 +66,7 @@ const StarsBalanceModal = ({
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
+    openWalletModal,
   } = getActions();
 
   const isTon = modal?.currency === TON_CURRENCY_CODE;
@@ -247,6 +248,14 @@ const StarsBalanceModal = ({
     setIsHeaderTitleShown(scrollTop > HEADER_TITLE_SCROLL_TOP);
   }
 
+  // The wallet's native dialog would cover this modal, so the wallet is closed while it is open. When the wallet
+  // opened it, leaving reopens the wallet.
+  const handleClose = useLastCallback(() => {
+    closeStarsBalanceModal();
+
+    if (modal?.shouldReturnToWallet) openWalletModal();
+  });
+
   const handleLoadMoreTransactions = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
@@ -296,7 +305,7 @@ const StarsBalanceModal = ({
 
   const header = (
     <ModalHeader className={buildClassName(styles.header, isScrolled && styles.headerScrolled)} noMask>
-      <ModalCloseButton />
+      <ModalCloseButton onBack={modal?.shouldReturnToWallet ? handleClose : undefined} />
       <ModalTitle className={buildClassName(styles.headerTitle, isHeaderTitleShown && styles.headerTitleShown)}>
         {isTon ? lang('GramEarnings') : lang('TelegramStars')}
       </ModalTitle>
@@ -317,7 +326,7 @@ const StarsBalanceModal = ({
       dialogClassName={styles.dialog}
       noContentInlinePadding
       noScrollable
-      onClose={closeStarsBalanceModal}
+      onClose={handleClose}
     >
       <div
         className={buildClassName(

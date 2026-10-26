@@ -7,6 +7,8 @@ import useClickable from '../../../hooks/useClickable';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import AnimatedCounter from '../../common/AnimatedCounter';
+
 import styles from './ExpandableTonAmount.module.scss';
 
 type OwnProps = {
@@ -15,10 +17,11 @@ type OwnProps = {
   className?: string;
   fractionClassName?: string;
   withTicker?: boolean;
+  isAnimated?: boolean;
 };
 
 const ExpandableTonAmount = ({
-  nanos, className, fractionClassName, withTicker,
+  nanos, className, fractionClassName, withTicker, isAnimated,
 }: OwnProps) => {
   const lang = useLang();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -38,10 +41,15 @@ const ExpandableTonAmount = ({
   const text = isExpanded ? expanded : collapsed;
   const [whole, fraction] = fractionClassName ? text.split('.') : [text];
 
+  // Expanding is not a change of the amount, so it starts fresh counters rather than rolling every digit
+  const counterKey = isExpanded ? 'expanded' : 'collapsed';
+
   const amount = (
     <span className={buildClassName(canExpand && styles.expandable, className)} {...clickableProps}>
-      {whole}
-      {fraction && <span className={fractionClassName}>{`.${fraction}`}</span>}
+      {isAnimated ? <AnimatedCounter key={`whole-${counterKey}`} text={whole} /> : whole}
+      {fraction && (isAnimated
+        ? <AnimatedCounter key={`fraction-${counterKey}`} text={`.${fraction}`} className={fractionClassName} />
+        : <span className={fractionClassName}>{`.${fraction}`}</span>)}
     </span>
   );
 

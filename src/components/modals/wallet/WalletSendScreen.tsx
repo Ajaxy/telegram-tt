@@ -27,6 +27,7 @@ import { loadCurrentUserAddress } from './helpers/loadCurrentUserAddress';
 
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 import useFlag from '../../../hooks/useFlag';
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -74,6 +75,7 @@ export const EMPTY_SEND_DRAFT: WalletSendDraft = {
 };
 
 type OwnProps = {
+  isActive: boolean;
   draft: WalletSendDraft;
   collectible?: ApiWalletCollectible;
   onSubmit: (payload: WalletTransferPayload) => void;
@@ -104,6 +106,8 @@ type StateProps = {
   freeTransfersPerDay?: number;
   // Nanotons. The server accepts smaller transfers but leaves them out of the history.
   minAmount?: bigint;
+  // `Modal` freezes its content while it closes, so the form learns about the closing from here
+  isModalOpen: boolean;
 };
 
 const RECENT_LIMIT = 50;
@@ -117,17 +121,26 @@ const COMMENT_COUNTER_THRESHOLD = 100;
 const NANOTON_DECIMALS = 9;
 const CAN_READ_CLIPBOARD = Boolean(window.navigator.clipboard?.readText);
 
-const WalletSendScreen = ({
-  balance, usdRate, currency, currencyRate, currentUserId, contactIds, activeChatIds, topPeerIds, recentlyFoundChatIds,
-  usersById, userAddresses, resolvedAddresses, walletDomainLookup, walletRecipientSearch,
-  walletTransfer, walletTransferFee, gaslessInfo, freeTransfersPerDay, minAmount,
-  draft, collectible,
-  onSubmit, onDraftChange, onBuy,
-}: OwnProps & StateProps) => {
+const WalletSendScreen = (props: OwnProps & StateProps) => {
   const {
     loadWalletUserAddresses, loadWalletTransferFee, loadWalletDomainAddress, loadTopPeers, searchWalletRecipients,
     showNotification,
   } = getActions();
+
+  // A form leaving with its slide or the modal keeps its last values, so nothing changes under the animation
+  const formProps = useFrozenProps(props, !props.isActive || !props.isModalOpen);
+  const {
+    usdRate, currency, currencyRate, currentUserId, contactIds, activeChatIds, topPeerIds, recentlyFoundChatIds,
+    usersById, userAddresses, resolvedAddresses, walletDomainLookup, walletRecipientSearch,
+    walletTransfer, walletTransferFee, gaslessInfo, freeTransfersPerDay, minAmount,
+    draft, collectible,
+    onSubmit, onDraftChange, onBuy,
+  } = formProps;
+
+  const isSubmitted = getIsSubmitted(walletTransfer);
+  // A submitted transfer lowers the balance at once, and its amount would then show as more than the balance. So the
+  // balance stays as it was before the transfer.
+  const { balance } = useFrozenProps(formProps, isSubmitted);
 
   const lang = useLang();
 
@@ -142,8 +155,6 @@ const WalletSendScreen = ({
   const updateDraft = useLastCallback((update: Partial<WalletSendDraft>) => {
     onDraftChange({ ...draft, ...update });
   });
-
-  const isSending = walletTransfer?.status === 'pending';
 
   // The item contract pays its fees from the fixed amount and returns the rest
   const collectibleAddress = draft.collectibleAddress;
@@ -312,6 +323,9 @@ const WalletSendScreen = ({
   const fiatAmount = amountNanos > 0n
     ? formatTonInFiat(amountNanos, usdRate, currency, currencyRate, lang.code)
     : undefined;
+  const fiatFee = estimatedFee
+    ? formatTonInFiat(estimatedFee, usdRate, currency, currencyRate, lang.code, { isPrecise: true })
+    : undefined;
 
   // An edit after a tap on a row cancels the tap. Otherwise the row's address would replace the newer input when
   // it arrives.
@@ -399,7 +413,8 @@ const WalletSendScreen = ({
           <div className={styles.collectibleName}>{collectible.name ?? lang('WalletCollectibleTitle')}</div>
         </Island>
       )}
-      <Island className={buildClassName(styles.form, isRecipientValid && styles.formBeforeSubmit)}>
+      {/* Until the transfer is sent or fails, the fields keep showing what it was signed with */}
+      <Island className={buildClassName(styles.form, isRecipientValid && styles.formBeforeSubmit)} inert={isSubmitted}>
         <div className={styles.recipientField}>
           {/* An address is too long for one line, so it wraps instead of scrolling out of sight */}
           <TextArea
@@ -452,9 +467,9 @@ const WalletSendScreen = ({
                 { withNodes: true },
               )}
               {Boolean(balance) && (
-                <button type="button" className={styles.maxButton} onClick={handleMaxClick}>
+                <Link isPrimary className={styles.maxButton} onClick={handleMaxClick}>
                   {lang('WalletSendMax')}
-                </button>
+                </Link>
               )}
             </div>
           </div>
@@ -520,7 +535,7 @@ const WalletSendScreen = ({
                 <Button
                   round
                   size="tiny"
-                  color="translucent"
+                  color="translucent-primary"
                   className={styles.feeInfoButton}
                   iconName="help"
                   ariaLabel={lang('WalletNetworkFeesTitle')}
@@ -539,8 +554,8 @@ const WalletSendScreen = ({
           )}
           <Button
             pill
-            disabled={!canSubmit || isSending || isEstimatingFee}
-            isLoading={isSending || isEstimatingFee}
+            disabled={!canSubmit || isSubmitted || isEstimatingFee}
+            isLoading={isSubmitted || isEstimatingFee}
             onClick={handleSubmit}
           >
             {lang('WalletSendContinue')}
@@ -604,7 +619,7 @@ const WalletSendScreen = ({
       {canShowFeesInfo && (
         <WalletFeesInfoDialog
           isOpen={isFeesInfoOpen}
-          fee={estimatedFee}
+          fiatFee={fiatFee}
           freeTransfersPerDay={freeTransfersPerDay!}
           onClose={closeFeesInfo}
         />
@@ -616,6 +631,10 @@ const WalletSendScreen = ({
 // Bots and deleted accounts have no wallet
 function canHaveWallet(user?: ApiUser) {
   return user !== undefined && !isUserBot(user) && !isDeletedUser(user);
+}
+
+function getIsSubmitted(walletTransfer?: TabState['walletTransfer']) {
+  return walletTransfer?.status === 'pending' || walletTransfer?.status === 'sent';
 }
 
 export default memo(withGlobal<OwnProps>(
@@ -642,6 +661,7 @@ export default memo(withGlobal<OwnProps>(
       gaslessInfo: global.wallet?.gaslessInfo,
       freeTransfersPerDay: global.appConfig.walletGaslessDailyTransfers,
       minAmount: global.appConfig.walletTransferMinNanos,
+      isModalOpen: Boolean(tabState.walletModal),
     };
   },
 )(WalletSendScreen));

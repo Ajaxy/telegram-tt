@@ -17,7 +17,10 @@ const DEFAULT_PARTICLE_PARAMS = {
   centerShift: [0, -36] as const,
 };
 
-const MIN_BURST_INTERVAL = 8;
+// A burst comes with every pointer move, which a 120 Hz display reports twice as often. At most one burst per 15 ms
+// keeps it near 60 per second there, and staying just under a 60 Hz frame (16.7 ms) lets a move that comes a
+// millisecond early still count.
+const MIN_BURST_INTERVAL = 15;
 
 const InteractiveSparkles = ({
   color = 'purple',

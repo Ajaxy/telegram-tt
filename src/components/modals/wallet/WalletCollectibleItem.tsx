@@ -13,10 +13,11 @@ import styles from './WalletCollectibleItem.module.scss';
 
 type OwnProps = {
   collectible: ApiWalletCollectible;
+  className?: string;
   onClick: (collectible: ApiWalletCollectible) => void;
 };
 
-const WalletCollectibleItem = ({ collectible, onClick }: OwnProps) => {
+const WalletCollectibleItem = ({ collectible, className, onClick }: OwnProps) => {
   const { name, description } = collectible;
 
   const lang = useLang();
@@ -30,7 +31,7 @@ const WalletCollectibleItem = ({ collectible, onClick }: OwnProps) => {
   });
 
   return (
-    <Interactive clickable ripple onClick={handleClick}>
+    <Interactive className={className} clickable ripple onClick={handleClick}>
       <Control className={styles.root}>
         <ControlBefore>
           <WalletCollectibleImage collectible={collectible} className={styles.preview} />

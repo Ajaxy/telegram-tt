@@ -1,6 +1,7 @@
 import type { TeactNode } from '../../../lib/teact/teact';
 
 import Transition from '../../ui/Transition';
+import WalletEmojiSticker from './WalletEmojiSticker';
 
 import styles from './WalletNoticeScreen.module.scss';
 
@@ -29,7 +30,9 @@ const WalletNoticeScreen = ({
         className={styles.hero}
         slideClassName={styles.heroSlide}
       >
-        <div className={styles.sticker}>{sticker}</div>
+        <div className={styles.sticker}>
+          {typeof sticker === 'string' ? <WalletEmojiSticker emoji={sticker} /> : sticker}
+        </div>
         <div className={styles.heading}>
           <div className={styles.title}>{title}</div>
           {Boolean(subtitle) && <div className={styles.subtitle}>{subtitle}</div>}

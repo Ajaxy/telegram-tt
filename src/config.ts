@@ -350,6 +350,7 @@ export const TME_LINK_PREFIX = 'https://t.me/';
 export const BOT_FATHER_USERNAME = 'botfather';
 // Gram Wallet
 export const WALLET_BOT_USERNAME = 'walt';
+export const DEFAULT_OLD_WALLET_BOT_USERNAME = 'wallet';
 export const WALLET_SEND_LINK_DOMAIN = 'sendgrams';
 // An address or `transaction/<hash>` is appended as is
 export const DEFAULT_TON_EXPLORER_URL = 'https://tonviewer.com/';

@@ -7,11 +7,16 @@ const BOC_MAGIC = [0xb5, 0xee, 0x9c, 0x72];
 const HAS_CRC32C_FLAG = 0x40;
 // `max_ext_msg_size`, `max_ext_msg_depth` and `max_msg_cells` of config parameter 43: a larger BOC could never be sent
 export const MAX_BOC_BYTES = 65535;
-const MAX_CELL_DEPTH = 512;
+// `max_ext_msg_depth` is 512, and a node refuses an incoming external message of that depth or deeper
+// (`ExtMessageQ::create_ext_message` in `validator/impl/external-message.cpp` of the TON node)
+const MAX_CELL_DEPTH = 511;
 const MAX_CELL_COUNT = 8192;
 
 export function serializeBoc(root: Cell): Uint8Array<ArrayBuffer> {
   const cells = sortCells(root);
+
+  // Payloads within the limits can still exceed them once the wallet wraps them into its own cells
+  if (root.depth > MAX_CELL_DEPTH || cells.length > MAX_CELL_COUNT) throw new Error('BOC exceeds the message limits');
 
   // The header says how many bytes each reference index takes, so every cell must use the same width
   const sizeBytes = countMinBytes(cells.length);

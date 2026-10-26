@@ -70,7 +70,9 @@
 
     transition: clip-path var(--slide-transition);
 
-    &.stretched {
+    // The highlighted copies line up with the original tabs only when both rows are laid out across the same width
+    &.stretched,
+    &.centered {
       width: 100%;
     }
   }

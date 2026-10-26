@@ -17,9 +17,9 @@ type OwnProps = {
   className?: string;
 };
 
-const TERMS_URL = 'https://telegram.org/tos';
+export const WALLET_TERMS_URL = 'https://telegram.org/tos';
 
-const FEATURES: [IconName, RegularLangKey, RegularLangKey][] = [
+export const WALLET_FEATURES: [IconName, RegularLangKey, RegularLangKey][] = [
   ['bolt', 'WalletFeatureInstantTitle', 'WalletFeatureInstantText'],
   ['no-fees', 'WalletFeatureNoFeesTitle', 'WalletFeatureNoFeesText'],
   ['blockchain-verified', 'WalletFeatureVerifiedTitle', 'WalletFeatureVerifiedText'],
@@ -30,7 +30,7 @@ const WalletFeatures = ({ className }: OwnProps) => {
 
   return (
     <div className={buildClassName(styles.root, className)}>
-      {FEATURES.map(([icon, titleKey, textKey]) => (
+      {WALLET_FEATURES.map(([icon, titleKey, textKey]) => (
         <Control key={titleKey} className={styles.feature}>
           <ControlBefore className={styles.featureIcon}>
             <Icon name={icon} />
@@ -41,7 +41,7 @@ const WalletFeatures = ({ className }: OwnProps) => {
       ))}
       <div className={styles.terms}>
         {lang('WalletTermsNotice', {
-          link: <SafeLink url={TERMS_URL} text={lang('WalletTermsLink')} />,
+          link: <SafeLink url={WALLET_TERMS_URL} text={lang('WalletTermsLink')} />,
         }, { withNodes: true })}
       </div>
     </div>

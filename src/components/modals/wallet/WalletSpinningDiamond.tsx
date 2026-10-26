@@ -2,9 +2,11 @@ import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import { setDiamondIconSpin, subscribeDiamondIcon } from '../../../lib/diamond/icon';
 import { getIsDiamond3dDegraded } from '../../../lib/diamond/performance';
+import { selectShouldLoopStickers } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { LOCAL_TGS_PREVIEW_URLS } from '../../common/helpers/animatedAssets';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 
@@ -17,14 +19,14 @@ type OwnProps = {
 
 // The diamond is small, so a denser frame would cost GPU time without a visible difference
 const MAX_PIXEL_RATIO = 2;
-const IS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const WalletSpinningDiamond = ({ size, className }: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
+  const shouldLoop = useSelector(selectShouldLoopStickers);
   const isDegraded = useDerivedState(getIsDiamond3dDegraded);
   const [isReady, markReady] = useFlag();
   const [isFailed, markFailed] = useFlag();
-  const shouldAnimate = !isDegraded && !isFailed && !IS_REDUCED_MOTION;
+  const shouldAnimate = shouldLoop && !isDegraded && !isFailed;
 
   useEffect(() => {
     if (!shouldAnimate) return undefined;

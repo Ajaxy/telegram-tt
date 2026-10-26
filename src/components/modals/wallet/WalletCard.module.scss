@@ -1,32 +1,138 @@
+@use 'sass:math';
+
 $card-width: 336;
 $card-height: 205;
 
 $tilt-angle: 8deg;
-// An absolute length, tuned to the card's own width
-$tilt-perspective: 40rem;
+// About 2.2 card widths away. An absolute length, tuned to the card's own width.
+$card-perspective: 52rem;
+// The edge of the Android card is 1.25% of its width
+$edge-layer-gap: 0.0625rem;
+
+// The motion of the Android app: the card lags the scroll by half its height, shrinks toward its top edge, tilts back
+// until it stands edge-on and fades out over the last quarter. Android lags it by a further 24dp, which under this
+// perspective brings the edge down onto the buttons.
+$fold-scale: 0.8;
+$fold-fade-start: 0.75;
+$fold-steps: 20;
 
 // Card metrics from the mockup against the card's inline size, so the composition scales down together
 @function cq($px) {
   @return calc(#{$px} / #{$card-width} * 100cqi);
 }
 
-// Measures the pointer for `useCardTilt` and stays flat while the card inside rotates
+@function parallax($shift) {
+  @return calc(var(--tilt-x) * #{$shift}) calc(var(--tilt-y) * #{$shift});
+}
+
+// No tilt for the first percent of the way, then a quick lean back
+@function fold-angle($progress) {
+  @return math.max(0deg, 90deg * math.sqrt($progress) - 10deg + 10deg * $progress);
+}
+
+// Measures the pointer for `useCardTilt` and stays flat while the card inside rotates. It also fades the card out:
+// opacity on the layer below would flatten its 3D and drop the edge.
 .root {
   --tilt-x: 0;
   --tilt-y: 0;
-  --card-glow: 0;
   --glare-angle: calc(var(--tilt-x) * 90deg + var(--tilt-y) * 60deg);
 
   // A horizontal drag tilts the card, a vertical one scrolls the screen
   touch-action: pan-y;
   width: 100%;
-  perspective: $tilt-perspective;
+  perspective: $card-perspective;
+  transition: scale 0.25s;
+}
+
+.pressed {
+  scale: 1.012;
+}
+
+// Holds the face and the layers of its edge in one 3D space. The pointer tilts it through `transform`, while the fold
+// goes through the separate transform properties, which apply on top.
+.fold {
+  transform-style: preserve-3d;
+  transform: rotateY(calc(var(--tilt-x) * #{$tilt-angle})) rotateX(calc(var(--tilt-y) * -#{$tilt-angle}));
+}
+
+// A stack of layers behind the face, which shows as the edge once the card turns
+.edgeLayer {
+  position: absolute;
+  inset: 0;
+  transform: translateZ(calc(var(--layer) * -#{$edge-layer-gap}));
+
+  border-radius: 1.75rem;
+
+  background-image: linear-gradient(to bottom, #2a64c4, #0f3a8c);
+}
+
+.edgeRim {
+  background-image: linear-gradient(to bottom, #6fb4ff, #2f74d8);
+}
+
+// The deepest layer casts the shadow, so it stays behind the edge as well as the face
+.edgeShadow {
+  box-shadow: 0 0.625rem 1.625rem -0.875rem rgb(0 96 230 / 60%);
+  transition: box-shadow 0.25s;
+}
+
+.pressed .edgeShadow {
+  box-shadow: 0 0.4375rem 1rem rgb(0 0 0 / 18%);
+}
+
+@supports (animation-timeline: view()) {
+  .root {
+    animation-name: card-fade;
+    view-timeline: --wallet-card block;
+  }
+
+  // The scroll padding of the screen insets the timeline by the header, so the fold runs from the card top meeting
+  // the header to its bottom edge passing under it. The scroll drives it directly, so it never lags behind a frame.
+  .root,
+  .fold {
+    animation-duration: auto;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: --wallet-card;
+    animation-range: exit;
+  }
+
+  .fold {
+    animation-name: card-fold;
+  }
+
+  :global(body.no-page-transitions) .root,
+  :global(body.no-page-transitions) .fold {
+    animation: none;
+  }
+}
+
+// The shift keeps the top edge in place under the scale and adds the lag; the keyframes trace the curve of the angle
+@keyframes card-fold {
+  @for $i from 0 through $fold-steps {
+    $progress: math.div($i, $fold-steps);
+
+    #{$progress * 100%} {
+      translate: 0 ($progress * 50% * $fold-scale);
+      rotate: x fold-angle($progress);
+      scale: 1 - (1 - $fold-scale) * $progress;
+    }
+  }
+}
+
+@keyframes card-fade {
+  #{$fold-fade-start * 100%} {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 .card {
   isolation: isolate;
   position: relative;
-  transform: rotateY(calc(var(--tilt-x) * #{$tilt-angle})) rotateX(calc(var(--tilt-y) * -#{$tilt-angle}));
 
   container-type: inline-size;
   overflow: clip;
@@ -99,7 +205,7 @@ $tilt-perspective: 40rem;
   mix-blend-mode: plus-lighter;
 }
 
-// The glare lobes peak at 54deg and 234deg of the gradient
+// The glare lobes peak at 54deg and 234deg of its gradient
 .star {
   --star-azimuth: atan2(calc(var(--star-x) * 1cqw), calc(var(--star-y) * 1cqh));
   --star-light:
@@ -107,10 +213,12 @@ $tilt-perspective: 40rem;
       (cos(var(--glare-angle) + 54deg - var(--star-azimuth)) + 1) / 2,
       (cos(var(--glare-angle) + 234deg - var(--star-azimuth)) + 1) / 2
     );
+  // The fourth power narrows the light to the lobes
+  --star-lit: calc(var(--star-light) * var(--star-light) * var(--star-light) * var(--star-light));
 
   position: absolute;
-  transform: translate(-50%, -50%) scale(calc(1 + var(--card-glow) * var(--star-light) * 0.35));
-  opacity: calc(var(--star-opacity) * (1 + var(--card-glow) * var(--star-light) * 1.6));
+  transform: translate(-50%, -50%) scale(calc(1 + var(--star-lit) * 0.3));
+  opacity: calc(var(--star-opacity) * (1 + var(--star-lit) * 1.4));
 }
 
 .sparkle {
@@ -156,6 +264,16 @@ $tilt-perspective: 40rem;
   }
 }
 
+.balanceGlint {
+  pointer-events: none;
+
+  position: absolute;
+  inset: 0;
+  transform: translateX(-110%);
+
+  background-image: linear-gradient(105deg, transparent 30%, rgb(200 242 255 / 50%) 50%, transparent 70%);
+}
+
 // Firefox rebuilds the blend group of a blended layer inside the 3D-transformed card every frame, and
 // the content blinks; plain alpha compositing keeps it stable
 @supports (-moz-appearance: none) {
@@ -170,6 +288,7 @@ $tilt-perspective: 40rem;
   // The QR button sits at `cq(46)` from the right and is `cq(48)` wide
   right: cq(100);
   left: cq(25.5);
+  translate: parallax(0.25rem);
 
   overflow: hidden;
 
@@ -180,6 +299,12 @@ $tilt-perspective: 40rem;
   white-space: nowrap;
 }
 
+// The held diamond grows out of the line and over the labels below, and keeps doing so while it shrinks back
+.amount:has([data-raised]) {
+  z-index: 1;
+  overflow: visible;
+}
+
 .amountContent {
   transform-origin: left center;
   transform: scale(var(--fit-scale, 1));
@@ -187,17 +312,18 @@ $tilt-perspective: 40rem;
   display: flex;
   gap: cq(4.5);
   align-items: center;
+
+  width: max-content;
 }
 
 .amountFraction {
   font-size: cq(18);
 }
 
-// The mockup's 28px icon box carries built-in padding; these are the glyph metrics
-.gramIcon {
-  width: cq(21);
-  height: cq(17.5);
-  margin: 0 !important;
+// About the size of the first digit, as on the iOS card
+.diamond {
+  width: cq(27);
+  height: cq(22.5);
 }
 
 .ticker {
@@ -212,6 +338,7 @@ $tilt-perspective: 40rem;
   position: absolute;
   top: cq(102);
   left: cq(24);
+  translate: parallax(0.21875rem);
 
   font-family: var(--font-family-monospace);
   font-size: cq(13);
@@ -222,14 +349,20 @@ $tilt-perspective: 40rem;
 
 .ownerName {
   position: absolute;
+  right: cq(65);
   bottom: cq(17);
   left: cq(24);
+  translate: parallax(0.1875rem);
+
+  overflow: hidden;
 
   font-family: var(--font-family-monospace);
   font-size: cq(13);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .address {
@@ -239,6 +372,7 @@ $tilt-perspective: 40rem;
   top: cq(18);
   right: cq(12);
   bottom: cq(18);
+  translate: parallax(0.125rem);
 
   display: flex;
   align-items: center;
@@ -260,18 +394,17 @@ $tilt-perspective: 40rem;
 
 .addressLine {
   font-family: var(--font-family-monospace);
-  font-size: cq(9.7);
+  font-size: cq(10);
   line-height: 1.15;
-  color: rgb(0 0 0 / 14%);
+  color: rgb(5 90 196 / 80%);
   text-align: center;
-  text-shadow: 0 cq(1) 0 rgb(255 255 255 / 6%);
+  // The line is turned a quarter clockwise, so its horizontal offset casts the highlight downwards on the card
+  text-shadow: cq(1) 0 0 rgb(255 255 255 / 10%);
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .qrButton {
-  --chip-peak: calc(50% + var(--tilt-x) * 28% + var(--tilt-y) * 16%);
-
   position: absolute;
   top: cq(74);
   right: cq(46);
@@ -288,23 +421,47 @@ $tilt-perspective: 40rem;
   border: 0;
   border-radius: cq(8);
 
-  opacity: 0.88;
-  background-image:
-    linear-gradient(
-      115deg,
-      rgb(0 0 0 / 8%) 0%,
-      rgb(255 255 255 / 16%) calc(var(--chip-peak) - 30%),
-      rgb(255 255 255 / 48%) var(--chip-peak),
-      rgb(255 255 255 / 16%) calc(var(--chip-peak) + 30%),
-      rgb(0 0 0 / 8%) 100%
-    ),
-    linear-gradient(127.28deg, #fdfeff 8%, #bbbdc0 92%);
-  box-shadow: 0 0 0 cq(1) rgb(0 0 0 / 16%);
+  background-image: linear-gradient(172deg, #f4f9ff 27%, #a8c7ed 97%);
+  box-shadow:
+    inset 0 0 0 cq(1) #0c73d5,
+    inset 0 cq(1.5) cq(4) rgb(255 255 255 / 85%),
+    0 0 0 cq(1.2) rgb(0 0 0 / 10%),
+    0 cq(2) cq(6) rgb(0 50 140 / 25%);
+
+  transition: scale 0.15s;
+
+  &::before {
+    content: "";
+
+    position: absolute;
+    inset: -40% -60%;
+    translate: calc(var(--tilt-x) * 28% + var(--tilt-y) * 16%) 0;
+
+    background-image:
+      linear-gradient(
+        115deg,
+        transparent 38%,
+        rgb(255 255 255 / 50%) 47%,
+        rgb(255 255 255 / 85%) 50%,
+        rgb(255 255 255 / 40%) 53%,
+        transparent 62%
+      );
+  }
+
+  &:active {
+    scale: 0.94;
+
+    :global(body.no-page-transitions) & {
+      scale: none;
+    }
+  }
 }
 
 .qrIcon {
+  position: relative;
   width: cq(24);
   height: cq(24);
+  filter: drop-shadow(0 cq(1) 0 #e6edf5);
 }
 
 .innerShadow {
@@ -322,7 +479,9 @@ $tilt-perspective: 40rem;
     calc(-1 * sin(var(--shadow-angle)) * #{cq(1)})
     calc(cos(var(--shadow-angle)) * #{cq(1)})
     cq(1)
-    rgb(0 0 0 / 14%);
+    rgb(0 0 0 / 14%),
+    inset 0 0.0625rem rgb(120 214 255 / 35%),
+    inset 0.0625rem 0 rgb(120 214 255 / 18%);
 }
 
 @keyframes twinkle {
@@ -338,8 +497,6 @@ $tilt-perspective: 40rem;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sparkle {
-    animation: none;
-  }
+:global(body.no-page-transitions) .sparkle {
+  animation: none;
 }

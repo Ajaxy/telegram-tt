@@ -49,7 +49,7 @@ const WalletDisableBackupScreen = ({
 
   return (
     <WalletNoticeScreen
-      sticker="⚠️"
+      sticker="❗️"
       title={lang('WalletDisableBackupTitle')}
       text={lang(shouldRotateKey ? 'WalletDisableBackupRotateText' : 'WalletDisableBackupText')}
     >

@@ -9,7 +9,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { convertTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { convertTonFromNanos, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatAddressInGroups } from '../../../util/tonAddress';
 
@@ -83,8 +83,11 @@ const WalletTransactionScreen = ({
   }, [peer]);
 
   // The hint about the daily free transfers belongs where the relayer paid
-  const isFeeFree = Boolean(isGasless) && !fee;
+  const isFeeFree = Boolean(isGasless);
   const canShowFeesInfo = isFeeFree && Boolean(freeTransfersPerDay);
+  const fiatFee = fee !== undefined
+    ? formatTonInFiat(fee, tonUsdRate, currency, currencyRate, lang.code, { isPrecise: true })
+    : undefined;
 
   const tableData = useMemo(() => {
     const rows: TableData = [];
@@ -137,16 +140,14 @@ const WalletTransactionScreen = ({
       ]);
     }
 
-    if (fee !== undefined) {
-      const fiatFee = formatTonInFiat(fee, tonUsdRate, currency, currencyRate, lang.code);
-
+    if (fee !== undefined && !isIncoming) {
       rows.push([
         lang('WalletTransactionFee'),
         <span className={styles.fee}>
-          <GramIcon isMono className={styles.feeIcon} />
+          <GramIcon className={styles.feeIcon} />
           {isFeeFree ? lang('WalletTransactionFeeFree') : (
             <>
-              <ExpandableTonAmount nanos={fee} />
+              {formatTonFromNanos(fee)}
               {fiatFee && <span className={styles.fiatFee}>{` ~ ${fiatFee}`}</span>}
             </>
           )}
@@ -154,7 +155,7 @@ const WalletTransactionScreen = ({
             <Button
               round
               size="tiny"
-              color="translucent"
+              color="translucent-primary"
               className={styles.feeInfoButton}
               iconName="help"
               ariaLabel={lang('WalletNetworkFeesTitle')}
@@ -192,8 +193,8 @@ const WalletTransactionScreen = ({
 
     return rows;
   }, [
-    user, peer, isIncoming, isKeyChange, fee, isFeeFree, timestamp, comment, lang, tonUsdRate, currencyRate,
-    currency, decryptedComment, encryptedComment, isDecryptingComment, canShowFeesInfo, onDecryptComment, onSend,
+    user, peer, isIncoming, isKeyChange, fee, fiatFee, isFeeFree, timestamp, comment, lang, decryptedComment,
+    encryptedComment, isDecryptingComment, canShowFeesInfo, onDecryptComment, onSend,
   ]);
 
   const fiatAmount = formatTonInFiat(amount, tonUsdRate, currency, currencyRate, lang.code);
@@ -242,7 +243,7 @@ const WalletTransactionScreen = ({
       {canShowFeesInfo && (
         <WalletFeesInfoDialog
           isOpen={isFeesInfoOpen}
-          fee={fee}
+          fiatFee={fee ? fiatFee : undefined}
           freeTransfersPerDay={freeTransfersPerDay}
           onClose={closeFeesInfo}
         />

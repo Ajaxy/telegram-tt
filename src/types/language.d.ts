@@ -2299,6 +2299,8 @@ export interface LangPair {
   'WalletReceiveCopyHint': undefined;
   'WalletReceiveNetworkNote': undefined;
   'WalletReceiveBuy': undefined;
+  'WalletReceiveAddressCopied': undefined;
+  'WalletReceiveShowQr': undefined;
   'WalletBuyTitle': undefined;
   'WalletBuyPayWith': undefined;
   'WalletBuyCurrency': undefined;
@@ -2359,8 +2361,6 @@ export interface LangPair {
   'WalletCollectibleOnSale': undefined;
   'WalletCollectibleNotReady': undefined;
   'WalletCollectibleUnavailable': undefined;
-  'WalletNoCollectibles': undefined;
-  'WalletNoCollectiblesAction': undefined;
   'WalletTransactionIncoming': undefined;
   'WalletTransactionOutgoing': undefined;
   'WalletTransactionDeposit': undefined;
@@ -2412,6 +2412,7 @@ export interface LangPair {
   'WalletReleaseKeyTitle': undefined;
   'WalletReleaseKeyText': undefined;
   'WalletReleaseKeyRemove': undefined;
+  'WalletLogoutWarning': undefined;
   'WalletAppPasscodePlaceholder': undefined;
   'WalletAppPasscodeDescription': undefined;
   'PasscodeWalletKeyOtherAccounts': undefined;
@@ -2435,6 +2436,7 @@ export interface LangPair {
   'WalletSessionTooFreshError': undefined;
   'WalletDecryptError': undefined;
   'WalletSendInvalidAddress': undefined;
+  'WalletLogoutKeyRotation': undefined;
   'WalletSendDomainNotFound': undefined;
   'WalletSendDomainLookupFailed': undefined;
   'WalletLinkNoWallet': undefined;

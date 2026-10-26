@@ -1119,6 +1119,7 @@ export type TabState = {
       purpose?: string;
     };
     currency?: ApiTypeCurrencyAmount['currency'];
+    shouldReturnToWallet?: boolean;
   };
 
   giftInfoModal?: {

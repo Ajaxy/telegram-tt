@@ -118,6 +118,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
     topup,
     shouldIgnoreBalance,
     currency = STARS_CURRENCY_CODE,
+    shouldReturnToWallet,
     tabId = getCurrentTabId(),
   } = payload || {};
 
@@ -152,6 +153,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
       originGift,
       topup,
       currency,
+      shouldReturnToWallet,
     },
   }, tabId);
 });

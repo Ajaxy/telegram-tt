@@ -2,23 +2,31 @@
   --modal-content-block-padding: 0;
 }
 
+// The screens scroll on under the header, so it keeps no background of its own until they do. The fading strip
+// carries no `backdrop-filter`: under the squircle clip of the modal Chrome ignores the mask a blur needs to fade.
 .header {
+  isolation: isolate;
   position: relative;
+  background-color: transparent;
   transition: background-color 0.2s ease;
 }
 
 .header::before {
+  pointer-events: none;
   content: "";
 
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
-  height: 1px;
+  z-index: -1;
+  inset: 0 0 -1.5rem;
 
   opacity: 0;
-  background-color: var(--color-borders);
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--modal-background-color) 94%, transparent) 0%,
+      color-mix(in srgb, var(--modal-background-color) 80%, transparent) 50%,
+      transparent 100%
+    );
 
   transition: opacity 0.2s ease-in-out;
 }
@@ -131,17 +139,26 @@
   }
 }
 
-// The container keeps one height so the dialog does not resize under every step
+// The container keeps one height so the dialog does not resize under every step. Its negative margin takes
+// back the room the modal leaves for the header, and `.slideContent` pads it instead, so the screens scroll
+// under the header.
 .transition {
-  height: min(40rem, calc(var(--modal-max-height) - var(--modal-header-height)));
+  --slide-background-color: var(--modal-background-color);
+  --slide-height: min(calc(41.5rem + var(--modal-header-height)), var(--modal-max-height));
+
+  height: var(--slide-height);
+  margin-top: calc(-1 * var(--modal-header-height));
 }
 
 // The gutter is held with or without the bar, so a longer screen does not nudge the content sideways.
 // The tilted wallet card reaches into it, which must not scroll the screen sideways.
 .slide {
   scrollbar-gutter: stable;
+  scroll-padding-top: var(--modal-header-height);
+
   overflow-x: hidden;
   overflow-y: auto;
+
   height: 100%;
 }
 
@@ -150,8 +167,10 @@
   display: grid;
   // Capped at the slide width for long unbreakable text
   grid-template-columns: minmax(0, 1fr);
+
   box-sizing: border-box;
   min-height: 100%;
+  padding-top: var(--modal-header-height);
 }
 
 .slideAccent {

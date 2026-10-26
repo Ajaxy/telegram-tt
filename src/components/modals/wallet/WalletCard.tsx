@@ -1,21 +1,33 @@
 import { memo, useRef } from '../../../lib/teact/teact';
 
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { selectCanAnimateInterface } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonInFiat } from '../../../util/formatCurrency';
 import { splitAddressInHalves } from '../../../util/tonAddress';
 import useCardTilt from './useCardTilt';
 
+import useSelector from '../../../hooks/data/useSelector';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShrinkToFit from '../../../hooks/useShrinkToFit';
 
-import GramIcon from '../../common/icons/GramIcon';
+import AnimatedCounter from '../../common/AnimatedCounter';
 import Button from '../../ui/Button';
 import ExpandableTonAmount from './ExpandableTonAmount';
+import WalletCardDiamond from './WalletCardDiamond';
 import WalletCardStars from './WalletCardStars';
 
 import styles from './WalletCard.module.scss';
 
 import QrIcon from '../../../assets/wallet-card-qr.svg';
+
+// One layer per pixel of the edge, so it reads as solid at any angle
+const EDGE_LAYERS = [1, 2, 3, 4, 5];
+const BALANCE_GLINT_KEYFRAMES = [{ transform: 'translateX(-110%)' }, { transform: 'translateX(110%)' }];
+const BALANCE_GLINT_OPTIONS = { duration: 1100, easing: 'cubic-bezier(0.45, 0, 0.2, 1)' };
 
 type OwnProps = {
   address: string;
@@ -34,12 +46,28 @@ const WalletCard = ({
   const lang = useLang();
 
   const ref = useRef<HTMLDivElement>();
+  const balanceGlintRef = useRef<HTMLDivElement>();
   const amountRef = useRef<HTMLDivElement>();
   const amountContentRef = useRef<HTMLDivElement>();
+  const canAnimate = useSelector(selectCanAnimateInterface);
+  const [isPressed, markPressed, unmarkPressed] = useFlag();
 
-  useCardTilt(ref);
+  useCardTilt(ref, !canAnimate);
 
   useShrinkToFit(amountRef, amountContentRef);
+
+  useEffectWithPrevDeps(([prevBalance]) => {
+    if (prevBalance === undefined || balance === undefined || balance === prevBalance) return;
+    if (!canAnimate || document.hidden) return;
+
+    requestMutation(() => {
+      balanceGlintRef.current?.animate(BALANCE_GLINT_KEYFRAMES, BALANCE_GLINT_OPTIONS);
+    });
+  }, [balance, canAnimate]);
+
+  const handlePointerDown = useLastCallback((e: React.PointerEvent) => {
+    if (e.button === 0 && canAnimate) markPressed();
+  });
 
   const [addressStart, addressEnd] = splitAddressInHalves(address);
 
@@ -48,34 +76,60 @@ const WalletCard = ({
   });
 
   return (
-    <div ref={ref} className={buildClassName(styles.root, className)}>
-      <div className={styles.card}>
-        <div className={styles.texture} aria-hidden />
-        <WalletCardStars />
-        <div className={styles.glare} aria-hidden />
-        <div ref={amountRef} className={styles.amount}>
-          <div ref={amountContentRef} className={styles.amountContent}>
-            <GramIcon isMono className={styles.gramIcon} />
-            <ExpandableTonAmount nanos={balance ?? 0n} fractionClassName={styles.amountFraction} />
-            <span className={styles.ticker}>{lang('WalletCurrencyTicker')}</span>
+    <div
+      ref={ref}
+      className={buildClassName(styles.root, isPressed && styles.pressed, className)}
+      onPointerDown={handlePointerDown}
+      onPointerUp={unmarkPressed}
+      onPointerCancel={unmarkPressed}
+      onPointerLeave={unmarkPressed}
+    >
+      <div className={styles.fold}>
+        {EDGE_LAYERS.map((layer) => (
+          <div
+            key={layer}
+            className={buildClassName(
+              styles.edgeLayer,
+              layer === 1 && styles.edgeRim,
+              layer === EDGE_LAYERS.length && styles.edgeShadow,
+            )}
+            style={`--layer: ${layer}`}
+            aria-hidden
+          />
+        ))}
+        <div className={styles.card}>
+          <div className={styles.texture} aria-hidden />
+          <WalletCardStars />
+          <div className={styles.glare} aria-hidden />
+          <div ref={balanceGlintRef} className={styles.balanceGlint} aria-hidden />
+          <div ref={amountRef} className={styles.amount}>
+            <div ref={amountContentRef} className={styles.amountContent}>
+              <WalletCardDiamond className={styles.diamond} />
+              <ExpandableTonAmount
+                nanos={balance ?? 0n}
+                fractionClassName={styles.amountFraction}
+                isAnimated
+              />
+              <span className={styles.ticker}>{lang('WalletCurrencyTicker')}</span>
+            </div>
           </div>
-        </div>
-        {fiatAmount && <div className={styles.fiat}>{fiatAmount}</div>}
-        <div className={styles.ownerName}>{ownerName}</div>
-        <div className={styles.address} aria-hidden>
-          <div className={styles.addressRotator}>
-            <span className={styles.addressLine}>{addressStart}</span>
-            <span className={styles.addressLine}>{addressEnd}</span>
+          {fiatAmount && <AnimatedCounter text={fiatAmount} className={styles.fiat} />}
+          <div className={styles.ownerName}>{ownerName}</div>
+          <div className={styles.address} aria-hidden>
+            <div className={styles.addressRotator}>
+              <span className={styles.addressLine}>{addressStart}</span>
+              <span className={styles.addressLine}>{addressEnd}</span>
+            </div>
           </div>
+          <Button
+            className={styles.qrButton}
+            ariaLabel={lang('WalletShowAddress')}
+            onClick={onQrClick}
+          >
+            <img src={QrIcon} alt="" draggable={false} className={styles.qrIcon} />
+          </Button>
+          <div className={styles.innerShadow} aria-hidden />
         </div>
-        <Button
-          className={styles.qrButton}
-          ariaLabel={lang('WalletShowAddress')}
-          onClick={onQrClick}
-        >
-          <img src={QrIcon} alt="" draggable={false} className={styles.qrIcon} />
-        </Button>
-        <div className={styles.innerShadow} aria-hidden />
       </div>
     </div>
   );

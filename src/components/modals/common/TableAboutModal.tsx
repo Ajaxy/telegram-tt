@@ -28,6 +28,7 @@ type OwnProps = {
   hasBackdrop?: boolean;
   absoluteCloseButtonColor?: ButtonProps['color'];
   withSeparator?: boolean;
+  isNativeDialog?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -44,6 +45,7 @@ const TableAboutModal = ({
   hasBackdrop,
   absoluteCloseButtonColor,
   withSeparator,
+  isNativeDialog,
   contentClassName,
   onClose,
   onButtonClick,
@@ -54,6 +56,7 @@ const TableAboutModal = ({
       className={buildClassName(styles.root, className)}
       contentClassName={buildClassName(styles.content, contentClassName)}
       hasAbsoluteCloseButton
+      isNativeDialog={isNativeDialog}
       absoluteCloseButtonColor={absoluteCloseButtonColor || (hasBackdrop ? 'translucent-white' : undefined)}
       onClose={onClose}
     >

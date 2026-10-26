@@ -1,5 +1,5 @@
-import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
-import { memo, useEffect, useMemo, useRef } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -10,15 +10,20 @@ import { getUserFullName } from '../../../global/helpers';
 import {
   selectUser, selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatTonShortFromNanos } from '../../../util/formatCurrency';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import { formatTonAsIcon, formatTonTextFromNanos } from '../../../util/localization/format';
+import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
 
-import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import Spinner from '../../ui/Spinner';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -34,7 +39,7 @@ import styles from './WalletMainScreen.module.scss';
 
 type OwnProps = {
   activeTab: number;
-  scrollContainerRef: ElementRef<HTMLDivElement>;
+  scrollContainerClosest: string;
   onProtect: NoneToVoidFunction;
   onProtectAccount: NoneToVoidFunction;
   onOpenSettings: NoneToVoidFunction;
@@ -60,27 +65,24 @@ type StateProps = {
   transactions?: ApiWalletTransaction[];
   transferMinNanos?: bigint;
   collectibles?: ApiWalletCollectible[];
-  hasMoreTransactions?: boolean;
-  hasMoreCollectibles?: boolean;
   usersById: Record<string, ApiUser>;
   existingWaltBalanceUrl?: string;
   savedWallets?: ApiWalletSavedWallet[];
   earningsNanos?: bigint;
 };
 
+const TRANSACTIONS_TAB_INDEX = 0;
 const COLLECTIBLES_TAB_INDEX = 1;
 // Nanotons. Above it the screen suggests a cloud password and banners money kept elsewhere.
 const NOTABLE_BALANCE_NANOS = 500_000_000n;
 
-const FRAGMENT_GIFTS_URL = 'https://fragment.com/gifts';
-// A percentage in `rootMargin` is relative to the scroll container, so the next page loads one screen early
-const HISTORY_PRELOAD_MARGIN = '100%';
+const HISTORY_ITEM_CLASS = 'WalletHistoryItem';
 
 const WalletMainScreen = ({
-  activeTab, scrollContainerRef,
+  activeTab, scrollContainerClosest,
   status, hasStateError, canEnableBackup, hasCloudPassword, address, currentUser, balance, tonUsdRate, currency,
   currencyRate,
-  transactions, transferMinNanos, collectibles, hasMoreTransactions, hasMoreCollectibles, usersById,
+  transactions, transferMinNanos, collectibles, usersById,
   existingWaltBalanceUrl, savedWallets, earningsNanos,
   onProtect, onProtectAccount, onOpenSettings, onOpenEarnings, onReceive, onSend, onSwitchTab,
   onTransactionClick, onCollectibleClick,
@@ -91,9 +93,9 @@ const WalletMainScreen = ({
 
   const lang = useLang();
 
-  const historyEndRef = useRef<HTMLDivElement>();
-
-  const isCollectiblesTab = activeTab === COLLECTIBLES_TAB_INDEX;
+  const hasCollectibles = Boolean(collectibles?.length);
+  // As in the Android app, the collectibles tab exists only while there are collectibles
+  const isCollectiblesTab = hasCollectibles && activeTab === COLLECTIBLES_TAB_INDEX;
   const shouldProtectAccount = hasCloudPassword === false && (balance ?? 0n) > NOTABLE_BALANCE_NANOS;
   const oldWalletsNanos = useMemo(
     () => savedWallets?.reduce((sum, wallet) => sum + (wallet.balance ?? 0n), 0n) ?? 0n,
@@ -101,31 +103,47 @@ const WalletMainScreen = ({
   );
   const hasOldWalletsFunds = oldWalletsNanos > NOTABLE_BALANCE_NANOS;
   const hasEarnings = (earningsNanos ?? 0n) > NOTABLE_BALANCE_NANOS;
-  const hasHistory = Boolean(isCollectiblesTab ? collectibles?.length : transactions?.length);
-  const hasMoreHistory = isCollectiblesTab ? hasMoreCollectibles : hasMoreTransactions;
+  const transactionIds = useMemo(() => transactions?.map(({ id }) => id), [transactions]);
+  const transactionsById = useMemo(() => transactions && buildCollectionByKey(transactions, 'id'), [transactions]);
+  const collectibleAddresses = useMemo(() => collectibles?.map((collectible) => collectible.address), [collectibles]);
+  const collectiblesByAddress = useMemo(
+    () => collectibles && buildCollectionByKey(collectibles, 'address'),
+    [collectibles],
+  );
 
-  const { observe: observeHistoryEnd } = useIntersectionObserver({
-    rootRef: scrollContainerRef,
-    margin: HISTORY_PRELOAD_MARGIN,
+  const handleLoadMoreTransactions = useLastCallback(() => {
+    loadWalletTransactions();
   });
 
-  // An empty tab must not request more pages even if its cursor is stale
-  const shouldObserveHistoryEnd = hasHistory && hasMoreHistory;
-
-  useOnIntersect(historyEndRef, shouldObserveHistoryEnd ? observeHistoryEnd : undefined, ({ isIntersecting }) => {
-    if (!isIntersecting) return;
-
-    if (isCollectiblesTab) {
-      loadWalletCollectibles();
-    } else {
-      loadWalletTransactions();
-    }
+  const handleLoadMoreCollectibles = useLastCallback(() => {
+    loadWalletCollectibles();
   });
+
+  const [transactionViewportIds, getMoreTransactions] = useInfiniteScroll(
+    handleLoadMoreTransactions, transactionIds, undefined, WALLET_TRANSACTIONS_LIMIT,
+  );
+  const [collectibleViewportIds, getMoreCollectibles] = useInfiniteScroll(
+    handleLoadMoreCollectibles, collectibleAddresses, undefined, WALLET_COLLECTIBLES_LIMIT,
+  );
+  const hasHistory = isCollectiblesTab || Boolean(transactionViewportIds?.length);
 
   const historyTabs = useMemo(() => ([
     { title: lang('WalletTabTransactions') },
     { title: lang('WalletTabCollectibles') },
   ]), [lang]);
+
+  const { ref: historyTabListRef, shouldRender: shouldRenderHistoryTabList } = useShowTransition({
+    isOpen: hasCollectibles,
+    noMountTransition: true,
+    withShouldRender: true,
+    className: false,
+  });
+
+  // As in the Android app, the last collectible leaving switches back to the transactions, so the highlight moves
+  // there while the tabs fold, and new collectibles later do not swap the list under the user
+  useEffect(() => {
+    if (!hasCollectibles && activeTab === COLLECTIBLES_TAB_INDEX) onSwitchTab(TRANSACTIONS_TAB_INDEX);
+  }, [hasCollectibles, activeTab, onSwitchTab]);
 
   // Collectibles load with the screen rather than with their tab, and again after the address changes
   useEffect(() => {
@@ -133,10 +151,6 @@ const WalletMainScreen = ({
 
     loadWalletCollectibles({ shouldRefresh: true });
   }, [address, collectibles]);
-
-  const handleOpenFragment = useLastCallback(() => {
-    openUrl({ url: FRAGMENT_GIFTS_URL });
-  });
 
   const handleRetryState = useLastCallback(() => {
     loadWalletState();
@@ -171,49 +185,71 @@ const WalletMainScreen = ({
   function renderHistory() {
     return (
       <div className={styles.transactions}>
-        <Island className={styles.history}>
-          <TabList
-            tabs={historyTabs}
-            activeTab={activeTab}
-            className={styles.historyTabs}
-            centered
-            onSwitchTab={onSwitchTab}
-          />
-          {isCollectiblesTab
-            ? (
-              <Transition
-                name="fade"
-                activeKey={collectibles?.length ? 1 : 0}
-                shouldCleanup
-                className={styles.tabContent}
-              >
-                {collectibles?.length ? collectibles.map((collectible) => (
-                  <WalletCollectibleItem
-                    key={collectible.address}
-                    collectible={collectible}
-                    onClick={onCollectibleClick}
-                  />
-                )) : renderNoCollectibles()}
-              </Transition>
-            )
-            : (
-              <Transition
-                name="fade"
-                activeKey={transactions?.length ? 1 : 0}
-                shouldCleanup
-                className={styles.tabContent}
-              >
-                {transactions?.length ? transactions.map((transaction) => (
-                  <WalletTransactionItem
-                    key={transaction.id}
-                    transaction={transaction}
-                    user={transaction.peer.type === 'user' ? usersById[transaction.peer.userId] : undefined}
-                    onClick={onTransactionClick}
-                  />
-                )) : <WalletFeatures className={styles.features} />}
-              </Transition>
-            )}
-          <div ref={historyEndRef} />
+        {shouldRenderHistoryTabList && (
+          <div ref={historyTabListRef} className={styles.historyTabListReveal}>
+            <div className={styles.historyTabListClip}>
+              <TabList
+                tabs={historyTabs}
+                activeTab={activeTab}
+                className={styles.historyTabs}
+                centered
+                onSwitchTab={onSwitchTab}
+              />
+            </div>
+          </div>
+        )}
+        <Island>
+          {isCollectiblesTab ? (
+            <InfiniteScroll
+              items={collectibleViewportIds}
+              itemSelector={`.${HISTORY_ITEM_CLASS}`}
+              preloadBackwards={WALLET_COLLECTIBLES_LIMIT}
+              scrollContainerClosest={scrollContainerClosest}
+              noScrollRestoreOnTop
+              onLoadMore={getMoreCollectibles}
+            >
+              {collectibleViewportIds?.map((collectibleAddress) => (
+                <WalletCollectibleItem
+                  key={collectibleAddress}
+                  collectible={collectiblesByAddress![collectibleAddress]}
+                  className={HISTORY_ITEM_CLASS}
+                  onClick={onCollectibleClick}
+                />
+              ))}
+            </InfiniteScroll>
+          ) : (
+            <Transition
+              name="fade"
+              activeKey={transactionViewportIds?.length ? 1 : 0}
+              shouldCleanup
+              className={styles.tabContent}
+            >
+              {transactionViewportIds?.length ? (
+                <InfiniteScroll
+                  items={transactionViewportIds}
+                  itemSelector={`.${HISTORY_ITEM_CLASS}`}
+                  preloadBackwards={WALLET_TRANSACTIONS_LIMIT}
+                  scrollContainerClosest={scrollContainerClosest}
+                  noScrollRestoreOnTop
+                  onLoadMore={getMoreTransactions}
+                >
+                  {transactionViewportIds.map((id) => {
+                    const transaction = transactionsById![id];
+
+                    return (
+                      <WalletTransactionItem
+                        key={id}
+                        transaction={transaction}
+                        user={transaction.peer.type === 'user' ? usersById[transaction.peer.userId] : undefined}
+                        className={HISTORY_ITEM_CLASS}
+                        onClick={onTransactionClick}
+                      />
+                    );
+                  })}
+                </InfiniteScroll>
+              ) : <WalletFeatures className={styles.features} />}
+            </Transition>
+          )}
         </Island>
         {!isCollectiblesTab && Boolean(transactions?.length && transferMinNanos) && (
           <IslandDescription>
@@ -238,18 +274,6 @@ const WalletMainScreen = ({
           </ControlAfter>
         </Control>
       </Interactive>
-    );
-  }
-
-  function renderNoCollectibles() {
-    return (
-      <div className={styles.noCollectibles}>
-        <div className={styles.noCollectiblesSticker}>🎁</div>
-        <div className={styles.noCollectiblesText}>{lang('WalletNoCollectibles')}</div>
-        <Button isText pill color="translucent" onClick={handleOpenFragment}>
-          {lang('WalletNoCollectiblesAction')}
-        </Button>
-      </div>
     );
   }
 
@@ -307,7 +331,9 @@ const WalletMainScreen = ({
           </Interactive>
         </Island>
       )}
-      <div className={styles.section}>{renderHistory()}</div>
+      <div className={buildClassName(styles.section, hasHistory && styles.sectionFilled)}>
+        {renderHistory()}
+      </div>
     </div>
   );
 };
@@ -330,8 +356,6 @@ export default memo(withGlobal<OwnProps>(
       transactions: global.wallet?.transactions,
       transferMinNanos: global.appConfig.walletTransferMinNanos,
       collectibles: global.wallet?.collectibles,
-      hasMoreTransactions: global.wallet?.nextOffset !== undefined,
-      hasMoreCollectibles: global.wallet?.collectiblesNextOffset !== undefined,
       usersById: global.users.byId,
       existingWaltBalanceUrl: global.wallet?.existingWaltBalanceUrl,
       savedWallets: global.wallet?.savedWallets,

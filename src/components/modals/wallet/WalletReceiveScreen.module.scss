@@ -9,19 +9,91 @@
   @include mixins.scrollable-padding(1rem);
 }
 
-.card {
-  cursor: var(--custom-cursor, pointer);
+.qrCard {
+  position: relative;
+  margin-block: 0.75rem;
+  // A far camera, as in the Android app, keeps the flip nearly flat
+  perspective: 500rem;
+}
 
+.ring {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  overflow: visible;
+}
+
+.ringText {
+  font-family: var(--font-family-monospace);
+  font-size: 0.75rem;
+  dominant-baseline: central;
+  fill: #0072ce;
+}
+
+.card {
+  position: relative;
+  transform-style: preserve-3d;
+  width: 13.75rem;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  :global(body.no-page-transitions) & {
+    transition: none;
+  }
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.face {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   align-items: center;
 
-  width: 13.75rem;
   padding: 1.25rem 1.25rem 1rem;
   border-radius: 1.625rem;
 
+  backface-visibility: hidden;
   background-color: #ffffff;
+}
+
+.front {
+  cursor: var(--custom-cursor, pointer);
+}
+
+.back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  justify-content: center;
+}
+
+.backAddress {
+  font-family: var(--font-family-monospace);
+  font-size: 1.125rem;
+  line-height: 1.4;
+  color: #000000;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.copied {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+.showQr {
+  width: auto;
 }
 
 .qr {
@@ -80,10 +152,20 @@
   text-align: center;
 }
 
+// A secondary button fills with the primary color on hover (see `.secondary` in `Button.scss`), which is this
+// screen's background, so it would vanish. Its hover stays white with a tint of that color instead.
 .buyButton {
-  --button-text-color: #707579;
+  --button-text-color: var(--color-primary);
   --button-background-color: #ffffff;
+  --button-active-text-color: var(--color-primary);
+  --button-active-background-color: color-mix(in srgb, var(--color-primary) 10%, #ffffff);
+  --button-no-ripple-background-color: color-mix(in srgb, var(--color-primary) 10%, #ffffff);
 
   align-self: stretch;
   margin-top: auto;
+}
+
+.buyIcon {
+  margin-inline-end: 0.375rem;
+  font-size: 1.5rem;
 }

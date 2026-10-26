@@ -7,7 +7,8 @@ import type { Signal } from '../../../util/signals';
 import { SettingsScreens } from '../../../types';
 
 import {
-  selectHasLocalOnlyWalletPhrase, selectIsWalletAvailable, selectWalletLocalOnlyNanos, selectWalletSavedWallets,
+  selectHasLocalOnlyWalletPhrase, selectIsWalletAvailable, selectIsWalletKeyRotationPending,
+  selectWalletLocalOnlyNanos, selectWalletSavedWallets,
 } from '../../../global/selectors';
 import { formatTonShortFromNanos } from '../../../util/formatCurrency';
 import { formatTonAsIcon } from '../../../util/localization/format';
@@ -63,16 +64,20 @@ const SettingsHeader = ({
   const { isMobile } = useAppLayout();
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
   const [isCheckingWallets, markCheckingWallets, unmarkCheckingWallets] = useFlag();
+  const [isWalletCheckTimedOut, setIsWalletCheckTimedOut] = useState(false);
   const walletCheckIdRef = useRef(0);
   const isWalletAvailable = useSelector(selectIsWalletAvailable);
   const hasLocalOnlyWalletPhrase = useSelector(selectHasLocalOnlyWalletPhrase);
   const localOnlyWalletNanos = useSelector(selectWalletLocalOnlyNanos);
   const savedWallets = useSelector(selectWalletSavedWallets);
-  // A phrase stored only on this device is lost on logout whatever its balance, so the warning does not wait for the sum
-  const hasUnbackedWallet = isWalletAvailable && (hasLocalOnlyWalletPhrase || Boolean(savedWallets?.length));
+  const isKeyRotationPending = useSelector(selectIsWalletKeyRotationPending);
   const unbackedWalletNanos = useMemo(() => (
     savedWallets?.reduce((sum, { balance }) => sum + (balance ?? 0n), localOnlyWalletNanos) ?? localOnlyWalletNanos
   ), [savedWallets, localOnlyWalletNanos]);
+  // A wallet without Grams may still hold collectibles, which are not loaded here, so any wallet whose keys are
+  // only on this device is warned about, as in Telegram Desktop
+  const hasUnbackedWallet = isWalletAvailable && (hasLocalOnlyWalletPhrase || Boolean(savedWallets?.length));
+  const isKeyRotationWarned = isWalletAvailable && (isKeyRotationPending || isWalletCheckTimedOut);
 
   const handleMultiClick = useMultiClick(5, () => {
     openSettingsScreen({ screen: SettingsScreens.Experimental });
@@ -88,17 +93,19 @@ const SettingsHeader = ({
     const checkId = ++walletCheckIdRef.current;
     markCheckingWallets();
 
-    const { loadWalletState, loadSavedWallets } = getPromiseActions();
+    const { loadWalletState, loadSavedWallets, loadWalletKeyRotationPending } = getPromiseActions();
 
-    await Promise.race([
+    const isChecked = await Promise.race([
       (async () => {
         await loadWalletState();
-        await loadSavedWallets();
+        await Promise.all([loadSavedWallets(), loadWalletKeyRotationPending()]);
+        return true;
       })(),
-      pause(WALLET_CHECK_TIMEOUT),
+      pause(WALLET_CHECK_TIMEOUT).then(() => false),
     ]);
 
     if (checkId === walletCheckIdRef.current) {
+      setIsWalletCheckTimedOut(!isChecked);
       unmarkCheckingWallets();
     }
   });
@@ -382,21 +389,21 @@ const SettingsHeader = ({
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
-        text={hasUnbackedWallet ? undefined : lang('SureLogout')}
-        textParts={hasUnbackedWallet ? (
-          <p>
-            {lang(
-              'AreYouSureLogoutGrams',
-              { amount: formatTonAsIcon(lang, formatTonShortFromNanos(unbackedWalletNanos)) },
-              { withNodes: true, withMarkdown: true, renderTextFilters: ['br'] },
-            )}
-          </p>
-        ) : undefined}
         confirmLabel={lang('AccountSettingsLogout')}
         confirmHandler={handleSignOutMessage}
         confirmIsDestructive
         isConfirmLoading={isCheckingWallets}
-      />
+      >
+        <p>
+          {hasUnbackedWallet && unbackedWalletNanos > 0 ? lang(
+            'AreYouSureLogoutGrams',
+            { amount: formatTonAsIcon(lang, formatTonShortFromNanos(unbackedWalletNanos)) },
+            { withNodes: true, withMarkdown: true, renderTextFilters: ['br'] },
+          ) : lang('SureLogout')}
+        </p>
+        {hasUnbackedWallet && !unbackedWalletNanos && <p>{lang('WalletLogoutWarning')}</p>}
+        {isKeyRotationWarned && <p>{lang('WalletLogoutKeyRotation')}</p>}
+      </ConfirmDialog>
     </div>
   );
 };

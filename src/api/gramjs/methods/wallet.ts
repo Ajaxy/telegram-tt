@@ -129,9 +129,6 @@ type EstimateFeeResponse = ToncenterError & {
   };
 };
 
-const TRANSACTIONS_PAGE_LIMIT = 50;
-const COLLECTIBLES_FIRST_PAGE_LIMIT = 5;
-const COLLECTIBLES_PAGE_LIMIT = 20;
 // MoonPay rejects an uppercase coin code
 const ONRAMP_CRYPTO_CURRENCY = 'gram';
 // Representation hash of the `WalletTg` trampoline code cell, as toncenter reports it
@@ -145,14 +142,15 @@ const PUBLIC_KEY_LENGTH = 32;
 // Nanotons: below this balance the chain bounces the rotation for the fee
 const KEY_ROTATION_MIN_BALANCE = 10_000_000n;
 const KEY_ROTATION_POLL_INTERVAL = 3000;
-// Seconds past the request's expiry during which a block may still carry it
-const KEY_ROTATION_EXPIRY_MARGIN = 30;
+// Seconds past the request's expiry before it counts as never executed: the indexer and the local clock can lag
+// behind the chain, as the iOS app assumes too
+const KEY_ROTATION_EXPIRY_MARGIN = 120;
 const KEY_CHANGES_PAGE_SIZE = 100;
 // Derived from the phrase and the published history, so kept only while the worker lives
 const previousSigningKeysCache = new Map<string, WalletKeys[]>();
 // The last transfer broadcast per wallet, until its seqno moves on or it expires. Kept on disk as well:
 // a transfer sent right before a reload is not in the history yet.
-type SentTransfer = { seqno: number; validUntil: number };
+type SentTransfer = { seqno: number; validUntil: number; isKeyRotation?: boolean; replacedRotation?: SentTransfer };
 const sentTransfers = new Map<string, SentTransfer>();
 let sentTransfersRestored: Promise<void> | undefined;
 const SEND_LOCK_PREFIX = 'wallet-send:';
@@ -176,10 +174,10 @@ export async function fetchWalletState(): Promise<ApiWalletStateResult | undefin
 }
 
 export async function fetchWalletTransactions({
-  offset = '', limit = TRANSACTIONS_PAGE_LIMIT,
+  offset = '', limit,
 }: {
   offset?: string;
-  limit?: number;
+  limit: number;
 }) {
   const result = await invokeRequest(new GramJs.wallet.GetTransactions({
     inbound: true,
@@ -291,11 +289,8 @@ export async function fetchWalletGaslessInfo() {
   await invokeRequest(new GramJs.wallet.GetGaslessInfo());
 }
 
-export async function fetchWalletCollectibles({ offset }: { offset?: string }) {
-  const result = await invokeRequest(new GramJs.wallet.GetNfts({
-    offset: offset ?? '',
-    limit: offset ? COLLECTIBLES_PAGE_LIMIT : COLLECTIBLES_FIRST_PAGE_LIMIT,
-  }));
+export async function fetchWalletCollectibles({ offset = '', limit }: { offset?: string; limit: number }) {
+  const result = await invokeRequest(new GramJs.wallet.GetNfts({ offset, limit }));
 
   if (!result) {
     return undefined;
@@ -773,7 +768,7 @@ async function sendKeyRotation({
       newSecretSeed,
     });
 
-    await rememberSentTransfer(ownAddress, state.seqno, now + TRANSFER_TTL_SECONDS);
+    await rememberSentTransfer(ownAddress, state.seqno, now + TRANSFER_TTL_SECONDS, true);
 
     try {
       await invokeRequest(new GramJs.wallet.SendTransfer({
@@ -792,10 +787,47 @@ async function sendKeyRotation({
   });
 }
 
+// A rotation sent right before a reload may still execute, and until then the chain shows the old key. Read now,
+// that key would make the new phrase on the device look stale, so it is read once the rotation has executed or
+// expired.
 export async function fetchWalletChainPublicKey({ ownAddress }: { ownAddress: string }): Promise<string | undefined> {
+  await waitForKeyRotation(ownAddress);
+
   const publicKey = await fetchWalletPublicKey(ownAddress);
 
   return publicKey && serializeBytes(publicKey);
+}
+
+// Until a rotation sent from here executes or expires, its new phrase is the only copy of the key it may install
+export async function fetchIsWalletKeyRotationPending({ ownAddress }: { ownAddress: string }) {
+  const rotation = await getSentKeyRotation(ownAddress);
+  if (!rotation) return false;
+
+  const state = await fetchToncenterWalletState(ownAddress);
+
+  // Without an answer the rotation counts as pending: a needless warning costs less than a lost key
+  return !state || state.seqno <= rotation.seqno;
+}
+
+async function waitForKeyRotation(ownAddress: string) {
+  const rotation = await getSentKeyRotation(ownAddress);
+  if (!rotation) return;
+
+  while (getServerTime() < getSentTransferExpiry(rotation)) {
+    const state = await fetchToncenterWalletState(ownAddress);
+    if (state && state.seqno > rotation.seqno) return;
+
+    await pause(KEY_ROTATION_POLL_INTERVAL);
+  }
+}
+
+// Only a rotation changes the key, so a regular transfer in flight is not waited for
+async function getSentKeyRotation(ownAddress: string) {
+  await loadSentTransfer(ownAddress);
+
+  const sent = sentTransfers.get(toRawAddress(ownAddress)!);
+
+  return sent?.isKeyRotation ? sent : undefined;
 }
 
 // Nanotons
@@ -1379,12 +1411,18 @@ export async function runWalletSend<T>(ownAddress: string, send: () => Promise<T
   });
 }
 
+// A worker started by another tab taking over has no records in memory yet
+export async function loadSentTransfer(ownAddress: string) {
+  await restoreSentTransfers();
+  await syncSentTransfer(toRawAddress(ownAddress)!);
+}
+
 // Each tab's worker keeps its own copy; only IndexedDB is shared, so it is read once the lock is held
 async function syncSentTransfer(rawAddress: string) {
   try {
     const sent = await WALLET_IDB_STORE.get<SentTransfer>(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`);
 
-    if (sent && sent.validUntil > getServerTime()) {
+    if (sent && getSentTransferExpiry(sent) > getServerTime()) {
       sentTransfers.set(rawAddress, sent);
     } else {
       sentTransfers.delete(rawAddress);
@@ -1402,7 +1440,7 @@ function restoreSentTransfers(): Promise<void> {
     for (const [key, sent] of entries) {
       if (!key.startsWith(SENT_TRANSFER_KEY_PREFIX)) continue;
 
-      if (sent.validUntil > now) {
+      if (getSentTransferExpiry(sent) > now) {
         sentTransfers.set(key.slice(SENT_TRANSFER_KEY_PREFIX.length), sent);
       } else {
         void WALLET_IDB_STORE.del(key).catch(() => undefined);
@@ -1413,23 +1451,52 @@ function restoreSentTransfers(): Promise<void> {
   return sentTransfersRestored;
 }
 
+// A rotation is kept for the margin past its expiry, until which the chain may still turn out to have taken it
+function getSentTransferExpiry({ validUntil, isKeyRotation }: SentTransfer) {
+  return isKeyRotation ? validUntil + KEY_ROTATION_EXPIRY_MARGIN : validUntil;
+}
+
 // Written before the broadcast: a request whose answer got lost may still have gone out
-export async function rememberSentTransfer(ownAddress: string, seqno: number, validUntil: number) {
+export async function rememberSentTransfer(
+  ownAddress: string, seqno: number, validUntil: number, isKeyRotation?: boolean,
+) {
   const rawAddress = toRawAddress(ownAddress)!;
-  sentTransfers.set(rawAddress, { seqno, validUntil });
-  await WALLET_IDB_STORE.set(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`, { seqno, validUntil }).catch(() => undefined);
+  const previous = sentTransfers.get(rawAddress);
+  // A rotation past its expiry may still land within the margin, and a message on the same seqno only executes
+  // if it does not. So the record keeps counting as a rotation, or a key read would stop waiting for it.
+  const replacedRotation = previous?.isKeyRotation && previous.seqno === seqno
+    ? { seqno, validUntil: previous.validUntil, isKeyRotation: true }
+    : undefined;
+  const sent: SentTransfer = {
+    seqno,
+    validUntil,
+    isKeyRotation: isKeyRotation || Boolean(replacedRotation),
+    replacedRotation,
+  };
+  sentTransfers.set(rawAddress, sent);
+  await WALLET_IDB_STORE.set(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`, sent).catch(() => undefined);
 }
 
 // Only the server's own refusal means the message never went out; a timeout or a lost connection
-// leaves it unknown, and the record stays until it expires
+// leaves it unknown, and the record stays until it expires. The refusal says nothing of the rotation
+// the message replaced, so that record comes back.
 export function forgetRefusedTransfer(ownAddress: string, seqno: number, err: unknown) {
   if (!(err instanceof RPCError)) return;
 
   const rawAddress = toRawAddress(ownAddress)!;
-  if (sentTransfers.get(rawAddress)?.seqno !== seqno) return;
+  const sent = sentTransfers.get(rawAddress);
+  if (sent?.seqno !== seqno) return;
+
+  const key = `${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`;
+
+  if (sent.replacedRotation) {
+    sentTransfers.set(rawAddress, sent.replacedRotation);
+    void WALLET_IDB_STORE.set(key, sent.replacedRotation).catch(() => undefined);
+    return;
+  }
 
   sentTransfers.delete(rawAddress);
-  void WALLET_IDB_STORE.del(`${SENT_TRANSFER_KEY_PREFIX}${rawAddress}`).catch(() => undefined);
+  void WALLET_IDB_STORE.del(key).catch(() => undefined);
 }
 
 // A second message now would go out on the next seqno and spend twice once the first executes

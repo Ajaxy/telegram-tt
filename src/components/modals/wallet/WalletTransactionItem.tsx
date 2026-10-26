@@ -27,6 +27,7 @@ import styles from './WalletTransactionItem.module.scss';
 type OwnProps = {
   transaction: ApiWalletTransaction;
   user?: ApiUser;
+  className?: string;
   onClick: (transaction: ApiWalletTransaction) => void;
 };
 
@@ -34,7 +35,9 @@ const AVATAR_SIZE = 42;
 // 40dp as on Android
 const PENDING_DIAMOND_SIZE = 40;
 
-const WalletTransactionItem = ({ transaction, user, onClick }: OwnProps) => {
+const WalletTransactionItem = ({
+  transaction, user, className, onClick,
+}: OwnProps) => {
   const {
     isIncoming, peer, amount, comment, isPending, isFailed, timestamp, collectible,
   } = transaction;
@@ -59,7 +62,7 @@ const WalletTransactionItem = ({ transaction, user, onClick }: OwnProps) => {
   const clickableProps = useClickable<HTMLDivElement>(handleClick);
 
   return (
-    <div className={buildClassName(styles.root, isPending && styles.pending)} {...clickableProps}>
+    <div className={buildClassName(styles.root, isPending && styles.pending, className)} {...clickableProps}>
       <div className={styles.preview}>
         {user ? (
           <Avatar peer={user} size={AVATAR_SIZE} />

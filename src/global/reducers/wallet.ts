@@ -2,6 +2,7 @@ import type { ApiTonConnectSession, ApiWalletState, ApiWalletStatus, ApiWalletTr
 import type { GlobalState, TabState } from '../types';
 
 import { getServerTime } from '../../util/serverTime';
+import { keepRecipientUser, runForAllTabs } from '../helpers';
 import { selectTabState } from '../selectors/tabs';
 import { updateTabState } from './tabs';
 
@@ -66,10 +67,13 @@ export function replacePendingWalletTransaction<T extends GlobalState>(
   global: T, pendingId: string, transaction: ApiWalletTransaction,
 ): T {
   const current = global.wallet?.transactions || [];
-  const transactions = current.filter(({ id }) => id !== pendingId);
+  const pendingPeer = current.find(({ id }) => id === pendingId)?.peer;
+  const transactions = current
+    .filter(({ id }) => id !== pendingId)
+    .map((item) => (item.id === transaction.id ? { ...item, peer: keepRecipientUser(item.peer, pendingPeer) } : item));
 
   if (!current.some(({ id }) => id === transaction.id)) {
-    transactions.unshift(transaction);
+    transactions.unshift({ ...transaction, peer: keepRecipientUser(transaction.peer, pendingPeer) });
   }
 
   return updateWallet(global, { transactions });
@@ -85,12 +89,12 @@ export function updateWalletTonConnectSession<T extends GlobalState>(global: T, 
       : [...sessions, session],
   });
 
-  for (const [tabId, tab] of Object.entries(global.byTabId)) {
-    const flow = tab.walletTonConnect;
-    if (flow?.session?.id !== session.id || flow.status === 'pending') continue;
+  runForAllTabs(global, (tabId) => {
+    const flow = selectTabState(global, tabId).walletTonConnect;
+    if (flow?.session?.id !== session.id || flow.status === 'pending') return;
 
-    global = updateTabState(global, { walletTonConnect: { ...flow, session } }, Number(tabId));
-  }
+    global = updateTabState(global, { walletTonConnect: { ...flow, session } }, tabId);
+  });
 
   return global;
 }

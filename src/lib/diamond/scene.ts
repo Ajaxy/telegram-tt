@@ -15,7 +15,7 @@ import smallSparklesUrl from '../../assets/models/diamond/small.bin?url&no-inlin
 import verticesUrl from '../../assets/models/diamond/vertices.bin?url&no-inline';
 import widthsUrl from '../../assets/models/diamond/widths.bin?url&no-inline';
 
-export type DiamondPalette = 'regular' | 'icon';
+export type DiamondPalette = 'regular' | 'white' | 'icon';
 
 export type DiamondViewport = {
   x: number;
@@ -63,9 +63,11 @@ const MATRIX_SIZE = 16;
 const DIAMOND_ATTRIBUTE_COUNT = 3;
 const SPARKLE_ATTRIBUTE_COUNT = 2;
 
-// As the Android app passes them: the large diamond keeps the model colors, the chat icon is blue with a white glow
+// As the apps pass them: the large diamond keeps the model colors, the wallet card has the icy white one of the iOS
+// app, the chat icon is blue with a white glow
 const PALETTE_IDS: Record<DiamondPalette, number> = {
   regular: 0,
+  white: 1,
   icon: 2,
 };
 

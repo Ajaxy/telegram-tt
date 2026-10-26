@@ -46,7 +46,7 @@ import {
 import { deserializeBytes } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
-import { takeTonConnectOauthSession } from './tonConnect';
+import { returnTonConnectOauthSession, takeTonConnectOauthSession } from './tonConnect';
 
 export async function answerCallbackButton({
   chatId, accessHash, messageId, data, isGame,
@@ -516,7 +516,7 @@ async function acceptUrlAuth(
   walletSessionId: string | undefined,
   buildRequest: (tonconnectSession?: GramJs.InputTonConnectOauthSession) => GramJs.messages.AcceptUrlAuth,
 ): Promise<ApiUrlAuthResult | undefined> {
-  const tonconnectSession = walletSessionId ? takeTonConnectOauthSession(walletSessionId) : undefined;
+  let tonconnectSession = walletSessionId ? takeTonConnectOauthSession(walletSessionId) : undefined;
 
   if (walletSessionId && !tonconnectSession) {
     return { type: 'expired' };
@@ -524,6 +524,15 @@ async function acceptUrlAuth(
 
   try {
     return await invokeUrlAuthRequest(buildRequest(tonconnectSession));
+  } catch (err) {
+    // An error from the server means the request was processed and the prepared session is spent. A network error
+    // leaves the request unsent or unanswered, so the session goes back and Login can be pressed again.
+    if (tonconnectSession && !(err instanceof RPCError)) {
+      returnTonConnectOauthSession(walletSessionId!, tonconnectSession);
+      tonconnectSession = undefined;
+    }
+
+    throw err;
   } finally {
     tonconnectSession?.challengeAnswer.fill(0);
   }

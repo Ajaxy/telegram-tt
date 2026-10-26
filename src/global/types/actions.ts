@@ -1452,6 +1452,7 @@ export interface ActionPayloads {
     };
     shouldIgnoreBalance?: boolean;
     currency?: ApiTypeCurrencyAmount['currency'];
+    shouldReturnToWallet?: boolean;
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
 
@@ -1544,6 +1545,7 @@ export interface ActionPayloads {
     words: string[];
   } & WithTabId;
   loadSavedWallets: undefined;
+  loadWalletKeyRotationPending: undefined;
   removeSavedWallet: {
     address: string;
   };

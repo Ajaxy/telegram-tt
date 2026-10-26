@@ -20,6 +20,7 @@ import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
 import RadioGroup from '../../ui/RadioGroup';
 import Spinner from '../../ui/Spinner';
+import WalletEmojiSticker from './WalletEmojiSticker';
 import Island, { IslandTitle } from '@gili/layout/Island';
 
 import styles from './WalletBuyAmountScreen.module.scss';
@@ -149,7 +150,7 @@ const WalletBuyAmountScreen = ({ walletBuy, providers }: StateProps) => {
   if (walletBuy.status === 'unavailable') {
     return (
       <div className={buildClassName(styles.root, styles.centered)}>
-        <div className={styles.sticker}>🌍</div>
+        <WalletEmojiSticker emoji="🌍" />
         <div className={styles.message}>{lang('WalletBuyUnavailable')}</div>
       </div>
     );

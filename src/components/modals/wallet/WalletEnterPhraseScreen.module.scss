@@ -1,4 +1,4 @@
-// `TabList` sizes its indicator to the tabs alone, so the row has to hug them
+// The row hugs the tabs, so its island is a pill around them rather than a bar across the screen
 .tabs {
   width: fit-content;
   margin-bottom: 0.5rem;

@@ -15,7 +15,6 @@ export enum WalletScreen {
   DisableBackup,
   ReleaseKey,
   Settings,
-  HowItWorks,
   DeleteWallet,
   ReplaceWallet,
   PasscodeRequired,

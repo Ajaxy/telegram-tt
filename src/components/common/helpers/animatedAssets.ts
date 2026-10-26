@@ -58,6 +58,7 @@ import BlueDiamondPreview from '../../../assets/tgs-previews/wallet/BlueDiamond.
 import BlueDiamond3dPreview from '../../../assets/tgs-previews/wallet/BlueDiamond3d.webp';
 import GramPreview from '../../../assets/tgs-previews/wallet/Gram.svg';
 import Gram3dPreview from '../../../assets/tgs-previews/wallet/Gram3d.webp';
+import WhiteDiamond3dPreview from '../../../assets/tgs-previews/wallet/WhiteDiamond3d.webp';
 
 export const LOCAL_TGS_PREVIEW_URLS = {
   HandStop: HandStopPreview,
@@ -73,6 +74,8 @@ export const LOCAL_TGS_PREVIEW_URLS = {
   BlueDiamond3d: BlueDiamond3dPreview,
   Gram: GramPreview,
   Gram3d: Gram3dPreview,
+  // The first frame of the white 3D diamond on the wallet card
+  WhiteDiamond3d: WhiteDiamond3dPreview,
 };
 
 export const LOCAL_TGS_URLS = {

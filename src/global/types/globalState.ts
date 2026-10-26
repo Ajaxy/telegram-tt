@@ -546,6 +546,7 @@ export type GlobalState = {
     // `false` records an address with no Telegram user
     resolvedAddresses?: Record<string, ApiWalletUserAddress | false>;
     hasLocalSecret?: boolean;
+    isKeyRotationPending?: boolean;
     // Tells the echo of a swap made here from a swap made on another device
     isReplacing?: boolean;
     // The server balance a sent transfer was deducted from; the same figure from the server is stale

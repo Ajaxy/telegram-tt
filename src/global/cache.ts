@@ -676,6 +676,9 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT).filter(isUserId) || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],
     ...global.contactList?.userIds || [],
+    // The cached wallet history shows its peers by name
+    ...global.wallet?.transactions?.slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT)
+      .flatMap(({ peer }) => (peer.type === 'user' ? [peer.userId] : [])) || [],
     ...Object.keys(byId),
   ]).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 

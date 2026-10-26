@@ -1,7 +1,10 @@
 import type {
-  ApiTonConnectError, DecryptWalletCommentError, ReplaceWalletError, SendTonTransferError, WalletBackupError,
+  ApiTonConnectError, ApiWalletTransactionPeer, DecryptWalletCommentError, ReplaceWalletError, SendTonTransferError,
+  WalletBackupError,
 } from '../../api/types';
 import type { RegularLangKey } from '../../types/language';
+
+import { toNonBounceableAddress } from '../../lib/ton/address';
 
 export type WalletFlowError = SendTonTransferError | WalletBackupError | DecryptWalletCommentError | ReplaceWalletError
   | ApiTonConnectError;
@@ -19,6 +22,17 @@ export function buildWalletTransferFeeKey({
   return [
     toAddress, amount, comment ?? '', Boolean(shouldEncryptComment), Boolean(shouldSendAll), collectibleAddress ?? '',
   ].join(':');
+}
+
+// The server lists a transfer to a user under the user's address, so the user it was sent to is kept, as the Android
+// app does
+export function keepRecipientUser(
+  peer: ApiWalletTransactionPeer, knownPeer?: ApiWalletTransactionPeer,
+): ApiWalletTransactionPeer {
+  if (knownPeer?.type !== 'user' || peer.type !== 'address') return peer;
+  if (toNonBounceableAddress(knownPeer.address) !== toNonBounceableAddress(peer.address)) return peer;
+
+  return { ...knownPeer, domain: peer.domain ?? knownPeer.domain };
 }
 
 export const WALLET_ERROR_LANG_KEYS: Record<WalletFlowError, RegularLangKey> = {

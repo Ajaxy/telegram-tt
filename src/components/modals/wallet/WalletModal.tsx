@@ -51,7 +51,7 @@ import WalletCurrencyScreen from './WalletCurrencyScreen';
 import WalletDeleteScreen from './WalletDeleteScreen';
 import WalletDisableBackupScreen from './WalletDisableBackupScreen';
 import WalletEnterPhraseScreen from './WalletEnterPhraseScreen';
-import WalletHowItWorksScreen from './WalletHowItWorksScreen';
+import WalletHowItWorksModal from './WalletHowItWorksModal';
 import WalletIntroScreen from './WalletIntroScreen';
 import WalletMainScreen from './WalletMainScreen';
 import WalletPasscodeRequiredScreen from './WalletPasscodeRequiredScreen';
@@ -184,6 +184,7 @@ const WalletModal = ({
   const { pendingReplace, wrongPhrase, handleImportOwnWallet } = keysFlows;
 
   const [isPhraseWhyOpen, openPhraseWhy, closePhraseWhy] = useFlag();
+  const [isHowItWorksOpen, openHowItWorks, closeHowItWorks] = useFlag();
 
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | undefined>();
   const [selectedCollectibleAddress, setSelectedCollectibleAddress] = useState<string | undefined>();
@@ -193,23 +194,17 @@ const WalletModal = ({
   // The send screen unmounts when another slides over it, so its draft lives here
   const [sendDraft, setSendDraft] = useState(EMPTY_SEND_DRAFT);
 
-  const mainSlideRef = useRef<HTMLDivElement>();
-
   // A link fills the form once, so a wallet swapped in from another tab does not become the sender
   const appliedLinkRef = useRef<string>();
 
   const isOpen = Boolean(modal);
 
-  // Names the screen the hairline was measured on, so a screen that opens fresh starts without it
+  // Names the screen whose slide is scrolled, so a screen that opens fresh starts without the header edge
   const [scrolledScreen, setScrolledScreen] = useState<WalletScreen | undefined>();
   const isScrolled = scrolledScreen === screen;
-  const handleSlideScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrolledScreen(e.currentTarget.scrollTop > 0 ? screen : undefined);
+  const handleSlideScrolledChange = useLastCallback((isSlideScrolled: boolean) => {
+    setScrolledScreen(isSlideScrolled ? screen : undefined);
   });
-
-  useEffect(() => {
-    setScrolledScreen(undefined);
-  }, [screen]);
 
   const hasWallet = Boolean(address);
 
@@ -491,16 +486,12 @@ const WalletModal = ({
 
   const handleOpenEarnings = useLastCallback(() => {
     closeWalletModal();
-    openStarsBalanceModal({ currency: TON_CURRENCY_CODE });
+    openStarsBalanceModal({ currency: TON_CURRENCY_CODE, shouldReturnToWallet: true });
   });
 
   const handleOpenPasscodeSettings = useLastCallback(() => {
     openSettingsScreen({ screen: hasAppPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled });
     closeWalletModal();
-  });
-
-  const handleOpenHowItWorks = useLastCallback(() => {
-    push(WalletScreen.HowItWorks);
   });
 
   const handleReleaseKeyRemove = useLastCallback(() => {
@@ -718,7 +709,7 @@ const WalletModal = ({
             {Boolean(selectedTransaction?.txHash) && (
               <MenuItem icon="search" onClick={handleOpenInExplorer}>{lang('WalletViewInExplorer')}</MenuItem>
             )}
-            <MenuItem icon="help" onClick={handleOpenHowItWorks}>{lang('WalletWhatIsGram')}</MenuItem>
+            <MenuItem icon="help" onClick={openHowItWorks}>{lang('WalletWhatIsGram')}</MenuItem>
           </DropdownMenu>
         </ModalHeaderAction>
       )}
@@ -729,11 +720,11 @@ const WalletModal = ({
     return (
       <WalletSlide
         isRoot={key === rootScreen}
-        ref={key === WalletScreen.Main ? mainSlideRef : undefined}
+        isActive={isActive}
         className={buildClassName(styles.slide, 'custom-scroll', ACCENT_SCREENS.has(key) && styles.slideAccent)}
         contentClassName={styles.slideContent}
         onBack={handleBack}
-        onScroll={handleSlideScroll}
+        onScrolledChange={handleSlideScrolledChange}
       >
         {renderScreenContent(key, isActive)}
       </WalletSlide>
@@ -755,6 +746,7 @@ const WalletModal = ({
       case WalletScreen.Send:
         return (
           <WalletSendScreen
+            isActive={isActive}
             draft={sendDraft}
             collectible={sendCollectible}
             onSubmit={handleSendSubmit}
@@ -828,7 +820,7 @@ const WalletModal = ({
             onConnectedAppsClick={handleOpenConnectedApps}
             onCurrencyClick={handleOpenCurrency}
             onPasscodeClick={handleOpenPasscodeSettings}
-            onHowItWorksClick={handleOpenHowItWorks}
+            onHowItWorksClick={openHowItWorks}
             onShowPhrase={keysFlows.handleShowPhrase}
             onEnableBackup={keysFlows.handleEnableBackup}
             onDisableBackup={keysFlows.handleDisableBackup}
@@ -838,8 +830,6 @@ const WalletModal = ({
             onEnterOwnPhrase={keysFlows.handleImportOwnWallet}
           />
         );
-      case WalletScreen.HowItWorks:
-        return <WalletHowItWorksScreen onDone={handleBack} />;
       case WalletScreen.Intro:
         return <WalletIntroScreen onDone={handleIntroDone} />;
       case WalletScreen.ConnectedApps:
@@ -927,7 +917,7 @@ const WalletModal = ({
         return (
           <WalletMainScreen
             activeTab={activeTab}
-            scrollContainerRef={mainSlideRef}
+            scrollContainerClosest={`.${styles.slide}`}
             onProtect={keysFlows.handleEnableBackup}
             onProtectAccount={handleProtectAccount}
             onOpenSettings={handleOpenSettings}
@@ -964,6 +954,7 @@ const WalletModal = ({
       >
         {renderScreen}
       </Transition>
+      <WalletHowItWorksModal isOpen={isHowItWorksOpen} onClose={closeHowItWorks} />
       <ConfirmDialog
         isOpen={isPhraseWhyOpen}
         text={lang('WalletSecretPhraseWhyText')}

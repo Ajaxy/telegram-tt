@@ -1,7 +1,7 @@
 import type { GlobalState } from '../types';
 
 import {
-  DEFAULT_TON_EXPLORER_URL, SERVICE_NOTIFICATIONS_USER_ID, USD_CURRENCY_CODE, WALLET_BOT_USERNAME,
+  DEFAULT_OLD_WALLET_BOT_USERNAME, DEFAULT_TON_EXPLORER_URL, SERVICE_NOTIFICATIONS_USER_ID, USD_CURRENCY_CODE,
 } from '../../config';
 import { toNonBounceableAddress } from '../../lib/ton/address';
 import memoized from '../../util/memoized';
@@ -58,6 +58,10 @@ export function selectWalletSavedWallets<T extends GlobalState>(global: T) {
   return global.wallet?.savedWallets;
 }
 
+export function selectIsWalletKeyRotationPending<T extends GlobalState>(global: T) {
+  return Boolean(global.wallet?.isKeyRotationPending);
+}
+
 // False until both the wallet state and the device storage have answered
 export function selectIsWalletKeyMissing<T extends GlobalState>(global: T) {
   const state = global.wallet?.state;
@@ -69,18 +73,6 @@ export function selectCanExportWalletPhrase<T extends GlobalState>(global: T) {
   return Boolean(global.wallet?.state?.canExportPhrase) || selectHasLocalOnlyWalletPhrase(global);
 }
 
-// The name may be one of the bot's secondary usernames
-const findWalletBotId = memoized((bots: GlobalState['attachMenu']['bots'], users: GlobalState['users']['byId']) => (
-  Object.values(bots).find((bot) => users[bot.id]?.usernames?.some(({ username, isActive }) => (
-    isActive && username.toLowerCase() === WALLET_BOT_USERNAME
-  )))?.id
-));
-
-// Memoized on the bot list and the users, so the menu render does not walk them every time
-export function selectWalletBotId<T extends GlobalState>(global: T) {
-  return findWalletBotId(global.attachMenu.bots, global.users.byId);
-}
-
 export function selectIsWalletAvailable<T extends GlobalState>(global: T) {
   return Boolean(global.appConfig.isWalletAvailable);
 }
@@ -89,9 +81,19 @@ export function selectTonExplorerUrl<T extends GlobalState>(global: T) {
   return global.appConfig.tonExplorerUrl || DEFAULT_TON_EXPLORER_URL;
 }
 
-// The built-in wallet's "Send Money" replaces this bot in the attach menu
-export function selectReplacedWalletBotId<T extends GlobalState>(global: T) {
-  return global.appConfig.isWalletAvailable ? selectWalletBotId(global) : undefined;
+// Memoized on the bot list and the users, so the menu render does not walk them every time
+const findAttachBotId = memoized((
+  bots: GlobalState['attachMenu']['bots'], users: GlobalState['users']['byId'], username: string,
+) => Object.keys(bots).find((id) => (
+  users[id]?.usernames?.some((item) => item.isActive && item.username.toLowerCase() === username)
+)));
+
+// The built-in wallet replaces this bot in the menus; an empty name in the config keeps it
+export function selectOldWalletBotId<T extends GlobalState>(global: T) {
+  const { isWalletAvailable, oldWalletBotUsername = DEFAULT_OLD_WALLET_BOT_USERNAME } = global.appConfig;
+  if (!isWalletAvailable || !oldWalletBotUsername) return undefined;
+
+  return findAttachBotId(global.attachMenu.bots, global.users.byId, oldWalletBotUsername.toLowerCase());
 }
 
 export function selectOnrampProvider<T extends GlobalState>(global: T, providerId: string) {

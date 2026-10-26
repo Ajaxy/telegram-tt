@@ -28,21 +28,18 @@
   align-self: stretch;
 }
 
-.section {
-  flex: 1;
+// As in the native apps, a short history leaves empty room below it, so the card always folds away in full rather
+// than stopping halfway
+.sectionFilled {
+  min-height: calc(var(--slide-height) - var(--modal-header-height));
 }
 
 .transactions {
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
-.history {
-  flex: 1;
-}
-
-// `Transition` fills its parent, which here would add the tab row on top of the stretched island
+// The list takes the height of its rows rather than of its parent
 .tabContent {
   height: auto;
 
@@ -90,30 +87,27 @@
   flex: 1;
 }
 
-// `TabList` sizes its indicator to the tabs alone, so the row has to hug them
+// The grid track folds the row's height, and the clip keeps the tabs inside it while it moves. The clip's padding
+// leaves room for the island shadow of `TabList`.
+.historyTabListReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows var(--slide-transition), opacity var(--slide-transition);
+
+  &:global(.open) {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+.historyTabListClip {
+  overflow: hidden;
+  min-height: 0;
+  margin: -0.3125rem;
+  padding: 0.3125rem;
+}
+
 .historyTabs {
-  width: fit-content;
-  margin-bottom: 0.25rem;
-  margin-inline: auto;
-}
-
-.noCollectibles {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  align-items: center;
-
-  padding: 1.5rem 1rem 0.5rem;
-}
-
-.noCollectiblesSticker {
-  font-size: 3rem;
-  line-height: 1.25;
-}
-
-.noCollectiblesText {
-  font-size: 0.9375rem;
-  line-height: 1.25;
-  color: var(--color-text-secondary);
-  text-align: center;
+  margin-bottom: 0.5rem;
 }

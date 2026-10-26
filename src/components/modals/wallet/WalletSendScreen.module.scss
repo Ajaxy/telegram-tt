@@ -122,18 +122,9 @@
 }
 
 .maxButton {
-  cursor: var(--custom-cursor, pointer);
-
   margin-inline-start: auto;
-  padding: 0;
-  border: none;
-
-  font-size: inherit;
   font-weight: var(--font-weight-medium);
-  color: var(--color-primary);
   text-transform: uppercase;
-
-  background: none;
 }
 
 .commentInput :global(.form-control.form-control) {

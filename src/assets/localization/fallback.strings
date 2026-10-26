@@ -3130,6 +3130,8 @@
 "WalletReceiveCopyHint" = "Click to copy address";
 "WalletReceiveNetworkNote" = "Share your address or QR code to receive GRAM.";
 "WalletReceiveBuy" = "Buy with cash or crypto";
+"WalletReceiveAddressCopied" = "Address copied";
+"WalletReceiveShowQr" = "Show my QR";
 "WalletBuyTitle" = "Buy Grams";
 "WalletBuyPayWith" = "Pay with";
 "WalletBuyCurrency" = "Currency";
@@ -3166,8 +3168,8 @@
 "WalletSendNetworkFee" = "Network fee: {amount}";
 "WalletSendFeeUnavailable" = "Couldn't estimate the network fee.";
 "WalletNetworkFeesTitle" = "Network Fees";
-"WalletNetworkFeesInfo_one" = "Every transfer costs a small network fee (**~{fee} Grams**). Telegram covers your first **{count}** transfer each day.";
-"WalletNetworkFeesInfo_other" = "Every transfer costs a small network fee (**~{fee} Grams**). Telegram covers your first **{count}** transfers each day.";
+"WalletNetworkFeesInfo_one" = "Every transfer costs a small network fee (**~{fee}**). Telegram covers your first **{count}** transfer each day.";
+"WalletNetworkFeesInfo_other" = "Every transfer costs a small network fee (**~{fee}**). Telegram covers your first **{count}** transfers each day.";
 "WalletNetworkFeesInfoShort_one" = "Every transfer costs a small network fee. Telegram covers your first **{count}** transfer each day.";
 "WalletNetworkFeesInfoShort_other" = "Every transfer costs a small network fee. Telegram covers your first **{count}** transfers each day.";
 "WalletSendMinAmount" = "Minimum transfer: {amount}";
@@ -3202,8 +3204,6 @@
 "WalletCollectibleOnSale" = "This collectible is up for sale. Take it off sale to transfer it.";
 "WalletCollectibleNotReady" = "This collectible is not ready to be transferred yet.";
 "WalletCollectibleUnavailable" = "Unable to prepare collectible transfer.";
-"WalletNoCollectibles" = "Collectible gifts you own will appear here.";
-"WalletNoCollectiblesAction" = "Get One on Fragment";
 "WalletTransactionsHidden" = "Transactions under {amount} are hidden.";
 "WalletTransactionIncoming" = "Incoming transfer";
 "WalletTransactionOutgoing" = "Outgoing transfer";
@@ -3257,6 +3257,7 @@
 "WalletReleaseKeyTitle" = "Wallet Key";
 "WalletReleaseKeyText" = "Your Gram wallet keys are protected by the app passcode and go with it. Make sure the backup is on or the recovery phrases are written down before turning it off.";
 "WalletReleaseKeyRemove" = "Remove Keys";
+"WalletLogoutWarning" = "The Secret Phrases saved on this device for your wallets will be deleted when you log out. Make sure each phrase has a cloud backup or a written copy first.";
 "WalletAppPasscodePlaceholder" = "Passcode";
 "WalletAppPasscodeDescription" = "Enter your passcode to continue.";
 "PasscodeWalletKeyOtherAccounts" = "Wallet keys in another Telegram account are protected by this passcode. Switch to each account and remove its wallet keys before turning off the app passcode.";
@@ -3280,7 +3281,8 @@
 "WalletSessionTooFreshError" = "For security reasons, this action is unavailable during the first 24 hours after logging in. Please try again later.";
 "WalletDecryptError" = "Failed to decrypt the comment. Please try again.";
 "WalletSendInvalidAddress" = "Invalid wallet address.";
-"AreYouSureLogoutGrams" = "Are you sure you want to log out?\n\nThis will cancel all your Secret Chats and **delete wallet backups holding {amount}**. Without their recovery phrases, you'll lose access to these funds.\n\nYou can use Telegram on all your devices at once and use several accounts in the same app.";
+"AreYouSureLogoutGrams" = "Are you sure you want to log out?\n\nThis will **delete wallet backups holding {amount}**. Without their recovery phrases, you'll lose access to these funds.\n\nYou can use Telegram on all your devices at once and use several accounts in the same app.";
+"WalletLogoutKeyRotation" = "A key change for your wallet is not confirmed yet. Its new key is stored only on this device. If you log out and the change goes through, you will lose access to the wallet.";
 "WalletSendDomainNotFound" = "This domain has no wallet address";
 "WalletSendDomainLookupFailed" = "Couldn't check the domain. Please try again.";
 "WalletLinkNoWallet" = "This user has no wallet yet.";

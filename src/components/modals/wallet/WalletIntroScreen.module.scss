@@ -8,11 +8,9 @@
   @include mixins.scrollable-padding(0);
 }
 
-// `ParticlesHeader` pads its canvas by 9rem, so it is pulled 1rem under the modal header
 .header {
   position: relative;
   align-self: stretch;
-  margin-top: -1rem;
 }
 
 .tips {

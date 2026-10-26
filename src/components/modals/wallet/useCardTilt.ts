@@ -24,16 +24,15 @@ const RELEASE_DAMPING = 0.06;
 const REST_THRESHOLD = 0.0002;
 const STYLE_PRECISION = 4;
 
-// Drives `--tilt-x`/`--tilt-y` in [-1, 1] and `--card-glow` in [0, 1] through springs
-export default function useCardTilt(ref: ElementRef<HTMLElement>) {
+// Drives `--tilt-x`/`--tilt-y` in [-1, 1] through springs
+export default function useCardTilt(ref: ElementRef<HTMLElement>, isDisabled?: boolean) {
   useEffect(() => {
     const element = ref.current;
-    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    if (!element || isDisabled) return undefined;
 
     const tiltX = createSpring();
     const tiltY = createSpring();
-    const glow = createSpring();
-    const springs = [tiltX, tiltY, glow];
+    const springs = [tiltX, tiltY];
 
     let isCancelled = false;
     let isFollowing = false;
@@ -46,7 +45,6 @@ export default function useCardTilt(ref: ElementRef<HTMLElement>) {
 
       element!.style.setProperty('--tilt-x', String(round(tiltX.value, STYLE_PRECISION)));
       element!.style.setProperty('--tilt-y', String(round(tiltY.value, STYLE_PRECISION)));
-      element!.style.setProperty('--card-glow', String(round(glow.value, STYLE_PRECISION)));
     }
 
     function tick() {
@@ -98,7 +96,6 @@ export default function useCardTilt(ref: ElementRef<HTMLElement>) {
       isFollowing = true;
       tiltX.target = clamp(((e.clientX - left) / width - 0.5) * 2, -1, 1);
       tiltY.target = clamp(((e.clientY - top) / height - 0.5) * 2, -1, 1);
-      glow.target = 1;
       startAnimation();
     };
 
@@ -125,7 +122,7 @@ export default function useCardTilt(ref: ElementRef<HTMLElement>) {
       element.removeEventListener('pointerleave', handleRelease);
       element.removeEventListener('pointercancel', handleRelease);
     };
-  }, [ref]);
+  }, [ref, isDisabled]);
 }
 
 function createSpring(): Spring {

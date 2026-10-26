@@ -18,7 +18,7 @@ import {
   getMessagePhoto,
   getMessageVideo, getMessageVoice,
 } from '../../../global/helpers';
-import { selectReplacedWalletBotId } from '../../../global/selectors';
+import { selectOldWalletBotId } from '../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getDebugLogs } from '../../../util/debugConsole';
@@ -114,7 +114,7 @@ const AttachMenu = ({
     updateAttachmentSettings,
     openWalletTransferLink,
   } = getActions();
-  const replacedWalletBotId = useSelector(selectReplacedWalletBotId);
+  const oldWalletBotId = useSelector(selectOldWalletBotId);
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
   const [isDateModalOpen, openDateModal, closeDateModal] = useFlag();
@@ -188,7 +188,7 @@ const AttachMenu = ({
   const bots = useMemo(() => {
     return attachBots
       ? Object.values(attachBots).filter((bot) => {
-        if (!peerType || !bot.isForAttachMenu || bot.id === replacedWalletBotId) return false;
+        if (!peerType || !bot.isForAttachMenu || bot.id === oldWalletBotId) return false;
 
         if (peerType === 'bots' && bot.id === chatId
           && bot.attachMenuPeerTypes && bot.attachMenuPeerTypes.includes('self')) {
@@ -197,7 +197,7 @@ const AttachMenu = ({
         return bot.attachMenuPeerTypes!.includes(peerType);
       })
       : undefined;
-  }, [attachBots, chatId, peerType, replacedWalletBotId]);
+  }, [attachBots, chatId, peerType, oldWalletBotId]);
 
   const lang = useLang();
 

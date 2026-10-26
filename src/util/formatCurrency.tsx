@@ -15,6 +15,8 @@ const LEADING_NUMBER_REGEX = /^\+?(\d*)(?:\.(\d*))?(?:e([+-]?\d+))?/i;
 const MAX_EXPONENT = 30;
 const SUBSCRIPT_DIGITS = '\u2080\u2081\u2082\u2083\u2084\u2085\u2086\u2087\u2088\u2089';
 const SHORT_FRACTION_DIGITS = 2;
+const PRECISE_SIGNIFICANT_DIGITS = 3;
+const MAX_FRACTION_DIGITS = 20;
 
 export function convertCurrencyFromBaseUnit(amount: number, currency: string) {
   return amount / 10 ** getCurrencyExp(currency);
@@ -115,6 +117,7 @@ export function formatTonInFiat(
   locale?: string,
   options?: {
     shouldOmitFractions?: boolean;
+    isPrecise?: boolean;
   },
 ): string | undefined {
   if (tonUsdRate === undefined || currencyRate === undefined) {
@@ -125,7 +128,7 @@ export function formatTonInFiat(
     convertTonToCurrency(nanos, tonUsdRate, currency, currencyRate),
     currency,
     locale,
-    { shouldOmitFractions: options?.shouldOmitFractions },
+    { shouldOmitFractions: options?.shouldOmitFractions, isPrecise: options?.isPrecise },
   );
 }
 
@@ -144,6 +147,7 @@ export function formatCurrencyAsString(
   locale: string = FALLBACK_LANG_CODE,
   options?: {
     shouldOmitFractions?: boolean;
+    isPrecise?: boolean;
   },
 ) {
   const price = convertCurrencyFromBaseUnit(totalPrice, currency);
@@ -169,7 +173,18 @@ export function formatCurrencyAsString(
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    maximumFractionDigits: options?.isPrecise ? getPreciseFractionDigits(price, currency) : undefined,
   }).format(price);
+}
+
+// Three significant digits keep an amount below the smallest unit visible, as `$0.000382` rather than `$0.00`
+function getPreciseFractionDigits(price: number, currency: string) {
+  const exp = getCurrencyExp(currency);
+  if (!price) return exp;
+
+  const digits = PRECISE_SIGNIFICANT_DIGITS - 1 - Math.floor(Math.log10(Math.abs(price)));
+
+  return Math.min(Math.max(exp, digits), MAX_FRACTION_DIGITS);
 }
 
 function getCurrencyExp(currency: string) {

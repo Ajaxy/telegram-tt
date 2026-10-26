@@ -1,27 +1,24 @@
 import { memo } from '../../../lib/teact/teact';
 
-import { formatTonShortFromNanos } from '../../../util/formatCurrency';
-
 import useLang from '../../../hooks/useLang';
 
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
 type OwnProps = {
   isOpen: boolean;
-  // Nanotons; absent when the relayer paid
-  fee?: bigint;
+  fiatFee?: string;
   freeTransfersPerDay: number;
   onClose: NoneToVoidFunction;
 };
 
 const WalletFeesInfoDialog = ({
-  isOpen, fee, freeTransfersPerDay, onClose,
+  isOpen, fiatFee, freeTransfersPerDay, onClose,
 }: OwnProps) => {
   const lang = useLang();
 
-  const text = fee
+  const text = fiatFee
     ? lang('WalletNetworkFeesInfo', {
-      fee: formatTonShortFromNanos(fee),
+      fee: fiatFee,
       count: freeTransfersPerDay,
     }, { withNodes: true, withMarkdown: true, pluralValue: freeTransfersPerDay })
     : lang('WalletNetworkFeesInfoShort', {

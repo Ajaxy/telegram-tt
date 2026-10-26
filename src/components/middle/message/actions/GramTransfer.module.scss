@@ -197,7 +197,7 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+:global(body.no-page-transitions) {
   .spinning,
   .shine,
   .shine:global(.closing),
@@ -269,8 +269,9 @@
 }
 
 .amountContent {
-  transform-origin: center;
+  transform-origin: left center;
   transform: scale(var(--fit-scale, 1));
+  width: max-content;
   white-space: nowrap;
 }
 
@@ -314,13 +315,12 @@
 // Solid, as a translucent black would read greyer on the bright diagonal of the gradient
 .addressLine {
   font-family: var(--font-family-monospace);
-  font-size: 0.5625rem;
+  font-size: 0.625rem;
   font-weight: var(--font-weight-normal);
   line-height: 1.35;
-  color: #0068c6;
+  color: #0145d0;
   text-align: center;
   text-shadow: 0 0.0625rem 0 rgb(255 255 255 / 6%);
-  text-transform: uppercase;
   white-space: nowrap;
 }
 

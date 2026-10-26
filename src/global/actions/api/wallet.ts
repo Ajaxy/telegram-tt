@@ -2,6 +2,7 @@ import type {
   ApiOnrampProvider,
   ApiWalletCollectible,
   ApiWalletTransaction,
+  ApiWalletTransactionPeer,
   DecryptWalletCommentError,
   DecryptWalletCommentResult,
   ExportSecretPhraseError,
@@ -33,7 +34,8 @@ import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { callApi } from '../../../api/gramjs';
-import { buildWalletTransferFeeKey, WALLET_ERROR_LANG_KEYS } from '../../helpers/wallet';
+import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
+import { buildWalletTransferFeeKey, keepRecipientUser, WALLET_ERROR_LANG_KEYS } from '../../helpers/wallet';
 import {
   addActionHandler, getGlobal, getPromiseActions, setGlobal,
 } from '../../index';
@@ -273,6 +275,21 @@ addActionHandler('loadSavedWallets', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadWalletKeyRotationPending', async (global): Promise<void> => {
+  const ownAddress = selectWalletAddress(global);
+  if (!ownAddress) return;
+
+  const isKeyRotationPending = await callApi('fetchIsWalletKeyRotationPending', { ownAddress })
+    .catch(() => undefined);
+
+  global = getGlobal();
+  if (selectWalletAddress(global) !== ownAddress) return;
+
+  // Without an answer from the worker the rotation counts as pending: a needless warning costs less than a lost key
+  global = updateWallet(global, { isKeyRotationPending: isKeyRotationPending ?? true });
+  setGlobal(global);
+});
+
 async function findStaleSavedWallets(addresses: string[]) {
   const publicKeys = await callApi('fetchWalletPublicKeys', { addresses });
   if (!publicKeys) return [];
@@ -497,7 +514,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
   const refreshId = shouldRefresh ? ++lastTransactionsRefreshId : undefined;
 
-  const result = await callApi('fetchWalletTransactions', { offset });
+  const result = await callApi('fetchWalletTransactions', { offset, limit: WALLET_TRANSACTIONS_LIMIT });
   if (!result) return;
 
   if (refreshId !== undefined && refreshId !== lastTransactionsRefreshId) return;
@@ -511,7 +528,12 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   if (!shouldRefresh && global.wallet?.nextOffset !== offset) return;
 
   const current = global.wallet?.transactions || [];
-  const page = filterDustTransactions(result.transactions, global.appConfig.walletTransferMinNanos);
+  const knownPeers = new Map(current.map(({ id, peer }) => [id, peer]));
+  const page = result.transactions.map((transaction) => {
+    const peer = keepRecipientUser(transaction.peer, knownPeers.get(transaction.id));
+
+    return peer === transaction.peer ? transaction : { ...transaction, peer };
+  });
   const freshIds = new Set(page.map(({ id }) => id));
   let transactions: ApiWalletTransaction[];
   let { nextOffset } = result;
@@ -531,11 +553,6 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   global = updateWallet(global, { transactions, nextOffset });
   setGlobal(global);
 
-  // A page filtered out entirely as dust would stall the paging
-  if (!page.length && nextOffset) {
-    actions.loadWalletTransactions();
-  }
-
   if (!shouldRefresh) return;
 
   // A local record the fresh page does not list is resolved by its message hash
@@ -553,15 +570,6 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
     setGlobal(global);
   }
 });
-
-// Only incoming transfers under the server's threshold count as dust
-function filterDustTransactions(transactions: ApiWalletTransaction[], minAmount?: bigint) {
-  if (!minAmount) return transactions;
-
-  return transactions.filter(({ amount, isIncoming, isKeyChange, collectible }) => (
-    !isIncoming || isKeyChange || collectible || amount >= minAmount
-  ));
-}
 
 // An item already listed is updated in place; new ones keep the server's order
 function mergeCollectibles(list: ApiWalletCollectible[], page: ApiWalletCollectible[]) {
@@ -601,7 +609,7 @@ addActionHandler('loadWalletCollectibles', async (global, actions, payload): Pro
     current.wallet?.collectibles !== previousCollectibles || (shouldRefresh && refreshId !== lastCollectiblesRefreshId)
   );
 
-  const result = await callApi('fetchWalletCollectibles', { offset });
+  const result = await callApi('fetchWalletCollectibles', { offset, limit: WALLET_COLLECTIBLES_LIMIT });
   if (!result) return;
 
   let collectibles = mergeCollectibles(shouldRefresh ? [] : previousCollectibles || [], result.collectibles);
@@ -613,7 +621,7 @@ addActionHandler('loadWalletCollectibles', async (global, actions, payload): Pro
 
     if (selectWalletAddress(global) !== ownerAddress || isOutdated(global)) return;
 
-    const nextPage = await callApi('fetchWalletCollectibles', { offset: nextOffset });
+    const nextPage = await callApi('fetchWalletCollectibles', { offset: nextOffset, limit: WALLET_COLLECTIBLES_LIMIT });
     if (!nextPage) return;
 
     collectibles = mergeCollectibles(collectibles, nextPage.collectibles);
@@ -1207,7 +1215,8 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
       const localWords = local ? decodeWords(local) : undefined;
       const candidateWords = localWords?.join(' ') !== exported.words.join(' ') ? localWords : undefined;
 
-      // A phrase the chain does not know is a stale copy from a rotation made on another device
+      // The chain is read once a rotation sent from this device has executed or expired. A phrase it does not know
+      // then is a stale copy from a rotation made on another device.
       const chainPublicKey = candidateWords ? await callApi('fetchWalletChainPublicKey', { ownAddress }) : undefined;
       const isCandidateCurrent = candidateWords && chainPublicKey ? await callApi('validateWalletPhrase', {
         words: candidateWords, ownAddress, ownPublicKey: chainPublicKey,
@@ -1448,9 +1457,13 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
   }
 
   if (isSameWallet) {
+    const recipientPeer: ApiWalletTransactionPeer = toUserId
+      ? { type: 'user', userId: toUserId, address: toAddress }
+      : { type: 'address', address: toAddress };
+
     if (result.transaction) {
       global = replacePendingWalletTransaction(global, result.msgHash, {
-        ...result.transaction, msgHash: result.msgHash,
+        ...result.transaction, peer: keepRecipientUser(result.transaction.peer, recipientPeer), msgHash: result.msgHash,
       });
     } else {
       global = addPendingWalletTransaction(global, {
@@ -1460,7 +1473,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         validUntil: result.validUntil,
         isIncoming: false,
         isPending: true,
-        peer: { type: 'address', address: toAddress },
+        peer: recipientPeer,
         // The server lists a collectible transfer with a zero amount as well
         amount: collectibleAddress ? 0n : amount,
         // The cache keeps pending records, so a private comment is held only encrypted, as the server lists it

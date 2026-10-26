@@ -56,7 +56,7 @@ import { deserializeBytes, serializeBytes } from '../helpers/misc';
 import { invokeRequest } from './client';
 import {
   checkIsAddressActive, deriveWalletSeeds, estimateFee, exportWalletSecretPhrase, fetchToncenterWalletState,
-  forgetRefusedTransfer, isTransferPending, rememberSentTransfer, runWalletSend, sendTransferData,
+  forgetRefusedTransfer, isTransferPending, loadSentTransfer, rememberSentTransfer, runWalletSend, sendTransferData,
 } from './wallet';
 
 type TonConnectCredentials = {
@@ -113,6 +113,8 @@ type StoredResponse = {
   // Absent while the transaction is on its way out, so a reload does not take the request up again
   body?: string;
   expires: number;
+  responseError?: number;
+  sentTransfer?: ApiTonConnectSentTransfer;
   shouldCloseSession?: boolean;
 };
 
@@ -272,7 +274,7 @@ export async function prepareTonConnectOauthSession({
   }
 }
 
-// The prepared connection is handed over once: a second login attempt has to prepare it again
+// The prepared connection is handed over once; only a login that got no answer brings it back
 export function takeTonConnectOauthSession(sessionId: string) {
   const prepared = oauthSessions.get(sessionId);
   if (!prepared) return undefined;
@@ -281,6 +283,16 @@ export function takeTonConnectOauthSession(sessionId: string) {
   oauthSessions.delete(sessionId);
 
   return prepared.session;
+}
+
+// A login that got no answer may be sent again, unless the connection was prepared anew meanwhile
+export function returnTonConnectOauthSession(sessionId: string, session: GramJs.InputTonConnectOauthSession) {
+  if (oauthSessions.has(sessionId)) {
+    session.challengeAnswer.fill(0);
+    return;
+  }
+
+  rememberOauthSession(sessionId, session);
 }
 
 function rememberOauthSession(sessionId: string, session: GramJs.InputTonConnectOauthSession) {
@@ -479,6 +491,8 @@ async function processTonConnectRequest({
 
       if (!state?.isSupportedContract) throw new TonConnectError('UNSUPPORTED_WALLET');
 
+      await loadSentTransfer(credentials.ownAddress);
+
       if (isTransferPending(credentials.ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
         throw new TonConnectError('TRANSFER_PENDING');
       }
@@ -517,8 +531,19 @@ async function processTonConnectRequest({
       }
 
       const maxBytes = isSignMessage ? MAX_BOC_BYTES : WALLET_TRANSFER_DATA_MAX_BYTES;
+      // `serializeBoc` throws for a message deeper or with more cells than the chain takes, which counts as too large.
+      // Any other failure refuses the request the same way, and the log keeps it from passing for a size problem.
+      const size = isExpired ? 0 : await getBatchTransferSize({ ...params, isInternal: isSignMessage })
+        .catch((err: unknown) => {
+          if (DEBUG) {
+            // eslint-disable-next-line no-console
+            console.warn('[tonConnect] Transaction size check failed:', err);
+          }
 
-      if (!isExpired && await getBatchTransferSize({ ...params, isInternal: isSignMessage }) > maxBytes) {
+          return Infinity;
+        });
+
+      if (size > maxBytes) {
         transaction = undefined;
         response = buildTonConnectError(appRequest.id, TON_CONNECT_BAD_REQUEST_ERROR_CODE, 'Transaction is too large');
       }
@@ -645,11 +670,10 @@ async function processTonConnectRequest({
   const finalResponse = response!;
   const body = serializeBytes(encryptTonConnectMessage(finalResponse, session.dappClientId, keys.secretKey));
 
+  const responseError = 'error' in finalResponse ? finalResponse.error.code : undefined;
+
   pendingResponses.set(cacheKey, {
-    body, expires,
-    responseError: 'error' in finalResponse ? finalResponse.error.code : undefined,
-    sentTransfer,
-    shouldCloseSession,
+    body, expires, responseError, sentTransfer, shouldCloseSession,
   });
 
   await TON_CONNECT_IDB_STORE.set(cacheKey, {
@@ -659,6 +683,8 @@ async function processTonConnectRequest({
     traceId: request.traceId,
     body,
     expires,
+    responseError,
+    sentTransfer,
     shouldCloseSession,
   } satisfies StoredResponse).catch(() => undefined);
 
@@ -738,7 +764,11 @@ async function restoreStoredResponse(cacheKey: string, currentUserId: string) {
   if (!stored || stored.userId !== currentUserId || stored.expires <= getServerTime()) return undefined;
 
   const response: PendingResponse = {
-    body: stored.body, expires: stored.expires, shouldCloseSession: stored.shouldCloseSession,
+    body: stored.body,
+    expires: stored.expires,
+    responseError: stored.responseError,
+    sentTransfer: stored.sentTransfer,
+    shouldCloseSession: stored.shouldCloseSession,
   };
 
   pendingResponses.set(cacheKey, response);

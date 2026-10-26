@@ -72,6 +72,7 @@ export type FontIconName =
   | 'card-alt'
   | 'carousel'
   | 'cash-circle'
+  | 'cash-circle-filled'
   | 'channel'
   | 'chat-badge'
   | 'chats-badge'

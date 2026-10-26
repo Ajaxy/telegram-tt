@@ -349,6 +349,7 @@ export interface ApiAppConfig {
   // Transfers below this are hidden from the wallet history
   walletTransferMinNanos?: bigint;
   walletGaslessDailyTransfers?: number;
+  oldWalletBotUsername?: string;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;
   pollCountriesMax: number;

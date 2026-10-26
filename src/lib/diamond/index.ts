@@ -1,4 +1,4 @@
-import type { DiamondDrawState, DiamondScene } from './scene';
+import type { DiamondDrawState, DiamondPalette, DiamondScene } from './scene';
 
 import { timingFunctions } from '../../util/animation';
 import { lerp } from '../../util/math';
@@ -8,6 +8,14 @@ import { createFrameWatchdog, getIsDiamond3dDegraded } from './performance';
 import { createDiamondScene, getFrameTime, TURN_DURATION } from './scene';
 
 import { getIsInBackground } from '../../hooks/window/useBackgroundMode';
+
+export type DiamondOptions = {
+  palette?: DiamondPalette;
+  // Seconds per turn while nobody holds the diamond
+  turnDuration?: number;
+  // A small diamond that only turns needs fewer frames than one in the hand
+  restFrameInterval?: number;
+};
 
 type Animation = {
   startTime: number;
@@ -38,6 +46,7 @@ export function setupDiamond(
   canvas: HTMLCanvasElement,
   onReady: NoneToVoidFunction,
   onError: NoneToVoidFunction,
+  options: DiamondOptions = {},
 ) {
   if (getIsDiamond3dDegraded()) {
     onError();
@@ -56,7 +65,7 @@ export function setupDiamond(
   onFullyIdle(() => {
     if (isDestroyed) return;
 
-    destroyRenderer = createRenderer(canvas, onReady, onError);
+    destroyRenderer = createRenderer(canvas, onReady, onError, options);
   });
 
   return () => {
@@ -70,6 +79,7 @@ function createRenderer(
   canvas: HTMLCanvasElement,
   onReady: NoneToVoidFunction,
   onError: NoneToVoidFunction,
+  options: DiamondOptions,
 ) {
   // Without a usable GPU the browser renders WebGL on the CPU, far too slow for these shaders
   const gl = canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: true });
@@ -83,11 +93,11 @@ function createRenderer(
   let isDestroyed = false;
   let stop: NoneToVoidFunction | undefined;
 
-  createDiamondScene(gl, 'regular')
+  createDiamondScene(gl, options.palette ?? 'regular')
     .then((scene) => {
       if (isDestroyed) return;
 
-      stop = startRendering(canvas, scene, onReady);
+      stop = startRendering(canvas, scene, onReady, options);
     })
     .catch(() => {
       if (!isDestroyed) onError();
@@ -103,7 +113,12 @@ function createRenderer(
   };
 }
 
-function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady: NoneToVoidFunction) {
+function startRendering(
+  canvas: HTMLCanvasElement,
+  scene: DiamondScene,
+  onReady: NoneToVoidFunction,
+  { turnDuration = TURN_DURATION, restFrameInterval = MIN_FRAME_INTERVAL }: DiamondOptions,
+) {
   // The modals open at start are the diamond's own; anything on top of them covers it
   const baseModalCount = getOpenModalCount();
   const pixelRatio = window.devicePixelRatio || 1;
@@ -123,6 +138,8 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
   let isIdleEnabled = false;
   let isPressed = false;
   let isDragging = false;
+  // The first report of the observer comes right after it starts
+  let isVisible = false;
   let startX = 0;
   let startY = 0;
   let lastX = 0;
@@ -133,7 +150,9 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
     watchdog.track(now);
 
     // Android draws at most 60 times per second; skipping every other frame on 120 Hz halves the GPU work
-    if (lastFrameTime !== undefined && now - lastFrameTime < MIN_FRAME_INTERVAL) return;
+    const isMoving = isPressed || (animation && !animation.isRepeated);
+    const minInterval = isMoving ? MIN_FRAME_INTERVAL : restFrameInterval;
+    if (lastFrameTime !== undefined && now - lastFrameTime < minInterval) return;
 
     const frameTime = getFrameTime(now, lastFrameTime);
     lastFrameTime = now;
@@ -179,7 +198,7 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
 
     animation = {
       startTime: time,
-      duration: TURN_DURATION,
+      duration: turnDuration,
       isRepeated: true,
       onUpdate: (progress) => {
         yaw = fromYaw + FULL_TURN * progress;
@@ -230,8 +249,9 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
     isPressed = true;
     isDragging = false;
     animation = undefined;
-    startX = lastX = e.offsetX;
-    startY = lastY = e.offsetY;
+    // Client coordinates, since the offsets follow the canvas when it is scaled, as the card diamond is in the hand
+    startX = lastX = e.clientX;
+    startY = lastY = e.clientY;
     canvas.setPointerCapture(e.pointerId);
   }
 
@@ -245,15 +265,15 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
     }
 
     if (!isDragging) {
-      if (Math.hypot(e.offsetX - startX, e.offsetY - startY) <= TOUCH_SLOP) return;
+      if (Math.hypot(e.clientX - startX, e.clientY - startY) <= TOUCH_SLOP) return;
 
       isDragging = true;
     }
 
-    yaw += (e.offsetX - lastX) * pixelRatio * DRAG_YAW_SPEED;
-    pitch += (e.offsetY - lastY) * pixelRatio * DRAG_PITCH_SPEED;
-    lastX = e.offsetX;
-    lastY = e.offsetY;
+    yaw += (e.clientX - lastX) * pixelRatio * DRAG_YAW_SPEED;
+    pitch += (e.clientY - lastY) * pixelRatio * DRAG_PITCH_SPEED;
+    lastX = e.clientX;
+    lastY = e.clientY;
   }
 
   function handlePointerUp(e: PointerEvent) {
@@ -267,9 +287,9 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
     }
   }
 
-  // Like animated stickers: pauses in a background window, during heavy animations and under a dialog
+  // Like animated stickers: pauses in a background window, during heavy animations, under a dialog and out of sight
   function updatePlayback() {
-    if (getIsInBackground() || getIsHeavyAnimating() || getOpenModalCount() > baseModalCount) {
+    if (!isVisible || getIsInBackground() || getIsHeavyAnimating() || getOpenModalCount() > baseModalCount) {
       pause();
     } else {
       resume();
@@ -294,6 +314,11 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
   const unsubscribeFromBackground = getIsInBackground.subscribe(updatePlayback);
   const unsubscribeFromHeavyAnimation = getIsHeavyAnimating.subscribe(updatePlayback);
   const unsubscribeFromModals = getOpenModalCount.subscribe(updatePlayback);
+  const visibilityObserver = new IntersectionObserver(([entry]) => {
+    isVisible = entry.isIntersecting;
+    updatePlayback();
+  });
+  visibilityObserver.observe(canvas);
 
   canvas.addEventListener('pointerdown', handlePointerDown);
   canvas.addEventListener('pointermove', handlePointerMove);
@@ -307,6 +332,7 @@ function startRendering(canvas: HTMLCanvasElement, scene: DiamondScene, onReady:
     unsubscribeFromBackground();
     unsubscribeFromHeavyAnimation();
     unsubscribeFromModals();
+    visibilityObserver.disconnect();
     canvas.removeEventListener('pointerdown', handlePointerDown);
     canvas.removeEventListener('pointermove', handlePointerMove);
     canvas.removeEventListener('pointerup', handlePointerUp);

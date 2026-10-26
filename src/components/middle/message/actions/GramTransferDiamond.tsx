@@ -24,7 +24,6 @@ type OwnProps = {
 
 // A denser frame would cost GPU time without a visible difference at this size
 const MAX_PIXEL_RATIO = 2;
-const IS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const GramTransferDiamond = ({
   size, className, isHovered, shouldLoopStickers,
@@ -40,10 +39,9 @@ const GramTransferDiamond = ({
   const [isZoomed, markZoomed, unmarkZoomed] = useFlag();
   const [isHeld, markHeld, unmarkHeld] = useFlag();
   const is3d = shouldLoopStickers && !isDegraded && !isFailed;
-  const shouldAnimate = is3d && !IS_REDUCED_MOTION;
 
   useEffect(() => {
-    if (!shouldAnimate) return undefined;
+    if (!is3d) return undefined;
 
     const canvas = canvasRef.current!;
 
@@ -66,7 +64,7 @@ const GramTransferDiamond = ({
       canvas.removeEventListener('touchstart', stopPropagation);
       unsubscribe?.();
     };
-  }, [shouldAnimate]);
+  }, [is3d]);
 
   const handlePointerDown = useLastCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
     if (e.button !== 0 || !iconRef.current?.holdDiamondIcon(e.currentTarget)) return;
@@ -140,7 +138,7 @@ const GramTransferDiamond = ({
           draggable={false}
           className={buildClassName(styles.preview, isReady && styles.previewHidden)}
         />
-        {shouldAnimate && (
+        {is3d && (
           <canvas
             ref={canvasRef}
             className={buildClassName(styles.canvas, isReady && styles.ready)}
