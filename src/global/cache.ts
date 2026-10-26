@@ -723,6 +723,10 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...currentChatIds,
     ...messagesChatIds,
     ...topPeerIds,
+    // The cached wallet history shows its channels by name. They go before the folders, whose long lists are cut by
+    // the chat limit.
+    ...selectWalletTransactions(global)?.slice(0, WALLET_TRANSACTIONS_CACHE_LIMIT)
+      .flatMap(({ peer }) => (peer.type === 'channel' ? [peer.channelId] : [])) || [],
     ...global.recentlyFoundChatIds || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
     ...getOrderedIds(ALL_FOLDER_ID) || [],

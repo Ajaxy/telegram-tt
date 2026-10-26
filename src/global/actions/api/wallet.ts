@@ -1564,7 +1564,7 @@ addActionHandler('decryptWalletComment', async (global, actions, payload): Promi
   const ownAddress = selectWalletAddress(global);
   const transaction = selectWalletTransactions(global)?.find(({ id }) => id === transactionId)
     || Object.values(global.wallet?.loadedTransactions || {}).find(({ id }) => id === transactionId);
-  if (!ownAddress || !transaction?.encryptedComment || transaction.peer.type === 'unsupported') return;
+  if (!ownAddress || !transaction?.encryptedComment || !('address' in transaction.peer)) return;
 
   // The comment is salted with the sender's address, which is ours for an outgoing transfer
   const saltAddress = transaction.isIncoming ? transaction.peer.address : ownAddress;

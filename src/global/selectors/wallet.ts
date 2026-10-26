@@ -1,3 +1,4 @@
+import type { ApiPeer, ApiWalletTransactionPeer } from '../../api/types';
 import type { GlobalState } from '../types';
 
 import {
@@ -5,7 +6,8 @@ import {
 } from '../../config';
 import { toNonBounceableAddress } from '../../lib/ton/address';
 import memoized from '../../util/memoized';
-import { isDeletedUser, isUserBot } from '../helpers';
+import { getWalletPeerId, isDeletedUser, isUserBot } from '../helpers';
+import { selectPeer } from './peers';
 import { selectUser } from './users';
 
 export function selectWalletAddress<T extends GlobalState>(global: T) {
@@ -39,6 +41,18 @@ export function selectCanSendMoneyToUser<T extends GlobalState>(global: T, userI
 
 export function selectWalletResolvedUser<T extends GlobalState>(global: T, address: string) {
   return selectWalletAddressOwner(global, toNonBounceableAddress(address)) || undefined;
+}
+
+// A gift moved between the wallet and the user's profile shows the current user, as the iOS app does
+export function selectWalletCounterparty<T extends GlobalState>(
+  global: T, peer: ApiWalletTransactionPeer,
+): ApiPeer | undefined {
+  const peerId = getWalletPeerId(peer);
+  if (peerId) return selectPeer(global, peerId);
+
+  if (peer.type === 'address') return selectWalletResolvedUser(global, peer.address);
+
+  return peer.type === 'telegramGift' && peer.isOwnProfile ? selectUser(global, global.currentUserId!) : undefined;
 }
 
 // `false` means the server names no owner; `undefined` means no answer yet or the owner is not loaded

@@ -2393,6 +2393,8 @@ export interface LangPair {
   'WalletTransactionKeyChange': undefined;
   'WalletTransactionIncomingCollectible': undefined;
   'WalletTransactionOutgoingCollectible': undefined;
+  'WalletTransactionMovedToProfile': undefined;
+  'WalletTransactionMovedFromProfile': undefined;
   'WalletCollectibleGift': undefined;
   'WalletCollectibleUsername': undefined;
   'WalletCollectibleNumber': undefined;
@@ -6602,6 +6604,7 @@ export interface LangKeyGroups {
       | 'ContextMenuNoForwardsPeer'
       | 'RatingReflectsActivity'
       | 'WalletSendAddressLinked'
+      | 'WalletSendRecipientWallet'
       | 'WalletConnectSuccess'
       | 'WalletConnectDisconnected'
       | 'WalletConnectToApp'
@@ -6890,6 +6893,7 @@ export interface LangKeyGroups {
       | 'WalletSendBalance'
       | 'WalletSendNetworkFee'
       | 'WalletSendMinAmount'
+      | 'WalletSendAmountButton'
       | 'WalletTransactionsHidden'
       | 'AreYouSureLogoutGrams'
       | 'WalletAlsoHaveOldWallets'

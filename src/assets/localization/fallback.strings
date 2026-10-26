@@ -3255,6 +3255,8 @@
 "WalletTransactionKeyChange" = "Key Update";
 "WalletTransactionIncomingCollectible" = "Incoming collectible";
 "WalletTransactionOutgoingCollectible" = "Outgoing collectible";
+"WalletTransactionMovedToProfile" = "Moved to profile";
+"WalletTransactionMovedFromProfile" = "Moved from profile";
 "WalletCollectibleGift" = "Collectible Gift";
 "WalletCollectibleUsername" = "Collectible Username";
 "WalletCollectibleNumber" = "Collectible Number";

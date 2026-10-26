@@ -1,11 +1,12 @@
 import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser, ApiWalletTransaction } from '../../../api/types';
+import type { ApiPeer, ApiWalletTransaction } from '../../../api/types';
 
-import { getUserFullName } from '../../../global/helpers';
+import { getPeerFullTitle } from '../../../global/helpers/peers';
+import { getWalletGiftMoveKey } from '../../../global/helpers/wallet';
 import {
-  selectTabState, selectUser, selectWalletCurrency, selectWalletCurrencyRate, selectWalletResolvedUser,
+  selectTabState, selectWalletCounterparty, selectWalletCurrency, selectWalletCurrencyRate,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -47,7 +48,7 @@ type StateProps = {
   currency: string;
   tonUsdRate?: number;
   currencyRate?: number;
-  user?: ApiUser;
+  counterparty?: ApiPeer;
   decryptedComment?: string;
   isDecryptingComment?: boolean;
   freeTransfersPerDay?: number;
@@ -64,7 +65,7 @@ type DomainCellOwnProps = {
 const DIAMOND_SIZE = 120;
 
 const WalletTransactionScreen = ({
-  transaction, isRoot, currency, tonUsdRate, currencyRate, user, decryptedComment, isDecryptingComment,
+  transaction, isRoot, currency, tonUsdRate, currencyRate, counterparty, decryptedComment, isDecryptingComment,
   freeTransfersPerDay, onDecryptComment, onSend, onDone,
 }: OwnProps & StateProps) => {
   const { loadWalletUserAddresses } = getActions();
@@ -101,14 +102,14 @@ const WalletTransactionScreen = ({
     );
 
     const peerLabel = lang(isIncoming ? 'WalletTransactionSender' : 'WalletTransactionRecipient');
-    const domain = peer.type === 'unsupported' ? undefined : peer.domain;
+    const domain = 'address' in peer ? peer.domain : undefined;
 
-    if (user) {
+    if (counterparty) {
       rows.push([
         peerLabel,
         <span className={styles.peer}>
-          <Avatar peer={user} size="small" />
-          <span className={styles.peerText}>{renderText(getUserFullName(lang, user))}</span>
+          <Avatar peer={counterparty} size="small" />
+          <span className={styles.peerText}>{renderText(getPeerFullTitle(lang, counterparty))}</span>
           {sendToAddress && sendButton(sendToAddress, peer.type === 'user' ? peer.userId : undefined)}
         </span>,
       ]);
@@ -116,6 +117,8 @@ const WalletTransactionScreen = ({
       if (domain) {
         rows.push([lang('WalletTransactionDomain'), <DomainCell domain={domain} />]);
       }
+    } else if (peer.type === 'telegramGift') {
+      rows.push([peerLabel, lang('Telegram')]);
     } else if (domain) {
       // The button sends to the address behind the domain, which the form takes without resolving it again
       rows.push([
@@ -131,12 +134,12 @@ const WalletTransactionScreen = ({
       rows.push([lang('WalletTransactionProvider'), peer.providerName]);
     }
 
-    if (peer.type !== 'unsupported') {
+    if ('address' in peer) {
       rows.push([
         lang('WalletTransactionAddress'),
         <span className={styles.peer}>
           <AddressCell address={peer.address} />
-          {sendToAddress && !user && !domain && sendButton(sendToAddress)}
+          {sendToAddress && !counterparty && !domain && sendButton(sendToAddress)}
         </span>,
       ]);
     }
@@ -194,11 +197,12 @@ const WalletTransactionScreen = ({
 
     return rows;
   }, [
-    user, peer, isIncoming, isKeyChange, fee, fiatFee, isFeeFree, timestamp, comment, lang, decryptedComment,
+    counterparty, peer, isIncoming, isKeyChange, fee, fiatFee, isFeeFree, timestamp, comment, lang, decryptedComment,
     encryptedComment, isDecryptingComment, canShowFeesInfo, onDecryptComment, onSend,
   ]);
 
   const fiatAmount = formatTonInFiat(amount, tonUsdRate, currency, currencyRate, lang.code);
+  const giftMoveKey = getWalletGiftMoveKey(transaction);
 
   const sign = amount === 0n ? '' : isIncoming ? '+' : '−';
 
@@ -215,6 +219,7 @@ const WalletTransactionScreen = ({
         <>
           <WalletCollectibleImage collectible={collectible} isFull className={styles.collectible} />
           <div className={styles.title}>{collectible.name ?? lang('WalletCollectibleTitle')}</div>
+          {giftMoveKey && <div className={styles.status}>{lang(giftMoveKey)}</div>}
         </>
       ) : (
         <>
@@ -286,8 +291,7 @@ export default memo(withGlobal<OwnProps>(
       currency: selectWalletCurrency(global),
       tonUsdRate: global.appConfig.tonUsdRate,
       currencyRate: selectWalletCurrencyRate(global),
-      user: peer.type === 'user' ? selectUser(global, peer.userId)
-        : peer.type === 'address' ? selectWalletResolvedUser(global, peer.address) : undefined,
+      counterparty: selectWalletCounterparty(global, peer),
       decryptedComment: global.wallet?.decryptedComments?.[transaction.id],
       isDecryptingComment: decryption?.transactionId === transaction.id && decryption.status === 'pending',
       freeTransfersPerDay: global.appConfig.walletGaslessDailyTransfers,

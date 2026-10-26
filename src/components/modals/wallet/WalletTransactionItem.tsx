@@ -1,12 +1,16 @@
-import { memo, useRef } from '../../../lib/teact/teact';
+import { memo, useCallback, useRef } from '../../../lib/teact/teact';
 
 import type {
-  ApiUser, ApiWalletCollectible, ApiWalletTransaction,
+  ApiPeer, ApiWalletCollectible, ApiWalletTransaction, ApiWalletTransactionPeer,
 } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { RegularLangKey } from '../../../types/language';
+import type { LangFn } from '../../../util/localization';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getUserFullName } from '../../../global/helpers';
+import { getPeerFullTitle } from '../../../global/helpers/peers';
+import { getWalletGiftMoveKey, getWalletPeerId } from '../../../global/helpers/wallet';
+import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { shortenAddress } from '../../../util/tonAddress';
@@ -14,6 +18,7 @@ import renderText from '../../common/helpers/renderText';
 import { sampleFrames, SETTLE_EASING } from './helpers/motion';
 import { ROW_DIAMOND_SIZE } from './helpers/sendFlight';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useClickable from '../../../hooks/useClickable';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -34,7 +39,6 @@ import styles from './WalletTransactionItem.module.scss';
 
 type OwnProps = {
   transaction: ApiWalletTransaction;
-  user?: ApiUser;
   className?: string;
   onClick: (transaction: ApiWalletTransaction) => void;
 };
@@ -60,13 +64,19 @@ const IMPACT_FRAMES = sampleFrames(IMPACT_DURATION, (time) => {
 });
 
 const WalletTransactionItem = ({
-  transaction, user, className, onClick,
+  transaction, className, onClick,
 }: OwnProps) => {
   const {
     isIncoming, peer, amount, comment, isPending, isFailed, timestamp, collectible,
   } = transaction;
 
   const lang = useLang();
+
+  const peerId = getWalletPeerId(peer);
+  const counterpartySelector = useCallback((global: GlobalState) => {
+    return peerId ? selectPeer(global, peerId) : undefined;
+  }, [peerId]);
+  const counterparty = useSelector(counterpartySelector);
 
   const ref = useRef<HTMLDivElement>();
   const gramIconRef = useRef<HTMLSpanElement>();
@@ -106,13 +116,7 @@ const WalletTransactionItem = ({
   });
 
   const onrampIcon = peer.type === 'onramp' ? getOnrampProviderIcon(peer.providerName).icon : undefined;
-  const title = user
-    ? getUserFullName(lang, user)
-    : peer.type === 'onramp'
-      ? lang(onrampIcon === 'walt' ? 'WalletTransactionTopUpCrypto' : 'WalletTransactionTopUp')
-      : peer.type !== 'unsupported'
-        ? peer.domain || shortenAddress(peer.address)
-        : lang('WalletTransactionUnsupportedPeer');
+  const title = getTitle(lang, peer, counterparty);
   const description = comment
     || (peer.type === 'onramp' ? capitalizeName(peer.providerName) : lang(getDescriptionKey(transaction)));
   const status = isPending ? lang('WalletTransactionSending') : isFailed ? lang('WalletTransactionFailed') : undefined;
@@ -137,8 +141,8 @@ const WalletTransactionItem = ({
         <WalletRowOverlay originRef={gramIconRef} onEnd={markBurstDone} />
       )}
       <div className={styles.preview}>
-        {user ? (
-          <Avatar peer={user} size={AVATAR_SIZE} />
+        {counterparty ? (
+          <Avatar peer={counterparty} size={AVATAR_SIZE} />
         ) : (
           <div className={buildClassName(styles.direction, isIncoming ? styles.directionIn : styles.directionOut)}>
             {onrampIcon ? (
@@ -223,6 +227,23 @@ const WalletTransactionItem = ({
   );
 };
 
+function getTitle(lang: LangFn, peer: ApiWalletTransactionPeer, counterparty?: ApiPeer) {
+  if (counterparty) return getPeerFullTitle(lang, counterparty);
+
+  switch (peer.type) {
+    case 'onramp':
+      return lang(getOnrampProviderIcon(peer.providerName).icon === 'walt'
+        ? 'WalletTransactionTopUpCrypto'
+        : 'WalletTransactionTopUp');
+    case 'telegramGift':
+      return lang('Telegram');
+    case 'unsupported':
+      return lang('WalletTransactionUnsupportedPeer');
+    default:
+      return peer.domain || shortenAddress(peer.address);
+  }
+}
+
 function getCollectibleTypeKey(type: ApiWalletCollectible['type']): RegularLangKey {
   switch (type) {
     case 'gift':
@@ -241,9 +262,11 @@ function capitalizeName(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-function getDescriptionKey({
-  encryptedComment, isKeyChange, collectible, peer, isIncoming,
-}: ApiWalletTransaction): RegularLangKey {
+function getDescriptionKey(transaction: ApiWalletTransaction): RegularLangKey {
+  const { encryptedComment, isKeyChange, collectible, peer, isIncoming } = transaction;
+  const giftMoveKey = getWalletGiftMoveKey(transaction);
+  if (giftMoveKey) return giftMoveKey;
+
   if (encryptedComment) return 'WalletCommentEncrypted';
 
   if (isKeyChange) return 'WalletTransactionKeyChange';

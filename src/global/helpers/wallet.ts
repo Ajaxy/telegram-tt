@@ -53,6 +53,19 @@ export function keepRecipientUser(
   return { ...knownPeer, domain: peer.domain ?? knownPeer.domain };
 }
 
+export function getWalletPeerId(peer: ApiWalletTransactionPeer) {
+  if (peer.type === 'user') return peer.userId;
+  if (peer.type === 'channel') return peer.channelId;
+
+  return undefined;
+}
+
+export function getWalletGiftMoveKey({ peer, isIncoming }: ApiWalletTransaction): RegularLangKey | undefined {
+  if (peer.type !== 'telegramGift' || !peer.isOwnProfile) return undefined;
+
+  return isIncoming ? 'WalletTransactionMovedFromProfile' : 'WalletTransactionMovedToProfile';
+}
+
 export const WALLET_ERROR_LANG_KEYS: Record<WalletFlowError, RegularLangKey> = {
   PASSWORD_INVALID: 'ErrorIncorrectPassword',
   PASSCODE_INVALID: 'WalletPasscodeInvalid',

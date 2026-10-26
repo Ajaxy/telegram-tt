@@ -87,6 +87,10 @@ export function buildApiWalletStateResult(state: GramJs.TypeWalletState): ApiWal
 export function buildApiWalletTransaction(transaction: GramJs.WalletTransaction): ApiWalletTransaction {
   // With the flag set, `comment` holds the base64 payload
   const isCommentEncrypted = transaction.commentEncrypted;
+  const peer = buildApiWalletTransactionPeer(transaction.peer);
+  // Telegram writes a service reference such as `Ref#qpK1nO11N` into the comment of a gift it moves. The native apps
+  // do not show it.
+  const comment = peer.type === 'telegramGift' ? undefined : transaction.comment;
 
   return {
     id: transaction.id,
@@ -94,12 +98,12 @@ export function buildApiWalletTransaction(transaction: GramJs.WalletTransaction)
     isFailed: transaction.failed,
     isGasless: transaction.gasless,
     isKeyChange: transaction.keyChange,
-    peer: buildApiWalletTransactionPeer(transaction.peer),
+    peer,
     // The server signs the amount by direction, but `ApiWalletTransaction` keeps it positive
     amount: getBigIntAbs(transaction.amount),
     fee: transaction.fee,
-    comment: isCommentEncrypted ? undefined : transaction.comment,
-    encryptedComment: isCommentEncrypted ? transaction.comment : undefined,
+    comment: isCommentEncrypted ? undefined : comment,
+    encryptedComment: isCommentEncrypted ? comment : undefined,
     txHash: transaction.txHash,
     timestamp: transaction.date,
     collectible: transaction.nft && buildApiWalletCollectible(transaction.nft),
@@ -127,6 +131,19 @@ function buildApiWalletTransactionPeer(peer: GramJs.TypeWalletTransactionPeer): 
       domain: peer.domain,
       providerName: peer.providerName,
     };
+  }
+
+  if (peer instanceof GramJs.WalletTransactionPeerChannel) {
+    return {
+      type: 'channel',
+      channelId: buildApiPeerId(peer.channelId, 'channel'),
+      address: toNonBounceableAddress(peer.address),
+      domain: peer.domain,
+    };
+  }
+
+  if (peer instanceof GramJs.WalletTransactionPeerTelegramGift) {
+    return { type: 'telegramGift', isOwnProfile: peer.ownProfile };
   }
 
   return { type: 'unsupported' };

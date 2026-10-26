@@ -66,7 +66,6 @@ type StateProps = {
   transactions?: ApiWalletTransaction[];
   transferMinNanos?: bigint;
   collectibles?: ApiWalletCollectible[];
-  usersById: Record<string, ApiUser>;
   existingWaltBalanceUrl?: string;
   savedWallets?: ApiWalletSavedWallet[];
   earningsNanos?: bigint;
@@ -83,7 +82,7 @@ const WalletMainScreen = ({
   activeTab, scrollContainerClosest,
   status, hasStateError, canEnableBackup, hasCloudPassword, address, currentUser, balance, tonUsdRate, currency,
   currencyRate,
-  transactions, transferMinNanos, collectibles, usersById,
+  transactions, transferMinNanos, collectibles,
   existingWaltBalanceUrl, savedWallets, earningsNanos,
   onProtect, onProtectAccount, onOpenSettings, onOpenEarnings, onReceive, onSend, onSwitchTab,
   onTransactionClick, onCollectibleClick,
@@ -248,7 +247,6 @@ const WalletMainScreen = ({
                       <WalletTransactionItem
                         key={transaction.localId ?? id}
                         transaction={transaction}
-                        user={transaction.peer.type === 'user' ? usersById[transaction.peer.userId] : undefined}
                         className={HISTORY_ITEM_CLASS}
                         onClick={onTransactionClick}
                       />
@@ -364,7 +362,6 @@ export default memo(withGlobal<OwnProps>(
       transactions: selectWalletTransactions(global),
       transferMinNanos: global.appConfig.walletTransferMinNanos,
       collectibles: global.wallet?.collectibles,
-      usersById: global.users.byId,
       existingWaltBalanceUrl: global.wallet?.existingWaltBalanceUrl,
       savedWallets: global.wallet?.savedWallets,
       earningsNanos: global.ton?.balance.amount,

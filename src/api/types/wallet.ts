@@ -102,6 +102,9 @@ export type ApiWalletTransactionPeer =
   | { type: 'user'; userId: string; address: string; domain?: string }
   | { type: 'address'; address: string; domain?: string }
   | { type: 'onramp'; address: string; domain?: string; providerName: string }
+  | { type: 'channel'; channelId: string; address: string; domain?: string }
+  // The other side is Telegram itself; `isOwnProfile` marks a gift moved between the wallet and the user's profile
+  | { type: 'telegramGift'; isOwnProfile?: boolean }
   | { type: 'unsupported' };
 
 export interface ApiWalletTransaction {
