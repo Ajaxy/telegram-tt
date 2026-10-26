@@ -147,6 +147,11 @@ $fold-steps: 20;
   background-image: linear-gradient(145deg, #5cc8ff 0%, #0088ff 46%, #0057c2 100%);
 }
 
+.backdrop {
+  position: absolute;
+  inset: 0;
+}
+
 .texture {
   pointer-events: none;
 
@@ -228,11 +233,16 @@ $fold-steps: 20;
   animation: twinkle 7s ease-in-out var(--star-delay) infinite;
 }
 
+// Safari leaves a blended layer out of the rounded clip of the card, so the glare cuts its blurred lobes off itself
 .glare {
   pointer-events: none;
 
   position: absolute;
   inset: 0;
+
+  overflow: hidden;
+
+  border-radius: inherit;
 
   opacity: 0.64;
   mix-blend-mode: plus-lighter;
@@ -457,6 +467,11 @@ $fold-steps: 20;
   }
 }
 
+// Without a handler the plate is only a picture, so it does not shrink under a press
+.qrPlate {
+  pointer-events: none;
+}
+
 .qrIcon {
   position: relative;
   width: cq(24);
@@ -482,6 +497,23 @@ $fold-steps: 20;
     rgb(0 0 0 / 14%),
     inset 0 0.0625rem rgb(120 214 255 / 35%),
     inset 0.0625rem 0 rgb(120 214 255 / 18%);
+}
+
+.withBackdrop {
+  .edgeLayer {
+    background-color: var(--card-edge-color);
+    background-image: none;
+  }
+
+  &:not(.pressed) .edgeShadow {
+    box-shadow: 0 0.625rem 1.625rem -0.875rem var(--card-edge-color);
+  }
+
+  .ticker,
+  .fiat,
+  .addressLine {
+    color: var(--card-accent-color);
+  }
 }
 
 @keyframes twinkle {

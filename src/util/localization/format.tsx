@@ -31,6 +31,18 @@ export function formatTonTextFromNanos(lang: LangFn, nanos: bigint, isShort?: bo
   return lang('GramAmountText', { amount }, { pluralValue: convertTonFromNanos(nanos) });
 }
 
+export function formatTonShortParts(lang: LangFn, nanos: bigint): [whole: string, fraction?: string] {
+  const parts = lang.internalFormatters.preciseNumber.formatToParts(Number(formatTonShortFromNanos(nanos)));
+  const decimalIndex = parts.findIndex(({ type }) => type === 'decimal');
+  if (decimalIndex === -1) return [joinNumberParts(parts)];
+
+  return [joinNumberParts(parts.slice(0, decimalIndex)), joinNumberParts(parts.slice(decimalIndex))];
+}
+
+function joinNumberParts(parts: Intl.NumberFormatPart[]) {
+  return parts.map(({ value }) => value).join('');
+}
+
 export function formatTonAsIcon(
   lang: LangFn,
   // Nanotons, or an amount already formatted for display

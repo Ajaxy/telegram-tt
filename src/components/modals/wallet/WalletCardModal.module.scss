@@ -1,0 +1,76 @@
+.root :global(.modal-backdrop) {
+  background-color: rgb(0 0 0 / 50%);
+}
+
+// The card comes out of the balance pill and goes back into it, which the fade of the whole modal would wash out. The
+// modal stays opaque, and only its backdrop fades.
+.flying {
+  &:global(.opacity-transition.not-open) {
+    opacity: 1;
+  }
+
+  :global(.modal-backdrop) {
+    transition: opacity 0.25s;
+  }
+
+  &:global(.not-open) :global(.modal-backdrop) {
+    opacity: 0;
+  }
+
+  &:global(.closing) :global(.modal-backdrop) {
+    transition-duration: 0.3s;
+  }
+}
+
+// The card floats over the backdrop without a dialog box around it, and the flight replaces the dialog's own slide
+.dialog {
+  transform: none;
+
+  max-width: 22.5rem;
+
+  background: none;
+  box-shadow: none;
+
+  transition: none;
+}
+
+// The card flies in from the profile, far outside the dialog
+.content {
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  // Room for the tilted card and its shadow
+  padding: 1rem;
+}
+
+// The slot mask covers the padded box, which leaves room for the card turned sideways and tilted back. `will-change`
+// gives both boxes layers of their own, so Safari moves the layers instead of repainting the card every frame.
+// `position` makes the box the offset parent of the pose in every browser, as the flight measures the pose from it.
+.cardFlight {
+  pointer-events: none;
+  will-change: translate, opacity, mask-image;
+
+  position: relative;
+
+  margin: -12.5rem;
+  padding: 12.5rem;
+}
+
+.cardPose {
+  pointer-events: auto;
+  will-change: transform;
+}
+
+// The wallet keeps the blue of the light theme in every theme
+.button {
+  --button-background-color: var(--color-telegram-blue);
+  --button-active-background-color: color-mix(in srgb, var(--color-telegram-blue) 92%, black);
+  --button-no-ripple-background-color: color-mix(in srgb, var(--color-telegram-blue) 84%, black);
+}
+
+.sendIcon {
+  margin-inline-end: 0.3125rem;
+  font-size: 1.25rem;
+}

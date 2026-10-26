@@ -314,8 +314,16 @@ const WalletModal = ({
     closeWalletModal();
   });
 
+  // Opened from a wallet card, the form has only the main screen below it, and the user did not come from there
+  const shouldBackClose = Boolean(modal?.shouldCloseOnBack && stack.length === 2);
+
   const handleBack = useLastCallback(() => {
     if (isRequestPending) return;
+
+    if (shouldBackClose) {
+      closeWalletModal();
+      return;
+    }
 
     credentials.handleBack();
     keysFlows.handleBack();
@@ -588,7 +596,10 @@ const WalletModal = ({
       )}
       noMask
     >
-      <ModalCloseButton className={styles.headerButton} onBack={stack.length > 1 ? handleBack : undefined} />
+      <ModalCloseButton
+        className={styles.headerButton}
+        onBack={stack.length > 1 && !shouldBackClose ? handleBack : undefined}
+      />
       <ModalTitle>
         <div
           className={buildClassName(

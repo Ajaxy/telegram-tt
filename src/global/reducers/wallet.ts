@@ -6,17 +6,36 @@ import { keepRecipientUser, runForAllTabs } from '../helpers';
 import { selectTabState } from '../selectors/tabs';
 import { selectWalletTransactions } from '../selectors/wallet';
 import { updateTabState } from './tabs';
+import { updateUserFullInfo } from './users';
 
 type TonConnectFlow = NonNullable<TabState['walletTonConnect']>;
 
 export function updateWallet<T extends GlobalState>(global: T, update: NonNullable<GlobalState['wallet']>): T {
-  return {
+  global = {
     ...global,
     wallet: {
       ...global.wallet,
       ...update,
     },
   };
+
+  // An omitted `state` leaves it as is, while an empty one comes from the server when there is no ready wallet
+  return 'state' in update ? syncOwnWalletCard(global, update.state) : global;
+}
+
+// The own card comes with the profile and is not refreshed after transfers, so it takes each newer wallet balance.
+// A card of a replaced wallet, or one left after the wallet went away, is dropped until the profile loads again.
+function syncOwnWalletCard<T extends GlobalState>(global: T, state?: ApiWalletState): T {
+  const userId = global.currentUserId!;
+  const card = global.users.fullInfoById[userId]?.walletCard;
+  if (!card) return global;
+
+  const isSameWallet = state?.address === card.address;
+  if (isSameWallet && card.balance === state.balance) return global;
+
+  return updateUserFullInfo(global, userId, {
+    walletCard: isSameWallet ? { ...card, balance: state.balance } : undefined,
+  });
 }
 
 export function updateWalletServerState<T extends GlobalState>(

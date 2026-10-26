@@ -1,68 +1,67 @@
 @use "../../../styles/mixins";
 
 .root {
-  pointer-events: none;
-
-  position: absolute;
-  z-index: 2;
-  inset-inline: 0;
-  bottom: 0.5rem;
-
-  display: flex;
-  justify-content: center;
-
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: bottom 0.25s;
-
-  @include mixins.with-vt-type('profileAvatar');
-}
-
-.strip {
-  pointer-events: auto;
   cursor: var(--custom-cursor, pointer);
 
   display: flex;
+  gap: 0.25rem;
   align-items: center;
+  justify-content: center;
 
-  max-width: 85%;
-  padding: 0.0625rem 0.625rem;
-  border-radius: 1rem;
+  padding-inline: 1rem;
 
   font-size: 0.75rem;
   line-height: 1rem;
-  color: var(--color-text);
+  color: var(--color-primary);
   white-space: nowrap;
 
-  background-color: color-mix(in srgb, var(--color-background) 90%, transparent);
+  transition: background-color 0.15s, filter 0.15s;
+
+  @include mixins.with-vt-type('profileAvatar');
+
+  &:not(.overlay):hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}
+
+// `ProfileInfo` sets the background it shares with the balance pill
+.overlay {
+  color: var(--color-white);
+  background: var(--profile-button-background);
+  background-blend-mode: overlay;
   backdrop-filter: blur(10px);
 
-  transition: color 0.15s, background-color 0.15s;
-
   &:hover {
-    background-color: color-mix(in srgb, var(--color-background) 70%, transparent);
+    filter: brightness(1.1);
   }
 }
 
 .icon {
   flex-shrink: 0;
   font-size: 0.875rem;
-  transition: color 0.25s;
-}
-
-.performer {
-  margin-inline-start: 0.125rem;
-  font-weight: var(--font-weight-medium);
-  transition: color 0.25s;
-}
-
-.separator {
-  margin-inline: 0.25rem;
-  transition: color 0.25s;
 }
 
 .title {
   overflow: hidden;
+  font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
-  opacity: 0.7;
-  transition: color 0.25s;
+}
+
+.performer {
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  text-overflow: ellipsis;
+}
+
+// The glyph is narrower than its icon box, and the empty side would pull the centered content off center
+.chevron {
+  flex-shrink: 0;
+  margin-inline-end: -0.1875rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.overlay .performer,
+.overlay .chevron {
+  color: rgb(255 255 255 / 70%);
 }

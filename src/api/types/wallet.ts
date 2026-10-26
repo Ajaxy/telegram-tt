@@ -1,4 +1,6 @@
 import type { ApiWebDocument } from './bots';
+import type { ApiStarGiftUnique } from './stars';
+import type { ApiMediaAreaCoordinates } from './stories';
 
 export interface ApiTonConnectManifest {
   url: string;
@@ -195,6 +197,19 @@ export type ApiWalletCollectible = {
   | { type: 'gift'; model?: string; backdrop?: string }
   | { type: 'username' | 'number' | 'other' }
 );
+
+export interface ApiWalletCardSticker {
+  coordinates: ApiMediaAreaCoordinates;
+  gift: ApiStarGiftUnique;
+}
+
+export interface ApiWalletCard {
+  address: string;
+  // Nanotons
+  balance: bigint;
+  stickers?: ApiWalletCardSticker[];
+  backgroundGift?: ApiStarGiftUnique;
+}
 
 export interface ApiOnrampProvider {
   id: string;

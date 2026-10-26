@@ -2319,6 +2319,8 @@ export interface LangPair {
   'WalletReceiveBuy': undefined;
   'WalletReceiveAddressCopied': undefined;
   'WalletReceiveShowQr': undefined;
+  'WalletReceivePeerShowQr': undefined;
+  'WalletReceivePeerNote': undefined;
   'WalletBuyTitle': undefined;
   'WalletBuyPayWith': undefined;
   'WalletBuyCurrency': undefined;

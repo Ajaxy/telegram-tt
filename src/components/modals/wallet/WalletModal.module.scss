@@ -35,7 +35,10 @@
   opacity: 1;
 }
 
+// The wallet keeps the blue of the light theme in every theme
 .headerOnAccent {
+  --color-primary: var(--color-telegram-blue);
+
   color: var(--color-white);
   background-color: var(--color-primary);
 
@@ -182,6 +185,8 @@
 }
 
 .slideAccent {
+  --color-primary: var(--color-telegram-blue);
+
   background-color: var(--color-primary);
 }
 

@@ -1,10 +1,13 @@
-import { memo, useRef } from '../../../lib/teact/teact';
+import { memo, useMemo, useRef } from '../../../lib/teact/teact';
+
+import type { ApiStarGiftUnique, ApiWalletCardSticker } from '../../../api/types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonInFiat } from '../../../util/formatCurrency';
 import { splitAddressInHalves } from '../../../util/tonAddress';
+import { getGiftAttributes } from '../../common/helpers/gifts';
 import renderText from '../../common/helpers/renderText';
 import useCardTilt from './useCardTilt';
 
@@ -16,10 +19,12 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useShrinkToFit from '../../../hooks/useShrinkToFit';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
+import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
 import Button from '../../ui/Button';
 import ExpandableTonAmount from './ExpandableTonAmount';
 import WalletCardDiamond from './WalletCardDiamond';
 import WalletCardStars from './WalletCardStars';
+import WalletCardStickers from './WalletCardStickers';
 
 import styles from './WalletCard.module.scss';
 
@@ -37,12 +42,14 @@ type OwnProps = {
   usdRate?: number;
   currency: string;
   currencyRate?: number;
+  stickers?: ApiWalletCardSticker[];
+  backgroundGift?: ApiStarGiftUnique;
   className?: string;
   onQrClick?: NoneToVoidFunction;
 };
 
 const WalletCard = ({
-  address, ownerName, balance, usdRate, currency, currencyRate, className, onQrClick,
+  address, ownerName, balance, usdRate, currency, currencyRate, stickers, backgroundGift, className, onQrClick,
 }: OwnProps) => {
   const lang = useLang();
 
@@ -76,10 +83,16 @@ const WalletCard = ({
     shouldOmitFractions: true,
   });
 
+  const { backdrop, pattern } = (backgroundGift && getGiftAttributes(backgroundGift)) || {};
+  const backdropColors = useMemo(() => backdrop && [backdrop.centerColor, backdrop.edgeColor], [backdrop]);
+
+  const qrIcon = <img src={QrIcon} alt="" draggable={false} className={styles.qrIcon} />;
+
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.root, isPressed && styles.pressed, className)}
+      className={buildClassName(styles.root, isPressed && styles.pressed, backdrop && styles.withBackdrop, className)}
+      style={backdrop && `--card-edge-color: ${backdrop.edgeColor}; --card-accent-color: ${backdrop.textColor}`}
       onPointerDown={handlePointerDown}
       onPointerUp={unmarkPressed}
       onPointerCancel={unmarkPressed}
@@ -99,10 +112,21 @@ const WalletCard = ({
           />
         ))}
         <div className={styles.card}>
+          {backdrop && (
+            <RadialPatternBackground
+              className={styles.backdrop}
+              backgroundColors={backdropColors}
+              patternColor={backdrop.patternColor}
+              patternIcon={pattern?.sticker}
+              withAdaptiveHeight
+            />
+          )}
           <div className={styles.texture} aria-hidden />
           <WalletCardStars />
           <div className={styles.glare} aria-hidden />
           <div ref={balanceGlintRef} className={styles.balanceGlint} aria-hidden />
+          {/* The amount, name, address and QR code come later, so the stickers stay under them */}
+          {Boolean(stickers?.length) && <WalletCardStickers stickers={stickers} />}
           <div ref={amountRef} className={styles.amount}>
             <div ref={amountContentRef} className={styles.amountContent}>
               <WalletCardDiamond className={styles.diamond} />
@@ -122,13 +146,17 @@ const WalletCard = ({
               <span className={styles.addressLine}>{addressEnd}</span>
             </div>
           </div>
-          <Button
-            className={styles.qrButton}
-            ariaLabel={lang('WalletShowAddress')}
-            onClick={onQrClick}
-          >
-            <img src={QrIcon} alt="" draggable={false} className={styles.qrIcon} />
-          </Button>
+          {onQrClick ? (
+            <Button
+              className={styles.qrButton}
+              ariaLabel={lang('WalletShowAddress')}
+              onClick={onQrClick}
+            >
+              {qrIcon}
+            </Button>
+          ) : (
+            <div className={buildClassName(styles.qrButton, styles.qrPlate)} aria-hidden>{qrIcon}</div>
+          )}
           <div className={styles.innerShadow} aria-hidden />
         </div>
       </div>

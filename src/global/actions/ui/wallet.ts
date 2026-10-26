@@ -8,7 +8,8 @@ import { updateTabState } from '../../reducers/tabs';
 addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType => {
   const {
     initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
-    initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect, tabId = getCurrentTabId(),
+    shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
+    tabId = getCurrentTabId(),
   } = payload || {};
 
   // The wallet state is not fetched here: the modal's poll makes its first call on open
@@ -21,12 +22,29 @@ addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType
   return updateTabState(global, {
     walletModal: {
       initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
-      initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
+      shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
     },
   }, tabId);
 });
 
 addTabStateResetterAction('closeWalletModal', 'walletModal');
+
+addActionHandler('openWalletCardModal', (global, actions, payload): ActionReturnType => {
+  const { userId, tabId = getCurrentTabId() } = payload;
+
+  // The card shows the balance in the wallet currency
+  actions.loadCurrencyRates();
+
+  // A cached profile keeps the card it was saved with, and the balance changes with every transfer. The own card
+  // follows the wallet state instead, and a reload answered after a transfer would bring back the older balance.
+  if (userId !== global.currentUserId) {
+    actions.loadFullUser({ userId });
+  }
+
+  return updateTabState(global, { walletCardModal: { userId } }, tabId);
+});
+
+addTabStateResetterAction('closeWalletCardModal', 'walletCardModal');
 
 // The server is told separately, through `dismissSuggestion`
 addActionHandler('dismissWalletIntro', (global, actions, payload): ActionReturnType => {

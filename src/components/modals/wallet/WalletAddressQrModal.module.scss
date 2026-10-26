@@ -1,0 +1,17 @@
+.dialog {
+  --color-primary: var(--color-telegram-blue);
+  --modal-background-color: var(--color-primary);
+}
+
+.header {
+  color: var(--color-white);
+  background-color: var(--color-primary);
+}
+
+.closeButton :global(.animated-close-icon) {
+  &,
+  &::before,
+  &::after {
+    background-color: var(--color-white);
+  }
+}

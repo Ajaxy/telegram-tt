@@ -154,7 +154,7 @@ export function buildApiStealthMode(stealthMode: GramJs.TypeStoriesStealthMode):
   };
 }
 
-function buildApiMediaAreaCoordinates(coordinates: GramJs.TypeMediaAreaCoordinates): ApiMediaAreaCoordinates {
+export function buildApiMediaAreaCoordinates(coordinates: GramJs.TypeMediaAreaCoordinates): ApiMediaAreaCoordinates {
   const {
     x, y, w, h, rotation, radius,
   } = coordinates;

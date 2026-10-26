@@ -1,0 +1,15 @@
+@use "../../../styles/mixins";
+
+.root {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  translate: calc(var(--tilt-x) * 0.3125rem) calc(var(--tilt-y) * 0.3125rem);
+}
+
+.sticker {
+  position: absolute;
+  translate: -50% -50%;
+
+  @include mixins.filter-outline(0.125rem, #ffffff);
+}

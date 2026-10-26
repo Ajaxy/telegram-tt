@@ -749,7 +749,7 @@ addActionHandler('loadWalletDomainAddress', async (global, actions, payload): Pr
 
 addActionHandler('openWalletTransferLink', async (global, actions, payload): Promise<void> => {
   const {
-    to, userId: linkUserId, amount, comment, isCommentEncrypted, shouldCloseAfterSend,
+    to, userId: linkUserId, amount, comment, isCommentEncrypted, shouldCloseAfterSend, shouldCloseOnBack,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -787,6 +787,7 @@ addActionHandler('openWalletTransferLink', async (global, actions, payload): Pro
     initialComment: comment,
     isInitialCommentEncrypted: isCommentEncrypted,
     shouldCloseAfterSend,
+    shouldCloseOnBack,
     tabId,
   });
 });

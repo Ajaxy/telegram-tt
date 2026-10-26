@@ -223,6 +223,7 @@ const LeftSideMenuItems = ({
           onClick={handleOpenWallet}
         >
           {lang('WalletMenuItem')}
+          <span className="menu-item-badge">{lang('New')}</span>
         </MenuItem>
       )}
       {bots.map((bot) => (

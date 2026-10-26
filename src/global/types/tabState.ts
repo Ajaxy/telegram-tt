@@ -1028,10 +1028,16 @@ export type TabState = {
     initialComment?: string;
     isInitialCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
+    // Leaving the form for the main screen closes the wallet instead
+    shouldCloseOnBack?: boolean;
     initialTransactionId?: string;
     shouldShowIntro?: boolean;
     // Moves the phrase out of the app passcode's keeping before that passcode goes
     shouldReleaseKey?: boolean;
+  };
+
+  walletCardModal?: {
+    userId: string;
   };
 
   // The form's request until the transfer is queued; its record in the history follows it from then on

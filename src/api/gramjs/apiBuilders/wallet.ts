@@ -8,6 +8,8 @@ import type {
   ApiOnrampSession,
   ApiTonConnectRequest,
   ApiTonConnectSession,
+  ApiWalletCard,
+  ApiWalletCardSticker,
   ApiWalletCollectible,
   ApiWalletGaslessInfo,
   ApiWalletSentTransfer,
@@ -20,8 +22,10 @@ import { toNonBounceableAddress } from '../../../lib/ton/address';
 import { getBigIntAbs } from '../../../util/numbers';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
+import { buildApiStarGift } from './gifts';
 import { buildApiWebDocument } from './messageContent';
 import { buildApiPeerId } from './peers';
+import { buildApiMediaAreaCoordinates } from './stories';
 
 const MODEL_TRAIT = 'Model';
 const FRAGMENT_NFT_HOST = 'nft.fragment.com';
@@ -215,6 +219,36 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
     model: attributes?.find(({ traitType }) => traitType === MODEL_TRAIT)?.value,
     backdrop: attributes?.find(({ traitType }) => traitType === BACKDROP_TRAIT)?.value,
   };
+}
+
+export function buildApiWalletCard(card: GramJs.wallet.Card): ApiWalletCard {
+  const {
+    address, balance, stickers, bgNftItem,
+  } = card;
+
+  return {
+    address: toNonBounceableAddress(address),
+    balance,
+    stickers: stickers?.map(buildApiWalletCardSticker).filter(Boolean),
+    backgroundGift: bgNftItem && buildUniqueGiftFromNft(bgNftItem),
+  };
+}
+
+// A sticker shows the model of a collectible gift, so an NFT of another kind has nothing to draw
+function buildApiWalletCardSticker({ coordinates, nft }: GramJs.wallet.CardSticker): ApiWalletCardSticker | undefined {
+  const gift = buildUniqueGiftFromNft(nft);
+  if (!gift) return undefined;
+
+  return {
+    coordinates: buildApiMediaAreaCoordinates(coordinates),
+    gift,
+  };
+}
+
+function buildUniqueGiftFromNft(nft: GramJs.wallet.NftItem) {
+  const gift = nft.gift && buildApiStarGift(nft.gift);
+
+  return gift?.type === 'starGiftUnique' ? gift : undefined;
 }
 
 function getCollectibleType(metadataUrl?: string, imageUrl?: string): ApiWalletCollectible['type'] {

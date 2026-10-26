@@ -1328,6 +1328,7 @@ const Profile = ({
         <ProfileInfo
           isExpanded={isProfileExpanded}
           isActive={isActive}
+          isOwnProfile={isOwnProfile}
           peerId={peerId}
           canPlayVideo={isReady}
           isForMonoforum={Boolean(monoforumChannel)}

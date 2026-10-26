@@ -2,6 +2,7 @@
 
 .root {
   --profile-info-bg: var(--color-background-secondary);
+  --music-band-height: 0rem;
   --rating-outline-color: #000000;
   --rating-text-color: #000000;
 
@@ -33,7 +34,7 @@
 }
 
 .plain.minimized {
-  padding-block: 1.5rem 0;
+  padding-block: 1.5rem var(--music-band-height);
   color: var(--color-text);
 
   .info {
@@ -398,11 +399,17 @@
   text-align: center;
 }
 
+// A collapsed header with the music band is taller than a narrow column is wide, and a square would end above the
+// band. The square stays otherwise, so the pattern is not redrawn while the header height animates.
 .radialPatternBackground {
   pointer-events: none;
+
   position: absolute;
   inset: 0;
+
   aspect-ratio: 1 / 1;
+  width: 100%;
+  min-height: 100%;
 }
 
 .standaloneAvatar {
@@ -420,8 +427,8 @@
 }
 
 .minimized {
-  height: 18rem;
-  padding-block: 4.25rem 1rem;
+  height: calc(18rem + var(--music-band-height));
+  padding-block: 4.25rem calc(1rem + var(--music-band-height));
 
   .status, .title, .info {
     align-self: center;
@@ -538,32 +545,136 @@
   }
 }
 
+// The music band lies along the bottom edge. The header grows by it, so everything else keeps its place above it.
+.hasMusic {
+  --music-band-height: 1.5rem;
+}
+
+.hasMusic:not(.minimized) .info {
+  padding-bottom: calc(0.5rem + var(--music-band-height));
+}
+
+.musicBand {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  bottom: 0;
+
+  height: var(--music-band-height);
+}
+
+// The music band and the balance pill share one background, as on iOS. Over a profile color the tint blends into it
+// with `overlay`, like iOS `blendOver`.
+.root {
+  --profile-button-background: rgb(255 255 255 / 10%);
+}
+
+.minimized {
+  --profile-button-tint: rgb(255 255 255 / 35%);
+  --profile-button-background: linear-gradient(var(--profile-button-tint) 0 0) var(--profile-button-base, transparent);
+}
+
+:global(.theme-dark) .minimized {
+  --profile-button-tint: rgb(0 0 0 / 25%);
+}
+
+.plain.minimized {
+  --profile-button-background: var(--color-background);
+}
+
 .hasMusic .info {
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: padding-bottom 0.25s;
 }
 
-.hasMusic:not(.minimized) .info {
-  padding-bottom: 2.25rem;
+.hasWalletBalance.minimized {
+  height: calc(19.75rem + var(--music-band-height));
 }
 
-.hasMusic.minimized {
-  padding-bottom: 2.75rem;
+.walletBalance {
+  pointer-events: auto;
+  cursor: var(--custom-cursor, pointer);
+
+  position: relative;
+  z-index: 1;
+
+  overflow: hidden;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  align-self: center;
+
+  height: 1.25rem;
+  margin-top: 0.5rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: 0.625rem;
+
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: inherit;
+  white-space: nowrap;
+
+  background: var(--profile-button-background);
+  background-blend-mode: overlay;
+  outline: none;
+
+  transition: filter 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    filter: brightness(1.1);
+  }
+
+  @include mixins.with-vt-type('profileAvatar');
 }
 
-.hasMusic.plain {
-  padding-bottom: 2.75rem;
+// Over the photo the pill lines up under the status along the start edge, with the name and the status
+.hasWalletBalance:not(.minimized) .walletBalance {
+  align-self: flex-start;
 }
 
-.hasMusic {
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 0.25s;
+.walletLabel,
+.walletAmount {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 }
 
-.hasMusic.plain.minimized:not(.withBackground) .standaloneAvatar {
-  margin-top: 2.75rem;
+// The wallet card rolls the content up out of the pill while it comes out of it
+.walletLabel,
+.walletChevron {
+  translate: 0 var(--wallet-card-shutter, 0);
 }
 
-.musicOverlay {
-  bottom: 0.375rem;
+.walletAmount {
+  gap: 0.125rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+// `GramIcon` is `1em` high, with side margins that make the gem box as wide as on iOS
+.walletIcon {
+  font-size: 0.5625rem;
+  color: var(--color-white);
+}
+
+.minimized .walletIcon {
+  color: rgb(255 255 255 / 30%);
+}
+
+.plain.minimized .walletIcon {
+  color: var(--color-primary);
+}
+
+// A smaller font with the inherited line height would sit lower and make the pill taller
+.walletFraction {
+  font-size: 0.5625rem;
+  line-height: 1;
+}
+
+// The glyph sits in the middle of a wider icon box, and its empty sides would widen the gaps around it
+.walletChevron {
+  flex-shrink: 0;
+  margin-inline: -0.1875rem;
+  font-size: 0.875rem;
 }

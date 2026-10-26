@@ -1502,6 +1502,7 @@ export interface ActionPayloads {
     initialComment?: string;
     isInitialCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
+    shouldCloseOnBack?: boolean;
     initialTransactionId?: string;
     shouldShowIntro?: boolean;
     shouldReleaseKey?: boolean;
@@ -1510,6 +1511,10 @@ export interface ActionPayloads {
     transactionId: string;
   } & WithTabId;
   closeWalletModal: WithTabId | undefined;
+  openWalletCardModal: {
+    userId: string;
+  } & WithTabId;
+  closeWalletCardModal: WithTabId | undefined;
   dismissWalletIntro: WithTabId | undefined;
   loadWalletMnemonic: {
     password?: string;
@@ -1562,6 +1567,7 @@ export interface ActionPayloads {
     comment?: string;
     isCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
+    shouldCloseOnBack?: boolean;
   } & WithTabId;
   watchWalletActivity: undefined;
   unwatchWalletActivity: undefined;

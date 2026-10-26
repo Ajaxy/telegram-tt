@@ -24,6 +24,7 @@ import styles from './ProfileMusicStrip.module.scss';
 type OwnProps = {
   audio: ApiAudio;
   peerId: string;
+  isOverlay?: boolean;
   className?: string;
   style?: string;
 };
@@ -31,7 +32,7 @@ type OwnProps = {
 const SAVED_MUSIC_CAPABILITIES = getPlaybackCapabilities('savedMusic');
 
 const ProfileMusicStrip = ({
-  audio, peerId, className, style,
+  audio, peerId, isOverlay, className, style,
 }: OwnProps) => {
   const { openAudioPlayer, openAudioPlaylistModal } = getActions();
 
@@ -87,25 +88,19 @@ const ProfileMusicStrip = ({
     handleClick();
   });
 
-  const title = renderText(audio.title || audio.fileName);
-
   return (
-    <div className={buildClassName(styles.root, className)} style={style}>
-      <div
-        className={styles.strip}
-        role="button"
-        tabIndex={0}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-      >
-        <Icon name="music-note" className={styles.icon} />
-        {audio.performer && (
-          <span className={styles.performer}>{renderText(audio.performer)}</span>
-        )}
-        {audio.performer && <span className={styles.separator}>-</span>}
-        <span className={styles.title}>{title}</span>
-        <Icon name="next" className={styles.icon} />
-      </div>
+    <div
+      className={buildClassName(styles.root, isOverlay && styles.overlay, className)}
+      style={style}
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      <Icon name="music-note" className={styles.icon} />
+      <span className={styles.title}>{renderText(audio.title || audio.fileName)}</span>
+      {audio.performer && <span className={styles.performer}>{renderText(audio.performer)}</span>}
+      <Icon name="next" className={styles.chevron} />
     </div>
   );
 };

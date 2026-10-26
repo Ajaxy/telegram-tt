@@ -27,6 +27,7 @@ import QrLogo from '../../../assets/wallet-qr-logo.svg';
 
 type OwnProps = {
   address: string;
+  isPeer?: boolean;
   onBuyClick?: NoneToVoidFunction;
 };
 
@@ -37,7 +38,7 @@ const QR_MARGIN = 0;
 const QR_HOLE_RATIO = 0.5;
 const BACK_GROUPS_PER_LINE = 3;
 
-const WalletReceiveScreen = ({ address, onBuyClick }: OwnProps) => {
+const WalletReceiveScreen = ({ address, isPeer, onBuyClick }: OwnProps) => {
   const { showNotification } = getActions();
 
   const lang = useLang();
@@ -133,7 +134,7 @@ const WalletReceiveScreen = ({ address, onBuyClick }: OwnProps) => {
               {lang('WalletReceiveAddressCopied')}
             </div>
             <Button className={styles.showQr} size="smaller" pill isText onClick={hideAddress}>
-              {lang('WalletReceiveShowQr')}
+              {lang(isPeer ? 'WalletReceivePeerShowQr' : 'WalletReceiveShowQr')}
             </Button>
           </div>
         </div>
@@ -141,17 +142,19 @@ const WalletReceiveScreen = ({ address, onBuyClick }: OwnProps) => {
             remount the card and drop the QR code the library has drawn into it */}
         {cardSize && <WalletAddressRing address={address} width={cardSize.width} height={cardSize.height} />}
       </div>
-      <div className={styles.note}>{lang('WalletReceiveNetworkNote')}</div>
-      <Button
-        className={styles.buyButton}
-        color="secondary"
-        pill
-        iconName="cash-circle-filled"
-        iconClassName={styles.buyIcon}
-        onClick={onBuyClick}
-      >
-        {lang('WalletReceiveBuy')}
-      </Button>
+      <div className={styles.note}>{lang(isPeer ? 'WalletReceivePeerNote' : 'WalletReceiveNetworkNote')}</div>
+      {onBuyClick && (
+        <Button
+          className={styles.buyButton}
+          color="secondary"
+          pill
+          iconName="cash-circle-filled"
+          iconClassName={styles.buyIcon}
+          onClick={onBuyClick}
+        >
+          {lang('WalletReceiveBuy')}
+        </Button>
+      )}
     </div>
   );
 };
