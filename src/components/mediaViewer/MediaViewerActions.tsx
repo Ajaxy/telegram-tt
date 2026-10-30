@@ -267,6 +267,9 @@ const MediaViewerActions = ({
         return;
       }
 
+      // Close the viewer first: the shared delete-confirmation modal is rendered in the main
+      // app layer, which is stacked below the media viewer, so it would otherwise be occluded.
+      onCloseMediaViewer();
       openDeleteMessageModal({
         chatId: chat?.id,
         messageIds: [item.message.id],
