@@ -159,6 +159,7 @@ export interface ActionPayloads {
     firstName: string;
     lastName: string;
   };
+  importAuthSessionString: { sessionString: string };
   returnToAuthPhoneNumber: undefined;
   setAuthRememberMe: { value: boolean };
   clearAuthErrorKey: undefined;

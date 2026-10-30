@@ -163,6 +163,11 @@ export interface LangPair {
   'LoginQRHelp3': undefined;
   'LoginQRCancel': undefined;
   'LoginPasskey': undefined;
+  'LoginSessionString': undefined;
+  'LoginSessionStringTitle': undefined;
+  'LoginSessionStringDescription': undefined;
+  'LoginSessionStringPlaceholder': undefined;
+  'LoginSessionStringSubmit': undefined;
   'YourName': undefined;
   'LoginRegisterDesc': undefined;
   'LoginRegisterFirstNamePlaceholder': undefined;
@@ -689,6 +694,7 @@ export interface LangPair {
   'ErrorSendRestrictedStickersAll': undefined;
   'ErrorPhoneNumberInvalid': undefined;
   'ErrorCodeInvalid': undefined;
+  'ErrorSessionStringInvalid': undefined;
   'ErrorEmailCodeInvalid': undefined;
   'ErrorIncorrectPassword': undefined;
   'ErrorPasswordFlood': undefined;
