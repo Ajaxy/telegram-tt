@@ -96,6 +96,12 @@ export function buildBotInlineMessage(
       entities: sendMessage.entities?.map(buildApiMessageEntity),
     };
   } else if (sendMessage instanceof GramJs.BotInlineMessageMediaAuto) {
+    if (sendMessage.message) {
+      content.text = {
+        text: sendMessage.message,
+        entities: sendMessage.entities?.map(buildApiMessageEntity),
+      };
+    }
     if (type === 'photo' && photo instanceof GramJs.Photo) {
       content.photo = buildApiPhoto(photo);
     } else if (type === 'audio' && document instanceof GramJs.Document) {
@@ -108,7 +114,7 @@ export function buildBotInlineMessage(
       content.document = buildApiDocument(document);
     } else if (type === 'gif' && document instanceof GramJs.Document) {
       content.video = buildVideoFromDocument(document);
-    } else {
+    } else if (!content.text) {
       content.text = {
         text: sendMessage.message,
         entities: sendMessage.entities?.map(buildApiMessageEntity),
