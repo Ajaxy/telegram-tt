@@ -1,11 +1,12 @@
 import type {
-  AnyConfig, ExtendedRegExpMatchArray, InputRuleFinder,
+  AnyConfig, ExtendedRegExpMatchArray, InputRuleFinder, JSONContent,
 } from '@tiptap/core';
 import {
   Extension, getExtensionField, getSchemaTypeByName, InputRule,
 } from '@tiptap/core';
 import { Markdown } from '@tiptap/markdown';
-import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
+import type { Node as ProseMirrorNode, Schema } from '@tiptap/pm/model';
+import { Mark } from '@tiptap/pm/model';
 import { Plugin } from '@tiptap/pm/state';
 
 import { normalizeBotApiHtml } from '../../../../util/tiptap/botApiHtml';
@@ -83,9 +84,16 @@ export const RichEditorMarkdown = Markdown.extend({
             return false;
           }
 
-          return editor.commands.insertContent(preserveUnsupportedMarkdown(markdown), {
-            contentType: 'markdown',
-          });
+          let content: JSONContent;
+          try {
+            content = dropExcludedMarks(editor.markdown!.parse(preserveUnsupportedMarkdown(markdown)), editor.schema);
+            // Tiptap replaces invalid content with an empty document, so fall back to plain text paste instead
+            editor.schema.nodeFromJSON(content).check();
+          } catch (err) {
+            return false;
+          }
+
+          return editor.commands.insertContent(content);
         },
       },
     })];
@@ -176,6 +184,18 @@ function matchInputRule(find: InputRuleFinder, text: string): ExtendedRegExpMatc
   match.input = text;
   match.data = result.data;
   return match;
+}
+
+// Markdown nests marks freely (`==a `b`==`), but the schema rejects text with `code` plus other marks
+function dropExcludedMarks(node: JSONContent, schema: Schema): JSONContent {
+  const marks = node.marks?.reduce<readonly Mark[]>(
+    (set, mark) => schema.markFromJSON(mark).addToSet(set), Mark.none,
+  );
+  return {
+    ...node,
+    marks: marks?.map((mark) => mark.toJSON()),
+    content: node.content?.map((child) => dropExcludedMarks(child, schema)),
+  };
 }
 
 function preserveUnsupportedMarkdown(markdown: string) {

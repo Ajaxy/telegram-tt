@@ -163,6 +163,16 @@ const RichEditorTable = TableExtension.extend({
     };
   },
 
+  // The schema has no `tableHeader`, so header cells become highlighted cells like `th` in `parseHTML`
+  parseMarkdown(token, helpers) {
+    return this.parent!(token, {
+      ...helpers,
+      createNode: (type, attrs, content) => (type === 'tableHeader'
+        ? helpers.createNode('tableCell', { ...attrs, [TABLE_CELL_HIGHLIGHT_ATTR]: true }, content)
+        : helpers.createNode(type, attrs, content)),
+    });
+  },
+
   addCommands() {
     return {
       ...this.parent?.(),
