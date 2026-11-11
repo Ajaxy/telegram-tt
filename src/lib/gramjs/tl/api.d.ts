@@ -1351,24 +1351,22 @@ namespace Api {
   export class InputMediaWidget extends VirtualClass<{
     // flags: Api.Type;
     allowQueries?: true;
-    fwdAllowQueries?: true;
     sharedWidget?: true;
     width: int;
     height: int;
     html: string;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    chatData?: string;
   }> {
     // flags: Api.Type;
     allowQueries?: true;
-    fwdAllowQueries?: true;
     sharedWidget?: true;
     width: int;
     height: int;
     html: string;
-    publicData?: bytes;
-    chatData?: bytes;
-    CONSTRUCTOR_ID: 1389944197;
+    publicData?: string;
+    chatData?: string;
+    CONSTRUCTOR_ID: 1157021774;
     SUBCLASS_OF_ID: 4210575092;
     className: 'InputMediaWidget';
 
@@ -1377,11 +1375,11 @@ namespace Api {
   export class InputMediaWidgetId extends VirtualClass<{
     // flags: Api.Type;
     widgetId: long;
-    chatData?: bytes;
+    chatData?: string;
   }> {
     // flags: Api.Type;
     widgetId: long;
-    chatData?: bytes;
+    chatData?: string;
     CONSTRUCTOR_ID: 2089114805;
     SUBCLASS_OF_ID: 4210575092;
     className: 'InputMediaWidgetId';
@@ -2955,8 +2953,9 @@ namespace Api {
     width: int;
     height: int;
     payload: bytes;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     widgetId?: long;
   }> {
     // flags: Api.Type;
@@ -2966,10 +2965,11 @@ namespace Api {
     width: int;
     height: int;
     payload: bytes;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     widgetId?: long;
-    CONSTRUCTOR_ID: 2821832503;
+    CONSTRUCTOR_ID: 574157332;
     SUBCLASS_OF_ID: 1198308914;
     className: 'MessageMediaWidget';
 
@@ -7268,19 +7268,21 @@ namespace Api {
     // flags: Api.Type;
     peer: Api.TypePeer;
     msgId: int;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     pts: int;
     ptsCount: int;
   }> {
     // flags: Api.Type;
     peer: Api.TypePeer;
     msgId: int;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     pts: int;
     ptsCount: int;
-    CONSTRUCTOR_ID: 939566996;
+    CONSTRUCTOR_ID: 3148904669;
     SUBCLASS_OF_ID: 2676568142;
     className: 'UpdateMessageWidgetData';
 
@@ -10003,26 +10005,30 @@ namespace Api {
   export class InputBotInlineMessageWidget extends VirtualClass<{
     // flags: Api.Type;
     allowQueries?: true;
-    fwdAllowQueries?: true;
     sharedWidget?: true;
+    invertMedia?: true;
     width: int;
     height: int;
     html: string;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
   }> {
     // flags: Api.Type;
     allowQueries?: true;
-    fwdAllowQueries?: true;
     sharedWidget?: true;
+    invertMedia?: true;
     width: int;
     height: int;
     html: string;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
-    CONSTRUCTOR_ID: 3274354636;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
+    CONSTRUCTOR_ID: 4120355824;
     SUBCLASS_OF_ID: 1408974864;
     className: 'InputBotInlineMessageWidget';
 
@@ -10030,15 +10036,21 @@ namespace Api {
   }
   export class InputBotInlineMessageWidgetId extends VirtualClass<{
     // flags: Api.Type;
+    invertMedia?: true;
     widgetId: long;
-    chatData?: bytes;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
   }> {
     // flags: Api.Type;
+    invertMedia?: true;
     widgetId: long;
-    chatData?: bytes;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
-    CONSTRUCTOR_ID: 799728125;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
+    CONSTRUCTOR_ID: 4270553387;
     SUBCLASS_OF_ID: 1408974864;
     className: 'InputBotInlineMessageWidgetId';
 
@@ -10294,23 +10306,31 @@ namespace Api {
   }
   export class BotInlineMessageWidget extends VirtualClass<{
     // flags: Api.Type;
+    invertMedia?: true;
     width: int;
     height: int;
     payload: bytes;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
     widgetId?: long;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
   }> {
     // flags: Api.Type;
+    invertMedia?: true;
     width: int;
     height: int;
     payload: bytes;
-    publicData?: bytes;
-    chatData?: bytes;
+    publicData?: string;
+    publicDataHash?: long;
+    chatData?: string;
     replyMarkup?: Api.TypeReplyMarkup;
     widgetId?: long;
-    CONSTRUCTOR_ID: 4052032638;
+    message: string;
+    entities?: Api.TypeMessageEntity[];
+    CONSTRUCTOR_ID: 3131144244;
     SUBCLASS_OF_ID: 3297841032;
     className: 'BotInlineMessageWidget';
 
@@ -23669,10 +23689,10 @@ namespace Api {
     }
     export class BotWidgetQueryAnswer extends VirtualClass<{
       // flags: Api.Type;
-      result?: bytes;
+      result?: string;
     } | void> {
       // flags: Api.Type;
-      result?: bytes;
+      result?: string;
       CONSTRUCTOR_ID: 2511810595;
       SUBCLASS_OF_ID: 175837226;
       className: 'BotWidgetQueryAnswer';
@@ -23691,11 +23711,11 @@ namespace Api {
     }
     export class WidgetPublicData extends VirtualClass<{
       hash: long;
-      data: bytes;
+      data: string;
       period: int;
     }> {
       hash: long;
-      data: bytes;
+      data: string;
       period: int;
       CONSTRUCTOR_ID: 71908351;
       SUBCLASS_OF_ID: 820079985;
@@ -31085,45 +31105,45 @@ namespace Api {
     export class SetBotWidgetQueryAnswer extends Request<{
       // flags: Api.Type;
       queryId: long;
-      result?: bytes;
+      result?: string;
     }, Bool> {
       // flags: Api.Type;
       queryId: long;
-      result?: bytes;
+      result?: string;
     }
     export class EditMessageWidgetData extends Request<{
       // flags: Api.Type;
       peer: Api.TypeInputPeer;
       id: int;
-      publicData?: bytes;
-      chatData?: bytes;
+      publicData?: string;
+      chatData?: string;
     }, Api.TypeUpdates> {
       // flags: Api.Type;
       peer: Api.TypeInputPeer;
       id: int;
-      publicData?: bytes;
-      chatData?: bytes;
+      publicData?: string;
+      chatData?: string;
     }
     export class EditInlineBotMessageWidgetData extends Request<{
       // flags: Api.Type;
       id: Api.TypeInputBotInlineMessageID;
-      publicData?: bytes;
-      chatData?: bytes;
+      publicData?: string;
+      chatData?: string;
     }, Bool> {
       // flags: Api.Type;
       id: Api.TypeInputBotInlineMessageID;
-      publicData?: bytes;
-      chatData?: bytes;
+      publicData?: string;
+      chatData?: string;
     }
     export class EditWidgetData extends Request<{
       // flags: Api.Type;
       widgetId: long;
-      publicData: bytes;
+      publicData: string;
       cacheTime?: int;
     }, Bool> {
       // flags: Api.Type;
       widgetId: long;
-      publicData: bytes;
+      publicData: string;
       cacheTime?: int;
     }
     export class GetWidgetPublicData extends Request<{
