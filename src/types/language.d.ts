@@ -2985,6 +2985,7 @@ export interface LangPair {
   'October': undefined;
   'OnlyAllowThisReactions': undefined;
   'OptionPremiumRequiredMessage': undefined;
+  'PaymentCheckoutAcceptTermsLink': undefined;
   'PaymentCheckoutMethodNewCard': undefined;
   'PeerInfoPaneStories': undefined;
   'PermissionNoLocationPosition': undefined;

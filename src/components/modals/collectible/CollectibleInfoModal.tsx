@@ -9,8 +9,9 @@ import type { TabState } from '../../../global/types';
 
 import { TON_CURRENCY_CODE } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatCurrencyAsString, formatTonAsCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
+import { formatTonTextFromNanos } from '../../../util/localization/format';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
@@ -100,7 +101,7 @@ const CollectibleInfoModal = ({
     const fiat = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
     // Only TON has a known number of decimals, so another crypto amount would come out wrong
     const paid = modal.cryptoCurrency === TON_CURRENCY_CODE
-      ? `${formatTonAsCurrency(modal.cryptoAmount, lang.code)} (${fiat})`
+      ? `${formatTonTextFromNanos(lang, modal.cryptoAmount)} (${fiat})`
       : fiat;
     return lang(key, { date, amount: paid, details: '' });
   }, [modal, isUsername, lang]);
