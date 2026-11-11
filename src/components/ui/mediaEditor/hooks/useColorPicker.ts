@@ -11,9 +11,10 @@ import { clamp } from '../../../../util/math';
 
 import useFlag from '../../../../hooks/useFlag';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useWindow from '../../../../hooks/useWindow';
 
-const PREDEFINED_COLORS_BASE = [
-  '#FE4438', '#FF8901', '#FFD60A', '#33C759',
+export const PREDEFINED_COLORS = [
+  '#FFFFFF', '#FE4438', '#FF8901', '#FFD60A', '#33C759',
   '#62E5E0', '#0A84FF', '#5856D6', '#BD5CF3',
 ];
 const RGB_CHANNEL_MAX = 255;
@@ -30,40 +31,52 @@ type PickerInputState = Pick<PickerState, 'hexInputValue' | 'rgbInputValue'>;
 
 interface UseColorPickerOptions {
   initialColor: string;
+  onChange: (color: string, isPreview?: boolean) => void;
 }
 
-export function getPredefinedColors(theme: 'light' | 'dark') {
-  return theme === 'light'
-    ? ['#000000', ...PREDEFINED_COLORS_BASE]
-    : ['#FFFFFF', ...PREDEFINED_COLORS_BASE];
-}
-
-export default function useColorPicker({ initialColor }: UseColorPickerOptions) {
+export default function useColorPicker({ initialColor, onChange }: UseColorPickerOptions) {
+  const renderingWindow = useWindow();
   const hueSliderRef = useRef<HTMLDivElement>();
   const satBrightRef = useRef<HTMLDivElement>();
 
   const [isColorPickerOpen, openColorPicker, closeColorPicker] = useFlag(false);
   const [pickerState, setPickerState] = useState<PickerState>(() => buildPickerState(buildColorFromHex(initialColor)));
+  const pendingColorRef = useRef<Color>();
 
   const { color, hexInputValue, rgbInputValue } = pickerState;
   const selectedColor = buildHexFromColor(color).toUpperCase();
-  const pickerColor = selectedColor;
   const [hueCoord, saturationCoord, brightnessCoord] = convertColor(color, 'hsv').coords;
   const hue = (hueCoord || 0) / HSV_HUE_MAX;
   const saturation = saturationCoord! / COLOR_PERCENT_MAX;
   const brightness = brightnessCoord! / COLOR_PERCENT_MAX;
   const rgbColorValue = convertColor(color, 'srgb').coords.map(convertSrgbChannel).join(', ');
 
-  const updateColor = useLastCallback((newColor: Color, state?: Partial<PickerInputState>) => {
+  const updateColor = useLastCallback((newColor: Color, state?: Partial<PickerInputState>, isPreview?: boolean) => {
+    pendingColorRef.current = isPreview ? newColor : undefined;
     setPickerState({
       ...buildPickerState(newColor),
       ...state,
     });
+    onChange(buildHexFromColor(newColor).toUpperCase(), isPreview);
   });
 
-  const setSelectedColor = useLastCallback((newColor: string) => {
-    updateColor(buildColorFromHex(newColor));
+  const commitColor = useLastCallback(() => {
+    const pendingColor = pendingColorRef.current;
+    if (!pendingColor) return;
+
+    pendingColorRef.current = undefined;
+    onChange(buildHexFromColor(pendingColor).toUpperCase());
   });
+
+  useEffect(() => {
+    if (pendingColorRef.current) return;
+
+    setPickerState((prev) => (
+      buildHexFromColor(prev.color).toUpperCase() === initialColor.toUpperCase()
+        ? prev
+        : buildPickerState(buildColorFromHex(initialColor))
+    ));
+  }, [initialColor]);
 
   useEffect(() => {
     if (!isColorPickerOpen) return;
@@ -78,19 +91,21 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
         s * COLOR_PERCENT_MAX,
         v * COLOR_PERCENT_MAX,
       ],
-    }));
+    }), undefined, true);
   });
 
   const setupColorDrag = useLastCallback((
     handler: (e: MouseEvent | TouchEvent) => void,
   ) => {
+    const targetDocument = renderingWindow.document;
     const handleMove = (ev: MouseEvent) => handler(ev);
     const handleUp = () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
+      targetDocument.removeEventListener('mousemove', handleMove);
+      targetDocument.removeEventListener('mouseup', handleUp);
+      commitColor();
     };
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleUp);
+    targetDocument.addEventListener('mousemove', handleMove);
+    targetDocument.addEventListener('mouseup', handleUp);
   });
 
   const handleHueChange = useLastCallback((e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
@@ -123,7 +138,7 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
       : cleanHex;
 
     if (fullHex.length === 6) {
-      updateColor(buildColorFromHex(fullHex), { hexInputValue: `#${cleanHex}` });
+      updateColor(buildColorFromHex(fullHex), { hexInputValue: `#${cleanHex}` }, true);
     } else {
       setPickerState((prev) => ({ ...prev, hexInputValue: `#${cleanHex}` }));
     }
@@ -146,7 +161,7 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
             g / RGB_CHANNEL_MAX,
             b / RGB_CHANNEL_MAX,
           ],
-        }), { rgbInputValue: value });
+        }), { rgbInputValue: value }, true);
         return;
       }
     }
@@ -156,15 +171,16 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
 
   const handleHexInputBlur = useLastCallback(() => {
     setPickerState((prev) => ({ ...prev, hexInputValue: selectedColor }));
+    commitColor();
   });
 
   const handleRgbInputBlur = useLastCallback(() => {
     setPickerState((prev) => ({ ...prev, rgbInputValue: rgbColorValue }));
+    commitColor();
   });
 
   const handleColorSelect = useLastCallback((newColor: string) => {
     updateColor(buildColorFromHex(newColor));
-    closeColorPicker();
   });
 
   const handleHueSliderMouseDown = useLastCallback((e: React.MouseEvent) => {
@@ -177,18 +193,21 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
     setupColorDrag(handleSatBrightChange);
   });
 
+  const handleTouchEnd = useLastCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    commitColor();
+  });
+
   return {
     hueSliderRef,
     satBrightRef,
     selectedColor,
-    setSelectedColor,
     isColorPickerOpen,
     openColorPicker,
     closeColorPicker,
     hue,
     saturation,
     brightness,
-    pickerColor,
     hexInputValue,
     rgbInputValue,
     handleHueChange,
@@ -200,6 +219,7 @@ export default function useColorPicker({ initialColor }: UseColorPickerOptions) 
     handleColorSelect,
     handleHueSliderMouseDown,
     handleSatBrightMouseDown,
+    handleTouchEnd,
   };
 }
 

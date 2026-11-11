@@ -144,6 +144,7 @@ import {
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
+const VIDEO_COVER_FILENAME = 'cover.jpg';
 
 type TranslateTextParams = ({
   text: ApiFormattedText[];
@@ -521,7 +522,7 @@ export function sendApiMessage(
     }
     if (!media && attachment) {
       try {
-        media = await uploadMedia(localMessage, attachment, onProgress!);
+        media = await uploadMedia(chat, localMessage, attachment, onProgress!);
       } catch (err) {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -542,10 +543,10 @@ export function sendApiMessage(
     } else if (poll) {
       try {
         const attachedMedia = poll.attachedMedia
-          ? await uploadMedia(localMessage, poll.attachedMedia, onProgress!)
+          ? await uploadMedia(chat, localMessage, poll.attachedMedia, onProgress!)
           : undefined;
         const solutionMedia = poll.solutionMedia
-          ? await uploadMedia(localMessage, poll.solutionMedia, onProgress!)
+          ? await uploadMedia(chat, localMessage, poll.solutionMedia, onProgress!)
           : undefined;
 
         media = buildInputPoll(poll, randomId, {
@@ -685,18 +686,7 @@ export async function sendMessage(
   return localMessage ? sendApiMessage(params, localMessage, onProgress) : undefined;
 }
 
-export async function sendEphemeralMessage({
-  chat,
-  receiver,
-  text,
-  entities,
-  richMessage,
-  replyInfo,
-  attachment,
-  sticker,
-  gif,
-  topMsgId,
-}: {
+type EphemeralMessageParams = {
   chat: ApiChat;
   receiver: ApiUser;
   text?: string;
@@ -707,8 +697,20 @@ export async function sendEphemeralMessage({
   sticker?: ApiSticker;
   gif?: ApiVideo;
   topMsgId?: number;
-}, onProgress?: ApiOnProgress) {
-  const randomId = generateRandomBigInt();
+};
+
+export function sendEphemeralMessageLocal({
+  chat,
+  receiver,
+  text,
+  entities,
+  richMessage,
+  replyInfo,
+  attachment,
+  sticker,
+  gif,
+  topMsgId,
+}: EphemeralMessageParams) {
   const { message: baseLocalMessage } = buildLocalMessage({
     chat,
     text,
@@ -723,7 +725,7 @@ export async function sendEphemeralMessage({
   const localMessage: ApiMessage = {
     ...baseLocalMessage,
     ephemeralBotId: receiver.id,
-    ephemeralRandomId: randomId.toString(),
+    ephemeralRandomId: generateRandomBigInt().toString(),
     ephemeralTopMsgId: topMsgId,
     isEphemeral: true,
     isForwardingAllowed: false,
@@ -732,6 +734,19 @@ export async function sendEphemeralMessage({
     '@type': 'newEphemeralMessage',
     message: localMessage,
   });
+
+  return localMessage;
+}
+
+export async function sendEphemeralMessage(
+  params: EphemeralMessageParams & { localMessage?: ApiMessage },
+  onProgress?: ApiOnProgress,
+) {
+  const {
+    chat, receiver, text, entities, richMessage, replyInfo, attachment, sticker, gif, topMsgId,
+  } = params;
+  const localMessage = params.localMessage ?? sendEphemeralMessageLocal(params);
+  const randomId = BigInt(localMessage.ephemeralRandomId!);
   if (attachment) onProgress!(0, getMessageKey(localMessage));
 
   const requestReplyInfo: ApiInputReplyInfo | undefined = replyInfo || (topMsgId ? {
@@ -747,7 +762,7 @@ export async function sendEphemeralMessage({
     } else if (gif) {
       media = buildInputMediaDocument(gif, gif.isSpoiler || undefined);
     } else if (attachment) {
-      media = await uploadMedia(localMessage, attachment, onProgress!);
+      media = await uploadMedia(chat, localMessage, attachment, onProgress!);
     }
     if (onProgress?.isCanceled) return undefined;
 
@@ -933,7 +948,7 @@ function sendGroupedMedia(
     } else {
       let media;
       try {
-        media = await uploadMedia(localMessage, attachment, onProgress!);
+        media = await uploadMedia(chat, localMessage, attachment, onProgress!);
       } catch (err) {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -1035,11 +1050,12 @@ async function fetchInputMedia(
     && messageMedia.document
     && messageMedia.document instanceof GramJs.Document)
   ) {
-    const { document: { id, accessHash, fileReference } } = messageMedia;
+    const { document: { id, accessHash, fileReference }, videoCover } = messageMedia;
 
     return new GramJs.InputMediaDocument({
       id: new GramJs.InputDocument({ id, accessHash, fileReference }),
       spoiler: isSpoiler,
+      videoCover: videoCover instanceof GramJs.Photo ? buildInputPhotoFromPhoto(videoCover) : undefined,
     });
   }
 
@@ -1064,15 +1080,23 @@ export async function editMessage({
   noWebPage?: boolean;
 }, onProgress?: ApiOnProgress) {
   const isScheduled = message.date * 1000 > getServerTime() * 1000;
+  const { video } = message.content;
+  const isCoverOnlyEdit = Boolean(
+    attachment?.isFromMessageMedia && attachment.editState && !attachment.videoProcessing
+    && !attachment.shouldSendAsFile && video,
+  );
 
-  const media = attachment && buildUploadingMedia(attachment);
+  const media = attachment && !isCoverOnlyEdit ? buildUploadingMedia(attachment) : undefined;
   const inputRichMessage = richMessage && buildInputRichMessage(richMessage);
   if (richMessage && (!inputRichMessage || media)) {
     return;
   }
 
   const isInvertedMedia = text && !attachment?.shouldSendAsFile ? message.isInvertedMedia : undefined;
-  const baseContent = richMessage ? omit(message.content, ['webPage']) : message.content;
+  const messageContent = isCoverOnlyEdit
+    ? { ...message.content, video: { ...video!, isSpoiler: attachment!.shouldSendAsSpoiler } }
+    : message.content;
+  const baseContent = richMessage ? omit(messageContent, ['webPage']) : messageContent;
 
   const newContent = {
     ...(media || baseContent),
@@ -1100,7 +1124,9 @@ export async function editMessage({
   try {
     let mediaUpdate: GramJs.TypeInputMedia | undefined;
     if (attachment) {
-      mediaUpdate = await uploadMedia(message, attachment, onProgress!);
+      mediaUpdate = isCoverOnlyEdit
+        ? await buildVideoCoverEdit(chat, video!, attachment)
+        : await uploadMedia(chat, message, attachment, onProgress!);
     }
 
     const mtpEntities = entities && entities.map(buildMtpMessageEntity);
@@ -1295,7 +1321,7 @@ export async function uploadRichMedia({
   chat: ApiChat;
   attachment: ApiAttachment;
 }, onProgress: ApiOnProgress) {
-  const uploadedMedia = await uploadAttachment({
+  const uploadedMedia = await uploadAttachment(chat, {
     ...attachment,
     shouldSendAsSpoiler: undefined,
   }, onProgress);
@@ -1318,7 +1344,9 @@ export async function uploadRichMedia({
   return content?.photo || content?.video || content?.audio || content?.document;
 }
 
-async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
+async function uploadMedia(
+  chat: ApiChat, message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress,
+) {
   const patchedOnProgress: ApiOnProgress = (progress) => {
     if (onProgress.isCanceled) {
       patchedOnProgress.isCanceled = true;
@@ -1327,13 +1355,17 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
     }
   };
 
-  return uploadAttachment(attachment, patchedOnProgress);
+  const media = await uploadAttachment(chat, attachment, patchedOnProgress);
+  // A concurrent upload, such as a video cover, can outlast the cancellation of the main one
+  if (onProgress.isCanceled) throw new Error('USER_CANCELED');
+
+  return media;
 }
 
-async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProgress) {
+async function uploadAttachment(chat: ApiChat, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
     filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
-    isRoundVideo,
+    isRoundVideo, videoCover, shouldSendAsGif, attachedStickers,
   } = attachment;
 
   const fetchAndUpload = async (url: string, progressCallback?: (progress: number) => void) => {
@@ -1343,11 +1375,19 @@ async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProg
 
   const isVideo = SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType);
   const shouldUploadThumb = audio || isVideo || shouldSendAsFile;
+  const coverPromise = isVideo && !shouldSendAsFile && !shouldSendAsGif && videoCover
+    ? uploadVideoCover(chat, videoCover.blobUrl) : undefined;
 
-  const [inputFile, thumb] = await Promise.all(compact([
-    fetchAndUpload(blobUrl, onProgress),
-    shouldUploadThumb && previewBlobUrl && fetchAndUpload(previewBlobUrl),
-  ]));
+  const [[inputFile, thumb], inputCover] = await Promise.all([
+    Promise.all(compact([
+      fetchAndUpload(blobUrl, onProgress),
+      shouldUploadThumb && previewBlobUrl && fetchAndUpload(previewBlobUrl),
+    ])),
+    coverPromise,
+  ]);
+
+  const inputStickers = !shouldSendAsFile && attachedStickers ? compact(attachedStickers.map(buildInputDocument)) : [];
+  const stickers = inputStickers.length ? inputStickers : undefined;
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (!shouldSendAsFile) {
@@ -1356,6 +1396,7 @@ async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProg
         return new GramJs.InputMediaUploadedPhoto({
           file: inputFile,
           spoiler: shouldSendAsSpoiler,
+          stickers,
         });
       }
 
@@ -1369,6 +1410,14 @@ async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProg
             supportsStreaming: true,
             roundMessage: isRoundVideo || undefined,
           }));
+        }
+
+        if (shouldSendAsGif) {
+          attributes.push(new GramJs.DocumentAttributeAnimated());
+        }
+
+        if (stickers) {
+          attributes.push(new GramJs.DocumentAttributeHasStickers());
         }
       }
     }
@@ -1401,9 +1450,40 @@ async function uploadAttachment(attachment: ApiAttachment, onProgress: ApiOnProg
     attributes,
     thumb,
     forceFile: shouldSendAsFile,
+    nosoundVideo: (isVideo && !shouldSendAsFile && !shouldSendAsGif && !isRoundVideo) || undefined,
     spoiler: shouldSendAsSpoiler,
+    stickers,
+    videoCover: inputCover,
     ttlSeconds,
   });
+}
+
+async function buildVideoCoverEdit(chat: ApiChat, video: ApiVideo, attachment: ApiAttachment) {
+  const { videoCover, shouldSendAsSpoiler } = attachment;
+  return new GramJs.InputMediaDocument({
+    id: buildInputDocument(video)!,
+    videoCover: videoCover ? await uploadVideoCover(chat, videoCover.blobUrl) : undefined,
+    videoTimestamp: video.timestamp,
+    spoiler: shouldSendAsSpoiler,
+  });
+}
+
+async function uploadVideoCover(chat: ApiChat, blobUrl: string) {
+  const file = await fetchFile(blobUrl, VIDEO_COVER_FILENAME);
+  const messageMedia = await invokeRequest(new GramJs.messages.UploadMedia({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    media: new GramJs.InputMediaUploadedPhoto({ file: await uploadFile(file) }),
+  }), { shouldThrow: true });
+
+  if (!(messageMedia instanceof GramJs.MessageMediaPhoto) || !(messageMedia.photo instanceof GramJs.Photo)) {
+    throw new Error('Failed to upload video cover');
+  }
+
+  return buildInputPhotoFromPhoto(messageMedia.photo);
+}
+
+function buildInputPhotoFromPhoto({ id, accessHash, fileReference }: GramJs.Photo) {
+  return new GramJs.InputPhoto({ id, accessHash, fileReference });
 }
 
 export async function pinMessage({

@@ -41,6 +41,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { RegularLangKey } from '../../types/language';
+import type { MediaEditorResult } from '../ui/mediaEditor/MediaEditor';
 import type { RichEditorTooltipsConfig } from './tooltips/types';
 import { ApiMediaFormat, ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
@@ -66,6 +67,8 @@ import {
   getMediaHash,
   getMessageDocumentPhoto,
   getMessagePhoto,
+  getMessageVideo,
+  getPhotoFullDimensions,
   getReactionKey,
   getStoryKey,
   hasMessageMedia,
@@ -130,6 +133,7 @@ import {
   selectEditingScheduledDraft,
   selectNoWebPage,
 } from '../../global/selectors/threads';
+import { revokeAttachmentUrls } from '../../util/attachments';
 import {
   IS_IOS, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
 } from '../../util/browser/windowEnvironment';
@@ -152,6 +156,7 @@ import { EMPTY_RICH_MEDIA_CAPTION } from '../../util/tiptap/richMedia';
 import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, {
+  buildAttachmentWithVideoCover,
   buildGifAttachment,
   prepareAttachment,
   prepareAttachmentsToSend,
@@ -676,6 +681,14 @@ const Composer = ({
     canSendAudios: canSendAudios && !isEditingMedia,
     shouldSendInHighQuality: attachmentSettings.shouldSendInHighQuality,
   });
+  const richMediaEditorSource = useMemo(() => (editingRichMediaAttachment ? {
+    blobUrl: editingRichMediaAttachment.sourceBlobUrl ?? editingRichMediaAttachment.blobUrl,
+    mimeType: editingRichMediaAttachment.mimeType,
+    filename: editingRichMediaAttachment.filename,
+  } : undefined), [editingRichMediaAttachment]);
+  const handleApplyRichMediaEdit = useLastCallback((result: MediaEditorResult) => {
+    if (result.kind === 'photo') void handleSaveRichMediaEdit(result.file, result.editState);
+  });
   const hasAttachments = Boolean(attachments.length);
   const handleRichMediaSelect = useLastCallback((files: File[], shouldSendAsFile?: boolean) => {
     handleRichMediaFiles(files, undefined, undefined, shouldSendAsFile);
@@ -886,21 +899,38 @@ const Composer = ({
     shouldSendInHighQuality: attachmentSettings.shouldSendInHighQuality,
   });
 
-  const mediaEditRequestRef = useRef<number>();
   useEffect(() => {
-    if (!mediaEditorMessage) return;
-    const media = getMessagePhoto(mediaEditorMessage) || getMessageDocumentPhoto(mediaEditorMessage);
-    if (!media) return;
+    if (!mediaEditorMessage) return undefined;
+    const media = getMessagePhoto(mediaEditorMessage) || getMessageDocumentPhoto(mediaEditorMessage)
+      || getMessageVideo(mediaEditorMessage);
+    if (!media) return undefined;
     const mediaHash = getMediaHash(media, 'full');
-    if (!mediaHash) return;
-    const now = Date.now();
-    mediaEditRequestRef.current = now;
+    if (!mediaHash) return undefined;
+    let isCancelled = false;
     fetch(mediaHash, ApiMediaFormat.BlobUrl).then(async (blobUrl) => {
-      if (mediaEditRequestRef.current !== now) return;
+      if (isCancelled || !blobUrl) return;
       const blob = await fetchBlob(blobUrl);
-      const attachment = await buildAttachment(getMediaFilename(media), blob);
-      handleSetAttachments([attachment]);
+      const attachment = await buildAttachment(getMediaFilename(media), blob, {
+        isFromMessageMedia: true,
+        shouldSendAsSpoiler: (media.mediaType !== 'document' && media.isSpoiler) || undefined,
+      });
+      const cover = media.mediaType === 'video' ? media.cover : undefined;
+      const coverHash = cover && getMediaHash(cover, 'full');
+      const coverBlobUrl = coverHash ? await fetch(coverHash, ApiMediaFormat.BlobUrl) : undefined;
+      const coverBlob = coverBlobUrl ? await fetchBlob(coverBlobUrl) : undefined;
+      if (isCancelled || (cover && !coverBlob)) {
+        revokeAttachmentUrls(attachment);
+        return;
+      }
+
+      handleSetAttachments([coverBlob
+        ? buildAttachmentWithVideoCover(attachment, coverBlob, getPhotoFullDimensions(cover!))
+        : attachment]);
     });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [mediaEditorMessage, handleSetAttachments]);
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
@@ -2798,6 +2828,7 @@ const Composer = ({
         isForMessage={isInMessageList}
         shouldSchedule={canSchedule && isInScheduledList}
         canSchedule={canSchedule}
+        canSendGifs={canSendGifs}
         forceDarkTheme={isInStoryViewer}
         onSendSilent={handleSendSilentAttachments}
         onSend={handleSendAttachmentsFromModal}
@@ -2812,11 +2843,11 @@ const Composer = ({
       />
       <MediaEditor
         isOpen={Boolean(editingRichMediaAttachment)}
-        imageUrl={editingRichMediaAttachment?.blobUrl}
-        mimeType={editingRichMediaAttachment?.mimeType}
-        filename={editingRichMediaAttachment?.filename}
+        source={richMediaEditorSource}
+        initialEditState={editingRichMediaAttachment?.editState}
+        chatId={chatId}
         onClose={handleCloseRichMediaEditor}
-        onSave={handleSaveRichMediaEdit}
+        onApply={handleApplyRichMediaEdit}
       />
       {isForCurrentMessageList && (
         <ToDoListModal

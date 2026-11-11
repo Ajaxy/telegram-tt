@@ -1386,5 +1386,6 @@ export type TabState = {
   messageMediaEditorRequest?: {
     chatId: string;
     messageId: number;
+    videoTime?: number;
   };
 };

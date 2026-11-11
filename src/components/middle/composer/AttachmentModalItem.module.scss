@@ -15,6 +15,10 @@
   object-fit: cover;
 }
 
+.hidden {
+  display: none;
+}
+
 .duration {
   -webkit-user-select: none;
   user-select: none;
@@ -37,6 +41,10 @@
 .single .preview {
   height: auto;
   max-height: 24rem;
+}
+
+.editing {
+  visibility: hidden;
 }
 
 .no-grouping {

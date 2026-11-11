@@ -19,6 +19,7 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectIsMessageProtected,
   selectSender,
   selectTabState,
   selectTheme,
@@ -69,6 +70,7 @@ type StateProps = {
   forwardMessageIds?: number[];
   fromChatId?: string;
   isMediaNsfw?: boolean;
+  isMessageProtected?: boolean;
   theme: ThemeKey;
 };
 
@@ -87,6 +89,7 @@ const CLOSE_DURATION = 350;
 const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const {
     shouldAnimate,
+    isMessageProtected,
     isReplyToDiscussion,
     isInChangingRecipientMode,
     forwardMessageIds,
@@ -199,7 +202,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     && Boolean(frozenReplyInfo.quoteText || frozenReplyInfo.quoteRich?.length);
   const isShowingSuggestedPostRendering = Boolean(frozenSuggestedPostInfo) && !frozenShouldForceShowEditing;
 
-  const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile;
+  const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile && !isMessageProtected;
 
   useEffect(() => {
     if (shouldPreventComposerAnimation) {
@@ -594,6 +597,7 @@ export default memo(withGlobal<OwnProps>(
       forwardMessageIds,
       fromChatId,
       isMediaNsfw,
+      isMessageProtected: !editingId && selectIsMessageProtected(global, message),
       theme: selectTheme(global),
     };
   },

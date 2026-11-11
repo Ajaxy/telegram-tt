@@ -99,6 +99,7 @@ const ENTRY_ORDER = [
   'gramjs-worker',
   'fasttext-worker',
   'media-worker',
+  'video-processing-worker',
   'shared-state-worker',
   'latex-worker',
   'service-worker',
@@ -451,6 +452,10 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
     return { key: 'media-worker', label: '🎞️ Media worker' };
   }
 
+  if (/^videoProcessing\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'video-processing-worker', label: '🎬 Video processing worker' };
+  }
+
   if (/^sharedState\.worker-[\w-]+\.js$/.test(name)) {
     return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
   }
@@ -463,7 +468,7 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
 }
 
 function isWorkerAssetName(name: string) {
-  return /^(?:worker|fasttext\.worker|index\.worker|sharedState\.worker|latex\.worker)-[\w-]+\.js$/.test(name);
+  return /^(?:worker|(?:fasttext|index|videoProcessing|sharedState|latex)\.worker)-[\w-]+\.js$/.test(name);
 }
 
 function isIgnoredAsset(name: string) {

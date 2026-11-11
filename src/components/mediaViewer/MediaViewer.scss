@@ -238,7 +238,7 @@
   }
 }
 
-// Top-layer host (manual popover) for the ghost that flies into the Media Editor
+// Host for the ghost that flies into the Media Editor, a manual popover when it starts in the Media Viewer
 .ghost-host {
   pointer-events: none;
 
@@ -284,7 +284,13 @@
 
   &.for-media-editor {
     position: fixed;
-    border-radius: 0.25rem;
+    transform-origin: 0 0;
+    transition: none;
+  }
+
+  .ghost-media {
+    position: absolute;
+    transform-origin: 0 0;
   }
 
   img,

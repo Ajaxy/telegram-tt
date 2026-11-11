@@ -98,11 +98,11 @@ export function updateStickerSet<T extends GlobalState>(
   const isCustomEmoji = update.isEmoji || currentStickerSet.isEmoji;
   const addedSets = (isCustomEmoji ? global.customEmojis.added.setIds : global.stickers.added.setIds) || [];
   let setIds: string[] = addedSets;
-  if (update.installedDate && !update.isArchived && addedSets && !addedSets.includes(stickerSetId)) {
+  if (update.installedDate !== undefined && !update.isArchived && addedSets && !addedSets.includes(stickerSetId)) {
     setIds = [stickerSetId, ...setIds];
   }
 
-  if (!update.installedDate && addedSets?.includes(stickerSetId)) {
+  if ('installedDate' in update && update.installedDate === undefined && addedSets?.includes(stickerSetId)) {
     setIds = setIds.filter((id) => id !== stickerSetId);
   }
 

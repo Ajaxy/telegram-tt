@@ -575,6 +575,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'emojiGroups',
       'serviceNotifications',
       'attachmentSettings',
+      'mediaEditorSettings',
       'leftColumnWidth',
       'archiveSettings',
       'mediaViewer',
@@ -1001,6 +1002,7 @@ function omitLocalVideo(video: ApiVideo): ApiVideo {
     ...video,
     blobUrl: undefined,
     previewBlobUrl: undefined,
+    editPreview: undefined,
   };
 }
 

@@ -22,6 +22,7 @@ import type {
 import type { ActiveDownloads, SharedMediaType } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
+import { SUPPORTED_VIDEO_CONTENT_TYPES } from '../../config';
 import {
   IS_OPFS_SUPPORTED,
   IS_OPUS_SUPPORTED,
@@ -71,7 +72,11 @@ export function canEditMedia(message: MediaContainer) {
 }
 
 export function canEditMediaInEditor(message: MediaContainer) {
-  return canEditMedia(message) && (getMessagePhoto(message) || getMessageDocumentPhoto(message));
+  const video = getMessageVideo(message);
+  return canEditMedia(message) && Boolean(
+    getMessagePhoto(message) || getMessageDocumentPhoto(message)
+    || (video && !video.isRound && !video.isGif && SUPPORTED_VIDEO_CONTENT_TYPES.has(video.mimeType)),
+  );
 }
 
 export function getMessagePhoto(message: MediaContainer) {

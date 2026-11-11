@@ -1,4 +1,4 @@
-import type { ApiFormattedText } from '../../api/types';
+import type { ApiFormattedText, ApiStickerSet } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 export function getStickerHashById(stickerId: string, isPreview?: boolean) {
@@ -15,4 +15,9 @@ export function stripCustomEmoji(text: ApiFormattedText): ApiFormattedText {
 
   const entities = text.entities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji);
   return { ...text, entities };
+}
+
+// The server can report an installation date of zero
+export function getIsStickerSetInstalled(stickerSet: Pick<ApiStickerSet, 'installedDate'>) {
+  return stickerSet.installedDate !== undefined;
 }

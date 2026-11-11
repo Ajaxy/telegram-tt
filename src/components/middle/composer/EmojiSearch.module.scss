@@ -13,7 +13,8 @@
 
   background-color: #00000010;
 
-  :global(.theme-dark) & {
+  :global(.theme-dark) &,
+  :global(.component-theme-dark) & {
     background-color: rgba(255, 255, 255, 0.05);
   }
 }
@@ -144,9 +145,12 @@
 
   color: var(--color-text);
 
+  outline: none;
+
   transition: background-color var(--select-transition);
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: rgba(var(--color-text-secondary-rgb), 0.08);
   }
 }

@@ -132,6 +132,7 @@ import type {
   WebPageMediaSize,
 } from '../../types';
 import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
+import type { MediaEditorSettings } from '../../types/mediaEditor';
 import type { ClipboardTextFormat, MessageCopyRequest } from '../../types/messageCopy';
 import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
 import type { RegularLangFnParameters } from '../../util/localization';
@@ -2861,6 +2862,7 @@ export interface ActionPayloads {
     webPageMediaSize?: WebPageMediaSize;
     shouldSendInHighQuality?: boolean;
   };
+  updateMediaEditorSettings: MediaEditorSettings;
   updateShouldSaveAttachmentsCompression: { shouldSave: boolean } & WithTabId;
   applyDefaultAttachmentsCompression: undefined;
 
@@ -3724,6 +3726,7 @@ export interface ActionPayloads {
   requestMessageMediaEditor: {
     chatId: string;
     messageId: number;
+    videoTime?: number;
   } & WithTabId;
   resetMessageMediaEditorRequest: WithTabId | undefined;
 }

@@ -1,30 +1,34 @@
 import { useRef, useState } from '@teact';
 
-import type { DrawAction, DrawTool } from '../canvasUtils';
+import type { DrawAction, DrawSettings } from '../../../../types/mediaEditor';
 
 import useFlag from '../../../../hooks/useFlag';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useWindow from '../../../../hooks/useWindow';
 
-const DEFAULT_BRUSH_SIZE = 5;
+export const DEFAULT_BRUSH_SIZE = 5;
+const MAX_POINT_SPACING = 12; // px
 
 interface UseDrawingOptions {
   getCanvasCoordinates: (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => { x: number; y: number };
   canvasToImageCoords: (x: number, y: number) => { x: number; y: number };
-  selectedColor: string;
+  settings: DrawSettings;
+  displayScale: number;
   onActionComplete: (action: DrawAction) => void;
 }
 
 export default function useDrawing({
   getCanvasCoordinates,
   canvasToImageCoords,
-  selectedColor,
+  settings,
+  displayScale,
   onActionComplete,
 }: UseDrawingOptions) {
-  const [drawTool, setDrawTool] = useState<DrawTool>('pen');
-  const [brushSize, setBrushSize] = useState(DEFAULT_BRUSH_SIZE);
+  const renderingWindow = useWindow();
   const [currentDrawAction, setCurrentDrawAction] = useState<DrawAction | undefined>(undefined);
   const [isDrawing, markDrawing, unmarkDrawing] = useFlag(false);
   const lastCompletedActionRef = useRef<DrawAction | undefined>(undefined);
+  const pathSinceLastPointRef = useRef(0);
 
   const handlePointerMove = useLastCallback((e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
     // Also check lastCompletedActionRef to prevent moves after completion (stale state race)
@@ -33,11 +37,21 @@ export default function useDrawing({
     const canvasCoords = getCanvasCoordinates(e);
     const imageCoords = canvasToImageCoords(canvasCoords.x, canvasCoords.y);
     const isShiftPressed = 'shiftKey' in e ? e.shiftKey : false;
+    const { points, brushSize } = currentDrawAction;
+    const lastPoint = points[points.length - 1];
+
+    const distance = Math.hypot(imageCoords.x - lastPoint.x, imageCoords.y - lastPoint.y) * displayScale;
+    pathSinceLastPointRef.current += distance;
+    const shouldMoveLastPoint = points.length > 1
+      && pathSinceLastPointRef.current < Math.min(brushSize * displayScale, MAX_POINT_SPACING);
+    if (!shouldMoveLastPoint) {
+      pathSinceLastPointRef.current = 0;
+    }
 
     // When shift is pressed, only keep first and last point (straight line)
     const newPoints = isShiftPressed
-      ? [currentDrawAction.points[0], imageCoords]
-      : [...currentDrawAction.points, imageCoords];
+      ? [points[0], imageCoords]
+      : [...(shouldMoveLastPoint ? points.slice(0, -1) : points), imageCoords];
 
     setCurrentDrawAction({
       ...currentDrawAction,
@@ -61,32 +75,37 @@ export default function useDrawing({
       onActionComplete(completedAction);
     }
 
-    document.removeEventListener('mousemove', handlePointerMove);
-    document.removeEventListener('touchmove', handlePointerMove);
-    document.removeEventListener('mouseup', handlePointerUp);
-    document.removeEventListener('touchend', handlePointerUp);
+    const targetDocument = renderingWindow.document;
+    targetDocument.removeEventListener('mousemove', handlePointerMove);
+    targetDocument.removeEventListener('touchmove', handlePointerMove);
+    targetDocument.removeEventListener('mouseup', handlePointerUp);
+    targetDocument.removeEventListener('touchend', handlePointerUp);
+    targetDocument.removeEventListener('touchcancel', handlePointerUp);
   });
 
   const handlePointerDown = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
     markDrawing();
+    pathSinceLastPointRef.current = 0;
     const canvasCoords = getCanvasCoordinates(e);
     const imageCoords = canvasToImageCoords(canvasCoords.x, canvasCoords.y);
     const isShiftPressed = 'shiftKey' in e ? e.shiftKey : false;
 
     setCurrentDrawAction({
       type: 'draw',
-      tool: drawTool,
+      tool: settings.tool,
       points: [imageCoords],
-      color: selectedColor,
-      brushSize,
+      color: settings.color,
+      brushSize: settings.size,
       isShiftPressed,
     });
 
     // Attach document listeners to continue drawing even when cursor leaves canvas
-    document.addEventListener('mousemove', handlePointerMove);
-    document.addEventListener('touchmove', handlePointerMove);
-    document.addEventListener('mouseup', handlePointerUp);
-    document.addEventListener('touchend', handlePointerUp);
+    const targetDocument = renderingWindow.document;
+    targetDocument.addEventListener('mousemove', handlePointerMove);
+    targetDocument.addEventListener('touchmove', handlePointerMove);
+    targetDocument.addEventListener('mouseup', handlePointerUp);
+    targetDocument.addEventListener('touchend', handlePointerUp);
+    targetDocument.addEventListener('touchcancel', handlePointerUp);
   });
 
   const resetDrawing = useLastCallback(() => {
@@ -95,10 +114,6 @@ export default function useDrawing({
   });
 
   return {
-    drawTool,
-    setDrawTool,
-    brushSize,
-    setBrushSize,
     currentDrawAction,
     isDrawing,
     handlePointerDown,

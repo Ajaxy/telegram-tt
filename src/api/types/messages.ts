@@ -1,4 +1,5 @@
 import type { ThreadId, ThreadReadState, WebPageMediaSize } from '../../types';
+import type { MediaEditDocument } from '../../types/mediaEditor';
 import type {
   ApiBotInlineMediaResult,
   ApiBotInlineResult,
@@ -134,12 +135,18 @@ export interface ApiVideo {
   previewPhotoSizes?: ApiPhotoSize[];
   blobUrl?: string;
   previewBlobUrl?: string;
+  editPreview?: {
+    blobUrl: string;
+    mimeType: string;
+    document: MediaEditDocument;
+  };
   size: number;
   noSound?: boolean;
   waveform?: number[];
   timestamp?: number;
   altVideos?: ApiVideo[];
   storyboardInfo?: StoryboardInfo;
+  cover?: ApiPhoto;
 }
 
 export interface ApiAudio {

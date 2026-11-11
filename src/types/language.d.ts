@@ -2043,6 +2043,67 @@ export interface LangPair {
   'HEX': undefined;
   'RGB': undefined;
   'Text': undefined;
+  'Adjust': undefined;
+  'Quality': undefined;
+  'EditorSetCover': undefined;
+  'EditorChooseCoverFromComputer': undefined;
+  'EditorUseFrameAsCover': undefined;
+  'EditorClearCover': undefined;
+  'EditorCoverAspectHint': undefined;
+  'EditorCoverInvalidFile': undefined;
+  'EditorTrimStart': undefined;
+  'EditorTrimEnd': undefined;
+  'AccActionPause': undefined;
+  'VideoProcessingFailed': undefined;
+  'VideoEditorLoadFailed': undefined;
+  'EditorStickersLoadFailed': undefined;
+  'VideoTooLargeToEdit': undefined;
+  'VideoAudioUnsupported': undefined;
+  'AccActionMute': undefined;
+  'AccActionUnmute': undefined;
+  'EditorMutedHint': undefined;
+  'EditorGifHint': undefined;
+  'EditorUnmutedHint': undefined;
+  'EditorSendAsGif': undefined;
+  'VideoQualityGifHint': undefined;
+  'AttachmentGifSeparateHint': undefined;
+  'EditorAdjustments': undefined;
+  'Enhance': undefined;
+  'Exposure': undefined;
+  'Contrast': undefined;
+  'Saturation': undefined;
+  'Warmth': undefined;
+  'Fade': undefined;
+  'Highlights': undefined;
+  'Shadows': undefined;
+  'Vignette': undefined;
+  'Grain': undefined;
+  'Sharpen': undefined;
+  'Tint': undefined;
+  'TintShadows': undefined;
+  'TintHighlights': undefined;
+  'EditorTintNone': undefined;
+  'Curves': undefined;
+  'CurvesAll': undefined;
+  'CurvesRed': undefined;
+  'CurvesGreen': undefined;
+  'CurvesBlue': undefined;
+  'EditorShowOriginal': undefined;
+  'DiscardChanges': undefined;
+  'PhotoEditorDiscardAlert': undefined;
+  'Discard': undefined;
+  'EditorTextHint': undefined;
+  'EditorFont': undefined;
+  'EditorTextPlain': undefined;
+  'EditorTextFilled': undefined;
+  'EditorTextSemi': undefined;
+  'EditorTextAlignLeft': undefined;
+  'EditorTextAlignCenter': undefined;
+  'EditorTextAlignRight': undefined;
+  'EditorDeleteLayer': undefined;
+  'VideoEditingUnsupportedCover': undefined;
+  'VideoEditingUnsupportedMute': undefined;
+  'VideoEditingUnsupportedCoverMute': undefined;
   'ConfirmBuyGiftForGramDescription': undefined;
   'TitleGiftLocked': undefined;
   'QuickPreview': undefined;
@@ -5034,6 +5095,15 @@ export interface LangPairWithVariables<V = LangVariable> {
   'GiftAuctionForSaleOnTelegram': {
     'count': V;
   };
+  'VideoQualityInfo': {
+    'type': V;
+    'size': V;
+    'width': V;
+    'height': V;
+  };
+  'EditorMutedGifTooLarge': {
+    'size': V;
+  };
   'GiftLockedMessage': {
     'relativeDate': V;
   };
@@ -7664,6 +7734,16 @@ export interface LangKeyGroups {
     keys:
       | 'PriceChangedText';
     variables: 'newAmount' | 'originalAmount';
+  };
+  'height,size,type,width': {
+    keys:
+      | 'VideoQualityInfo';
+    variables: 'height' | 'size' | 'type' | 'width';
+  };
+  'size': {
+    keys:
+      | 'EditorMutedGifTooLarge';
+    variables: 'size';
   };
   'relativeDate': {
     keys:

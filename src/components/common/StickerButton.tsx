@@ -45,6 +45,7 @@ type OwnProps<T> = {
   shouldIgnorePremium?: boolean;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
+  withInstantThumb?: boolean;
   forcePlayback?: boolean;
   isEffectEmoji?: boolean;
   noShowPremium?: boolean;
@@ -84,6 +85,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   noShowPremium,
   sharedCanvasRef,
   withTranslucentThumb,
+  withInstantThumb,
   forcePlayback,
   isEffectEmoji,
   noIcons,
@@ -305,7 +307,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           customColor={customColor}
           forceAlways={forcePlayback}
         />
-      ) : (isIntersecting && sticker.thumbnail?.dataUri && (
+      ) : ((withInstantThumb || isIntersecting) && sticker.thumbnail?.dataUri && (
         <img
           src={sticker.thumbnail.dataUri}
           className="sticker-media"

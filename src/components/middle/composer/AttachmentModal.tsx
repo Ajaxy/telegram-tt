@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
+import { memo, type StateHookSetter, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -19,7 +19,7 @@ import {
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getAttachmentMediaType } from '../../../global/helpers';
 import {
-  selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectTabState,
+  selectCanSetVideoCover, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectTabState,
 } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { selectLanguageCode } from '../../../global/selectors/settings';
@@ -30,8 +30,12 @@ import { validateFiles } from '../../../util/files';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { removeAllSelections } from '../../../util/selection';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import { getAttachedStickers } from '../../ui/mediaEditor/editDocument';
+import { checkCanEncodeVideo } from '../../ui/mediaEditor/export/videoCapabilities';
+import { fetchVideoProbe } from '../../ui/mediaEditor/export/videoProbe';
+import { getGifLevel, getOutputSize } from '../../ui/mediaEditor/export/videoQuality';
 import { buildRichMessageFromFormatted, getRichInputAsFormatted } from '../../ui/textInput/richText';
-import buildAttachment from './helpers/buildAttachment';
+import buildAttachment, { applyVideoEdit } from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 import { getRichMessageText } from './helpers/richEditorComposer';
 
@@ -39,6 +43,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -46,7 +51,7 @@ import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
-import MediaEditor from '../../ui/mediaEditor/MediaEditor';
+import MediaEditor, { type MediaEditorResult } from '../../ui/mediaEditor/MediaEditor';
 import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
 import AttachmentModalItem from './AttachmentModalItem';
@@ -73,10 +78,11 @@ export type OwnProps = {
   forceDarkTheme?: boolean;
   canScheduleUntilOnline?: boolean;
   canSchedule?: boolean;
+  canSendGifs?: boolean;
   paidMessagesStars?: number;
   onSend: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
-  onAttachmentsUpdate: (attachments: ApiAttachment[]) => void;
+  onAttachmentsUpdate: StateHookSetter<ApiAttachment[]>;
   onClear: NoneToVoidFunction;
   onSendSilent: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onSendScheduled: (
@@ -99,11 +105,14 @@ type StateProps = {
   attachmentSettings: GlobalState['attachmentSettings'];
   shouldSaveAttachmentsCompression?: boolean;
   shouldOpenMessageMediaEditor?: boolean;
+  messageMediaEditorVideoTime?: number;
   aiMessageEditorPendingResult?: TabState['aiMessageEditorPendingResult'];
   isCurrentUserPremium?: boolean;
+  canSetVideoCover?: boolean;
 };
 
 const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
+const VIDEO_ENCODER_CHECK_SIZE = { width: 1920, height: 1080 };
 const DROP_LEAVE_TIMEOUT_MS = 150;
 const CLOSE_MENU_ANIMATION_DURATION = 200;
 
@@ -135,9 +144,12 @@ const AttachmentModal = ({
   forceDarkTheme,
   canScheduleUntilOnline,
   canSchedule,
+  canSendGifs,
   paidMessagesStars,
   shouldOpenMessageMediaEditor,
+  messageMediaEditorVideoTime,
   aiMessageEditorPendingResult,
+  canSetVideoCover,
   onAttachmentsUpdate,
   onSend,
   onFileAppend,
@@ -159,6 +171,7 @@ const AttachmentModal = ({
   const mainButtonRef = useRef<HTMLButtonElement>();
   const inputRef = useRef<HTMLDivElement>();
   const captionRef = useRef<HTMLDivElement>();
+  const attachmentsRef = useRef<HTMLDivElement>();
 
   const hideTimeoutRef = useRef<number>();
   const prevAttachments = usePreviousDeprecated(attachments);
@@ -173,6 +186,8 @@ const AttachmentModal = ({
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [editingAttachmentIndex, setEditingAttachmentIndex] = useState<number | undefined>(undefined);
+  const [hasEditorGhost, setHasEditorGhost] = useState<boolean | undefined>();
+  const [editorVideoTime, setEditorVideoTime] = useState<number | undefined>();
   // `true` when the modal was opened straight into the editor (from the Media Viewer / reply), so the
   // attachment only exists to be edited — cancelling the editor should dismiss the whole modal.
   const wasOpenedAsEditorRef = useRef(false);
@@ -180,20 +195,58 @@ const AttachmentModal = ({
   const richText = useMemo(() => getRichMessageText(richValue), [richValue]);
   const editingAttachment = editingAttachmentIndex !== undefined
     ? attachments[editingAttachmentIndex] : undefined;
+  const editorSource = useMemo(() => (editingAttachment ? {
+    blobUrl: editingAttachment.sourceBlobUrl ?? editingAttachment.blobUrl,
+    mimeType: editingAttachment.mimeType,
+    filename: editingAttachment.filename,
+  } : undefined), [editingAttachment]);
+  const editorSourceSizeHint = editingAttachment && !editingAttachment.editState
+    ? editingAttachment.sourceDimensions ?? editingAttachment.quick : undefined;
 
   useEffect(() => {
     if (shouldOpenMessageMediaEditor && attachments.length) {
       setEditingAttachmentIndex(0);
+      setHasEditorGhost(undefined);
+      setEditorVideoTime(messageMediaEditorVideoTime);
       wasOpenedAsEditorRef.current = true;
       resetMessageMediaEditorRequest();
     }
-  }, [shouldOpenMessageMediaEditor, attachments.length]);
+  }, [shouldOpenMessageMediaEditor, attachments.length, messageMediaEditorVideoTime]);
 
   const shouldSendCompressed = attachmentSettings.shouldCompress;
   const isSendingCompressed = Boolean(
     (shouldSendCompressed || shouldForceCompression || isInAlbum || hasGifFromPicker) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
+  const [canEncodeVideo, setCanEncodeVideo] = useState<boolean | undefined>();
+  const hasVideoAttachments = attachments.some(({ mimeType }) => SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType));
+  useEffect(() => {
+    if (!hasVideoAttachments || canEncodeVideo !== undefined) return;
+    void checkCanEncodeVideo(VIDEO_ENCODER_CHECK_SIZE).then(setCanEncodeVideo);
+  }, [hasVideoAttachments, canEncodeVideo]);
+
+  useEffect(() => {
+    if (isMobile) return;
+
+    attachments.forEach(({
+      mimeType, blobUrl, sourceBlobUrl, quick, editState,
+    }) => {
+      if (!blobUrl || !SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return;
+
+      void fetchVideoProbe(sourceBlobUrl ?? blobUrl);
+      if (quick && !editState) void checkCanEncodeVideo(getOutputSize(quick, 'transcode'));
+    });
+  }, [attachments, isMobile]);
+
+  // A picker GIF is sent by its server reference, so edits would be lost
+  const getCanEditAttachment = (attachment: ApiAttachment) => !attachment.gif && (
+    !SUPPORTED_VIDEO_CONTENT_TYPES.has(attachment.mimeType) || canEncodeVideo !== false
+    || Boolean(canSetVideoCover && isSendingCompressed)
+    || Boolean(attachment.quick && !getGifLevel(attachment.quick))
+  );
+
+  const shouldShowGifSeparateHint = shouldSendGrouped && isSendingCompressed && attachments.length > 1
+    && attachments.some(({ shouldSendAsGif }) => shouldSendAsGif);
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
   const [shouldSendInHighQuality, setShouldSendInHighQuality] = useState(
     attachmentSettings.shouldSendInHighQuality,
@@ -201,6 +254,7 @@ const AttachmentModal = ({
   const [renderingShouldSendInHighQuality, setRenderingShouldSendInHighQuality] = useState(shouldSendInHighQuality);
 
   const isOpen = Boolean(attachments.length);
+  const { observe: observeIntersection } = useIntersectionObserver({ rootRef: attachmentsRef, isDisabled: !isOpen });
   const renderingIsOpen = Boolean(renderingAttachments?.length);
   const hasPreparingAttachments = attachments.some(({ isPreparing }) => isPreparing);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
@@ -464,6 +518,8 @@ const AttachmentModal = ({
   });
 
   const handleDelete = useLastCallback((index: number) => {
+    const { sourceBlobUrl } = attachments[index];
+    if (sourceBlobUrl) URL.revokeObjectURL(sourceBlobUrl);
     onAttachmentsUpdate(attachments.filter((a, i) => i !== index));
   });
 
@@ -502,8 +558,10 @@ const AttachmentModal = ({
     }));
   });
 
-  const handleEdit = useLastCallback((index: number) => {
+  const handleEdit = useLastCallback((index: number, hasGhost?: boolean, videoTime?: number) => {
     setEditingAttachmentIndex(index);
+    setHasEditorGhost(hasGhost);
+    setEditorVideoTime(videoTime);
   });
 
   const handleCloseEditor = useLastCallback(() => {
@@ -515,25 +573,29 @@ const AttachmentModal = ({
     }
   });
 
-  const handleSaveEdit = useLastCallback(async (file: File) => {
+  const handleApplyEdit = useLastCallback(async (result: MediaEditorResult) => {
     if (editingAttachmentIndex === undefined) return;
 
     wasOpenedAsEditorRef.current = false;
-
-    const newAttachment = await buildAttachment(file.name, file, {
-      shouldSendAsFile: attachments[editingAttachmentIndex].shouldSendAsFile,
-      shouldSendAsSpoiler: attachments[editingAttachmentIndex].shouldSendAsSpoiler,
-      shouldSendInHighQuality: attachments[editingAttachmentIndex].shouldSendInHighQuality,
-    });
-
-    onAttachmentsUpdate(attachments.map((attachment, i) => {
-      if (i === editingAttachmentIndex) {
-        return newAttachment;
-      }
-      return attachment;
-    }));
-
     setEditingAttachmentIndex(undefined);
+
+    const editedAttachment = attachments[editingAttachmentIndex];
+    const newAttachment = result.kind === 'photo'
+      ? await buildAttachment(result.file.name, result.file, {
+        shouldSendAsFile: editedAttachment.shouldSendAsFile,
+        shouldSendAsSpoiler: editedAttachment.shouldSendAsSpoiler,
+        shouldSendInHighQuality: editedAttachment.shouldSendInHighQuality,
+        sourceBlobUrl: editedAttachment.sourceBlobUrl ?? editedAttachment.blobUrl,
+        editState: result.editState,
+        videoProcessing: result.gifProcessing,
+        shouldSendAsGif: result.gifProcessing ? true : undefined,
+        attachedStickers: getAttachedStickers(result.editState.document),
+      })
+      : applyVideoEdit(editedAttachment, result);
+
+    onAttachmentsUpdate((currentAttachments) => currentAttachments.map((attachment) => (
+      attachment.uniqueId === editedAttachment.uniqueId ? newAttachment : attachment
+    )));
   });
 
   const handleResize = useLastCallback(() => {
@@ -596,10 +658,16 @@ const AttachmentModal = ({
       };
     }
     return {
-      areAllPhotos: renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
-      areAllVideos: renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType)),
+      areAllPhotos: renderingAttachments.every((a) => (
+        SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType) && !a.shouldSendAsGif
+      )),
+      areAllVideos: renderingAttachments.every((a) => (
+        SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType) || a.shouldSendAsGif
+      )),
       areAllAudios: renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType)),
-      hasAnyPhoto: renderingAttachments.some((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType)),
+      hasAnyPhoto: renderingAttachments.some((a) => (
+        SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType) && !a.shouldSendAsGif
+      )),
     };
   }, [renderingAttachments, isQuickGallery]);
 
@@ -802,6 +870,7 @@ const AttachmentModal = ({
           <rect className={styles.dropOutline} x="0" y="0" width="100%" height="100%" rx="8" />
         </svg>
         <div
+          ref={attachmentsRef}
           className={buildClassName(
             styles.attachments,
             'custom-scroll',
@@ -814,14 +883,19 @@ const AttachmentModal = ({
               shouldDisplayCompressed={isSendingCompressed}
               shouldDisplayGrouped={shouldSendGrouped}
               isSingle={renderingAttachments.length === 1}
+              isEditing={hasEditorGhost && i === editingAttachmentIndex}
               index={i}
               key={attachment.uniqueId}
+              observeIntersection={observeIntersection}
               onDelete={handleDelete}
               onToggleSpoiler={handleToggleSpoiler}
-              onEdit={!isMobile ? handleEdit : undefined}
+              onEdit={!isMobile && getCanEditAttachment(attachment) ? handleEdit : undefined}
             />
           ))}
         </div>
+        {shouldShowGifSeparateHint && (
+          <div className={styles.gifSeparateHint}>{lang('AttachmentGifSeparateHint')}</div>
+        )}
         <div
           ref={captionRef}
           className={buildClassName(
@@ -907,11 +981,18 @@ const AttachmentModal = ({
       </div>
       <MediaEditor
         isOpen={Boolean(editingAttachment)}
-        imageUrl={editingAttachment?.blobUrl}
-        mimeType={editingAttachment?.mimeType}
-        filename={editingAttachment?.filename}
+        source={editorSource}
+        sourceSizeHint={editorSourceSizeHint}
+        hasOriginGhost={hasEditorGhost}
+        initialVideoTime={editorVideoTime}
+        initialEditState={editingAttachment?.editState}
+        initialQualityLevel={editingAttachment?.videoQualityLevel}
+        canSetCover={canSetVideoCover && isSendingCompressed && !editingAttachment?.shouldSendAsFile}
+        canSendGifs={canSendGifs && isSendingCompressed && !isInAlbum && !editingAttachment?.shouldSendAsFile}
+        isAsFile={!isSendingCompressed}
+        chatId={chatId}
         onClose={handleCloseEditor}
-        onSave={handleSaveEdit}
+        onApply={handleApplyEdit}
       />
     </Modal>
   );
@@ -950,8 +1031,11 @@ export default memo(withGlobal<OwnProps>(
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       attachmentSettings,
       shouldSaveAttachmentsCompression,
-      shouldOpenMessageMediaEditor: Boolean(messageMediaEditorRequest),
+      shouldOpenMessageMediaEditor: messageMediaEditorRequest?.chatId === chatId,
+      messageMediaEditorVideoTime: messageMediaEditorRequest?.chatId === chatId
+        ? messageMediaEditorRequest.videoTime : undefined,
       aiMessageEditorPendingResult,
+      canSetVideoCover: selectCanSetVideoCover(global, chatId),
     };
   },
 )(AttachmentModal));

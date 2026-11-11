@@ -47,8 +47,10 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
   TON_CURRENCY_CODE,
 } from '../../../config';
+import { revokeAttachmentUrls } from '../../../util/attachments';
 import { ensureProtocol } from '../../../util/browser/url';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
+import buildUploadingMedia from '../../../util/buildUploadingMedia';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -68,6 +70,7 @@ import { getTranslationFn, type RegularLangFnParameters } from '../../../util/lo
 import { formatStarsAsText } from '../../../util/localization/format';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
+import { cancelVideoAttachmentProcessing, processVideoAttachment } from '../../../util/videoProcessingQueue';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
   getIsSavedDialog,
@@ -208,6 +211,7 @@ type SendEphemeralMessagesParams = {
   sticker?: ApiSticker;
   gif?: ApiVideo;
   topMsgId?: number;
+  tabId?: number;
 };
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
@@ -218,6 +222,9 @@ const TTL_CLEANUP_MAX_DELAY = 24 * 60 * 60 * SECOND_IN_MS;
 const TTL_CLEANUP_DELAY_BUFFER = SECOND_IN_MS;
 
 const uploadProgressCallbacks = new Map<MessageKey, ApiOnProgress>();
+const processedVideoMessageKeys = new Set<MessageKey>();
+const VIDEO_PROCESSING_FAILED_ERROR = 'VIDEO_PROCESSING_FAILED';
+const VIDEO_PROCESSING_PROGRESS_SHARE = 0.33;
 
 const ttlCleanupTimersByChatId = new Map<string, { timer: number; expiresAt: number }>();
 const audioForwardTokens = new Map<number, symbol>();
@@ -568,6 +575,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
       sticker: payload.sticker,
       gif: payload.gif,
       topMsgId: threadId !== MAIN_THREAD_ID ? Number(threadId) : undefined,
+      tabId,
     });
     actions.resetDraftReplyInfo({ tabId });
     actions.clearWebPagePreview({ tabId });
@@ -593,6 +601,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
       sticker: payload.sticker,
       gif: payload.gif,
       topMsgId: replyMessage.ephemeralTopMsgId,
+      tabId,
     });
     actions.resetDraftReplyInfo({ tabId });
     actions.clearWebPagePreview({ tabId });
@@ -718,6 +727,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const isSingle = (!payload.attachments || payload.attachments.length <= 1) && !isForwarding;
   const isGrouped = !isSingle && payload.shouldGroupMessages;
   const localMessages: SendMessageParams[] = [];
+  const queuedSends: SendMessageParams[] = [];
 
   if (isSingle) {
     const { attachments, ...restParams } = params;
@@ -726,37 +736,36 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
       attachment: attachments ? attachments[0] : undefined,
       wasDrafted: Boolean(draft),
     };
-    await sendMessageOrReduceLocal(global, sendParams, localMessages);
+    queuedSends.push(sendParams);
   } else if (isGrouped) {
     const {
       text, entities, attachments, ...commonParams
     } = params;
     const byType = splitAttachmentsByType(attachments!);
+    // The caption goes to the leading group if it is media, otherwise to the last group:
+    // on the first item of a media group and on the last item of other groups
+    const captionGroupIndex = getIsMediaGroup(byType[0]) ? 0 : byType.length - 1;
 
-    let hasSentCaption = false;
     for (let groupIndex = 0; groupIndex < byType.length; groupIndex++) {
       const group = byType[groupIndex];
       const groupedAttachments = split(group, MAX_MEDIA_FILES_FOR_ALBUM);
       for (let i = 0; i < groupedAttachments.length; i++) {
         const groupedId = `${Date.now()}${groupIndex}${i}`;
+        const isCaptionGroup = groupIndex === captionGroupIndex;
 
-        const isFirst = i === 0 && groupIndex === 0;
-        const isLast = i === groupedAttachments.length - 1 && groupIndex === byType.length - 1;
-
-        if (group[0].quick && !group[0].shouldSendAsFile) {
+        if (getIsMediaGroup(group)) {
           const [firstAttachment, ...restAttachments] = groupedAttachments[i];
+          const hasCaption = isCaptionGroup && i === 0;
 
           let sendParams: SendMessageParams = {
             ...commonParams,
-            text: isFirst && !hasSentCaption ? text : undefined,
-            entities: isFirst && !hasSentCaption ? entities : undefined,
+            text: hasCaption ? text : undefined,
+            entities: hasCaption ? entities : undefined,
             attachment: firstAttachment,
             groupedId: restAttachments.length > 0 ? groupedId : undefined,
             wasDrafted: Boolean(draft),
           };
-          await sendMessageOrReduceLocal(global, sendParams, localMessages);
-
-          hasSentCaption = true;
+          queuedSends.push(sendParams);
 
           for (const attachment of restAttachments) {
             sendParams = {
@@ -764,7 +773,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
               attachment,
               groupedId,
             };
-            await sendMessageOrReduceLocal(global, sendParams, localMessages);
+            queuedSends.push(sendParams);
           }
         } else {
           const firstAttachments = groupedAttachments[i].slice(0, -1);
@@ -775,20 +784,19 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
               attachment,
               groupedId,
             };
-            await sendMessageOrReduceLocal(global, sendParams, localMessages);
+            queuedSends.push(sendParams);
           }
 
+          const hasCaption = isCaptionGroup && i === groupedAttachments.length - 1;
           const sendParams = {
             ...commonParams,
-            text: isLast && !hasSentCaption ? text : undefined,
-            entities: isLast && !hasSentCaption ? entities : undefined,
+            text: hasCaption ? text : undefined,
+            entities: hasCaption ? entities : undefined,
             attachment: lastAttachment,
             groupedId: firstAttachments.length > 0 ? groupedId : undefined,
             wasDrafted: Boolean(draft),
           };
-          await sendMessageOrReduceLocal(global, sendParams, localMessages);
-
-          hasSentCaption = true;
+          queuedSends.push(sendParams);
         }
       }
     }
@@ -806,7 +814,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
         replyInfo: replyToForFirstMessage,
         wasDrafted: Boolean(draft),
       };
-      await sendMessageOrReduceLocal(global, sendParams, localMessages);
+      queuedSends.push(sendParams);
     }
 
     if (attachments) {
@@ -815,16 +823,24 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
           ...commonParams,
           attachment,
         };
-        await sendMessageOrReduceLocal(global, sendParams, localMessages);
+        queuedSends.push(sendParams);
       }
     }
   }
+  const forwardingGlobal = global;
   if (isForwarding) {
-    const localForwards = await executeForwardMessages(global, params, tabId);
+    global = getGlobal();
+    global = updateTabState(global, { forwardMessages: {}, isShareMessageModalShown: false }, tabId);
+    setGlobal(global);
+  }
+  await sendWithVideoProcessing(global, queuedSends, localMessages, tabId);
+  if (isForwarding) {
+    const localForwards = await executeForwardMessages(forwardingGlobal, params, tabId);
     if (localForwards) {
       localMessages.push(...localForwards);
     }
   }
+  global = getGlobal();
   if (localMessages?.length) sendMessagesWithNotification(global, localMessages);
 });
 
@@ -884,18 +900,6 @@ addActionHandler('editMessage', (global, actions, payload): ActionReturnType => 
     return;
   }
 
-  let currentMessageKey: MessageKey | undefined;
-  const progressCallback = attachments ? (progress: number, messageKey: MessageKey) => {
-    if (!uploadProgressCallbacks.has(messageKey)) {
-      currentMessageKey = messageKey;
-      uploadProgressCallbacks.set(messageKey, progressCallback!);
-    }
-
-    global = getGlobal();
-    global = updateUploadByMessageKey(global, messageKey, progress);
-    setGlobal(global);
-  } : undefined;
-
   const { chatId, threadId, type: messageListType } = messageList;
   const chat = selectChat(global, chatId);
   const message = selectEditingMessage(global, chatId, threadId, messageListType);
@@ -906,23 +910,27 @@ addActionHandler('editMessage', (global, actions, payload): ActionReturnType => 
   actions.setEditingId({ messageId: undefined, tabId });
 
   (async () => {
-    await callApi('editMessage', {
+    let attachment = attachments?.[0];
+    if (attachment?.videoProcessing) {
+      setUploadProgress(getMessageKey(message), 0);
+      try {
+        attachment = await processMessageVideo(message, attachment);
+      } catch {
+        actions.showNotification({ message: { key: 'VideoProcessingFailed' }, tabId });
+        return;
+      }
+      if (!attachment) return;
+    }
+
+    await sendWithUploadProgress(global, Boolean(attachments), (progressCallback) => callApi('editMessage', {
       chat,
       message,
-      attachment: attachments ? attachments[0] : undefined,
+      attachment,
       text,
       entities: richMessage ? undefined : entities,
       richMessage,
       noWebPage: selectNoWebPage(global, chatId, threadId),
-    }, progressCallback);
-
-    if (progressCallback && currentMessageKey) {
-      global = getGlobal();
-      global = updateUploadByMessageKey(global, currentMessageKey, undefined);
-      setGlobal(global);
-
-      uploadProgressCallbacks.delete(currentMessageKey);
-    }
+    }, progressCallback), message);
   })();
 });
 
@@ -947,7 +955,8 @@ addActionHandler('editTodo', (global, actions, payload): ActionReturnType => {
 addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId } = payload;
 
-  const message = selectChatMessageOrEphemeral(global, chatId, messageId);
+  const message = selectChatMessageOrEphemeral(global, chatId, messageId)
+    ?? selectScheduledMessage(global, chatId, messageId);
   if (!message) return;
 
   if (message.isEphemeral) {
@@ -956,10 +965,11 @@ addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnTy
   }
 
   cancelMessageUpload(message);
+  cancelVideoAttachmentProcessing(getMessageKey(message));
 
   if (isMessageLocal(message)) {
     actions.apiUpdate({
-      '@type': 'deleteMessages',
+      '@type': message.isScheduled ? 'deleteScheduledMessages' : 'deleteMessages',
       ids: [messageId],
       chatId,
     });
@@ -1337,6 +1347,7 @@ addActionHandler('deleteEphemeralMessage', async (global, actions, payload): Pro
   }
 
   cancelMessageUpload(message);
+  cancelVideoAttachmentProcessing(getMessageKey(message));
   deleteEphemeralMessagesWithAnimation(global, chatId, [message.id]);
 
   if (!shouldDeleteOnServer) return;
@@ -2076,9 +2087,10 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
 });
 
 async function executeForwardMessages(global: GlobalState, sendParams: SendMessageParams, tabId: number) {
+  const { forwardMessages } = selectTabState(global, tabId);
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions, toThreadId = MAIN_THREAD_ID,
-  } = selectTabState(global, tabId).forwardMessages;
+  } = forwardMessages;
   const { messagePriceInStars, isSilent, scheduledAt, scheduleRepeatPeriod, effectId, attachments } = sendParams;
   const isForwardOnly = !sendParams.text && !sendParams.richMessage && !attachments?.length;
   const forwardEffectId = isForwardOnly ? effectId : undefined;
@@ -2171,11 +2183,13 @@ async function executeForwardMessages(global: GlobalState, sendParams: SendMessa
   }
 
   global = getGlobal();
-  global = updateTabState(global, {
-    forwardMessages: {},
-    isShareMessageModalShown: false,
-  }, tabId);
-  setGlobal(global);
+  if (selectTabState(global, tabId).forwardMessages === forwardMessages) {
+    global = updateTabState(global, {
+      forwardMessages: {},
+      isShareMessageModalShown: false,
+    }, tabId);
+    setGlobal(global);
+  }
   return localMessages;
 }
 
@@ -2463,7 +2477,7 @@ async function sendMessageOrReduceLocal<T extends GlobalState>(
   if (!sendParams.messagePriceInStars) {
     sendMessage(global, sendParams);
   } else {
-    const message = await callApi('sendMessageLocal', sendParams);
+    const message = sendParams.localMessage || await callApi('sendMessageLocal', sendParams);
     if (message) {
       localMessages.push({
         ...sendParams,
@@ -2471,6 +2485,175 @@ async function sendMessageOrReduceLocal<T extends GlobalState>(
       });
     }
   }
+}
+
+async function sendWithVideoProcessing<T extends GlobalState>(
+  global: T,
+  sends: SendMessageParams[],
+  localMessages: SendMessageParams[],
+  tabId: number,
+) {
+  if (!sends.some(({ attachment }) => attachment?.videoProcessing)) {
+    for (const sendParams of sends) {
+      await sendMessageOrReduceLocal(global, sendParams, localMessages);
+    }
+    return;
+  }
+
+  const withLocalMessages: SendMessageParams[] = [];
+  for (const sendParams of sends) {
+    const localMessage = await callApi('sendMessageLocal', sendParams);
+    if (localMessage) withLocalMessages.push({ ...sendParams, localMessage });
+  }
+
+  withLocalMessages.forEach(({ attachment, localMessage }) => {
+    if (!attachment?.videoProcessing) return;
+    setUploadProgress(getMessageKey(localMessage!), 0);
+  });
+
+  let pendingGroup: SendMessageParams[] = [];
+  // A dropped item's caption moves to the next surviving singleton or to the last item of the next album
+  let orphanSend: SendMessageParams | undefined;
+  const dropSend = (sendParams: SendMessageParams) => {
+    clearProcessedVideoProgress(getMessageKey(sendParams.localMessage!));
+    if (sendParams.text && sendParams.attachment) orphanSend = sendParams;
+  };
+  const takeOrphanCaption = (sendParams: SendMessageParams): SendMessageParams => {
+    if (!orphanSend) return sendParams;
+
+    const { text, entities, localMessage: orphanMessage } = orphanSend;
+    if (hasLocalMessage(orphanSend)) updateLocalMessageContent(orphanMessage!, omit(orphanMessage!.content, ['text']));
+    orphanSend = undefined;
+    const { localMessage } = sendParams;
+    const content = { ...localMessage!.content, text: orphanMessage!.content.text };
+    return { ...sendParams, text, entities, localMessage: updateLocalMessageContent(localMessage!, content) };
+  };
+  const flushPendingGroup = async () => {
+    const group = pendingGroup.filter((sendParams) => {
+      if (hasLocalMessage(sendParams)) return true;
+      dropSend(sendParams);
+      return false;
+    });
+    pendingGroup = [];
+
+    const lastIndex = group.length - 1;
+    if (lastIndex >= 0) group[lastIndex] = takeOrphanCaption(group[lastIndex]);
+    if (group.length === 1) group[0] = { ...group[0], groupedId: undefined };
+
+    for (const sendParams of group) {
+      await sendMessageOrReduceLocal(global, sendParams, localMessages);
+    }
+  };
+
+  for (const sendParams of withLocalMessages) {
+    if (pendingGroup.length && pendingGroup[0].groupedId !== sendParams.groupedId) {
+      await flushPendingGroup();
+    }
+
+    let prepared: SendMessageParams | undefined = hasLocalMessage(sendParams) ? sendParams : undefined;
+    if (prepared && sendParams.attachment?.videoProcessing) {
+      try {
+        prepared = await processVideoSend(sendParams);
+      } catch {
+        prepared = undefined;
+        const { chatId, id, isScheduled } = sendParams.localMessage!;
+        getActions().apiUpdate({
+          '@type': isScheduled ? 'updateScheduledMessageSendFailed' : 'updateMessageSendFailed',
+          chatId,
+          localId: id,
+          error: VIDEO_PROCESSING_FAILED_ERROR,
+        });
+        getActions().showNotification({ message: { key: 'VideoProcessingFailed' }, tabId });
+      }
+    }
+    if (!prepared || !hasLocalMessage(prepared)) {
+      dropSend(sendParams);
+      continue;
+    }
+
+    if (prepared.groupedId) {
+      pendingGroup.push(prepared);
+    } else {
+      await sendMessageOrReduceLocal(global, takeOrphanCaption(prepared), localMessages);
+    }
+  }
+
+  await flushPendingGroup();
+}
+
+function hasLocalMessage({ localMessage }: SendMessageParams) {
+  return getIsMessageAlive(localMessage!);
+}
+
+function getIsMessageAlive({ chatId, id, isScheduled }: ApiMessage) {
+  const global = getGlobal();
+  const message = isScheduled
+    ? selectScheduledMessage(global, chatId, id) : selectChatMessageOrEphemeral(global, chatId, id);
+  return Boolean(message && !message.isDeleting);
+}
+
+function clearProcessedVideoProgress(messageKey: MessageKey) {
+  processedVideoMessageKeys.delete(messageKey);
+  setUploadProgress(messageKey, undefined);
+}
+
+async function processVideoSend(sendParams: SendMessageParams) {
+  const { attachment, localMessage } = sendParams;
+  const processedAttachment = await processMessageVideo(localMessage!, attachment!);
+  if (!processedAttachment) return undefined;
+
+  return {
+    ...sendParams,
+    attachment: processedAttachment,
+    localMessage: updateLocalMessageContent(localMessage!, buildProcessedContent(localMessage!, processedAttachment)),
+  };
+}
+
+function buildProcessedContent(localMessage: ApiMessage, processedAttachment: ApiAttachment): MediaContent {
+  const { video, ...media } = buildUploadingMedia(processedAttachment);
+
+  return {
+    ...omit(localMessage.content, ['photo', 'document']),
+    ...media,
+    video: video ? { ...video, previewBlobUrl: processedAttachment.previewBlobUrl } : undefined,
+  };
+}
+
+async function processMessageVideo(message: ApiMessage, attachment: ApiAttachment) {
+  const messageKey = getMessageKey(message);
+  let processedAttachment: ApiAttachment | undefined;
+
+  try {
+    processedAttachment = await processVideoAttachment(messageKey, attachment, (progress) => (
+      setUploadProgress(messageKey, progress * VIDEO_PROCESSING_PROGRESS_SHARE)
+    ));
+    if (processedAttachment && !getIsMessageAlive(message)) {
+      revokeAttachmentUrls(processedAttachment, [attachment]);
+      processedAttachment = undefined;
+    }
+    return processedAttachment;
+  } finally {
+    if (processedAttachment) processedVideoMessageKeys.add(messageKey);
+    setUploadProgress(messageKey, processedAttachment ? VIDEO_PROCESSING_PROGRESS_SHARE : undefined);
+  }
+}
+
+function updateLocalMessageContent(localMessage: ApiMessage, content: MediaContent): ApiMessage {
+  getActions().apiUpdate({
+    '@type': localMessage.isScheduled ? 'updateScheduledMessage' : 'updateMessage',
+    chatId: localMessage.chatId,
+    id: localMessage.id,
+    message: { content },
+    isFull: false,
+  });
+
+  return { ...localMessage, content };
+}
+
+function setUploadProgress(messageKey: MessageKey, progress: number | undefined) {
+  let global = getGlobal();
+  global = updateUploadByMessageKey(global, messageKey, progress);
+  setGlobal(global);
 }
 
 async function sendMessage<T extends GlobalState>(global: T, params: SendMessageParams) {
@@ -2481,7 +2664,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: SendMessage
 
   await sendWithUploadProgress(global, Boolean(params.attachment), (progressCallback) => (
     callApi('sendMessage', params, progressCallback)
-  ));
+  ), params.localMessage);
 }
 
 export async function sendEphemeralMessages<T extends GlobalState>(
@@ -2497,6 +2680,7 @@ export async function sendEphemeralMessages<T extends GlobalState>(
     sticker,
     gif,
     topMsgId,
+    tabId,
   }: SendEphemeralMessagesParams,
 ) {
   if (sticker || gif || !attachments?.length) {
@@ -2514,51 +2698,109 @@ export async function sendEphemeralMessages<T extends GlobalState>(
     return;
   }
 
-  for (const [attachmentIndex, attachment] of attachments.entries()) {
-    const isFirst = attachmentIndex === 0;
+  let hasSentCaption = false;
+  let captionPlaceholder: ApiMessage | undefined;
+  for (const attachment of attachments) {
+    if (captionPlaceholder) {
+      removeEphemeralCaption(captionPlaceholder);
+      captionPlaceholder = undefined;
+    }
+
+    const sendParams = {
+      chat,
+      receiver,
+      text: hasSentCaption ? undefined : text,
+      entities: hasSentCaption ? undefined : entities,
+      richMessage: hasSentCaption ? undefined : richMessage,
+      replyInfo,
+      attachment,
+      topMsgId,
+    };
+    let localMessage: ApiMessage | undefined;
+    let preparedAttachment: ApiAttachment | undefined = attachment;
+    if (attachment.videoProcessing) {
+      localMessage = await callApi('sendEphemeralMessageLocal', sendParams);
+      if (!localMessage) continue;
+
+      // A failed or cancelled item keeps its placeholder, and the caption moves to the next item
+      preparedAttachment = await processEphemeralVideo(localMessage, attachment, tabId);
+      if (!preparedAttachment) {
+        if (sendParams.text || sendParams.richMessage) captionPlaceholder = localMessage;
+        continue;
+      }
+
+      localMessage = { ...localMessage, content: buildProcessedContent(localMessage, preparedAttachment) };
+      getActions().apiUpdate({ '@type': 'updateEphemeralMessage', message: localMessage });
+    }
+
     const result = await sendWithUploadProgress(global, true, (progressCallback) => (
-      callApi('sendEphemeralMessage', {
-        chat,
-        receiver,
-        text: isFirst ? text : undefined,
-        entities: isFirst ? entities : undefined,
-        richMessage: isFirst ? richMessage : undefined,
-        replyInfo,
-        attachment,
-        topMsgId,
-      }, progressCallback)
-    ));
+      callApi('sendEphemeralMessage', { ...sendParams, attachment: preparedAttachment, localMessage }, progressCallback)
+    ), localMessage);
     if (!result) return;
+    hasSentCaption = true;
   }
+}
+
+async function processEphemeralVideo(localMessage: ApiMessage, attachment: ApiAttachment, tabId?: number) {
+  setUploadProgress(getMessageKey(localMessage), 0);
+
+  try {
+    return await processMessageVideo(localMessage, attachment);
+  } catch {
+    getActions().apiUpdate({
+      '@type': 'updateEphemeralMessage',
+      message: { ...localMessage, sendingState: 'messageSendingStateFailed' },
+    });
+    getActions().showNotification({ message: { key: 'VideoProcessingFailed' }, tabId });
+    return undefined;
+  }
+}
+
+function removeEphemeralCaption({ chatId, id }: ApiMessage) {
+  const global = getGlobal();
+  const message = selectEphemeralMessage(global, chatId, id);
+  if (!message) return;
+
+  getActions().apiUpdate({
+    '@type': 'updateEphemeralMessage',
+    message: { ...message, content: omit(message.content, ['text', 'richMessage']) },
+  });
 }
 
 async function sendWithUploadProgress<T extends GlobalState, TResult>(
   global: T,
   hasAttachment: boolean,
   send: (progressCallback?: ApiOnProgress) => Promise<TResult>,
+  message?: ApiMessage,
 ) {
-  let currentMessageKey: MessageKey | undefined;
-  const progressCallback: ApiOnProgress | undefined = hasAttachment ? (progress, messageKey: MessageKey) => {
-    if (!uploadProgressCallbacks.has(messageKey)) {
+  if (!hasAttachment) return send();
+
+  let currentMessageKey = message && getMessageKey(message);
+  const startProgress = currentMessageKey && processedVideoMessageKeys.delete(currentMessageKey)
+    ? VIDEO_PROCESSING_PROGRESS_SHARE : 0;
+  const progressCallback: ApiOnProgress = (progress, messageKey: MessageKey) => {
+    if (!currentMessageKey) {
       currentMessageKey = messageKey;
-      uploadProgressCallbacks.set(messageKey, progressCallback!);
+      uploadProgressCallbacks.set(messageKey, progressCallback);
     }
 
     global = getGlobal();
-    global = updateUploadByMessageKey(global, messageKey, progress);
+    global = updateUploadByMessageKey(global, messageKey, startProgress + (1 - startProgress) * progress);
     setGlobal(global);
-  } : undefined;
+  };
+  if (currentMessageKey) uploadProgressCallbacks.set(currentMessageKey, progressCallback);
 
   try {
-    const result = await send(progressCallback);
-    return result;
+    return await send(progressCallback);
   } finally {
-    if (progressCallback && currentMessageKey) {
+    if (currentMessageKey) {
       global = getGlobal();
       global = updateUploadByMessageKey(global, currentMessageKey, undefined);
       setGlobal(global);
 
-      uploadProgressCallbacks.delete(currentMessageKey);
+      if (uploadProgressCallbacks.get(currentMessageKey) === progressCallback) {
+        uploadProgressCallbacks.delete(currentMessageKey);
+      }
     }
   }
 }
@@ -2570,11 +2812,17 @@ function cancelMessageUpload(message: ApiMessage) {
 
 async function sendMessagesWithNotification<T extends GlobalState>(
   global: T,
-  sendParams: SendMessageParams[],
+  allSendParams: SendMessageParams[],
 ) {
-  const chat = sendParams[0]?.chat;
-  if (!chat || !sendParams.length) return;
+  const chat = allSendParams[0]?.chat;
+  if (!chat || !allSendParams.length) return;
   const starsForOneMessage = await getPeerStarsForMessage(global, chat.id);
+  const sendParams = allSendParams.filter((params) => {
+    if (!params.localMessage || hasLocalMessage(params)) return true;
+    clearProcessedVideoProgress(getMessageKey(params.localMessage));
+    return false;
+  });
+  if (!sendParams.length) return;
   if (!starsForOneMessage) {
     getActions().sendMessages({ sendParams });
     return;
@@ -4066,9 +4314,10 @@ function splitAttachmentsByType(attachments: ApiAttachment[]) {
       return acc;
     }
 
+    // GIFs are never grouped, so each one stays a separate message in its place
     const type = getAttachmentType(attachment);
     const previousType = getAttachmentType(arr[index - 1]);
-    if (type === previousType) {
+    if (type === previousType && type !== 'gif') {
       acc[acc.length - 1].push(attachment);
     } else {
       acc.push([attachment]);
@@ -4078,13 +4327,17 @@ function splitAttachmentsByType(attachments: ApiAttachment[]) {
   }, [] as ApiAttachment[][]);
 }
 
+function getIsMediaGroup(group: ApiAttachment[]) {
+  return Boolean(group[0].quick && !group[0].shouldSendAsFile);
+}
+
 function getAttachmentType(attachment: ApiAttachment) {
   const {
     shouldSendAsFile, mimeType,
   } = attachment;
   if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) return 'audio';
   if (shouldSendAsFile) return 'file';
-  if (mimeType === GIF_MIME_TYPE) return 'gif';
+  if (mimeType === GIF_MIME_TYPE || attachment.shouldSendAsGif || attachment.gif) return 'gif';
   if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType) || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return 'media';
   if (attachment.voice) return 'voice';
   return 'file';

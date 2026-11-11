@@ -1,9 +1,10 @@
 import { memo } from '@teact';
 
-import getPointerPosition from '../../../util/events/getPointerPosition';
-import { clamp } from '../../../util/math';
+import getPointerPosition from '../../../../util/events/getPointerPosition';
+import { clamp } from '../../../../util/math';
 
-import useLastCallback from '../../../hooks/useLastCallback';
+import useLastCallback from '../../../../hooks/useLastCallback';
+import useWindow from '../../../../hooks/useWindow';
 
 import styles from './RotationSlider.module.scss';
 
@@ -19,10 +20,13 @@ const LABEL_INTERVAL = 15;
 const PIXELS_PER_DEGREE = 5;
 
 function RotationSlider({ value, onChange, onChangeEnd }: OwnProps) {
+  const renderingWindow = useWindow();
+
   const handlePointerDown = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const { x: startX } = getPointerPosition(e);
     const startValue = value;
+    const targetDocument = renderingWindow.document;
 
     const handleMove = (ev: MouseEvent | TouchEvent) => {
       ev.preventDefault();
@@ -33,17 +37,19 @@ function RotationSlider({ value, onChange, onChangeEnd }: OwnProps) {
     };
 
     const handleUp = () => {
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('touchmove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
-      document.removeEventListener('touchend', handleUp);
+      targetDocument.removeEventListener('mousemove', handleMove);
+      targetDocument.removeEventListener('touchmove', handleMove);
+      targetDocument.removeEventListener('mouseup', handleUp);
+      targetDocument.removeEventListener('touchend', handleUp);
+      targetDocument.removeEventListener('touchcancel', handleUp);
       onChangeEnd?.();
     };
 
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('touchmove', handleMove, { passive: false });
-    document.addEventListener('mouseup', handleUp);
-    document.addEventListener('touchend', handleUp);
+    targetDocument.addEventListener('mousemove', handleMove);
+    targetDocument.addEventListener('touchmove', handleMove, { passive: false });
+    targetDocument.addEventListener('mouseup', handleUp);
+    targetDocument.addEventListener('touchend', handleUp);
+    targetDocument.addEventListener('touchcancel', handleUp);
   });
 
   const nearestLabel = Math.round(value / LABEL_INTERVAL) * LABEL_INTERVAL;

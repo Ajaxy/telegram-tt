@@ -49,6 +49,11 @@ export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: Medi
         addDocumentToLocalDb(doc);
       }
     }
+
+    if (media.videoCover) {
+      const photo = addMessageRepairInfo(media.videoCover, context);
+      addPhotoToLocalDb(photo);
+    }
   }
 
   if (media instanceof GramJs.MessageMediaGame) {

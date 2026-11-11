@@ -257,6 +257,7 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
 export function buildVideoFromDocument(document: GramJs.Document, altDocuments?: GramJs.TypeDocument[], params?: {
   isSpoiler?: boolean;
   timestamp?: number;
+  cover?: GramJs.TypePhoto;
 }): ApiVideo | undefined {
   return buildApiVideoFromDocument(document, altDocuments, params);
 }
@@ -277,7 +278,7 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   return buildVideoFromDocument(
     media.document,
     media.altDocuments,
-    { isSpoiler: media.spoiler, timestamp: media.videoTimestamp },
+    { isSpoiler: media.spoiler, timestamp: media.videoTimestamp, cover: media.videoCover },
   );
 }
 
@@ -793,7 +794,9 @@ export function buildWebPage(webPage: GramJs.TypeWebPage): ApiWebPage | undefine
       id, photo, document, attributes, cachedPage,
     } = webPage;
 
-    const video = document instanceof GramJs.Document ? buildVideoFromDocument(document) : undefined;
+    const video = document instanceof GramJs.Document
+      ? buildVideoFromDocument(document, undefined, { cover: webPage.videoCoverPhoto ? photo : undefined })
+      : undefined;
     const audio = document instanceof GramJs.Document ? buildAudioFromDocument(document) : undefined;
 
     let story: ApiWebPageStoryData | undefined;

@@ -182,6 +182,21 @@ export const VIDEO_RECORDING_MIME_TYPE = 'video/mp4;codecs=avc1.42E01E,mp4a.40.2
 export const ROUND_VIDEO_BITRATE = 1_200_000; // bps
 export const ROUND_AUDIO_BITRATE = 64_000; // bps
 
+// Video editor
+export const MAX_EDITABLE_VIDEO_SOURCE_SIZE = 1000 * 1024 * 1024;
+export const MAX_EDITABLE_VIDEO_PIXELS = 4096 * 4096;
+export const MAX_EDITABLE_VIDEO_OUTPUT_SIZE = 1024 * 1024 * 1024;
+export const MIN_VIDEO_TRIM_DURATION = 1; // s
+export const MIN_TRIMMABLE_VIDEO_DURATION = 1.5; // s
+export const VIDEO_TIME_PRECISION = 0.001; // s
+export const VIDEO_THUMB_MAX_SIDE = 320; // px
+export const VIDEO_COVER_MAX_SIDE = 1280; // px
+export const VIDEO_COVER_JPEG_QUALITY = 0.87;
+export const VIDEO_MAX_FRAME_RATE = 60;
+export const VIDEO_LOW_LEVEL_MAX_FRAME_RATE = 30;
+export const VIDEO_GIF_LEVEL = 720;
+export const VIDEO_GIF_MAX_SOURCE_SIZE = 10 * 1024 * 1024;
+
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 export const EDITABLE_STORY_INPUT_ID = 'editable-story-input-text';

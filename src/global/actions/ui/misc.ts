@@ -542,6 +542,16 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
   };
 });
 
+addActionHandler('updateMediaEditorSettings', (global, actions, payload): ActionReturnType => {
+  return {
+    ...global,
+    mediaEditorSettings: {
+      ...global.mediaEditorSettings,
+      ...payload,
+    },
+  };
+});
+
 addActionHandler('updateShouldSaveAttachmentsCompression', (global, actions, payload): ActionReturnType => {
   const { shouldSave, tabId = getCurrentTabId() } = payload;
 
@@ -1039,7 +1049,9 @@ addActionHandler('openCocoonModal', (global, actions, payload): ActionReturnType
 addTabStateResetterAction('closeCocoonModal', 'isCocoonModalOpen');
 
 addActionHandler('requestMessageMediaEditor', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  const {
+    chatId, messageId, videoTime, tabId = getCurrentTabId(),
+  } = payload;
 
   const message = selectChatMessage(global, chatId, messageId);
   if (!message || !canEditMediaInEditor(message)) return;
@@ -1048,6 +1060,7 @@ addActionHandler('requestMessageMediaEditor', (global, actions, payload): Action
     messageMediaEditorRequest: {
       chatId: message.chatId,
       messageId: message.id,
+      videoTime,
     },
   }, tabId);
 });

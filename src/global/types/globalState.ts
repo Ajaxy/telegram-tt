@@ -93,6 +93,7 @@ import type {
   TopicsInfo,
   WebPageMediaSize,
 } from '../../types';
+import type { MediaEditorSettings } from '../../types/mediaEditor';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { SharedState } from './sharedState';
 import type { TabState } from './tabState';
@@ -164,6 +165,8 @@ export type GlobalState = {
     webPageMediaSize?: WebPageMediaSize;
     shouldSendInHighQuality?: boolean;
   };
+
+  mediaEditorSettings?: MediaEditorSettings;
 
   attachMenu: {
     hash?: string;

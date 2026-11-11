@@ -711,7 +711,8 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
   const hasMessageEditRight = isOwn || (isChannel && getHasAdminRight(chat, 'editMessages'));
 
-  const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
+  const isUploading = selectUploadProgress(global, message) !== undefined;
+  const canEdit = !isLocal && !isAction && !isUploading && isMessageEditable && hasMessageEditRight;
 
   const hasSticker = Boolean(message.content.sticker);
   const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);

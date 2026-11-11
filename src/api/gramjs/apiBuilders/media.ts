@@ -20,6 +20,7 @@ import { generateWaveform } from '../../../util/generateWaveform';
 import { pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import {
+  buildApiPhoto,
   buildApiPhotoPreviewSizes,
   buildApiPhotoSize,
   buildApiThumbnailFromPath,
@@ -43,6 +44,7 @@ export function buildApiPageDocument(document: GramJs.TypeDocument): ApiPageDocu
 export function buildApiVideoFromDocument(document: GramJs.Document, altDocuments?: GramJs.TypeDocument[], params?: {
   isSpoiler?: boolean;
   timestamp?: number;
+  cover?: GramJs.TypePhoto;
 }): ApiVideo | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
@@ -50,7 +52,7 @@ export function buildApiVideoFromDocument(document: GramJs.Document, altDocument
 
   const altVideos = altDocuments && buildAltVideosFromDocuments(altDocuments);
 
-  const { isSpoiler, timestamp } = params || {};
+  const { isSpoiler, timestamp, cover } = params || {};
 
   const {
     id, mimeType, thumbs, size, videoThumbs, attributes,
@@ -106,6 +108,7 @@ export function buildApiVideoFromDocument(document: GramJs.Document, altDocument
     noSound: nosound,
     altVideos,
     storyboardInfo,
+    cover: cover instanceof GramJs.Photo ? buildApiPhoto(cover) : undefined,
   };
 }
 

@@ -1,5 +1,6 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
+import type { MediaEditState, VideoProcessingParams, VideoQualityLevel } from '../../types/mediaEditor';
 import type { AdvancedLangFnParameters, RegularLangFnParameters } from '../../util/localization';
 import type {
   ApiContact,
@@ -8,6 +9,7 @@ import type {
   ApiMessageEntity,
   ApiPhoto,
   ApiReaction,
+  ApiSticker,
   ApiVideo,
 } from './messages';
 import type { ApiPremiumSection } from './payments';
@@ -93,6 +95,18 @@ export interface ApiAttachment {
   ttlSeconds?: number;
   isRoundVideo?: boolean;
   shouldSendInHighQuality?: boolean;
+  editState?: MediaEditState;
+  videoProcessing?: VideoProcessingParams;
+  videoQualityLevel?: VideoQualityLevel;
+  shouldSendAsGif?: true;
+  attachedStickers?: ApiSticker[];
+  isFromMessageMedia?: true;
+  sourceBlobUrl?: string;
+  videoCover?: {
+    blobUrl: string;
+    width: number;
+    height: number;
+  };
 
   gif?: ApiVideo;
 }

@@ -61,6 +61,12 @@ export function selectIsChatWithSelf<T extends GlobalState>(global: T, chatId: s
   return chatId === global.currentUserId;
 }
 
+export function selectCanSetVideoCover<T extends GlobalState>(global: T, chatId: string) {
+  const chat = selectChat(global, chatId);
+  return selectIsChatWithSelf(global, chatId) || Boolean(chat && isChatChannel(chat))
+    || Boolean(selectIsChatWithBot(global, chatId));
+}
+
 export function selectIsChatWithBot<T extends GlobalState>(global: T, chatId: string) {
   const user = selectUser(global, chatId);
   return user && isUserBot(user);

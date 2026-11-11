@@ -7,9 +7,12 @@
   margin-bottom: 0.25rem;
   padding-inline: 0.25rem;
 
+  outline: none;
+
   transition: opacity 0.15s ease-in-out;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     opacity: 0.85;
   }
 }

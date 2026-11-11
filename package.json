@@ -134,6 +134,7 @@
     "idb-keyval": "^6.3.0",
     "lovely-chart": "^2.0.6",
     "lowlight": "^3.3.0",
+    "mediabunny": "1.62.0",
     "music-metadata": "^12.1.1",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a94120baad5ac60ac060c2ecd032b6107b",
     "qr-code-styling": "^1.9.2",

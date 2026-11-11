@@ -1,0 +1,99 @@
+@layer ui.input {
+  .root {
+    --thumb-size: 1.125rem;
+    --track-height: 0.375rem;
+    --slider-track-color: var(--ui-border-color, var(--color-borders-input));
+    --slider-accent-color: var(--ui-accent-color, var(--color-primary));
+
+    position: relative;
+    width: 100%;
+    height: var(--thumb-size);
+  }
+
+  .input {
+    cursor: var(--custom-cursor, pointer);
+
+    position: absolute;
+    z-index: 1;
+    inset: -0.5rem 0;
+
+    width: 100%;
+    height: calc(100% + 1rem);
+    margin: 0;
+
+    appearance: none;
+    opacity: 0;
+
+    &::-webkit-slider-thumb {
+      width: var(--thumb-size);
+      height: var(--thumb-size);
+      appearance: none;
+    }
+
+    &::-moz-range-thumb {
+      width: var(--thumb-size);
+      height: var(--thumb-size);
+      border: none;
+    }
+  }
+
+  .track {
+    position: absolute;
+    inset-inline: calc(var(--thumb-size) / 2);
+    top: calc(50% - var(--track-height) / 2);
+
+    height: var(--track-height);
+    border-radius: 0.25rem;
+
+    background-color: var(--slider-track-color);
+  }
+
+  .fill {
+    position: absolute;
+    inset-inline-start: calc(var(--fill-start) * 100%);
+    top: 0;
+
+    width: calc(var(--fill-length) * 100%);
+    height: 100%;
+    border-radius: inherit;
+
+    background-color: var(--slider-accent-color);
+  }
+
+  .thumb {
+    position: absolute;
+    inset-inline-start: calc((100% - var(--thumb-size)) * var(--value));
+    top: 0;
+
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    border: 0.125rem solid var(--slider-track-color);
+    border-radius: 50%;
+
+    background-color: var(--ui-bg-color, var(--color-background));
+
+    transition: transform 0.2s ease, border-color 0.2s ease;
+
+    :global(body.no-page-transitions) & {
+      transition: none;
+    }
+  }
+
+  .active .thumb {
+    border-color: var(--slider-accent-color);
+  }
+
+  .root:hover .thumb,
+  .input:focus-visible ~ .thumb {
+    transform: scale(1.15);
+  }
+
+  .input:active ~ .thumb {
+    transform: scale(1.3);
+  }
+
+  .disabled {
+    pointer-events: none;
+    opacity: var(--input-disabled-opacity, 0.5);
+  }
+}

@@ -27,6 +27,7 @@ import {
 } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
 import selectViewableMedia from './helpers/getViewableMedia';
+import { getMediaViewerMedia } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
@@ -120,11 +121,11 @@ const MediaViewerActions = ({
   const isMessage = item?.type === 'message';
   const message = item?.type === 'message' ? item.message : undefined;
 
-  const { canSendPhotos } = getAllowedAttachmentOptions(chat, chatFullInfo);
+  const { canSendPhotos, canSendVideos } = getAllowedAttachmentOptions(chat, chatFullInfo);
   const canEditViewedMedia = Boolean(
-    message && !message.isEphemeral && !isMobile && !isProtected && !isChatProtected
+    message && !message.isEphemeral && !message.isScheduled && !isMobile && !isProtected && !isChatProtected
     && message.chatId === chat?.id
-    && canSendPhotos
+    && (message.content.video ? canSendVideos : canSendPhotos)
     && canEditMediaInEditor(message),
   );
 
@@ -162,7 +163,12 @@ const MediaViewerActions = ({
 
   const handleEditClick = useLastCallback(() => {
     if (!message) return;
-    requestMessageMediaEditor({ chatId: message.chatId, messageId: message.id });
+    const mediaEl = getMediaViewerMedia();
+    requestMessageMediaEditor({
+      chatId: message.chatId,
+      messageId: message.id,
+      videoTime: mediaEl instanceof HTMLVideoElement ? mediaEl.currentTime : undefined,
+    });
     if (!withAnimation) {
       closeMediaViewer();
       return;

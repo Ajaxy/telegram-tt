@@ -22,6 +22,7 @@ import {
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
 import { requestForcedReflow } from '../../../lib/fasterdom/fasterdom';
+import { getIsStickerSetInstalled } from '../../../global/helpers';
 import {
   selectChat,
   selectChatFullInfo,
@@ -41,6 +42,7 @@ import resetScroll from '../../../util/resetScroll';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionActiveKey';
+import useDerivedState from '../../../hooks/useDerivedState';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
@@ -78,6 +80,8 @@ type OwnProps = {
   loadAndPlay: boolean;
   canSendStickers?: boolean;
   noContextMenus?: boolean;
+  noRenderDelay?: boolean;
+  withInstantThumbs?: boolean;
   idPrefix: string;
   onStickerSelect: (
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, canUpdateStickerSetsOrder?: boolean,
@@ -121,6 +125,8 @@ const StickerPicker = ({
   isTranslucent,
   loadAndPlay,
   canSendStickers,
+  noRenderDelay,
+  withInstantThumbs,
   recentStickers,
   favoriteStickers,
   effectStickers,
@@ -168,12 +174,14 @@ const StickerPicker = ({
   const prefix = `${idPrefix}-sticker-set`;
   const {
     activeSetIndex,
+    getLastVisibleSetIndex,
     observeIntersectionForSet,
     observeIntersectionForPlayingItems,
     observeIntersectionForShowingItems,
     observeIntersectionForCovers,
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
+  const lastVisibleSetIndex = useDerivedState(getLastVisibleSetIndex);
 
   const lang = useLang();
 
@@ -293,6 +301,7 @@ const StickerPicker = ({
   });
 
   const [openedPack, setOpenedPack] = useState<ApiStickerSet | undefined>();
+  const pendingSetIndexRef = useRef<number>();
   const [isLocalSectionCollapsed, setIsLocalSectionCollapsed] = useState(false);
   const [isGlobalSectionCollapsed, setIsGlobalSectionCollapsed] = useState(false);
 
@@ -354,12 +363,12 @@ const StickerPicker = ({
 
     const sets = featuredIds
       .map((id) => stickerSetsById[id])
-      .filter((set) => set && !(set.installedDate && !set.isArchived));
+      .filter((set) => set && !(getIsStickerSetInstalled(set) && !set.isArchived));
 
     return sets.length ? sets : undefined;
   }, [isForEffects, featuredIds, hiddenTrendingSetId, stickerSetsById]);
 
-  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+  const canRenderContents = useAsyncRendering([], noRenderDelay ? undefined : SLIDE_TRANSITION_DURATION);
   const shouldRenderContents = areAddedLoaded && canRenderContents
     && !(isForEffects && noPopulatedSets) && (canSendStickers || isForEffects);
 
@@ -427,6 +436,23 @@ const StickerPicker = ({
   const handlePackBackClick = useLastCallback(() => {
     setOpenedPack(undefined);
   });
+
+  const handleCoverClick = useLastCallback((index: number) => {
+    if (!openedSet) {
+      selectStickerSet(index);
+      return;
+    }
+
+    pendingSetIndexRef.current = index;
+    setOpenedPack(undefined);
+  });
+
+  useEffect(() => {
+    if (openedSet || pendingSetIndexRef.current === undefined) return;
+
+    selectStickerSet(pendingSetIndexRef.current);
+    pendingSetIndexRef.current = undefined;
+  }, [openedSet, selectStickerSet]);
 
   const handleTrendingDismiss = useLastCallback(() => {
     const el = trendingRef.current;
@@ -503,7 +529,7 @@ const StickerPicker = ({
           faded={stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === FAVORITE_SYMBOL_SET_ID}
           color="translucent"
 
-          onClick={() => selectStickerSet(index)}
+          onClick={() => handleCoverClick(index)}
         >
           {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
             <Icon name="clock" />
@@ -536,7 +562,7 @@ const StickerPicker = ({
           isCurrentUserPremium
           sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
           withTranslucentThumb={isTranslucent}
-          onClick={selectStickerSet}
+          onClick={handleCoverClick}
           clickArg={index}
           forcePlayback
         />
@@ -828,11 +854,12 @@ const StickerPicker = ({
                       observeIntersection={observeIntersectionForSet}
                       observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
                       observeIntersectionForShowingItems={observeIntersectionForShowingItems}
-                      isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+                      isNearActive={i >= activeSetIndex - 1 && i <= lastVisibleSetIndex + 1}
                       favoriteStickers={favoriteStickers}
                       isSavedMessages={isSavedMessages}
                       isCurrentUserPremium={isCurrentUserPremium}
                       isTranslucent={isTranslucent}
+                      withInstantThumbs={withInstantThumbs}
                       isChatStickerSet={stickerSet.id === chatStickerSetId}
                       onStickerSelect={handleStickerSelect}
                       onStickerUnfave={handleStickerUnfave}

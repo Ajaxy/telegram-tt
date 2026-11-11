@@ -21,7 +21,7 @@ import {
   RECENT_SYMBOL_SET_ID,
   STICKER_SIZE_PICKER,
 } from '../../config';
-import { getReactionKey } from '../../global/helpers';
+import { getIsStickerSetInstalled, getReactionKey } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
@@ -62,6 +62,7 @@ type OwnProps = {
   isChatEmojiSet?: boolean;
   isChatStickerSet?: boolean;
   isTranslucent?: boolean;
+  withInstantThumbs?: boolean;
   noContextMenus?: boolean;
   noAddButton?: boolean;
   forcePlayback?: boolean;
@@ -108,6 +109,7 @@ const StickerSet = ({
   isChatEmojiSet,
   isChatStickerSet,
   isTranslucent,
+  withInstantThumbs,
   noContextMenus,
   noAddButton,
   forcePlayback,
@@ -145,7 +147,7 @@ const StickerSet = ({
   const [itemsPerRow, setItemsPerRow] = useState(() => getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
-  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting || isNearActive);
+  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting || isNearActive || withInstantThumbs);
 
   // `isNearActive` is set in advance during animation, but it is not reliable for short sets
   const shouldRender = isNearActive || isIntersecting;
@@ -243,7 +245,7 @@ const StickerSet = ({
 
   const isLocked = !isSavedMessages && !isCurrentUserPremium && isPremiumSet && !isChatEmojiSet;
 
-  const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
+  const isInstalled = getIsStickerSetInstalled(stickerSet) && !stickerSet.isArchived;
 
   const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID
     && stickerSet.id !== POPULAR_SYMBOL_SET_ID && stickerSet.id !== EFFECT_EMOJIS_SET_ID
@@ -324,7 +326,7 @@ const StickerSet = ({
           transitionClassNames,
           stickerSet.id === EFFECT_EMOJIS_SET_ID && 'effect-emojis',
         )}
-        style={`height: ${height}px;`}
+        style={`${withInstantThumbs ? 'min-height' : 'height'}: ${height}px;`}
       >
         <canvas
           ref={sharedCanvasRef}
@@ -403,6 +405,7 @@ const StickerSet = ({
                 shouldIgnorePremium={isChatEmojiSet}
                 sharedCanvasRef={canvasRef}
                 withTranslucentThumb={isTranslucent}
+                withInstantThumb={withInstantThumbs}
                 onClick={onStickerSelect}
                 clickArg={sticker}
                 noIcons={isEmoji && !isRecent}

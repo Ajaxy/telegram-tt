@@ -1,20 +1,19 @@
 import { memo } from '@teact';
 
-import type { IconName } from '../../../types/icons';
-import type { AspectRatio } from './hooks/useCropper';
+import type { IconName } from '../../../../types/icons';
+import type { MediaEditorAspectRatio as AspectRatio } from '../../../../types/mediaEditor';
+import type { EditorPanelProps } from '../types';
 
-import useLang from '../../../hooks/useLang';
-import { ASPECT_RATIOS } from './hooks/useCropper';
+import { ASPECT_RATIOS, getCropWithAspectRatio } from '../crop';
+import { applyCrop } from '../editDocument';
 
-import Icon from '../../common/icons/Icon';
-import ListItem from '../ListItem';
+import useLang from '../../../../hooks/useLang';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
-import styles from './MediaEditor.module.scss';
+import Icon from '../../../common/icons/Icon';
+import ListItem from '../../ListItem';
 
-type OwnProps = {
-  currentRatio: AspectRatio;
-  onRatioChange: (ratio: AspectRatio) => void;
-};
+import styles from '../MediaEditor.module.scss';
 
 const RATIO_ICONS: Partial<Record<AspectRatio, IconName>> = {
   square: 'aspect-1-1',
@@ -24,6 +23,8 @@ const RATIO_ICONS: Partial<Record<AspectRatio, IconName>> = {
   '3:4': 'aspect-3-4',
   '5:4': 'aspect-5-4',
   '4:5': 'aspect-4-5',
+  '7:5': 'aspect-7-5',
+  '5:7': 'aspect-5-7',
   '16:9': 'aspect-16-9',
   '9:16': 'aspect-9-16',
 };
@@ -34,8 +35,18 @@ const FULL_WIDTH_RATIOS = ASPECT_RATIOS.slice(0, 3);
 // Remaining ratios are displayed in pairs
 const PAIRED_RATIOS = ASPECT_RATIOS.slice(3);
 
-function CropPanel({ currentRatio, onRatioChange }: OwnProps) {
+function CropPanel({
+  doc, sourceSize, isAspectRatioLocked, getDoc, onCommit,
+}: EditorPanelProps) {
   const lang = useLang();
+  const currentRatio = doc.crop.aspectRatio;
+
+  const handleRatioChange = useLastCallback((ratio: AspectRatio) => {
+    if (!sourceSize) return;
+
+    const currentDoc = getDoc();
+    onCommit(applyCrop(currentDoc, getCropWithAspectRatio(currentDoc.crop, ratio, sourceSize), sourceSize));
+  });
 
   const renderRatioIcon = (value: AspectRatio) => {
     if (value === 'free') {
@@ -65,16 +76,18 @@ function CropPanel({ currentRatio, onRatioChange }: OwnProps) {
       return (
         <div key={i} className={styles.aspectRatioRow}>
           <ListItem
+            buttonClassName={styles.aspectRatioButton}
             focus={currentRatio === leftRatio.value}
-            onClick={() => onRatioChange(leftRatio.value)}
+            onClick={() => handleRatioChange(leftRatio.value)}
           >
             {renderRatioIcon(leftRatio.value)}
             {leftRatio.label}
           </ListItem>
           {rightRatio && (
             <ListItem
+              buttonClassName={styles.aspectRatioButton}
               focus={currentRatio === rightRatio.value}
-              onClick={() => onRatioChange(rightRatio.value)}
+              onClick={() => handleRatioChange(rightRatio.value)}
             >
               {renderRatioIcon(rightRatio.value)}
               {rightRatio.label}
@@ -85,6 +98,10 @@ function CropPanel({ currentRatio, onRatioChange }: OwnProps) {
     });
   };
 
+  if (isAspectRatioLocked) {
+    return <div className={styles.panelNote}>{lang('EditorCoverAspectHint')}</div>;
+  }
+
   return (
     <>
       <div className={styles.sectionLabel}>{lang('AspectRatio')}</div>
@@ -92,8 +109,9 @@ function CropPanel({ currentRatio, onRatioChange }: OwnProps) {
         {FULL_WIDTH_RATIOS.map((option) => (
           <ListItem
             key={option.value}
+            buttonClassName={styles.aspectRatioButton}
             focus={currentRatio === option.value}
-            onClick={() => onRatioChange(option.value)}
+            onClick={() => handleRatioChange(option.value)}
           >
             {renderRatioIcon(option.value)}
             {renderRatioLabel(option)}

@@ -19,7 +19,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
-import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
+import { buildMessageKey, getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { buildSearchResultKey } from '../../../util/keys/searchResultKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
@@ -789,7 +789,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = {
         ...global,
         fileUploads: {
-          byMessageKey: omit(global.fileUploads.byMessageKey, [getMessageKey(message)]),
+          byMessageKey: omit(global.fileUploads.byMessageKey, [buildMessageKey(chatId, localId)]),
         },
       };
 
@@ -891,6 +891,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         previousLocalId: localId,
         isDeleting: undefined,
       });
+      global = {
+        ...global,
+        fileUploads: {
+          byMessageKey: omit(global.fileUploads.byMessageKey, [buildMessageKey(chatId, localId)]),
+        },
+      };
 
       runForAllTabs(global, (tabId) => {
         const { audioPlayer } = selectTabState(global, tabId);
