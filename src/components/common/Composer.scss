@@ -428,7 +428,7 @@
     .bot-commands {
       width: var(--composer-main-button-height);
       height: var(--composer-main-button-height);
-      color: white !important;
+      color: var(--color-primary-foreground) !important;
       background: var(--color-primary) !important;
 
       &.activated {
@@ -488,7 +488,7 @@
     box-shadow: none;
 
     .icon {
-      color: white;
+      color: var(--color-primary-foreground);
     }
 
     .icon-new-send {
@@ -514,7 +514,7 @@
       font-family: var(--font-family-monospace);
       font-size: 1rem;
       font-weight: var(--font-weight-semibold);
-      color: var(--color-white);
+      color: var(--color-primary-foreground);
 
       .icon {
         font-size: 1.25rem;
@@ -647,7 +647,9 @@
 
     color: var(--color-composer-button);
 
-    transition: opacity 150ms ease-out, background-color 150ms ease-out;
+    transition:
+      opacity 150ms ease-out,
+      background-color var(--message-color-transition-duration, 150ms) ease-out;
   }
 
   .ai-composer-button {
@@ -813,12 +815,12 @@
       padding: 0 var(--padding-sides);
       border-radius: calc(var(--height) / 2);
 
-      color: white !important;
+      color: var(--color-primary-foreground) !important;
       text-transform: none;
 
       background: var(--color-primary) !important;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-      transition: 0.25s ease-out width, 0.15s background-color;
+      transition: width 0.25s ease-out, background-color var(--message-color-transition-duration, 0.15s);
 
       &.open {
         width: calc(var(--icon-width) + var(--icon-gap) + var(--bot-menu-text-width) + var(--padding-sides) * 2);

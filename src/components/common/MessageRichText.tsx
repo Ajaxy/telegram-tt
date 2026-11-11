@@ -141,7 +141,7 @@ const MessageRichText = ({
       {shouldCollapse && (
         <div className={styles.readMoreWrapper}>
           <Button
-            className={buildClassName(styles.readMoreButton, isOwn && styles.ownReadMoreButton)}
+            className={styles.readMoreButton}
             color="primary"
             isLoading={isLoadingFullMessage}
             pill

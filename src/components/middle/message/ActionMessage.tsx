@@ -75,6 +75,7 @@ import SuggestedPostApproval from './actions/SuggestedPostApproval';
 import SuggestedPostBalanceTooLow from './actions/SuggestedPostBalanceTooLow';
 import SuggestedPostRejected from './actions/SuggestedPostRejected';
 import WalletTonConnectRequest from './actions/WalletTonConnectRequest';
+import WallpaperPreview from './actions/WallpaperPreview';
 import ContextMenuContainer from './ContextMenuContainer';
 import InlineButtons from './InlineButtons';
 import Reactions from './reactions/Reactions';
@@ -97,6 +98,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  actionMessageBg: string;
   sender?: ApiPeer;
   currentUserId?: string;
   isInsideTopic?: boolean;
@@ -104,7 +106,6 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   replyMessage?: ApiMessage;
-  actionMessageBg?: string;
   isCurrentUserPremium?: boolean;
   isInSelectMode?: boolean;
   hasUnreadReaction?: boolean;
@@ -136,6 +137,7 @@ const WITH_LINK_BREAKS_ACTIONS = new Set<ApiMessageAction['type']>([
 const ActionMessage = ({
   message,
   threadId,
+  actionMessageBg,
   sender,
   currentUserId,
   appearanceOrder,
@@ -148,7 +150,6 @@ const ActionMessage = ({
   focusDirection,
   noFocusHighlight,
   replyMessage,
-  actionMessageBg,
   isCurrentUserPremium,
   isInSelectMode,
   hasUnreadReaction,
@@ -192,7 +193,9 @@ const ActionMessage = ({
   const action = message.content.action!;
   const isLocal = isLocalMessageId(id);
 
-  const isTextHidden = HIDDEN_TEXT_ACTIONS.has(action.type);
+  const isTextHidden = HIDDEN_TEXT_ACTIONS.has(action.type)
+    || (action.type === 'setChatWallpaper' && !action.isSame
+      && Boolean(action.wallpaper?.document && !action.wallpaper.isPattern));
   const isSingleLine = SINGLE_LINE_ACTIONS.has(action.type);
   const withLinkBreaks = WITH_LINK_BREAKS_ACTIONS.has(action.type);
   const isFluidMultiline = IS_FLUID_BACKGROUND_SUPPORTED && !isSingleLine;
@@ -509,6 +512,21 @@ const ActionMessage = ({
 
   const fullContent = useMemo(() => {
     switch (action.type) {
+      case 'setChatWallpaper': {
+        if (action.isSame || !action.wallpaper?.document || action.wallpaper.isPattern) return undefined;
+        return (
+          <div className={styles.contentBox}>
+            <WallpaperPreview
+              wallpaper={action.wallpaper}
+              observeIntersection={observeIntersectionForLoading}
+            />
+            <div className={styles.suggestedText}>
+              <ActionMessageText message={message} isInsideTopic={isInsideTopic} />
+            </div>
+          </div>
+        );
+      }
+
       case 'chatEditPhoto': {
         if (!action.photo) return undefined;
         return (
@@ -665,7 +683,7 @@ const ActionMessage = ({
     }
   }, [
     action, message, observeIntersectionForLoading, sender, observeIntersectionForPlaying, shouldRenderGiftOfferButtons,
-    transferPeerName, isTransferLoading, shouldLoopStickers, isLocal, lang,
+    transferPeerName, isTransferLoading, shouldLoopStickers, isLocal, lang, isInsideTopic,
   ]);
 
   if ((isInsideTopic && action.type === 'topicCreate') || action.type === 'phoneCall') {
@@ -828,6 +846,7 @@ export default memo(withGlobal<OwnProps>(
     const shouldLoopStickers = isTransfer ? selectShouldLoopStickers(global) : undefined;
 
     return {
+      actionMessageBg: selectActionMessageBg(global),
       sender,
       currentUserId: global.currentUserId,
       isCurrentUserPremium,
@@ -837,7 +856,6 @@ export default memo(withGlobal<OwnProps>(
       isInsideTopic,
       replyMessage,
       isInSelectMode: selectIsInSelectMode(global),
-      actionMessageBg: selectActionMessageBg(global),
       hasUnreadReaction,
       hasUnreadPollVote,
       isResizingContainer,

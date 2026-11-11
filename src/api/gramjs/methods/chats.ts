@@ -56,6 +56,7 @@ import {
 } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
+import { buildApiWallpaper } from '../apiBuilders/misc';
 import {
   buildApiBotVerification,
   buildApiPeerId,
@@ -671,6 +672,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     reactionsLimit,
     hasScheduled,
     ttlPeriod,
+    themeEmoticon,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -692,6 +694,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       about,
       ttlPeriod,
       members,
+      peerTheme: themeEmoticon ? { type: 'emoticon', emoticon: themeEmoticon } : undefined,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       canViewMembers: true,
       botCommands,
@@ -774,6 +777,8 @@ async function getFullChannelInfo(
     mainTab,
     guardBotId,
     ttlPeriod,
+    themeEmoticon,
+    wallpaper,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -835,6 +840,8 @@ async function getFullChannelInfo(
       about,
       ttlPeriod,
       onlineCount,
+      peerTheme: themeEmoticon ? { type: 'emoticon', emoticon: themeEmoticon } : undefined,
+      wallpaper: wallpaper && buildApiWallpaper(wallpaper),
       inviteLink,
       slowMode: slowmodeSeconds ? {
         seconds: slowmodeSeconds,

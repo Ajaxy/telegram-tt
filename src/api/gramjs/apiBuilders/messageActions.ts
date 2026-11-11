@@ -8,6 +8,7 @@ import { buildApiBotApp } from './bots';
 import { buildApiFormattedText, buildApiPhoto } from './common';
 import { buildApiStarGift } from './gifts';
 import { buildPollAnswer, buildTodoItem } from './messageContent';
+import { buildApiWallpaper } from './misc';
 import { buildApiCurrencyAmount } from './payments';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiBirthday } from './users';
@@ -134,6 +135,33 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       type: 'setMessagesTtl',
       period,
       autoSettingFromId: autoSettingFrom?.toString(),
+    };
+  }
+  if (action instanceof GramJs.MessageActionSetChatTheme) {
+    const { theme } = action;
+    if (theme instanceof GramJs.ChatTheme) {
+      return {
+        mediaType: 'action',
+        type: 'setChatTheme',
+        emoticon: theme.emoticon || undefined,
+      };
+    }
+    const { gift } = theme;
+    if (!(gift instanceof GramJs.StarGiftUnique)) return UNSUPPORTED_ACTION;
+
+    return {
+      mediaType: 'action',
+      type: 'setChatTheme',
+      gift: { title: gift.title, number: gift.num },
+    };
+  }
+  if (action instanceof GramJs.MessageActionSetChatWallPaper) {
+    return {
+      mediaType: 'action',
+      type: 'setChatWallpaper',
+      isSame: action.same,
+      isForBoth: action.forBoth,
+      wallpaper: !action.same ? buildApiWallpaper(action.wallpaper) : undefined,
     };
   }
   if (action instanceof GramJs.MessageActionGameScore) {

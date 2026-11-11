@@ -42,6 +42,7 @@ import type {
   ApiStickerSet,
   ApiStory,
   ApiStorySkipped,
+  ApiThemeSettings,
   ApiThreadInfo,
   ApiTopic,
   ApiTypingStatus,
@@ -127,11 +128,12 @@ export type PerformanceTypeKey = (
   'pageTransitions' | 'messageSendingAnimations' | 'mediaViewerAnimations'
   | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur'
   | 'rightColumnAnimations' | 'animatedEmoji' | 'loopAnimatedStickers' | 'reactionEffects' | 'stickerEffects'
-  | 'autoplayGifs' | 'autoplayVideos' | 'storyRibbonAnimations' | 'snapEffect' | 'textStreaming'
+  | 'autoplayGifs' | 'autoplayVideos' | 'storyRibbonAnimations' | 'textStreaming'
 );
 export type PerformanceType = Record<PerformanceTypeKey, boolean>;
 
 export interface IThemeSettings {
+  // An empty string selects the built-in wallpaper; `undefined` allows the color theme's wallpaper
   background?: string;
   backgroundColor?: string;
   secondBackgroundColor?: string;
@@ -144,6 +146,8 @@ export interface IThemeSettings {
   patternIntensityFactor?: number;
   isPattern?: boolean;
   isBlurred?: boolean;
+  serverThemeSettings?: ApiThemeSettings;
+  chatThemeEmoticon?: string;
 }
 
 export type LangCode = (

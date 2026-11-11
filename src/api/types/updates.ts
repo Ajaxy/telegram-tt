@@ -41,7 +41,9 @@ import type {
   ApiNotifyPeerType,
   ApiPasskeyOption,
   ApiPeerNotifySettings,
+  ApiPeerTheme,
   ApiSessionData,
+  ApiWallpaper,
 } from './misc';
 import type { ApiEmojiStatusType, ApiPeerSettings } from './peers';
 import type { ApiRichMessage } from './richMessage';
@@ -521,6 +523,19 @@ export type ApiUpdatePeerHistoryTtl = {
   '@type': 'updatePeerHistoryTtl';
   id: string;
   ttlPeriod?: number;
+};
+
+export type ApiUpdatePeerTheme = {
+  '@type': 'updatePeerTheme';
+  id: string;
+  peerTheme?: ApiPeerTheme;
+  shouldReload?: boolean;
+};
+
+export type ApiUpdatePeerWallpaper = {
+  '@type': 'updatePeerWallpaper';
+  id: string;
+  wallpaper?: ApiWallpaper;
 };
 
 export type ApiUpdateUser = {
@@ -1047,6 +1062,7 @@ export type ApiUpdate = (
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
   ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings | ApiUpdatePeerHistoryTtl
+  | ApiUpdatePeerTheme | ApiUpdatePeerWallpaper
   | ApiUpdateUserAlreadyAuthorized |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage | ApiUpdateScheduledMessageSendFailed |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction | ApiUpdateThreadReadState |

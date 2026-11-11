@@ -514,6 +514,7 @@
 "ChatBackground" = "Chat Wallpaper";
 "ChatBackgroundColorThemes" = "Colors, Gradients & Patterns";
 "Theme" = "Theme";
+"ColorTheme" = "Color theme";
 "AccDescrStickers" = "Stickers";
 "DoubleTapSetting" = "Quick Reaction";
 "SuggestStickers" = "Sticker suggestions by emoji";
@@ -805,7 +806,6 @@
 "SettingsPerformanceContextAnimation" = "Context Menu Animation";
 "SettingsPerformanceContextBlur" = "Context Menu Blur";
 "SettingsPerformanceRightColumn" = "Right Column Animation";
-"SettingsPerformanceThanos" = "Dust-effect deletion";
 "SettingsPerformanceTextStreaming" = "Text Streaming";
 "SettingsPerformanceAnimatedEmoji" = "Allow Animated Emoji";
 "SettingsPerformanceLoopStickers" = "Loop Animated Stickers";
@@ -2172,6 +2172,20 @@
 "ActionChangedPhoto" = "{from} updated group photo";
 "ActionChangedPhotoYou" = "You updated group photo";
 "ActionChangedPhotoChannel" = "Channel photo updated";
+"ActionChangedTheme" = "{from} changed the chat theme to {theme}";
+"ActionChangedThemeYou" = "You changed the chat theme to {theme}";
+"ActionChangedThemeChannel" = "Channel theme changed to {theme}";
+"ActionDisabledTheme" = "{from} disabled the chat theme";
+"ActionDisabledThemeYou" = "You disabled the chat theme";
+"ActionDisabledThemeChannel" = "Channel theme disabled";
+"ActionChangedWallpaper" = "{from} set a new wallpaper for this chat";
+"ActionChangedWallpaperYou" = "You set a new wallpaper for this chat";
+"ActionChangedWallpaperBothYou" = "You set a new wallpaper for {peer} and you";
+"ActionSetSameWallpaper" = "{from} set the same wallpaper for this chat";
+"ActionSetSameWallpaperYou" = "You set the same wallpaper as your chat partner";
+"ActionChangedWallpaperGroup" = "Group set a new wallpaper";
+"ActionChangedWallpaperGroupYou" = "You set a new wallpaper for this group";
+"ActionChangedWallpaperChannel" = "Channel set a new wallpaper";
 "ActionChangedTitle" = "{from} changed group name to «{title}»";
 "ActionChangedTitleYou" = "You changed group name to «{title}»";
 "ActionChangedTitleChannel" = "Channel name was changed to «{title}»";

@@ -312,7 +312,6 @@ const EmbeddedMessage = ({
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={onClick}
     >
-      <div className="hover-effect" />
       <RippleEffect />
       {hasPictogram && (
         <CompactMediaPreview

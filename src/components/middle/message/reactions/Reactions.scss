@@ -30,15 +30,14 @@
   }
 
   &.is-outside .message-reaction {
-    --reaction-background: var(--action-message-bg);
-    --reaction-background-hover: var(--action-message-bg);
-    --reaction-background-hover-filter: brightness(115%);
-    --reaction-text-color: white;
+    --reaction-background: var(--message-service-background);
+    --reaction-background-hover: var(--message-service-background);
+    --reaction-text-color: var(--message-service-text);
 
     &.chosen {
-      --reaction-background: rgb(255, 255, 255, 0.6);
-      --reaction-background-hover: rgb(255, 255, 255, 0.75);
-      --reaction-text-color: rgb(62 62 62);
+      --reaction-background: var(--message-service-text);
+      --reaction-background-hover: var(--message-service-text);
+      --reaction-text-color: var(--message-service-background);
     }
   }
 }

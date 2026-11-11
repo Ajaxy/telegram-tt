@@ -2,11 +2,11 @@
 
 .root {
   --rich-content-meta-color: var(--color-text-meta);
+  --rich-content-table-border-color: var(--message-table-border, var(--color-borders));
 }
 
 .own {
   --rich-content-meta-color: var(--color-message-meta-own);
-  --rich-content-table-border-color: color-mix(in srgb, var(--color-accent-own) 30%, transparent);
 }
 
 .root,
@@ -31,10 +31,10 @@
 }
 
 .readMoreButton {
-  pointer-events: auto;
-}
+  --button-text-color: var(--message-links);
+  --button-background-color: transparent;
+  --button-active-text-color: var(--message-links);
+  --button-active-background-color: transparent;
 
-.ownReadMoreButton {
-  --button-background-color: var(--color-active);
-  --button-active-background-color: var(--color-active-darker);
+  pointer-events: auto;
 }

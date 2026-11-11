@@ -1,21 +1,26 @@
 import { decompressSync } from 'fflate';
 
-import type { ApiWallpaper, ApiWallpaperSettings } from '../api/types';
+import type {
+  ApiBaseTheme, ApiThemeSettings, ApiWallpaper, ApiWallpaperSettings,
+} from '../api/types';
 import type { IThemeSettings, ThemeKey } from '../types';
 
 import { DARK_THEME_BG_COLOR } from '../config';
-import { buildColorFromHex, buildDenseTint, getPatternColor } from './colors';
+import { buildColorFromHex, getPatternColor } from './colors';
 import int2hex from './int2hex';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
-const DEFAULT_LIGHT_ACTION_MESSAGE_BG = '#4A8E3A8C';
-const DEFAULT_DARK_ACTION_MESSAGE_BG = '#48576166';
-const ACTION_MESSAGE_BG_ALPHA = 0.85;
+const DEFAULT_LIGHT_PATTERN_COLOR = '#4A8E3A8C';
+const DEFAULT_DARK_PATTERN_COLOR = '#48576166';
 // The user slider scales the wallpaper's own intensity: 100 keeps it as is, 0 hides the pattern
 const MAX_PATTERN_INTENSITY_FACTOR = 100;
-export const DEFAULT_PATTERN_INTENSITY_FACTOR = 75;
+export const DEFAULT_PATTERN_INTENSITY_FACTOR = 100;
 const SVG_MIME = 'image/svg+xml';
 const XML_OPEN_BRACKET = 0x3C; // `<`
+const LIGHT_BASE_THEMES: ApiBaseTheme[] = ['classic', 'day'];
+const DARK_BASE_THEMES: ApiBaseTheme[] = ['night', 'tinted'];
+const LIGHT_SERVICE_BACKGROUND = '#00000040';
+const DARK_SERVICE_BACKGROUND = '#00000080';
 
 export type DefaultWallpaper = {
   colors: string[];
@@ -29,6 +34,7 @@ export type WallpaperRenderModel = {
   backgroundRotation?: number;
   patternColor?: string;
   patternIntensity?: number;
+  patternDimming?: number;
   baseColor?: string;
   isImage: boolean;
   isBlurred: boolean;
@@ -52,26 +58,18 @@ export const RESET_WALLPAPER_SETTINGS: Partial<IThemeSettings> = {
   patternIntensityFactor: undefined,
 };
 
-// Dark default chat wallpaper rendered through the same gradient engine as any picked wallpaper
-// Negative intensity => the pattern masks the gradient (doodles reveal the animated gradient over
-// a dark base), matching Telegram's dark-wallpaper convention.
+// Dark multicolor patterns reveal the gradient through their doodles over a black base
 export const DEFAULT_DARK_WALLPAPER: DefaultWallpaper = {
   colors: ['#4f5bd5', '#962fbf', '#dd6cb9', '#fec496'],
-  patternColor: getWallpaperPatternColor('#4f5bd5'),
+  patternColor: DEFAULT_DARK_PATTERN_COLOR,
   intensity: -DEFAULT_PATTERN_INTENSITY,
 };
 
 export const DEFAULT_LIGHT_WALLPAPER: DefaultWallpaper = {
   colors: ['#bdcd8c', '#8eba89', '#83b28f', '#c5d3b0'],
-  patternColor: getWallpaperPatternColor('#bdcd8c'),
+  patternColor: DEFAULT_LIGHT_PATTERN_COLOR,
   intensity: DEFAULT_PATTERN_INTENSITY,
 };
-
-// Negative intensity means the pattern masks the gradient (doodles reveal it over a dark base),
-// as opposed to a positive-intensity doodle overlay. Shared so `App` and `useChatBackground` agree.
-export function getIsMaskedPattern(isPattern?: boolean, patternIntensity?: number): boolean {
-  return Boolean(isPattern) && (patternIntensity ?? 0) < 0;
-}
 
 export function buildWallpaperRenderModel(theme: ThemeKey, settings: IThemeSettings): WallpaperRenderModel {
   const {
@@ -94,44 +92,38 @@ export function buildWallpaperRenderModel(theme: ThemeKey, settings: IThemeSetti
   const isDefault = getIsDefaultWallpaper(settings);
   const defaultWallpaper = getDefaultWallpaper(theme);
   const effectivePatternColor = isDefault ? defaultWallpaper.patternColor : patternColor;
-  const effectivePatternIntensity = isDefault ? defaultWallpaper.intensity : patternIntensity;
+  const effectivePatternIntensity = isDefault
+    ? defaultWallpaper.intensity : (patternIntensity ?? DEFAULT_PATTERN_INTENSITY);
   const isCustomPattern = Boolean(isPattern) && Boolean(customBackground);
-  // Masked mode is decided by the unscaled sign, so dialing the factor down to 0 keeps the dark
-  // wallpaper masked (fully dimmed) instead of flipping it into a bright unmasked gradient
-  const isMaskedPattern = getIsMaskedPattern(isCustomPattern || isDefault, effectivePatternIntensity);
-  const scaledPatternIntensity = effectivePatternIntensity !== undefined
-    ? (effectivePatternIntensity * (patternIntensityFactor ?? DEFAULT_PATTERN_INTENSITY_FACTOR))
-    / MAX_PATTERN_INTENSITY_FACTOR
-    : undefined;
-  const rawColors = isDefault ? defaultWallpaper.colors : customColors;
-  const colors = isMaskedPattern && rawColors.length === 1 ? [rawColors[0], rawColors[0]] : rawColors;
+  const colors = isDefault ? defaultWallpaper.colors : customColors;
   const hasGradient = colors.length >= 2;
+  const hasPattern = isCustomPattern || (isDefault && hasGradient);
+  const isDark = theme === 'dark';
+  // macOS chooses pattern compositing from the palette and color count, not the intensity sign
+  const isMaskedPattern = hasPattern && isDark && hasGradient;
+  const intensityFactor = patternIntensityFactor ?? DEFAULT_PATTERN_INTENSITY_FACTOR;
+  const scaledPatternIntensity = Math.abs(effectivePatternIntensity) * intensityFactor / MAX_PATTERN_INTENSITY_FACTOR;
+  // Single-color patterns keep their original colors and dark mode dims the entire result
+  const isDimmedPattern = hasPattern && isDark && colors.length === 1;
 
   return {
     customBackground,
     colors,
     backgroundRotation,
     patternColor: effectivePatternColor,
-    patternIntensity: scaledPatternIntensity,
-    baseColor: getWallpaperBaseColor(theme, settings),
+    patternIntensity: hasGradient ? scaledPatternIntensity : isDark ? MAX_PATTERN_INTENSITY_FACTOR : intensityFactor,
+    patternDimming: isDimmedPattern ? 1 - scaledPatternIntensity / MAX_PATTERN_INTENSITY_FACTOR : undefined,
+    baseColor: isMaskedPattern ? DARK_THEME_BG_COLOR : colors[0],
     isImage,
     isBlurred: Boolean(isBlurred),
     isDefault,
-    isPattern: isCustomPattern || (isDefault && hasGradient),
+    isPattern: hasPattern,
     isMaskedPattern,
   };
 }
 
 export function getWallpaperBaseColor(theme: ThemeKey, settings: IThemeSettings): string | undefined {
-  const isDefault = getIsDefaultWallpaper(settings);
-  const defaultWallpaper = getDefaultWallpaper(theme);
-  const patternIntensity = isDefault ? defaultWallpaper.intensity : settings.patternIntensity;
-  const isCustomPattern = Boolean(settings.isPattern && settings.background);
-  const isMaskedPattern = getIsMaskedPattern(isCustomPattern || isDefault, patternIntensity);
-
-  return isMaskedPattern
-    ? DARK_THEME_BG_COLOR
-    : (settings.backgroundColor || (isDefault ? defaultWallpaper.colors[0] : undefined));
+  return buildWallpaperRenderModel(theme, settings).baseColor;
 }
 
 export function getWallpaperColors(settings?: ApiWallpaperSettings): string[] {
@@ -143,6 +135,16 @@ export function getWallpaperColors(settings?: ApiWallpaperSettings): string[] {
     settings.thirdBackgroundColor,
     settings.fourthBackgroundColor,
   ].filter((color): color is number => color !== undefined).map(int2hex);
+}
+
+export function getChatThemeEntry(settings: ApiThemeSettings[], isDark: boolean): ApiThemeSettings | undefined {
+  const preferredBases = isDark ? DARK_BASE_THEMES : LIGHT_BASE_THEMES;
+  return settings.find((entry) => preferredBases.includes(entry.baseTheme));
+}
+
+export function getThemeWallpaper(settings?: IThemeSettings): ApiWallpaper | undefined {
+  if (settings?.background !== undefined || settings?.backgroundColor) return undefined;
+  return settings?.serverThemeSettings?.wallpaper;
 }
 
 // Telegram pattern documents are gzip-compressed SVG, unusable as an image until inflated.
@@ -163,20 +165,19 @@ export function getDefaultPatternColor(theme: ThemeKey): string {
   return theme === 'dark' ? DEFAULT_DARK_WALLPAPER.patternColor : DEFAULT_LIGHT_WALLPAPER.patternColor;
 }
 
-// Built-in wallpapers use their stable chip colors; custom wallpapers follow their derived tint.
-// The tint is densified against the wallpaper's average color to hide the doodles beneath the chips.
-export function getActionMessageBg(theme: ThemeKey, settings?: IThemeSettings): string | undefined {
-  const model = buildWallpaperRenderModel(theme, settings || {});
-  const defaultTint = theme === 'dark' ? DEFAULT_DARK_ACTION_MESSAGE_BG : DEFAULT_LIGHT_ACTION_MESSAGE_BG;
-  const tint = model.isDefault ? defaultTint : model.patternColor;
-  if (!tint) return undefined;
-
-  const backdropColors = model.isMaskedPattern ? [model.baseColor!] : model.colors;
-  return buildDenseTint(tint, backdropColors, ACTION_MESSAGE_BG_ALPHA);
+export function getActionMessageBg(theme: ThemeKey): string {
+  return theme === 'dark' ? DARK_SERVICE_BACKGROUND : LIGHT_SERVICE_BACKGROUND;
 }
 
-// Derives the translucent tint used for `--pattern-color` (message/embedded bubbles) and
-// `--action-message-bg` (service-message chips). The background doodle overlay controls its own opacity/blend.
+const MULTI_STOP_ACTION_MESSAGE_BG = '#0000002D';
+
+// Multi-stop gradients use a neutral tint instead of deriving it from one stop
+export function getWallpaperTintColor(colors: string[]): string | undefined {
+  if (colors.length > 1) return MULTI_STOP_ACTION_MESSAGE_BG;
+  return colors[0] ? getWallpaperPatternColor(colors[0]) : undefined;
+}
+
+// Derives the translucent wallpaper tint; the doodle overlay controls its own opacity and blend
 export function getWallpaperPatternColor(baseColorHex: string): string {
   return getPatternColor(buildColorFromHex(baseColorHex));
 }
@@ -235,12 +236,7 @@ export function buildThemeSettingsFromWallpaper(wallpaper: ApiWallpaper): Partia
   const [backgroundColor, secondBackgroundColor, thirdBackgroundColor, fourthBackgroundColor] = colors;
 
   const isPattern = Boolean(wallpaper.isPattern);
-  // Derive the chip/bubble tint from any wallpaper that has a base color — not just patterns —
-  // otherwise selecting a plain color/gradient leaves the service-message chips on the previous
-  // wallpaper's color.
-  const patternColor = backgroundColor
-    ? getWallpaperPatternColor(backgroundColor)
-    : undefined;
+  const patternColor = getWallpaperTintColor(colors);
 
   return {
     background: wallpaper.document ? wallpaper.slug : undefined,
@@ -250,8 +246,8 @@ export function buildThemeSettingsFromWallpaper(wallpaper: ApiWallpaper): Partia
     fourthBackgroundColor,
     backgroundRotation: wallpaper.settings?.rotation,
     isPattern,
+    isBlurred: wallpaper.settings?.isBlurred,
     patternColor,
-    // The sign is preserved: negative intensity switches `Main` into masked rendering (dark patterns)
     patternIntensity: isPattern
       ? (wallpaper.settings?.intensity ?? DEFAULT_PATTERN_INTENSITY)
       : undefined,

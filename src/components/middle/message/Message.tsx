@@ -184,7 +184,6 @@ import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Sparkles from '../../common/Sparkles';
-import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import InputText from '../../ui/InputText';
@@ -519,7 +518,6 @@ const Message = ({
   const isLocalOnly = isMessageLocalOnly(message);
 
   const [isTranscriptionHidden, setIsTranscriptionHidden] = useState(false);
-  const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const [shouldPlayDiceEffect, requestDiceEffect, hideDiceEffect] = useFlag();
@@ -792,21 +790,15 @@ const Message = ({
   }, [isLastInList, transcribedText, withVoiceTranscription]);
 
   useEffect(() => {
-    const element = ref.current;
     const isPartialAlbumDelete = message.isInAlbum && album?.messages.some((msg) => !msg.isDeleting);
-    if (!element || isPartialAlbumDelete) return;
+    if (isPartialAlbumDelete) return;
 
     if (!message.isDeleting) {
-      setIsPlayingSnapAnimation(false);
       setIsPlayingDeleteAnimation(false);
       return;
     }
 
-    if (animateSnap(element)) {
-      setIsPlayingSnapAnimation(true);
-    } else {
-      setIsPlayingDeleteAnimation(true);
-    }
+    setIsPlayingDeleteAnimation(true);
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- Synchronize animation on `isDeleting` changes
   }, [message.isDeleting]);
 
@@ -831,7 +823,6 @@ const Message = ({
     isFocused && !noFocusHighlight && 'focused',
     isForwarding && 'is-forwarding',
     isPlayingDeleteAnimation && 'is-deleting',
-    isPlayingSnapAnimation && 'is-dissolving',
     isInDocumentGroup && 'is-in-document-group',
     isAlbum && 'is-album',
     message.hasUnreadMention && 'has-unread-mention',

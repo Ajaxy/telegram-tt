@@ -94,7 +94,7 @@ import {
 import { INITIAL_GLOBAL_STATE } from '../../initialState';
 import { clearGlobalForLockScreen, clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 import { updateWallet } from '../../reducers/wallet';
-import { selectTabState } from '../../selectors';
+import { selectGlobalWallpaperBackgrounds, selectTabState } from '../../selectors';
 
 const WRONG_PASSCODE_ERROR: RegularLangFnParameters = { key: 'PasscodeWrong' };
 const TOO_MANY_ATTEMPTS_ERROR: RegularLangFnParameters = { key: 'PasscodeTooManyAttempts' };
@@ -821,10 +821,7 @@ async function updateLockScreenWallpaperCache(global: GlobalState) {
 }
 
 async function syncSelectedLockScreenWallpaperBlobs(global: GlobalState) {
-  const selectedBackgrounds = Object.values(global.sharedState.settings.themes)
-    .map((themeSettings) => themeSettings?.background)
-    .filter((background): background is string => Boolean(background));
-  await syncLockScreenWallpaperBlobs(selectedBackgrounds);
+  await syncLockScreenWallpaperBlobs(selectGlobalWallpaperBackgrounds(global));
 }
 
 function logPasscodeWarning(err: unknown) {

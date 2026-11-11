@@ -15,10 +15,10 @@
   border-radius: 0.5rem;
 
   font-size: 0.75rem;
-  color: #FFFFFF;
+  color: var(--message-media-text);
   white-space: nowrap;
 
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: var(--message-media-background);
 }
 
 .buy {
@@ -36,10 +36,10 @@
   border-radius: 1rem;
 
   line-height: 1rem;
-  color: #FFFFFF;
+  color: var(--message-media-text);
   white-space: nowrap;
 
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: var(--message-media-background);
 }
 
 .spoiler {

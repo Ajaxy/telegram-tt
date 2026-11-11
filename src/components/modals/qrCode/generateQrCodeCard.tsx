@@ -197,7 +197,7 @@ async function drawWallpaper(
   }
 
   const gradientCanvas = !model.isImage && model.colors.length >= 2
-    ? createGradientCanvas(model)
+    ? createGradientCanvas(model, width / height)
     : undefined;
   const patternUrl = model.isDefault ? defaultPatternUrl : resourceUrl;
   const patternOpacity = Math.abs(model.patternIntensity || 0) / 100;
@@ -210,8 +210,16 @@ async function drawWallpaper(
     if (model.isMaskedPattern && gradientCanvas) {
       await drawMaskedPattern(ctx, patternUrl, gradientCanvas, patternOpacity, width, height);
     } else {
-      await drawOverlayPattern(ctx, patternUrl, patternOpacity, width, height);
+      await drawOverlayPattern(ctx, patternUrl, patternOpacity, model.colors.length > 1, width, height);
     }
+  }
+
+  if (model.patternDimming !== undefined) {
+    ctx.save();
+    ctx.globalAlpha = model.patternDimming;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
   }
 }
 
@@ -234,9 +242,9 @@ async function drawBackgroundImage(
   ctx.restore();
 }
 
-function createGradientCanvas(model: WallpaperRenderModel) {
+function createGradientCanvas(model: WallpaperRenderModel, aspectRatio: number) {
   const canvas = document.createElement('canvas');
-  renderStaticGradient(canvas, model.colors, model.backgroundRotation);
+  renderStaticGradient(canvas, model.colors, model.backgroundRotation, aspectRatio);
   return canvas;
 }
 
@@ -263,6 +271,7 @@ async function drawOverlayPattern(
   ctx: CanvasRenderingContext2D,
   patternUrl: string,
   opacity: number,
+  shouldUseSoftLight: boolean,
   width: number,
   height: number,
 ) {
@@ -274,7 +283,7 @@ async function drawOverlayPattern(
 
   ctx.save();
   ctx.globalAlpha = opacity;
-  ctx.globalCompositeOperation = 'soft-light';
+  ctx.globalCompositeOperation = shouldUseSoftLight ? 'soft-light' : 'source-over';
   ctx.drawImage(patternCanvas, 0, 0, width, height);
   ctx.restore();
 }

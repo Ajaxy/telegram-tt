@@ -5,6 +5,13 @@ const LUMA_THRESHOLD = 128;
 const RGB_CHANNEL_MAX = 255;
 const COLOR_PERCENT_MAX = 100;
 const AVERAGE_COLOR_BLOCK_SIZE = 5;
+const IMAGE_EDGE_SAMPLE_COUNT = 16;
+const IMAGE_EDGE_INSET = 5;
+const IMAGE_EDGE_SAMPLE_HEIGHT = 2;
+const IMAGE_PIXEL_CHANNEL_COUNT = 4;
+const IMAGE_RGB_CHANNEL_COUNT = 3;
+const IMAGE_COLOR_BUCKET_SIZE = 32;
+const OUTGOING_COLOR_BLEND_WEIGHT = 0.5;
 const IMAGE_DATA_OPTIONS: ImageDataSettings[] = [
   { colorSpace: 'display-p3', pixelFormat: 'rgba-float16' },
   { colorSpace: 'display-p3' },
@@ -23,6 +30,44 @@ export async function getAverageColor(url: string): Promise<Color> {
   }
 
   return buildFallbackColor();
+}
+
+export function sampleImageEdgeColors(image: HTMLImageElement) {
+  const canvas = document.createElement('canvas');
+  canvas.width = IMAGE_EDGE_SAMPLE_COUNT;
+  canvas.height = IMAGE_EDGE_SAMPLE_HEIGHT;
+  const context = canvas.getContext('2d', { alpha: false });
+  if (!context) return undefined;
+
+  const { naturalWidth: width, naturalHeight: height } = image;
+  const edgeInset = Math.min(IMAGE_EDGE_INSET, Math.floor((height - 1) / IMAGE_EDGE_SAMPLE_HEIGHT));
+  try {
+    for (let index = 0; index < IMAGE_EDGE_SAMPLE_COUNT; index++) {
+      const x = Math.round(index * (width - 1) / (IMAGE_EDGE_SAMPLE_COUNT - 1));
+      context.drawImage(image, x, edgeInset, 1, 1, index, 0, 1, 1);
+      context.drawImage(image, x, height - 1 - edgeInset, 1, 1, index, 1, 1, 1);
+    }
+    const { data } = context.getImageData(0, 0, IMAGE_EDGE_SAMPLE_COUNT, IMAGE_EDGE_SAMPLE_HEIGHT);
+    const colors = [0, 1].map((row) => {
+      const groups = new Map<string, { count: number; color: string }>();
+      for (let index = 0; index < IMAGE_EDGE_SAMPLE_COUNT; index++) {
+        const offset = (row * IMAGE_EDGE_SAMPLE_COUNT + index) * IMAGE_PIXEL_CHANNEL_COUNT;
+        const channels = Array.from(data.subarray(offset, offset + IMAGE_RGB_CHANNEL_COUNT));
+        // Group similar shades so small variations don't split the prevalent color
+        const key = channels.map((value) => Math.floor(value / IMAGE_COLOR_BUCKET_SIZE)).join(',');
+        const group = groups.get(key);
+        if (group) {
+          group.count += 1;
+        } else {
+          groups.set(key, { count: 1, color: `rgb(${channels.join(', ')})` });
+        }
+      }
+      return Array.from(groups.values()).sort((a, b) => b.count - a.count)[0].color;
+    });
+    return { top: colors[0], bottom: colors[1] };
+  } catch {
+    return undefined;
+  }
 }
 
 export function getColorLuma(color: Color) {
@@ -59,17 +104,16 @@ export function getPatternColor(color: Color) {
   }, { format: 'hex', collapse: false, alpha: true });
 }
 
-// Raises the alpha of a translucent tint, keeping its composite over the average backdrop color unchanged
-export function buildDenseTint(tintHex: string, backdropHexColors: string[], alpha: number) {
-  const tint = buildColorFromHex(tintHex);
-  if (tint.alpha! >= alpha) return tintHex;
+export function deriveOutgoingBubbleFill(messageColors: string[]): string | undefined {
+  if (!messageColors.length) return undefined;
+  if (messageColors.every((color) => color.toLowerCase() === messageColors[0].toLowerCase())) {
+    return messageColors[0];
+  }
 
-  const backdrop = backdropHexColors.map(buildColorFromHex)
-    .reduce((average, color, i) => mixColors(average, color, 1 / (i + 1), { space: 'srgb' }), tint);
-  const denseTint = mixColors(backdrop, tint, tint.alpha! / alpha, { space: 'srgb' });
-  denseTint.alpha = alpha;
-
-  return serializeColor(denseTint, { format: 'hex', collapse: false, alpha: true });
+  const blended = messageColors.map(buildColorFromHex).reduce((fill, color) => (
+    mixColors(fill, color, OUTGOING_COLOR_BLEND_WEIGHT, { space: 'srgb' })
+  ));
+  return buildHexFromColor(blended);
 }
 
 export function int2cssRgba(color: number): string {

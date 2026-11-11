@@ -10,9 +10,9 @@
   padding-block: 0.1875rem;
   border-radius: 0.25rem;
 
-  color: var(--color-text);
+  color: var(--message-code-text);
 
-  background-color: var(--color-code-bg);
+  background-color: var(--message-code-background);
 
   .code-title {
     overflow: hidden;
@@ -21,7 +21,7 @@
 
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     font-weight: var(--font-weight-medium);
-    color: var(--accent-color);
+    color: var(--message-code-text);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -42,13 +42,13 @@
       white-space: pre;
     }
 
-    @include codeHighlight.code-highlight-theme(true);
+    @include codeHighlight.code-highlight-theme;
     @include codeHighlight.code-highlight-tokens;
 
     .hljs {
       overflow-x: auto;
       display: block;
-      color: var(--color-text);
+      color: var(--message-code-text);
     }
   }
 }

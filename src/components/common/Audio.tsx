@@ -16,7 +16,7 @@ import {
   isMessageLocal,
   isOwnMessage,
 } from '../../global/helpers';
-import { selectWebPageFromMessage } from '../../global/selectors';
+import { selectChatThemePalette, selectWebPageFromMessage } from '../../global/selectors';
 import { getPlaybackCapabilities, makeMessageTrackKeyFrom } from '../../global/selectors/audioPlayer';
 import { selectMessageMediaDuration } from '../../global/selectors/media';
 import { prepareTrackSwitch } from '../../util/audioPlayback/playbackController';
@@ -64,6 +64,7 @@ type OwnProps = {
 type StateProps = {
   mediaDuration?: number;
   webPage?: ApiWebPage;
+  waveformColor: string;
 };
 
 const SINGLE_SOURCE: PlaybackSource = { type: 'single' };
@@ -97,6 +98,7 @@ const Audio = ({
   autoPlay,
   webPage,
   mediaDuration,
+  waveformColor,
   onHideTranscription,
   onPlay,
   onPause,
@@ -200,6 +202,7 @@ const Audio = ({
       className={className}
       audio={audio}
       mediaSource={mediaSource}
+      waveformColor={waveformColor}
       trackKey={trackKey}
       mediaType={mediaType}
       capabilities={capabilities}
@@ -247,10 +250,13 @@ export default memo(withGlobal<OwnProps>(
   }): Complete<StateProps> => {
     const webPage = selectWebPageFromMessage(global, message);
     const mediaDuration = selectMessageMediaDuration(global, message);
+    const palette = selectChatThemePalette(global, message.chatId);
+    const direction = isOwnMessage(message) ? 'outgoing' : 'incoming';
 
     return {
       webPage,
       mediaDuration,
+      waveformColor: palette.variables[`--message-${direction}-accent`],
     };
   },
 )(Audio));

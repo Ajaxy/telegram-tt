@@ -114,6 +114,31 @@ export interface ApiWallpaper {
   settings?: ApiWallpaperSettings;
 }
 
+export type ApiBaseTheme = 'classic' | 'day' | 'night' | 'tinted';
+
+export interface ApiThemeSettings {
+  baseTheme: ApiBaseTheme;
+  accentColor: string;
+  outgoingColors?: string[];
+  areOutgoingColorsAnimated?: boolean;
+  outboxAccentColor?: string;
+  wallpaper?: ApiWallpaper;
+}
+
+export interface ApiChatTheme {
+  emoticon: string;
+  isDefault?: boolean;
+  settings: ApiThemeSettings[];
+}
+
+export type ApiPeerTheme = {
+  type: 'emoticon';
+  emoticon: string;
+} | {
+  type: 'gift';
+  settings: ApiThemeSettings[];
+};
+
 export interface ApiSession {
   hash: string;
   isCurrent: boolean;

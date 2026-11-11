@@ -33,7 +33,7 @@ import {
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_TAURI } from '../../util/browser/globalEnvironment';
-import { IS_ANDROID, IS_MAC_OS, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
+import { IS_ANDROID, IS_IOS, IS_MAC_OS, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
@@ -95,7 +95,6 @@ import GiveawayModal from './premium/GiveawayModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
 import ConfettiContainer from './visualEffects/ConfettiContainer';
-import SnapEffectContainer from './visualEffects/SnapEffectContainer';
 import WaveContainer from './visualEffects/WaveContainer';
 
 import './Main.scss';
@@ -106,6 +105,7 @@ export interface OwnProps {
 }
 
 type StateProps = {
+  chatId?: string;
   isMasterTab?: boolean;
   currentUserId?: string;
   hasCurrentUser?: boolean;
@@ -162,6 +162,7 @@ let DEBUG_isLogged = false;
 
 const Main = ({
   isMobile,
+  chatId,
   isLeftColumnOpen,
   isMiddleColumnOpen,
   isRightColumnOpen,
@@ -624,10 +625,14 @@ const Main = ({
 
   return (
     <Wallpaper
+      chatId={chatId}
       containerRef={containerRef}
       id="Main"
       className={className}
       bgClassName={bgClassName}
+      shouldExtendChatWallpaper={!isMobile}
+      browserColorMode={!IS_IOS || !isMobile ? undefined
+        : isMiddleColumnOpen && !isLeftColumnOpen && !isRightColumnOpen ? 'wallpaper' : 'surface'}
     >
       {IS_TAURI && IS_MAC_OS && (
         <div className="tauri-drag-region" data-tauri-drag-region />
@@ -669,7 +674,6 @@ const Main = ({
       <DownloadManager />
       <ConfettiContainer />
       {IS_WAVE_TRANSFORM_SUPPORTED && <WaveContainer />}
-      <SnapEffectContainer />
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
@@ -739,6 +743,7 @@ export default memo(withGlobal<OwnProps>(
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
+      chatId,
       currentUserId,
       hasCurrentUser: Boolean(selectUser(global, currentUserId!)),
       isLeftColumnOpen: isLeftColumnShown,

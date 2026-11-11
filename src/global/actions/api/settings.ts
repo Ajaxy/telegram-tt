@@ -1,4 +1,5 @@
 import type { ApiError, ApiPrivacySettings, ApiUsername } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 import type { ActionReturnType } from '../../types';
 import {
   LeftColumnContent,
@@ -22,17 +23,18 @@ import { requestPermission, subscribe, unsubscribe } from '../../../util/notific
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
 import { resolveSettingsLink } from '../../../util/settingsLinks';
+import { getChatThemeEntry, RESET_WALLPAPER_SETTINGS } from '../../../util/wallpaper';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
   addBlockedUser, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replacePersonalChannelIds, replaceSettings, updateChat,
-  updateNotifyDefaults, updateSharedSettings, updateUser, updateUserFullInfo,
+  updateNotifyDefaults, updateSharedSettings, updateThemeSettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat, selectIsCurrentUserFrozen,
+  selectChat, selectCurrentMessageList, selectIsCurrentUserFrozen,
   selectLanguageCode,
   selectTabState, selectUser,
 } from '../../selectors';
@@ -231,6 +233,49 @@ addActionHandler('loadWallpapers', async (global): Promise<void> => {
     },
   };
   setGlobal(global);
+});
+
+addActionHandler('loadChatThemes', async (global): Promise<void> => {
+  const result = await callApi('fetchChatThemes');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      chatThemes: result.chatThemes,
+    },
+  };
+  CHAT_THEME_KEYS.forEach((theme) => {
+    const emoticon = selectSharedSettings(global).themes[theme]?.chatThemeEmoticon;
+    const chatTheme = result.chatThemes.find((entry) => entry.emoticon === emoticon);
+    global = updateThemeSettings(global, theme, {
+      chatThemeEmoticon: chatTheme?.emoticon,
+      serverThemeSettings: chatTheme && getChatThemeEntry(chatTheme.settings, theme === 'dark'),
+    });
+  });
+  setGlobal(global);
+});
+
+const CHAT_THEME_KEYS: ThemeKey[] = ['light', 'dark'];
+
+addActionHandler('applyChatTheme', (global, actions, { emoticon, tabId = getCurrentTabId() }): ActionReturnType => {
+  const chatTheme = global.settings.chatThemes?.find((theme) => theme.emoticon === emoticon);
+  if (emoticon && !chatTheme) return global;
+
+  CHAT_THEME_KEYS.forEach((theme) => {
+    global = updateThemeSettings(global, theme, {
+      ...RESET_WALLPAPER_SETTINGS,
+      chatThemeEmoticon: emoticon,
+      serverThemeSettings: chatTheme && getChatThemeEntry(chatTheme.settings, theme === 'dark'),
+    });
+  });
+  return updateTabState(global, {
+    globalThemePreviewChatId: selectCurrentMessageList(global, tabId)?.chatId,
+  }, tabId);
 });
 
 addActionHandler('uploadWallpaper', async (global, actions, payload): Promise<void> => {

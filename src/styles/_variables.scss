@@ -80,6 +80,11 @@
     --color-background-own-selected: #{color.adjust($color-light-green, $lightness: -10%, $space: hsl)};
     --color-text: #{$color-black};
     --color-text-rgb: #{toRGB($color-black)};
+    --color-text-own: var(--color-text);
+    --color-text-own-rgb: var(--color-text-rgb);
+    --color-text-secondary-own: var(--color-text-secondary);
+    --color-text-secondary-own-rgb: var(--color-text-secondary-rgb);
+    --color-poll-check-own: var(--color-white);
     --color-text-lighter: #{$color-dark-gray};
     --color-text-secondary: #{$color-text-secondary};
     --color-icon-secondary: #{$color-text-secondary};
@@ -109,6 +114,7 @@
     --color-voice-transcribe-button-own: #cceebf;
 
     --color-primary: #{$color-primary};
+    --color-primary-foreground: #{$color-white};
     --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
     --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
     --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
@@ -128,6 +134,8 @@
     --color-green-rgb: #{toRGB($color-green)};
 
     --color-error: #{$color-error};
+    --color-error-background: #b3261e;
+    --color-error-foreground: #{$color-white};
     --color-error-shade: #{color.mix($color-error, $color-black, 92%)};
     --color-error-rgb: #{toRGB($color-error)};
 
@@ -151,6 +159,51 @@
     --color-code-bg: #{rgba($color-text-secondary, 0.08)};
     --color-code-own: #3c7940;
     --color-code-own-bg: #{rgba($color-text-secondary, 0.08)};
+
+    @each $direction in incoming, outgoing {
+      --message-#{$direction}-text: #000000;
+      --message-#{$direction}-text-rgb: 0, 0, 0;
+      --message-#{$direction}-secondary: #404040;
+      --message-#{$direction}-secondary-rgb: 64, 64, 64;
+      --message-#{$direction}-meta: #404040;
+      --message-#{$direction}-meta-rgb: 64, 64, 64;
+      --message-#{$direction}-links: #000000;
+      --message-#{$direction}-links-decoration: underline;
+      --message-#{$direction}-accent: #000000;
+      --message-#{$direction}-accent-rgb: 0, 0, 0;
+      --message-#{$direction}-accent-foreground: #ffffff;
+      --message-#{$direction}-control: var(--color-primary);
+      --message-#{$direction}-control-foreground: #ffffff;
+      --message-#{$direction}-file-title: var(--color-text);
+      --message-#{$direction}-file-description: var(--color-text-secondary);
+      --message-#{$direction}-checkbox-fill: var(--color-primary);
+      --message-#{$direction}-checkbox-foreground: #ffffff;
+      --message-#{$direction}-table-background: #0000000d;
+      --message-#{$direction}-table-border: #0000001a;
+      --message-#{$direction}-tint: #0000001f;
+      --message-#{$direction}-tint-hover: #0000003d;
+      --message-#{$direction}-ripple: #ffffff14;
+      --message-#{$direction}-selected-text: #000000;
+      --message-#{$direction}-error: #000000;
+      --message-#{$direction}-error-background: #b3261e;
+      --message-#{$direction}-error-foreground: #ffffff;
+    }
+
+    --message-incoming-background: #ffffff;
+    --message-incoming-selected: #e6e6e6;
+    --message-outgoing-background: #eeffde;
+    --message-outgoing-selected: #d6e6c8;
+    --message-service-background: var(--action-message-bg);
+    --message-service-text: #ffffff;
+    --message-call-success: #63da6e;
+    --message-media-background: #000000b3;
+    --message-media-text: #ffffff;
+    --message-paid-background: #ffb727;
+    --message-paid-text: #202124;
+    --message-code-background: #202124;
+    --message-code-text: #f5f5f5;
+    --message-code-overlay-background: #303134;
+    --message-code-overlay-text: #f5f5f5;
 
     --color-accent-own: #{$color-text-green};
     --color-accent-own-rgb: #{toRGB($color-text-green)};

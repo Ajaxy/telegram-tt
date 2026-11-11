@@ -248,6 +248,7 @@ export type TabState = {
   ratingPhoneCall?: ApiPhoneCall;
 
   messageLists: MessageList[];
+  globalThemePreviewChatId?: string;
 
   contentToBeScheduled?: {
     gif?: ApiVideo;

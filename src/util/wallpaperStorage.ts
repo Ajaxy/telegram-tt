@@ -2,11 +2,17 @@
 // that can be evicted by the browser and are moved to IDB when found.
 import type { ApiWallpaper } from '../api/types';
 import type { IThemeSettings, ThemeKey } from '../types';
+import { ApiMediaFormat } from '../api/types';
 
 import { CUSTOM_BG_CACHE_NAME } from '../config';
 import { MAIN_IDB_STORE } from './browser/idb';
+import { IS_IOS } from './browser/windowEnvironment';
+import { isSessionStoreLocked } from './passcode/sessionStore';
 import * as cacheApi from './cacheApi';
+import { sampleImageEdgeColors } from './colors';
 import { fetchBlob, preloadImage } from './files';
+import * as mediaLoader from './mediaLoader';
+import { getAccountSlots } from './multiaccount';
 import {
   clearWallpaperVaultBlobs,
   loadPasscodeMeta,
@@ -23,6 +29,7 @@ type WallpaperUrlEntry = {
   refCount: number;
   // Kept for the synchronous first-render path (`getResolvedWallpaperUrl`)
   url?: string;
+  edgeColors?: ReturnType<typeof sampleImageEdgeColors>;
   revokeTimeout?: number;
 };
 
@@ -41,6 +48,7 @@ const LOCK_SCREEN_WALLPAPER_STORE_KEY_PREFIX = 'lock-screen-wallpaper-';
 
 const wallpaperUrlEntries = new Map<string, WallpaperUrlEntry>();
 const blobCleanupTimeouts = new Map<string, number>();
+const pendingThemeWallpapers = new Map<string, Promise<boolean>>();
 
 export function saveWallpaperBlob(slug: string, blob: Blob) {
   return requestPasscodeStateLock(async () => {
@@ -69,6 +77,31 @@ export async function cacheWallpaperMedia(wallpaper: ApiWallpaper, mediaUrl: str
   const rawBlob = await fetchBlob(mediaUrl);
   const blob = wallpaper.isPattern ? await decodeWallpaperPatternBlob(rawBlob) : rawBlob;
   return saveWallpaperBlob(wallpaper.slug, blob);
+}
+
+export function cacheThemeWallpaper(wallpaper: ApiWallpaper): Promise<boolean> {
+  if (!wallpaper.document) return Promise.resolve(false);
+
+  const pending = pendingThemeWallpapers.get(wallpaper.slug);
+  if (pending) return pending;
+
+  const promise = loadThemeWallpaper(wallpaper).finally(() => {
+    pendingThemeWallpapers.delete(wallpaper.slug);
+  });
+  pendingThemeWallpapers.set(wallpaper.slug, promise);
+  cancelBlobCleanup(wallpaper.slug);
+  return promise;
+}
+
+async function loadThemeWallpaper(wallpaper: ApiWallpaper): Promise<boolean> {
+  try {
+    if (await loadStoredWallpaperBlob(wallpaper.slug)) return true;
+
+    const url = await mediaLoader.fetch(`wallpaper${wallpaper.document!.id}`, ApiMediaFormat.BlobUrl);
+    return url ? await cacheWallpaperMedia(wallpaper, url) : false;
+  } catch {
+    return false;
+  }
 }
 
 export async function encryptWallpaperBlobs() {
@@ -192,7 +225,9 @@ export function removeWallpaperBlobIfUnused(
   cancelBlobCleanup(background);
   const timeout = window.setTimeout(() => {
     blobCleanupTimeouts.delete(background);
-    if (!getSelectedBackgrounds().includes(background)) {
+    // Shared blobs can be referenced by other accounts whose peer state is unavailable here
+    if (isSessionStoreLocked() || getAccountSlots().length > 1) return;
+    if (!pendingThemeWallpapers.has(background) && !getSelectedBackgrounds().includes(background)) {
       void removeWallpaperBlob(background);
     }
   }, BLOB_CLEANUP_DELAY_MS);
@@ -215,6 +250,10 @@ export async function prefetchWallpaperUrl(background?: string) {
 // it is already loaded (e.g. prefetched). The caller must still acquire a handle to keep it alive.
 export function getResolvedWallpaperUrl(slug: string, source?: WallpaperStorageSource) {
   return wallpaperUrlEntries.get(buildWallpaperUrlKey(slug, source))?.url;
+}
+
+export function getResolvedWallpaperEdgeColors(slug: string, source?: WallpaperStorageSource) {
+  return wallpaperUrlEntries.get(buildWallpaperUrlKey(slug, source))?.edgeColors;
 }
 
 export function acquireWallpaperUrl(slug: string, source?: WallpaperStorageSource): WallpaperUrlHandle {
@@ -243,12 +282,14 @@ function getOrCreateWallpaperUrlEntry(slug: string, source?: WallpaperStorageSou
   if (existing) return existing;
 
   const entry: WallpaperUrlEntry = {
-    promise: loadWallpaperUrl(slug, source),
+    promise: loadWallpaperUrl(slug, source).then(({ url, edgeColors }) => {
+      entry.url = url;
+      entry.edgeColors = edgeColors;
+      return url;
+    }),
     refCount: 0,
   };
-  entry.promise.then((url) => {
-    entry.url = url;
-  }, () => {
+  entry.promise.catch(() => {
     if (wallpaperUrlEntries.get(storageKey) === entry) {
       wallpaperUrlEntries.delete(storageKey);
     }
@@ -262,13 +303,15 @@ async function loadWallpaperUrl(slug: string, source?: WallpaperStorageSource) {
   const url = URL.createObjectURL(blob);
 
   try {
-    await preloadImage(url);
+    const image = await preloadImage(url);
+    return {
+      url,
+      edgeColors: IS_IOS && source !== 'lockScreen' ? sampleImageEdgeColors(image) : undefined,
+    };
   } catch (err) {
     URL.revokeObjectURL(url);
     throw err;
   }
-
-  return url;
 }
 
 async function loadWallpaperBlob(slug: string, source?: WallpaperStorageSource): Promise<Blob> {

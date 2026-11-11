@@ -52,15 +52,23 @@
       height: 100%;
 
       // The wallpaper's own intensity, so the tile previews the same pattern strength as the chat
-      opacity: var(--pattern-intensity, 0.7);
-      // Match the chat background's overlay blend mode
-      background-color: #000;
+      opacity: var(--pattern-intensity, 0.5);
+      background-image: var(--pattern-mask);
+      background-repeat: repeat;
+      background-position: center;
+      background-size: 8.75rem auto;
       mix-blend-mode: soft-light;
+    }
 
-      mask-image: var(--pattern-mask);
-      mask-repeat: repeat;
-      mask-position: center;
-      mask-size: 8.75rem auto;
+    &.plainPattern .pattern {
+      mix-blend-mode: normal;
+    }
+
+    .pattern-dimming {
+      position: absolute;
+      inset: 0;
+      opacity: var(--pattern-dimming);
+      background: #000;
     }
 
     // Masked (dark) patterns render like the chat: a black base with the gradient revealed

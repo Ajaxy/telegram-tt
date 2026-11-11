@@ -142,10 +142,11 @@
     height: 1.3125rem;
     border-radius: 0.5rem;
 
-    background: var(--action-message-bg);
+    color: var(--message-service-text);
+
+    background: var(--message-service-background);
     &:hover {
-      opacity: 0.8;
-      background: var(--action-message-bg) !important;
+      background: var(--message-service-background) !important;
     }
   }
 

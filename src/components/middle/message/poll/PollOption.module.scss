@@ -2,7 +2,8 @@
   --poll-option-media-width: 0;
   --percent-column-width: 2rem;
   --ui-border-color: var(--secondary-color);
-  --ui-accent-color: var(--accent-color);
+  --ui-accent-color: var(--message-control, var(--accent-color));
+  --ui-check-color: var(--color-primary-foreground);
 
   display: grid;
   grid-template-columns:
@@ -13,10 +14,6 @@
   grid-template-rows: auto auto;
   column-gap: 0.375rem;
   align-items: start;
-
-  :global(.theme-dark .Message.own) & {
-    --ui-check-color: var(--color-primary);
-  }
 
   :global(body.is-macos) & {
     --percent-column-width: 2.25rem;
@@ -55,7 +52,7 @@
 
 .addAnswerIcon {
   font-size: 1.5rem;
-  color: var(--color-text-secondary);
+  color: var(--secondary-color);
 }
 
 .addAnswerInput {
@@ -70,6 +67,11 @@
 
   background: transparent;
   outline: 0;
+
+  &::placeholder {
+    color: var(--secondary-color);
+    opacity: 1;
+  }
 
   &:focus-visible {
     border-radius: 0.25rem;
@@ -173,9 +175,9 @@
   height: 3rem;
   border-radius: 0.5rem;
 
-  color: var(--color-white);
+  color: var(--message-media-text);
 
-  background-color: var(--accent-background-active-color);
+  background-color: var(--message-tint-hover, var(--accent-background-active-color));
 }
 
 .webPageMedia {
@@ -200,13 +202,13 @@
 
   font-size: 1.25rem;
   line-height: 1;
-  color: var(--color-white);
+  color: var(--message-media-text);
 
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: var(--message-media-background);
 }
 
 .webPageFallback .webPageIcon {
-  color: var(--accent-color);
+  color: var(--message-accent, var(--accent-color));
   background-color: transparent;
 }
 
@@ -231,7 +233,7 @@
   border-radius: 0.5rem;
 
   font-size: 0.875rem;
-  color: var(--ui-check-color, var(--color-white));
+  color: var(--ui-check-color);
 
   background-color: var(--ui-accent-color);
 }
@@ -241,8 +243,12 @@
 }
 
 .incorrect {
+  .chosenMarkerIcon {
+    color: var(--color-error-foreground);
+  }
+
   .chosenMarkerIcon, .progressFill {
-    background-color: var(--color-error);
+    background-color: var(--color-error-background);
   }
 }
 
@@ -254,7 +260,7 @@
   min-height: 0.25rem;
   border-radius: 0.125rem;
 
-  background-color: var(--accent-background-color);
+  background-color: var(--message-tint, var(--accent-background-color));
 }
 
 .progressTrack {
@@ -272,7 +278,7 @@
   height: 100%;
   border-radius: inherit;
 
-  background-color: var(--color-accent, var(--accent-color));
+  background-color: var(--message-accent, var(--accent-color));
 }
 
 .animated {

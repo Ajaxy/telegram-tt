@@ -1,17 +1,21 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiBaseTheme,
   ApiChatLink,
+  ApiChatTheme,
   ApiCollectibleInfo,
   ApiConfig,
   ApiCountry,
   ApiLanguage,
   ApiPasskey,
+  ApiPeerTheme,
   ApiPendingSuggestion,
   ApiPrivacyKey,
   ApiPromoData,
   ApiRestrictionReason,
   ApiSession,
+  ApiThemeSettings,
   ApiTimezone,
   ApiUrlAuthResult,
   ApiWallpaper,
@@ -20,14 +24,17 @@ import type {
   LangPackStringValue,
 } from '../../types';
 
+import int2hex from '../../../util/int2hex';
 import { omitUndefined, pick } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
-import { addUserToLocalDb } from '../helpers/localDb';
+import { addDocumentToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction } from './reactions';
 import { buildApiUser } from './users';
+
+const PATTERN_MIME_TYPE = 'application/x-tgwallpattern';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
   if (wallpaper instanceof GramJs.WallPaperNoFile) {
@@ -46,6 +53,8 @@ export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper
 
   const { slug } = wallpaper;
 
+  addDocumentToLocalDb(wallpaper.document);
+
   const document = buildApiDocument(wallpaper.document);
 
   if (!document) {
@@ -55,7 +64,8 @@ export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper
   return {
     slug,
     document,
-    isPattern: wallpaper.pattern,
+    // The server can omit the `pattern` flag while retaining the pattern MIME type
+    isPattern: wallpaper.pattern || document.mimeType === PATTERN_MIME_TYPE || undefined,
     isDark: wallpaper.dark,
     isCreator: wallpaper.creator,
     isDefault: wallpaper.default,
@@ -79,6 +89,63 @@ function buildApiWallpaperSettings(settings: GramJs.TypeWallPaperSettings): ApiW
     emoticon,
     isBlurred: blur,
     isMoving: motion,
+  };
+}
+
+const BASE_THEME_BY_CLASS_NAME: Record<string, ApiBaseTheme> = {
+  BaseThemeClassic: 'classic',
+  BaseThemeDay: 'day',
+  BaseThemeNight: 'night',
+  BaseThemeTinted: 'tinted',
+  BaseThemeArctic: 'day',
+};
+
+export function buildApiChatTheme(theme: GramJs.Theme): ApiChatTheme | undefined {
+  if (!theme.emoticon || !theme.settings?.length) {
+    return undefined;
+  }
+
+  const settings = theme.settings
+    .map(buildApiThemeSettings)
+    .filter(Boolean);
+
+  if (!settings.length) {
+    return undefined;
+  }
+
+  return {
+    emoticon: theme.emoticon,
+    isDefault: theme.default,
+    settings,
+  };
+}
+
+export function buildApiPeerTheme(theme: GramJs.TypeChatTheme): ApiPeerTheme | undefined {
+  if (theme instanceof GramJs.ChatTheme) {
+    return theme.emoticon ? { type: 'emoticon', emoticon: theme.emoticon } : undefined;
+  }
+
+  const settings = theme.themeSettings.map(buildApiThemeSettings).filter(Boolean);
+  return settings.length ? { type: 'gift', settings } : undefined;
+}
+
+function buildApiThemeSettings(settings: GramJs.TypeThemeSettings): ApiThemeSettings | undefined {
+  if (!(settings instanceof GramJs.ThemeSettings)) {
+    return undefined;
+  }
+
+  const baseTheme = BASE_THEME_BY_CLASS_NAME[settings.baseTheme.className];
+  if (!baseTheme) {
+    return undefined;
+  }
+
+  return {
+    baseTheme,
+    accentColor: int2hex(settings.accentColor),
+    outgoingColors: settings.messageColors?.map(int2hex),
+    areOutgoingColorsAnimated: settings.messageColorsAnimated,
+    outboxAccentColor: settings.outboxAccentColor !== undefined ? int2hex(settings.outboxAccentColor) : undefined,
+    wallpaper: settings.wallpaper && buildApiWallpaper(settings.wallpaper),
   };
 }
 

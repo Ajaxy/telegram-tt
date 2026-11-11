@@ -91,7 +91,6 @@ import {
 } from '../../reducers/threads';
 import { updateUserFullInfo } from '../../reducers/users';
 import {
-  selectCanAnimateSnapEffect,
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
@@ -131,7 +130,6 @@ import {
 } from '../../selectors/threads';
 
 const ANIMATION_DELAY = 350;
-const SNAP_ANIMATION_DELAY = 1000;
 const VIDEO_PROCESSING_NOTIFICATION_DELAY = 1000;
 let lastVideoProcessingNotificationTime = 0;
 
@@ -1801,14 +1799,13 @@ function deleteChatMessagesWithAnimation<T extends GlobalState>(global: T, chatI
     global = updateChatMessage(global, chatId, id, { isDeleting: true });
   });
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
   setTimeout(() => {
     global = getGlobal();
     // Prevent local deletion of sent messages in case of desync
     const stillDeletedIds = ids.filter((id) => selectChatMessage(global, chatId, id)?.isDeleting);
     global = deleteChatMessages(global, chatId, stillDeletedIds);
     setGlobal(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 
   return global;
 }
@@ -1833,7 +1830,6 @@ export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(
   });
   setGlobal(global);
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
   setTimeout(() => {
     global = getGlobal();
     const stillDeletingIds = messages
@@ -1842,7 +1838,7 @@ export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(
     global = deleteEphemeralMessages(global, chatId, stillDeletingIds);
     setGlobal(global);
     scheduleEphemeralExpiration(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 }
 
 function isEphemeralMessageInCurrentThread<T extends GlobalState>(
@@ -1883,11 +1879,9 @@ function deleteScheduledMessages<T extends GlobalState>(
     }
   });
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
-
   setTimeout(() => {
     global = getGlobal();
     global = deleteChatScheduledMessages(global, chatId, ids);
     setGlobal(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 }

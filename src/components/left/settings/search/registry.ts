@@ -301,7 +301,7 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   ]),
 
   ...buildEntries(SettingsScreens.General, ['TextSize'], { keywordsKey: 'SettingsKeywordsTextSize' }),
-  ...buildEntries(SettingsScreens.General, ['Theme'], { keywordsKey: 'SettingsKeywordsTheme' }),
+  ...buildEntries(SettingsScreens.General, ['ColorTheme'], { keywordsKey: 'SettingsKeywordsTheme' }),
   ...buildEntries(SettingsScreens.General, ['SettingsTimeFormat'], { keywordsKey: 'SettingsKeywordsTimeFormat' }),
   ...buildEntries(SettingsScreens.General, [
     'EmptyChatAppearanceLight', 'EmptyChatAppearanceDark', 'EmptyChatAppearanceSystem', 'SettingsTimeFormat12',
@@ -341,7 +341,6 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
     'SettingsPerformanceReactionEffects', 'SettingsPerformanceStickerEffects', 'SettingsPerformanceAutoplayGif',
     'SettingsPerformanceAutoplayVideo',
   ]),
-  ...buildEntries(SettingsScreens.Performance, ['SettingsPerformanceThanos'], { requires: 'isSnapEffectSupported' }),
 
   ...buildEntries(SettingsScreens.Stickers, ['SuggestStickers', 'InstalledStickersDynamicPackOrder']),
   ...buildEntries(SettingsScreens.Stickers, ['ChooseStickerMyStickerSets'], { requires: 'areStickerSetsLoaded' }),

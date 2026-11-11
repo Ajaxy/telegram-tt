@@ -66,10 +66,8 @@
 
     color: var(--accent-color) !important;
 
-    transition: opacity 0.2s ease-in;
-
     &:hover, &:active {
-      opacity: 0.85;
+      border-top-color: var(--accent-color);
       background-color: transparent !important;
     }
 
@@ -95,10 +93,8 @@
 
     &_interactive {
       cursor: var(--custom-cursor, pointer);
-      transition: opacity 0.15s;
-
-      &:hover {
-        opacity: 0.75;
+      &:hover .site-title {
+        text-decoration: underline;
       }
     }
   }

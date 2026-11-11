@@ -101,9 +101,6 @@ export const IS_TUCK_SUPPORTED = !IS_MOBILE && !IS_SAFARI
   // https://crbug.com/473562220
   && (!IS_CHROMIUM || CHROMIUM_VERSION >= MIN_CHROMIUM_TUCK_VERSION);
 export const IS_SVG_CALC_SUPPORTED = checkSvgFilterCalcSupport();
-export const IS_SNAP_EFFECT_SUPPORTED = !IS_MOBILE
-  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1896504
-  && !IS_SAFARI;
 export const IS_FLUID_BACKGROUND_SUPPORTED = !IS_FIREFOX;
 
 const TEST_VIDEO = document.createElement('video');

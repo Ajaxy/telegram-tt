@@ -97,7 +97,7 @@ const SETTINGS_LINKS = new Map<string, SettingsLink>([
   ]],
 
   ['appearance', [SettingsScreens.General]],
-  ['appearance/themes', [SettingsScreens.General, 'Theme']],
+  ['appearance/themes', [SettingsScreens.General, 'ColorTheme']],
   ['appearance/night-mode', [SettingsScreens.General, 'EmptyChatAppearanceDark']],
   ['appearance/auto-night-mode', [SettingsScreens.General, 'EmptyChatAppearanceSystem']],
   ['appearance/text-size', [SettingsScreens.General, 'TextSize']],

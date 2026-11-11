@@ -234,15 +234,12 @@
 
 .checkboxWrapper {
   --ui-border-color: var(--secondary-color);
-  --ui-accent-color: var(--accent-color);
+  --ui-accent-color: var(--message-checkbox-fill, var(--accent-color));
+  --ui-check-color: var(--message-checkbox-foreground, var(--color-primary-foreground));
 
   display: inline-flex;
   margin-inline-end: 0.25rem;
   vertical-align: text-bottom;
-
-  :global(.theme-dark .Message.own) & {
-    --ui-check-color: var(--color-primary);
-  }
 }
 
 .pullquote {
@@ -362,11 +359,11 @@
 
 .tableHeaderCell {
   font-weight: var(--font-weight-normal);
-  background: var(--color-code-bg);
+  background: var(--message-table-background, var(--color-code-bg));
 }
 
 .stripedRow {
-  background-color: var(--color-code-bg);
+  background-color: var(--message-table-background, var(--color-code-bg));
 }
 
 .relatedArticlesTitle {

@@ -2,6 +2,7 @@ import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiAudio, ApiDocument, ApiFormattedText, ApiPhoto } from './messages';
+import type { ApiPeerTheme, ApiWallpaper } from './misc';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
@@ -56,6 +57,8 @@ export interface ApiUser {
 }
 
 export interface ApiUserFullInfo {
+  peerTheme?: ApiPeerTheme;
+  wallpaper?: ApiWallpaper;
   isBlocked?: boolean;
   ttlPeriod?: number;
   bio?: string;

@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiPeer } from '../../../api/types';
+import type { ApiPeer, ApiWallpaper } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { IThemeSettings, ThemeKey } from '../../../types';
 import type { QrGradientStops } from '../../../util/qrCode/buildStyledQrCode';
@@ -13,7 +13,9 @@ import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../../config';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getChatAvatarHash } from '../../../global/helpers/chats';
 import { getMainUsername } from '../../../global/helpers/users';
-import { selectPeer, selectTheme, selectThemeValues } from '../../../global/selectors';
+import {
+  selectChatWallpaper, selectChatWallpaperSettings, selectPeer, selectTheme, selectThemeValues,
+} from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { CLIPBOARD_ITEM_SUPPORTED, copyTextToClipboard } from '../../../util/clipboard';
@@ -52,6 +54,8 @@ type StateProps = {
   username?: string;
   theme: ThemeKey;
   themeSettings?: IThemeSettings;
+  serverWallpaper?: ApiWallpaper;
+  fallbackThemeSettings?: IThemeSettings;
 };
 
 const QR_SIZE = 260;
@@ -70,6 +74,8 @@ const QrCodeModal = ({
   username,
   theme,
   themeSettings,
+  serverWallpaper,
+  fallbackThemeSettings,
 }: OwnProps & StateProps) => {
   const { closeQrCodeModal, showNotification } = getActions();
 
@@ -86,16 +92,18 @@ const QrCodeModal = ({
 
   const lang = useLang();
   const customBackground = themeSettings?.background;
-  const customBackgroundValue = useCustomBackground(theme, customBackground);
+  const customBackgroundValue = useCustomBackground(theme, customBackground, undefined, undefined, serverWallpaper);
 
   const gradient = QR_GRADIENT_BY_THEME[theme];
   const shouldWaitForAvatar = Boolean(peer && getChatAvatarHash(peer, 'big'));
-  const isCustomBackgroundReady = getIsCustomBackgroundReady(customBackground, customBackgroundValue);
+  const shouldUseFallback = Boolean(serverWallpaper?.document && !customBackgroundValue);
+  const isCustomBackgroundReady = shouldUseFallback
+    || getIsCustomBackgroundReady(customBackground, customBackgroundValue);
   const wallpaperSnapshot = useMemo<QrWallpaperSnapshot>(() => ({
-    model: buildWallpaperRenderModel(theme, themeSettings || {}),
+    model: buildWallpaperRenderModel(theme, (shouldUseFallback ? fallbackThemeSettings : themeSettings) || {}),
     resourceUrl: getBackgroundResourceUrl(customBackgroundValue),
     fallbackColor: theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
-  }), [customBackgroundValue, theme, themeSettings]);
+  }), [customBackgroundValue, theme, themeSettings, shouldUseFallback, fallbackThemeSettings]);
   const usernameText = username
     ? formatUsername(username).toUpperCase()
     : undefined;
@@ -315,13 +323,15 @@ export default memo(withGlobal<OwnProps>(
     const username = peer ? getMainUsername(peer) : undefined;
 
     const theme = selectTheme(global);
-    const themeSettings = selectThemeValues(global, theme);
+    const themeSettings = selectChatWallpaperSettings(global);
 
     return {
       peer,
       username,
       theme,
       themeSettings,
+      serverWallpaper: selectChatWallpaper(global),
+      fallbackThemeSettings: selectThemeValues(global, theme),
     };
   },
 )(QrCodeModal));

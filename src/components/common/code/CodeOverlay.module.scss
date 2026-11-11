@@ -23,10 +23,10 @@
 
   font-size: 1.25rem;
 
-  transition: background-color 0.15s ease-in-out;
+  transition: background-color var(--message-color-transition-duration, 0.15s) ease-in-out;
 
   &:hover, &.wrapOn {
-    background-color: var(--color-background-compact-menu-hover);
+    background-color: #45464a;
   }
 }
 
@@ -43,8 +43,9 @@
   padding: 0.125rem;
   border-bottom-left-radius: 0.25rem;
 
-  background-color: var(--color-background-compact-menu);
-  backdrop-filter: blur(1px);
+  color: var(--message-code-overlay-text);
+
+  background-color: var(--message-code-overlay-background);
 
   &.hidden {
     display: none;

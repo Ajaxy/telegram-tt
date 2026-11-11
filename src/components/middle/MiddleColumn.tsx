@@ -2,7 +2,7 @@ import type { ElementRef } from '@teact';
 import { memo, useEffect, useRef, useState } from '@teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiChatBannedRights, ApiInputDraftReplyInfo, ApiTopic } from '../../api/types';
+import type { ApiChat, ApiChatBannedRights, ApiInputDraftReplyInfo, ApiThemeSettings, ApiTopic } from '../../api/types';
 import type { ActiveEmojiInteraction, AnimationLevel, MessageListType, ThemeKey, ThreadId } from '../../types';
 import type { PaneState } from './hooks/useHeaderPane';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -36,6 +36,8 @@ import {
   selectCanAnimateInterface, selectCanAnimateRightColumn,
   selectChat,
   selectChatFullInfo,
+  selectChatThemeSettings,
+  selectChatWallpaperSettings,
   selectCurrentMessageList,
   selectCurrentMiddleSearch,
   selectIsChatBotNotStarted,
@@ -50,7 +52,6 @@ import {
   selectPinnedIds,
   selectTabState,
   selectTheme,
-  selectThemeValues,
   selectTopic,
   selectTopics,
   selectUserFullInfo,
@@ -69,6 +70,7 @@ import getHasMiddleFooter, { getHasFooterActionBar } from './helpers/getHasMiddl
 import { measureFooterContentHeight, syncMessageListBottomReserve } from './helpers/messageListReserves';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useChatTheme from '../../hooks/useChatTheme';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -123,6 +125,7 @@ type StateProps = {
   defaultBannedRights?: ApiChatBannedRights;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
+  serverThemeSettings?: ApiThemeSettings;
   customBackground?: string;
   backgroundColor?: string;
   patternColor?: string;
@@ -200,6 +203,7 @@ function MiddleColumn({
   pinnedMessagesCount,
   customBackground,
   theme,
+  serverThemeSettings,
   backgroundColor,
   patternColor,
   actionMessageBg,
@@ -306,6 +310,7 @@ function MiddleColumn({
   );
 
   const middleColumnRef = useRef<HTMLDivElement>();
+  useChatTheme(middleColumnRef, chatId, theme, serverThemeSettings, withInterfaceAnimations, actionMessageBg);
   const dropAreaHideTimeoutRef = useRef<number>();
   const isViewportAnimatingRef = useRef(false);
   const getIsKeyboardAnimating = useLastCallback(() => isViewportAnimatingRef.current);
@@ -736,7 +741,7 @@ export default memo(withGlobal<OwnProps>(
     const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
-    } = selectThemeValues(global, theme) || {};
+    } = selectChatWallpaperSettings(global, selectCurrentMessageList(global)?.chatId) || {};
 
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
@@ -749,6 +754,7 @@ export default memo(withGlobal<OwnProps>(
 
     const state: StateProps = {
       theme,
+      serverThemeSettings: selectChatThemeSettings(global, currentMessageList?.chatId),
       customBackground,
       backgroundColor,
       patternColor,

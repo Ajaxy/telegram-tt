@@ -28,6 +28,7 @@ import { BLOCKED_LIST_LIMIT } from '../../../limits';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
 import { buildApiDisallowedGiftsSettings } from '../apiBuilders/gifts';
 import {
+  buildApiChatTheme,
   buildApiCountryList,
   buildApiLanguage,
   buildApiPasskey,
@@ -226,6 +227,18 @@ export async function fetchWallpapers() {
 
   return {
     wallpapers: result.wallpapers.map(buildApiWallpaper).filter(Boolean),
+  };
+}
+
+export async function fetchChatThemes() {
+  const result = await invokeRequest(new GramJs.account.GetChatThemes({ hash: BigInt('0') }));
+
+  if (!result || result instanceof GramJs.account.ThemesNotModified) {
+    return undefined;
+  }
+
+  return {
+    chatThemes: result.themes.map(buildApiChatTheme).filter(Boolean),
   };
 }
 

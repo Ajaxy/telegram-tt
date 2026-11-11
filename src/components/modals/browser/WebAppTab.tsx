@@ -12,6 +12,7 @@ import type {
   WebAppInboundEvent,
   WebAppOutboundEvent,
 } from '../../../types/webapp';
+import type { ThemePalette } from '../../../util/theme';
 
 import { TME_LINK_PREFIX, VERIFY_AGE_MIN_DEFAULT } from '../../../config';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
@@ -19,6 +20,7 @@ import { convertToApiChatType, getUserFullName } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
   selectBotAppPermissions,
+  selectChatThemePalette,
   selectTabState,
   selectTheme,
   selectUser,
@@ -86,6 +88,7 @@ type StateProps = {
   botAppSettings?: ApiBotAppSettings;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
+  themePalette: ThemePalette;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
   modalState?: BrowserModalStateType;
@@ -118,6 +121,7 @@ const WebAppTab = ({
   webApp,
   bot,
   theme,
+  themePalette,
   isPaymentModalOpen,
   paymentStatus,
   isActive,
@@ -165,7 +169,7 @@ const WebAppTab = ({
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
   const [clipboardRequestId, setClipboardRequestId] = useState<string>();
   const [requestedFileDownload, setRequestedFileDownload] = useState<{ url: string; fileName: string }>();
-  const [bottomBarColor, setBottomBarColor] = useState<string>();
+  const [bottomBarColorFromEvent, setBottomBarColorFromEvent] = useState<string>();
   const {
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
@@ -228,11 +232,7 @@ const WebAppTab = ({
     requestMeasure(() => {
       setThemeParams(extractCurrentThemeParams());
     });
-  }, [theme]);
-
-  useEffect(() => {
-    setBottomBarColor(themeParams.secondary_bg_color);
-  }, [themeParams]);
+  }, []);
 
   const themeBackgroundColor = themeParams.bg_color;
   const [backgroundColorFromEvent, setBackgroundColorFromEvent] = useState<string>();
@@ -362,15 +362,17 @@ const WebAppTab = ({
   });
 
   const sendThemeCallback = useLastCallback(() => {
+    setThemeParams(extractCurrentThemeParams());
     sendTheme();
   });
 
-  // Notify view that theme changed
-  useSyncEffect(() => {
-    setTimeout(() => {
-      sendThemeCallback();
+  // Read the final colors after the theme transition
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      requestMeasure(sendThemeCallback);
     }, ANIMATION_WAIT);
-  }, [theme]);
+    return () => clearTimeout(timeout);
+  }, [themePalette, sendThemeCallback]);
 
   const setFullscreenCallback = useLastCallback(() => {
     if (!checkIfFullscreen() && isActive) {
@@ -706,7 +708,7 @@ const WebAppTab = ({
 
     if (eventType === 'web_app_set_bottom_bar_color') {
       const color = getValidHexColor(eventData.color);
-      if (color) setBottomBarColor(color);
+      if (color) setBottomBarColorFromEvent(color);
     }
 
     if (eventType === 'web_app_data_send') {
@@ -1258,7 +1260,7 @@ const WebAppTab = ({
       />
       {!isMinimizedState && (
         <div
-          style={`background-color: ${bottomBarColor};`}
+          style={`background-color: ${bottomBarColorFromEvent || themeParams.secondary_bg_color};`}
           className={buildClassName(
             styles.buttonsContainer,
             renderingSecondaryButton?.position === 'left' && styles.leftToRight,
@@ -1451,6 +1453,7 @@ export default memo(withGlobal<OwnProps>(
       bot,
       currentUser,
       theme,
+      themePalette: selectChatThemePalette(global),
       isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
       paymentStatus,
       modalState,

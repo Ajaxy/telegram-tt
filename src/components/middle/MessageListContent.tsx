@@ -73,6 +73,7 @@ interface OwnProps {
   isComments?: boolean;
   noAvatars: boolean;
   containerRef: ElementRef<HTMLDivElement>;
+  ownGradientCanvasRef?: ElementRef<HTMLCanvasElement>;
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
@@ -155,6 +156,7 @@ const MessageListContent = ({
   isBotForum,
   noAvatars,
   containerRef,
+  ownGradientCanvasRef,
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
@@ -197,7 +199,7 @@ const MessageListContent = ({
     }
 
     const growth = newHeight - prevHeight;
-    if (growth > 0) onContentResize?.(growth);
+    onContentResize?.(growth);
   });
 
   useResizeObserver(messagesContainerRef, handleContentResize);
@@ -734,7 +736,14 @@ const MessageListContent = ({
   });
 
   return (
-    <div ref={messagesContainerRef} className="messages-container" teactFastList>
+    <div
+      ref={messagesContainerRef}
+      className={buildClassName('messages-container', ownGradientCanvasRef && 'with-own-gradient')}
+      teactFastList
+    >
+      {ownGradientCanvasRef && (
+        <canvas ref={ownGradientCanvasRef} key="own-gradient-canvas" className="own-gradient-canvas" />
+      )}
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo
         && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} hasMessages />}

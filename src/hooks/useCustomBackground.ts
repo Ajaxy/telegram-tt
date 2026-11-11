@@ -1,11 +1,12 @@
 import { useEffect, useState } from '../lib/teact/teact';
 import { getActions } from '../global';
 
+import type { ApiWallpaper } from '../api/types';
 import type { ThemeKey } from '../types';
 import type { WallpaperStorageSource } from '../util/wallpaperStorage';
 
 import { getDefaultPatternColor, RESET_WALLPAPER_SETTINGS } from '../util/wallpaper';
-import { acquireWallpaperUrl, getResolvedWallpaperUrl } from '../util/wallpaperStorage';
+import { acquireWallpaperUrl, cacheThemeWallpaper, getResolvedWallpaperUrl } from '../util/wallpaperStorage';
 
 type ResolvedBackground = {
   slug: string;
@@ -19,20 +20,10 @@ export default function useCustomBackground(
   settingValue?: string,
   shouldKeepPrevious?: boolean,
   source?: WallpaperStorageSource,
+  wallpaper?: ApiWallpaper,
 ) {
-  const { setThemeSettings } = getActions();
-  // An already-prefetched URL is available on the first render
-  const [resolved, setResolved] = useState<ResolvedBackground | undefined>(() => {
-    if (!settingValue || settingValue.startsWith('#')) return undefined;
-
-    const prefetchedUrl = getResolvedWallpaperUrl(settingValue, source);
-    return prefetchedUrl ? {
-      slug: settingValue,
-      source,
-      value: `url(${prefetchedUrl})`,
-      canKeepAsFallback: Boolean(shouldKeepPrevious),
-    } : undefined;
-  });
+  const { setThemeSettings, syncGlobalWallpaperCache } = getActions();
+  const [resolved, setResolved] = useState<ResolvedBackground>();
 
   useEffect(() => {
     // Colors are usable synchronously (handled below); only slugs need their cached blob loaded.
@@ -43,10 +34,19 @@ export default function useCustomBackground(
 
     let isCancelled = false;
 
-    const urlHandle = acquireWallpaperUrl(settingValue, source);
-    urlHandle.promise
+    let urlHandle: ReturnType<typeof acquireWallpaperUrl> | undefined;
+    async function resolveBackground() {
+      if (wallpaper?.document) {
+        if (!await cacheThemeWallpaper(wallpaper)) throw new Error('Wallpaper unavailable');
+        syncGlobalWallpaperCache({ background: wallpaper.slug });
+      }
+      if (isCancelled) return undefined;
+      urlHandle = acquireWallpaperUrl(settingValue!, source);
+      return urlHandle.promise;
+    }
+    resolveBackground()
       .then((url) => {
-        if (isCancelled) return;
+        if (isCancelled || !url) return;
         const value = `url(${url})`;
         setResolved((prev) => (prev?.slug === settingValue && prev.source === source && prev.value === value
           ? prev
@@ -59,7 +59,7 @@ export default function useCustomBackground(
       })
       .catch(() => {
         if (isCancelled) return;
-        if (source === 'lockScreen') {
+        if (source === 'lockScreen' || wallpaper) {
           setResolved(undefined);
           return;
         }
@@ -67,6 +67,7 @@ export default function useCustomBackground(
         setThemeSettings({
           theme,
           ...RESET_WALLPAPER_SETTINGS,
+          background: '',
           isBlurred: true,
           patternColor: getDefaultPatternColor(theme),
         });
@@ -74,16 +75,18 @@ export default function useCustomBackground(
 
     return () => {
       isCancelled = true;
-      urlHandle.release();
+      urlHandle?.release();
       // Pattern masks remain visible while the next mask resolves
       if (!shouldKeepPrevious) {
         setResolved((prev) => (prev?.slug === settingValue ? undefined : prev));
       }
     };
-  }, [settingValue, shouldKeepPrevious, source, theme]);
+  }, [settingValue, shouldKeepPrevious, source, theme, wallpaper]);
 
   if (!settingValue) return undefined;
   if (settingValue.startsWith('#')) return settingValue;
+  const prefetchedUrl = getResolvedWallpaperUrl(settingValue, source);
+  if (prefetchedUrl) return `url(${prefetchedUrl})`;
   if (resolved?.slug === settingValue && resolved.source === source) return resolved.value;
   return shouldKeepPrevious && resolved && resolved.source === source && resolved.canKeepAsFallback
     ? resolved.value

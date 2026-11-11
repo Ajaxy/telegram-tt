@@ -179,6 +179,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       setGlobal(global);
       break;
     case 'authorizationStateReady': {
+      getActions().loadChatThemes();
       if (wasAuthReady) {
         break;
       }

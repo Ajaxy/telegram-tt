@@ -27,13 +27,13 @@
 
     border-radius: 50%;
 
-    background: white;
+    background: var(--color-error-foreground);
   }
 
   .icon-message-failed {
     position: relative;
     z-index: 1;
-    color: var(--color-error);
+    color: var(--color-error-background);
     background: none;
   }
 }

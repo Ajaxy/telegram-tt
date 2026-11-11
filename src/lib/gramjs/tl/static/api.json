@@ -28,6 +28,7 @@
     "account.updateProfile",
     "account.updateStatus",
     "account.getWallPapers",
+    "account.getChatThemes",
     "account.checkUsername",
     "account.updateUsername",
     "account.getPrivacy",

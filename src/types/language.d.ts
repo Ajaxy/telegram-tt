@@ -425,6 +425,7 @@ export interface LangPair {
   'ChatBackground': undefined;
   'ChatBackgroundColorThemes': undefined;
   'Theme': undefined;
+  'ColorTheme': undefined;
   'AccDescrStickers': undefined;
   'DoubleTapSetting': undefined;
   'SuggestStickers': undefined;
@@ -675,7 +676,6 @@ export interface LangPair {
   'SettingsPerformanceContextAnimation': undefined;
   'SettingsPerformanceContextBlur': undefined;
   'SettingsPerformanceRightColumn': undefined;
-  'SettingsPerformanceThanos': undefined;
   'SettingsPerformanceTextStreaming': undefined;
   'SettingsPerformanceAnimatedEmoji': undefined;
   'SettingsPerformanceLoopStickers': undefined;
@@ -1709,6 +1709,13 @@ export interface LangPair {
   'ActionRemovedPhotoChannel': undefined;
   'ActionChangedPhotoYou': undefined;
   'ActionChangedPhotoChannel': undefined;
+  'ActionDisabledThemeYou': undefined;
+  'ActionDisabledThemeChannel': undefined;
+  'ActionChangedWallpaperYou': undefined;
+  'ActionSetSameWallpaperYou': undefined;
+  'ActionChangedWallpaperGroup': undefined;
+  'ActionChangedWallpaperGroupYou': undefined;
+  'ActionChangedWallpaperChannel': undefined;
   'ActionCreatedChannel': undefined;
   'ActionScreenshotTakenYou': undefined;
   'ActionSharingDisabledYou': undefined;
@@ -4255,6 +4262,28 @@ export interface LangPairWithVariables<V = LangVariable> {
     'from': V;
   };
   'ActionChangedPhoto': {
+    'from': V;
+  };
+  'ActionChangedTheme': {
+    'from': V;
+    'theme': V;
+  };
+  'ActionChangedThemeYou': {
+    'theme': V;
+  };
+  'ActionChangedThemeChannel': {
+    'theme': V;
+  };
+  'ActionDisabledTheme': {
+    'from': V;
+  };
+  'ActionChangedWallpaper': {
+    'from': V;
+  };
+  'ActionChangedWallpaperBothYou': {
+    'peer': V;
+  };
+  'ActionSetSameWallpaper': {
     'from': V;
   };
   'ActionChangedTitle': {

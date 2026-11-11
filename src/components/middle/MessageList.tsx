@@ -4,10 +4,12 @@ import {
 import { addExtraClass, removeExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic } from '../../api/types';
+import type { ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiThemeSettings, ApiTopic } from '../../api/types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { LoadMoreDirection, type MessageListType, type ThreadId } from '../../types';
+import {
+  LoadMoreDirection, type MessageListType, type ThemeKey, type ThreadId,
+} from '../../types';
 
 import {
   ANIMATION_END_DELAY,
@@ -30,7 +32,9 @@ import {
   isSystemBot,
 } from '../../global/helpers';
 import {
+  selectActionMessageBg,
   selectBot,
+  selectCanAnimateInterface,
   selectCanTranslateChat,
   selectChat,
   selectChatAnchoredMessages,
@@ -39,6 +43,7 @@ import {
   selectChatLastMessage,
   selectChatMessages,
   selectChatScheduledMessages,
+  selectChatThemeSettings,
   selectCurrentMessageIds,
   selectFirstUnreadId,
   selectFocusedMessageId,
@@ -51,6 +56,7 @@ import {
   selectMonoforumChannel,
   selectPerformanceSettingsValue,
   selectTabState,
+  selectTheme,
   selectTopic,
   selectTranslationLanguage,
   selectUser,
@@ -88,6 +94,7 @@ import {
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useInterval from '../../hooks/schedulers/useInterval';
+import useChatTheme from '../../hooks/useChatTheme';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -98,6 +105,7 @@ import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
 import useContainerHeight from './hooks/useContainerHeight';
+import useOwnBubbleGradientCanvas from './hooks/useOwnBubbleGradientCanvas';
 import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
@@ -176,6 +184,11 @@ type StateProps = {
   canManageBotForumTopics?: boolean;
   shouldScrollToBottom?: boolean;
   reactionPollingPause?: { until: number; chatId: string };
+  serverThemeSettings?: ApiThemeSettings;
+  actionMessageBg: string;
+  canAnimateTheme?: boolean;
+  areOwnGradientColorsAnimated?: boolean;
+  theme: ThemeKey;
 };
 
 enum Content {
@@ -289,6 +302,11 @@ const MessageList = ({
   translationLanguage,
   shouldAutoTranslate,
   reactionPollingPause,
+  serverThemeSettings,
+  actionMessageBg,
+  canAnimateTheme,
+  areOwnGradientColorsAnimated,
+  theme,
   isQuickPreview,
   onIntersectPinnedMessage,
   onScrollDownToggle,
@@ -305,6 +323,11 @@ const MessageList = ({
   const isRestricted = restrictionReasons.length > 0;
 
   const containerRef = useRef<HTMLDivElement>();
+  const ownGradientCanvasRef = useRef<HTMLCanvasElement>();
+  const { palette, shouldSnapColors } = useChatTheme(
+    containerRef, chatId, theme, serverThemeSettings, canAnimateTheme, actionMessageBg,
+  );
+  const ownGradientColors = palette.outgoingColors;
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -668,6 +691,14 @@ const MessageList = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
+  const {
+    scheduleMeasure: scheduleOwnGradientMeasure,
+    updateOnScroll: updateOwnGradientScroll,
+  } = useOwnBubbleGradientCanvas(
+    containerRef, ownGradientCanvasRef, ownGradientColors, messageIds, theme, areOwnGradientColorsAnimated,
+    shouldSnapColors,
+  );
+
   const updateBottomSnapClass = useLastCallback(() => {
     const container = containerRef.current;
     const bottomTrigger = container?.querySelector<HTMLDivElement>('.fab-trigger');
@@ -715,13 +746,16 @@ const MessageList = ({
   });
 
   const handleScroll = useLastCallback(() => {
-    if (isScrollTopJustUpdatedRef.current) {
-      isScrollTopJustUpdatedRef.current = false;
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
 
-    const container = containerRef.current;
-    if (!container) {
+    // Programmatic scrolls are skipped below, but the gradient must follow them too
+    updateOwnGradientScroll(container);
+
+    if (isScrollTopJustUpdatedRef.current) {
+      isScrollTopJustUpdatedRef.current = false;
       return;
     }
 
@@ -767,6 +801,8 @@ const MessageList = ({
   const isMessageSendPendingRef = useRef(false);
 
   const handleContentResize = useLastCallback((growth: number) => {
+    scheduleOwnGradientMeasure();
+
     const container = containerRef.current;
     if (!container || growth <= 0) return;
 
@@ -1387,6 +1423,7 @@ const MessageList = ({
         withUsers={withUsers}
         noAvatars={noAvatars}
         containerRef={containerRef}
+        ownGradientCanvasRef={ownGradientColors ? ownGradientCanvasRef : undefined}
         anchorIdRef={anchorIdRef}
         memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
         memoFirstUnreadIdRef={memoFirstUnreadIdRef}
@@ -1553,6 +1590,11 @@ export default memo(withGlobal<OwnProps>(
       canManageBotForumTopics: chat.isBotForum && user?.canManageBotForumTopics,
       shouldScrollToBottom,
       reactionPollingPause: global.reactionPollingPause,
+      serverThemeSettings: selectChatThemeSettings(global, chatId),
+      actionMessageBg: selectActionMessageBg(global),
+      canAnimateTheme: selectCanAnimateInterface(global),
+      areOwnGradientColorsAnimated: selectChatThemeSettings(global, chatId)?.areOutgoingColorsAnimated,
+      theme: selectTheme(global),
     };
   },
 )(MessageList));

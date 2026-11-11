@@ -11,8 +11,9 @@
   border-radius: var(--border-radius-messages-small);
 
   font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  color: var(--message-service-text);
 
-  background-color: var(--action-message-bg);
+  background-color: var(--message-service-background);
   box-shadow: 0 1px 2px var(--color-default-shadow);
 
   @media (max-width: 600px) {
@@ -247,18 +248,9 @@
     }
   }
 
-  .theme-dark .Message.own & {
-    .text-entity-link {
-      text-decoration: underline !important;
-
-      &:hover {
-        text-decoration: none !important;
-      }
-    }
-  }
-
   &:not(.custom-shape) {
     font-size: var(--message-text-size, 1rem);
+    color: var(--color-text);
 
     body.is-ios & {
       font-size: var(--message-text-size, 1.0625rem);
@@ -270,14 +262,13 @@
   }
 
   .matching-text-highlight:not(.is-quote) {
+    --color-text: #000;
+    --color-links: #000;
+
     padding: 0 0.125rem;
     border-radius: 0.25rem;
     color: var(--color-text);
     background: #cae3f7;
-
-    .theme-dark & {
-      --color-text: #000;
-    }
   }
 
   .matching-text-highlight.is-quote {
@@ -286,14 +277,9 @@
 
     &.animate {
       color: var(--color-text);
-      background-color: #cae3f7;
+      background-color: var(--message-tint);
       animation: quote-highlight 0.5s;
       animation-delay: 1.5s;
-
-      .theme-dark & {
-        color: #000;
-        animation-name: quote-highlight-dark;
-      }
     }
   }
 
@@ -366,7 +352,7 @@
         cursor: var(--custom-cursor, pointer);
 
         &:hover {
-          opacity: 0.85;
+          text-decoration: underline;
         }
       }
     }
@@ -430,7 +416,7 @@
     .admin-title {
       font-size: 0.75rem;
       font-weight: var(--font-weight-normal);
-      color: rgba(var(--color-text-meta-rgb), 0.75);
+      color: var(--color-text-meta);
       text-align: right;
 
       .Message.own & {
@@ -472,7 +458,7 @@
     }
 
     .message-title {
-      color: white;
+      color: var(--message-service-text);
     }
   }
 
@@ -484,6 +470,23 @@
   &.has-background,
   .is-album & {
     background: var(--background-color);
+  }
+
+  // The canvas follows the bubble's transforms and opacity, including its tail and shadow
+  .with-own-gradient .Message.own &.has-solid-background,
+  .with-own-gradient .Message.own &.has-background,
+  .with-own-gradient .Message.own.is-album & {
+    background-color: transparent;
+    box-shadow: none;
+
+    .svg-appendix .appendix-parts {
+      display: none;
+    }
+
+    // Photo appendices retain their sampled fill; the canvas skips their tails
+    &[data-has-custom-appendix] .svg-appendix .appendix-parts {
+      display: inline;
+    }
   }
 
   &.has-solid-background {
@@ -560,6 +563,7 @@
 
       .theme-dark & {
         --color-primary: var(--color-selection-highlight);
+        --color-primary-foreground: var(--color-white);
       }
     }
 
@@ -626,7 +630,7 @@
           position: absolute;
           top: 0.125rem;
           left: 100%;
-          color: white;
+          color: var(--message-service-text);
         }
 
         .Message.own & {
@@ -635,7 +639,7 @@
         }
 
         .admin-title {
-          color: white;
+          color: var(--message-service-text);
         }
       }
 
@@ -857,6 +861,7 @@
   }
 
   .message-media-duration {
+    color: var(--message-media-text);
     background-color: var(--action-message-bg);
   }
 
@@ -988,7 +993,7 @@
   unicode-bidi: initial;
 
   color: var(--color-links) !important;
-  text-decoration: none !important;
+  text-decoration: var(--message-links-decoration, none) !important;
   overflow-wrap: break-word;
 
   &:hover,
@@ -1003,14 +1008,7 @@
 }
 
 .text-entity-code {
-  margin: 0;
-  padding: 1px 2px;
-  border-radius: 4px;
-
-  color: var(--color-code);
   white-space: pre-wrap;
-
-  background: var(--color-code-bg);
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
@@ -1048,9 +1046,10 @@
   padding: 0.5rem;
   border-radius: 4px;
 
+  color: var(--message-code-text);
   white-space: pre-wrap;
 
-  background-color: var(--color-code-bg);
+  background-color: var(--message-code-background);
 
   &:hover {
     .code-overlay {
@@ -1147,22 +1146,10 @@ blockquote, .blockquote {
 
 @keyframes quote-highlight {
   0% {
-    background-color: #cae3f7;
+    background-color: var(--message-tint);
   }
 
   100% {
-    background-color: transparent;
-  }
-}
-
-@keyframes quote-highlight-dark {
-  0% {
-    color: #000;
-    background-color: #cae3f7;
-  }
-
-  100% {
-    color: var(--color-text);
     background-color: transparent;
   }
 }

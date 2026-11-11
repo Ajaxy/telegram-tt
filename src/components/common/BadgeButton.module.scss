@@ -4,16 +4,15 @@
 
   font-size: 0.75rem;
   line-height: 1;
-  color: var(--accent-color);
+  color: var(--message-accent, var(--accent-color));
 
   background-color: var(--accent-background-active-color);
-  filter: brightness(1);
 
-  transition: 150ms filter ease-in;
+  transition: background-color var(--message-color-transition-duration, 150ms) ease-in;
 }
 
 .plain {
-  color: rgba(var(--color-text-meta-rgb), 0.75);
+  color: var(--color-text-meta);
   background-color: transparent;
 }
 
@@ -21,7 +20,7 @@
   cursor: var(--custom-cursor, pointer);
 
   &:hover {
-    filter: brightness(1.1);
+    background-color: var(--message-tint-hover, var(--accent-background-active-color));
   }
 }
 

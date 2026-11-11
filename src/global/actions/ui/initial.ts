@@ -17,6 +17,7 @@ import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import { hasStoredSession } from '../../../util/sessions';
 import switchTheme from '../../../util/switchTheme';
 import { getSystemTheme, setSystemThemeChangeCallback } from '../../../util/systemTheme';
+import { buildThemeColorOverrides } from '../../../util/theme';
 import { startWebsync, stopWebsync } from '../../../util/websync';
 import { callApi } from '../../../api/gramjs';
 import { clearCaching, setupCaching } from '../../cache';
@@ -127,7 +128,7 @@ addCallback((global: GlobalState) => {
   }, tabState.id);
 
   const {
-    messageTextSize, shouldUseSystemTheme, timeFormat,
+    messageTextSize, shouldUseSystemTheme, timeFormat, themes,
   } = selectSharedSettings(global);
 
   const globalTheme = selectTheme(global);
@@ -173,7 +174,7 @@ addCallback((global: GlobalState) => {
 
   const canAnimate = selectCanAnimateInterface(global);
 
-  switchTheme(theme, canAnimate);
+  switchTheme(theme, canAnimate, buildThemeColorOverrides(themes[theme], theme));
   setScrollbarWidthProperty();
 
   // Make sure global has the latest theme. Will cause `switchTheme` on change

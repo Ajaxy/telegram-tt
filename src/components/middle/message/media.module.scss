@@ -117,9 +117,9 @@
   align-items: center;
   justify-content: center;
 
-  color: #fff;
+  color: var(--message-media-text);
 
-  opacity: 0.7;
+  opacity: 1;
 
   transition: opacity 150ms;
 
@@ -132,11 +132,13 @@
     height: 3.375rem;
     border-radius: 50%;
 
-    background: rgba(black, 0.25);
+    background: var(--message-media-background);
   }
 
   &:hover {
-    opacity: 1;
+    &::before {
+      background: #000000cc;
+    }
   }
 
   &:global(.opacity-transition) {

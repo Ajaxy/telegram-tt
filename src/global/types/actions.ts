@@ -311,6 +311,7 @@ export interface ActionPayloads {
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;
+  syncGlobalWallpaperCache: { background: string };
   animateMessageSending: { chatId: string; threadId: ThreadId; tabId: number };
   updateIsOnline: { isOnline: boolean };
 
@@ -333,6 +334,8 @@ export interface ActionPayloads {
   clearWebPagePreview: WithTabId | undefined;
   loadWallpapers: undefined;
   uploadWallpaper: File;
+  loadChatThemes: undefined;
+  applyChatTheme: { emoticon?: string } & WithTabId;
   setDeviceToken: { token: string };
   deleteDeviceToken: undefined;
   createServiceNotification: {

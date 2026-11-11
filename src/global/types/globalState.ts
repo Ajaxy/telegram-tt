@@ -10,6 +10,7 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatlistExportedInvite,
+  ApiChatTheme,
   ApiConfig,
   ApiCountry,
   ApiCountryCode,
@@ -481,6 +482,7 @@ export type GlobalState = {
   settings: {
     byKey: AccountSettings;
     loadedWallpapers?: ApiWallpaper[];
+    chatThemes?: ApiChatTheme[];
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
     lastPremiumBandwithNotificationDate?: number;

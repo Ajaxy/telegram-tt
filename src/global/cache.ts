@@ -49,15 +49,13 @@ import { onBeforeUnload, throttle } from '../util/schedulers';
 import { getServerTime } from '../util/serverTime';
 import { hasStoredSession } from '../util/sessions';
 import { getSystemTheme } from '../util/systemTheme';
-import { getDefaultPatternColor } from '../util/wallpaper';
+import { getDefaultPatternColor, getThemeWallpaper } from '../util/wallpaper';
 import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaperStorage';
 import { buildPageAudioById } from './helpers/buildPageAudioById';
 import { selectSharedSettings } from './selectors/sharedState';
 import { selectThreadInfo } from './selectors/threads';
 import { addActionHandler, getGlobal } from './index';
-import {
-  INITIAL_GLOBAL_STATE, SHARED_STATE_CACHE_VERSION,
-} from './initialState';
+import { INITIAL_GLOBAL_STATE, SHARED_STATE_CACHE_VERSION } from './initialState';
 import { clearGlobalForLockScreen, updatePasscodeSettings } from './reducers';
 import {
   selectChatLastMessageId,
@@ -85,6 +83,11 @@ const APP_CONFIG_NANOTON_KEYS = [
 // wallpaper-derived ones
 const LEGACY_DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
 const LEGACY_DARK_THEME_PATTERN_COLOR = '#48576166';
+
+// Bump `SHARED_STATE_CACHE_VERSION` in `initialState.ts` alongside the newest step here
+const SHARED_STATE_PATTERN_COLORS_CACHE_VERSION = 3;
+const SHARED_STATE_V1_LIGHT_PATTERN_COLOR = '#77854b66';
+const SHARED_STATE_V1_DARK_PATTERN_COLOR = '#27308a66';
 const updateCacheThrottled = throttle(() => onFullyIdle(() => updateCache()), UPDATE_THROTTLE, false);
 const updateCacheForced = () => updateCache(true);
 
@@ -276,7 +279,10 @@ export function migrateSharedCache(
   let migrated = cached || initialState;
 
   if (cacheVersion < SHARED_STATE_CACHE_VERSION) {
-    const { messageBlur, ...performance } = settings.performance as PerformanceType & { messageBlur?: boolean };
+    const { messageBlur, snapEffect, ...performance } = settings.performance as PerformanceType & {
+      messageBlur?: boolean;
+      snapEffect?: boolean;
+    };
 
     migrated = {
       ...migrated,
@@ -290,13 +296,34 @@ export function migrateSharedCache(
     };
   }
 
+  if (cacheVersion < SHARED_STATE_PATTERN_COLORS_CACHE_VERSION) {
+    const themes = cloneThemeSettings(migrated.settings.themes);
+    if (themes.light?.patternColor === SHARED_STATE_V1_LIGHT_PATTERN_COLOR) {
+      themes.light.patternColor = getDefaultPatternColor('light');
+    }
+
+    if (themes.dark?.patternColor === SHARED_STATE_V1_DARK_PATTERN_COLOR) {
+      themes.dark.patternColor = getDefaultPatternColor('dark');
+    }
+
+    migrated = {
+      ...migrated,
+      settings: {
+        ...migrated.settings,
+        themes,
+      },
+    };
+  }
+
   return migrated;
 }
 
 function prefetchCurrentWallpaperUrl(global: GlobalState) {
   const { theme, themes, shouldUseSystemTheme } = selectSharedSettings(global);
   const currentTheme = shouldUseSystemTheme ? getSystemTheme() : theme;
-  return prefetchWallpaperUrl(themes[currentTheme]?.background);
+  const settings = themes[currentTheme];
+  const wallpaper = getThemeWallpaper(settings);
+  return prefetchWallpaperUrl(settings?.background ?? (wallpaper?.document ? wallpaper.slug : undefined));
 }
 
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
@@ -983,9 +1010,10 @@ function omitLocalDocument(document: ApiDocument): ApiDocument {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, accountDaysTtl,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, accountDaysTtl, chatThemes,
   } = global.settings;
 
+  // Cached palettes remain usable offline; the catalog refresh restores wallpaper documents in the worker
   return {
     byKey,
     privacy: {},
@@ -993,6 +1021,7 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     lastPremiumBandwithNotificationDate,
     notifyDefaults,
     accountDaysTtl,
+    chatThemes,
   };
 }
 

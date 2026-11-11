@@ -78,7 +78,7 @@
 
   background-color: var(--color-background);
 
-  transition: background-color 0.2s;
+  transition: background-color var(--message-color-transition-duration, 0.2s);
 
   &:hover:not(.no-hover) {
     background-color: var(--color-interactive-element-hover);

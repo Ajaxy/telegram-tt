@@ -93,6 +93,12 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - Give each styled element a class. Avoid broad, complex, and tag-based selectors; nest only for meaningful relationships such as `.parentModifier .child`.
 - Use existing font-weight variables, such as `var(--font-weight-medium)` and `var(--font-weight-semibold)`; never numeric weights, `bold`, or custom values.
 
+## Design variable documentation
+
+- Update [DESIGN.md](DESIGN.md) in the same change whenever CSS custom properties are added, removed, renamed, or changed, including runtime assignments and component overrides.
+- Keep each variable's purpose, light/dark defaults, aliases, derived relationships, inheritance, and scope/overrides accurate. Distinguish live `var(...)` references from copied or computed values.
+- Remove obsolete entries and update affected links and related descriptions when variables are removed or renamed.
+
 ## Localization
 
 - Use `lang()` for all user-facing text. In components, get it from `useLang()`.

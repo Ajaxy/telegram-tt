@@ -30,7 +30,8 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
   const bgColor = backgroundColor;
   const textColor = getPropertyHexColor(style, '--color-text') || FALLBACK_THEME_PARAMS.text_color;
   const buttonColor = getPropertyHexColor(style, '--color-primary') || FALLBACK_THEME_PARAMS.button_color;
-  const buttonTextColor = getPropertyHexColor(style, '--color-white') || FALLBACK_THEME_PARAMS.button_text_color;
+  const buttonTextColor = getPropertyHexColor(style, '--color-primary-foreground')
+    || FALLBACK_THEME_PARAMS.button_text_color;
   const linkColor = getPropertyHexColor(style, '--color-links') || FALLBACK_THEME_PARAMS.link_color;
   const hintColor = secondaryTextColor;
   const secondaryBgColor = getPropertyHexColor(style, '--color-background-secondary')

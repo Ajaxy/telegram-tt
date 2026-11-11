@@ -34,7 +34,6 @@ export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   rightColumnAnimations: true,
   stickerEffects: true,
   storyRibbonAnimations: true,
-  snapEffect: true,
   textStreaming: true,
 };
 
@@ -53,7 +52,6 @@ export const INITIAL_PERFORMANCE_STATE_MED: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: true,
   storyRibbonAnimations: true,
-  snapEffect: false,
   textStreaming: true,
 };
 
@@ -72,11 +70,10 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: false,
   storyRibbonAnimations: false,
-  snapEffect: false,
   textStreaming: false,
 };
 
-export const SHARED_STATE_CACHE_VERSION = 2;
+export const SHARED_STATE_CACHE_VERSION = 4;
 
 export const INITIAL_SHARED_STATE: SharedState = {
   cacheVersion: SHARED_STATE_CACHE_VERSION,

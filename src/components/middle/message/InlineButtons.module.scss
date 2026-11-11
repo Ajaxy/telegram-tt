@@ -5,7 +5,10 @@
 }
 
 .button {
-  --secondary-bg: transparent;
+  --button-text-color: var(--message-service-text);
+  --button-active-text-color: var(--message-service-text);
+  --button-background-color: var(--message-service-background);
+  --button-active-background-color: var(--message-service-background);
 
   flex: 1;
 
@@ -16,30 +19,17 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.25;
 
-  background-color: var(--action-message-bg);
-
-  transition: background-color 150ms, color 150ms, filter 150ms, opacity 150ms;
-
-  &::before {
-    content: '';
-
-    position: absolute;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-    border-radius: inherit;
-
-    opacity: 50%;
-    background-color: var(--secondary-bg);
-  }
+  transition:
+    background-color var(--message-color-transition-duration, 150ms),
+    color var(--message-color-transition-duration, 150ms),
+    filter 150ms,
+    opacity 150ms;
 
   &:active,
   &:hover,
   &:focus {
     opacity: 0.85;
-    background-color: var(--action-message-bg) !important;
+    background-color: var(--button-active-background-color) !important;
   }
 
   &:first-of-type {
@@ -103,15 +93,24 @@
 }
 
 .primaryTint {
-  --secondary-bg: var(--color-primary);
+  --button-text-color: var(--color-primary-foreground);
+  --button-active-text-color: var(--color-primary-foreground);
+  --button-background-color: var(--color-primary);
+  --button-active-background-color: var(--color-primary);
 }
 
 .successTint {
-  --secondary-bg: var(--color-success);
+  --button-text-color: var(--color-primary-foreground);
+  --button-active-text-color: var(--color-primary-foreground);
+  --button-background-color: var(--color-primary);
+  --button-active-background-color: var(--color-primary);
 }
 
 .destructiveTint {
-  --secondary-bg: var(--color-error);
+  --button-text-color: var(--color-error-foreground);
+  --button-active-text-color: var(--color-error-foreground);
+  --button-background-color: var(--color-error-background);
+  --button-active-background-color: var(--color-error-background);
 }
 
 .customEmojiIcon {

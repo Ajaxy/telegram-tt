@@ -1,9 +1,9 @@
 import type { GlobalState } from '../types';
 import { SettingsScreens } from '../../types';
 
-import {
-  IS_SNAP_EFFECT_SUPPORTED, IS_TRANSLATION_SUPPORTED, IS_WEBAUTHN_SUPPORTED,
-} from '../../util/browser/windowEnvironment';
+import { IS_TRANSLATION_SUPPORTED, IS_WEBAUTHN_SUPPORTED } from '../../util/browser/windowEnvironment';
+import memoized from '../../util/memoized';
+import { getThemeWallpaper } from '../../util/wallpaper';
 import { selectCurrentLimit } from './limits';
 import { selectSharedSettings } from './sharedState';
 import {
@@ -12,6 +12,9 @@ import {
   selectIsGiveawayGiftsPurchaseAvailable,
   selectIsPremiumPurchaseBlocked,
 } from './users';
+
+const getReferencedWallpaperBackgroundsMemo = memoized(getReferencedWallpaperBackgrounds);
+const getGlobalWallpaperBackgroundsMemo = memoized(getGlobalWallpaperBackgrounds);
 
 export function selectNotifySettings<T extends GlobalState>(global: T) {
   return global.settings.byKey;
@@ -73,7 +76,6 @@ export function selectSettingsSearchFlags<T extends GlobalState>(global: T) {
   const isPremium = selectIsCurrentUserPremium(global);
 
   return {
-    isSnapEffectSupported: IS_SNAP_EFFECT_SUPPORTED,
     canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     isGiveawayAvailable: selectIsGiveawayGiftsPurchaseAvailable(global),
     isPasswordStateKnown: hasPassword !== undefined,
@@ -121,4 +123,54 @@ export function selectSettingsKeys<T extends GlobalState>(global: T) {
 
 export function selectTimezones<T extends GlobalState>(global: T) {
   return global.timezones?.byId;
+}
+
+export function selectReferencedWallpaperBackgrounds<T extends GlobalState>(global: T) {
+  return getReferencedWallpaperBackgroundsMemo(
+    selectSharedSettings(global).themes,
+    global.settings.chatThemes,
+    global.users.fullInfoById,
+    global.chats.fullInfoById,
+  );
+}
+
+export function selectGlobalWallpaperBackgrounds<T extends GlobalState>(global: T) {
+  return getGlobalWallpaperBackgroundsMemo(selectSharedSettings(global).themes);
+}
+
+function getGlobalWallpaperBackgrounds(themes: GlobalState['sharedState']['settings']['themes']) {
+  return Object.values(themes).map((settings) => {
+    if (settings?.background) return settings.background;
+    const wallpaper = getThemeWallpaper(settings);
+    return wallpaper?.document ? wallpaper.slug : undefined;
+  }).filter((background): background is string => Boolean(background));
+}
+
+function getReferencedWallpaperBackgrounds(
+  themes: GlobalState['sharedState']['settings']['themes'],
+  chatThemes: GlobalState['settings']['chatThemes'],
+  userFullInfos: GlobalState['users']['fullInfoById'],
+  chatFullInfos: GlobalState['chats']['fullInfoById'],
+) {
+  const backgrounds = new Set<string>();
+  Object.values(themes).forEach((settings) => {
+    if (settings?.background) backgrounds.add(settings.background);
+    if (settings?.serverThemeSettings?.wallpaper?.document) {
+      backgrounds.add(settings.serverThemeSettings.wallpaper.slug);
+    }
+  });
+  chatThemes?.forEach(({ settings }) => {
+    settings.forEach(({ wallpaper }) => {
+      if (wallpaper?.document) backgrounds.add(wallpaper.slug);
+    });
+  });
+  [...Object.values(userFullInfos), ...Object.values(chatFullInfos)].forEach(({ wallpaper, peerTheme }) => {
+    if (wallpaper?.document) backgrounds.add(wallpaper.slug);
+    if (peerTheme?.type === 'gift') {
+      peerTheme.settings.forEach((settings) => {
+        if (settings.wallpaper?.document) backgrounds.add(settings.wallpaper.slug);
+      });
+    }
+  });
+  return [...backgrounds];
 }

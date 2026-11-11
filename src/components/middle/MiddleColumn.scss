@@ -8,6 +8,8 @@
   min-width: 0;
   height: 100%;
 
+  color: var(--color-text);
+
   opacity: 0;
 
   transition: opacity 0.3s ease;
@@ -75,8 +77,8 @@
         border-radius 0.15s,
         opacity var(--select-transition),
         transform var(--select-transition),
-        background-color 0.15s,
-        color 0.15s;
+        background-color var(--message-color-transition-duration, 0.15s),
+        color var(--message-color-transition-duration, 0.15s);
 
       transform: scale(1);
       opacity: 1;

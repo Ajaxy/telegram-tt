@@ -24,6 +24,7 @@ import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
+import ChatThemesPicker from './ChatThemesPicker';
 
 type OwnProps = {
   isActive?: boolean;
@@ -68,14 +69,14 @@ const SettingsGeneral = ({
   }];
 
   const appearanceThemeOptions: IRadioOption[] = [{
+    label: lang('EmptyChatAppearanceSystem'),
+    value: 'auto',
+  }, {
     label: lang('EmptyChatAppearanceLight'),
     value: 'light',
   }, {
     label: lang('EmptyChatAppearanceDark'),
     value: 'dark',
-  }, {
-    label: lang('EmptyChatAppearanceSystem'),
-    value: 'auto',
   }];
 
   const keyboardSendOptions = !isMobileDevice ? [
@@ -144,8 +145,9 @@ const SettingsGeneral = ({
         </ListItem>
       </Island>
 
-      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('Theme')}</IslandTitle>
+      <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('ColorTheme')}</IslandTitle>
       <Island>
+        <ChatThemesPicker />
         <RadioGroup
           name="theme"
           options={appearanceThemeOptions}

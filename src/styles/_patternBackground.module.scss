@@ -1,3 +1,47 @@
+.frame {
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+}
+
+.chatWallpaperFrame {
+  @media (max-width: 925px) {
+    :global(#Main.left-column-open) & {
+      transform: translate3d(33.5rem, 0, 0);
+    }
+
+    :global(#Main.left-column-animating) & {
+      transition: transform var(--layer-transition);
+    }
+  }
+
+  @media (min-width: 926px) {
+    position: relative;
+
+    grid-area: 1 / 2;
+
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+
+    :global(#Main.folders-sidebar-visible) & {
+      grid-column: 3;
+    }
+  }
+
+  @media (min-width: 601px) {
+    :global(#Main.right-column-open) & {
+      width: calc(100% - var(--right-column-width));
+    }
+
+    :global(#Main.right-column-animating) & {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+      transition: width var(--layer-transition);
+    }
+  }
+}
+
 .background {
   position: absolute;
   z-index: -1;
@@ -91,19 +135,26 @@
     left: 0;
 
     opacity: var(--pattern-intensity, 0.5);
-    // Strong black doodles soft-lit over the gradient darken it visibly on any background — matching
-    // WebK. A muted `--pattern-color` tint blends to near-nothing here, so it's not used.
-    background-color: #000;
+    background-image: var(--custom-pattern, url("../assets/pattern.svg"));
+    background-repeat: repeat;
+    background-position: center;
+    background-size: 26.875rem auto;
     mix-blend-mode: soft-light;
+  }
 
-    mask-image: var(--custom-pattern, url("../assets/pattern.svg"));
-    mask-repeat: repeat;
-    mask-position: center;
-    mask-size: 26.875rem auto;
+  &.withPlainPattern::after {
+    mix-blend-mode: normal;
+  }
+
+  &.withDimmedPattern.customBgColor::before {
+    z-index: 1;
+    display: block;
+    opacity: var(--pattern-dimming);
+    background: #000;
   }
 
   // Masked mode: the pattern masks the animated gradient itself, so the doodles reveal the
-  // gradient over the black base (used for dark wallpapers, where the intensity is negative)
+  // gradient over the black base in dark mode
   &.withMaskedPattern .gradientCanvas {
     mask-image: var(--custom-pattern, url("../assets/pattern.svg"));
     mask-repeat: repeat;
@@ -113,5 +164,81 @@
 
   &.withMaskedPattern .gradientCanvas[data-ready] {
     opacity: var(--pattern-intensity, 0.5);
+  }
+
+  // The doodles dip out before the mask swaps and fade back in with the regular transition
+  :global(body:not(.no-page-transitions)) &.patternSwapping.withPattern::after,
+  :global(body:not(.no-page-transitions)) &.patternSwapping.withMaskedPattern .gradientCanvas {
+    opacity: 0;
+    transition-duration: 0.15s;
+  }
+
+  &.noAnimation {
+    &, &::before, &::after, .gradientCanvas {
+      transition: none !important;
+    }
+  }
+}
+
+.leftExtension,
+.rightExtension {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  overflow: hidden;
+  display: none;
+
+  width: 100%;
+
+  background-color: var(--theme-background-color);
+
+  &::before,
+  &::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+    transform: scaleX(-1) scale(1.1);
+
+    background-image: var(--custom-background);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  &::before {
+    filter: blur(1.5rem);
+  }
+
+  &::after {
+    // Align the fade with the visible crop of the scaled image
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: calc(100% / 1.1) 100%;
+  }
+
+  .blurred ~ &::after {
+    filter: blur(12px);
+  }
+
+  .chatWallpaperFrame & {
+    display: block;
+  }
+}
+
+.leftExtension {
+  right: 100%;
+
+  &::after {
+    mask-image: linear-gradient(to right, #000, transparent calc(2rem / 1.1));
+  }
+}
+
+.rightExtension {
+  left: 100%;
+
+  &::after {
+    mask-image: linear-gradient(to left, #000, transparent calc(2rem / 1.1));
   }
 }

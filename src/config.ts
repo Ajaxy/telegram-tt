@@ -198,9 +198,6 @@ export const VT_TYPE_CLASS_PREFIX = 'active-vt-';
 export const RESIZE_HANDLE_CLASS_NAME = 'resizeHandle';
 export const RESIZE_HANDLE_SELECTOR = `.${RESIZE_HANDLE_CLASS_NAME}`;
 
-export const SNAP_EFFECT_CONTAINER_ID = 'snap-effect-container';
-export const SNAP_EFFECT_ID = 'snap-effect';
-
 export const STARS_ICON_PLACEHOLDER = '⭐';
 export const STARS_CURRENCY_CODE = 'XTR';
 

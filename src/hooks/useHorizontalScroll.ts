@@ -1,7 +1,7 @@
 import type { ElementRef } from '../lib/teact/teact';
 import { useEffect } from '../lib/teact/teact';
 
-import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 const useHorizontalScroll = (
   containerRef: ElementRef<HTMLDivElement>,
@@ -25,7 +25,7 @@ const useHorizontalScroll = (
         const maxScrollLeft = minScrollLeft + scrollRange;
         if (!e.deltaY || (e.deltaY < 0 ? scrollLeft <= minScrollLeft : scrollLeft >= maxScrollLeft)) return;
 
-        requestMutation(() => container.scrollBy({ left: e.deltaY / 4, behavior: 'instant' }));
+        requestMeasure(() => container.scrollBy({ left: e.deltaY / 4, behavior: 'instant' }));
         if (shouldPreventDefault) e.preventDefault();
         if (shouldStopPropagation) e.stopPropagation();
       }

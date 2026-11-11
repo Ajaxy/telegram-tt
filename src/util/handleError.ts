@@ -3,6 +3,7 @@ import { isCurrentTabMaster } from './establishMultitabRole';
 import { throttle } from './schedulers';
 
 const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
+const ARE_ERROR_ALERTS_ENABLED = true;
 
 let showError = true;
 let error: Error | undefined;
@@ -10,7 +11,7 @@ let error: Error | undefined;
 window.addEventListener('error', handleErrorEvent);
 window.addEventListener('unhandledrejection', handleErrorEvent);
 
-if (DEBUG) {
+if (DEBUG && ARE_ERROR_ALERTS_ENABLED) {
   window.addEventListener('focus', () => {
     if (!isCurrentTabMaster()) {
       return;
@@ -40,7 +41,7 @@ const throttleError = throttle((err) => {
 export function handleError(err: Error) {
   // eslint-disable-next-line no-console
   console.error(err);
-  if (DEBUG) {
+  if (DEBUG && ARE_ERROR_ALERTS_ENABLED) {
     throttleError(err);
   }
 }

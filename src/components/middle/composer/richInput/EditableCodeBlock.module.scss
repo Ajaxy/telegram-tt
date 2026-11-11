@@ -4,7 +4,7 @@
   overflow: hidden;
   margin: 0.25rem 0;
   border-radius: 0.25rem;
-  background-color: var(--color-code-bg);
+  background-color: var(--message-code-background);
 }
 
 .languageButton {
@@ -21,7 +21,7 @@
   font-size: 0.875rem;
   font-weight: var(--font-weight-semibold);
   line-height: 1.25;
-  color: var(--color-text-secondary);
+  color: var(--message-code-text);
 
   background: transparent;
 }
@@ -45,7 +45,7 @@
 
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
-  color: var(--color-text);
+  color: var(--message-code-text);
 
   background: transparent;
 
@@ -68,7 +68,7 @@
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
   font-style: italic;
-  color: var(--color-text-secondary);
+  color: var(--message-code-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

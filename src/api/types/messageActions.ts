@@ -1,5 +1,6 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
 import type { ApiBotApp, ApiFormattedText, ApiPhoto, ApiPollAnswer, ApiTodoItem } from './messages';
+import type { ApiWallpaper } from './misc';
 import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type { ApiBirthday } from './users';
 
@@ -80,6 +81,19 @@ export interface ApiMessageActionSetMessagesTtl extends ActionMediaType {
   type: 'setMessagesTtl';
   period: number;
   autoSettingFromId?: string;
+}
+
+export interface ApiMessageActionSetChatTheme extends ActionMediaType {
+  type: 'setChatTheme';
+  emoticon?: string;
+  gift?: Pick<ApiStarGiftUnique, 'title' | 'number'>;
+}
+
+export interface ApiMessageActionSetChatWallpaper extends ActionMediaType {
+  type: 'setChatWallpaper';
+  isSame?: true;
+  isForBoth?: true;
+  wallpaper?: ApiWallpaper;
 }
 
 export interface ApiMessageActionGameScore extends ActionMediaType {
@@ -445,6 +459,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChatDeleteUser | ApiMessageActionChatJoinedByLink | ApiMessageActionChannelCreate
   | ApiMessageActionChatMigrateTo | ApiMessageActionChannelMigrateFrom | ApiMessageActionPinMessage
   | ApiMessageActionHistoryClear | ApiMessageActionSetMessagesTtl
+  | ApiMessageActionSetChatTheme | ApiMessageActionSetChatWallpaper
   | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent

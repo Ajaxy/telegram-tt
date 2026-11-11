@@ -4,11 +4,7 @@
 
 .button {
   margin-inline-end: 0.5rem;
-  color: var(--color-accent) !important;
-
-  :global(.own) & {
-    color: var(--color-accent-own) !important;
-  }
+  color: var(--message-text) !important;
 }
 
 .info {
@@ -26,14 +22,10 @@
   transform: rotateZ(-45deg);
   display: inline-block;
   font-size: 1.125rem;
-  color: #4fae4e;
+  color: var(--message-call-success);
 
   &.incoming {
     transform: rotateZ(135deg);
-  }
-
-  :global(.own) & {
-    color: var(--color-accent-own);
   }
 
   &.missed, &.canceled {

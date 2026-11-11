@@ -7,8 +7,9 @@ import type { ApiWallpaper } from '../../../api/types';
 import type { IThemeSettings, ThemeKey } from '../../../types';
 import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
-import { selectTheme, selectThemeValues } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import {
+  selectChatWallpaperSettings, selectReferencedWallpaperBackgrounds, selectTheme, selectThemeValues,
+} from '../../../global/selectors';
 import { buildHexFromColor, getAverageColor, getPatternColor } from '../../../util/colors';
 import { validateFiles } from '../../../util/files';
 import { throttle } from '../../../util/schedulers';
@@ -99,6 +100,7 @@ const SettingsGeneralBackground = ({
     setThemeSettings({
       theme,
       ...RESET_WALLPAPER_SETTINGS,
+      background: '',
       isBlurred: true,
       patternColor: getDefaultPatternColor(theme),
     });
@@ -106,9 +108,7 @@ const SettingsGeneralBackground = ({
 
   const getActiveWallpaperBackgrounds = useLastCallback(() => {
     const global = getGlobal();
-    const selectedBackgrounds = Object.values(selectSharedSettings(global).themes)
-      .map((settings) => settings?.background)
-      .filter((background): background is string => Boolean(background));
+    const selectedBackgrounds = selectReferencedWallpaperBackgrounds(global);
     const requestedBackground = requestedWallpaperRef.current?.slug;
 
     return requestedBackground
@@ -262,6 +262,7 @@ const SettingsGeneralBackground = ({
             <WallpaperTile
               key={getWallpaperKey(wallpaper)}
               wallpaper={wallpaper}
+              theme={theme}
               isSelected={isWallpaperSelected(wallpaper, themeSettings)}
               onRequest={handleWallpaperRequest}
               onClick={handleWallPaperSelect}
@@ -278,7 +279,7 @@ const SettingsGeneralBackground = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const theme = selectTheme(global);
-    const themeSettings = selectThemeValues(global, theme);
+    const themeSettings = selectChatWallpaperSettings(global);
     const { loadedWallpapers } = global.settings;
 
     return {

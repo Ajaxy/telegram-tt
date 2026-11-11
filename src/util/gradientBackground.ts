@@ -1,5 +1,6 @@
-// Animated four-color gradient renderer based on the distance-weighted blend used by Telegram
-// Reference implementation: https://github.com/crashmax-dev/twallpaper-webgl
+import { easeThemeSwitch, THEME_SWITCH_DURATION_MS } from './switchTheme';
+
+// Matches Telegram macOS's `SoftwareGradientBackground` and `BackgroundGradientView`
 
 const VERTEX_SHADER_SOURCE = `
   attribute vec4 a_position;
@@ -13,6 +14,8 @@ const FRAGMENT_SHADER_SOURCE = `
   precision highp float;
 
   uniform vec2 resolution;
+  uniform float colorCount;
+  uniform vec2 linearDirection;
 
   uniform vec3 color1;
   uniform vec3 color2;
@@ -27,49 +30,57 @@ const FRAGMENT_SHADER_SOURCE = `
   void main() {
     vec2 position = gl_FragCoord.xy / resolution.xy;
     position.y = 1.0 - position.y;
+    // Native freeform rendering and the CPU fallback sample pixel indices
+    position -= 0.5 / resolution;
 
-    float dp1 = distance(position, color1Pos);
-    float dp2 = distance(position, color2Pos);
-    float dp3 = distance(position, color3Pos);
-    float dp4 = distance(position, color4Pos);
-    float minD = min(dp1, min(dp2, min(dp3, dp4)));
-    float p = 3.0;
+    if (colorCount < 3.0) {
+      float ratio = colorCount < 2.0 ? 0.0 : clamp(dot(position - 0.5, linearDirection) + 0.5, 0.0, 1.0);
+      gl_FragColor = vec4(mix(color1, color2, ratio) / 255.0, 1.0);
+      return;
+    }
 
-    dp1 = pow(1.0 - (dp1 - minD), p);
-    dp2 = pow(1.0 - (dp2 - minD), p);
-    dp3 = pow(1.0 - (dp3 - minD), p);
-    dp4 = pow(1.0 - (dp4 - minD), p);
-    float dpt = abs(dp1 + dp2 + dp3 + dp4);
+    vec2 centered = position - 0.5;
+    float swirlFactor = 0.35 * length(centered);
+    float theta = swirlFactor * swirlFactor * 0.8 * 8.0;
+    float sinTheta = sin(theta);
+    float cosTheta = cos(theta);
+    position = clamp(vec2(
+      centered.x * cosTheta - centered.y * sinTheta,
+      centered.x * sinTheta + centered.y * cosTheta
+    ) + 0.5, 0.0, 1.0);
 
-    gl_FragColor =
-      (vec4(color1 / 255.0, 1.0) * dp1 / dpt) +
-      (vec4(color2 / 255.0, 1.0) * dp2 / dpt) +
-      (vec4(color3 / 255.0, 1.0) * dp3 / dpt) +
-      (vec4(color4 / 255.0, 1.0) * dp4 / dpt);
+    float dp1 = pow(max(0.0, 0.92 - distance(position, color1Pos)), 3.0);
+    float dp2 = pow(max(0.0, 0.92 - distance(position, color2Pos)), 3.0);
+    float dp3 = pow(max(0.0, 0.92 - distance(position, color3Pos)), 3.0);
+    float dp4 = colorCount > 3.0 ? pow(max(0.0, 0.92 - distance(position, color4Pos)), 3.0) : 0.0;
+    gl_FragColor = vec4((color1 * dp1 + color2 * dp2 + color3 * dp3 + color4 * dp4)
+      / (255.0 * (dp1 + dp2 + dp3 + dp4)), 1.0);
   }
 `;
 
 const KEY_POINTS = [
-  [0.265, 0.582],
-  [0.176, 0.918],
-  [1 - 0.585, 1 - 0.164],
-  [0.644, 0.755],
-  [1 - 0.265, 1 - 0.582],
-  [1 - 0.176, 1 - 0.918],
-  [0.585, 0.164],
-  [1 - 0.644, 1 - 0.755],
+  [0.8, 0.9],
+  [0.6, 0.8],
+  [0.35, 0.75],
+  [0.25, 0.4],
+  [0.2, 0.1],
+  [0.4, 0.2],
+  [0.65, 0.25],
+  [0.75, 0.6],
 ];
 
 const ANIMATION_SPEED = 0.1;
 const POSITION_EPSILON = 0.01;
-const COLOR_MORPH_SPEED = 0.08;
-const COLOR_EPSILON = 1;
 const COLOR_POINT_COUNT = 4;
 const KEY_POINT_STEP = 2;
 const VERTEX_COMPONENT_COUNT = 2;
 const VERTEX_COUNT = 6;
 const STATIC_GRADIENT_SIZE = 64;
 const BLEND_POWER = 3;
+const BLEND_RADIUS = 0.92;
+const SWIRL_FACTOR = 0.35;
+const SWIRL_ANGLE_MULTIPLIER = 0.8 * 8;
+const MIN_FREEFORM_COLORS = 3;
 const MAX_CHANNEL = 255;
 const PIXEL_CHANNEL_COUNT = 4;
 const GREEN_CHANNEL_OFFSET = 1;
@@ -82,7 +93,7 @@ const ROTATION_CENTER = 0.5;
 const FULL_ROTATION = 360;
 
 export type GradientRenderer = {
-  update: (colors: string[], shouldSnap?: boolean, rotation?: number) => void;
+  update: (colors: string[], shouldSnap?: boolean, rotation?: number, aspectRatio?: number) => void;
   advancePosition: () => void;
   destroy: () => void;
 };
@@ -102,13 +113,13 @@ type WebGlResources = {
   positionBuffer: WebGLBuffer;
   colorLocations: (WebGLUniformLocation | undefined)[];
   colorPositionLocations: (WebGLUniformLocation | undefined)[];
+  colorCountLocation: WebGLUniformLocation;
+  linearDirectionLocation: WebGLUniformLocation;
 };
 
 // The reusable setup compiles shaders and uploads geometry after initialization or context restoration
-function setupWebGl(canvas: HTMLCanvasElement): WebGlResources | undefined {
-  // `preserveDrawingBuffer` keeps the static gradient visible between the sparse redraws
-  const context = canvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
-  if (!context || context.isContextLost()) {
+function setupWebGl(canvas: HTMLCanvasElement, context: WebGLRenderingContext): WebGlResources | undefined {
+  if (context.isContextLost()) {
     return undefined;
   }
 
@@ -155,6 +166,8 @@ function setupWebGl(canvas: HTMLCanvasElement): WebGlResources | undefined {
     vertexShader,
     fragmentShader,
     positionBuffer,
+    colorCountLocation: context.getUniformLocation(program, 'colorCount')!,
+    linearDirectionLocation: context.getUniformLocation(program, 'linearDirection')!,
     colorLocations: Array.from(
       { length: COLOR_POINT_COUNT },
       (_value, index) => context.getUniformLocation(program, `color${index + 1}`) ?? undefined,
@@ -168,21 +181,30 @@ function setupWebGl(canvas: HTMLCanvasElement): WebGlResources | undefined {
 
 export function createGradientRenderer(
   canvas: HTMLCanvasElement, colors: string[], rotation?: number,
+  options?: { noPositionAnimation?: boolean; aspectRatio?: number; onRender?: NoneToVoidFunction },
 ): GradientRenderer | undefined {
-  let resources = setupWebGl(canvas);
-  if (!resources) {
-    return undefined;
-  }
+  const outputContext = canvas.getContext('2d');
+  if (!outputContext) return undefined;
+
+  // Keep drawable pixels separate from the GPU context so a reset cannot blank the wallpaper or bubble source
+  const webGlCanvas = document.createElement('canvas');
+  webGlCanvas.width = canvas.width;
+  webGlCanvas.height = canvas.height;
+  // Keep the GPU frame available for copying into the display canvas
+  const webGlContext = webGlCanvas.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
+
+  let resources: WebGlResources | undefined;
 
   let colorVectors = buildColorVectors(colors);
   let targetColorVectors = colorVectors;
-  let normalizedRotation = normalizeRotation(rotation);
-  let keyPoints = buildRotatedKeyPoints(normalizedRotation);
+  let initialColorVectors = colorVectors;
+  let colorMorphStartedAt: number | undefined;
+  let linearDirection = buildLinearDirection(rotation, options?.aspectRatio);
 
   let keyShift = 0;
   const currentPositions = Array.from(
     { length: COLOR_POINT_COUNT },
-    (_value, index) => [...keyPoints[index * KEY_POINT_STEP]],
+    (_value, index) => [...KEY_POINTS[index * KEY_POINT_STEP]],
   );
   let targetPositions = pickTargetPositions();
 
@@ -198,35 +220,47 @@ export function createGradientRenderer(
   function buildTargetPositions(shift: number) {
     return Array.from(
       { length: COLOR_POINT_COUNT },
-      (_value, index) => keyPoints[(shift + index * KEY_POINT_STEP) % keyPoints.length],
+      (_value, index) => KEY_POINTS[(shift + index * KEY_POINT_STEP) % KEY_POINTS.length],
     );
   }
 
   function render() {
-    if (!resources) return;
-    const { context, colorLocations, colorPositionLocations } = resources;
+    if (!resources || resources.context.isContextLost()) {
+      drawGradient(outputContext!, colorVectors, currentPositions, linearDirection);
+      options?.onRender?.();
+      return;
+    }
+    const { context, colorLocations, colorPositionLocations, colorCountLocation, linearDirectionLocation } = resources;
 
+    context.uniform1f(colorCountLocation, colorVectors.length);
+    context.uniform2fv(linearDirectionLocation, linearDirection);
     colorVectors.forEach((color, index) => context.uniform3fv(colorLocations[index]!, color));
     currentPositions.forEach((position, index) => {
       context.uniform2fv(colorPositionLocations[index]!, position);
     });
     context.drawArrays(context.TRIANGLES, 0, VERTEX_COUNT);
+    if (context.isContextLost()) {
+      drawGradient(outputContext!, colorVectors, currentPositions, linearDirection);
+    } else {
+      outputContext!.drawImage(webGlCanvas, 0, 0);
+    }
+    options?.onRender?.();
   }
 
   // Eases the color stops and reports whether the morph is active
   function stepColors() {
-    let isMorphing = false;
-    colorVectors = colorVectors.map((color, colorIndex) => color.map((channel, channelIndex) => {
-      const target = targetColorVectors[colorIndex][channelIndex];
-      if (Math.abs(target - channel) > COLOR_EPSILON) isMorphing = true;
-      return channel + (target - channel) * COLOR_MORPH_SPEED;
-    }));
-
-    if (!isMorphing) {
-      colorVectors = targetColorVectors.map((color) => [...color]);
+    if (colorMorphStartedAt === undefined) return false;
+    const progress = Math.min((performance.now() - colorMorphStartedAt) / THEME_SWITCH_DURATION_MS, 1);
+    if (progress === 1) {
+      colorVectors = targetColorVectors;
+      colorMorphStartedAt = undefined;
+      return false;
     }
-
-    return isMorphing;
+    const ratio = easeThemeSwitch(progress);
+    colorVectors = initialColorVectors.map((color, colorIndex) => color.map((channel, channelIndex) => (
+      channel + (targetColorVectors[colorIndex][channelIndex] - channel) * ratio
+    )));
+    return true;
   }
 
   // Eases the color points and reports whether they are still moving
@@ -270,74 +304,63 @@ export function createGradientRenderer(
   }
 
   function releaseWebGl() {
-    if (!resources) return;
-    const {
-      context, program, vertexShader, fragmentShader, positionBuffer,
-    } = resources;
-
-    context.deleteProgram(program);
-    context.deleteShader(vertexShader);
-    context.deleteShader(fragmentShader);
-    context.deleteBuffer(positionBuffer);
+    if (resources) releasePartialWebGl(webGlContext!, resources);
     // Free the context slot immediately (browsers cap live WebGL contexts) instead of waiting
     // for the canvas to be garbage-collected
-    context.getExtension('WEBGL_lose_context')?.loseContext();
+    webGlContext?.getExtension('WEBGL_lose_context')?.loseContext();
     resources = undefined;
   }
 
-  // The GPU may drop the context (e.g. during hibernation); without `preventDefault` the browser
-  // never restores it and every subsequent draw becomes a silent no-op, freezing the wallpaper.
-  // Running animations are left alone: their JS math finishes on its own (draws no-op harmlessly),
-  // so the restore below renders the up-to-date state.
   function handleContextLost(e: Event) {
     e.preventDefault();
-  }
-
-  function handleContextRestored() {
-    resources = setupWebGl(canvas);
+    resources = undefined;
+    cancelAnimations();
+    colorVectors = targetColorVectors;
+    colorMorphStartedAt = undefined;
     render();
   }
 
-  canvas.addEventListener('webglcontextlost', handleContextLost);
-  canvas.addEventListener('webglcontextrestored', handleContextRestored);
+  function handleContextRestored() {
+    resources = setupWebGl(webGlCanvas, webGlContext!);
+    render();
+  }
 
+  webGlCanvas.addEventListener('webglcontextlost', handleContextLost);
+  webGlCanvas.addEventListener('webglcontextrestored', handleContextRestored);
+  canvas.addEventListener('contextrestored', render);
+
+  resources = webGlContext ? setupWebGl(webGlCanvas, webGlContext) : undefined;
   render();
 
   const renderer: GradientRenderer = {
-    update(newColors: string[], shouldSnap?: boolean, newRotation?: number) {
+    update(newColors: string[], shouldSnap?: boolean, newRotation?: number, aspectRatio?: number) {
       targetColorVectors = buildColorVectors(newColors);
-      const nextRotation = normalizeRotation(newRotation);
-      const hasRotationChanged = nextRotation !== normalizedRotation;
-      if (hasRotationChanged) {
-        normalizedRotation = nextRotation;
-        keyPoints = buildRotatedKeyPoints(normalizedRotation);
-        const targetShift = (keyShift - 1 + KEY_POINTS.length) % KEY_POINTS.length;
-        targetPositions = buildTargetPositions(targetShift);
-      }
+      linearDirection = buildLinearDirection(newRotation, aspectRatio);
       // Snap without morphing when entering masked mode: there the gradient shows through the
       // pattern doodles, so easing bright light colors down to dark ones flashes the doodles.
       // A running loop settles on its own next frame (colors are already at target).
-      if (shouldSnap) {
+      if (shouldSnap || !resources || resources.context.isContextLost()
+        || targetColorVectors.length !== colorVectors.length) {
         colorVectors = targetColorVectors.map((color) => [...color]);
-        if (hasRotationChanged) {
-          currentPositions.forEach((position, index) => {
-            position[0] = targetPositions[index][0];
-            position[1] = targetPositions[index][1];
-          });
-        }
+        colorMorphStartedAt = undefined;
         render();
         return;
       }
+      initialColorVectors = colorVectors;
+      colorMorphStartedAt = performance.now();
       ensureAnimating();
     },
     advancePosition() {
+      if (options?.noPositionAnimation || !resources || resources.context.isContextLost()
+        || colorVectors.length < MIN_FREEFORM_COLORS) return;
       targetPositions = pickTargetPositions();
       ensureAnimating();
     },
     destroy() {
       ACTIVE_RENDERERS.delete(renderer);
-      canvas.removeEventListener('webglcontextlost', handleContextLost);
-      canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+      webGlCanvas.removeEventListener('webglcontextlost', handleContextLost);
+      webGlCanvas.removeEventListener('webglcontextrestored', handleContextRestored);
+      canvas.removeEventListener('contextrestored', render);
       cancelAnimations();
       releaseWebGl();
     },
@@ -349,59 +372,45 @@ export function createGradientRenderer(
 }
 
 // Draws the animated renderer's resting gradient onto a plain 2D preview canvas
-export function renderStaticGradient(canvas: HTMLCanvasElement, colors: string[], rotation?: number) {
+export function renderStaticGradient(
+  canvas: HTMLCanvasElement, colors: string[], rotation?: number, aspectRatio?: number,
+) {
   canvas.width = STATIC_GRADIENT_SIZE;
   canvas.height = STATIC_GRADIENT_SIZE;
 
   const context = canvas.getContext('2d');
-  if (context) {
-    drawStaticGradient(context, colors, rotation);
-    return;
-  }
+  if (!context) return;
 
-  // The canvas is claimed by another context type (a WebGL init that fails mid-setup still claims
-  // it) — draw on a detached canvas and show it as a CSS background under the transparent bitmap
-  const fallbackCanvas = document.createElement('canvas');
-  fallbackCanvas.width = STATIC_GRADIENT_SIZE;
-  fallbackCanvas.height = STATIC_GRADIENT_SIZE;
-  const fallbackContext = fallbackCanvas.getContext('2d');
-  if (!fallbackContext) return;
-
-  drawStaticGradient(fallbackContext, colors, rotation);
-  canvas.style.background = `url(${fallbackCanvas.toDataURL()}) center / 100% 100%`;
+  drawStaticGradient(context, colors, rotation, aspectRatio);
 }
 
-function drawStaticGradient(context: CanvasRenderingContext2D, colors: string[], rotation?: number) {
+function drawStaticGradient(
+  context: CanvasRenderingContext2D, colors: string[], rotation?: number, aspectRatio?: number,
+) {
   const colorVectors = buildColorVectors(colors);
-  const keyPoints = buildRotatedKeyPoints(rotation);
+  const linearDirection = buildLinearDirection(rotation, aspectRatio);
   const positions = Array.from(
     { length: COLOR_POINT_COUNT },
-    (_value, index) => keyPoints[index * KEY_POINT_STEP],
+    (_value, index) => KEY_POINTS[index * KEY_POINT_STEP],
   );
-  const image = context.createImageData(STATIC_GRADIENT_SIZE, STATIC_GRADIENT_SIZE);
+  drawGradient(context, colorVectors, positions, linearDirection);
+}
+
+function drawGradient(
+  context: CanvasRenderingContext2D, colorVectors: number[][], positions: number[][], linearDirection: number[],
+) {
+  const { width, height } = context.canvas;
+  const image = context.createImageData(width, height);
   const { data } = image;
 
-  for (let rowIndex = 0; rowIndex < STATIC_GRADIENT_SIZE; rowIndex++) {
-    for (let columnIndex = 0; columnIndex < STATIC_GRADIENT_SIZE; columnIndex++) {
-      const xRatio = columnIndex / STATIC_GRADIENT_SIZE;
-      const yRatio = rowIndex / STATIC_GRADIENT_SIZE;
+  for (let rowIndex = 0; rowIndex < height; rowIndex++) {
+    for (let columnIndex = 0; columnIndex < width; columnIndex++) {
+      const xRatio = columnIndex / width;
+      const yRatio = rowIndex / height;
 
-      const distances = positions.map(([centerX, centerY]) => Math.hypot(xRatio - centerX, yRatio - centerY));
-      const minDistance = Math.min(...distances);
-      const weights = distances.map((distance) => (1 - (distance - minDistance)) ** BLEND_POWER);
-      const totalWeight = Math.abs(weights.reduce((sum, weight) => sum + weight, 0));
+      const [red, green, blue] = blendGradientColors(colorVectors, positions, xRatio, yRatio, linearDirection);
 
-      let red = 0;
-      let green = 0;
-      let blue = 0;
-      for (let index = 0; index < colorVectors.length; index++) {
-        const weight = weights[index] / totalWeight;
-        red += colorVectors[index][0] * weight;
-        green += colorVectors[index][GREEN_CHANNEL_OFFSET] * weight;
-        blue += colorVectors[index][BLUE_CHANNEL_OFFSET] * weight;
-      }
-
-      const offset = (rowIndex * STATIC_GRADIENT_SIZE + columnIndex) * PIXEL_CHANNEL_COUNT;
+      const offset = (rowIndex * width + columnIndex) * PIXEL_CHANNEL_COUNT;
       data[offset] = red;
       data[offset + GREEN_CHANNEL_OFFSET] = green;
       data[offset + BLUE_CHANNEL_OFFSET] = blue;
@@ -412,13 +421,54 @@ function drawStaticGradient(context: CanvasRenderingContext2D, colors: string[],
   context.putImageData(image, 0, 0);
 }
 
+export function buildGradientEdgeColors(colors: string[], rotation?: number) {
+  const colorVectors = buildColorVectors(colors);
+  const linearDirection = buildLinearDirection(rotation);
+  const positions = Array.from({ length: COLOR_POINT_COUNT }, (_value, index) => KEY_POINTS[index * KEY_POINT_STEP]);
+  // Safari extends solid colors; the edge centers approximate the resting gradient without reading pixels
+  const edges = [0, 1].map((y) => {
+    const channels = blendGradientColors(colorVectors, positions, ROTATION_CENTER, y, linearDirection);
+    return `#${channels.map((channel) => Math.round(channel).toString(HEX_RADIX)
+      .padStart(HEX_CHANNEL_LENGTH, '0')).join('')}`;
+  });
+  return { top: edges[0], bottom: edges[1] };
+}
+
+function blendGradientColors(
+  colorVectors: number[][], positions: number[][], x: number, y: number, linearDirection: number[],
+) {
+  if (colorVectors.length < MIN_FREEFORM_COLORS) {
+    const first = colorVectors[0];
+    const last = colorVectors[colorVectors.length - 1];
+    const ratio = Math.max(0, Math.min(1,
+      (x - ROTATION_CENTER) * linearDirection[0] + (y - ROTATION_CENTER) * linearDirection[1] + ROTATION_CENTER));
+    return first.map((channel, index) => channel + (last[index] - channel) * ratio);
+  }
+
+  const centeredX = x - ROTATION_CENTER;
+  const centeredY = y - ROTATION_CENTER;
+  const swirlFactor = SWIRL_FACTOR * Math.hypot(centeredX, centeredY);
+  const theta = swirlFactor * swirlFactor * SWIRL_ANGLE_MULTIPLIER;
+  const sin = Math.sin(theta);
+  const cos = Math.cos(theta);
+  const pixelX = Math.max(0, Math.min(1, ROTATION_CENTER + centeredX * cos - centeredY * sin));
+  const pixelY = Math.max(0, Math.min(1, ROTATION_CENTER + centeredX * sin + centeredY * cos));
+  const weights = colorVectors.map((_color, index) => (
+    Math.max(0, BLEND_RADIUS - Math.hypot(pixelX - positions[index][0], pixelY - positions[index][1])) ** BLEND_POWER
+  ));
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  const channels = [0, 0, 0];
+  for (let index = 0; index < colorVectors.length; index++) {
+    const weight = weights[index] / totalWeight;
+    channels[0] += colorVectors[index][0] * weight;
+    channels[GREEN_CHANNEL_OFFSET] += colorVectors[index][GREEN_CHANNEL_OFFSET] * weight;
+    channels[BLUE_CHANNEL_OFFSET] += colorVectors[index][BLUE_CHANNEL_OFFSET] * weight;
+  }
+  return channels;
+}
+
 function buildColorVectors(colors: string[]) {
-  const parsed = colors.map(buildColorVector);
-  const base = parsed.length ? parsed : [[0, 0, 0]];
-  return Array.from(
-    { length: COLOR_POINT_COUNT },
-    (_value, index) => base[index % base.length],
-  );
+  return colors.length ? colors.slice(0, COLOR_POINT_COUNT).map(buildColorVector) : [[0, 0, 0]];
 }
 
 function buildColorVector(color: string): number[] {
@@ -432,25 +482,11 @@ function buildColorVector(color: string): number[] {
   return [red, green, blue];
 }
 
-function normalizeRotation(rotation?: number) {
-  return ((rotation || 0) % FULL_ROTATION + FULL_ROTATION) % FULL_ROTATION;
-}
-
-function buildRotatedKeyPoints(rotation?: number) {
-  const normalizedRotation = normalizeRotation(rotation);
-  if (!normalizedRotation) return KEY_POINTS;
-
+function buildLinearDirection(rotation = 0, aspectRatio = 1) {
+  const normalizedRotation = ((rotation % FULL_ROTATION) + FULL_ROTATION) % FULL_ROTATION;
   const angle = normalizedRotation * DEGREES_TO_RADIANS;
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  return KEY_POINTS.map(([x, y]) => {
-    const centeredX = x - ROTATION_CENTER;
-    const centeredY = y - ROTATION_CENTER;
-    return [
-      centeredX * cos - centeredY * sin + ROTATION_CENTER,
-      centeredX * sin + centeredY * cos + ROTATION_CENTER,
-    ];
-  });
+  // Native rotation keeps the gradient's length equal to the wallpaper height
+  return [-Math.sin(angle) * aspectRatio, Math.cos(angle)];
 }
 
 function createShader(context: WebGLRenderingContext, type: number, source: string): WebGLShader | undefined {
@@ -499,5 +535,4 @@ function releasePartialWebGl(
   if (resources.program) context.deleteProgram(resources.program);
   if (resources.vertexShader) context.deleteShader(resources.vertexShader);
   if (resources.fragmentShader) context.deleteShader(resources.fragmentShader);
-  context.getExtension('WEBGL_lose_context')?.loseContext();
 }
