@@ -145,6 +145,7 @@ export const WALLET_ERROR_LANG_KEYS: Record<WalletFlowError, RegularLangKey> = {
   INSUFFICIENT_FUNDS: 'WalletSendInsufficientFunds',
   UNSUPPORTED_WALLET: 'WalletUnsupportedWallet',
   SEND_FAILED: 'WalletSendError',
+  SEND_UNCERTAIN: 'WalletSendPending',
   WALLET_CHANGED: 'WalletSendWalletChanged',
   NFT_NOT_OWNED: 'WalletCollectibleNotOwned',
   NFT_ON_SALE: 'WalletCollectibleOnSale',

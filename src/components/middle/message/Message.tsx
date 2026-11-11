@@ -218,6 +218,7 @@ import StoryMention from './StoryMention';
 import TodoList from './TodoList';
 import Video from './Video';
 import WebPage from './WebPage';
+import Widget from './Widget';
 
 import './Message.scss';
 
@@ -245,6 +246,8 @@ type OwnProps = {
   isThreadTop?: boolean;
   shouldIgnoreSendFocus?: boolean;
   isQuickPreview?: boolean;
+  // A message not sent yet (a bot's prepared message): its widget runs as a preview
+  isPreview?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
   containerRef?: ElementRef<HTMLDivElement>;
@@ -379,6 +382,7 @@ const Message = ({
   withSenderName,
   noComments,
   noReplies,
+  isPreview,
   appearanceOrder,
   isJustAdded,
   isFirstInGroup,
@@ -614,7 +618,7 @@ const Message = ({
     voice, document, sticker, contact,
     invoice, location,
     action, game, storyData, giveaway,
-    giveawayResults, todo, dice,
+    giveawayResults, todo, dice, widget,
   } = getMessageContent(message);
 
   const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
@@ -958,6 +962,7 @@ const Message = ({
     (photo || video || isAlbum || invoice?.extendedMedia || invoice?.photo)
     && ((text?.text.length || 0) > MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA || isMediaWithCommentButton),
   );
+  const hasWidgetTimeOverlay = Boolean(widget && (!hasText || isInvertedMedia) && !hasReactions);
   const contentClassName = buildClassName(buildContentClassName(message, album, {
     poll,
     webPage,
@@ -976,7 +981,9 @@ const Message = ({
     withVoiceTranscription,
     peerColorClass,
     hasOutsideReactions,
-  }), hasWideMedia && 'with-wide-media');
+  }), hasWideMedia && 'with-wide-media', hasWidgetTimeOverlay && 'widget-time-overlay',
+  // The time takes the widget's corner on the interface's side, whatever the direction of the message's content
+  hasWidgetTimeOverlay && lang.isRtl && 'widget-time-overlay-rtl');
 
   const withAppendix = contentClassName.includes('has-appendix');
   const emojiSize = getCustomEmojiSize(text?.emojiOnlyCount);
@@ -1585,7 +1592,7 @@ const Message = ({
       outgoingStatus && 'with-outgoing-icon',
     );
 
-    const hasMediaAfterText = isAlbum || (!isAlbum && photo) || (!isAlbum && video && !isRoundVideo);
+    const hasMediaAfterText = isAlbum || widget || (!isAlbum && photo) || (!isAlbum && video && !isRoundVideo);
     const hasContentAfterText = hasMediaAfterText || (!hasAnimatedEmoji && hasFactCheck);
     const isMetaInText = metaPosition === 'in-text';
 
@@ -1651,6 +1658,21 @@ const Message = ({
   function renderInvertibleMediaContent(hasCustomAppendix: boolean) {
     const content = (
       <>
+        {widget && (
+          <Widget
+            message={message}
+            theme={theme}
+            isInSelectMode={isInSelectMode}
+            isProtected={isProtected}
+            isActive={isMessageListActive}
+            canReply={canReply}
+            hasHeader={Boolean(asForwarded || hasSubheader || shouldRenderSenderName() || (isInvertedMedia && hasText))}
+            hasTimeOverlay={hasWidgetTimeOverlay}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+            isPreview={isPreview}
+          />
+        )}
         {isAlbum && observeIntersectionForLoading && (
           <Album
             album={album}

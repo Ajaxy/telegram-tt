@@ -81,7 +81,6 @@ type BubblePalette = {
   fileTitle: string;
   fileDescription: string;
   selected: string;
-  error: string;
 };
 
 const style = document.createElement('style');
@@ -273,9 +272,6 @@ function buildBubbleVariables(
     [`${prefix}ripple`]: `${bubble.text === BLACK ? WHITE : BLACK}14`,
     [`${prefix}selected`]: bubble.selected,
     [`${prefix}selected-text`]: bubble.text,
-    [`${prefix}error`]: bubble.error,
-    [`${prefix}error-background`]: ERROR_BACKGROUND,
-    [`${prefix}error-foreground`]: WHITE,
     [`${prefix}code-dark`]: bubble.text === WHITE ? '1' : '0',
   });
 }
@@ -307,7 +303,6 @@ function buildBubblePalette(
     fileTitle: text,
     fileDescription: secondary,
     selected: mixHexColors(fill, BLACK, MESSAGE_SELECTION_OPACITY),
-    error: text === WHITE ? text : '#ff3b30',
   };
 }
 

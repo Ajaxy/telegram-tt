@@ -369,6 +369,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   // Push registrations are reconciled against the shared subscription registry
   delete untypedCached.push;
 
+  cached.messageWidgetStorage ||= {};
   Object.values(cached.chats.fullInfoById).forEach((fullInfo) => {
     fullInfo.isCache = true;
   });
@@ -619,6 +620,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
     users: reduceUsers(global),
     chats: reduceChats(global),
     messages: reduceMessages(global),
+    messageWidgetStorage: reduceMessageWidgetStorage(global),
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
@@ -655,6 +657,25 @@ function reduceSharedState(sharedState: SharedState): SharedState {
     },
     isInitial: undefined,
   };
+}
+
+function reduceMessageWidgetStorage(global: GlobalState): GlobalState['messageWidgetStorage'] {
+  const result: GlobalState['messageWidgetStorage'] = {};
+  Object.entries(global.messageWidgetStorage).forEach(([chatId, byId]) => {
+    Object.entries(byId).forEach(([messageId, {
+      senderId, threadId, storage: { local }, lastSeenAt, height, resizeAnchor,
+    }]) => {
+      const hasLocal = Boolean(local && Object.keys(local).length);
+      const isLoaded = Boolean(global.messages.byChatId[chatId]?.byId[Number(messageId)]);
+      if (!hasLocal && (!height || !isLoaded)) return;
+      result[chatId] ||= {};
+      result[chatId][Number(messageId)] = {
+        senderId, threadId, storage: hasLocal ? { local } : {}, lastSeenAt: hasLocal ? lastSeenAt : undefined,
+        height, resizeAnchor,
+      };
+    });
+  });
+  return result;
 }
 
 export function serializeGlobal<T extends GlobalState>(global: T) {

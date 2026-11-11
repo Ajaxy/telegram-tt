@@ -149,7 +149,7 @@ Inside `.peer-color-{id}`, [--accent-color](#accent-color) aliases [--color-peer
 
 ## Message-specific variables
 
-The [runtime palette](src/util/theme.ts) defines separate incoming and outgoing roles. [Message styles](src/components/middle/message/Message.scss) select the incoming family by default; `.Message.own` selects the outgoing family. Message lists resolve their own chat palette, so retained lists do not borrow another chat's colors. Selecting a global color theme temporarily replaces the open chat's palette and wallpaper in that tab, until navigation leaves the chat. CSS fallbacks exist before initialization; the following default tables describe the initialized current implementation, not a contrast guarantee.
+The [runtime palette](src/util/theme.ts) defines separate incoming and outgoing roles. [Message styles](src/components/middle/message/Message.scss) select the incoming family by default; `.Message.own` selects the outgoing family. Message lists resolve their own chat palette, so retained lists do not borrow another chat's colors. Selecting a global color theme temporarily replaces the open chat's palette and wallpaper in that tab, until navigation leaves the chat. CSS fallbacks exist before initialization; the following default tables describe the initialized current implementation, not a contrast guarantee. An inline result's widget preview ([WidgetResult styles](src/components/middle/composer/inlineResults/WidgetResult.module.scss)) sits outside any message and re-aliases the incoming family itself, so it takes an incoming bubble's colors.
 
 ### Direction aliases
 

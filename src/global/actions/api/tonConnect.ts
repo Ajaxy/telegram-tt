@@ -12,10 +12,12 @@ import {
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
+import { settleWidgetWalletCall } from '../../../util/widgetWalletCalls';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { addPendingWalletTransaction, finishWalletTonConnect, updateWallet } from '../../reducers/wallet';
+import { selectChat } from '../../selectors';
 import { selectTabState } from '../../selectors/tabs';
 import { selectWalletAddress, selectWalletPublicKey, selectWalletTransferInFlight } from '../../selectors/wallet';
 import { readLocalSecret } from './wallet';
@@ -87,6 +89,12 @@ addActionHandler('openWalletTonConnectRequest', async (global, actions, payload)
   const { sessionId, messageId, tabId = getCurrentTabId() } = payload;
   const tab = selectTabState(global, tabId);
   if (tab.walletModal && tab.walletTonConnect?.status === 'pending') return;
+
+  // A widget's call this request replaces is declined, or its promise would never settle
+  const replaced = tab.walletTonConnect?.widget;
+  if (replaced && tab.walletTonConnect?.status !== 'done') {
+    settleWidgetWalletCall(replaced.callId, { error: 'REJECTED' });
+  }
 
   const pending: Flow = { status: 'pending', ownAddress: selectWalletAddress(global) };
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
@@ -456,6 +464,180 @@ addActionHandler('finishWalletTonConnectDisconnects', async (global, actions, pa
 
   actions.loadWalletTonConnectSessions();
 });
+
+addActionHandler('openWidgetWalletCall', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId(), ...widget } = payload;
+  const tab = selectTabState(global, tabId);
+
+  // One wallet window at a time: the user is already answering another one
+  if (tab.walletModal && tab.walletTonConnect && tab.walletTonConnect.status !== 'done') {
+    settleWidgetWalletCall(widget.callId, { error: 'REJECTED' });
+    return;
+  }
+
+  let ownAddress = selectWalletAddress(global);
+  let ownPublicKey = selectWalletPublicKey(global);
+  const pending: Flow = { status: 'pending', ownAddress, widget };
+
+  global = updateTabState(global, { walletTonConnect: pending }, tabId);
+  setGlobal(global);
+  actions.openWalletModal({ shouldOpenTonConnect: true, tabId });
+
+  // A request for the wallet creates it on the server, before this client may have loaded it
+  if (!ownAddress || !ownPublicKey) {
+    const state = (await callApi('fetchWalletState'))?.state;
+    ownAddress = state?.address;
+    ownPublicKey = state?.publicKey;
+    actions.loadWalletState();
+  }
+
+  if (!ownAddress || !ownPublicKey) {
+    finishTonConnect(tabId, pending, { status: 'error', error: 'WALLET_UNAVAILABLE' });
+    return;
+  }
+
+  const result = await callApi('previewWidgetWalletCall', { call: widget.call, ownAddress, ownPublicKey });
+
+  if (result && 'error' in result && (result.error === 'INVALID_REQUEST' || result.error === 'INSUFFICIENT_FUNDS')) {
+    refuseWidgetWalletCall(actions, tabId, pending, result.error);
+    return;
+  }
+
+  finishTonConnect(tabId, pending, result && !('error' in result)
+    ? { status: 'ready', ownAddress, preview: result }
+    : { status: 'error', ownAddress, error: result?.error || 'TONCONNECT_FAILED' });
+});
+
+addActionHandler('respondWidgetWalletCall', async (global, actions, payload): Promise<void> => {
+  const { passcode, password, tabId = getCurrentTabId() } = payload;
+  const flow = selectTabState(global, tabId).walletTonConnect;
+  const widget = flow?.widget;
+  const ownAddress = selectWalletAddress(global);
+  const ownPublicKey = selectWalletPublicKey(global);
+  const chat = widget && selectChat(global, widget.chatId);
+  if (!widget || !flow.preview || flow.status === 'pending' || flow.status === 'done'
+    || !ownAddress || !ownPublicKey || !chat) return;
+
+  if (flow.ownAddress !== ownAddress) {
+    global = updateTabState(global, { walletTonConnect: { ...flow, status: 'error', error: 'WALLET_CHANGED' } }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const pending: Flow = { ...flow, status: 'pending', error: undefined };
+  global = updateTabState(global, { walletTonConnect: pending }, tabId);
+  setGlobal(global);
+
+  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+
+  if ('error' in secret) {
+    finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
+    return;
+  }
+
+  global = getGlobal();
+  const inFlight = selectWalletTransferInFlight(global);
+  const result = await callApi('respondWidgetWalletCall', {
+    call: widget.call,
+    chat,
+    messageId: widget.messageId,
+    botId: widget.botId,
+    ownAddress,
+    ownPublicKey,
+    password,
+    ...secret,
+    previewFee: flow.preview.fee,
+    pendingSeqno: inFlight?.seqno,
+    pendingValidUntil: inFlight?.validUntil,
+  });
+
+  if (result && 'error' in result && (result.error === 'INVALID_REQUEST' || result.error === 'INSUFFICIENT_FUNDS')) {
+    refuseWidgetWalletCall(actions, tabId, pending, result.error);
+    return;
+  }
+
+  // The transfer may be on its way: the call fails and the window closes, with nothing to send again (iOS, tdesktop)
+  if (result && 'error' in result && result.error === 'SEND_UNCERTAIN') {
+    finishTonConnect(tabId, pending, { status: 'done' });
+    settleWidgetWalletCall(widget.callId, { error: 'FAILED' });
+    actions.showDialog({ data: { type: 'localized', text: { key: 'WalletSendPending' } }, tabId });
+    global = getGlobal();
+    if (selectTabState(global, tabId).walletModal?.shouldOpenTonConnect) actions.closeWalletModal({ tabId });
+    return;
+  }
+
+  // Nothing was sent: the user can try again or close the window
+  if (!result || 'error' in result) {
+    finishTonConnect(tabId, pending, { status: 'error', error: result?.error || 'TONCONNECT_FAILED' });
+    return;
+  }
+
+  finishTonConnect(tabId, pending, { status: 'done' });
+  settleWidgetWalletCall(widget.callId, result.answer);
+
+  global = getGlobal();
+
+  if (selectTabState(global, tabId).walletModal?.shouldOpenTonConnect) {
+    actions.closeWalletModal({ tabId });
+  }
+
+  if (result.sentTransfer) {
+    const { msgHash, seqno, validUntil, amount, toAddress } = result.sentTransfer;
+    global = getGlobal();
+
+    if (selectWalletAddress(global) === ownAddress) {
+      global = addPendingWalletTransaction(global, {
+        id: msgHash,
+        msgHash,
+        seqno,
+        validUntil,
+        isIncoming: false,
+        isPending: true,
+        peer: { type: 'address', address: toAddress },
+        amount,
+        timestamp: getServerTime(),
+      });
+
+      setGlobal(global);
+    }
+
+    actions.loadWalletState();
+    actions.loadWalletTransactions({ shouldRefresh: true });
+  }
+});
+
+addActionHandler('declineWidgetWalletCall', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const flow = selectTabState(global, tabId).walletTonConnect;
+  if (!flow?.widget || flow.status === 'pending') return;
+
+  // A window closed on its error is a call that failed, not one the user declined (tdesktop does the same)
+  settleWidgetWalletCall(flow.widget.callId, { error: flow.status === 'error' ? 'FAILED' : 'REJECTED' });
+  actions.closeWalletModal({ tabId });
+});
+
+// The wallet refuses a transaction or a payload it cannot take (another network or sender, an expired
+// `valid_until`, cells it cannot parse) or cannot pay for, which the widget gets as `BAD_REQUEST`. A short balance
+// offers the top-up over the chat; the call has ended by then, so the user pays with a new tap (sdk-v1 §5.13).
+function refuseWidgetWalletCall(
+  actions: RequiredGlobalActions, tabId: number, pending: Flow, error: 'INVALID_REQUEST' | 'INSUFFICIENT_FUNDS',
+) {
+  finishTonConnect(tabId, pending, { status: 'done' });
+  settleWidgetWalletCall(pending.widget!.callId, { error: 'BAD_REQUEST' });
+  actions.showNotification(error === 'INSUFFICIENT_FUNDS' ? {
+    containerSelector: '#portals',
+    message: { key: 'WalletSendInsufficientFunds' },
+    actionText: { key: 'WalletAddFunds' },
+    action: { action: 'openWalletModal', payload: { shouldOpenReceive: true, tabId } },
+    tabId,
+  } : { containerSelector: '#portals', message: { key: 'WalletConnectInvalid' }, tabId });
+
+  const global = getGlobal();
+
+  if (selectTabState(global, tabId).walletModal?.shouldOpenTonConnect) {
+    actions.closeWalletModal({ tabId });
+  }
+}
 
 // A refusal settles the request as an approval does, so only an answer that failed stays on the screen
 function finishTonConnectResponse(

@@ -73,6 +73,7 @@ import type {
   ApiUser,
   ApiVideo,
   ApiWalletGiftDeposit,
+  ApiWidgetWalletCall,
   DecryptWalletCommentError,
   ExportSecretPhraseError,
   ReplaceWalletError,
@@ -598,6 +599,7 @@ export type TabState = {
   dialogs: ApiDialog[];
 
   safeLinkModalUrl?: string;
+  safeLinkModalIsWidget?: boolean;
   mapModal?: {
     point: ApiGeoPoint;
     zoom?: number;
@@ -1045,6 +1047,7 @@ export type TabState = {
     // Moves the phrase out of the app passcode's keeping before that passcode goes
     shouldReleaseKey?: boolean;
     shouldOpenCollectibles?: boolean;
+    shouldOpenReceive?: boolean;
   };
 
   walletCardModal?: {
@@ -1076,6 +1079,14 @@ export type TabState = {
     request?: ApiTonConnectRequest;
     preview?: ApiTonConnectRequestPreview;
     error?: ApiTonConnectError;
+    // A widget's call to pay or sign: the window names its bot, and the outcome goes to the bot, see `widgetWalletCalls`
+    widget?: {
+      callId: string;
+      botId: string;
+      chatId: string;
+      messageId: number;
+      call: ApiWidgetWalletCall;
+    };
   };
 
   walletTransferFee?: {

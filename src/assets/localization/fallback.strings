@@ -89,6 +89,10 @@
 "PremiumLimitAccounts" = "You have reached your current limit of connected accounts. You can free one more place by subscribing to Telegram Premium with one of these connected accounts.";
 "SendMessage" = "Send Message";
 "MessageUnsupported" = "This message is not supported on the web version of Telegram";
+"Widget" = "Widget";
+"WidgetStopped" = "Widget stopped";
+"WidgetUnavailable" = "Widget unavailable";
+"WidgetUnsupportedBrowser" = "Unsupported browser";
 "PageContentUnsupported" = "Unsupported content";
 "PageContentEmbed" = "Embedded content";
 "ConversationDefaultRestrictedMedia" = "Sending media isn't allowed in this group.";
@@ -2248,6 +2252,9 @@
 "ActionSharingStillDisabled" = "Sharing in this chat is still disabled";
 "ContextMenuNoForwardsPeer" = "{name} disabled copying and forwarding in this chat.";
 "ContextMenuNoForwardsYou" = "You disabled copying and forwarding in this chat.";
+"CopyProtectionInfoGroup" = "Admins restricted members to copy or forward content from this group.";
+"CopyProtectionInfoChannel" = "Copying and forwarding is not allowed in this channel.";
+"CopyProtectionInfoMessage" = "Copying and forwarding is not allowed for this message.";
 "DisableSharing" = "Disable Sharing";
 "EnableSharing" = "Enable Sharing";
 "NotificationSharingEnabled" = "Sharing enabled for this chat.";
@@ -3549,7 +3556,6 @@
 "WalletConnectRequestAppExpired" = "{name}'s transaction request expired";
 "WalletConnectDeclined" = "Declined";
 "WalletConnectExpired" = "This request has expired.";
-"WalletConnectRemaining" = "Time remaining: {seconds}s";
 "WalletConnectExpiresIn_one" = "Expires in {count} minute";
 "WalletConnectExpiresIn_other" = "Expires in {count} minutes";
 "WalletConnectInvalid" = "This wallet request is invalid.";
@@ -3564,7 +3570,6 @@
 "WalletConnectUnavailable" = "Your wallet is not available.";
 "WalletConnectUnsupported" = "This app requested a method that isn't supported. You can send a refusal.";
 "WalletConnectContractData" = "Contract data";
-"WalletConnectSignTitle" = "{name} requests your signature";
 "WalletConnectSignData" = "Sign Data";
 "WalletConnectSign" = "Sign";
 "WalletConnectSignMessageNote" = "This transfer is signed but not sent. The app can send it later, and the funds will move then.";
@@ -3575,6 +3580,20 @@
 "WalletConnectStateInit" = "Contract deployment data";
 "WalletConnectFee" = "Estimated network fee: {amount}";
 "WalletConnectFeeUnavailable" = "Transaction simulation failed.";
+"WalletConnectPreview" = "Preview";
+"WalletConnectActionWithdraw" = "Withdrawal";
+"WalletConnectActionDeposit" = "Deposit";
+"WalletConnectActionTransfer" = "Transfer";
+"WalletConnectActionExcess" = "Excess";
+"WalletConnectActionCallContract" = "Call Contract";
+"WalletConnectActionDeployContract" = "Deploy Contract";
+"WalletConnectActionUnknown" = "Unknown Operation";
+"WalletConnectEmulationFailed" = "The preview shows that part of this transaction may fail.";
+"WalletConnectEmulationIncomplete" = "The preview of this transaction is incomplete.";
+"WalletConnectFeeEstimating" = "Estimating network fee…";
+"WalletConnectData" = "Data";
+"WalletConnectRecipients_one" = "{count} recipient";
+"WalletConnectRecipients_other" = "{count} recipients";
 "RichMediaCollage" = "Collage";
 "RichMediaSlideshow" = "Slideshow";
 "RichMediaRetry" = "Retry upload";

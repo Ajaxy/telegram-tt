@@ -51,7 +51,7 @@ export function buildContentClassName(
   const {
     photo = paidMediaPhoto, video = paidMediaVideo,
     audio, voice, document, contact, location, invoice, storyData,
-    giveaway, giveawayResults, richMessage,
+    giveaway, giveawayResults, richMessage, widget,
   } = content;
   const hasRichMessageAudio = Boolean(richMessage && getRichMessageAudios(richMessage).ids.length);
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
@@ -84,7 +84,7 @@ export function buildContentClassName(
     classNames.push(peerColorClass);
   }
 
-  if (!isMedia && text?.emojiOnlyCount) {
+  if (!isMedia && !widget && text?.emojiOnlyCount) {
     classNames.push('emoji-only');
     if (text.emojiOnlyCount <= EMOJI_SIZES) {
       classNames.push(`emoji-only-${text.emojiOnlyCount}`);
@@ -159,6 +159,10 @@ export function buildContentClassName(
     classNames.push('poll');
   }
 
+  if (widget) {
+    classNames.push('has-widget');
+  }
+
   if (invoice && !invoice.extendedMedia) {
     classNames.push('invoice');
   }
@@ -215,7 +219,8 @@ export function buildContentClassName(
       classNames.push('has-fact-check');
     }
 
-    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || hasBottomCommentButton)) {
+    if (isLastInGroup && !hasInlineKeyboard && !widget
+      && (photo || !isMediaWithNoText || hasBottomCommentButton)) {
       classNames.push('has-appendix');
     }
   }

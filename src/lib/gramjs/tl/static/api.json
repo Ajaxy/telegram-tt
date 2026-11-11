@@ -150,6 +150,8 @@
     "messages.sendInlineBotResult",
     "messages.editMessage",
     "messages.getBotCallbackAnswer",
+    "messages.getBotWidgetQueryAnswer",
+    "messages.getWidgetPublicData",
     "messages.getPeerDialogs",
     "messages.saveDraft",
     "messages.getFeaturedStickers",

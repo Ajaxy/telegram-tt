@@ -410,6 +410,20 @@ export interface ApiMediaTodo {
   completions?: ApiTodoCompletion[];
 }
 
+export interface ApiWidget {
+  mediaType: 'widget';
+  width: number;
+  height: number;
+  html?: string;
+  isCopy?: true;
+  canQuery?: true;
+  canBackgroundQuery?: true;
+  chatData?: string;
+  publicData?: string;
+  publicDataHash?: string;
+  widgetId?: string;
+}
+
 export type ApiNewMediaTodo = {
   todo: ApiTodoList;
 };
@@ -750,6 +764,7 @@ export type MediaContent = {
   contact?: ApiContact;
   pollId?: string;
   todo?: ApiMediaTodo;
+  widget?: ApiWidget;
   action?: ApiMessageAction;
   webPage?: ApiMessageWebPage;
   audio?: ApiAudio;

@@ -5,7 +5,7 @@
   @each $role in background, text, secondary, links, links-decoration, meta, accent, accent-foreground,
     control, control-foreground, file-title, file-description,
     checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
-    selected, selected-text, error, error-background, error-foreground,
+    selected, selected-text,
     text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
     --message-#{$role}: var(--message-incoming-#{$role});
   }
@@ -31,10 +31,6 @@
   --color-accent-own-rgb: var(--message-accent-rgb);
   --color-text-green: var(--message-accent);
   --color-text-green-rgb: var(--message-accent-rgb);
-  --color-error: var(--message-error);
-  --color-error-background: var(--message-error-background);
-  --color-error-shade: var(--message-error-background);
-  --color-error-foreground: var(--message-error-foreground);
   --color-interactive-active: var(--message-accent);
   --color-interactive-inactive: var(--message-tint);
   --color-interactive-buffered: var(--message-tint);
@@ -229,7 +225,7 @@
     @each $role in background, text, secondary, links, links-decoration, meta, accent, accent-foreground,
       control, control-foreground, file-title, file-description,
       checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
-      selected, selected-text, error, error-background, error-foreground,
+      selected, selected-text,
       text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
       --message-#{$role}: var(--message-outgoing-#{$role});
     }

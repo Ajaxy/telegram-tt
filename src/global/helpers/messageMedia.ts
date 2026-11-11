@@ -66,6 +66,7 @@ export function hasMessageMedia(message: MediaContainer) {
     || getMessageAudio(message)
     || getMessageVoice(message)
     || getMessagePaidMedia(message)
+    || message.content.widget
   ));
 }
 

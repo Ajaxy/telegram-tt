@@ -83,6 +83,30 @@
   font-size: 1rem;
 }
 
+.requester {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.requesterName {
+  overflow-wrap: anywhere;
+}
+
+.username {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+}
+
+// The heading sits on the island it names
+.dataTitle {
+  margin-bottom: -0.5rem;
+}
+
+// The answers to the request sit together on one island
+.actions,
 .message {
   display: flex;
   flex-direction: column;
@@ -116,6 +140,7 @@
   text-align: center;
 }
 
-.spinner {
+.spinner,
+.botAvatar {
   margin-inline: auto;
 }

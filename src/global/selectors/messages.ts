@@ -9,6 +9,7 @@ import type {
   ApiPeer, ApiSponsoredMessage,
   MediaContainer,
 } from '../../api/types';
+import type { ChatType } from '../../lib/widget-sandbox';
 import type {
   ChatTranslatedMessages,
   MessageListType,
@@ -68,6 +69,7 @@ import {
   isMessageTranslatable,
   isOwnMessage,
   isServiceNotificationMessage,
+  isUserBot,
   isUserRightBanned,
   prepareMessageReplyInfo,
 } from '../helpers';
@@ -145,6 +147,16 @@ export function selectCurrentChat<T extends GlobalState>(
 
 export function selectChatMessages<T extends GlobalState>(global: T, chatId: string) {
   return global.messages.byChatId[chatId]?.byId;
+}
+
+export function selectMessageWidgetStorage(global: GlobalState, chatId: string, messageId: number) {
+  return global.messageWidgetStorage[chatId]?.[messageId]?.storage;
+}
+
+// The stored record itself, with its `height` and `resizeAnchor`: no new object for a caller that runs on every render
+export function selectMessageWidgetHeight(global: GlobalState, chatId: string, messageId: number) {
+  const record = global.messageWidgetStorage[chatId]?.[messageId];
+  return record?.height ? record : undefined;
 }
 
 export function selectStoppableTypingDraftId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
@@ -707,7 +719,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
     ) && !(
       content.sticker || content.contact || content.pollId || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
-      || isDocumentSticker || content.dice
+      || isDocumentSticker || content.dice || content.widget
     )
     && !isForwarded
     && !message.viaBotId
@@ -1642,4 +1654,23 @@ export function selectReplyMessage<T extends GlobalState>(global: T, message: Ap
   }
 
   return selectChatMessage(global, replyInfo.replyToPeerId || message.chatId, replyInfo.replyToMsgId);
+}
+
+// The chat a widget is in, as the widget SDK names its kinds
+export function selectWidgetChatType<T extends GlobalState>(global: T, chatId: string): ChatType | undefined {
+  if (isUserId(chatId)) return 'private';
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+  if (isChatChannel(chat)) return 'channel';
+  return isChatBasicGroup(chat) ? 'group' : 'supergroup';
+}
+
+// The bot that speaks for a widget: the inline bot it came through, otherwise its author, when that is a bot
+export function selectWidgetBotId<T extends GlobalState>(global: T, message: ApiMessage) {
+  if (message.viaBotId) return message.viaBotId;
+
+  // A message in a private chat carries no sender: the chat is its author
+  const authorId = message.forwardInfo ? message.forwardInfo.fromId : selectSender(global, message)?.id;
+  const author = authorId ? selectUser(global, authorId) : undefined;
+  return author && isUserBot(author) ? author.id : undefined;
 }

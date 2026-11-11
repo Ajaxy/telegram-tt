@@ -4,6 +4,10 @@
   --modal-content-block-padding: 0;
 }
 
+.shielded {
+  pointer-events: none;
+}
+
 // The screens scroll on under the header, so it keeps no background of its own until they do. The fading strip
 // carries no `backdrop-filter`: under the squircle clip of the modal Chrome ignores the mask a blur needs to fade.
 .header {
@@ -161,6 +165,15 @@
 
   height: var(--slide-height);
   margin-top: calc(-1 * var(--modal-header-height));
+}
+
+// The active slide stays in the flow, so the dialog follows its content up to the usual height, then scrolls
+.autoHeight {
+  height: auto;
+
+  .slide {
+    max-height: var(--slide-height);
+  }
 }
 
 // The gutter is held with or without the bar, so a longer screen does not nudge the content sideways.

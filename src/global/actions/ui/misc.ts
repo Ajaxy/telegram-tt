@@ -430,10 +430,13 @@ addActionHandler('dismissDialog', (global, actions, payload): ActionReturnType =
 });
 
 addActionHandler('toggleSafeLinkModal', (global, actions, payload): ActionReturnType => {
-  const { url: safeLinkModalUrl, tabId = getCurrentTabId() } = payload;
+  const { url: safeLinkModalUrl, isWidget, tabId = getCurrentTabId() } = payload;
+
+  if (isWidget && selectTabState(global, tabId).safeLinkModalUrl) return undefined;
 
   return updateTabState(global, {
     safeLinkModalUrl,
+    safeLinkModalIsWidget: safeLinkModalUrl ? isWidget : undefined,
   }, tabId);
 });
 

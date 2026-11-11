@@ -535,6 +535,15 @@ export function updater(update: Update) {
         isMediaUnread: false,
       },
     });
+  } else if (update instanceof GramJs.UpdateMessageWidgetData) {
+    sendApiUpdate({
+      '@type': 'updateMessageWidgetData',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      messageId: update.msgId,
+      chatData: update.chatData,
+      publicData: update.publicData,
+      publicDataHash: update.publicDataHash?.toString(),
+    });
   } else if (update instanceof GramJs.UpdateMessagePoll) {
     const {
       pollId, poll, results, peer, msgId, topMsgId,

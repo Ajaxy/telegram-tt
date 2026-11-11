@@ -76,6 +76,15 @@ export function getMessageCopyOptions(
         afterEffect?.();
       },
     });
+  } else if (canCopy && message.content.widget && getWidgetSelectedText(message)) {
+    options.push({
+      label: 'ContextCopySelected',
+      icon: 'copy',
+      handler: () => {
+        copyTextToClipboard(getWidgetSelectedText(message)!);
+        afterEffect?.();
+      },
+    });
   } else if (canCopy && (text || message.content.richMessage)) {
     // Detect if the user has selection in the current message
     const hasSelection = Boolean((
@@ -135,6 +144,30 @@ export function getMessageCopyOptions(
 
   return options;
 }
+// A widget's text sits in its shadow root: Chromium and WebKit report the document's selection collapsed at the root's
+// host, and its composed ranges find the text; Firefox's range is in the root itself
+function getWidgetSelectedText(message: ApiMessage) {
+  const selection = window.getSelection();
+  const text = selection?.rangeCount ? selection.toString() : '';
+  if (!selection || !text.trim()) return undefined;
+
+  const messageElement = document.querySelector(`.Message.message-list-item[data-message-id="${message.id}"]`);
+  for (const host of messageElement?.querySelectorAll('.widget-shadow') || []) {
+    const root = host.shadowRoot;
+    if (!root) continue;
+    let range: AbstractRange | undefined;
+    try {
+      range = 'getComposedRanges' in selection ? selection.getComposedRanges({ shadowRoots: [root] })[0] : undefined;
+    } catch {
+      // An engine that takes the shadow roots as arguments
+    }
+    range ??= selection.getRangeAt(0);
+    if (!range.collapsed && (root.contains(range.startContainer) || root.contains(range.endContainer))) return text;
+  }
+
+  return undefined;
+}
+
 function checkMessageHasSelection(message: ApiMessage): boolean {
   const selection = window.getSelection();
   const selectionParentNode = selection?.anchorNode?.parentNode as HTMLElement;

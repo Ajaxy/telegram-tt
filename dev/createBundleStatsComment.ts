@@ -102,6 +102,7 @@ const ENTRY_ORDER = [
   'video-processing-worker',
   'shared-state-worker',
   'latex-worker',
+  'widget-sandbox-worker',
   'service-worker',
 ];
 const MANUAL_BUNDLES: BundleDefinition[] = [
@@ -464,11 +465,16 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
     return { key: 'latex-worker', label: '🧮 LaTeX worker' };
   }
 
+  if (/^widgetSandbox\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'widget-sandbox-worker', label: '🧩 Widget sandbox worker' };
+  }
+
   return undefined;
 }
 
 function isWorkerAssetName(name: string) {
-  return /^(?:worker|(?:fasttext|index|videoProcessing|sharedState|latex)\.worker)-[\w-]+\.js$/.test(name);
+  return /^(?:worker|(?:fasttext|index|videoProcessing|sharedState|latex|widgetSandbox)\.worker)-[\w-]+\.js$/
+    .test(name);
 }
 
 function isIgnoredAsset(name: string) {

@@ -78,6 +78,7 @@ import type {
   ApiVideo,
   ApiWalletCardSticker,
   ApiWalletGiftDeposit,
+  ApiWidgetWalletCall,
   BotsPrivacyType,
   KeyboardButtonSuggestedMessage,
   LinkContext,
@@ -595,6 +596,31 @@ export interface ActionPayloads {
   deleteEphemeralMessage: {
     chatId: string;
     messageId: number;
+  };
+  setMessageWidgetStorage: {
+    accountId: string;
+    chatId: string;
+    messageId: number;
+    area: 'local' | 'session';
+    values: Record<string, string>;
+  };
+  clearMessageWidgetStorage: undefined;
+  markMessageWidgetSeen: {
+    accountId: string;
+    chatId: string;
+    messageId: number;
+  };
+  setMessageWidgetHeight: {
+    accountId: string;
+    chatId: string;
+    messageId: number;
+    height: number;
+    resizeAnchor: 'top' | 'bottom';
+  };
+  setMessagesWidgetPublicData: {
+    messages: { chatId: string; messageId: number }[];
+    publicData: string;
+    publicDataHash: string;
   };
   resetLocalPaidMessages: WithTabId | undefined;
   deleteParticipantHistory: {
@@ -1523,6 +1549,18 @@ export interface ActionPayloads {
   disconnectWalletTonConnect: { sessionId: string; passcode?: string; password?: string } & WithTabId;
   disconnectAllWalletTonConnect: { passcode?: string; password?: string } & WithTabId;
   clearWalletTonConnectError: WithTabId | undefined;
+  openWidgetWalletCall: {
+    callId: string;
+    botId: string;
+    chatId: string;
+    messageId: number;
+    call: ApiWidgetWalletCall;
+  } & WithTabId;
+  respondWidgetWalletCall: {
+    passcode?: string;
+    password?: string;
+  } & WithTabId;
+  declineWidgetWalletCall: WithTabId | undefined;
   clearWalletTonConnect: WithTabId | undefined;
 
   openWalletModal: {
@@ -1538,6 +1576,7 @@ export interface ActionPayloads {
     shouldShowIntro?: boolean;
     shouldReleaseKey?: boolean;
     shouldOpenCollectibles?: boolean;
+    shouldOpenReceive?: boolean;
   } & WithTabId | undefined;
   openWalletTransaction: {
     transactionId: string;
@@ -2899,6 +2938,7 @@ export interface ActionPayloads {
   closeMapModal: WithTabId | undefined;
   toggleSafeLinkModal: {
     url?: string;
+    isWidget?: boolean;
   } & WithTabId;
   closeUrlAuthModal: WithTabId | undefined;
   showNotification: Omit<ApiNotification, 'localId'> & { localId?: string } & WithTabId;

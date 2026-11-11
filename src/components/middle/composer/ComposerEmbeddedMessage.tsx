@@ -59,6 +59,7 @@ type StateProps = {
   noAuthors?: boolean;
   noCaptions?: boolean;
   forwardsHaveCaptions?: boolean;
+  forwardsHaveWidgets?: boolean;
   isCurrentUserPremium?: boolean;
   isContextMenuDisabled?: boolean;
   isReplyToDiscussion?: boolean;
@@ -187,6 +188,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     noAuthors,
     noCaptions,
     forwardsHaveCaptions,
+    forwardsHaveWidgets,
     forwardedMessagesCount: frozenForwardedMessagesCount,
     message: frozenMessage,
     shouldForceShowEditing: frozenShouldForceShowEditing,
@@ -406,29 +408,33 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           >
             {isForwardingRendering && (
               <>
-                <MenuItem
-                  icon={!noAuthors ? 'check' : undefined}
-                  customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
+                {!forwardsHaveWidgets && (
+                  <>
+                    <MenuItem
+                      icon={!noAuthors ? 'check' : undefined}
+                      customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
 
-                  onClick={() => setForwardNoAuthors({
-                    noAuthors: false,
-                  })}
-                >
-                  {lang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
-                </MenuItem>
-                <MenuItem
-                  icon={noAuthors ? 'check' : undefined}
-                  customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
+                      onClick={() => setForwardNoAuthors({
+                        noAuthors: false,
+                      })}
+                    >
+                      {lang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={noAuthors ? 'check' : undefined}
+                      customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
 
-                  onClick={() => setForwardNoAuthors({
-                    noAuthors: true,
-                  })}
-                >
-                  {lang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
-                </MenuItem>
+                      onClick={() => setForwardNoAuthors({
+                        noAuthors: true,
+                      })}
+                    >
+                      {lang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
+                    </MenuItem>
+                  </>
+                )}
                 {forwardsHaveCaptions && (
                   <>
-                    <MenuSeparator />
+                    {!forwardsHaveWidgets && <MenuSeparator />}
                     <MenuItem
                       icon={!noCaptions ? 'check' : undefined}
                       customIcon={noCaptions ? <Icon name="placeholder" /> : undefined}
@@ -451,7 +457,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                     </MenuItem>
                   </>
                 )}
-                <MenuSeparator />
+                {(!forwardsHaveWidgets || forwardsHaveCaptions) && <MenuSeparator />}
                 <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick}>
                   {lang('ForwardToAnotherChat')}
                 </MenuItem>
@@ -566,6 +572,8 @@ export default memo(withGlobal<OwnProps>(
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (
       forward?.content.text && Object.keys(forward.content).length > 1
     ));
+    // A widget is never forwarded without its author, so hiding the sender is not offered
+    const forwardsHaveWidgets = forwardedMessages?.some((forward) => forward?.content.widget);
 
     const isContextMenuDisabled = replyInfo?.type === 'ephemeral'
       || (isForwarding && forwardMessageIds!.length === 1 && Boolean(message?.content.storyData));
@@ -586,6 +594,7 @@ export default memo(withGlobal<OwnProps>(
       noAuthors,
       noCaptions,
       forwardsHaveCaptions,
+      forwardsHaveWidgets,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isContextMenuDisabled,
       isReplyToDiscussion,

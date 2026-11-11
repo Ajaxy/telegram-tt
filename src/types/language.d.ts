@@ -57,6 +57,10 @@ export interface LangPair {
   'PremiumLimitAccounts': undefined;
   'SendMessage': undefined;
   'MessageUnsupported': undefined;
+  'Widget': undefined;
+  'WidgetStopped': undefined;
+  'WidgetUnavailable': undefined;
+  'WidgetUnsupportedBrowser': undefined;
   'PageContentUnsupported': undefined;
   'PageContentEmbed': undefined;
   'ConversationDefaultRestrictedMedia': undefined;
@@ -1754,6 +1758,9 @@ export interface LangPair {
   'ActionSharingEnabledYou': undefined;
   'ActionSharingStillDisabled': undefined;
   'ContextMenuNoForwardsYou': undefined;
+  'CopyProtectionInfoGroup': undefined;
+  'CopyProtectionInfoChannel': undefined;
+  'CopyProtectionInfoMessage': undefined;
   'DisableSharing': undefined;
   'EnableSharing': undefined;
   'NotificationSharingEnabled': undefined;
@@ -2678,6 +2685,18 @@ export interface LangPair {
   'WalletConnectDataCopied': undefined;
   'WalletConnectStateInit': undefined;
   'WalletConnectFeeUnavailable': undefined;
+  'WalletConnectPreview': undefined;
+  'WalletConnectActionWithdraw': undefined;
+  'WalletConnectActionDeposit': undefined;
+  'WalletConnectActionTransfer': undefined;
+  'WalletConnectActionExcess': undefined;
+  'WalletConnectActionCallContract': undefined;
+  'WalletConnectActionDeployContract': undefined;
+  'WalletConnectActionUnknown': undefined;
+  'WalletConnectEmulationFailed': undefined;
+  'WalletConnectEmulationIncomplete': undefined;
+  'WalletConnectFeeEstimating': undefined;
+  'WalletConnectData': undefined;
   'RichMediaCollage': undefined;
   'RichMediaSlideshow': undefined;
   'RichMediaRetry': undefined;
@@ -5394,12 +5413,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WalletConnectRequestAppExpired': {
     'name': V;
   };
-  'WalletConnectRemaining': {
-    'seconds': V;
-  };
-  'WalletConnectSignTitle': {
-    'name': V;
-  };
   'WalletConnectFee': {
     'amount': V;
   };
@@ -6290,6 +6303,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
   'WalletConnectExpiresIn': {
     'count': V;
   };
+  'WalletConnectRecipients': {
+    'count': V;
+  };
   'RichMediaSkippedFiles': {
     'count': V;
   };
@@ -6767,8 +6783,7 @@ export interface LangKeyGroups {
       | 'WalletConnectRequestAppPending'
       | 'WalletConnectRequestAppProcessed'
       | 'WalletConnectRequestAppDeclined'
-      | 'WalletConnectRequestAppExpired'
-      | 'WalletConnectSignTitle';
+      | 'WalletConnectRequestAppExpired';
     variables: 'name';
   };
   'limit,premiumLimit': {
@@ -7905,11 +7920,6 @@ export interface LangKeyGroups {
       | 'WalletSwitchText';
     variables: 'address';
   };
-  'seconds': {
-    keys:
-      | 'WalletConnectRemaining';
-    variables: 'seconds';
-  };
   'chat,moreBoosts': {
     keys:
       | 'ChannelBoostMoreBoostsNeededText';
@@ -8162,6 +8172,7 @@ export interface LangPluralKeyGroups {
       | 'WalletNetworkFeesInfoShort'
       | 'WalletStickerLimitError'
       | 'WalletConnectExpiresIn'
+      | 'WalletConnectRecipients'
       | 'RichMediaSkippedFiles'
       | 'AmongWinners'
       | 'BoostingBoostsCount'

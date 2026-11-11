@@ -33,9 +33,13 @@ import {
   cancelMessageMediaDownload,
   enterMessageSelectMode,
   exitMessageSelectMode,
+  markMessageWidgetSeen,
   toggleMessageSelection,
   updateChatMessage,
   updateFocusedMessage,
+  updateMessageWidgetData,
+  updateMessageWidgetHeight,
+  updateMessageWidgetStorage,
 } from '../../reducers';
 import { pushPlayedTrack } from '../../reducers/audioPlayer';
 import { updateTabState } from '../../reducers/tabs';
@@ -75,6 +79,49 @@ const POLL_RESULT_OPEN_DELAY_MS = 450;
 const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
+
+addActionHandler('setMessageWidgetStorage', (global, actions, payload): ActionReturnType => {
+  const {
+    accountId, chatId, messageId, area, values,
+  } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked || global.auth.isLoggingOut
+    || !message?.content.widget || message.isDeleting) return;
+
+  return updateMessageWidgetStorage(global, message, area, values);
+});
+
+addActionHandler('markMessageWidgetSeen', (global, actions, payload): ActionReturnType => {
+  const { accountId, chatId, messageId } = payload;
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked) return undefined;
+
+  return markMessageWidgetSeen(global, chatId, messageId);
+});
+
+addActionHandler('clearMessageWidgetStorage', (global): ActionReturnType => {
+  return { ...global, messageWidgetStorage: {} };
+});
+
+addActionHandler('setMessageWidgetHeight', (global, actions, payload): ActionReturnType => {
+  const {
+    accountId, chatId, messageId, height, resizeAnchor,
+  } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked || global.auth.isLoggingOut
+    || !message?.content.widget || message.isDeleting) return;
+
+  return updateMessageWidgetHeight(global, message, height, resizeAnchor);
+});
+
+addActionHandler('setMessagesWidgetPublicData', (global, actions, payload): ActionReturnType => {
+  const { messages, publicData, publicDataHash } = payload;
+
+  messages.forEach(({ chatId, messageId }) => {
+    global = updateMessageWidgetData(global, chatId, messageId, { publicData, publicDataHash });
+  });
+
+  return global;
+});
 
 addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType => {
   const {

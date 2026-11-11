@@ -8,6 +8,8 @@ import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ApiChat,
   ApiMessage,
+  ApiTonConnectEmulatedAction,
+  ApiTonConnectEmulation,
   ApiUser,
   ApiWalletCardSticker,
   ApiWalletGiftDeposit,
@@ -128,6 +130,19 @@ type WalletKeys = { seed: Uint8Array; publicKey: Uint8Array };
 type WalletKeyChange = {
   newPublicKey: Uint8Array;
   encryptedOldSeed?: Uint8Array;
+};
+
+type EmulateTraceResponse = ToncenterError & {
+  trace?: { tx_hash?: string };
+  transactions?: Record<string, {
+    description?: {
+      aborted?: boolean;
+      compute_ph?: { success?: boolean; exit_code?: number };
+      action?: { success?: boolean; result_code?: number };
+    };
+  }>;
+  actions?: { type?: string; success?: boolean; details?: Record<string, unknown> }[];
+  is_incomplete?: boolean;
 };
 
 type EstimateFeeResponse = ToncenterError & {
@@ -501,6 +516,87 @@ export async function estimateFee(
   }
 
   return BigInt((fees.in_fwd_fee || 0) + (fees.storage_fee || 0) + (fees.gas_fee || 0) + (fees.fwd_fee || 0));
+}
+
+const EXCESS_OPCODE = 0xd53276db;
+const EMULATED_TRANSFER_TYPES = new Set(['ton_transfer', 'extra_currency_transfer']);
+
+// What the transaction would do, by the same rules as Telegram Desktop: the wallet's own transfers, contract calls and
+// deployments, and everything else as an unknown action
+export async function emulateTransfer(
+  ownAddress: string, boc: string,
+): Promise<ApiTonConnectEmulation | undefined> {
+  const result = await invokeTonApiRequest<EmulateTraceResponse>({
+    endpoint: '/api/emulate/v1/emulateTrace',
+    payload: JSON.stringify({
+      boc,
+      ignore_chksig: true,
+      include_code_data: false,
+      include_address_book: false,
+      include_metadata: false,
+      with_actions: true,
+    }),
+    isPost: true,
+  });
+
+  if (!result || result.error || !Array.isArray(result.actions)) return undefined;
+
+  const own = toRawAddress(ownAddress);
+  const rootHash = result.trace?.tx_hash;
+  const root = rootHash ? result.transactions?.[rootHash]?.description : undefined;
+  const isRootDone = Boolean(root && !root.aborted
+    && root.compute_ph?.success && (root.compute_ph.exit_code === 0 || root.compute_ph.exit_code === 1)
+    && root.action?.success && root.action.result_code === 0);
+
+  const actions: ApiTonConnectEmulatedAction[] = [];
+  let hasFailedAction = false;
+
+  for (const { type, success, details = {} } of result.actions) {
+    if (type === 'unknown') continue;
+    if (success === false) hasFailedAction = true;
+
+    const source = readEmulatedAddress(details.source);
+    const destination = readEmulatedAddress(details.destination);
+    const amount = typeof details.value === 'string' && /^\d+$/.test(details.value) ? details.value : undefined;
+
+    if (type === 'contract_deploy') {
+      actions.push({ type: 'deployContract', address: destination && toBounceableAddress(destination) });
+      continue;
+    }
+
+    const isOutgoing = Boolean(source && source === own);
+    const isIncoming = !isOutgoing && Boolean(destination && destination === own);
+    const raw = isIncoming ? source : destination;
+    const counterparty = raw && toBounceableAddress(raw);
+
+    if (type && EMULATED_TRANSFER_TYPES.has(type)) {
+      actions.push({
+        type: isOutgoing ? 'withdraw' : isIncoming ? 'deposit' : 'transfer', amount, address: counterparty,
+      });
+    } else if (type === 'call_contract') {
+      const opcode = readEmulatedOpcode(details.opcode);
+      actions.push({ type: opcode === EXCESS_OPCODE ? 'excess' : 'callContract', amount, address: counterparty });
+    } else {
+      actions.push({ type: 'unknown', address: counterparty });
+    }
+  }
+
+  return {
+    actions,
+    isFailed: !isRootDone || hasFailedAction,
+    isIncomplete: Boolean(result.is_incomplete),
+  };
+}
+
+function readEmulatedAddress(value: unknown) {
+  return typeof value === 'string' ? toRawAddress(value) : undefined;
+}
+
+function readEmulatedOpcode(value: unknown) {
+  if (typeof value === 'number') return value >>> 0;
+  if (typeof value !== 'string' || !/^0x[\da-f]{1,8}$/i.test(value)) return undefined;
+
+  return Number.parseInt(value.slice(2), 16);
 }
 
 // Each holder DC keeps one XOR share and re-encrypts it to a key that lives only for this call

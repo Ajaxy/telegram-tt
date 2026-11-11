@@ -10,6 +10,7 @@ import { watchAndRun } from 'vite-plugin-watch-and-run';
 
 import buildGitInfoPlugin from './plugins/gitInfo.ts';
 import buildWebManifestPlugin from './plugins/webManifest.ts';
+import { createWidgetSandbox } from './src/lib/widget-sandbox/vite.ts';
 import packageJson from './package.json' with { type: 'json' };
 
 const DIR_NAME = dirname(fileURLToPath(import.meta.url));
@@ -66,7 +67,7 @@ type BundleReportHook = (
   isWrite: boolean,
 ) => void | Promise<void>;
 
-export default defineConfig(({ mode }): UserConfig => {
+export default defineConfig(async ({ mode }): Promise<UserConfig> => {
   const env = loadEnv(mode, process.cwd(), '');
   setViteEnv(env);
   const {
@@ -85,12 +86,18 @@ export default defineConfig(({ mode }): UserConfig => {
   const appleIcon = isProductionApp ? 'apple-touch-icon' : 'apple-touch-icon-dev';
   const publicUrl = new URL(baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`);
   const socialImageUrl = new URL(isProductionApp ? 'icon-512x512.png' : 'icon-dev-512x512.png', publicUrl).href;
+  const widgetSandbox = await createWidgetSandbox();
   const csp = buildCsp(appEnv);
+  const responseHeaders = {
+    'Content-Security-Policy': csp,
+    'Service-Worker-Allowed': '/',
+  };
   const isDevelopmentMode = mode === 'development';
   const telegramApiId = env.TELEGRAM_API_ID || '';
   const telegramApiHash = env.TELEGRAM_API_HASH || '';
   const workerReportBundles: OutputBundle[] = [];
   const plugins: PluginOption[] = [
+    widgetSandbox.plugin,
     buildGitInfoPlugin({
       appEnv,
       head: HEAD,
@@ -212,10 +219,7 @@ export default defineConfig(({ mode }): UserConfig => {
       host: '0.0.0.0',
       port: 1234,
       strictPort: true,
-      headers: {
-        'Content-Security-Policy': csp,
-        'Service-Worker-Allowed': '/',
-      },
+      headers: responseHeaders,
       https: getHttpsConfig(httpsCertPath, httpsKeyPath),
       warmup: {
         clientFiles: DEV_BUNDLE_WARMUP_CLIENT_FILES,
@@ -224,14 +228,18 @@ export default defineConfig(({ mode }): UserConfig => {
         ignored: DEV_SERVER_WATCH_IGNORES,
       },
     },
+    preview: {
+      headers: responseHeaders,
+    },
     build: {
       sourcemap: true,
       assetsInlineLimit: (filePath) => (IMAGE_ASSET_RE.test(filePath) ? false : undefined),
     },
     worker: {
-      plugins: shouldCollectWorkerReportBundles ? () => [
-        createWorkerBundleCollectorPlugin(workerReportBundles),
-      ] : undefined,
+      plugins: () => [
+        widgetSandbox.workerPlugin,
+        ...(shouldCollectWorkerReportBundles ? [createWorkerBundleCollectorPlugin(workerReportBundles)] : []),
+      ],
       rolldownOptions: {
         output: {
           entryFileNames: '[name]-[hash].js',

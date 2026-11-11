@@ -120,6 +120,19 @@ export type GlobalState = {
   isCacheApiSupported?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
+  messageWidgetStorage: Record<string, Record<number, {
+    senderId: string;
+    threadId: ThreadId;
+    storage: {
+      local?: Record<string, string>;
+      session?: Record<string, string>;
+    };
+    // When the widget was last shown or wrote `local` (`Date.now()`), for the cap on stored widgets
+    lastSeenAt?: number;
+    // The last content height the widget reported and its resize anchor, so the bubble opens at its size
+    height?: number;
+    resizeAnchor?: 'top' | 'bottom';
+  }>>;
   isSyncing?: boolean;
   isAppConfigLoaded?: boolean;
   isAppUpdateAvailable?: boolean;

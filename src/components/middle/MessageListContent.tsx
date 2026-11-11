@@ -31,6 +31,7 @@ import { formatCalendarDate, formatMessageListDate, secondsToDate } from '../../
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
 import { consumePendingTopGrowth } from './helpers/messageListReserves';
+import { consumeMessageWidgetResize } from './helpers/messageWidgetResize';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { renderPeerLink } from './message/helpers/messageActions';
 
@@ -193,12 +194,13 @@ const MessageListContent = ({
     const newHeight = entry.contentRect.height;
     const prevHeight = prevContentHeightRef.current;
     prevContentHeightRef.current = newHeight;
+    const widgetGrowth = consumeMessageWidgetResize(entry.target);
     if (prevHeight === undefined) {
       consumePendingTopGrowth(entry.target.closest<HTMLElement>('.MessageList')!);
       return;
     }
 
-    const growth = newHeight - prevHeight;
+    const growth = newHeight - prevHeight - widgetGrowth;
     onContentResize?.(growth);
   });
 

@@ -125,6 +125,12 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - Global actions call methods through `callApi` and check for `undefined` before updating state. Pass full `ApiPeer`, `ApiChat`, or `ApiUser` objects across this boundary; do not add separate `id`/`accessHash` method parameters. Extract fields for `buildInput*` inside the GramJS method.
 - Server updates enter through `src/api/gramjs/updates/mtpUpdateHandler.ts` and merge through `src/global/actions/apiUpdaters/`; update types live in `src/api/types/updates.ts`.
 
+## Widget sandbox
+
+- `src/lib/widget-sandbox/` vendors upstream `widget-sandbox` with local changes. Record each local change in its `NOTICE.md`, and keep its third-party license table in sync with what the bundles ship.
+- Its source follows upstream conventions and has its own TypeScript project: regenerate `types/` with `node node_modules/typescript/bin/tsc -p src/lib/widget-sandbox/tsconfig.json`; never edit `types/` by hand.
+- To update, follow the steps under "Updating" in its `NOTICE.md`. The widget worker's CSP is set by the service worker (`src/serviceWorker/service.worker.ts`, see its `DEPLOYMENT.md`); keep it in line with what the worker loads.
+
 ## Commits and PRs
 
 - Use `[Tag] Component / Area: Imperative description` for commit messages and PR titles. Capitalize the area and description's first word; omit trailing periods and semicolons.

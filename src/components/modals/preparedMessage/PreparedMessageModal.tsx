@@ -111,6 +111,7 @@ const PreparedMessageModal = ({
             messageListType="thread"
             noComments
             noReplies
+            isPreview
             appearanceOrder={0}
             isJustAdded={false}
             isFirstInGroup

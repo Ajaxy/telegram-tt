@@ -3,16 +3,14 @@ import type { TeactNode } from '../../../lib/teact/teact';
 import type { TextPart } from '../../../types';
 
 import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
-import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import { IS_EMOJI_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import {
   handleEmojiLoad,
   LOADED_EMOJIS,
-  nativeToUnifiedExtendedWithCache,
 } from '../../../util/emoji/emoji';
-import fixNonStandardEmoji from '../../../util/emoji/fixNonStandardEmoji';
+import splitEmoji from '../../../util/emoji/splitEmoji';
 import { compact } from '../../../util/iteratees';
 
 import MentionLink from '../../middle/message/MentionLink';
@@ -107,64 +105,45 @@ function replaceEmojis(
       return result;
     }
 
-    const source = part;
-    part = fixNonStandardEmoji(part);
-    const parts = part.split(EMOJI_REGEX);
-    const emojis: string[] = part.match(EMOJI_REGEX) || [];
-    let sourceOffset = parts[0].length;
-    result.push(postProcess(parts[0]));
+    const className = buildClassName(
+      'emoji',
+      size === 'small' && 'emoji-small',
+    );
 
-    return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
-      // Normalization inserts variation selectors; keep the source spelling for copy and quote offsets
-      const sourceStart = sourceOffset;
-      for (const character of emoji) {
-        if (character !== '\ufe0f' || source[sourceOffset] === character) sourceOffset += character.length;
+    splitEmoji(part, size).forEach((emojiPart) => {
+      if (typeof emojiPart === 'string') {
+        result.push(postProcess(emojiPart));
+        return;
       }
-      const sourceEmoji = source.slice(sourceStart, sourceOffset);
-      const code = nativeToUnifiedExtendedWithCache(emoji);
-      if (!code) {
-        emojiResult.push(postProcess(sourceEmoji));
-      } else {
-        const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
-        const className = buildClassName(
-          'emoji',
-          size === 'small' && 'emoji-small',
+
+      const { src, text: sourceEmoji } = emojiPart;
+      if (type === 'jsx') {
+        const isLoaded = LOADED_EMOJIS.has(src);
+
+        result.push(
+          <img
+            src={src}
+            className={`${className}${!isLoaded ? ' opacity-transition slow shown' : ''}`}
+            alt={sourceEmoji}
+            data-path={src}
+            draggable={false}
+            onLoad={!isLoaded ? handleEmojiLoad : undefined}
+          />,
         );
-
-        if (type === 'jsx') {
-          const isLoaded = LOADED_EMOJIS.has(src);
-
-          emojiResult.push(
-            <img
-              src={src}
-              className={`${className}${!isLoaded ? ' opacity-transition slow shown' : ''}`}
-              alt={sourceEmoji}
-              data-path={src}
-              draggable={false}
-              onLoad={!isLoaded ? handleEmojiLoad : undefined}
-            />,
-          );
-        }
-        if (type === 'html') {
-          emojiResult.push(
-            `<img\
-            draggable="false"\
-            class="${className}"\
-            src="${src}"\
-            alt="${sourceEmoji}"\
-          />`,
-          );
-        }
       }
-
-      const index = i * 2 + 2;
-      if (parts[index]) {
-        emojiResult.push(postProcess(parts[index]));
-        sourceOffset += parts[index].length;
+      if (type === 'html') {
+        result.push(
+          `<img\
+          draggable="false"\
+          class="${className}"\
+          src="${src}"\
+          alt="${sourceEmoji}"\
+        />`,
+        );
       }
+    });
 
-      return emojiResult;
-    }, result);
+    return result;
   }, [] as TextPart[]);
 }
 

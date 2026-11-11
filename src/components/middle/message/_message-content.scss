@@ -463,9 +463,10 @@
     background: var(--background-color);
   }
 
-  // The canvas follows the bubble's transforms and opacity, including its tail and shadow
-  .with-own-gradient .Message.own &.has-solid-background,
-  .with-own-gradient .Message.own &.has-background,
+  // The canvas follows the bubble's transforms and opacity, including its tail and shadow. A widget's bubble keeps its
+  // one colour, which the widget paints its background in (widget-sandbox sdk-v1 §5.1)
+  .with-own-gradient .Message.own &.has-solid-background:not(.has-widget),
+  .with-own-gradient .Message.own &.has-background:not(.has-widget),
   .with-own-gradient .Message.own.is-album & {
     background-color: transparent;
     box-shadow: none;

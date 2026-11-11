@@ -9,7 +9,7 @@ addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType
   const {
     initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
     shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
-    shouldOpenCollectibles, tabId = getCurrentTabId(),
+    shouldOpenCollectibles, shouldOpenReceive, tabId = getCurrentTabId(),
   } = payload || {};
 
   // The wallet state is not fetched here: the modal's poll makes its first call on open
@@ -23,7 +23,7 @@ addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType
     walletModal: {
       initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
       shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
-      shouldOpenCollectibles,
+      shouldOpenCollectibles, shouldOpenReceive,
     },
   }, tabId);
 });

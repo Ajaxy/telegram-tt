@@ -19,6 +19,7 @@ import ArticleResult from '../../middle/composer/inlineResults/ArticleResult';
 import GifResult from '../../middle/composer/inlineResults/GifResult';
 import MediaResult from '../../middle/composer/inlineResults/MediaResult';
 import StickerResult from '../../middle/composer/inlineResults/StickerResult';
+import WidgetResult from '../../middle/composer/inlineResults/WidgetResult';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import ListItem from '../../ui/ListItem';
 import RichEditorTooltipPanel from './RichEditorTooltipPanel';
@@ -128,6 +129,19 @@ const InlineBotTooltip = ({ isOpen, ...props }: OwnProps) => {
 
   function renderContent() {
     return inlineBotResults!.map((inlineBotResult, index) => {
+      // A widget result can have any type: what it sends decides how it looks
+      if (inlineBotResult.sendMessage.content.widget) {
+        return (
+          <WidgetResult
+            key={inlineBotResult.id}
+            focus={selectedIndex === index}
+            inlineResult={inlineBotResult}
+            observeIntersection={observeIntersection}
+            onClick={onSelectResult}
+          />
+        );
+      }
+
       switch (inlineBotResult.type) {
         case 'gif':
           return (

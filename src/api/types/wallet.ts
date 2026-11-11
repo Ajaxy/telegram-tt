@@ -58,6 +58,8 @@ export type ApiTonConnectError = ExportSecretPhraseError | 'TONCONNECT_FAILED' |
   | 'LOOKUP_INVALID' | 'TONCONNECT_CLIENT_ID_INVALID' | 'TONCONNECT_CLIENT_ID_OCCUPIED' | 'CHALLENGE_INVALID'
   | 'BODY_INVALID' | 'WALLET_UNAVAILABLE' | 'UNSUPPORTED_WALLET' | 'INVALID_REQUEST' | 'INSUFFICIENT_FUNDS'
   | 'INACTIVE_ADDRESS' | 'TRANSFER_PENDING' | 'SEND_FAILED' | 'WALLET_CHANGED'
+  // Past the broadcast: the transfer may have been sent
+  | 'SEND_UNCERTAIN'
   // A login through Telegram got a session other than the one it named
   | 'SESSION_CHANGED'
   // The same session or request is being answered already
@@ -65,14 +67,46 @@ export type ApiTonConnectError = ExportSecretPhraseError | 'TONCONNECT_FAILED' |
 
 export type ApiTonConnectResult<T> = T | { error: ApiTonConnectError };
 
+// What an emulated action did to the wallet; anything else the emulator reports is `unknown`, as in the native apps
+export type ApiTonConnectEmulatedActionType = 'withdraw' | 'deposit' | 'transfer' | 'excess' | 'callContract'
+  | 'deployContract' | 'unknown';
+
+export interface ApiTonConnectEmulatedAction {
+  type: ApiTonConnectEmulatedActionType;
+  // Nanotons
+  amount?: string;
+  // The other side of the action
+  address?: string;
+}
+
+export interface ApiTonConnectEmulation {
+  actions: ApiTonConnectEmulatedAction[];
+  // The emulated trace failed, or did not run to its end
+  isFailed?: boolean;
+  isIncomplete?: boolean;
+}
+
 export interface ApiTonConnectRequestPreview {
   request: ApiTonConnectAppRequest;
   transaction?: ApiTonConnectTransaction;
   signData?: ApiTonConnectSignData;
   fee?: bigint;
-  expires: number;
+  // Absent when the emulation could not run
+  emulation?: ApiTonConnectEmulation;
+  // Absent for a widget's transaction without `valid_until`
+  expires?: number;
   isInvalid?: boolean;
 }
+
+// A widget's wallet call (widget-sandbox sdk-v1 §2.18): TON Connect's `sendTransaction` request or `signData` payload, as the
+// framework checked it, and the label the bot gets with the outcome
+export type ApiWidgetWalletCall = {
+  method: 'sendTransaction' | 'signData';
+  params: object;
+  data: string;
+};
+
+export type ApiWidgetWalletAnswer = { result?: string; error?: 'TIMEOUT' | 'RATE_LIMITED' | 'FAILED' };
 
 export interface ApiWalletUserAddress {
   // Named only to a user who has a contact or a chat with the owner

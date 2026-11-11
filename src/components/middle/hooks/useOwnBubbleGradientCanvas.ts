@@ -25,8 +25,9 @@ import useSyncEffect from '../../../hooks/useSyncEffect';
 
 // A buffered canvas paints viewport-anchored fills; animated bubbles use their visible bounds and opacity
 const OWN_MESSAGE_SELECTOR = '.Message.own';
-const OWN_BUBBLE_SELECTOR = `${OWN_MESSAGE_SELECTOR} .message-content.has-solid-background, `
-  + `${OWN_MESSAGE_SELECTOR} .message-content.has-background, `
+// A widget's bubble is of one colour, the background the widget is told (widget-sandbox sdk-v1 §5.1)
+const OWN_BUBBLE_SELECTOR = `${OWN_MESSAGE_SELECTOR} .message-content.has-solid-background:not(.has-widget), `
+  + `${OWN_MESSAGE_SELECTOR} .message-content.has-background:not(.has-widget), `
   + `${OWN_MESSAGE_SELECTOR}.is-album .message-content`;
 const ANIMATED_ELEMENT_SELECTOR = '.Message.own, .Message.own > .message-content-wrapper';
 

@@ -1,0 +1,63 @@
+.root {
+  position: relative;
+
+  overflow: hidden;
+
+  width: var(--widget-width);
+  max-width: calc(100% - var(--surface-breakout-margin) + 0.5rem);
+  height: var(--widget-height);
+  min-height: 3.125rem;
+  max-height: 37.5rem;
+  margin-top: -0.3125rem;
+  margin-right: -0.5rem;
+  margin-bottom: -0.375rem;
+  margin-left: var(--surface-breakout-margin);
+  // The bubble's corners, square where a header or a caption meets the widget, as on a photo
+  border-radius:
+    var(--border-top-left-radius) var(--border-top-right-radius)
+    var(--border-bottom-right-radius) var(--border-bottom-left-radius);
+
+  font-size: var(--message-text-size, 1rem);
+}
+
+.withHeader {
+  margin-top: 0.25rem;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.withFooter {
+  margin-bottom: 0.375rem;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.mount {
+  // A new run boots below the picture it replaces, so the scroll must not anchor to anything in here
+  overflow-anchor: none;
+  position: absolute;
+  inset: 0;
+
+  :global(.widget-frame) {
+    display: block;
+    width: 100%;
+    height: 100% !important;
+    border: 0;
+  }
+}
+
+.isSelecting .mount {
+  pointer-events: none;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  padding: 0.5rem 0.75rem;
+
+  color: var(--secondary-color);
+  text-align: center;
+}

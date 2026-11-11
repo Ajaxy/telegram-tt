@@ -39,12 +39,16 @@ type OwnProps = {
   isFailed?: boolean;
   isLoading?: boolean;
   shouldLoopStickers?: boolean;
+  // A transfer the wallet is asked to make: the card alone, with no status and nothing to open
+  isRequest?: boolean;
   onClick?: NoneToVoidFunction;
 };
 
 // The sender key, the message key and a random prefix ahead of the text
 const ENCRYPTED_COMMENT_OVERHEAD = 64;
 const EN_DASH = '\u2013';
+// The rounded font's dash has almost no side bearing, so it would touch the digits
+const THIN_SPACE = '\u2009';
 // The Android app's ribbon colors; a failed transfer takes the red of the theme there as well
 const RIBBON_COLOR_IN = '#4bb9fe';
 const RIBBON_COLOR_OUT = '#15be00';
@@ -54,7 +58,7 @@ const SHINE_MIN_DURATION = 600;
 const SHINE_HIDE_DURATION = 320;
 
 const GramTransfer = ({
-  action, localMessageId, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, onClick,
+  action, localMessageId, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, isRequest, onClick,
 }: OwnProps) => {
   const lang = useLang();
   const [isHover, markHover, unmarkHover] = useFlag();
@@ -115,13 +119,14 @@ const GramTransfer = ({
   ));
 
   const { ref: clockRef, shouldRender: shouldRenderClock } = useShowTransition({
-    isOpen: isInProgress, withShouldRender: true, noMountTransition: true,
+    isOpen: isInProgress && !isRequest, withShouldRender: true, noMountTransition: true,
   });
   const { ref: ribbonRef, shouldRender: shouldRenderRibbon } = useShowTransition({
-    isOpen: !isInProgress, withShouldRender: true, noMountTransition: true,
+    isOpen: !isInProgress && !isRequest, withShouldRender: true, noMountTransition: true,
   });
 
-  const [whole, fraction] = formatTonParts(lang, amount, true);
+  // A request shows every nanoton the wallet is asked for; a chat card keeps the short form
+  const [whole, fraction] = formatTonParts(lang, amount, !isRequest);
   const [addressStart, addressEnd] = splitAddressInHalves(peerAddress);
 
   // The server cannot read an encrypted comment, so the spoiler length is estimated from the payload size
@@ -135,7 +140,7 @@ const GramTransfer = ({
 
   return (
     <div
-      className={buildClassName(styles.root, hasComment && styles.withComment)}
+      className={buildClassName(styles.root, hasComment && styles.withComment, isRequest && styles.request)}
       {...clickableProps}
       onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
@@ -154,6 +159,7 @@ const GramTransfer = ({
           <div ref={amountContentRef} className={styles.amountContent}>
             <span>
               {isOutgoing ? EN_DASH : '+'}
+              {THIN_SPACE}
               {whole}
               {fraction && <span className={styles.amountFraction}>{fraction}</span>}
             </span>
@@ -165,6 +171,8 @@ const GramTransfer = ({
           <span className={styles.addressLine}>{addressStart}</span>
           <span className={styles.addressLine}>{addressEnd}</span>
         </div>
+        {/* The halves read as two words, so a screen reader gets the address whole */}
+        {peerAddress && <span className="visually-hidden">{peerAddress}</span>}
         {shouldRenderShine && (
           <div ref={shineRef} className={styles.shine} aria-hidden>
             <div className={styles.shineStroke} />

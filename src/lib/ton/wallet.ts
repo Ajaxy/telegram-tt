@@ -199,9 +199,37 @@ export function buildSignedInternalBatchTransfer({ secretSeed, ...params }: Wall
   return buildBatchTransfer({ ...params, isInternal: true }, secretSeed);
 }
 
+// The signed external message and its normalised hash (TEP-467), by which explorers find the transaction
+export async function buildSignedBatchTransferWithHash({
+  secretSeed, ownAddress, anchorPublicKey, shouldDeploy, ...bodyParams
+}: WalletBatchTransferParams): Promise<{ boc: Uint8Array<ArrayBuffer>; msgHash: string }> {
+  const unsignedBody = await buildUnsignedBatchTransferBody(bodyParams);
+  const body = await attachSignature(unsignedBody, await signEd25519(unsignedBody.hash, secretSeed));
+  const stateInit = shouldDeploy ? await buildWalletStateInit(anchorPublicKey) : undefined;
+  const normalized = await new Builder()
+    .storeUint(2, 2) // `ext_in_msg_info$10`
+    .storeUint(0, 2) // Source: `addr_none`
+    .storeAddress(ownAddress.workchain, ownAddress.hash)
+    .storeCoins(0n) // Import fee
+    .storeBit(0) // No state init
+    .storeBit(1)
+    .storeRef(body)
+    .build();
+
+  return {
+    boc: serializeBoc(await buildExternalMessage(ownAddress, body, stateInit)),
+    msgHash: Array.from(normalized.hash, (byte) => byte.toString(16).padStart(2, '0')).join(''),
+  };
+}
+
 // A blank signature takes the same 64 bytes, so the size is known before the key is unlocked
 export async function getBatchTransferSize(params: WalletBatchMessageParams): Promise<number> {
   return (await buildBatchTransfer(params)).length;
+}
+
+// The external message with a blank signature, for an emulation that ignores the signature
+export async function buildUnsignedBatchTransferBoc(params: WalletBatchMessageParams): Promise<string> {
+  return bufferToBase64(await buildBatchTransfer(params));
 }
 
 async function buildBatchTransfer(

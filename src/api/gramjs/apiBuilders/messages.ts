@@ -687,6 +687,14 @@ export function buildLocalForwardedMessage({
   const updatedContent = {
     ...content,
     text: !shouldHideText ? textWithTimestamps : undefined,
+    // A forward is a copy: no queries and no chat state, its shared state and widget id stay (tgw-format.md)
+    widget: content.widget ? {
+      ...content.widget,
+      isCopy: true as const,
+      canQuery: undefined,
+      canBackgroundQuery: undefined,
+      chatData: undefined,
+    } : undefined,
   };
 
   // TODO Prepare reply info between forwarded messages locally, to prevent height jumps

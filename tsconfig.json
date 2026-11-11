@@ -18,6 +18,7 @@
     "src"
   ],
   "exclude": [
+    "src/lib/widget-sandbox",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/lib/gramjs/tl/generateModules.ts",

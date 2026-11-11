@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { RPCError } from '../../../lib/gramjs/errors';
+import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
@@ -13,7 +13,10 @@ import type {
   ApiTonConnectSentTransfer,
   ApiTonConnectSession,
   ApiTonConnectTransaction,
+  ApiWidgetWalletAnswer,
+  ApiWidgetWalletCall,
 } from '../../types';
+import type { ApiChat } from '../../types/chats';
 
 import {
   DEBUG, GRAM_TRANSFER_FEE_RESERVE, TON_CONNECT_BAD_REQUEST_ERROR_CODE, TON_CONNECT_UNKNOWN_APP_ERROR_CODE,
@@ -21,7 +24,7 @@ import {
   TON_CONNECT_USER_DECLINED_ERROR_CODE, WALLET_TRANSFER_DATA_MAX_BYTES,
 } from '../../../config';
 import { parseAddress, toRawAddress } from '../../../lib/ton/address';
-import { MAX_BOC_BYTES, parseBoc } from '../../../lib/ton/boc';
+import { MAX_BOC_BYTES, parseBoc, serializeBoc } from '../../../lib/ton/boc';
 import { parseTonConnectConnectRequest } from '../../../lib/ton/connectRequest';
 import { getEd25519PublicKey } from '../../../lib/ton/ed25519';
 import { signTonConnectData } from '../../../lib/ton/signData';
@@ -42,8 +45,10 @@ import {
   validateProofDomain,
 } from '../../../lib/ton/tonConnect';
 import {
-  buildSignedBatchTransfer, buildSignedInternalBatchTransfer, buildUnsignedBatchTransferBodyBoc, buildWalletInitBocs,
-  getBatchTransferSize, TRANSFER_TTL_SECONDS,
+  buildSignedBatchTransfer, buildSignedBatchTransferWithHash, buildSignedInternalBatchTransfer,
+  buildUnsignedBatchTransferBoc, buildUnsignedBatchTransferBodyBoc, buildWalletInitBocs, buildWalletStateInit,
+  getBatchTransferSize,
+  TRANSFER_TTL_SECONDS,
 } from '../../../lib/ton/wallet';
 import { TON_CONNECT_IDB_STORE } from '../../../util/browser/idb';
 import { bufferToBase64 } from '../../../util/encoding/buffer';
@@ -53,11 +58,12 @@ import {
   buildApiTonConnectRequest, buildApiTonConnectSession, buildApiWalletSentTransfer,
 } from '../apiBuilders/wallet';
 import { deserializeBytes, serializeBytes } from '../helpers/misc';
+import { invokeBotWidgetQuery } from './bots';
 import { invokeRequest } from './client';
 import {
-  checkIsAddressActive, deriveWalletSeeds, estimateFee, exportWalletSecretPhrase, fetchToncenterWalletState,
-  forgetRefusedTransfer, isTransferPending, loadSentTransfer, markSentTransferAccepted, rememberSentTransfer,
-  runWalletSend, sendTransferData,
+  checkIsAddressActive, deriveWalletSeeds, emulateTransfer, estimateFee, exportWalletSecretPhrase,
+  fetchToncenterWalletState, forgetRefusedTransfer, isTransferPending, isTransferUnanswered, loadSentTransfer,
+  markSentTransferAccepted, rememberSentTransfer, runWalletSend, sendTransferData,
 } from './wallet';
 
 type TonConnectCredentials = {
@@ -137,7 +143,7 @@ const TON_CONNECT_ERRORS: ApiTonConnectError[] = [
   'REQUEST_NOT_FOUND', 'REQUEST_EXPIRED', 'REQUEST_ALREADY_CLAIMED', 'BAD_REQUEST_ID',
   'LOOKUP_INVALID', 'TONCONNECT_CLIENT_ID_INVALID', 'TONCONNECT_CLIENT_ID_OCCUPIED', 'CHALLENGE_INVALID',
   'BODY_INVALID', 'WALLET_UNAVAILABLE', 'UNSUPPORTED_WALLET', 'INVALID_REQUEST', 'INSUFFICIENT_FUNDS',
-  'TRANSFER_PENDING', 'SEND_FAILED',
+  'TRANSFER_PENDING', 'SEND_FAILED', 'SEND_UNCERTAIN',
 ];
 
 // Ends a method with the error its caller gets, see `runTonConnect`
@@ -399,15 +405,11 @@ export function decryptTonConnectRequest({
     const state = await fetchToncenterWalletState(credentials.ownAddress);
     if (!state?.isSupportedContract) throw new TonConnectError('UNSUPPORTED_WALLET');
 
-    const body = await buildUnsignedBatchTransferBodyBoc({
-      messages: await buildTonConnectTransferMessages(preview.transaction),
-      seqno: state.seqno, now: getServerTime(), validUntil: preview.transaction.validUntil,
-    });
+    const { fee, emulation } = await previewTransfer(
+      credentials.ownAddress, keys.anchorPublicKey, state, preview.transaction,
+    );
 
-    preview.fee = await estimateFee(credentials.ownAddress, body,
-      state.isDeployed ? undefined : await buildWalletInitBocs(keys.anchorPublicKey));
-
-    return preview;
+    return { ...preview, fee, emulation };
   });
 }
 
@@ -487,7 +489,7 @@ async function processTonConnectRequest({
 
       await loadSentTransfer(credentials.ownAddress);
 
-      if (isTransferPending(credentials.ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
+      if (isTransferBlocked(credentials.ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
         throw new TonConnectError('TRANSFER_PENDING');
       }
     }
@@ -617,7 +619,7 @@ async function processTonConnectRequest({
         // the seqno on, or is still on its way, or has spent what this batch needs
         const current = await fetchToncenterWalletState(credentials.ownAddress);
 
-        if (!current || isTransferPending(credentials.ownAddress, current.seqno, pendingSeqno, pendingValidUntil)) {
+        if (!current || isTransferBlocked(credentials.ownAddress, current.seqno, pendingSeqno, pendingValidUntil)) {
           throw new Error('Transfer pending');
         }
 
@@ -696,7 +698,7 @@ async function signTonConnectMessage(
     const current = await fetchToncenterWalletState(ownAddress);
 
     if (!current?.isSupportedContract
-      || isTransferPending(ownAddress, current.seqno, pendingSeqno, pendingValidUntil)) {
+      || isTransferBlocked(ownAddress, current.seqno, pendingSeqno, pendingValidUntil)) {
       throw new Error('Transfer pending');
     }
 
@@ -722,6 +724,227 @@ async function signTonConnectRequestData(
   return {
     signature: bufferToBase64(signature), address: toRawAddress(ownAddress), timestamp, domain, payload,
   };
+}
+
+type WidgetWalletParams = TonConnectCredentials & {
+  call: ApiWidgetWalletCall;
+};
+
+type WidgetWalletRespondParams = WidgetWalletParams & {
+  chat: ApiChat;
+  messageId: number;
+  botId: string;
+  previewFee?: bigint;
+  // See `ApiWalletSentTransfer`
+  pendingSeqno?: number;
+  pendingValidUntil?: number;
+};
+
+// A widget's call has no session to decrypt, so the window shows it and its fee before the wallet is unlocked
+export function previewWidgetWalletCall({
+  call, ownAddress, ownPublicKey,
+}: WidgetWalletParams): Promise<ApiTonConnectResult<ApiTonConnectRequestPreview>> {
+  return runTonConnect(async () => {
+    const request = { id: '0', method: call.method, params: [] };
+
+    if (call.method === 'signData') {
+      return { request, signData: await parseWidgetWalletSignData(call, ownAddress) };
+    }
+
+    const transaction = await parseWidgetWalletTransaction(call, ownAddress);
+    transaction.messages = await Promise.all(transaction.messages.map(async (message) => ({
+      ...message, comment: message.payload ? await readTonConnectComment(message.payload) : undefined,
+    })));
+
+    const state = await fetchToncenterWalletState(ownAddress);
+    if (!state?.isSupportedContract) throw new TonConnectError('UNSUPPORTED_WALLET');
+
+    // A wallet that is not deployed has never rotated its key, so its current key is the one of its state init
+    const { fee, emulation } = await previewTransfer(ownAddress, deserializeBytes(ownPublicKey), state, transaction);
+
+    // A wallet that cannot pay is answered before the window, with the top-up offered over the chat (sdk-v1 §5.13)
+    const total = transaction.messages.reduce((sum, message) => sum + BigInt(message.amount), 0n);
+    const reserve = getBigIntMax(fee ?? 0n, GRAM_TRANSFER_FEE_RESERVE * BigInt(transaction.messages.length));
+    if (total + reserve > state.balance) throw new TonConnectError('INSUFFICIENT_FUNDS');
+
+    return {
+      request, transaction, fee, emulation, expires: transaction.validUntil,
+    };
+  });
+}
+
+// The outcome goes to the bot as a widget query with the device's wallet, and the widget gets the bot's answer
+export function respondWidgetWalletCall({
+  call, chat, messageId, botId, previewFee, pendingSeqno, pendingValidUntil, ...credentials
+}: WidgetWalletRespondParams): Promise<ApiTonConnectResult<{
+  answer: ApiWidgetWalletAnswer; sentTransfer?: ApiTonConnectSentTransfer;
+}>> {
+  return runTonConnect(async () => {
+    const { ownAddress } = credentials;
+    const exported = await exportWalletSecretPhrase(credentials);
+    if ('error' in exported) throw new TonConnectError(exported.error);
+
+    const seeds = await deriveWalletSeeds(exported.words, ownAddress, credentials.ownPublicKey);
+    if (!seeds) throw new TonConnectError('UNSUPPORTED_WALLET');
+
+    const anchorPublicKey = await getEd25519PublicKey(seeds.anchor);
+    const signingPublicKey = await getEd25519PublicKey(seeds.signing);
+    // Its hash is the address and its data holds the key, so the bot ties the key to the address before deployment
+    const stateInit = serializeBoc(await buildWalletStateInit(anchorPublicKey));
+    const buildUserWallet = (balance: bigint) => new GramJs.UserWallet({
+      address: ownAddress, balance, publicKey: signingPublicKey, stateInit,
+    });
+
+    if (call.method === 'signData') {
+      const data = await parseWidgetWalletSignData(call, ownAddress);
+      // There is no dApp domain: a widget signs for its bot
+      const domain = `bot${botId}`;
+      const timestamp = getServerTime();
+      const signature = await signTonConnectData({
+        data, address: parseAddress(ownAddress)!, domain, timestamp, seed: seeds.signing,
+      });
+      const state = await fetchToncenterWalletState(ownAddress);
+      const answer = await invokeBotWidgetQuery({
+        chat,
+        messageId,
+        data: call.data,
+        queryType: new GramJs.WidgetQueryTypeSignData({
+          wallet: buildUserWallet(state?.balance ?? 0n),
+          signData: new GramJs.DataJSON({
+            data: JSON.stringify({
+              signature: bufferToBase64(signature),
+              address: toRawAddress(ownAddress),
+              timestamp,
+              domain,
+              payload: call.params,
+            }),
+          }),
+        }),
+      });
+
+      return { answer };
+    }
+
+    const transaction = await parseWidgetWalletTransaction(call, ownAddress);
+    const state = await fetchToncenterWalletState(ownAddress);
+    if (!state?.isSupportedContract) throw new TonConnectError('UNSUPPORTED_WALLET');
+
+    await loadSentTransfer(ownAddress);
+    if (isTransferBlocked(ownAddress, state.seqno, pendingSeqno, pendingValidUntil)) {
+      throw new TonConnectError('TRANSFER_PENDING');
+    }
+
+    const messages = await buildTonConnectTransferMessages(transaction);
+    const params = buildBatchParams(ownAddress, { anchorPublicKey }, state, messages, transaction.validUntil);
+    // `valid_until` passed while the window was open
+    if (params.validUntil <= params.now) throw new TonConnectError('INVALID_REQUEST');
+
+    const total = transaction.messages.reduce((sum, message) => sum + BigInt(message.amount), 0n);
+    const reserve = getBigIntMax(previewFee ?? 0n, GRAM_TRANSFER_FEE_RESERVE * BigInt(params.messages.length));
+    if (total + reserve > state.balance) throw new TonConnectError('INSUFFICIENT_FUNDS');
+
+    for (const message of transaction.messages) {
+      const to = parseAddress(message.address)!;
+
+      if (to.isBounceable && !message.stateInit && await checkIsAddressActive(message.address) === false) {
+        throw new TonConnectError('INACTIVE_ADDRESS');
+      }
+    }
+
+    const size = await getBatchTransferSize(params).catch(() => Infinity);
+    if (size > WALLET_TRANSFER_DATA_MAX_BYTES) throw new TonConnectError('INVALID_REQUEST');
+
+    let sentTransfer: ApiTonConnectSentTransfer | undefined;
+    let sent: { msgHash: string; balance: bigint } | undefined;
+
+    // Past the broadcast the transfer may be on its way: the call fails for good, it is never offered again
+    let isMaybeSent = false;
+
+    try {
+      await runWalletSend(ownAddress, async () => {
+        // The seqno and the balance are read again under the lock, as for a TON Connect transaction
+        const current = await fetchToncenterWalletState(ownAddress);
+
+        if (!current || isTransferBlocked(ownAddress, current.seqno, pendingSeqno, pendingValidUntil)) {
+          throw new Error('Transfer pending');
+        }
+
+        const sendParams = buildBatchParams(ownAddress, { anchorPublicKey }, current, messages, transaction.validUntil);
+        const fee = await estimateFee(
+          ownAddress,
+          await buildUnsignedBatchTransferBodyBoc(sendParams),
+          current.isDeployed ? undefined : await buildWalletInitBocs(anchorPublicKey),
+        );
+        const sendReserve = getBigIntMax(fee ?? 0n, GRAM_TRANSFER_FEE_RESERVE * BigInt(sendParams.messages.length));
+
+        if (total + sendReserve > current.balance) throw new Error('Insufficient funds');
+
+        const signed = await buildSignedBatchTransferWithHash({ ...sendParams, secretSeed: seeds.signing });
+        await rememberSentTransfer(ownAddress, current.seqno, sendParams.validUntil);
+
+        const updates = await sendTransferData(signed.boc, undefined, generateRandomBigInt()).catch((err: unknown) => {
+          forgetRefusedTransfer(ownAddress, current.seqno, err);
+          // A timeout means the server stopped waiting, not that it refused
+          isMaybeSent = !(err instanceof RPCError) || err instanceof TimedOutError;
+          throw err;
+        });
+        const accepted = buildApiWalletSentTransfer(updates, {
+          seqno: current.seqno, validUntil: sendParams.validUntil,
+        });
+
+        // The bot looks the transfer up by the server's own message hash; without it the call fails, as in iOS and
+        // tdesktop, and the transfer is kept as unanswered
+        if (!accepted) {
+          isMaybeSent = true;
+          forgetRefusedTransfer(ownAddress, current.seqno, new Error('No message hash'));
+          throw new Error('No message hash');
+        }
+
+        await markSentTransferAccepted(ownAddress, current.seqno);
+        sentTransfer = {
+          msgHash: accepted.msgHash,
+          seqno: current.seqno,
+          validUntil: sendParams.validUntil,
+          amount: total,
+          toAddress: transaction.messages[0].address,
+        };
+        sent = { msgHash: accepted.msgHash, balance: current.balance };
+
+        return signed.boc;
+      });
+    } catch {
+      throw new TonConnectError(isMaybeSent ? 'SEND_UNCERTAIN' : 'SEND_FAILED');
+    }
+
+    const answer = await invokeBotWidgetQuery({
+      chat,
+      messageId,
+      data: call.data,
+      queryType: new GramJs.WidgetQueryTypeSentTransaction({
+        wallet: buildUserWallet(sent!.balance), msgHash: sent!.msgHash,
+      }),
+    });
+
+    return { answer, sentTransfer };
+  });
+}
+
+// The framework checked the call's shape; the wallet refuses what it cannot take (another network or sender, an
+// expired `valid_until`, cells it cannot parse), and the widget gets that as `BAD_REQUEST`
+async function parseWidgetWalletTransaction(call: ApiWidgetWalletCall, ownAddress: string) {
+  try {
+    return await parseTonConnectTransaction(call.params, ownAddress, getServerTime());
+  } catch {
+    throw new TonConnectError('INVALID_REQUEST');
+  }
+}
+
+async function parseWidgetWalletSignData(call: ApiWidgetWalletCall, ownAddress: string) {
+  try {
+    return await parseTonConnectSignData(call.params, ownAddress);
+  } catch {
+    throw new TonConnectError('INVALID_REQUEST');
+  }
 }
 
 export async function republishTonConnectResponses(currentUserId: string): Promise<void> {
@@ -840,8 +1063,35 @@ function forgetTonConnectKeys(sessionId: string) {
 
 // The size check, the fee estimate and the signed message all use the same parameters, so they
 // describe the same message
+// A transfer without an answer may still go through: no other one goes until it expires, as in the plain transfer flow
+function isTransferBlocked(ownAddress: string, seqno: number, pendingSeqno?: number, pendingValidUntil?: number) {
+  return isTransferPending(ownAddress, seqno, pendingSeqno, pendingValidUntil)
+    || isTransferUnanswered(ownAddress, seqno);
+}
+
+// The fee and what the transaction would do (the native apps emulate it before the window opens); either is absent
+// when its request fails
+async function previewTransfer(
+  ownAddress: string, anchorPublicKey: Uint8Array, state: WalletChainState, transaction: ApiTonConnectTransaction,
+) {
+  const messages = await buildTonConnectTransferMessages(transaction);
+  const params = {
+    messages, seqno: state.seqno, now: getServerTime(), validUntil: transaction.validUntil,
+  };
+  const [fee, emulation] = await Promise.all([
+    estimateFee(ownAddress, await buildUnsignedBatchTransferBodyBoc(params),
+      state.isDeployed ? undefined : await buildWalletInitBocs(anchorPublicKey)),
+    buildUnsignedBatchTransferBoc({
+      ...params, ownAddress: parseAddress(ownAddress)!, anchorPublicKey, shouldDeploy: !state.isDeployed,
+    }).then((boc) => emulateTransfer(ownAddress, boc)).catch(() => undefined),
+  ]);
+
+  return { fee, emulation };
+}
+
 function buildBatchParams(
-  ownAddress: string, keys: TonConnectKeys, state: WalletChainState, messages: TonConnectBatchMessages,
+  ownAddress: string, keys: Pick<TonConnectKeys, 'anchorPublicKey'>, state: WalletChainState,
+  messages: TonConnectBatchMessages,
   requestedUntil: number | undefined,
 ) {
   const now = getServerTime();

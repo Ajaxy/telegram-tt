@@ -3,7 +3,9 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiTonConnectSession, ApiWalletCollectible, ApiWalletTransaction } from '../../../api/types';
+import type {
+  ApiTonConnectSession, ApiUser, ApiWalletCollectible, ApiWalletTransaction,
+} from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
@@ -15,12 +17,13 @@ import { TON_CURRENCY_CODE, WALLET_FIRST_TRANSFER_SUGGESTION } from '../../../co
 import { getIsWalletTransferSubmitted, WALLET_ERROR_LANG_KEYS } from '../../../global/helpers';
 import {
   selectCanExportWalletPhrase, selectIsWalletKeyMissing, selectShouldLoopStickers, selectTabState,
-  selectTonExplorerUrl, selectWalletAddress, selectWalletPublicKey, selectWalletTransactions,
+  selectTonExplorerUrl, selectUser, selectWalletAddress, selectWalletPublicKey, selectWalletTransactions,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonNumber } from '../../../util/localization/format';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
+import { settleWidgetWalletCall } from '../../../util/widgetWalletCalls';
 import useWalletCredentials from './useWalletCredentials';
 import useWalletKeyFlows from './useWalletKeyFlows';
 import useWalletNavigation from './useWalletNavigation';
@@ -100,6 +103,7 @@ type StateProps = {
   walletCommentDecryption?: TabState['walletCommentDecryption'];
   walletTonConnect?: TabState['walletTonConnect'];
   tonConnectSessions?: ApiTonConnectSession[];
+  widgetBot?: ApiUser;
   decryptedComments?: Record<string, string>;
   animationLevel: AnimationLevel;
 };
@@ -123,11 +127,13 @@ const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
 
 // The server caches the balance for about this long
 const POLL_INTERVAL = 30000;
+// The second tap of a double tap over the widget must not land in the window
+const WIDGET_SHIELD_DELAY = 700;
 
 const WalletModal = ({
   modal, canExportPhrase, isKeyMissing, hasLocalSecret, hasAppPasscode, address, publicKey, balance, tonExplorerUrl,
   transactions, loadedTransactions, collectibles, walletTransfer, walletMnemonic, walletBackup, walletReplace,
-  walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel,
+  walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel, widgetBot,
 }: OwnProps & StateProps) => {
   const {
     openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions,
@@ -135,7 +141,7 @@ const WalletModal = ({
     clearWalletCommentDecryption, dropWalletVaultSecrets, openSettingsScreen, openUrl,
     watchWalletActivity, unwatchWalletActivity, openStarsBalanceModal, loadWalletCollectibles,
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
-    clearWalletTonConnect, closeUrlAuthModal,
+    clearWalletTonConnect, closeUrlAuthModal, respondWidgetWalletCall, declineWidgetWalletCall,
     disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion, saveWalletCardDraft,
     loadWalletCollectibleGift,
   } = getActions();
@@ -270,6 +276,7 @@ const WalletModal = ({
   const shouldReleaseKey = modal?.shouldReleaseKey;
   const initialTransactionId = modal?.initialTransactionId;
   const shouldOpenCollectibles = modal?.shouldOpenCollectibles;
+  const shouldOpenReceive = modal?.shouldOpenReceive;
   const hasCollectibles = Boolean(collectibles?.length);
 
   // The main screen falls back to the transactions tab while there are no collectibles, and they load with the screen,
@@ -293,8 +300,14 @@ const WalletModal = ({
       return;
     }
 
+    // The top-up a widget's wallet call offered, once the address it shows is known
+    if (shouldOpenReceive && address) {
+      push(WalletScreen.Receive);
+      return;
+    }
+
     if (initialTransactionId) setSelectedTransactionId(initialTransactionRecordId);
-  }, [shouldReleaseKey, initialTransactionId, initialTransactionRecordId, push]);
+  }, [shouldReleaseKey, shouldOpenReceive, address, initialTransactionId, initialTransactionRecordId, push]);
 
   const handleCloseAnimationEnd = useLastCallback(() => {
     reset();
@@ -312,6 +325,14 @@ const WalletModal = ({
       closeUrlAuthModal();
     }
 
+    // A widget's call that the window closed on is declined, or failed if it closed on an error; an answered one is
+    // settled already
+    if (walletTonConnect?.widget) {
+      settleWidgetWalletCall(walletTonConnect.widget.callId, {
+        error: walletTonConnect.status === 'error' ? 'FAILED' : 'REJECTED',
+      });
+    }
+
     clearWalletTonConnect();
   });
 
@@ -320,6 +341,19 @@ const WalletModal = ({
   const isReading = credentials.intent === 'phrase' || credentials.intent === 'decrypt';
   const isRequestPending = (credentials.flow?.status === 'pending' && !isReading)
     || walletTonConnect?.status === 'pending';
+
+  // A widget's call opens the window under the finger that tapped it: the second tap of a double tap must land on
+  // nothing in it, the backdrop included (iOS and tdesktop shield the whole window as well)
+  const tonConnectWidget = walletTonConnect?.widget;
+  const [armedWidget, setArmedWidget] = useState<typeof tonConnectWidget>();
+  const isWidgetShielded = Boolean(tonConnectWidget) && armedWidget !== tonConnectWidget;
+
+  useEffect(() => {
+    if (!tonConnectWidget) return undefined;
+
+    const timeout = setTimeout(() => setArmedWidget(tonConnectWidget), WIDGET_SHIELD_DELAY);
+    return () => clearTimeout(timeout);
+  }, [tonConnectWidget]);
 
   const handleClose = useLastCallback(() => {
     if (isRequestPending) return;
@@ -371,7 +405,16 @@ const WalletModal = ({
   });
 
   const handleTonConnectConfirm = useLastCallback(() => {
-    const { session, request, oauth } = walletTonConnect!;
+    const { session, request, oauth, widget } = walletTonConnect!;
+
+    if (widget) {
+      credentials.ask({ intent: 'tonConnect', run: (entered) => {
+        hasSubmittedTonConnectRef.current = true;
+        respondWidgetWalletCall(entered);
+      } });
+      return;
+    }
+
     if (!session && !oauth) return;
 
     credentials.ask({ intent: 'tonConnect', run: (entered) => {
@@ -386,7 +429,12 @@ const WalletModal = ({
   });
 
   const handleTonConnectDecline = useLastCallback(() => {
-    const { session, request, connectRequest, oauth } = walletTonConnect!;
+    const { session, request, connectRequest, oauth, widget } = walletTonConnect!;
+
+    if (widget) {
+      declineWidgetWalletCall();
+      return;
+    }
 
     if (oauth) {
       closeWalletModal();
@@ -535,6 +583,8 @@ const WalletModal = ({
   });
 
   const isTransactionRoot = stack.length === 1;
+  // A request opened on its own has no screens to move between, so the dialog takes the height of its content
+  const isAutoHeight = screen === WalletScreen.TonConnect && stack.length === 1;
   const handleOpenWallet = useLastCallback(() => {
     openWalletModal();
   });
@@ -831,6 +881,8 @@ const WalletModal = ({
         ) : (
           <WalletTonConnectScreen
             flow={walletTonConnect}
+            bot={widgetBot}
+            isArmed={!isWidgetShielded}
             onUnlock={handleTonConnectUnlock}
             onConfirm={handleTonConnectConfirm}
             onDecline={handleTonConnectDecline}
@@ -910,9 +962,10 @@ const WalletModal = ({
       header={header}
       width="slim"
       height="auto"
-      dialogClassName={styles.dialog}
+      dialogClassName={buildClassName(styles.dialog, isWidgetShielded && styles.shielded)}
       noContentInlinePadding
       noScrollable
+      noLightDismiss={isWidgetShielded}
       ariaLabel={lang(screenTitleKey || 'WalletTitle')}
       onClose={handleClose}
       onCloseAnimationEnd={handleCloseAnimationEnd}
@@ -922,7 +975,7 @@ const WalletModal = ({
         name={transitionName}
         activeKey={screen}
         direction={direction}
-        className={styles.transition}
+        className={buildClassName(styles.transition, isAutoHeight && styles.autoHeight)}
       >
         {renderScreen}
       </Transition>
@@ -1001,6 +1054,7 @@ export default memo(withGlobal<OwnProps>(
       tonConnectSessions: global.wallet?.tonConnectSessions,
       decryptedComments: global.wallet?.decryptedComments,
       animationLevel: selectSharedSettings(global).animationLevel,
+      widgetBot: tabState.walletTonConnect?.widget && selectUser(global, tabState.walletTonConnect.widget.botId),
     };
   },
 )(WalletModal));
