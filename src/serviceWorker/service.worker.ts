@@ -75,7 +75,7 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   }
 
   if (protocol === 'http:' || protocol === 'https:') {
-    if (pathname === scopePathname || pathname.match(RE_NETWORK_FIRST_ASSETS)) {
+    if ((pathname === scopePathname && e.request.mode === 'navigate') || pathname.match(RE_NETWORK_FIRST_ASSETS)) {
       e.respondWith(respondWithCacheNetworkFirst(e));
       return true;
     }
