@@ -20,7 +20,6 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import { formatTonShortFromNanos } from '../../../util/formatCurrency';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
-import { getAddressGroupSeparator, splitAddressIntoGroups } from '../../../util/tonAddress';
 import useWalletCredentials from './useWalletCredentials';
 import useWalletKeyFlows from './useWalletKeyFlows';
 import useWalletNavigation from './useWalletNavigation';
@@ -43,6 +42,7 @@ import Link from '../../ui/Link';
 import MenuItem from '../../ui/MenuItem';
 import Spinner from '../../ui/Spinner';
 import Transition from '../../ui/Transition';
+import WalletAddressGroups from './WalletAddressGroups';
 import WalletBuyAmountScreen from './WalletBuyAmountScreen';
 import WalletBuyScreen from './WalletBuyScreen';
 import WalletCollectibleScreen from './WalletCollectibleScreen';
@@ -54,7 +54,8 @@ import WalletDisableBackupScreen from './WalletDisableBackupScreen';
 import WalletEnterPhraseScreen from './WalletEnterPhraseScreen';
 import WalletHowItWorksModal from './WalletHowItWorksModal';
 import WalletIntroScreen from './WalletIntroScreen';
-import WalletMainScreen, { TRANSACTIONS_TAB_INDEX } from './WalletMainScreen';
+import WalletMainScreen, { COLLECTIBLES_TAB_INDEX, TRANSACTIONS_TAB_INDEX } from './WalletMainScreen';
+import WalletMoveToGiftsDialog from './WalletMoveToGiftsDialog';
 import WalletPasscodeRequiredScreen from './WalletPasscodeRequiredScreen';
 import WalletPasswordScreen from './WalletPasswordScreen';
 import WalletPhraseInfoScreen from './WalletPhraseInfoScreen';
@@ -139,6 +140,7 @@ const WalletModal = ({
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
     clearWalletTonConnect, closeUrlAuthModal,
     disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion,
+    loadWalletCollectibleGift,
   } = getActions();
 
   const lang = useLang();
@@ -263,6 +265,14 @@ const WalletModal = ({
   // Keyed on the values, so a new `modal` object with the same ones does not run the effect again
   const shouldReleaseKey = modal?.shouldReleaseKey;
   const initialTransactionId = modal?.initialTransactionId;
+  const shouldOpenCollectibles = modal?.shouldOpenCollectibles;
+  const hasCollectibles = Boolean(collectibles?.length);
+
+  // The main screen falls back to the transactions tab while there are no collectibles, and they load with the screen,
+  // so the collectibles tab is chosen once they arrive
+  useEffect(() => {
+    if (shouldOpenCollectibles && hasCollectibles) setActiveTab(COLLECTIBLES_TAB_INDEX);
+  }, [shouldOpenCollectibles, hasCollectibles]);
 
   // The record's own id can differ from the one the chat names when the transfer came from the chain
   const initialTransactionRecordId = useMemo(() => {
@@ -524,15 +534,20 @@ const WalletModal = ({
   });
 
   const isTransactionRoot = stack.length === 1;
-  const handleTransactionDone = useLastCallback(() => {
-    if (isTransactionRoot) {
-      openWalletModal();
-    } else {
-      handleBack();
-    }
+  const handleOpenWallet = useLastCallback(() => {
+    openWalletModal();
   });
 
   const handleOpenTransaction = useLastCallback((transaction: ApiWalletTransaction) => {
+    // Like Android, a gift moved through Telegram opens as the gift itself while the wallet holds it
+    const ownedGift = transaction.peer.type === 'telegramGift' && transaction.collectible
+      ? collectibles?.find(({ address: itemAddress }) => itemAddress === transaction.collectible!.address)
+      : undefined;
+    if (ownedGift) {
+      handleOpenCollectible(ownedGift);
+      return;
+    }
+
     setSelectedTransactionId(transaction.localId ?? transaction.id);
     push(WalletScreen.Transaction);
   });
@@ -543,6 +558,10 @@ const WalletModal = ({
   );
 
   const handleOpenCollectible = useLastCallback((collectible: ApiWalletCollectible) => {
+    if (collectible.type === 'gift' && collectible.gift) {
+      loadWalletCollectibleGift({ collectibleAddress: collectible.address });
+    }
+
     setSelectedCollectibleAddress(collectible.address);
     push(WalletScreen.Collectible);
   });
@@ -563,8 +582,6 @@ const WalletModal = ({
     loadWalletBuyContext({ provider });
     push(WalletScreen.BuyAmount);
   });
-
-  const wrongPhraseGroups = wrongPhrase?.address ? splitAddressIntoGroups(wrongPhrase.address) : undefined;
 
   // Memoized: the phrase screen is a memo component, and a new node each render would re-render it while the user types
   const isOwnPhraseExpected = Boolean(pendingReplace?.isOwnExpected);
@@ -702,6 +719,7 @@ const WalletModal = ({
             draft={sendDraft}
             onDraftChange={sendFlow.setDraft}
             onContinue={sendFlow.handleRecipientContinue}
+            onMoveToGifts={sendFlow.canMoveToGifts ? sendFlow.handleMoveToGiftsOpen : undefined}
           />
         );
       case WalletScreen.SendAmount:
@@ -722,7 +740,7 @@ const WalletModal = ({
             isRoot={isTransactionRoot}
             onDecryptComment={handleDecryptComment}
             onSend={address ? sendFlow.handleSendTo : undefined}
-            onDone={handleTransactionDone}
+            onOpenWallet={handleOpenWallet}
           />
         ) : (
           <div className={styles.loading}>
@@ -917,6 +935,11 @@ const WalletModal = ({
       </Transition>
       <WalletSendFlight canLaunch={screen === WalletScreen.SendAmount} onReadyChange={setIsSendFlightReady} />
       <WalletHowItWorksModal isOpen={isHowItWorksOpen} onClose={closeHowItWorks} />
+      <WalletMoveToGiftsDialog
+        isOpen={sendFlow.isMoveToGiftsOpen}
+        onConfirm={sendFlow.handleMoveToGiftsConfirm}
+        onClose={sendFlow.handleMoveToGiftsClose}
+      />
       <ConfirmDialog
         isOpen={isPhraseWhyOpen}
         text={lang('WalletSecretPhraseWhyText')}
@@ -935,15 +958,8 @@ const WalletModal = ({
         isOnlyConfirm
         onClose={keysFlows.handleWrongPhraseClose}
       >
-        {wrongPhraseGroups && (
-          <div className={styles.wrongPhraseAddress}>
-            {wrongPhraseGroups.map((group, index) => (
-              <span key={index} className={index % 2 ? styles.wrongPhraseGroupMuted : undefined}>
-                {group}
-                {getAddressGroupSeparator(index, wrongPhraseGroups.length)}
-              </span>
-            ))}
-          </div>
+        {wrongPhrase?.address && (
+          <WalletAddressGroups address={wrongPhrase.address} className={styles.wrongPhraseAddress} />
         )}
       </ConfirmDialog>
     </Modal>

@@ -213,6 +213,8 @@ export type FontIconName =
   | 'more'
   | 'move-caption-down'
   | 'move-caption-up'
+  | 'move-to-gifts'
+  | 'move-to-wallet'
   | 'music'
   | 'music-note'
   | 'mute'

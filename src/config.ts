@@ -364,6 +364,10 @@ export const WALLET_FIRST_TRANSFER_SUGGESTION = 'WALLET_FIRST_INCOMING_TRANSFER'
 // The item contract takes its fees from the attached amount, forwards the second one and returns the rest
 export const NFT_TRANSFER_ATTACHED_NANOS = 100_000_000n;
 export const NFT_TRANSFER_FORWARD_NANOS = 10_000_000n;
+// The most a server-built gift deposit may attach; the item contract returns the unspent part
+export const GIFT_DEPOSIT_MAX_NANOS = 1_000_000_000n;
+// Errors with which the server refuses the password of a gift move, typed or temporary
+export const GIFT_PASSWORD_ERRORS = new Set(['TMP_PASSWORD_INVALID', 'PASSWORD_HASH_INVALID', 'SRP_PASSWORD_CHANGED']);
 export const TON_CONNECT_BAD_REQUEST_ERROR_CODE = 1;
 export const TON_CONNECT_MANIFEST_CONTENT_ERROR_CODE = 3;
 export const TON_CONNECT_UNKNOWN_APP_ERROR_CODE = 100;

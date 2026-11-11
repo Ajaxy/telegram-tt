@@ -41,7 +41,7 @@ type OwnProps = {
   onDecryptComment: NoneToVoidFunction;
   // With `userId`, the form opens on the user's current address rather than the one in the record
   onSend?: (recipient: string, userId?: string) => void;
-  onDone: NoneToVoidFunction;
+  onOpenWallet: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -66,7 +66,7 @@ const DIAMOND_SIZE = 120;
 
 const WalletTransactionScreen = ({
   transaction, isRoot, currency, tonUsdRate, currencyRate, counterparty, decryptedComment, isDecryptingComment,
-  freeTransfersPerDay, onDecryptComment, onSend, onDone,
+  freeTransfersPerDay, onDecryptComment, onSend, onOpenWallet,
 }: OwnProps & StateProps) => {
   const { loadWalletUserAddresses } = getActions();
   const lang = useLang();
@@ -254,9 +254,11 @@ const WalletTransactionScreen = ({
           onClose={closeFeesInfo}
         />
       )}
-      <Button className={styles.okButton} pill onClick={onDone}>
-        {lang(isRoot ? 'WalletTransactionOpenWallet' : 'OK')}
-      </Button>
+      {isRoot && (
+        <Button className={styles.openWalletButton} pill onClick={onOpenWallet}>
+          {lang('WalletTransactionOpenWallet')}
+        </Button>
+      )}
     </div>
   );
 };

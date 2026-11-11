@@ -207,7 +207,9 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
     // An item without a page of its own is sold from the Fragment home page
     fragmentUrl: buildFragmentUrl(contentUrl?.url) || FRAGMENT_URL,
   };
-  const type = getCollectibleType(contentUrl?.url, item.image?.url);
+  const gift = item.gift && buildApiStarGift(item.gift);
+  const uniqueGift = gift?.type === 'starGiftUnique' ? gift : undefined;
+  const type = uniqueGift ? 'gift' : getCollectibleType(contentUrl?.url, item.image?.url);
 
   if (type !== 'gift') {
     return { ...base, type };
@@ -218,6 +220,7 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
     type,
     model: attributes?.find(({ traitType }) => traitType === MODEL_TRAIT)?.value,
     backdrop: attributes?.find(({ traitType }) => traitType === BACKDROP_TRAIT)?.value,
+    gift: uniqueGift,
   };
 }
 

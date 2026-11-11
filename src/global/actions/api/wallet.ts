@@ -35,8 +35,11 @@ import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { callApi } from '../../../api/gramjs';
+import { getStickerFromGift } from '../../../components/common/helpers/gifts';
 import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
-import { buildWalletTransferFeeKey, keepRecipientUser, WALLET_ERROR_LANG_KEYS } from '../../helpers/wallet';
+import {
+  buildWalletTransferFeeKey, getIsWalletGiftDepositConfirmed, keepRecipientUser, WALLET_ERROR_LANG_KEYS,
+} from '../../helpers/wallet';
 import {
   addActionHandler, getGlobal, getPromiseActions, setGlobal,
 } from '../../index';
@@ -48,6 +51,7 @@ import {
   markWalletTransactionFailed,
   replacePendingWalletTransaction,
   updateWallet,
+  updateWalletCollectibleGift,
   updateWalletServerState,
 } from '../../reducers/wallet';
 import { selectChat, selectChatLastMessageId } from '../../selectors/chats';
@@ -55,7 +59,7 @@ import { selectTabState } from '../../selectors/tabs';
 import { selectTheme } from '../../selectors/ui';
 import { selectUser } from '../../selectors/users';
 import {
-  selectOnrampProvider, selectWalletAddress, selectWalletCurrency, selectWalletPublicKey,
+  selectOnrampProvider, selectWalletAddress, selectWalletCollectibleGift, selectWalletCurrency, selectWalletPublicKey,
   selectWalletTransactions, selectWalletTransferInFlight,
 } from '../../selectors/wallet';
 import { fetchChatByUsername } from './chats';
@@ -563,6 +567,13 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
   if (!shouldRefresh) return;
 
+  if (page.some((transaction) => {
+    const previous = known.get(transaction.id);
+    return getIsWalletGiftDepositConfirmed(transaction) && (!previous || !getIsWalletGiftDepositConfirmed(previous));
+  })) {
+    actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+  }
+
   // For a local row that the fresh page does not list, the transaction is looked up by the message hash, or by the body
   // hashes when there is no message hash
   const unresolved = transactions.filter(({ id, isPending, msgHash, bodyHashes }) => (
@@ -582,6 +593,10 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
     global = replacePendingWalletTransaction(global, id, { ...confirmed, msgHash });
     setGlobal(global);
+
+    if (getIsWalletGiftDepositConfirmed(confirmed)) {
+      actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+    }
 
     if (bodyHashes) deleteUnansweredCard(actions, transaction);
   }
@@ -1349,13 +1364,15 @@ addActionHandler('loadWalletKeyRotationFee', async (global): Promise<void> => {
 addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise<void> => {
   const {
     fromAddress, toAddress, toUserId, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
-    isGasless, isAnimated, password, passcode, tabId = getCurrentTabId(),
+    giftDeposit, isGasless, isAnimated, password, passcode, tabId = getCurrentTabId(),
   } = payload;
 
   const ownAddress = selectWalletAddress(global);
   if (!ownAddress) return;
 
   if (selectTabState(global, tabId).walletTransfer?.status === 'pending') return;
+
+  const giftDepositState = selectTabState(global, tabId).walletGiftDeposit;
 
   if (ownAddress !== fromAddress) {
     global = updateTabState(global, { walletTransfer: { status: 'error', error: 'WALLET_CHANGED' } }, tabId);
@@ -1382,7 +1399,8 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
     localId,
     isIncoming: false,
     isPending: true,
-    peer: toUserId ? { type: 'user', userId: toUserId, address: toAddress } : { type: 'address', address: toAddress },
+    peer: giftDeposit ? { type: 'telegramGift', isOwnProfile: true }
+      : toUserId ? { type: 'user', userId: toUserId, address: toAddress } : { type: 'address', address: toAddress },
     // The server lists a collectible transfer with a zero amount as well
     amount: collectibleAddress ? 0n : amount,
     comment: shouldEncryptComment && !collectibleAddress ? undefined : comment,
@@ -1410,6 +1428,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         shouldEncryptComment,
         shouldSendAll,
         collectibleAddress,
+        collectiblePayload: giftDeposit?.payload,
         isGasless,
         ownAddress,
         ownPublicKey: selectWalletPublicKey(global)!,
@@ -1487,7 +1506,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
   // The server learns about the transfer with a delay, so the amount is deducted now; `staleBalance` marks its view.
   // The item contract returns most of what a collectible transfer attaches, so only the forwarded part is deducted.
   // A self-transfer only costs the fees, so its balance is left for the server to update.
-  const spentAmount = collectibleAddress ? NFT_TRANSFER_FORWARD_NANOS : amount;
+  const spentAmount = collectibleAddress ? (giftDeposit?.forwardAmount ?? NFT_TRANSFER_FORWARD_NANOS) : amount;
   const isSelfTransfer = toNonBounceableAddress(toAddress) === toNonBounceableAddress(ownAddress);
   const walletState = isSameWallet && !isSelfTransfer ? global.wallet?.state : undefined;
 
@@ -1529,9 +1548,36 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
     });
   }
 
+  if (giftDeposit && selectTabState(global, tabId).walletGiftDeposit === giftDepositState) {
+    global = updateTabState(global, { walletGiftDeposit: undefined }, tabId);
+  }
+
   setGlobal(global);
 
-  if (!isAnimated || !selectTabState(global, tabId).walletModal) {
+  // The server sends no deposit confirmation: the gift arrives as a service message once the chain takes the transfer
+  if (giftDeposit) {
+    const { collectible } = queuedRecord;
+    const giftSticker = collectible?.type === 'gift' && collectible.gift
+      ? getStickerFromGift(collectible.gift)
+      : undefined;
+
+    actions.showNotification({
+      message: { key: 'WalletMoveToGiftsDone' },
+      customEmojiIconId: giftSticker?.id,
+      icon: giftSticker ? undefined : 'gift',
+      actionText: { key: 'ViewAction' },
+      action: [{
+        action: 'closeWalletModal',
+        payload: undefined,
+      }, {
+        action: 'openChatWithInfo',
+        payload: {
+          id: global.currentUserId!, isOwnProfile: true, profileTab: 'gifts', forceScrollProfileTab: true,
+        },
+      }],
+      tabId,
+    });
+  } else if (!isAnimated || !selectTabState(global, tabId).walletModal) {
     actions.showNotification({
       message: {
         key: collectibleAddress ? 'WalletSendCollectibleSuccess'
@@ -1543,17 +1589,131 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
 
   actions.loadWalletState();
 
-  if (result.transaction) return;
-
   // The hash stays on the record, so a refresh keeps it on top until the server lists it
-  const confirmed = await fetchSentTransaction(result.msgHash);
+  const confirmed = result.transaction ?? await fetchSentTransaction(result.msgHash);
   if (!confirmed) return;
+
+  // As in the Android app, the gift list reloads once the chain takes the deposit, as a loaded list is not fetched
+  // again
+  if (giftDeposit && !confirmed.isFailed) {
+    actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+  }
+
+  if (result.transaction) return;
 
   global = getGlobal();
 
   if (selectWalletAddress(global) !== ownAddress) return;
 
   global = replacePendingWalletTransaction(global, result.msgHash, { ...confirmed, msgHash: result.msgHash });
+  setGlobal(global);
+});
+
+const lastGiftDepositRequestIdByTab: Record<number, number> = {};
+
+addActionHandler('loadWalletGiftDeposit', async (global, actions, payload): Promise<void> => {
+  const { collectibleAddress, tabId = getCurrentTabId() } = payload;
+
+  const state = global.wallet?.state;
+  const gift = selectWalletCollectibleGift(global, collectibleAddress);
+  if (!state || !gift) return;
+
+  global = updateTabState(global, { walletGiftDeposit: { collectibleAddress, isLoading: true } }, tabId);
+  setGlobal(global);
+
+  const requestId = (lastGiftDepositRequestIdByTab[tabId] || 0) + 1;
+  lastGiftDepositRequestIdByTab[tabId] = requestId;
+
+  const result = await callApi('fetchWalletGiftDeposit', {
+    slug: gift.slug,
+    collectibleAddress,
+    ownAddress: state.address,
+    ownPublicKey: state.publicKey,
+  });
+
+  global = getGlobal();
+
+  // The dialog was opened again, the send screen was left or another item was picked meanwhile, or another wallet was
+  // swapped in
+  const current = selectTabState(global, tabId).walletGiftDeposit;
+  if (requestId !== lastGiftDepositRequestIdByTab[tabId] || current?.collectibleAddress !== collectibleAddress
+    || selectWalletAddress(global) !== state.address) return;
+
+  if (result && 'errorKey' in result) {
+    global = updateTabState(global, { walletGiftDeposit: { collectibleAddress, errorKey: result.errorKey } }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const isFailed = !result || 'error' in result;
+
+  global = updateTabState(global, {
+    walletGiftDeposit: {
+      collectibleAddress,
+      deposit: isFailed ? undefined : result,
+      error: isFailed ? result?.error ?? 'NFT_UNAVAILABLE' : undefined,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('displayWalletGift', async (global, actions, payload): Promise<void> => {
+  const { collectibleAddress, shouldDisplay, tabId = getCurrentTabId() } = payload;
+
+  const gift = selectWalletCollectibleGift(global, collectibleAddress);
+  if (!gift) return;
+
+  const result = await callApi('displayStarGift', { slug: gift.slug, shouldDisplay });
+
+  // The API layer reports an error answer itself, but not a `false` one
+  if (result === false) {
+    actions.showNotification({ message: { key: 'ErrorUnexpected' }, tabId });
+  }
+
+  if (!result) return;
+
+  global = getGlobal();
+
+  // The gift may have been refreshed during the request, so only its host changes
+  const currentGift = selectWalletCollectibleGift(global, collectibleAddress);
+  if (!currentGift) return;
+
+  global = updateWalletCollectibleGift(global, collectibleAddress, {
+    ...currentGift,
+    hostPeerId: shouldDisplay ? global.currentUserId : undefined,
+  });
+  setGlobal(global);
+
+  // Loaded gift lists are complete and not fetched again, so the profiles that gain or lose the gift reload theirs
+  actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+
+  if (currentGift.hostPeerId && currentGift.hostPeerId !== global.currentUserId) {
+    actions.reloadPeerSavedGifts({ peerId: currentGift.hostPeerId });
+  }
+});
+
+// The NFT item carries a copy of the gift, while the gift itself has the current rarity, value and host
+addActionHandler('loadWalletCollectibleGift', async (global, actions, payload): Promise<void> => {
+  const { collectibleAddress } = payload;
+
+  const gift = selectWalletCollectibleGift(global, collectibleAddress);
+  if (!gift) return;
+
+  const result = await callApi('fetchUniqueStarGift', { slug: gift.slug });
+  if (!result || 'error' in result) return;
+
+  global = getGlobal();
+
+  const currentGift = selectWalletCollectibleGift(global, collectibleAddress);
+  if (!currentGift) return;
+
+  // The server may have answered before taking a display change made meanwhile, and the user's choice is newer
+  const isHostChanged = currentGift.hostPeerId !== gift.hostPeerId;
+
+  global = updateWalletCollectibleGift(global, collectibleAddress, {
+    ...result,
+    hostPeerId: isHostChanged ? currentGift.hostPeerId : result.hostPeerId,
+  });
   setGlobal(global);
 });
 

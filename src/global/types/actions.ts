@@ -75,6 +75,7 @@ import type {
   ApiUpdate,
   ApiUser,
   ApiVideo,
+  ApiWalletGiftDeposit,
   BotsPrivacyType,
   KeyboardButtonSuggestedMessage,
   LinkContext,
@@ -1519,6 +1520,7 @@ export interface ActionPayloads {
     initialTransactionId?: string;
     shouldShowIntro?: boolean;
     shouldReleaseKey?: boolean;
+    shouldOpenCollectibles?: boolean;
   } & WithTabId | undefined;
   openWalletTransaction: {
     transactionId: string;
@@ -1620,6 +1622,7 @@ export interface ActionPayloads {
     // The fees are taken out of `amount` instead of on top of it
     shouldSendAll?: boolean;
     collectibleAddress?: string;
+    giftDeposit?: ApiWalletGiftDeposit;
     isGasless?: boolean;
     // The wallet shows the sent transfer flying into its history, which takes the place of the notification
     isAnimated?: boolean;
@@ -1627,6 +1630,17 @@ export interface ActionPayloads {
     passcode?: string;
   } & WithTabId;
   clearWalletTransfer: WithTabId | undefined;
+  loadWalletGiftDeposit: {
+    collectibleAddress: string;
+  } & WithTabId;
+  clearWalletGiftDeposit: WithTabId | undefined;
+  displayWalletGift: {
+    collectibleAddress: string;
+    shouldDisplay?: boolean;
+  } & WithTabId;
+  loadWalletCollectibleGift: {
+    collectibleAddress: string;
+  };
   decryptWalletComment: {
     transactionId: string;
     password?: string;
@@ -3391,6 +3405,12 @@ export interface ActionPayloads {
   } & WithTabId;
   clearGiftWithdrawError: WithTabId | undefined;
   closeGiftWithdrawModal: WithTabId | undefined;
+  openGiftMoveToWalletModal: {
+    gift: ApiSavedStarGift;
+  } & WithTabId;
+  closeGiftMoveToWalletPasswordStep: WithTabId | undefined;
+  clearGiftMoveToWalletError: WithTabId | undefined;
+  closeGiftMoveToWalletModal: WithTabId | undefined;
   openGiftStatusInfoModal: {
     emojiStatus: ApiEmojiStatusCollectible;
   } & WithTabId;
@@ -3454,6 +3474,10 @@ export interface ActionPayloads {
   processStarGiftWithdrawal: {
     gift: ApiInputSavedStarGift;
     password: string;
+  } & WithTabId;
+  moveGiftToWallet: {
+    shouldKeepOnProfile?: boolean;
+    password?: string;
   } & WithTabId;
 
   openGiftTransferModal: {

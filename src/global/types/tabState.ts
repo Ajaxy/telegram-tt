@@ -75,6 +75,7 @@ import type {
   ApiUrlAuthResultRequest,
   ApiUser,
   ApiVideo,
+  ApiWalletGiftDeposit,
   DecryptWalletCommentError,
   ExportSecretPhraseError,
   ReplaceWalletError,
@@ -1041,6 +1042,7 @@ export type TabState = {
     shouldShowIntro?: boolean;
     // Moves the phrase out of the app passcode's keeping before that passcode goes
     shouldReleaseKey?: boolean;
+    shouldOpenCollectibles?: boolean;
   };
 
   walletCardModal?: {
@@ -1083,6 +1085,15 @@ export type TabState = {
     canUseRelayer?: boolean;
     isLoading?: boolean;
     isFailed?: boolean;
+  };
+
+  // The transfer prepared to move a gift NFT from the wallet to the account
+  walletGiftDeposit?: {
+    collectibleAddress: string;
+    deposit?: ApiWalletGiftDeposit;
+    error?: SendTonTransferError;
+    errorKey?: RegularLangFnParameters;
+    isLoading?: boolean;
   };
 
   // The `.ton` domain typed as the recipient in this tab. `false` records a domain with no wallet.
@@ -1250,6 +1261,14 @@ export type TabState = {
     gift: ApiSavedStarGift;
     isLoading?: boolean;
     errorKey?: RegularLangFnParameters;
+  };
+
+  giftMoveToWalletModal?: {
+    gift: ApiSavedStarGift;
+    isPasswordStep?: boolean;
+    isLoading?: boolean;
+    errorKey?: RegularLangFnParameters;
+    passwordErrorKey?: RegularLangFnParameters;
   };
 
   giftStatusInfoModal?: {

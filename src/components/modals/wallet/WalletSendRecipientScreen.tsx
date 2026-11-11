@@ -21,11 +21,12 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import { useStateRef } from '../../../hooks/useStateRef';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Spinner from '../../ui/Spinner';
 import TextArea from '../../ui/TextArea';
 import WalletRecentRecipient from './WalletRecentRecipient';
-import Control, { ControlDescription, ControlLabel } from '@gili/layout/Control';
+import Control, { ControlBefore, ControlDescription, ControlLabel } from '@gili/layout/Control';
 import Interactive from '@gili/layout/Interactive';
 import Island, { IslandTitle } from '@gili/layout/Island';
 
@@ -36,6 +37,7 @@ type OwnProps = {
   draft: WalletSendDraft;
   onDraftChange: (draft: WalletSendDraft) => void;
   onContinue: NoneToVoidFunction;
+  onMoveToGifts?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -71,7 +73,7 @@ const WalletSendRecipientScreen = (props: OwnProps & StateProps) => {
     currentUserId, contactIds, activeChatIds, topPeerIds, recentlyFoundChatIds,
     usersById, resolvedAddresses, walletDomainLookup, walletRecipientSearch,
     draft,
-    onDraftChange, onContinue,
+    onDraftChange, onContinue, onMoveToGifts,
   } = useFrozenProps(props, !props.isActive || !props.isModalOpen);
 
   const lang = useLang();
@@ -342,18 +344,36 @@ const WalletSendRecipientScreen = (props: OwnProps & StateProps) => {
             </>
           )}
         </>
-      ) : Boolean(recentRecipients.length) && (
+      ) : (
         <>
-          <IslandTitle>{lang('WalletSendRecent')}</IslandTitle>
-          <Island>
-            {recentRecipients.map((userId) => (
-              <WalletRecentRecipient
-                key={userId}
-                userId={userId}
-                onSelect={handleRecipientSelect}
-              />
-            ))}
-          </Island>
+          {onMoveToGifts && !hasRecipient && (
+            <Island>
+              <Interactive clickable ripple onClick={onMoveToGifts}>
+                <Control>
+                  <ControlBefore>
+                    <div className={styles.moveToGiftsIcon}>
+                      <Icon name="move-to-gifts" />
+                    </div>
+                  </ControlBefore>
+                  <ControlLabel>{lang('WalletMoveToGifts')}</ControlLabel>
+                </Control>
+              </Interactive>
+            </Island>
+          )}
+          {Boolean(recentRecipients.length) && (
+            <>
+              <IslandTitle>{lang('WalletSendRecent')}</IslandTitle>
+              <Island>
+                {recentRecipients.map((userId) => (
+                  <WalletRecentRecipient
+                    key={userId}
+                    userId={userId}
+                    onSelect={handleRecipientSelect}
+                  />
+                ))}
+              </Island>
+            </>
+          )}
         </>
       )}
     </div>

@@ -10,12 +10,13 @@ import type {
 } from '../../types';
 import { PaymentStep } from '../../../types';
 
-import { TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
+import { GIFT_PASSWORD_ERRORS, TON_CURRENCY_CODE, USD_CURRENCY_CODE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getStripeError } from '../../../util/payments/stripe';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
+import { getStickerFromGift } from '../../../components/common/helpers/gifts';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
 import {
   areCurrencyAmountsEqual,
@@ -1355,6 +1356,90 @@ addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): 
 
   actions.openUrl({ url: result.url, tabId });
   actions.closeGiftWithdrawModal({ tabId });
+});
+
+addActionHandler('moveGiftToWallet', async (global, actions, payload): Promise<void> => {
+  const {
+    shouldKeepOnProfile, password, tabId = getCurrentTabId(),
+  } = payload;
+
+  let modal = selectTabState(global, tabId).giftMoveToWalletModal;
+  const savedGift = modal?.gift;
+  const inputGift = savedGift?.inputGift && getRequestInputSavedStarGift(global, savedGift.inputGift);
+  if (!modal || !savedGift || !inputGift) return;
+
+  global = updateTabState(global, {
+    giftMoveToWalletModal: {
+      ...modal,
+      isLoading: true,
+      errorKey: undefined,
+      passwordErrorKey: undefined,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('withdrawStarGift', { inputGift, shouldKeepOnProfile, password });
+
+  global = getGlobal();
+
+  // The dialog may have been closed, and opened for another gift, during the request
+  modal = selectTabState(global, tabId).giftMoveToWalletModal;
+  const isOwnModal = modal?.gift === savedGift;
+
+  // The gift has left even if its dialog is gone, so the gift list and the notification follow it anyway
+  if (result === true) {
+    if (isOwnModal) {
+      actions.closeGiftMoveToWalletModal({ tabId });
+      actions.closeGiftInfoModal({ tabId });
+    }
+
+    actions.reloadPeerSavedGifts({
+      peerId: inputGift.type === 'chat' ? inputGift.chat.id : global.currentUserId!,
+    });
+    actions.showNotification({
+      message: { key: 'GiftMoveToWalletDone' },
+      customEmojiIconId: getStickerFromGift(savedGift.gift)?.id,
+      actionText: { key: 'ViewAction' },
+      action: {
+        action: 'openWalletModal',
+        payload: { shouldOpenCollectibles: true, tabId },
+      },
+      tabId,
+    });
+    return;
+  }
+
+  if (!modal || !isOwnModal) return;
+
+  if (result && 'isPasswordRequired' in result) {
+    global = updateTabState(global, {
+      giftMoveToWalletModal: {
+        ...modal,
+        isPasswordStep: true,
+        isLoading: false,
+      },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  // A `false` answer refuses the move without a reason
+  const error = result || undefined;
+  // Like the native apps, a server error without wording of its own is reported generically
+  const errorKey: RegularLangFnParameters = error && error.messageKey.key !== 'ErrorUnexpectedMessage'
+    ? error.messageKey
+    : { key: 'GiftMoveError' };
+  const isPasswordError = Boolean(error?.errorMessage && GIFT_PASSWORD_ERRORS.has(error.errorMessage));
+
+  global = updateTabState(global, {
+    giftMoveToWalletModal: {
+      ...modal,
+      isLoading: false,
+      errorKey: isPasswordError ? undefined : errorKey,
+      passwordErrorKey: isPasswordError ? errorKey : undefined,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 function handlePaymentFormError(error: string, tabId: number) {

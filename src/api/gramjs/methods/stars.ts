@@ -11,6 +11,7 @@ import type {
   ApiTypeCurrencyAmount,
 } from '../../types';
 
+import { GIFT_PASSWORD_ERRORS } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
   buildApiFormattedText,
@@ -36,6 +37,7 @@ import {
   buildApiUniqueStarGiftValueInfo,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
+import { getGiftTmpPassword, resetGiftTmpPassword, storeGiftTmpPassword } from '../giftTmpPassword';
 import {
   buildInputPeer,
   buildInputSavedStarGift,
@@ -43,8 +45,11 @@ import {
   buildInputUser,
   DEFAULT_PRIMITIVES } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
-import { invokeRequest } from './client';
+import { getTmpPassword, invokeRequest } from './client';
 import { getTemporaryPaymentPassword } from './twoFaSettings';
+
+const GIFT_TMP_PASSWORD_PERIOD = 600;
+const TMP_PASSWORD_REQUIRED = { isPasswordRequired: true } as const;
 
 export async function fetchCheckCanSendGift({ giftId }: { giftId: string }) {
   const result = await invokeRequest(new GramJs.payments.CheckCanSendGift({
@@ -198,6 +203,20 @@ export function saveStarGift({
   return invokeRequest(new GramJs.payments.SaveStarGift({
     stargift: buildInputSavedStarGift(inputGift),
     unsave: shouldUnsave || undefined,
+  }));
+}
+
+// Shows a gift held in the wallet on the own profile, or hides it from every profile
+export function displayStarGift({
+  slug,
+  shouldDisplay,
+}: {
+  slug: string;
+  shouldDisplay?: boolean;
+}) {
+  return invokeRequest(new GramJs.payments.DisplayStarGift({
+    slug,
+    peer: shouldDisplay ? new GramJs.InputPeerSelf() : undefined,
   }));
 }
 
@@ -605,6 +624,65 @@ export async function fetchStarGiftWithdrawalUrl({
   }
 
   return undefined;
+}
+
+export async function withdrawStarGift({
+  inputGift,
+  shouldKeepOnProfile,
+  password,
+}: {
+  inputGift: ApiRequestInputSavedStarGift;
+  shouldKeepOnProfile?: boolean;
+  password?: string;
+}) {
+  try {
+    return await invokeWithGiftTmpPassword(password, (tmpPassword) => (
+      invokeRequest(new GramJs.payments.WithdrawStarGift({
+        keepOnProfile: shouldKeepOnProfile || undefined,
+        stargift: buildInputSavedStarGift(inputGift),
+        tmpPassword,
+      }), {
+        shouldThrow: true,
+      })
+    ));
+  } catch (err: unknown) {
+    if (!checkErrorType(err)) return undefined;
+
+    return wrapError(err);
+  }
+}
+
+// Without a typed password the request goes with the stored temporary one, if it is still valid
+async function invokeWithGiftTmpPassword<T>(
+  password: string | undefined,
+  invoke: (tmpPassword: Uint8Array<ArrayBuffer>) => Promise<T>,
+): Promise<T | typeof TMP_PASSWORD_REQUIRED> {
+  const storedTmpPassword = password ? undefined : getGiftTmpPassword();
+  if (!password && !storedTmpPassword) return TMP_PASSWORD_REQUIRED;
+
+  const tmpPassword = storedTmpPassword || await issueGiftTmpPassword(password!);
+
+  try {
+    return await invoke(tmpPassword);
+  } catch (err: unknown) {
+    // A gift request carries only the temporary password, so a password error means the server refused it
+    if (!(err instanceof RPCError) || !GIFT_PASSWORD_ERRORS.has(err.errorMessage)) throw err;
+
+    if (getGiftTmpPassword() === tmpPassword) resetGiftTmpPassword();
+
+    if (storedTmpPassword) return TMP_PASSWORD_REQUIRED;
+
+    throw err;
+  }
+}
+
+async function issueGiftTmpPassword(password: string) {
+  const result = await getTmpPassword(password, GIFT_TMP_PASSWORD_PERIOD);
+  if (!(result instanceof GramJs.account.TmpPassword)) throw new Error('Temporary password is not issued');
+
+  storeGiftTmpPassword(result.tmpPassword, result.validUntil);
+
+  return result.tmpPassword;
 }
 
 export async function fetchStarGiftCollections({

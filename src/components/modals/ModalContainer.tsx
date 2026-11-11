@@ -52,6 +52,7 @@ import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
 import GiftResalePriceComposerModal from './gift/resale/GiftResalePriceComposerModal.async';
 import StarGiftPriceDecreaseInfoModal from './gift/StarGiftPriceDecreaseInfoModal.async';
 import GiftStatusInfoModal from './gift/status/GiftStatusInfoModal.async';
+import GiftMoveToWalletModal from './gift/transfer/GiftMoveToWalletModal.async';
 import GiftTransferConfirmModal from './gift/transfer/GiftTransferConfirmModal.async';
 import GiftTransferModal from './gift/transfer/GiftTransferModal.async';
 import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
@@ -156,6 +157,7 @@ type ModalKey = keyof Pick<TabState,
   'giftStatusInfoModal' |
   'giftTransferModal' |
   'giftTransferConfirmModal' |
+  'giftMoveToWalletModal' |
   'giftDescriptionRemoveModal' |
   'giftOfferAcceptModal' |
   'chatRefundModal' |
@@ -296,6 +298,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   requestPeerModal: RequestPeerModal,
   giftTransferModal: GiftTransferModal,
   giftTransferConfirmModal: GiftTransferConfirmModal,
+  giftMoveToWalletModal: GiftMoveToWalletModal,
   giftDescriptionRemoveModal: GiftDescriptionRemoveModal,
   giftOfferAcceptModal: GiftOfferAcceptModal,
   chatRefundModal: ChatRefundModal,

@@ -1909,6 +1909,14 @@
 "GiftTransferConfirmButton" = "Transfer for {amount}";
 "GiftTransferConfirmButtonFree" = "Transfer";
 "GiftTransferSuccessMessage" = "You have successfully gifted {gift} to {peer}.";
+"GiftTransferUnlocksTitle" = "Unlocking in progress";
+"GiftMoveToWallet" = "Move to My Wallet";
+"GiftMoveToWalletText" = "Transfer this gift to your blockchain wallet?";
+"GiftMoveToWalletKeep" = "Keep showing on my profile";
+"GiftMoveAppear" = "It will appear in";
+"GiftMoveButton" = "Move";
+"GiftMoveToWalletDone" = "Gift moved to your wallet.";
+"GiftMoveError" = "An error occurred. Please try again later.";
 "RemoveGiftDescriptionTitle" = "Remove Description";
 "RemoveGiftDescriptionConfirmText" = "Do you want to permanently remove this description from your gift?";
 "RemoveGiftDescriptionButton" = "Remove for {amount}";
@@ -3294,6 +3302,10 @@
 "WalletCollectibleNumber" = "Collectible Number";
 "WalletCollectibleItemIn" = "+1 item";
 "WalletCollectibleItemOut" = "−1 item";
+"WalletCollectibleShowInGifts" = "also show in my gifts";
+"WalletMoveToGifts" = "Move to My Gifts";
+"WalletMoveToGiftsText" = "Transfer this collectible off-chain to your Telegram account?";
+"WalletMoveToGiftsDone" = "Gift moved to your account.";
 "WalletTransactionComment" = "Comment";
 "WalletCommentEncrypted" = "🔒 Encrypted comment";
 "WalletTransactionDomain" = "Domain";

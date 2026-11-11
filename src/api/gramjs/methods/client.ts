@@ -31,6 +31,7 @@ import {
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
+import { resetGiftTmpPassword } from '../giftTmpPassword';
 import {
   buildInputChannelFromLocalDb,
   buildInputPeerFromLocalDb,
@@ -214,6 +215,7 @@ export async function destroy(noLogOut = false, noClearLocalDb = false) {
     resetUpdatesManager();
   }
 
+  resetGiftTmpPassword();
   client.destroy();
 }
 

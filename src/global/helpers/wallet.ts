@@ -66,6 +66,10 @@ export function getWalletGiftMoveKey({ peer, isIncoming }: ApiWalletTransaction)
   return isIncoming ? 'WalletTransactionMovedFromProfile' : 'WalletTransactionMovedToProfile';
 }
 
+export function getIsWalletGiftDepositConfirmed({ peer, isIncoming, isPending, isFailed }: ApiWalletTransaction) {
+  return !isIncoming && !isPending && !isFailed && peer.type === 'telegramGift' && Boolean(peer.isOwnProfile);
+}
+
 export const WALLET_ERROR_LANG_KEYS: Record<WalletFlowError, RegularLangKey> = {
   PASSWORD_INVALID: 'ErrorIncorrectPassword',
   PASSCODE_INVALID: 'WalletPasscodeInvalid',

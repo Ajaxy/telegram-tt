@@ -1,0 +1,31 @@
+.root {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 0.25rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.step {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.icon {
+  font-size: 1.125rem;
+}
+
+.arrow {
+  font-size: 0.875rem;
+}

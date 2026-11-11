@@ -72,7 +72,7 @@ type StateProps = {
 };
 
 export const TRANSACTIONS_TAB_INDEX = 0;
-const COLLECTIBLES_TAB_INDEX = 1;
+export const COLLECTIBLES_TAB_INDEX = 1;
 // Nanotons. Above it the screen suggests a cloud password and banners money kept elsewhere.
 const NOTABLE_BALANCE_NANOS = 500_000_000n;
 

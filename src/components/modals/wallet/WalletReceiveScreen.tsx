@@ -8,7 +8,6 @@ import { disableStrict, enableStrict } from '../../../lib/fasterdom/stricterdom'
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { createStyledQrCode } from '../../../util/qrCode/buildStyledQrCode';
-import { getAddressGroupSeparator, splitAddressIntoGroups } from '../../../util/tonAddress';
 
 import useAsync from '../../../hooks/useAsync';
 import useClickable from '../../../hooks/useClickable';
@@ -19,6 +18,7 @@ import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
+import WalletAddressGroups from './WalletAddressGroups';
 import WalletAddressRing from './WalletAddressRing';
 
 import styles from './WalletReceiveScreen.module.scss';
@@ -97,8 +97,6 @@ const WalletReceiveScreen = ({ address, isPeer, onBuyClick }: OwnProps) => {
     showNotification({ message: { key: 'ErrorUnexpected' } });
   }, [qrCodeError]);
 
-  const groups = splitAddressIntoGroups(address);
-
   return (
     <div className={styles.root}>
       <div className={styles.qrCard}>
@@ -109,26 +107,21 @@ const WalletReceiveScreen = ({ address, isPeer, onBuyClick }: OwnProps) => {
               <img src={QrLogo} alt="" draggable={false} className={styles.qrLogo} />
             </div>
             <div className={styles.addressBlock}>
-              <div className={styles.address}>
-                {groups.map((group, index) => (
-                  <span key={index} className={index % 2 ? styles.addressGroupMuted : undefined}>
-                    {group}
-                    {getAddressGroupSeparator(index, groups.length)}
-                  </span>
-                ))}
-              </div>
+              <WalletAddressGroups
+                address={address}
+                className={styles.address}
+                mutedClassName={styles.addressGroupMuted}
+              />
               <div className={styles.copyHint}>{lang('WalletReceiveCopyHint')}</div>
             </div>
           </div>
           <div className={buildClassName(styles.face, styles.back)} inert={!isAddressShown}>
-            <div className={styles.backAddress}>
-              {groups.map((group, index) => (
-                <span key={index} className={index % 2 ? styles.addressGroupMuted : undefined}>
-                  {group}
-                  {index < groups.length - 1 && ((index + 1) % BACK_GROUPS_PER_LINE ? ' ' : '\n')}
-                </span>
-              ))}
-            </div>
+            <WalletAddressGroups
+              address={address}
+              groupsPerLine={BACK_GROUPS_PER_LINE}
+              className={styles.backAddress}
+              mutedClassName={styles.addressGroupMuted}
+            />
             <div className={styles.copied}>
               <Icon name="check" />
               {lang('WalletReceiveAddressCopied')}

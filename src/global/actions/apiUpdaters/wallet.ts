@@ -2,6 +2,7 @@ import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { throttle } from '../../../util/schedulers';
+import { getIsWalletGiftDepositConfirmed } from '../../helpers/wallet';
 import { addActionHandler, getActions } from '../../index';
 import {
   clearWalletRecords,
@@ -89,6 +90,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const { msgHash, transaction } = update;
       const isPendingHere = selectWalletTransactions(global)?.some(({ id, isPending }) => id === msgHash && isPending);
       if (!transaction || !isPendingHere) break;
+
+      if (getIsWalletGiftDepositConfirmed(transaction)) {
+        actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
+      }
 
       return replacePendingWalletTransaction(global, msgHash, { ...transaction, msgHash });
     }

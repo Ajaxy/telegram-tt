@@ -1,4 +1,6 @@
 .root {
+  position: relative;
+
   container-type: size;
   overflow: hidden;
   display: flex;
@@ -18,4 +20,13 @@
 .placeholder {
   font-size: 40cqmin;
   color: var(--color-text-secondary);
+}
+
+.giftBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.giftSticker {
+  position: relative;
 }

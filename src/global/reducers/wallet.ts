@@ -1,4 +1,6 @@
-import type { ApiTonConnectSession, ApiWalletState, ApiWalletStatus, ApiWalletTransaction } from '../../api/types';
+import type {
+  ApiStarGiftUnique, ApiTonConnectSession, ApiWalletState, ApiWalletStatus, ApiWalletTransaction,
+} from '../../api/types';
 import type { GlobalState, TabState } from '../types';
 
 import { getServerTime } from '../../util/serverTime';
@@ -54,6 +56,21 @@ export function updateWalletServerState<T extends GlobalState>(
     status,
     state: isServerStale ? { ...state, balance: currentState.balance } : state,
     staleBalance: isServerStale ? staleBalance : undefined,
+  });
+}
+
+export function updateWalletCollectibleGift<T extends GlobalState>(
+  global: T, collectibleAddress: string, gift: ApiStarGiftUnique,
+): T {
+  const collectibles = global.wallet?.collectibles;
+  if (!collectibles) return global;
+
+  return updateWallet(global, {
+    collectibles: collectibles.map((collectible) => (
+      collectible.address === collectibleAddress && collectible.type === 'gift'
+        ? { ...collectible, gift }
+        : collectible
+    )),
   });
 }
 

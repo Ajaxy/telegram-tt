@@ -44,6 +44,14 @@ const SEND_ALL_MODE = 130;
 const TEXT_COMMENT_OPCODE = 0;
 // TEP-62 `transfer`
 const NFT_TRANSFER_OPCODE = 0x5fcc3d14;
+const QUERY_ID_BITS = 64;
+// `addr_std$10`
+const ADDRESS_STD_TAG = 2;
+const ADDRESS_TAG_BITS = 2;
+const ADDRESS_HASH_BITS = 256;
+const HEX_DIGIT_BITS = 4;
+// `VarUInteger 16` keeps its byte length in 4 bits
+const COINS_LENGTH_BITS = 4;
 // A cell fits 1023 bits; the first comment cell also carries the 32-bit opcode
 const COMMENT_FIRST_CHUNK_BYTES = 123;
 const COMMENT_CHUNK_BYTES = 127;
@@ -303,6 +311,56 @@ export async function buildNftTransferPayload({
   const notification = await buildSnakeCell(TEXT_COMMENT_OPCODE, new TextEncoder().encode(comment));
 
   return builder.storeBit(1).storeRef(notification).build();
+}
+
+// Reads a TEP-62 `transfer` up to `forward_amount`; addresses are returned in the raw form
+export function parseNftTransferPayload(cell: Cell) {
+  const { bits } = cell;
+  let offset = 0;
+
+  function readUint(bitCount: number) {
+    if (offset + bitCount > bits.length) {
+      throw new Error('Cell bits underflow');
+    }
+
+    let value = 0n;
+
+    for (let i = 0; i < bitCount; i++) {
+      value = (value << 1n) | BigInt(bits[offset++]);
+    }
+
+    return value;
+  }
+
+  // `addr_std$10` without anycast
+  function readAddress() {
+    if (readUint(ADDRESS_TAG_BITS) !== BigInt(ADDRESS_STD_TAG) || readUint(1) !== 0n) {
+      throw new Error('Unsupported address');
+    }
+
+    const workchain = BigInt.asIntN(UINT8_BITS, readUint(UINT8_BITS));
+    const hash = readUint(ADDRESS_HASH_BITS).toString(16).padStart(ADDRESS_HASH_BITS / HEX_DIGIT_BITS, '0');
+
+    return `${workchain}:${hash}`;
+  }
+
+  try {
+    if (readUint(UINT32_BITS) !== BigInt(NFT_TRANSFER_OPCODE)) return undefined;
+
+    readUint(QUERY_ID_BITS);
+
+    const newOwner = readAddress();
+    const responseDestination = readAddress();
+
+    // `custom_payload:(Maybe ^Cell)` takes one bit here, the cell itself is a ref
+    readUint(1);
+
+    const forwardAmount = readUint(Number(readUint(COINS_LENGTH_BITS)) * UINT8_BITS);
+
+    return { newOwner, responseDestination, forwardAmount };
+  } catch {
+    return undefined;
+  }
 }
 
 export async function buildSignedKeyRotation({

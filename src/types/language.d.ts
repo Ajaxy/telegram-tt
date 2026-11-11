@@ -1533,6 +1533,14 @@ export interface LangPair {
   'GiftTransferTitle': undefined;
   'GiftTransferTON': undefined;
   'GiftTransferConfirmButtonFree': undefined;
+  'GiftTransferUnlocksTitle': undefined;
+  'GiftMoveToWallet': undefined;
+  'GiftMoveToWalletText': undefined;
+  'GiftMoveToWalletKeep': undefined;
+  'GiftMoveAppear': undefined;
+  'GiftMoveButton': undefined;
+  'GiftMoveToWalletDone': undefined;
+  'GiftMoveError': undefined;
   'RemoveGiftDescriptionTitle': undefined;
   'RemoveGiftDescriptionConfirmText': undefined;
   'RemoveGiftDescriptionSuccessMessage': undefined;
@@ -2425,6 +2433,10 @@ export interface LangPair {
   'WalletCollectibleNumber': undefined;
   'WalletCollectibleItemIn': undefined;
   'WalletCollectibleItemOut': undefined;
+  'WalletCollectibleShowInGifts': undefined;
+  'WalletMoveToGifts': undefined;
+  'WalletMoveToGiftsText': undefined;
+  'WalletMoveToGiftsDone': undefined;
   'WalletTransactionComment': undefined;
   'WalletCommentEncrypted': undefined;
   'WalletTransactionDomain': undefined;

@@ -18,6 +18,12 @@ export function selectWalletPublicKey<T extends GlobalState>(global: T) {
   return global.wallet?.state?.publicKey;
 }
 
+export function selectWalletCollectibleGift<T extends GlobalState>(global: T, collectibleAddress: string) {
+  const collectible = global.wallet?.collectibles?.find(({ address }) => address === collectibleAddress);
+
+  return collectible?.type === 'gift' ? collectible.gift : undefined;
+}
+
 export function selectWalletTonConnectSessions<T extends GlobalState>(global: T) {
   return global.wallet?.tonConnectSessions;
 }

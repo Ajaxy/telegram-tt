@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { ApiWalletCollectible } from '../../../api/types';
+import type { ApiWalletCollectible, ApiWalletGiftDeposit } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { WalletTransferPayload } from './types';
 import type useWalletCredentials from './useWalletCredentials';
@@ -17,6 +17,7 @@ import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { loadCurrentUserAddress } from './helpers/loadCurrentUserAddress';
 import { startSendFlight } from './helpers/sendFlight';
 
+import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import { useStateRef } from '../../../hooks/useStateRef';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -43,7 +44,7 @@ export default function useWalletSendFlow({
 }: Options) {
   const {
     sendWalletTransfer, clearWalletTransfer, clearWalletTransferFee, loadWalletGaslessInfo, closeWalletModal,
-    showNotification,
+    showNotification, loadWalletGiftDeposit, clearWalletGiftDeposit,
   } = getActions();
 
   const {
@@ -58,6 +59,7 @@ export default function useWalletSendFlow({
 
   // The send screen unmounts when another slides over it, so its draft lives here
   const [draft, setDraft] = useState(EMPTY_SEND_DRAFT);
+  const [isMoveToGiftsOpen, openMoveToGifts, closeMoveToGifts] = useFlag();
 
   // A link fills the form once, so a wallet swapped in from another tab does not become the sender
   const appliedLinkRef = useRef<string>();
@@ -124,6 +126,12 @@ export default function useWalletSendFlow({
     if (screen === WalletScreen.Main) shouldCloseAfterSendRef.current = false;
   }, [screen]);
 
+  // Closes the dialog once the send screen is left: a credentials screen covers it, or a queued transfer returns to
+  // the main screen
+  useEffect(() => {
+    if (screen !== WalletScreen.Send) closeMoveToGifts();
+  }, [screen, closeMoveToGifts]);
+
   // A transfer started from a chat closes the wallet, leaving the chat where the message appears
   useEffect(() => {
     if (walletTransfer?.status !== 'queued') return;
@@ -144,6 +152,7 @@ export default function useWalletSendFlow({
     if (!isSendScreen) return;
 
     clearWalletTransferFee();
+    clearWalletGiftDeposit();
 
     // Back to the recipient screen keeps the draft, so the field and the list stay as the user left them
     if (stack[stack.length - 2] !== WalletScreen.Send) setDraft(EMPTY_SEND_DRAFT);
@@ -152,6 +161,7 @@ export default function useWalletSendFlow({
   const reset = useLastCallback(() => {
     setDraft(EMPTY_SEND_DRAFT);
     clearWalletTransferFee();
+    clearWalletGiftDeposit();
   });
 
   const handleOpenSend = useLastCallback(() => {
@@ -239,12 +249,35 @@ export default function useWalletSendFlow({
     () => collectibles?.find(({ address: itemAddress }) => itemAddress === draft.collectibleAddress),
     [collectibles, draft.collectibleAddress],
   );
+  const canMoveToGifts = collectible?.type === 'gift' && Boolean(collectible.gift);
+
+  const handleMoveToGiftsOpen = useLastCallback(() => {
+    loadWalletGiftDeposit({ collectibleAddress: draft.collectibleAddress! });
+    openMoveToGifts();
+  });
+
+  const handleMoveToGiftsClose = useLastCallback(() => {
+    if (walletTransfer?.status === 'pending') return;
+
+    closeMoveToGifts();
+  });
+
+  const handleMoveToGiftsConfirm = useLastCallback((giftDeposit: ApiWalletGiftDeposit) => {
+    handleSubmit({
+      toAddress: giftDeposit.escrowAddress,
+      amount: giftDeposit.amount,
+      collectibleAddress: draft.collectibleAddress,
+      giftDeposit,
+    });
+  });
 
   return {
     draft,
     setDraft,
     collectible,
     isSendScreen,
+    canMoveToGifts,
+    isMoveToGiftsOpen,
     handleBack,
     reset,
     handleOpenSend,
@@ -253,5 +286,8 @@ export default function useWalletSendFlow({
     handleRecipientContinue,
     handleSendMax,
     handleSubmit,
+    handleMoveToGiftsOpen,
+    handleMoveToGiftsClose,
+    handleMoveToGiftsConfirm,
   };
 }

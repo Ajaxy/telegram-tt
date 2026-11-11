@@ -194,7 +194,8 @@ export type ApiWalletCollectible = {
   // The item's Fragment page, or the Fragment home page when the metadata names none
   fragmentUrl: string;
 } & (
-  | { type: 'gift'; model?: string; backdrop?: string }
+  // `gift` is set for a Telegram gift, which can move to the account and show on a profile
+  | { type: 'gift'; model?: string; backdrop?: string; gift?: ApiStarGiftUnique }
   | { type: 'username' | 'number' | 'other' }
 );
 
@@ -209,6 +210,16 @@ export interface ApiWalletCard {
   balance: bigint;
   stickers?: ApiWalletCardSticker[];
   backgroundGift?: ApiStarGiftUnique;
+}
+
+// The server's transfer of a gift NFT to its escrow, which puts the gift on the account. Amounts are in nanotons.
+export interface ApiWalletGiftDeposit {
+  escrowAddress: string;
+  // Base64 BOC of the transfer body
+  payload: string;
+  amount: bigint;
+  forwardAmount: bigint;
+  fee?: bigint;
 }
 
 export interface ApiOnrampProvider {

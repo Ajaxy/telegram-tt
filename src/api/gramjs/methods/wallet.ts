@@ -3,10 +3,13 @@ import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
+import type { Cell } from '../../../lib/ton/cell';
+import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ApiChat,
   ApiMessage,
   ApiUser,
+  ApiWalletGiftDeposit,
   ApiWalletStateResult,
   ApiWalletTransferFee,
   ApiWalletUserAddress,
@@ -21,7 +24,7 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, GRAM_TRANSFER_FEE_RESERVE, NFT_TRANSFER_ATTACHED_NANOS, NFT_TRANSFER_FORWARD_NANOS,
+  DEBUG, GIFT_DEPOSIT_MAX_NANOS, GRAM_TRANSFER_FEE_RESERVE, NFT_TRANSFER_ATTACHED_NANOS, NFT_TRANSFER_FORWARD_NANOS,
 } from '../../../config';
 import { unwatchAddressActivity, watchAddressActivity } from '../../../lib/ton/activityStream';
 import {
@@ -31,6 +34,7 @@ import {
   COMPOSITE_WORD_COUNT, deriveBip39MnemonicSeeds, deriveImportedWalletSeeds, deriveTonMnemonicSeeds,
   deriveWholeBip39MnemonicSeeds, isBip39Mnemonic,
 } from '../../../lib/ton/bip39';
+import { parseBoc } from '../../../lib/ton/boc';
 import { MAX_COINS } from '../../../lib/ton/cell';
 import { decryptE2eBlob, encryptE2eBlob, generateE2eSeed } from '../../../lib/ton/e2e';
 import { getEd25519PublicKey } from '../../../lib/ton/ed25519';
@@ -48,6 +52,7 @@ import {
   buildWalletInitBocs,
   deriveWalletAddress,
   encryptPreviousSigningSeed,
+  parseNftTransferPayload,
   TRANSFER_TTL_SECONDS,
 } from '../../../lib/ton/wallet';
 import { WALLET_IDB_STORE } from '../../../util/browser/idb';
@@ -73,7 +78,7 @@ import {
   buildApiWalletTransaction,
 } from '../apiBuilders/wallet';
 import { buildInputUser, buildInputUserFromLocalDb } from '../gramjsBuilders';
-import { deserializeBytes, serializeBytes } from '../helpers/misc';
+import { deserializeBytes, serializeBytes, wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { getClient, invokeRequest } from './client';
 import { handleLocalMessageUpdate } from './messages';
@@ -1183,20 +1188,22 @@ async function fetchWalletKeyChanges(ownAddress: string): Promise<WalletKeyChang
 
 export async function sendTonTransfer({
   toAddress, toUser, chat, lastMessageId, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
-  isGasless, ownAddress, ownPublicKey, pendingSeqno, pendingValidUntil, words, password,
+  collectiblePayload, isGasless, ownAddress, ownPublicKey, pendingSeqno, pendingValidUntil, words, password,
 }: {
   toAddress: string;
   // Once the chain shows the transfer reached them, the server names each side to the other
   toUser?: ApiUser;
   chat?: ApiChat;
   lastMessageId?: number;
-  // Nanotons; ignored for a collectible, which always carries `NFT_TRANSFER_ATTACHED_NANOS`
+  // Nanotons; ignored for a collectible without `collectiblePayload`, which carries `NFT_TRANSFER_ATTACHED_NANOS`
   amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
   // A collectible's comment cannot be encrypted and goes as plain text
   collectibleAddress?: string;
+  // Base64 BOC of a transfer body the server built for the collectible, see `fetchWalletGiftDeposit`
+  collectiblePayload?: string;
   // A transfer the relayer turns down is not sent at the user's expense instead
   isGasless?: boolean;
   ownAddress: string;
@@ -1209,7 +1216,7 @@ export async function sendTonTransfer({
 }, onQueued?: (localMessageId?: number) => void): Promise<SendTonTransferResult | undefined> {
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
-  if (collectible) {
+  if (collectible && !collectiblePayload) {
     amount = NFT_TRANSFER_ATTACHED_NANOS;
   }
 
@@ -1222,6 +1229,15 @@ export async function sendTonTransfer({
 
   if (!own || !to || (collectibleAddress && !collectible)) {
     return { error: 'INVALID_ADDRESS' };
+  }
+
+  const collectibleBody = collectiblePayload ? await parseBoc(collectiblePayload).catch(() => undefined) : undefined;
+
+  // The history records `toAddress`, so it must name the new owner from the body. The wallet trusts the server with
+  // the escrow address itself.
+  if (collectiblePayload && (!collectible || !collectibleBody
+    || parseGiftDepositBody(collectibleBody, amount, ownAddress)?.newOwner !== toRawAddress(toAddress))) {
+    return { error: 'NFT_UNAVAILABLE' };
   }
 
   const exported = await exportWalletSecretPhrase({
@@ -1355,7 +1371,7 @@ export async function sendTonTransfer({
       seqno: state.seqno,
       now: getServerTime(),
       secretSeed: keys.seed,
-      payload: await buildNftTransferPayload({
+      payload: collectibleBody ?? await buildNftTransferPayload({
         newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
       }),
     } : {
@@ -1446,6 +1462,80 @@ export async function sendTonTransfer({
   }
 
   return outcome;
+}
+
+// The server prepares the transfer of the item to its escrow, and the gift then lands on the account
+export async function fetchWalletGiftDeposit({
+  slug, collectibleAddress, ownAddress, ownPublicKey,
+}: {
+  slug: string;
+  collectibleAddress: string;
+  ownAddress: string;
+  ownPublicKey: string;
+}): Promise<ApiWalletGiftDeposit | { error: SendTonTransferError } | { errorKey: RegularLangFnParameters }> {
+  const collectible = parseTonTransferAddress(collectibleAddress);
+
+  if (!collectible || !parseTonTransferAddress(ownAddress)) {
+    return { error: 'INVALID_ADDRESS' };
+  }
+
+  try {
+    const answer = await invokeRequest(new GramJs.payments.DepositStarGift({
+      peer: new GramJs.InputPeerSelf(),
+      slug,
+    }), { shouldThrow: true });
+
+    if (!answer || toRawAddress(answer.nftAddress) !== toRawAddress(collectibleAddress)) {
+      return { error: 'NFT_UNAVAILABLE' };
+    }
+
+    const payload = bufferToBase64(answer.payload);
+    const body = await parseBoc(payload);
+    const transfer = parseGiftDepositBody(body, answer.amount, ownAddress);
+
+    if (!transfer) {
+      return { error: 'NFT_UNAVAILABLE' };
+    }
+
+    const state = await fetchToncenterWalletState(ownAddress);
+    const fee = state?.isSupportedContract ? await estimateFee(
+      ownAddress,
+      await buildUnsignedTransferBodyBoc({
+        to: { ...collectible, isBounceable: true },
+        amount: answer.amount,
+        seqno: state.seqno,
+        now: getServerTime(),
+        payload: body,
+      }),
+      state.isDeployed ? undefined : await buildWalletInitBocs(deserializeBytes(ownPublicKey)),
+    ) : undefined;
+
+    return {
+      escrowAddress: toNonBounceableAddress(transfer.newOwner),
+      payload,
+      amount: answer.amount,
+      forwardAmount: transfer.forwardAmount,
+      fee,
+    };
+  } catch (err: unknown) {
+    // A server refusal with wording of its own, such as a flood wait, is shown as the native apps show it
+    const messageKey = err instanceof RPCError ? wrapError(err).messageKey : undefined;
+
+    return messageKey && messageKey.key !== 'ErrorUnexpectedMessage'
+      ? { errorKey: messageKey }
+      : { error: 'NFT_UNAVAILABLE' };
+  }
+}
+
+// The server builds the body the wallet signs. It must be an NFT transfer that returns the excess to the wallet, and
+// the attached value must stay small. The item pays `forward_amount` out of the attached value, so when the value
+// does not exceed it, the item fails the transfer and the gift stays in the wallet. The rest of the body,
+// `custom_payload` and `forward_payload`, is signed as the server sent it, like the native apps do.
+export function parseGiftDepositBody(body: Cell, amount: bigint, ownAddress: string) {
+  const transfer = parseNftTransferPayload(body);
+  if (!transfer || transfer.responseDestination !== toRawAddress(ownAddress)) return undefined;
+
+  return transfer.forwardAmount < amount && amount <= GIFT_DEPOSIT_MAX_NANOS ? transfer : undefined;
 }
 
 async function checkCollectibleTransferable(
