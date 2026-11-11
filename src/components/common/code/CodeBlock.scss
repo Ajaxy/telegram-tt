@@ -10,9 +10,9 @@
   padding-block: 0.1875rem;
   border-radius: 0.25rem;
 
-  color: var(--message-code-text);
+  color: var(--color-text);
 
-  background-color: var(--message-code-background);
+  @include codeHighlight.code-surface;
 
   .code-title {
     overflow: hidden;
@@ -21,7 +21,7 @@
 
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     font-weight: var(--font-weight-medium);
-    color: var(--message-code-text);
+    color: var(--accent-color);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -48,7 +48,7 @@
     .hljs {
       overflow-x: auto;
       display: block;
-      color: var(--message-code-text);
+      color: var(--color-text);
     }
   }
 }

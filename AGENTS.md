@@ -97,7 +97,7 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 
 ## Design variable documentation
 
-- Update [DESIGN.md](DESIGN.md) in the same change whenever CSS custom properties are added, removed, renamed, or changed, including runtime assignments and component overrides.
+- Update [DESIGN.md](DESIGN.md) in the same change whenever CSS custom properties are added, removed, renamed, or changed, including runtime assignments and component overrides. Only document global and message list specific theming properties.
 - Keep each variable's purpose, light/dark defaults, aliases, derived relationships, inheritance, and scope/overrides accurate. Distinguish live `var(...)` references from copied or computed values.
 - Remove obsolete entries and update affected links and related descriptions when variables are removed or renamed.
 

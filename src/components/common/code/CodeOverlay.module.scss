@@ -26,7 +26,7 @@
   transition: background-color var(--message-color-transition-duration, 0.15s) ease-in-out;
 
   &:hover, &.wrapOn {
-    background-color: #45464a;
+    background-color: var(--code-background);
   }
 }
 
@@ -43,9 +43,10 @@
   padding: 0.125rem;
   border-bottom-left-radius: 0.25rem;
 
-  color: var(--message-code-overlay-text);
-
-  background-color: var(--message-code-overlay-background);
+  // Opaque copy of the code surface, so scrolled code does not show through
+  background:
+    linear-gradient(var(--code-background), var(--code-background)),
+    var(--color-background);
 
   &.hidden {
     display: none;

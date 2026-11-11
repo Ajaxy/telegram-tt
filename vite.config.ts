@@ -189,14 +189,13 @@ export default defineConfig(({ mode }): UserConfig => {
     base: './',
     envPrefix: ['VITE_', 'TG_'],
     assetsInclude: ['**/*.tgs'],
-    optimizeDeps: {
-      exclude: ['temml'],
-    },
     define: {
       APP_VERSION: JSON.stringify(APP_VERSION),
     },
     resolve: {
       tsconfigPaths: true,
+      // `lowlight` pins its own nested copy, while `@tiptap/extension-code-block-lowlight` uses the root one
+      dedupe: ['highlight.js'],
     },
     css: {
       modules: {

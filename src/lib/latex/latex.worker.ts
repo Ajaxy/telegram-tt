@@ -1,6 +1,5 @@
 export type LatexRequest = {
   type: 'init';
-  moduleUrl: string;
 } | {
   type: 'render';
   source: string;
@@ -26,7 +25,7 @@ let temml: TemmlModule['default'];
 
 self.onmessage = ({ data }: MessageEvent<LatexRequest>) => {
   if (data.type === 'init') {
-    void initializeTemml(data.moduleUrl);
+    void initializeTemml();
     return;
   }
 
@@ -36,10 +35,9 @@ self.onmessage = ({ data }: MessageEvent<LatexRequest>) => {
   } satisfies LatexResponse);
 };
 
-async function initializeTemml(moduleUrl: string) {
+async function initializeTemml() {
   try {
-    // Vite breaks Temml on build. https://github.com/ronkok/Temml/pull/128
-    temml = ((await import(/* @vite-ignore */ moduleUrl)) as TemmlModule).default;
+    temml = (await import('temml')).default;
     self.postMessage({ type: 'ready' } satisfies LatexResponse);
   } catch {
     self.postMessage({ type: 'error' } satisfies LatexResponse);

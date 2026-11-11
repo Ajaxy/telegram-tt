@@ -26,16 +26,32 @@ const MEDIA_PLACEHOLDER_PREFIX = 'TG_RICH_MEDIA_PLACEHOLDER_';
 export const RichEditorMarkdown = Markdown.extend({
   addProseMirrorPlugins() {
     const { editor } = this;
+    let isPlainTextPaste = false;
 
     return [new Plugin({
       props: {
-        handlePaste: (_view, event) => {
+        // ProseMirror runs this before `handlePaste` and sets `isPlainText` for Ctrl+Shift+V and code blocks
+        transformPastedText: (text, isPlainText) => {
+          isPlainTextPaste = isPlainText;
+          return text;
+        },
+        handlePaste: (view, event, slice) => {
           const markdown = event.clipboardData?.getData('text/plain');
           const { $from } = editor.state.selection;
+          const isInCode = $from.parent.type.spec.code;
+          const isPlainText = isPlainTextPaste && !isInCode;
+          isPlainTextPaste = false;
+
+          // Tiptap paste rules convert `**bold**` and similar after `uiEvent: paste` transactions only
+          if (isPlainText) {
+            view.dispatch(view.state.tr.replaceSelection(slice).setMeta('paste', true).scrollIntoView());
+            return true;
+          }
+
           if (
             !markdown
             || event.clipboardData?.getData('text/html')
-            || $from.parent.type.spec.code
+            || isInCode
             || $from.marks().some(({ type }) => type.spec.code)
             || (
               !RE_RICH_MARKDOWN_BLOCK.test(markdown)

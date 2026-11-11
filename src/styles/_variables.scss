@@ -187,6 +187,7 @@
       --message-#{$direction}-error: #000000;
       --message-#{$direction}-error-background: #b3261e;
       --message-#{$direction}-error-foreground: #ffffff;
+      --message-#{$direction}-code-dark: 0;
     }
 
     --message-incoming-background: #ffffff;
@@ -200,10 +201,7 @@
     --message-media-text: #ffffff;
     --message-paid-background: #ffb727;
     --message-paid-text: #202124;
-    --message-code-background: #202124;
-    --message-code-text: #f5f5f5;
-    --message-code-overlay-background: #303134;
-    --message-code-overlay-text: #f5f5f5;
+    --message-code-dark: 0;
 
     --color-accent-own: #{$color-text-green};
     --color-accent-own-rgb: #{toRGB($color-text-green)};

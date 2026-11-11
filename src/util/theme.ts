@@ -203,10 +203,7 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--message-media-text': WHITE,
     '--message-paid-background': '#ffb727',
     '--message-paid-text': BLACK,
-    '--message-code-background': '#202124',
-    '--message-code-text': '#f5f5f5',
-    '--message-code-overlay-background': '#303134',
-    '--message-code-overlay-text': '#f5f5f5',
+    '--message-code-dark': variables['--message-incoming-code-dark'],
   });
 
   const palette: ThemePalette = {
@@ -258,6 +255,7 @@ function buildBubbleVariables(
     [`${prefix}error`]: bubble.error,
     [`${prefix}error-background`]: ERROR_BACKGROUND,
     [`${prefix}error-foreground`]: WHITE,
+    [`${prefix}code-dark`]: bubble.text === WHITE ? '1' : '0',
   });
 }
 

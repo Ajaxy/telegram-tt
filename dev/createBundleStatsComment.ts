@@ -100,6 +100,7 @@ const ENTRY_ORDER = [
   'fasttext-worker',
   'media-worker',
   'shared-state-worker',
+  'latex-worker',
   'service-worker',
 ];
 const MANUAL_BUNDLES: BundleDefinition[] = [
@@ -454,11 +455,15 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
     return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
   }
 
+  if (/^latex\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'latex-worker', label: '🧮 LaTeX worker' };
+  }
+
   return undefined;
 }
 
 function isWorkerAssetName(name: string) {
-  return /^(?:worker|fasttext\.worker|index\.worker|sharedState\.worker)-[\w-]+\.js$/.test(name);
+  return /^(?:worker|fasttext\.worker|index\.worker|sharedState\.worker|latex\.worker)-[\w-]+\.js$/.test(name);
 }
 
 function isIgnoredAsset(name: string) {

@@ -1,6 +1,6 @@
 # Design variables
 
-This is the shared CSS-variable reference for the client. Global colors, spacing and radii are listed separately from message palettes and message-local aliases. Component-private state, one-off dimensions and embedded SVG payloads are not expanded here.
+This is the theming CSS-variable reference for the client. It covers global theme colors and message-list theming: message palettes, message-local aliases and wallpaper inputs. Layout, typography, animation and component-private properties are not documented here.
 
 ## Reading the tables
 
@@ -133,166 +133,6 @@ The reference column describes the initialized defaults. In particular, matching
 
 The primary alpha variants have stylesheet fallback references to [--color-primary](#color-primary), but initialization replaces them with generated alpha colors. The same distinction applies to the outgoing compatibility variables in the message section.
 
-### Radii
-
-Defined in [variables](src/styles/_variables.scss) and [composer primitives](src/styles/_composer-primitives.scss). Equal radii are separate values unless the reference column says otherwise.
-
-| Variable | Default | Default reference / inheritance | Scope / overrides |
-| --- | --- | --- | --- |
-| <a id="border-radius-button"></a>`--border-radius-button` | `1.75rem` | No; independent value | — |
-| <a id="border-radius-button-tiny"></a>`--border-radius-button-tiny` | `1.125rem` | No; independent value | — |
-| <a id="border-radius-modal"></a>`--border-radius-modal` | `2rem` | No; independent value | — |
-| <a id="border-radius-menu"></a>`--border-radius-menu` | `1rem` | No; independent value | — |
-| <a id="border-radius-list-item"></a>`--border-radius-list-item` | `1rem` | No; independent value | — |
-| <a id="border-radius-toast"></a>`--border-radius-toast` | `1rem` | No; independent value | — |
-| <a id="border-radius-island"></a>`--border-radius-island` | `1.5rem` | No; independent value | — |
-| <a id="border-radius-pane"></a>`--border-radius-pane` | `1.5rem` | No; independent value | — |
-| <a id="border-radius-default"></a>`--border-radius-default` | `1rem` | No; independent value | — |
-| <a id="border-radius-default-small"></a>`--border-radius-default-small` | `0.625rem` | No; independent value | — |
-| <a id="border-radius-default-tiny"></a>`--border-radius-default-tiny` | `0.375rem` | No; independent value | — |
-| <a id="border-radius-messages"></a>`--border-radius-messages` | `0.9375rem` | No; independent value | iOS: 1rem; grouped corners use the small message radius |
-| <a id="border-radius-messages-small"></a>`--border-radius-messages-small` | `0.375rem` | No; independent value | iOS: 0.5rem; used at grouped message corners |
-| <a id="border-radius-forum-avatar"></a>`--border-radius-forum-avatar` | `33.3333%` | No; independent value | — |
-| <a id="custom-emoji-border-radius"></a>`--custom-emoji-border-radius` | `0` | No; independent value | — |
-| <a id="composer-pill-radius"></a>`--composer-pill-radius` | `1.5rem` | No; independent value | — |
-| <a id="composer-control-radius"></a>`--composer-control-radius` | `1.25rem` | No; independent value | — |
-| <a id="composer-embed-radius"></a>`--composer-embed-radius` | `0.5rem` | No; independent value | — |
-| <a id="pane-content-radius"></a>`--pane-content-radius` | `calc(var(--border-radius-pane) - 0.25rem)` | CSS-derived: [--border-radius-pane](#border-radius-pane) | Declared by the shared middle-header-pane mixin, not at the root |
-
-### Padding, spacing and layout
-
-There is no global CSS spacing scale. [Spacing utilities](src/styles/_spacing.scss) generate padding/margin classes from Sass values `0`, `0.25`, `0.5`, `1`, `1.5`, `2` and `3rem`. The shared CSS spacing and dimensions are below; `1rem` is based on the 16px root font size.
-
-| Variable | Default | Default reference / inheritance | Scope / overrides |
-| --- | --- | --- | --- |
-| <a id="vh"></a>`--vh` | `1vh` | No; independent value | Window measurement replaces the default with innerHeight / 100 pixels |
-| <a id="messages-container-width"></a>`--messages-container-width` | `47.5rem` | No; independent value | ≥1921px viewport: 50vw |
-| <a id="right-column-width"></a>`--right-column-width` | `26.5rem` | No; independent value | 1276–1920px viewport: 25vw; ≤600px: 100vw |
-| <a id="right-column-padding"></a>`--right-column-padding` | `1rem` | No; independent value | — |
-| <a id="right-column-content-width"></a>`--right-column-content-width` | `calc(var(--right-column-width) - var(--right-column-padding))` | CSS-derived: [--right-column-width](#right-column-width), [--right-column-padding](#right-column-padding) | — |
-| <a id="middle-panel-inline-padding"></a>`--middle-panel-inline-padding` | `1rem` | No; independent value | ≤600px viewport: 0.5rem |
-| <a id="chat-list-inline-inset"></a>`--chat-list-inline-inset` | `0.5rem` | No; independent value | — |
-| <a id="folders-sidebar-width"></a>`--folders-sidebar-width` | `5rem` | No; independent value | — |
-| <a id="window-controls-width"></a>`--window-controls-width` | `0rem` | No; independent value | Tauri: 5rem |
-| <a id="middle-header-height"></a>`--middle-header-height` | `3rem` | No; independent value | — |
-| <a id="middle-header-gap"></a>`--middle-header-gap` | `0.5rem` | No; independent value | — |
-| <a id="column-header-height"></a>`--column-header-height` | `4rem` | No; independent value | — |
-| <a id="symbol-menu-width"></a>`--symbol-menu-width` | `24rem` | No; independent value | ≤600px viewport: 100vw |
-| <a id="symbol-menu-height"></a>`--symbol-menu-height` | `22.375rem` | No; independent value | ≤600px viewport: 17.6875rem |
-| <a id="symbol-menu-footer-height"></a>`--symbol-menu-footer-height` | `3rem` | No; independent value | — |
-| <a id="scrollbar-width"></a>`--scrollbar-width` | `0` | No; independent value | Browser scrollbar measurement replaces the default with pixels |
-| <a id="safe-area-top"></a>`--safe-area-top` | `env(safe-area-inset-top)` | No; independent value | — |
-| <a id="safe-area-right"></a>`--safe-area-right` | `env(safe-area-inset-right)` | No; independent value | — |
-| <a id="safe-area-bottom"></a>`--safe-area-bottom` | `env(safe-area-inset-bottom)` | No; independent value | — |
-| <a id="safe-area-left"></a>`--safe-area-left` | `env(safe-area-inset-left)` | No; independent value | — |
-| <a id="picker-title-shift"></a>`--picker-title-shift` | `1rem` | No; independent value | — |
-| <a id="middle-header-panes-height"></a>`--middle-header-panes-height` | `0px` | No; independent value | Measured pane height; changes when header panes appear |
-| <a id="middle-header-player-height"></a>`--middle-header-player-height` | `0px` | No; independent value | Measured player height |
-| <a id="composer-height"></a>`--composer-height` | `3rem` | No; independent value | — |
-| <a id="composer-pill-padding"></a>`--composer-pill-padding` | `0.25rem` | No; independent value | — |
-| <a id="composer-row-gap"></a>`--composer-row-gap` | `0.25rem` | No; independent value | — |
-| <a id="composer-bottom-gap"></a>`--composer-bottom-gap` | `1rem` | No; independent value | — |
-| <a id="composer-bottom-gap-mobile"></a>`--composer-bottom-gap-mobile` | `0.5rem` | No; independent value | — |
-| <a id="composer-top-gap"></a>`--composer-top-gap` | `0.5rem` | No; independent value | — |
-| <a id="composer-min-bottom-reserve"></a>`--composer-min-bottom-reserve` | `calc(var(--composer-height) + var(--composer-bottom-gap))` | CSS-derived: [--composer-height](#composer-height), [--composer-bottom-gap](#composer-bottom-gap) | ≤600px: height + mobile bottom gap + safe-area bottom; keyboard visible: omit safe-area bottom |
-| <a id="composer-embedded-message-gap"></a>`--composer-embedded-message-gap` | `0.5rem` | No; independent value | — |
-| <a id="composer-icon-button-padding"></a>`--composer-icon-button-padding` | `0.5rem` | No; independent value | — |
-| <a id="composer-icon-size"></a>`--composer-icon-size` | `1.5rem` | No; independent value | — |
-| <a id="composer-main-button-width"></a>`--composer-main-button-width` | `2.5rem` | No; independent value | — |
-| <a id="composer-main-button-height"></a>`--composer-main-button-height` | `2.5rem` | No; independent value | — |
-
-### Typography
-
-Font stacks and platform overrides come from [the global stylesheet](src/styles/index.scss). Message and composer font sizes are runtime settings and are listed with message geometry.
-
-| Variable | Default | Default reference / inheritance | Scope / overrides |
-| --- | --- | --- | --- |
-| <a id="font-family"></a>`--font-family` | `"Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif` | No; independent value | iOS/macOS use system-ui first; Persian prepends Vazirmatn |
-| <a id="font-family-monospace"></a>`--font-family-monospace` | `"Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono", "Consolas", monospace` | No; independent value | — |
-| <a id="font-family-numbers-rounded"></a>`--font-family-numbers-rounded` | `ui-rounded, "Numbers Rounded", "Roboto", "Helvetica Neue", sans-serif` | No; independent value | — |
-| <a id="font-family-rounded"></a>`--font-family-rounded` | `"Nunito", "Roboto", "Helvetica Neue", sans-serif` | No; independent value | iOS/macOS prepend ui-rounded |
-| <a id="font-family-condensed"></a>`--font-family-condensed` | `"Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif` | No; independent value | — |
-| <a id="font-weight-semibold"></a>`--font-weight-semibold` | `500` | No; independent value | iOS/macOS: 600 |
-| <a id="font-weight-normal"></a>`--font-weight-normal` | `400` | No; independent value | — |
-| <a id="font-weight-medium"></a>`--font-weight-medium` | `500` | No; independent value | — |
-| <a id="emoji-size"></a>`--emoji-size` | `1.25em` | No; independent value | — |
-| <a id="custom-emoji-size"></a>`--custom-emoji-size` | `var(--emoji-size)` | CSS alias: [--emoji-size](#emoji-size) | — |
-
-### Shadows, animation and layers
-
-[Theme application](src/util/switchTheme.ts) supplies transitions for registered color properties. Component transition shorthands remain responsible for their own transform, opacity and layout animation.
-
-| Variable | Default | Default reference / inheritance | Scope / overrides |
-| --- | --- | --- | --- |
-| <a id="shadow-island"></a>`--shadow-island` | `0 1px 4px 0 #0000000D` | No; independent value | — |
-| <a id="shadow-pane"></a>`--shadow-pane` | `0 1px 5px -1px rgba(0, 0, 0, 0.21)` | No; independent value | — |
-| <a id="shadow-footer"></a>`--shadow-footer` | `0 1px 8px 1px rgba(0, 0, 0, 0.12)` | No; independent value | — |
-| <a id="shadow-chat-list-panel"></a>`--shadow-chat-list-panel` | `0 1px 8px 0 rgba(0, 0, 0, 0.1)` | No; independent value | — |
-| <a id="layer-blackout-opacity"></a>`--layer-blackout-opacity` | `0.1` | No; independent value | — |
-| <a id="layer-transition"></a>`--layer-transition` | `300ms cubic-bezier(0.33, 1, 0.68, 1)` | No; independent value | iOS: 650ms cubic-bezier(0.22, 1, 0.36, 1) |
-| <a id="layer-transition-behind"></a>`--layer-transition-behind` | `300ms cubic-bezier(0.33, 1, 0.68, 1)` | No; independent value | iOS: 650ms cubic-bezier(0.33, 1, 0.68, 1) |
-| <a id="slide-transition"></a>`--slide-transition` | `300ms cubic-bezier(0.25, 1, 0.5, 1)` | No; independent value | iOS: 450ms cubic-bezier(0.25, 1, 0.5, 1); Android: 350ms cubic-bezier(0.16, 1, 0.3, 1) |
-| <a id="top-stack-transition"></a>`--top-stack-transition` | `450ms cubic-bezier(0.25, 1, 0.5, 1)` | No; independent value | — |
-| <a id="mask-glide-transition"></a>`--mask-glide-transition` | `150ms` | No; independent value | — |
-| <a id="select-transition"></a>`--select-transition` | `200ms ease-out` | No; independent value | — |
-| <a id="chat-transform-transition"></a>`--chat-transform-transition` | `0.2s ease-out` | No; independent value | — |
-| <a id="composer-embedded-message-duration"></a>`--composer-embedded-message-duration` | `150ms` | No; independent value | — |
-| <a id="composer-input-grow-duration"></a>`--composer-input-grow-duration` | `100ms` | No; independent value | — |
-| <a id="pane-slide-transition"></a>`--pane-slide-transition` | Unset; `0s` on body.no-page-transitions | No; independent value | Other uses supply their own fallback |
-| <a id="custom-cursor"></a>`--custom-cursor` | `unset` | No; independent value | Consumers supply their cursor fallback; Tauri sets default; drag/resize states set grabbing or ew-resize |
-
-| Variable | Default | Default reference / inheritance | Scope / overrides |
-| --- | --- | --- | --- |
-| <a id="z-overlay-effects"></a>`--z-overlay-effects` | `12000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-modal-confirm"></a>`--z-modal-confirm` | `10500` | No; independent value | Local stacking contexts still apply |
-| <a id="z-reaction-picker"></a>`--z-reaction-picker` | `10200` | No; independent value | Local stacking contexts still apply |
-| <a id="z-portal-menu"></a>`--z-portal-menu` | `10000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-symbol-menu-modal"></a>`--z-symbol-menu-modal` | `5000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-lock-screen"></a>`--z-lock-screen` | `3000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-ui-loader-mask"></a>`--z-ui-loader-mask` | `2000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-notification"></a>`--z-notification` | `1700` | No; independent value | Local stacking contexts still apply |
-| <a id="z-confetti"></a>`--z-confetti` | `1600` | No; independent value | Local stacking contexts still apply |
-| <a id="z-round-video-recorder"></a>`--z-round-video-recorder` | `1160` | No; independent value | Local stacking contexts still apply |
-| <a id="z-story-viewer"></a>`--z-story-viewer` | `1150` | No; independent value | Local stacking contexts still apply |
-| <a id="z-reaction-interaction-effect"></a>`--z-reaction-interaction-effect` | `1100` | No; independent value | Local stacking contexts still apply |
-| <a id="z-right-column"></a>`--z-right-column` | `900` | No; independent value | Local stacking contexts still apply |
-| <a id="z-right-column-menu"></a>`--z-right-column-menu` | `950` | No; independent value | Local stacking contexts still apply |
-| <a id="z-header-menu"></a>`--z-header-menu` | `990` | No; independent value | Local stacking contexts still apply |
-| <a id="z-header-menu-backdrop"></a>`--z-header-menu-backdrop` | `980` | No; independent value | Local stacking contexts still apply |
-| <a id="z-modal"></a>`--z-modal` | `1510` | No; independent value | Local stacking contexts still apply |
-| <a id="z-modal-menu"></a>`--z-modal-menu` | `1600` | No; independent value | Local stacking contexts still apply |
-| <a id="z-resize-grip"></a>`--z-resize-grip` | `1000` | No; independent value | Local stacking contexts still apply |
-| <a id="z-media-viewer"></a>`--z-media-viewer` | `1500` | No; independent value | Local stacking contexts still apply |
-| <a id="z-modal-low-priority"></a>`--z-modal-low-priority` | `1400` | No; independent value | Local stacking contexts still apply |
-| <a id="z-video-player-controls"></a>`--z-video-player-controls` | `3` | No; independent value | Local stacking contexts still apply |
-| <a id="z-drop-area"></a>`--z-drop-area` | `55` | No; independent value | Local stacking contexts still apply |
-| <a id="z-animation-fade"></a>`--z-animation-fade` | `50` | No; independent value | Local stacking contexts still apply |
-| <a id="z-menu-bubble"></a>`--z-menu-bubble` | `21` | No; independent value | Local stacking contexts still apply |
-| <a id="z-menu-backdrop"></a>`--z-menu-backdrop` | `20` | No; independent value | Local stacking contexts still apply |
-| <a id="z-message-effect"></a>`--z-message-effect` | `15` | No; independent value | Local stacking contexts still apply |
-| <a id="z-message-highlighted"></a>`--z-message-highlighted` | `14` | No; independent value | Local stacking contexts still apply |
-| <a id="z-forum-panel"></a>`--z-forum-panel` | `13` | No; independent value | Local stacking contexts still apply |
-| <a id="z-message-context-menu"></a>`--z-message-context-menu` | `13` | No; independent value | Local stacking contexts still apply |
-| <a id="z-scroll-down-button"></a>`--z-scroll-down-button` | `12` | No; independent value | Local stacking contexts still apply |
-| <a id="z-local-search"></a>`--z-local-search` | `12` | No; independent value | Local stacking contexts still apply |
-| <a id="z-left-header"></a>`--z-left-header` | `11` | No; independent value | Local stacking contexts still apply |
-| <a id="z-middle-header"></a>`--z-middle-header` | `11` | No; independent value | Local stacking contexts still apply |
-| <a id="z-middle-footer"></a>`--z-middle-footer` | `11` | No; independent value | Local stacking contexts still apply |
-| <a id="z-middle-header-panes"></a>`--z-middle-header-panes` | `10` | No; independent value | Local stacking contexts still apply |
-| <a id="z-scroll-notch"></a>`--z-scroll-notch` | `10` | No; independent value | Local stacking contexts still apply |
-| <a id="z-story-ribbon"></a>`--z-story-ribbon` | `10` | No; independent value | Local stacking contexts still apply |
-| <a id="z-country-code-input-group"></a>`--z-country-code-input-group` | `10` | No; independent value | Local stacking contexts still apply |
-| <a id="z-message-select-control"></a>`--z-message-select-control` | `9` | No; independent value | Local stacking contexts still apply |
-| <a id="z-message-select-area"></a>`--z-message-select-area` | `8` | No; independent value | Local stacking contexts still apply |
-| <a id="z-sticky-date"></a>`--z-sticky-date` | `9` | No; independent value | Local stacking contexts still apply |
-| <a id="z-register-add-avatar"></a>`--z-register-add-avatar` | `5` | No; independent value | Local stacking contexts still apply |
-| <a id="z-media-viewer-head"></a>`--z-media-viewer-head` | `3` | No; independent value | Local stacking contexts still apply |
-| <a id="z-symbol-menu-mobile"></a>`--z-symbol-menu-mobile` | `calc(var(--z-story-viewer) + 1)` | CSS-derived: [--z-story-viewer](#z-story-viewer) | Local stacking contexts still apply |
-| <a id="z-resize-handle"></a>`--z-resize-handle` | `2` | No; independent value | Local stacking contexts still apply |
-| <a id="z-below"></a>`--z-below` | `-1` | No; independent value | Local stacking contexts still apply |
-| <a id="z-chat-ripple"></a>`--z-chat-ripple` | `6` | No; independent value | Local stacking contexts still apply |
-| <a id="z-chat-float-button"></a>`--z-chat-float-button` | `calc(var(--z-chat-ripple) + 1)` | CSS-derived: [--z-chat-ripple](#z-chat-ripple) | Local stacking contexts still apply |
-
 ### Peer colors
 
 [Peer-color generation](src/util/theme.ts) writes indexed root variables. IDs 0–6 initially use `#D45246`, `#F68136`, `#6C61DF`, `#46BA43`, `#5CAFFA`, `#408ACF` and `#D95574`; server peer colors can replace them, including separate dark colors.
@@ -304,7 +144,6 @@ Font stacks and platform overrides come from [the global stylesheet](src/styles/
 | <a id="color-peer-bg-active-{id}"></a>`--color-peer-bg-active-{id}` | `Peer color with alpha 2b` | No CSS alias; generated from [--color-peer-{id}](#color-peer-{id}) |
 | <a id="color-peer-gradient-{id}"></a>`--color-peer-gradient-{id}` | `Repeating -45deg stripes in 5px steps when multiple colors exist` | No CSS alias; generated from the peer-color list |
 | <a id="bar-gradient"></a>`--bar-gradient` | `var(--color-peer-gradient-{id})` | CSS alias in .peer-color-{id}: [--color-peer-gradient-{id}](#color-peer-gradient-{id}) |
-| <a id="color-user"></a>`--color-user` | `var(--accent-color)` | Shared Avatar/ProfilePhoto alias: [--accent-color](#accent-color); special account avatars override it |
 
 Inside `.peer-color-{id}`, [--accent-color](#accent-color) aliases [--color-peer-{id}](#color-peer-{id}) with [--color-text](#color-text) as fallback. Accent backgrounds alias the indexed peer background variables, falling back to [--hover-color](#hover-color) and [--active-color](#active-color). The `.peer-color-count-*` wrappers use those hover/active aliases directly.
 
@@ -346,6 +185,7 @@ Every row is a live CSS alias. The alias is local to `.Message`; the directional
 | <a id="message-meta-rgb"></a>`--message-meta-rgb` | [--message-incoming-meta-rgb](#message-incoming-meta-rgb) | [--message-outgoing-meta-rgb](#message-outgoing-meta-rgb) | Metadata text channels, without alpha |
 | <a id="message-accent-rgb"></a>`--message-accent-rgb` | [--message-incoming-accent-rgb](#message-incoming-accent-rgb) | [--message-outgoing-accent-rgb](#message-outgoing-accent-rgb) | Accent channels, without alpha |
 | <a id="message-ripple"></a>`--message-ripple` | [--message-incoming-ripple](#message-incoming-ripple) | [--message-outgoing-ripple](#message-outgoing-ripple) | Ripple overlay |
+| <a id="message-code-dark"></a>`--message-code-dark` | [--message-incoming-code-dark](#message-incoming-code-dark) | [--message-outgoing-code-dark](#message-outgoing-code-dark) | `1` selects a black `#00000080` code surface and dark [syntax colors](src/components/common/code/_codeHighlight.scss), `0` selects the [--accent-background-color](#message-alias-accent-background-color) surface and light syntax colors |
 
 ### Directional palette defaults
 
@@ -381,6 +221,7 @@ Every row is a live CSS alias. The alias is local to `.Message`; the directional
 | <a id="message-incoming-meta-rgb"></a>`--message-incoming-meta-rgb`<br><a id="message-outgoing-meta-rgb"></a>`--message-outgoing-meta-rgb` | `82, 82, 82`<br>`255, 255, 255` | `92, 140, 49`<br>`255, 255, 255` | No CSS alias; separately assigned RGB channels of [--message-meta](#message-meta) |
 | <a id="message-incoming-accent-rgb"></a>`--message-incoming-accent-rgb`<br><a id="message-outgoing-accent-rgb"></a>`--message-outgoing-accent-rgb` | `51, 144, 236`<br>`135, 116, 225` | `115, 167, 59`<br>`255, 255, 255` | No CSS alias; separately assigned RGB channels of [--message-accent](#message-accent) |
 | <a id="message-incoming-ripple"></a>`--message-incoming-ripple`<br><a id="message-outgoing-ripple"></a>`--message-outgoing-ripple` | `#ffffff14`<br>`#00000014` | `#ffffff14`<br>`#00000014` | No CSS alias; opposite primary-text polarity with alpha 14 |
+| <a id="message-incoming-code-dark"></a>`--message-incoming-code-dark`<br><a id="message-outgoing-code-dark"></a>`--message-outgoing-code-dark` | `0`<br>`1` | `0`<br>`1` | No CSS alias; `1` under white text, otherwise `0` |
 
 Server message colors replace the outgoing stops. When stops are absent, the base theme supplies its fallback. Light/day/classic outgoing accents, controls, secondary text and file details are derived separately; night/tinted palettes use their selected black/white foreground family. Incoming night and tinted fills also depend on the base theme. The outgoing canvas consumes the same stop list as the palette's solid fallback; the stop list itself is not a CSS variable.
 
@@ -397,12 +238,9 @@ These roles are shared by incoming and outgoing messages. Fixed values remain se
 | <a id="message-media-text"></a>`--message-media-text` | Text/icons on media overlays | `#ffffff` | No; generated palette value |
 | <a id="message-paid-background"></a>`--message-paid-background` | Paid-reaction fill | `#ffb727` | No; generated palette value |
 | <a id="message-paid-text"></a>`--message-paid-text` | Paid-reaction foreground | `#000000` | No; generated palette value |
-| <a id="message-code-background"></a>`--message-code-background` | Opaque code surface | `#202124` | No; generated palette value |
-| <a id="message-code-text"></a>`--message-code-text` | Plain code text | `#f5f5f5` | No; generated palette value |
-| <a id="message-code-overlay-background"></a>`--message-code-overlay-background` | Code copy/wrap overlay surface | `#303134` | No; generated palette value |
-| <a id="message-code-overlay-text"></a>`--message-code-overlay-text` | Code copy/wrap overlay foreground | `#f5f5f5` | No; generated palette value |
+| <a id="message-color-transition-duration"></a>`--message-color-transition-duration` | Color transition duration of message surfaces | Unset; consumer fallback applies | No alias; theme application temporarily sets `0ms` for paired-color updates, then removes it |
 
-The stylesheet-only fallback for [--message-paid-text](#message-paid-text) is `#202124`; the initialized palette assigns black. Service/date colors depend on the wallpaper and can be translucent. These tables describe the current color rules; they do not assert a numeric contrast bound.
+The stylesheet-only fallback for [--message-paid-text](#message-paid-text) is `#202124`; the initialized palette assigns black. Outside `.Message`, the document root assigns [--message-code-dark](#message-code-dark) from the incoming value, so composer and Instant View code blocks follow the app surface. Code text uses [--color-text](#color-text). Light code surfaces use the quote tint, so a code block in forwarded or quoted content matches the sender's peer-color bar. Service/date colors depend on the wallpaper and can be translucent. These tables describe the current color rules; they do not assert a numeric contrast bound.
 
 ### Compatibility colors
 
@@ -424,7 +262,7 @@ These older shared variables remain available globally. Their global defaults ar
 | <a id="color-own-links"></a>`--color-own-links` | Outgoing links | `#73a73b` | `#ffffff` | No CSS alias; copies outgoing accent ([--message-outgoing-accent](#message-outgoing-accent)); message links use their own role |
 | <a id="color-code"></a>`--color-code` | Legacy inline-code text | `#4a729a` | `#8774E1` | No; literal or Sass-computed value |
 | <a id="color-code-bg"></a>`--color-code-bg` | Legacy inline-code background | `#70757914` | `#00000080` | No; literal or Sass-computed value |
-| <a id="color-code-own"></a>`--color-code-own` | Legacy outgoing inline-code text | `#73a73b` | `#ffffff` | No CSS alias; copies outgoing accent; scoped code uses [--message-code-text](#message-code-text) |
+| <a id="color-code-own"></a>`--color-code-own` | Legacy outgoing inline-code text | `#73a73b` | `#ffffff` | No CSS alias; copies outgoing accent |
 | <a id="color-code-own-bg"></a>`--color-code-own-bg` | Legacy outgoing inline-code background | `#70757914` | `#00000050` | No; literal or Sass-computed value |
 | <a id="color-accent-own"></a>`--color-accent-own` | Outgoing accent | `#73a73b` | `#ffffff` | No CSS alias; outgoing palette accent ([--message-outgoing-accent](#message-outgoing-accent)) |
 | <a id="color-accent-own-rgb"></a>`--color-accent-own-rgb` | Accent own rgb | `115, 167, 59` | `255, 255, 255` | No CSS alias; outgoing accent channels ([--message-outgoing-accent-rgb](#message-outgoing-accent-rgb)) |
@@ -478,8 +316,6 @@ These are the actual CSS aliases declared on `.Message` in addition to the direc
 | <a id="message-alias-color-error-background"></a>`--color-error-background` | `var(--message-error-background)` | CSS alias / dependency: [--message-error-background](#message-error-background) |
 | <a id="message-alias-color-error-shade"></a>`--color-error-shade` | `var(--message-error-background)` | CSS alias / dependency: [--message-error-background](#message-error-background) |
 | <a id="message-alias-color-error-foreground"></a>`--color-error-foreground` | `var(--message-error-foreground)` | CSS alias / dependency: [--message-error-foreground](#message-error-foreground) |
-| <a id="message-alias-color-code"></a>`--color-code` | `var(--message-code-text)` | CSS alias / dependency: [--message-code-text](#message-code-text) |
-| <a id="message-alias-color-code-bg"></a>`--color-code-bg` | `var(--message-code-background)` | CSS alias / dependency: [--message-code-background](#message-code-background) |
 | <a id="message-alias-color-interactive-active"></a>`--color-interactive-active` | `var(--message-accent)` | CSS alias / dependency: [--message-accent](#message-accent) |
 | <a id="message-alias-color-interactive-inactive"></a>`--color-interactive-inactive` | `var(--message-tint)` | CSS alias / dependency: [--message-tint](#message-tint) |
 | <a id="message-alias-color-interactive-buffered"></a>`--color-interactive-buffered` | `var(--message-tint)` | CSS alias / dependency: [--message-tint](#message-tint) |
@@ -503,41 +339,6 @@ These are the actual CSS aliases declared on `.Message` in addition to the direc
 
 Selected bubbles override [--background-color](#background-color) with [--message-selected](#message-selected); story-mention service content uses [--message-service-background](#message-service-background). Peer-color wrappers can supply author accents. Outgoing content with `noUserColors` uses the outgoing message accents. In the dark theme, document file tiles override [--color-primary](#message-alias-color-primary) with [--color-selection-highlight](#color-selection-highlight) and [--color-primary-foreground](#message-alias-color-primary-foreground) with [--color-white](#color-white).
 
-### Message geometry and typography
-
-Shared dimensions combine root tokens, user settings and the actual header/footer layout. See [global radii](#radii) and [padding, spacing and layout](#padding-spacing-and-layout) for the values they depend on.
-
-| Variable | Default / declaration | Default reference / inheritance |
-| --- | --- | --- |
-| <a id="message-text-size"></a>`--message-text-size` | `16px` | No; runtime user setting; default iOS 17px, macOS 15px |
-| <a id="message-meta-height"></a>`--message-meta-height` | `floor(messageTextSize * 1.25)px` | No CSS alias; runtime-derived from [--message-text-size](#message-text-size) |
-| <a id="composer-text-size"></a>`--composer-text-size` | `max(messageTextSize, platformMinimum)px` | No CSS alias; [--message-text-size](#message-text-size) with minimum 16px iOS, 15px elsewhere |
-| <a id="max-width"></a>`--max-width` | `29rem` | No; incoming bubble width; .own 30rem, own ≥1921px 30vw; custom shapes override |
-| <a id="border-top-left-radius"></a>`--border-top-left-radius` | `var(--border-radius-messages)` | CSS alias: [--border-radius-messages](#border-radius-messages); grouped corners use [--border-radius-messages-small](#border-radius-messages-small) |
-| <a id="border-top-right-radius"></a>`--border-top-right-radius` | `var(--border-radius-messages)` | CSS alias: [--border-radius-messages](#border-radius-messages); grouped corners use [--border-radius-messages-small](#border-radius-messages-small) |
-| <a id="border-bottom-left-radius"></a>`--border-bottom-left-radius` | `var(--border-radius-messages)` | CSS alias: [--border-radius-messages](#border-radius-messages); appendix edge can be 0 |
-| <a id="border-bottom-right-radius"></a>`--border-bottom-right-radius` | `var(--border-radius-messages)` | CSS alias: [--border-radius-messages](#border-radius-messages); appendix edge can be 0 |
-| <a id="message-list-top-inset"></a>`--message-list-top-inset` | `0px` | No; local value |
-| <a id="message-list-min-reserve"></a>`--message-list-min-reserve` | `var(--composer-min-bottom-reserve)` | CSS alias / dependency: [--composer-min-bottom-reserve](#composer-min-bottom-reserve) |
-| <a id="message-list-composer-gap"></a>`--message-list-composer-gap` | `var(--composer-top-gap)` | CSS alias / dependency: [--composer-top-gap](#composer-top-gap) |
-| <a id="message-list-base-reserve"></a>`--message-list-base-reserve` | `calc(var(--message-list-min-reserve) + var(--message-list-composer-gap))` | CSS alias / dependency: [--message-list-min-reserve](#message-list-min-reserve), [--message-list-composer-gap](#message-list-composer-gap) |
-| <a id="message-list-bottom-inset"></a>`--message-list-bottom-inset` | `var(--message-list-base-reserve)` | CSS fallback alias: [--message-list-base-reserve](#message-list-base-reserve); layout assigns the measured bottom reserve in pixels; footerless lists use `0px` |
-| <a id="message-list-fade-floor"></a>`--message-list-fade-floor` | `rgba(0, 0, 0, 0.24)` | No; local value |
-| <a id="message-list-top-fade-ramp"></a>`--message-list-top-fade-ramp` | `1.5rem` | No; local value |
-| <a id="message-list-bottom-fade"></a>`--message-list-bottom-fade` | `var(--message-list-min-reserve)` | CSS fallback alias: [--message-list-min-reserve](#message-list-min-reserve); layout assigns the measured bottom reserve minus composer gap in pixels; footerless lists use `0px` |
-| <a id="sticky-date-height"></a>`--sticky-date-height` | `calc(1.25 * (var(--message-text-size, 1rem) - 0.0625rem) + 0.375rem)` | CSS alias / dependency: [--message-text-size](#message-text-size) |
-| <a id="sticky-topic-top"></a>`--sticky-topic-top` | `calc(1.3125rem + var(--sticky-date-height) + var(--message-list-top-inset))` | CSS alias / dependency: [--sticky-date-height](#sticky-date-height), [--message-list-top-inset](#message-list-top-inset) |
-| <a id="message-list-header-base"></a>`--message-list-header-base` | `calc(var(--middle-header-height) + var(--middle-panel-inline-padding))` | CSS-derived: [--middle-header-height](#middle-header-height), [--middle-panel-inline-padding](#middle-panel-inline-padding) |
-| <a id="message-list-top-stack"></a>`--message-list-top-stack` | `calc(var(--middle-header-player-height, 0px) + var(--message-list-header-base))` | CSS-derived: [--middle-header-player-height](#middle-header-player-height), [--message-list-header-base](#message-list-header-base) |
-| <a id="message-list-mask-panes-height"></a>`--message-list-mask-panes-height` | `var(--middle-header-panes-mask-height, var(--middle-header-panes-height))` | CSS-derived: [--middle-header-panes-mask-height](#middle-header-panes-mask-height), [--middle-header-panes-height](#middle-header-panes-height); registered `<length>`, inherits: false, initial 0px |
-| <a id="message-list-mask-player-height"></a>`--message-list-mask-player-height` | `var(--middle-header-player-height, 0px)` | CSS alias: [--middle-header-player-height](#middle-header-player-height); registered `<length>`, inherits: false, initial 0px |
-| <a id="message-list-mask-top-stack"></a>`--message-list-mask-top-stack` | `calc(var(--message-list-header-base) + var(--message-list-mask-player-height))` | CSS-derived: [--message-list-header-base](#message-list-header-base), [--message-list-mask-player-height](#message-list-mask-player-height) |
-| <a id="message-list-mask-top-inset"></a>`--message-list-mask-top-inset` | `calc(var(--message-list-mask-top-stack) + var(--message-list-mask-panes-height))` | CSS-derived: [--message-list-mask-top-stack](#message-list-mask-top-stack), [--message-list-mask-panes-height](#message-list-mask-panes-height) |
-| <a id="middle-header-panes-mask-height"></a>`--middle-header-panes-mask-height` | `Measured length` | No; runtime header mask height; consumers fall back to [--middle-header-panes-height](#middle-header-panes-height) |
-| <a id="message-color-transition-duration"></a>`--message-color-transition-duration` | `Unset; consumer fallback applies` | No alias; theme application temporarily sets 0ms for paired-color updates, then removes it |
-
-Within `.messages-layout`, [--message-list-top-inset](#message-list-top-inset) is `calc(var(--message-list-top-stack) + var(--middle-header-panes-height))` rather than `0px`. On iOS/macOS, [--sticky-date-height](#sticky-date-height) becomes `calc(var(--message-text-size, 1rem) + 0.46875rem)`. [Bottom-reserve layout](src/components/middle/helpers/messageListReserves.ts) replaces the bottom-inset/fade fallbacks with measured pixel values while a reserve exists. The mask-height properties are local animation values and explicitly do not inherit.
-
 ### Wallpaper inputs
 
 [Wallpaper rendering](src/hooks/useChatBackground.ts) defines these on the wrapper shared by the backdrop and chat content; the image URL is on the background layer. Missing values use the renderer's defaults rather than a global root declaration.
@@ -559,27 +360,7 @@ Browser wallpaper colors are assigned on the document root by [theme application
 | <a id="browser-top-color"></a>`--browser-top-color` | `Unset in light and dark mode` | No CSS alias; inherited computed upper wallpaper edge color, also copied to the browser theme-color metadata; dark single-color patterns include [--pattern-dimming](#pattern-dimming), dark multicolor patterns use the black base |
 | <a id="browser-bottom-color"></a>`--browser-bottom-color` | `Unset in light and dark mode` | No CSS alias; inherited computed lower wallpaper edge color, with the same pattern dimming and black-base rules as [--browser-top-color](#browser-top-color) |
 
-### Syntax colors
-
-The [shared code-highlighting mixin](src/components/common/code/_codeHighlight.scss) uses these literal colors on [--message-code-background](#message-code-background). They are not aliases to app accent colors.
-
-| Variable | Default | Default reference / inheritance |
-| --- | --- | --- |
-| <a id="color-type"></a>`--color-type` | `#56b6c2` | No; literal |
-| <a id="color-keyword"></a>`--color-keyword` | `#c678dd` | No; literal |
-| <a id="color-class"></a>`--color-class` | `#e06c75` | No; literal |
-| <a id="color-string"></a>`--color-string` | `#98c379` | No; literal |
-| <a id="color-template"></a>`--color-template` | `#d19a66` | No; literal |
-| <a id="color-selector"></a>`--color-selector` | `#e06c75` | No; literal |
-| <a id="color-function"></a>`--color-function` | `#61aeee` | No; literal |
-| <a id="color-comment"></a>`--color-comment` | `#9da5b4` | No; literal |
-| <a id="color-section"></a>`--color-section` | `#e06c75` | No; literal |
-| <a id="color-variable"></a>`--color-variable` | `#d19a66` | No; literal |
-| <a id="color-attribute"></a>`--color-attribute` | `#d19a66` | No; literal |
-| <a id="color-link"></a>`--color-link` | `#d19a66` | No; literal |
-| <a id="color-tag"></a>`--color-tag` | `#e06c75` | No; literal |
-
 ## Updating this reference
 
-Update the tables when changing the shared declarations, theme base map, runtime palette or message aliases. Check stylesheet fallbacks and initialized values separately; a matching color is not sufficient evidence of a CSS alias.
+Update the tables when changing global theme colors, the theme base map, the runtime palette, message aliases or wallpaper inputs. Check stylesheet fallbacks and initialized values separately; a matching color is not sufficient evidence of a CSS alias.
 

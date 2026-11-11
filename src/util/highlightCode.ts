@@ -9,7 +9,15 @@ import { getCodeLanguageName } from './codeLanguages';
 const THIRD_PARTY_LANGUAGES = ['typelanguage'];
 export const CODE_HIGHLIGHTING_CHANGED_META = 'codeHighlightingChanged';
 
-const LANGUAGE_MODULES = import.meta.glob('../../node_modules/highlight.js/es/languages/*.js') as Record<
+// Must list every highlight.js language from `CODE_LANGUAGE_ALIASES` in `codeLanguages.ts`
+const LANGUAGE_MODULES = import.meta.glob([
+  '../../node_modules/highlight.js/es/languages/{1c,ada,arduino,armasm,bash,basic,c,cpp,csharp,css,dart}.js',
+  '../../node_modules/highlight.js/es/languages/{dockerfile,elixir,erlang,go,handlebars,haskell,ini,java}.js',
+  '../../node_modules/highlight.js/es/languages/{javascript,json,kotlin,latex,lisp,lua,makefile,markdown}.js',
+  '../../node_modules/highlight.js/es/languages/{matlab,nginx,objectivec,perl,php,plaintext,powershell}.js',
+  '../../node_modules/highlight.js/es/languages/{python,r,ruby,rust,scheme,scss,shell,smalltalk,sql,swift}.js',
+  '../../node_modules/highlight.js/es/languages/{twig,typescript,xml,yaml}.js',
+]) as Record<
   string,
   () => Promise<{ default: any }>
 >;

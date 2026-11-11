@@ -1,5 +1,6 @@
 @use "sass:map";
 @use "../../../styles/icons";
+@use "../../common/code/codeHighlight";
 
 @mixin subheader-styles() {
   overflow: hidden;
@@ -1036,10 +1037,10 @@
   padding: 0.5rem;
   border-radius: 4px;
 
-  color: var(--message-code-text);
+  color: var(--color-text);
   white-space: pre-wrap;
 
-  background-color: var(--message-code-background);
+  @include codeHighlight.code-surface;
 
   &:hover {
     .code-overlay {
