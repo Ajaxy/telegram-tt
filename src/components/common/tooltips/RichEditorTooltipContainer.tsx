@@ -198,7 +198,7 @@ const RichEditorTooltipContainer = ({
   if (surface === 'customEmoji' || surface === 'sticker') {
     const customEmojiConfig = config.customEmoji;
     return (
-      <div className={styles.emojiStack}>
+      <div className={buildClassName(styles.emojiStack, stickerSuggestion && styles.raised)}>
         {stickerSuggestion ? (
           <StickerTooltip
             isOpen={isStickerOpen}
@@ -246,7 +246,7 @@ const RichEditorTooltipContainer = ({
 
   if (surface === 'inlineBot' && inlineBot && inlineBotState) {
     return (
-      <div className={styles.root}>
+      <div className={buildClassName(styles.root, styles.raised)}>
         <InlineBotTooltip
           isOpen={isOpen}
           selectedIndex={selectedIndex}

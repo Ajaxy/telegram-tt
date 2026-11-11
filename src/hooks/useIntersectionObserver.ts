@@ -16,6 +16,7 @@ type ObserveCleanup = NoneToVoidFunction;
 export type ObserveFn = (target: HTMLElement, targetCallback?: TargetCallback) => ObserveCleanup;
 
 interface IntersectionController {
+  root?: HTMLElement;
   observer: IntersectionObserver;
   addCallback: (element: HTMLElement, callback: TargetCallback) => void;
   removeCallback: (element: HTMLElement, callback: TargetCallback) => void;
@@ -167,6 +168,7 @@ export function useIntersectionObserver({
     }
 
     controllerRef.current = {
+      root: rootRef.current,
       observer,
       addCallback,
       removeCallback,
@@ -175,6 +177,13 @@ export function useIntersectionObserver({
   }
 
   const observe = useLastCallback((target, targetCallback) => {
+    // Root element can be remounted while the hook owner stays, leaving the observer bound to a detached root
+    const prevRoot = controllerRef.current?.root;
+    if (prevRoot && !prevRoot.isConnected && prevRoot !== rootRef.current) {
+      controllerRef.current!.destroy();
+      controllerRef.current = undefined;
+    }
+
     if (!controllerRef.current) {
       initController();
     }
