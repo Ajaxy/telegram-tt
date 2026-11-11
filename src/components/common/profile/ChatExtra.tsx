@@ -149,6 +149,7 @@ const ChatExtra = ({
     requestMainWebView,
     toggleUserEmojiStatusPermission,
     toggleUserLocationPermission,
+    toggleUserMediaPermission,
     requestNextManagementScreen,
     openQrCodeModal,
     openChatWithInfo,
@@ -266,6 +267,16 @@ const ChatExtra = ({
   const handleLocationPermissionChange = useLastCallback(() => {
     if (!user) return;
     toggleUserLocationPermission({ botId: user.id, isAccessGranted: !botAppPermissions?.geolocation });
+  });
+
+  const handleCameraPermissionChange = useLastCallback(() => {
+    if (!user) return;
+    toggleUserMediaPermission({ botId: user.id, kind: 'camera', isAccessGranted: !botAppPermissions?.camera });
+  });
+
+  const handleMicrophonePermissionChange = useLastCallback(() => {
+    if (!user) return;
+    toggleUserMediaPermission({ botId: user.id, kind: 'microphone', isAccessGranted: !botAppPermissions?.microphone });
   });
 
   const handleOpenSavedDialog = useLastCallback(() => {
@@ -643,6 +654,40 @@ const ChatExtra = ({
             <span>{lang('BotProfilePermissionLocation')}</span>
             <Switch
               checked={Boolean(botAppPermissions?.geolocation)}
+              className={styles.switch}
+            />
+          </ListItem>
+        )}
+        {botAppPermissions?.camera !== undefined && (
+          <ListItem
+            icon="camera"
+            iconBg="blue"
+            className={styles.botCamera}
+            narrow
+            ripple
+            onClick={handleCameraPermissionChange}
+            style={createVtnStyle('botCamera')}
+          >
+            <span>{lang('BotProfilePermissionCamera')}</span>
+            <Switch
+              checked={Boolean(botAppPermissions?.camera)}
+              className={styles.switch}
+            />
+          </ListItem>
+        )}
+        {botAppPermissions?.microphone !== undefined && (
+          <ListItem
+            icon="microphone"
+            iconBg="red"
+            className={styles.botMicrophone}
+            narrow
+            ripple
+            onClick={handleMicrophonePermissionChange}
+            style={createVtnStyle('botMicrophone')}
+          >
+            <span>{lang('BotProfilePermissionMicrophone')}</span>
+            <Switch
+              checked={Boolean(botAppPermissions?.microphone)}
               className={styles.switch}
             />
           </ListItem>

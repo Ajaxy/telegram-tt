@@ -139,7 +139,7 @@ import type {
 import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
 import type { MediaEditorSettings } from '../../types/mediaEditor';
 import type { ClipboardTextFormat, MessageCopyRequest } from '../../types/messageCopy';
-import type { WebApp, WebAppOutboundEvent } from '../../types/webapp';
+import type { WebApp, WebAppMediaKind, WebAppOutboundEvent } from '../../types/webapp';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
@@ -3741,6 +3741,15 @@ export interface ActionPayloads {
   } & WithTabId;
   closeLocationAccessModal: WithTabId | undefined;
 
+  openMediaAccessModal: {
+    bot: ApiUser;
+    webAppKey: string;
+    kinds: WebAppMediaKind[];
+  } & WithTabId;
+  closeMediaAccessModal: {
+    isAccessGranted: boolean;
+  } & WithTabId;
+
   toggleUserEmojiStatusPermission: {
     botId: string;
     isEnabled: boolean;
@@ -3749,6 +3758,12 @@ export interface ActionPayloads {
 
   toggleUserLocationPermission: {
     botId: string;
+    isAccessGranted: boolean;
+  };
+
+  toggleUserMediaPermission: {
+    botId: string;
+    kind: WebAppMediaKind;
     isAccessGranted: boolean;
   };
 

@@ -853,6 +853,8 @@ export type CallSound = (
 
 export type BotAppPermissions = {
   geolocation?: boolean;
+  camera?: boolean;
+  microphone?: boolean;
 };
 
 export type GiftProfileFilterOptions = {

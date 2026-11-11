@@ -2113,6 +2113,15 @@
 "ProfileTabSimilarBots" = "Similar Bots";
 "ProfileTabPublicPosts" = "Public Posts";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
+"MediaAccessCameraText" = "**{name}** requests access to your **camera**. You will be able to revoke this access in the profile page of **{name}**.";
+"MediaAccessMicrophoneText" = "**{name}** requests access to your **microphone**. You will be able to revoke this access in the profile page of **{name}**.";
+"MediaAccessCameraMicrophoneText" = "**{name}** requests access to your **camera** and **microphone**. You will be able to revoke this access in the profile page of **{name}**.";
+"MediaAccessReloadNote" = "The mini app will need to be reloaded to apply this permission.";
+"WebAppMediaReloadText" = "Reload the mini app to apply new permission settings.";
+"WebAppMediaReloadButton" = "Reload";
+"WebAppCameraAccessRevoked" = "Camera access is turned off, the app was restarted.";
+"WebAppMicrophoneAccessRevoked" = "Microphone access is turned off, the app was restarted.";
+"WebAppMediaAccessRevoked" = "Camera and microphone access is turned off, the app was restarted.";
 "UnlockMoreSimilarBots" = "Show More Apps";
 "MoreSimilarBotsDescription_one" = "Subscribe to **Telegram Premium** to unlock up to {count} similar bot.";
 "MoreSimilarBotsDescription_other" = "Subscribe to **Telegram Premium** to unlock up to {count} similar bots.";
@@ -3785,6 +3794,8 @@
 "BotManageInfo" = "Use @BotFather to manage this bot.";
 "BotProfilePermissionEmojiStatus" = "Emoji Status";
 "BotProfilePermissionLocation" = "Geolocation";
+"BotProfilePermissionCamera" = "Camera";
+"BotProfilePermissionMicrophone" = "Microphone";
 "BotRemoveFromMenu" = "This will remove **{user}** shortcuts from all menus.";
 "BotRemoveFromMenuTitle" = "Remove bot";
 "BotWebViewStartPermission" = "To launch this web app, you will connect to its website.";

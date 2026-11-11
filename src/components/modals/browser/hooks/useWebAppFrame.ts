@@ -5,7 +5,7 @@ import { getActions, getGlobal } from '../../../../global';
 import type { WebApp, WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
 import { getWebAppKey } from '../../../../global/helpers';
-import { isMessageFromIframe } from '../../../../util/browser/iframe';
+import { getWebAppOrigin, isMessageFromIframe } from '../../../../util/browser/iframe';
 import { isValidProtocol } from '../../../../util/browser/url';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -427,20 +427,12 @@ function useWebAppFrame(
   }, [isOpen, isFullscreen, sendViewport, sendSafeArea, ref]);
 
   return {
-    sendEvent, sendFullScreenChanged, reloadFrame, sendViewport, sendSafeArea, sendTheme,
+    sendEvent, sendFullScreenChanged, reloadFrame, forceReloadFrame, sendViewport, sendSafeArea, sendTheme,
   };
 }
 
 function getIsFrameBlank(frame: HTMLIFrameElement) {
   return frame.src === 'about:blank' || frame.contentDocument?.URL === 'about:blank';
-}
-
-function getWebAppOrigin(url: string) {
-  try {
-    return new URL(url).origin;
-  } catch (err) {
-    return undefined;
-  }
 }
 
 export default useWebAppFrame;

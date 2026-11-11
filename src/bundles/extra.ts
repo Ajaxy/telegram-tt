@@ -34,6 +34,7 @@ export { default as AboutMonetizationModal } from '../components/common/AboutMon
 export { default as VerificationMonetizationModal } from '../components/common/VerificationMonetizationModal';
 export { default as EmojiStatusAccessModal } from '../components/modals/emojiStatusAccess/EmojiStatusAccessModal';
 export { default as LocationAccessModal } from '../components/modals/locationAccess/LocationAccessModal';
+export { default as MediaAccessModal } from '../components/modals/mediaAccess/MediaAccessModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
 export { default as ReportModal } from '../components/modals/reportModal/ReportModal';
 export { default as PreparedMessageModal } from '../components/modals/preparedMessage/PreparedMessageModal';

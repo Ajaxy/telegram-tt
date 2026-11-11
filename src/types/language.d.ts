@@ -1679,6 +1679,12 @@ export interface LangPair {
   'ProfileTabSimilarChannels': undefined;
   'ProfileTabSimilarBots': undefined;
   'ProfileTabPublicPosts': undefined;
+  'MediaAccessReloadNote': undefined;
+  'WebAppMediaReloadText': undefined;
+  'WebAppMediaReloadButton': undefined;
+  'WebAppCameraAccessRevoked': undefined;
+  'WebAppMicrophoneAccessRevoked': undefined;
+  'WebAppMediaAccessRevoked': undefined;
   'UnlockMoreSimilarBots': undefined;
   'GiftWasNotFound': undefined;
   'ViewButtonRequestJoin': undefined;
@@ -2827,6 +2833,8 @@ export interface LangPair {
   'BotManageInfo': undefined;
   'BotProfilePermissionEmojiStatus': undefined;
   'BotProfilePermissionLocation': undefined;
+  'BotProfilePermissionCamera': undefined;
+  'BotProfilePermissionMicrophone': undefined;
   'BotRemoveFromMenuTitle': undefined;
   'BotWebViewStartPermission': undefined;
   'BusinessHoursDayClosed': undefined;
@@ -4292,6 +4300,15 @@ export interface LangPairWithVariables<V = LangVariable> {
     'peer': V;
   };
   'LocationPermissionText': {
+    'name': V;
+  };
+  'MediaAccessCameraText': {
+    'name': V;
+  };
+  'MediaAccessMicrophoneText': {
+    'name': V;
+  };
+  'MediaAccessCameraMicrophoneText': {
     'name': V;
   };
   'ActionPinnedText': {
@@ -6778,6 +6795,9 @@ export interface LangKeyGroups {
       | 'NewDiscussionChatTitle'
       | 'EmojiStatusAccessText'
       | 'LocationPermissionText'
+      | 'MediaAccessCameraText'
+      | 'MediaAccessMicrophoneText'
+      | 'MediaAccessCameraMicrophoneText'
       | 'ContextMenuNoForwardsPeer'
       | 'RatingReflectsActivity'
       | 'WalletSendAddressLinked'

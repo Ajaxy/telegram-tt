@@ -126,6 +126,7 @@ import type {
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
 import type { RegularLangKey } from '../../types/language';
+import type { WebAppMediaKind } from '../../types/webapp';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -753,6 +754,12 @@ export type TabState = {
   locationAccessModal?: {
     bot: ApiUser;
     webAppKey: string;
+  };
+
+  mediaAccessModal?: {
+    bot: ApiUser;
+    webAppKey: string;
+    kinds: WebAppMediaKind[];
   };
 
   confetti?: {

@@ -26,7 +26,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
-import { IFRAME_ALLOW_ATTRIBUTES, WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
+import { WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle.ts';
@@ -47,6 +47,7 @@ import useSyncEffect from '../../../hooks/useSyncEffect';
 import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFullscreen';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
+import useWebAppMediaAccess from './hooks/useWebAppMediaAccess';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
@@ -93,6 +94,7 @@ type StateProps = {
   paymentStatus?: TabState['payment']['status'];
   modalState?: BrowserModalStateType;
   botAppPermissions?: BotAppPermissions;
+  isMediaAccessModalOpen?: boolean;
   verifyAgeMin?: number;
   verifyAgeBotUsername?: string;
 };
@@ -129,6 +131,7 @@ const WebAppTab = ({
   modalState,
   isMultiTabSupported,
   botAppPermissions,
+  isMediaAccessModalOpen,
   botAppSettings,
   modalHeight,
   verifyAgeMin = VERIFY_AGE_MIN_DEFAULT,
@@ -263,16 +266,37 @@ const WebAppTab = ({
   const isSimple = Boolean(buttonText);
 
   const {
-    reloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
+    reloadFrame, forceReloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
   } = useWebAppFrame(frameRef, isOpen, isFullscreen, isSimple, handleEvent, webApp, markLoaded);
+
+  const {
+    allowAttribute, isReloadRequired: isMediaReloadRequired, handleMediaAccessEvent, markPermissionsApplied,
+  } = useWebAppMediaAccess(sendEvent, forceReloadFrame, webApp, bot, botAppPermissions, isMediaAccessModalOpen);
+
+  const handleReloadFrame = useLastCallback((frameUrl: string) => {
+    markPermissionsApplied();
+    reloadFrame(frameUrl);
+  });
+
+  const handleMediaReloadClick = useLastCallback(() => {
+    handleReloadFrame(url!);
+  });
+
+  // Any permission change replaces the object, so the panel shows again
+  const [mediaReloadDismissedFor, setMediaReloadDismissedFor] = useState<BotAppPermissions>();
+  const isMediaReloadPanelVisible = isMediaReloadRequired && mediaReloadDismissedFor !== botAppPermissions;
+
+  const handleMediaReloadDismiss = useLastCallback(() => {
+    setMediaReloadDismissedFor(botAppPermissions);
+  });
 
   useEffect(() => {
     if (isActive) registerSendEventCallback(sendEvent);
   }, [sendEvent, registerSendEventCallback, isActive]);
 
   useEffect(() => {
-    if (isActive) registerReloadFrameCallback(reloadFrame);
-  }, [reloadFrame, registerReloadFrameCallback, isActive]);
+    if (isActive) registerReloadFrameCallback(handleReloadFrame);
+  }, [handleReloadFrame, registerReloadFrameCallback, isActive]);
 
   function hasBottomButtonContent(text: string | undefined, iconCustomEmojiId?: string) {
     return Boolean(text?.trim().length || iconCustomEmojiId);
@@ -659,6 +683,8 @@ const WebAppTab = ({
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
 
+    handleMediaAccessEvent(event);
+
     if (eventType === 'web_app_request_fullscreen') {
       if (!isActive) return;
 
@@ -914,7 +940,7 @@ const WebAppTab = ({
       handleRequestLocation();
     }
 
-    if (eventType === 'web_app_open_location_settings') {
+    if (eventType === 'web_app_open_location_settings' || eventType === 'web_app_open_media_access_settings') {
       handleOpenChat();
     }
 
@@ -1244,6 +1270,23 @@ const WebAppTab = ({
     >
       {isFullscreen && getIsWebAppsFullscreenSupported() && renderFullscreenHeaderPanel()}
       {!isMinimizedState && renderPlaceholder()}
+      {isMediaReloadPanelVisible && !isMinimizedState && (
+        <div className={buildClassName(styles.mediaReloadPanel, isFullscreen && styles.mediaReloadPanelFullscreen)}>
+          <Button
+            round
+            size="tiny"
+            color="translucent"
+            ariaLabel={lang('Close')}
+            onClick={handleMediaReloadDismiss}
+          >
+            <Icon name="close" />
+          </Button>
+          <span className={styles.mediaReloadText}>{lang('WebAppMediaReloadText')}</span>
+          <Button size="tiny" fluid onClick={handleMediaReloadClick}>
+            {lang('WebAppMediaReloadButton')}
+          </Button>
+        </div>
+      )}
       <iframe
         className={buildClassName(
           styles.frame,
@@ -1254,7 +1297,7 @@ const WebAppTab = ({
         src={url}
         title={lang('AriaMiniApp', { bot: bot?.firstName })}
         sandbox={WEB_APP_SANDBOX_ATTRIBUTES}
-        allow={IFRAME_ALLOW_ATTRIBUTES}
+        allow={allowAttribute}
         allowFullScreen
         ref={frameRef}
       />
@@ -1444,7 +1487,8 @@ export default memo(withGlobal<OwnProps>(
     const tabState = selectTabState(global);
     const { isPaymentModalOpen, status: regularPaymentStatus } = tabState.payment;
     const { status: starsPaymentStatus, inputInvoice: starsInputInvoice } = tabState.starsPayment;
-    const botAppPermissions = bot ? selectBotAppPermissions(global, bot.id) : undefined;
+    const botAppPermissions = botId ? selectBotAppPermissions(global, botId) : undefined;
+    const isMediaAccessModalOpen = Boolean(webApp) && tabState.mediaAccessModal?.webAppKey === getWebAppKey(webApp);
 
     const paymentStatus = starsPaymentStatus || regularPaymentStatus;
 
@@ -1458,6 +1502,7 @@ export default memo(withGlobal<OwnProps>(
       paymentStatus,
       modalState,
       botAppPermissions,
+      isMediaAccessModalOpen,
       botAppSettings,
       verifyAgeMin,
       verifyAgeBotUsername,
