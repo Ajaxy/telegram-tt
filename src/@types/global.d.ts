@@ -107,6 +107,11 @@ declare module '*.webp' {
   export default url;
 }
 
+declare module '*.avif' {
+  const url: string;
+  export default url;
+}
+
 declare module '*.svg' {
   const url: string;
   export default url;

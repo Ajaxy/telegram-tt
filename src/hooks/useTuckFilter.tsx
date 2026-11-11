@@ -6,7 +6,7 @@ import {
 } from '../util/browser/windowEnvironment';
 import { addSvgDefinition, removeSvgDefinition } from '../util/svgController';
 
-import pickerTuck from '../assets/filters/status-picker-tuck.webp';
+import pickerTuck from '../assets/filters/status-picker-tuck.avif';
 
 const FILTER_BAND_START = IS_SVG_CALC_SUPPORTED ? 'calc(100% - 64px)' : '80%';
 const FILTER_BAND_HEIGHT = IS_SVG_CALC_SUPPORTED ? '32' : '10%';

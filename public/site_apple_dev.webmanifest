@@ -21,11 +21,6 @@
             "type": "image/png"
         }
     ],
-    "screenshots" : [{
-      "src": "screenshot.jpg",
-      "sizes": "1280x802",
-      "type": "image/jpeg"
-    }],
     "share_target": {
       "action": "./share/",
       "method": "POST",

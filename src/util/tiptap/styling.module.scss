@@ -327,11 +327,11 @@
     -0.125rem 0.125rem 0 var(--color-background),
     0.125rem 0.125rem 0 var(--color-background);
 
-  background-image: url("../../assets/spoiler-dots-black.png");
+  background-image: url("../../assets/spoiler-dots-black.webp");
   background-size: auto min(100%, 1.125rem);
 
   :global(html.theme-dark) & {
-    background-image: url("../../assets/spoiler-dots-white.png");
+    background-image: url("../../assets/spoiler-dots-white.webp");
   }
 }
 

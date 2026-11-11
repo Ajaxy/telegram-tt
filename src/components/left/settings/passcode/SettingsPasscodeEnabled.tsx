@@ -5,7 +5,7 @@ import type { IRadioOption } from '../../../ui/RadioGroup';
 import { SettingsScreens } from '../../../../types';
 
 import { IS_WEBAUTHN_SUPPORTED } from '../../../../util/browser/windowEnvironment';
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
@@ -17,8 +17,6 @@ import Button from '../../../ui/Button';
 import Checkbox from '../../../ui/Checkbox';
 import ListItem from '../../../ui/ListItem';
 import RadioGroup from '../../../ui/RadioGroup';
-
-import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   isActive?: boolean;
@@ -82,7 +80,7 @@ const SettingsPasscodeEnabled = ({
       <div className="settings-content-header no-border">
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={160}
           className="settings-content-icon"
         />

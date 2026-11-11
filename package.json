@@ -29,6 +29,7 @@
     "lang:ts": "tsx ./dev/generateLangTypes.js",
     "lang:initial": "tsx ./dev/generateInitialLangFallback.js",
     "icons:build": "tsx ./dev/buildIcons.ts",
+    "tgs:avif": "tsx ./dev/tgsToAvif.ts",
     "test": "cross-env APP_ENV=test vitest run --silent=true",
     "postinstall": "node -e \"require('fs').rmSync('.cache', { recursive: true, force: true })\"",
     "postversion": "echo $(node -p \"require('./package.json').version\") > public/version.txt && git commit --amend --no-verify --no-edit public/version.txt"
@@ -84,6 +85,7 @@
     "rollup-plugin-bundle-stats": "^4.22.3",
     "rollup-plugin-visualizer": "^7.1.1",
     "sass": "^1.105.1",
+    "sharp": "^0.35.5",
     "stylelint": "^17.16.0",
     "stylelint-config-clean-order": "^10.0.0",
     "stylelint-config-recommended-scss": "^17.0.1",

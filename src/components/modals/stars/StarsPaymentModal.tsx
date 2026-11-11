@@ -32,7 +32,7 @@ import PaidMediaThumb from './transaction/PaidMediaThumb';
 
 import styles from './StarsBalanceModal.module.scss';
 
-import StarsBackground from '../../../assets/stars-bg.png';
+import StarsBackground from '../../../assets/stars-bg.svg';
 
 export type OwnProps = {
   modal: TabState['starsPayment'];

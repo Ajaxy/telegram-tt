@@ -5,7 +5,7 @@ import type { GlobalState } from '../../global/types';
 
 import { IS_WEBAUTHN_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { cancelConditionalPasskeyRequest } from '../../util/passcode/passkey';
-import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useFlag from '../../hooks/useFlag';
@@ -21,8 +21,6 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import Link from '../ui/Link';
 
 import styles from './LockScreen.module.scss';
-
-import lockPreviewUrl from '../../assets/lock.png';
 
 export type OwnProps = {
   isLocked?: boolean;
@@ -122,7 +120,7 @@ const LockScreen = ({
       <div className={styles.wrapper} dir={lang.isRtl ? 'rtl' : undefined}>
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={ICON_SIZE}
           className={styles.icon}
         />
@@ -141,7 +139,7 @@ const LockScreen = ({
       <div className={styles.wrapper} dir={lang.isRtl ? 'rtl' : undefined}>
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={ICON_SIZE}
           className={styles.icon}
         />
