@@ -991,9 +991,8 @@
   overflow-wrap: break-word;
 
   &:hover,
-  &:active,
-  &:visited {
-    text-decoration: underline !important;
+  &:active {
+    text-decoration: var(--message-links-decoration-hover, underline) !important;
   }
 }
 

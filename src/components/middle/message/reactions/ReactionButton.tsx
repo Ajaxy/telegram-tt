@@ -187,7 +187,7 @@ const ReactionButton = ({
     >
       {reaction.reaction.type === 'paid' ? (
         <>
-          <Sparkles preset="button" className={styles.paidSparkles} />
+          <Sparkles preset="button" />
           <PaidReactionEmoji
             className={styles.animatedEmoji}
             containerId={containerId}

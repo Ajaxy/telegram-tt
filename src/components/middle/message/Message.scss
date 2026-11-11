@@ -2,8 +2,8 @@
 
 // General styles
 .Message {
-  @each $role in background, text, secondary, links, links-decoration, meta, accent, accent-foreground,
-    control, control-foreground, file-title, file-description,
+  @each $role in background, text, secondary, links, links-decoration, links-decoration-hover, meta,
+    accent, accent-foreground, control, control-foreground, file-title, file-description,
     checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
     selected, selected-text,
     text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
@@ -37,12 +37,12 @@
   --color-interactive-element-hover: var(--message-tint);
   --background-color: var(--message-background);
   --hover-color: var(--message-tint);
-  --color-reaction: var(--message-tint);
-  --hover-color-reaction: var(--message-tint-hover);
+  --color-reaction: color-mix(in srgb, var(--message-accent) 10%, transparent);
+  --color-reaction-hover: color-mix(in srgb, var(--message-accent) 30%, transparent);
   --text-color-reaction: var(--accent-color);
   --color-reaction-chosen: var(--accent-color);
   --text-color-reaction-chosen: var(--message-accent-foreground);
-  --hover-color-reaction-chosen: var(--message-accent);
+  --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 90%, black);
   --active-color: var(--message-tint-hover);
   --max-width: 29rem;
   --accent-color: var(--message-accent);
@@ -64,6 +64,13 @@
   display: flex;
   align-items: flex-end;
   margin-bottom: 0.375rem;
+
+  .theme-dark & {
+    --color-reaction: rgb(255, 255, 255, 0.1);
+    --color-reaction-hover: rgb(255, 255, 255, 0.2);
+    --text-color-reaction: var(--message-text);
+    --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 90%, white);
+  }
 
   &.is-swiped {
     transform: translateX(-2.5rem) !important;
@@ -222,8 +229,8 @@
   }
 
   &.own {
-    @each $role in background, text, secondary, links, links-decoration, meta, accent, accent-foreground,
-      control, control-foreground, file-title, file-description,
+    @each $role in background, text, secondary, links, links-decoration, links-decoration-hover, meta,
+      accent, accent-foreground, control, control-foreground, file-title, file-description,
       checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
       selected, selected-text,
       text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
@@ -235,8 +242,16 @@
 
     --max-width: 30rem;
     --deleting-translate-x: 50%;
+    --text-color-reaction-chosen: var(--message-background);
 
     flex-direction: row-reverse;
+
+    .theme-dark & {
+      --color-reaction-chosen: color-mix(in srgb, var(--message-accent) 75%, transparent);
+      --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 85%, transparent);
+      // Resolves to the old rgb(62, 62, 62) over the default white accent
+      --text-color-reaction-chosen: color-mix(in srgb, var(--message-accent-foreground) 75%, var(--message-accent));
+    }
 
     &.first-in-group:not(.last-in-group) {
       --border-bottom-right-radius: var(--border-radius-messages-small);

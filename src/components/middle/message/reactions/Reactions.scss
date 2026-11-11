@@ -32,12 +32,13 @@
   &.is-outside .message-reaction {
     --reaction-background: var(--message-service-background);
     --reaction-background-hover: var(--message-service-background);
+    --reaction-background-hover-filter: brightness(115%);
     --reaction-text-color: var(--message-service-text);
 
     &.chosen {
-      --reaction-background: var(--message-service-text);
-      --reaction-background-hover: var(--message-service-text);
-      --reaction-text-color: var(--message-service-background);
+      --reaction-background: rgb(255, 255, 255, 0.6);
+      --reaction-background-hover: rgb(255, 255, 255, 0.75);
+      --reaction-text-color: rgb(62, 62, 62);
     }
   }
 }

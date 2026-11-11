@@ -221,8 +221,6 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--message-call-success': isDark ? '#49ad51' : '#63da6e',
     '--message-media-background': '#000000b3',
     '--message-media-text': WHITE,
-    '--message-paid-background': '#ffb727',
-    '--message-paid-text': WHITE,
     '--message-code-dark': variables['--message-incoming-code-dark'],
   });
 
@@ -262,6 +260,8 @@ function buildBubbleVariables(
     [`${prefix}background`]: bubble.fill,
     [`${prefix}links`]: bubble.links,
     [`${prefix}links-decoration`]: bubble.links === bubble.text ? 'underline' : 'none',
+    // Hover flips the underline, so links colored like the text still react
+    [`${prefix}links-decoration-hover`]: bubble.links === bubble.text ? 'none' : 'underline',
     [`${prefix}accent-foreground`]: bubble.accentForeground,
     [`${prefix}control`]: bubble.control,
     [`${prefix}control-foreground`]: bubble.controlForeground,

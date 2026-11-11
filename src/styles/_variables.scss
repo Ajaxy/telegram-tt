@@ -168,6 +168,7 @@
       --message-#{$direction}-meta-rgb: 64, 64, 64;
       --message-#{$direction}-links: #000000;
       --message-#{$direction}-links-decoration: underline;
+      --message-#{$direction}-links-decoration-hover: none;
       --message-#{$direction}-accent: #000000;
       --message-#{$direction}-accent-rgb: 0, 0, 0;
       --message-#{$direction}-accent-foreground: #ffffff;
@@ -200,8 +201,6 @@
     --message-call-success: #63da6e;
     --message-media-background: #000000b3;
     --message-media-text: #ffffff;
-    --message-paid-background: #ffb727;
-    --message-paid-text: #ffffff;
     --message-code-dark: 0;
 
     --color-accent-own: #{$color-text-green};

@@ -92,7 +92,11 @@ export function selectActionMessageBg<T extends GlobalState>(
   chatId?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return getActionMessageBgMemo(selectTheme(global), selectChatWallpaperSettings(global, chatId, tabId));
+  return getActionMessageBgMemo(
+    selectTheme(global),
+    selectChatThemePalette(global, chatId, tabId),
+    selectChatWallpaperSettings(global, chatId, tabId),
+  );
 }
 
 export function selectChatThemeSettings<T extends GlobalState>(

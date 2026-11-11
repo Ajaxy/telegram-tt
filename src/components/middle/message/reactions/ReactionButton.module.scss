@@ -2,7 +2,7 @@
 .root.root {
   --custom-emoji-size: 1.25rem;
   --reaction-background: var(--color-reaction);
-  --reaction-background-hover: var(--hover-color-reaction);
+  --reaction-background-hover: var(--color-reaction-hover);
   --reaction-text-color: var(--text-color-reaction);
 
   position: relative;
@@ -35,20 +35,25 @@
 
   &.chosen {
     --reaction-background: var(--color-reaction-chosen);
-    --reaction-background-hover: var(--hover-color-reaction-chosen);
+    --reaction-background-hover: var(--color-reaction-chosen-hover);
     --reaction-text-color: var(--text-color-reaction-chosen);
   }
 
   &.paid {
-    --reaction-background: var(--message-paid-background) !important;
-    --reaction-background-hover: var(--message-paid-background) !important;
-    --reaction-text-color: var(--message-paid-text) !important;
-
     z-index: 2;
+  }
 
-    &.chosen {
-      box-shadow: inset 0 0 0 0.125rem var(--message-paid-text);
-    }
+  // Outside, an unchosen paid reaction keeps the regular chip
+  &.paid:not(.outside) {
+    --reaction-background: #FFB72740 !important;
+    --reaction-background-hover: #FFB72766 !important;
+    --reaction-text-color: #FFB727 !important;
+  }
+
+  &.paid.chosen {
+    --reaction-background: #FFB727 !important;
+    --reaction-background-hover: #E6A523 !important;
+    --reaction-text-color: #FFFFFF !important;
   }
 
   &:hover {
@@ -60,10 +65,6 @@
       filter: var(--reaction-background-hover-filter);
     }
   }
-}
-
-.paidSparkles {
-  color: var(--color-white);
 }
 
 .animated-emoji {

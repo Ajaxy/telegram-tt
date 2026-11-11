@@ -2,7 +2,7 @@
 
 .ReactorListModal {
   --color-reaction: var(--color-message-reaction);
-  --hover-color-reaction: var(--color-message-reaction-hover);
+  --color-reaction-hover: var(--color-message-reaction-hover);
   --accent-color: var(--color-primary);
 
   .modal-dialog {
@@ -48,7 +48,7 @@
 
   .not-chosen-button {
     &:hover {
-      background-color: var(--hover-color-reaction) !important;
+      background-color: var(--color-reaction-hover) !important;
     }
   }
 

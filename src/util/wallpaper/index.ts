@@ -4,9 +4,12 @@ import type {
   ApiBaseTheme, ApiThemeSettings, ApiWallpaper, ApiWallpaperSettings,
 } from '../../api/types';
 import type { IThemeSettings, ThemeKey } from '../../types';
+import type { ThemePalette } from '../theme';
 
 import { DARK_THEME_BG_COLOR } from '../../config';
-import { buildColorFromHex, buildDenseTint, getPatternColor } from '../colors';
+import {
+  buildColorFromHex, buildDenseTint, getPatternColor, getServiceColor, mixAverageColor,
+} from '../colors';
 import int2hex from '../int2hex';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
@@ -178,12 +181,21 @@ export function buildDefaultWallpaperSettings(theme: ThemeKey): Partial<IThemeSe
 }
 
 // Chips follow the wallpaper tint, densified against its average color to hide the doodles beneath them
-export function getActionMessageBg(theme: ThemeKey, settings?: IThemeSettings): string {
+export function getActionMessageBg(theme: ThemeKey, palette: ThemePalette, settings?: IThemeSettings): string {
   const model = buildWallpaperRenderModel(theme, settings || {});
   if (!model.patternColor) return theme === 'dark' ? DARK_SERVICE_BACKGROUND : LIGHT_SERVICE_BACKGROUND;
 
-  const backdropColors = model.isMaskedPattern ? [model.baseColor!] : model.colors;
-  return buildDenseTint(model.patternColor, backdropColors, ACTION_MESSAGE_BG_ALPHA);
+  if (theme !== 'dark' || !model.colors.length) {
+    return buildDenseTint(model.patternColor, model.colors, ACTION_MESSAGE_BG_ALPHA);
+  }
+
+  if (model.isMaskedPattern) {
+    // The pattern hides the gradient, so chips follow the incoming bubble color instead
+    return buildDenseTint(palette.incomingColor, [model.baseColor!], ACTION_MESSAGE_BG_ALPHA);
+  }
+
+  // The pattern tint brightens dark colors, so dark chips darken the wallpaper instead
+  return buildDenseTint(getServiceColor(mixAverageColor(model.colors)), model.colors, ACTION_MESSAGE_BG_ALPHA);
 }
 
 // Derives the translucent wallpaper tint; the doodle overlay controls its own opacity and blend

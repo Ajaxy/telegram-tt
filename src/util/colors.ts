@@ -86,17 +86,34 @@ export function buildHexFromColor(color: Color) {
   return serializeColor(color, { format: 'hex', collapse: false, alpha: false });
 }
 
-// Raises the alpha of a translucent tint, keeping its composite over the average backdrop color unchanged
+export function mixAverageColor(hexColors: string[]) {
+  return hexColors.map(buildColorFromHex)
+    .reduce((average, color, i) => mixColors(average, color, 1 / (i + 1), { space: 'srgb' }));
+}
+
+// Re-expresses a tint at another alpha, keeping its composite over the average backdrop color unchanged
 export function buildDenseTint(tintHex: string, backdropHexColors: string[], alpha: number) {
+  if (!backdropHexColors.length) return tintHex;
+
   const tint = buildColorFromHex(tintHex);
   const tintAlpha = tint.alpha ?? 1;
-  if (tintAlpha >= alpha || !backdropHexColors.length) return tintHex;
-
-  const backdrop = backdropHexColors.map(buildColorFromHex)
-    .reduce((average, color, i) => mixColors(average, color, 1 / (i + 1), { space: 'srgb' }));
+  const backdrop = mixAverageColor(backdropHexColors);
+  // A ratio above 1 extrapolates away from the backdrop, so a lower alpha still reaches an opaque tint
   const denseTint = mixColors(backdrop, { ...tint, alpha: 1 }, tintAlpha / alpha, { space: 'srgb' });
 
   return serializeColor({ ...denseTint, alpha }, { format: 'hex', collapse: false, alpha: true });
+}
+
+// Adapted from Telegram iOS `serviceColor(with:)`
+export function getServiceColor(color: Color) {
+  const [h, s, v] = convertColor(color, 'hsv').coords.map((coord) => coord || 0);
+  const saturation = s ? Math.min(COLOR_PERCENT_MAX, s + 5 + 0.1 * (COLOR_PERCENT_MAX - s)) : 0;
+
+  return serializeColor({
+    space: 'hsv',
+    coords: [h, saturation, v * 0.65],
+    alpha: 102 / RGB_CHANNEL_MAX,
+  }, { format: 'hex', collapse: false, alpha: true });
 }
 
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
