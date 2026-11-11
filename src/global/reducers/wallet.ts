@@ -1,12 +1,17 @@
 import type {
-  ApiStarGiftUnique, ApiTonConnectSession, ApiWalletState, ApiWalletStatus, ApiWalletTransaction,
+  ApiStarGiftUnique,
+  ApiTonConnectSession,
+  ApiWalletCard,
+  ApiWalletState,
+  ApiWalletStatus,
+  ApiWalletTransaction,
 } from '../../api/types';
 import type { GlobalState, TabState } from '../types';
 
 import { getServerTime } from '../../util/serverTime';
 import { keepRecipientUser, runForAllTabs } from '../helpers';
 import { selectTabState } from '../selectors/tabs';
-import { selectWalletTransactions } from '../selectors/wallet';
+import { selectOwnWalletCardDecoration, selectWalletAddress, selectWalletTransactions } from '../selectors/wallet';
 import { updateTabState } from './tabs';
 import { updateUserFullInfo } from './users';
 
@@ -26,8 +31,13 @@ export function updateWallet<T extends GlobalState>(global: T, update: NonNullab
 }
 
 // The own card comes with the profile and is not refreshed after transfers, so it takes each newer wallet balance.
-// A card of a replaced wallet, or one left after the wallet went away, is dropped until the profile loads again.
+// The card or draft of a replaced wallet, or of one that went away, is dropped until the profile loads again.
 function syncOwnWalletCard<T extends GlobalState>(global: T, state?: ApiWalletState): T {
+  const draft = global.wallet?.cardDraft;
+  if (draft && draft.address !== state?.address) {
+    global = updateWallet(global, { cardDraft: undefined });
+  }
+
   const userId = global.currentUserId!;
   const card = global.users.fullInfoById[userId]?.walletCard;
   if (!card) return global;
@@ -38,6 +48,45 @@ function syncOwnWalletCard<T extends GlobalState>(global: T, state?: ApiWalletSt
   return updateUserFullInfo(global, userId, {
     walletCard: isSameWallet ? { ...card, balance: state.balance } : undefined,
   });
+}
+
+// Puts the card without the dropped stickers into the draft, which is then saved to the server
+export function filterWalletCardStickers<T extends GlobalState>(
+  global: T, getIsKept: (nftAddress: string) => boolean,
+): T {
+  const address = selectWalletAddress(global);
+  const decoration = selectOwnWalletCardDecoration(global);
+  const layout = address && decoration && filterCardLayout(decoration, getIsKept);
+  if (!layout) return global;
+
+  return updateWallet(global, { cardDraft: { address, ...layout } });
+}
+
+// The server drops a gift that left the wallet from the saved card itself, so only the cached one needs it
+export function filterSavedWalletCardStickers<T extends GlobalState>(
+  global: T, getIsKept: (nftAddress: string) => boolean,
+): T {
+  const userId = global.currentUserId!;
+  const card = global.users.fullInfoById[userId]?.walletCard;
+  const layout = card && filterCardLayout(card, getIsKept);
+  if (!layout) return global;
+
+  return updateUserFullInfo(global, userId, { walletCard: { ...card, ...layout } });
+}
+
+function filterCardLayout(
+  { stickers, backgroundAddress }: Pick<ApiWalletCard, 'stickers' | 'backgroundAddress'>,
+  getIsKept: (nftAddress: string) => boolean,
+) {
+  if (!stickers) return undefined;
+
+  const keptStickers = stickers.filter((sticker) => getIsKept(sticker.address));
+  if (keptStickers.length === stickers.length) return undefined;
+
+  return {
+    stickers: keptStickers,
+    backgroundAddress: backgroundAddress && getIsKept(backgroundAddress) ? backgroundAddress : undefined,
+  };
 }
 
 export function updateWalletServerState<T extends GlobalState>(

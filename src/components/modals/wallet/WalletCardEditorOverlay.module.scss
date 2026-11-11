@@ -1,0 +1,80 @@
+// tdesktop draws the frame of the selected sticker with 1px dashes and two round handles
+$handle-size: 0.625rem;
+
+// The menu backdrop reaches far past the screen. The wallet dialog contains its layout, so the backdrop would make it
+// scroll; the layer takes the backdrop in and clips it instead.
+.root {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: var(--z-modal-menu);
+  inset: 0;
+
+  contain: strict;
+}
+
+// The menu has no portal of its own, so it is placed at the top left of the layer, and its bubble takes the viewport
+// coordinates of the anchor
+.menu {
+  pointer-events: auto;
+
+  :global(.Menu) {
+    position: absolute;
+  }
+}
+
+// Fills the overlay, so its clip path takes viewport pixels
+.clip {
+  position: absolute;
+  inset: 0;
+}
+
+.sticker {
+  position: absolute;
+  top: calc(var(--layer-size) / -2);
+  left: calc(var(--layer-size) / -2);
+
+  width: var(--layer-size);
+  height: var(--layer-size);
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  translate: -50% -50%;
+
+  width: calc(var(--side) + #{$handle-size});
+  height: calc(var(--side) + #{$handle-size});
+  border: 0.0625rem dashed #ffffff;
+}
+
+.handle {
+  pointer-events: auto;
+  cursor: var(--custom-cursor, grab);
+
+  position: absolute;
+  top: 50%;
+  translate: -50% -50%;
+
+  width: $handle-size;
+  height: $handle-size;
+  border: 0.0625rem solid #ffffff;
+  border-radius: 50%;
+
+  background-color: #ffffff;
+}
+
+.handleLeft {
+  left: 0;
+}
+
+.handleRight {
+  left: 100%;
+}

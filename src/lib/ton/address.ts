@@ -108,6 +108,13 @@ export function toNonBounceableAddress(address: string): string {
   return formatAddress(parsed.workchain, parsed.hash, false, parsed.isTestOnly);
 }
 
+export function toBounceableAddress(address: string): string {
+  const parsed = parseAddress(address);
+  if (!parsed) return address;
+
+  return formatAddress(parsed.workchain, parsed.hash, true, parsed.isTestOnly);
+}
+
 // CRC-16/XMODEM, as used by TON user-friendly addresses
 function crc16(data: Uint8Array): number {
   let crc = 0;

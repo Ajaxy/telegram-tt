@@ -2492,6 +2492,17 @@ export interface LangPair {
   'WalletMoveToGifts': undefined;
   'WalletMoveToGiftsText': undefined;
   'WalletMoveToGiftsDone': undefined;
+  'WalletStickerAddToCard': undefined;
+  'WalletStickerRemoveFromCard': undefined;
+  'WalletStickerApplyColor': undefined;
+  'WalletStickerRemoveColor': undefined;
+  'WalletStickerTutorialTile': undefined;
+  'WalletStickerGridFooter': undefined;
+  'WalletStickerSaveErrorTitle': undefined;
+  'WalletStickerSaveError': undefined;
+  'WalletStickerProfileError': undefined;
+  'WalletStickerInvalidError': undefined;
+  'WalletStickerBackgroundError': undefined;
   'WalletTransactionComment': undefined;
   'WalletCommentEncrypted': undefined;
   'WalletTransactionDomain': undefined;
@@ -5327,12 +5338,14 @@ export interface LangPairWithVariables<V = LangVariable> {
   'WalletTermsNotice': {
     'link': V;
   };
-  'WalletCollectibleTraits': {
-    'model': V;
-    'backdrop': V;
-  };
   'WalletTransactionsHidden': {
     'amount': V;
+  };
+  'WalletStickerColorRestricted': {
+    'collections': V;
+  };
+  'WalletStickerColorCollection': {
+    'collection': V;
   };
   'WalletDisableBackupFee': {
     'amount': V;
@@ -6268,6 +6281,9 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'WalletNetworkFeesInfoShort': {
+    'count': V;
+  };
+  'WalletStickerLimitError': {
     'count': V;
   };
   'WalletConnectExpiresIn': {
@@ -7858,10 +7874,15 @@ export interface LangKeyGroups {
       | 'TranslateToButton';
     variables: 'language';
   };
-  'backdrop,model': {
+  'collections': {
     keys:
-      | 'WalletCollectibleTraits';
-    variables: 'backdrop' | 'model';
+      | 'WalletStickerColorRestricted';
+    variables: 'collections';
+  };
+  'collection': {
+    keys:
+      | 'WalletStickerColorCollection';
+    variables: 'collection';
   };
   'amount,fiat': {
     keys:
@@ -8138,6 +8159,7 @@ export interface LangPluralKeyGroups {
       | 'AiTonePreviewUsedBy2'
       | 'PollModalAddMoreText'
       | 'WalletNetworkFeesInfoShort'
+      | 'WalletStickerLimitError'
       | 'WalletConnectExpiresIn'
       | 'RichMediaSkippedFiles'
       | 'AmongWinners'

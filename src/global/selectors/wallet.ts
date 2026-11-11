@@ -8,7 +8,7 @@ import { toNonBounceableAddress } from '../../lib/ton/address';
 import memoized from '../../util/memoized';
 import { getWalletPeerId, isDeletedUser, isUserBot } from '../helpers';
 import { selectPeer } from './peers';
-import { selectUser } from './users';
+import { selectUser, selectUserFullInfo } from './users';
 
 export function selectWalletAddress<T extends GlobalState>(global: T) {
   return global.wallet?.state?.address;
@@ -30,6 +30,22 @@ export function selectWalletTonConnectSessions<T extends GlobalState>(global: T)
 
 export function selectWalletTransactions<T extends GlobalState>(global: T) {
   return global.wallet?.transactions;
+}
+
+// The draft shows instead of the card from the profile until the server takes it
+export function selectOwnWalletCardDecoration<T extends GlobalState>(global: T) {
+  const draft = global.wallet?.cardDraft;
+  if (draft && draft.address === selectWalletAddress(global)) return draft;
+
+  return selectUserFullInfo(global, global.currentUserId!)?.walletCard;
+}
+
+// As in the desktop app, the card can be edited only once the card of the current wallet is loaded. Otherwise an edit
+// starts from an empty card, and its save deletes the stickers saved on the server.
+export function selectCanEditOwnWalletCard<T extends GlobalState>(global: T) {
+  const card = selectUserFullInfo(global, global.currentUserId!)?.walletCard;
+
+  return Boolean(global.wallet?.cardDraft || (card && card.address === selectWalletAddress(global)));
 }
 
 // Its seqno keeps a second transfer from going out on the same one

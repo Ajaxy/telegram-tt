@@ -31,6 +31,16 @@ $fold-steps: 20;
   @return math.max(0deg, 90deg * math.sqrt($progress) - 10deg + 10deg * $progress);
 }
 
+@mixin face-background {
+  background-image:
+    linear-gradient(
+      145deg,
+      var(--card-face-start, #5cc8ff) 0%,
+      var(--card-face-middle, #0088ff) 46%,
+      var(--card-face-end, #0057c2) 100%
+    );
+}
+
 // Measures the pointer for `useCardTilt` and stays flat while the card inside rotates. It also fades the card out:
 // opacity on the layer below would flatten its 3D and drop the edge.
 .root {
@@ -64,16 +74,16 @@ $fold-steps: 20;
 
   border-radius: 1.75rem;
 
-  background-image: linear-gradient(to bottom, #2a64c4, #0f3a8c);
+  background-image: linear-gradient(to bottom, var(--card-edge-start, #2a64c4), var(--card-edge-end, #0f3a8c));
 }
 
 .edgeRim {
-  background-image: linear-gradient(to bottom, #6fb4ff, #2f74d8);
+  background-image: linear-gradient(to bottom, var(--card-rim-start, #6fb4ff), var(--card-rim-end, #2f74d8));
 }
 
 // The deepest layer casts the shadow, so it stays behind the edge as well as the face
 .edgeShadow {
-  box-shadow: 0 0.625rem 1.625rem -0.875rem rgb(0 96 230 / 60%);
+  box-shadow: 0 0.625rem 1.625rem -0.875rem var(--card-edge-shadow, rgb(0 96 230 / 60%));
   transition: box-shadow 0.25s;
 }
 
@@ -145,12 +155,22 @@ $fold-steps: 20;
 
   color: #ffffff;
 
-  background-image: linear-gradient(145deg, #5cc8ff 0%, #0088ff 46%, #0057c2 100%);
+  @include face-background;
 }
 
-.backdrop {
+// The face in the color a change brings or takes away, in a circle with a soft edge of 18 points, as in the iOS app
+.waveFace {
+  pointer-events: none;
   position: absolute;
   inset: 0;
+  mask-image:
+    radial-gradient(
+      circle var(--wave-radius) at var(--wave-x) var(--wave-y),
+      #000000 var(--wave-inner),
+      transparent var(--wave-radius)
+    );
+
+  @include face-background;
 }
 
 .texture {
@@ -282,7 +302,13 @@ $fold-steps: 20;
   inset: 0;
   transform: translateX(-110%);
 
-  background-image: linear-gradient(105deg, transparent 30%, rgb(200 242 255 / 50%) 50%, transparent 70%);
+  background-image:
+    linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(var(--card-glint, 200 242 255) / 50%) 50%,
+      transparent 70%
+    );
 }
 
 // Firefox rebuilds the blend group of a blended layer inside the 3D-transformed card every frame, and
@@ -340,7 +366,7 @@ $fold-steps: 20;
 }
 
 .ticker {
-  color: #6ddcff;
+  color: var(--card-ticker, #6ddcff);
 }
 
 .amountContent:has(.amountFraction) .ticker {
@@ -357,7 +383,7 @@ $fold-steps: 20;
   font-size: cq(13);
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
-  color: #87efff;
+  color: var(--card-fiat, #87efff);
 }
 
 .ownerName {
@@ -411,7 +437,7 @@ $fold-steps: 20;
   font-family: var(--font-family-monospace);
   font-size: cq(10);
   line-height: 1.15;
-  color: rgb(5 90 196 / 80%);
+  color: var(--card-address, rgb(5 90 196 / 80%));
   text-align: center;
   // The line is turned a quarter clockwise, so its horizontal offset casts the highlight downwards on the card
   text-shadow: cq(1) 0 0 rgb(255 255 255 / 10%);
@@ -419,17 +445,24 @@ $fold-steps: 20;
   white-space: nowrap;
 }
 
-// As on the iOS card, the labels stand out from the stickers
-.withStickers {
-  .amountContent,
-  .fiat,
-  .ownerName {
-    text-shadow: 0 cq(0.73) cq(4) rgb(0 0 0 / 80%);
-  }
+// As on the iOS card, a label stands out from a sticker that covers it. The shadow fades only when a sticker comes or
+// goes, so the repaint is short and rare.
+.amountContent,
+.fiat,
+.ownerName,
+.addressLine {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: text-shadow 0.45s ease-in-out;
+}
 
-  .addressLine {
-    text-shadow: 0 0 cq(2.5) rgb(255 255 255 / 70%);
-  }
+.amountContent.emphasized,
+.fiat.emphasized,
+.ownerName.emphasized {
+  text-shadow: 0 cq(0.73) cq(4) rgb(0 0 0 / 80%);
+}
+
+.address.emphasized .addressLine {
+  text-shadow: 0 0 cq(2.5) rgb(255 255 255 / 70%);
 }
 
 .qrButton {
@@ -451,7 +484,7 @@ $fold-steps: 20;
 
   background-image: linear-gradient(172deg, #f4f9ff 27%, #a8c7ed 97%);
   box-shadow:
-    inset 0 0 0 cq(1) #0c73d5,
+    inset 0 0 0 cq(1) var(--card-qr-ring, #0c73d5),
     inset 0 cq(1.5) cq(4) rgb(255 255 255 / 85%),
     0 0 0 cq(1.2) rgb(0 0 0 / 10%),
     0 cq(2) cq(6) rgb(0 50 140 / 25%);
@@ -513,25 +546,8 @@ $fold-steps: 20;
     calc(cos(var(--shadow-angle)) * #{cq(1)})
     cq(1)
     rgb(0 0 0 / 14%),
-    inset 0 0.0625rem rgb(120 214 255 / 35%),
-    inset 0.0625rem 0 rgb(120 214 255 / 18%);
-}
-
-.withBackdrop {
-  .edgeLayer {
-    background-color: var(--card-edge-color);
-    background-image: none;
-  }
-
-  &:not(.pressed) .edgeShadow {
-    box-shadow: 0 0.625rem 1.625rem -0.875rem var(--card-edge-color);
-  }
-
-  .ticker,
-  .fiat,
-  .addressLine {
-    color: var(--card-accent-color);
-  }
+    inset 0 0.0625rem rgb(var(--card-inner-light, 120 214 255) / 35%),
+    inset 0.0625rem 0 rgb(var(--card-inner-light, 120 214 255) / 18%);
 }
 
 @keyframes twinkle {

@@ -61,6 +61,7 @@ import type {
   ApiUserSavedMusic,
   ApiUserStatus,
   ApiVideo,
+  ApiWalletCardSticker,
   ApiWalletCollectible,
   ApiWalletGaslessInfo,
   ApiWalletSavedWallet,
@@ -545,6 +546,13 @@ export type GlobalState = {
     nextOffset?: string;
     collectibles?: ApiWalletCollectible[];
     collectiblesNextOffset?: string;
+    // Own card edits that the server has not taken yet; they show instead of the card from the profile
+    cardDraft?: {
+      // The wallet the edits were made for
+      address: string;
+      stickers: ApiWalletCardSticker[];
+      backgroundAddress?: string;
+    };
     // Empty for a user the server knows no wallet of
     userAddresses?: Record<string, string>;
     // `false` records an address with no Telegram user

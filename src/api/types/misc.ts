@@ -399,6 +399,8 @@ export interface ApiAppConfig {
   // Transfers below this are hidden from the wallet history
   walletTransferMinNanos?: bigint;
   walletGaslessDailyTransfers?: number;
+  // Collection slugs, such as `PlushPepe`, whose gifts can color the wallet card
+  walletCardBackgroundCollections?: string[];
   oldWalletBotUsername?: string;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;

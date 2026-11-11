@@ -4,6 +4,7 @@ import {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiWalletCard } from '../../../api/types';
+import type { WalletCardLayout } from '../../../global/helpers/wallet';
 import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
@@ -11,6 +12,7 @@ import {
   selectCanAnimateInterface,
   selectCanSendMoneyToUser,
   selectIsWalletAvailable,
+  selectOwnWalletCardDecoration,
   selectUser,
   selectUserFullInfo,
   selectWalletCurrency,
@@ -37,6 +39,8 @@ export type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   walletCard?: ApiWalletCard;
+  // The own card shows its edits before the server takes them
+  decoration?: WalletCardLayout;
   tonUsdRate?: number;
   currency: string;
   currencyRate?: number;
@@ -46,7 +50,7 @@ type StateProps = {
 };
 
 const WalletCardModal = ({
-  modal, user, walletCard, tonUsdRate, currency, currencyRate, canSendMoney, isWalletAvailable, canAnimate,
+  modal, user, walletCard, decoration, tonUsdRate, currency, currencyRate, canSendMoney, isWalletAvailable, canAnimate,
 }: OwnProps & StateProps) => {
   const { closeWalletCardModal, openWalletTransferLink, openWalletModal } = getActions();
 
@@ -63,6 +67,7 @@ const WalletCardModal = ({
 
   const renderingUser = useCurrentOrPrev(user);
   const renderingCard = useCurrentOrPrev(walletCard);
+  const renderingDecoration = useCurrentOrPrev(decoration);
   const renderingCanSendMoney = useCurrentOrPrev(canSendMoney);
 
   useWalletCardFlight({
@@ -112,8 +117,8 @@ const WalletCardModal = ({
               usdRate={tonUsdRate}
               currency={currency}
               currencyRate={currencyRate}
-              stickers={renderingCard.stickers}
-              backgroundGift={renderingCard.backgroundGift}
+              stickers={renderingDecoration?.stickers}
+              backgroundAddress={renderingDecoration?.backgroundAddress}
               onQrClick={handleQrClick}
             />
           </div>
@@ -152,10 +157,12 @@ const WalletCardModal = ({
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): Complete<StateProps> => {
     const userId = modal?.userId;
+    const walletCard = userId ? selectUserFullInfo(global, userId)?.walletCard : undefined;
 
     return {
       user: userId ? selectUser(global, userId) : undefined,
-      walletCard: userId ? selectUserFullInfo(global, userId)?.walletCard : undefined,
+      walletCard,
+      decoration: userId === global.currentUserId ? selectOwnWalletCardDecoration(global) : walletCard,
       tonUsdRate: global.appConfig.tonUsdRate,
       currency: selectWalletCurrency(global),
       currencyRate: selectWalletCurrencyRate(global),

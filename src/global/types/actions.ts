@@ -75,6 +75,7 @@ import type {
   ApiUpdate,
   ApiUser,
   ApiVideo,
+  ApiWalletCardSticker,
   ApiWalletGiftDeposit,
   BotsPrivacyType,
   KeyboardButtonSuggestedMessage,
@@ -1608,6 +1609,11 @@ export interface ActionPayloads {
   loadWalletTransactions: {
     shouldRefresh?: boolean;
   } | undefined;
+  updateWalletCardDraft: {
+    stickers: ApiWalletCardSticker[];
+    backgroundAddress?: string;
+  };
+  saveWalletCardDraft: undefined;
   loadWalletCollectibles: {
     shouldRefresh?: boolean;
   } | undefined;

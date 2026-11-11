@@ -527,5 +527,6 @@
     "wallet.tonConnectNextEventId",
     "wallet.tonConnectCloseSession",
     "wallet.tonConnectGetSessions",
-    "wallet.getNfts"
+    "wallet.getNfts",
+    "wallet.setCardStickers"
 ]

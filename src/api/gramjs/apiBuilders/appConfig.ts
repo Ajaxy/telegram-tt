@@ -123,6 +123,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   wallet_available?: boolean;
   wallet_transfer_min_nanos?: number;
   wallet_gasless_daily_transfers?: number;
+  wallet_card_bg_gifts?: string[];
   old_wallet_bot_username?: string;
   poll_answers_max?: number;
   poll_close_period_max?: number;
@@ -298,6 +299,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     isWalletAvailable: appConfig.wallet_available,
     walletTransferMinNanos: buildNanotons(appConfig.wallet_transfer_min_nanos),
     walletGaslessDailyTransfers: appConfig.wallet_gasless_daily_transfers,
+    walletCardBackgroundCollections: appConfig.wallet_card_bg_gifts,
     oldWalletBotUsername: appConfig.old_wallet_bot_username,
     pollMaxAnswers: appConfig.poll_answers_max,
     pollClosePeriodMax: appConfig.poll_close_period_max,

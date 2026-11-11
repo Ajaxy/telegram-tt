@@ -7,6 +7,7 @@ import type { ApiTonConnectSession, ApiWalletCollectible, ApiWalletTransaction }
 import type { TabState } from '../../../global/types';
 import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
+import type { CardEditorRef } from './helpers/cardEditing';
 import { SettingsScreens } from '../../../types';
 import { WalletScreen } from './types';
 
@@ -135,7 +136,7 @@ const WalletModal = ({
     watchWalletActivity, unwatchWalletActivity, openStarsBalanceModal, loadWalletCollectibles,
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
     clearWalletTonConnect, closeUrlAuthModal,
-    disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion,
+    disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion, saveWalletCardDraft,
     loadWalletCollectibleGift,
   } = getActions();
 
@@ -252,6 +253,13 @@ const WalletModal = ({
 
     return unwatchWalletActivity;
   }, [isOpen, address]);
+
+  // As in the iOS app, card edits wait for a pause, but leaving the wallet saves them at once
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    return saveWalletCardDraft;
+  }, [isOpen]);
 
   // Screens like Receive have nothing to show without an address, so the modal falls back to the main screen
   useEffect(() => {
@@ -509,6 +517,8 @@ const WalletModal = ({
   }, [decryptedComment, screen, credentialIntent, dropCredentials, back]);
 
   const headerBalanceRef = useRef<HTMLButtonElement>();
+  // The card editor of the wallet screen, which the gift screen asks to make and animate its changes
+  const cardEditorRef: CardEditorRef = useRef();
   const [headerBalanceWidth, setHeaderBalanceWidth] = useState(0);
 
   const handleOpenInExplorer = useLastCallback(() => {
@@ -732,6 +742,8 @@ const WalletModal = ({
         return selectedCollectible ? (
           <WalletCollectibleScreen
             collectible={selectedCollectible}
+            isActive={isActive}
+            cardEditorRef={cardEditorRef}
             onTransfer={sendFlow.handleOpenCollectibleTransfer}
             onDone={handleBack}
           />
@@ -877,6 +889,7 @@ const WalletModal = ({
           <WalletMainScreen
             activeTab={activeTab}
             scrollContainerClosest={`.${styles.slide}`}
+            cardEditorRef={cardEditorRef}
             onProtect={keysFlows.handleEnableBackup}
             onProtectAccount={handleProtectAccount}
             onOpenSettings={handleOpenSettings}

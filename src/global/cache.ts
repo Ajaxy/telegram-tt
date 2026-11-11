@@ -36,6 +36,7 @@ import {
   SHARED_STATE_CACHE_KEY,
   TON_CURRENCY_CODE,
 } from '../config';
+import { toRawAddress } from '../lib/ton/address';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
 import { getOrderedIds } from '../util/folderManager';
@@ -471,6 +472,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (cached.cacheVersion < 8) {
     migrateNanotonsToBigInt(cached);
     cached.cacheVersion = 8;
+  }
+
+  if (cached.cacheVersion < 9) {
+    migrateWalletNftAddresses(cached);
+    cached.cacheVersion = 9;
   }
 
   if (!cached.auth) {
@@ -1057,6 +1063,8 @@ function reduceWallet<T extends GlobalState>(global: T): GlobalState['wallet'] {
     state: wallet.state,
     // The logout warning counts their last known balances while the network has not answered
     savedWallets: wallet.savedWallets,
+    // Kept to be saved after a reload
+    cardDraft: wallet.cardDraft,
     // Sent transfers are kept with their hash and seqno, and transfers without an answer with their body hashes. A
     // transfer that did not reach the server is not kept. The history cursor is reset to the stale marker.
     // The chat card of a pending transfer is not cached, and after a reload its local id can go to another message
@@ -1100,6 +1108,18 @@ function migrateButtonActions(cached: GlobalState) {
 
 // A cache saved by an earlier app version holds TON amounts as plain numbers, and the wallet balance is an
 // `ApiTonAmount` object
+// Collectibles compare by the raw NFT address. A cached card has its stickers without one and comes again with the
+// profile.
+function migrateWalletNftAddresses(cached: GlobalState) {
+  Object.values(cached.users.fullInfoById).forEach((fullInfo) => {
+    delete fullInfo.walletCard;
+  });
+
+  cached.wallet?.transactions?.forEach(({ collectible }) => {
+    if (collectible) collectible.address = toRawAddress(collectible.address) ?? collectible.address;
+  });
+}
+
 function migrateNanotonsToBigInt(cached: GlobalState) {
   const { wallet, appConfig } = cached;
 

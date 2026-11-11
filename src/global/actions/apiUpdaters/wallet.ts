@@ -13,6 +13,7 @@ import {
   updateWalletTonConnectSession,
 } from '../../reducers/wallet';
 import { selectWalletTransactions } from '../../selectors';
+import { removeSentCardStickers } from '../api/wallet';
 
 // The server reports each step of a transfer, and a burst of them is one history change
 const HISTORY_REFRESH_THROTTLE_MS = 2000;
@@ -95,7 +96,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
       }
 
-      return replacePendingWalletTransaction(global, msgHash, { ...transaction, msgHash });
+      const previous = selectWalletTransactions(global);
+      global = replacePendingWalletTransaction(global, msgHash, { ...transaction, msgHash });
+
+      return removeSentCardStickers(global, previous);
     }
 
     case 'updateWalletGaslessInfo':

@@ -1,11 +1,28 @@
 import type {
-  ApiTonConnectError, ApiWalletCollectible, ApiWalletTransaction, ApiWalletTransactionPeer, DecryptWalletCommentError,
-  ReplaceWalletError, SendTonTransferError, WalletBackupError,
+  ApiTonConnectError, ApiWalletCardSticker, ApiWalletCollectible, ApiWalletTransaction, ApiWalletTransactionPeer,
+  DecryptWalletCommentError, ReplaceWalletError, SendTonTransferError, WalletBackupError,
 } from '../../api/types';
 import type { RegularLangKey } from '../../types/language';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { TabState } from '../types';
 
 import { toNonBounceableAddress } from '../../lib/ton/address';
+import { WALLET_CARD_STICKERS_LIMIT } from '../../limits';
+
+export type WalletCardLayout = {
+  stickers?: ApiWalletCardSticker[];
+  backgroundAddress?: string;
+};
+
+// As in the iOS app, positions closer than this are the same, so an edit back to the saved card is not saved again
+const CARD_LAYOUT_TOLERANCE = 1e-6;
+const CARD_COORDINATE_KEYS = ['x', 'y', 'width', 'height', 'rotation', 'radius'] as const;
+
+export const WALLET_STICKER_LIMIT_MESSAGE = {
+  key: 'WalletStickerLimitError',
+  variables: { count: WALLET_CARD_STICKERS_LIMIT },
+  options: { pluralValue: WALLET_CARD_STICKERS_LIMIT },
+} satisfies RegularLangFnParameters;
 
 export type WalletFlowError = SendTonTransferError | WalletBackupError | DecryptWalletCommentError | ReplaceWalletError
   | ApiTonConnectError;
@@ -34,6 +51,39 @@ export function getPendingWalletTransfer(transactions: ApiWalletTransaction[] | 
 // leaves nothing behind
 export function getIsWalletTransferConfirmed(transactions: ApiWalletTransaction[] | undefined, localId: string) {
   return Boolean(transactions?.some((item) => item.localId === localId && !item.isPending && !item.isFailed));
+}
+
+// The collectibles whose transfers were pending in `previous` and are confirmed in `current`. A transfer to the own
+// wallet keeps its collectible.
+export function getSentCollectibleAddresses(
+  previous: ApiWalletTransaction[] | undefined, current: ApiWalletTransaction[] | undefined, ownAddress: string,
+) {
+  const ownKey = toNonBounceableAddress(ownAddress);
+
+  return (previous || [])
+    .filter(({
+      isPending, localId, collectible, peer,
+    }) => (
+      isPending && collectible && localId && getIsWalletTransferConfirmed(current, localId)
+      && !('address' in peer && toNonBounceableAddress(peer.address) === ownKey)
+    ))
+    .map(({ collectible }) => collectible!.address);
+}
+
+export function getAreWalletCardLayoutsEqual(first?: WalletCardLayout, second?: WalletCardLayout) {
+  if (first?.backgroundAddress !== second?.backgroundAddress) return false;
+
+  const firstStickers = first?.stickers || [];
+  const secondStickers = second?.stickers || [];
+  if (firstStickers.length !== secondStickers.length) return false;
+
+  return firstStickers.every(({ address, coordinates }, i) => {
+    const other = secondStickers[i];
+
+    return address === other.address && CARD_COORDINATE_KEYS.every((key) => (
+      Math.abs((coordinates[key] ?? 0) - (other.coordinates[key] ?? 0)) < CARD_LAYOUT_TOLERANCE
+    ));
+  });
 }
 
 // Hides items whose transfer is still pending, so the user cannot send them again. The toncenter list of owners is

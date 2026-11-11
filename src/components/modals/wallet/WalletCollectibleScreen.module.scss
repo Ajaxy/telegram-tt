@@ -71,15 +71,36 @@
   padding-inline: 1rem;
 }
 
+// Three actions share the header, so the label keeps 8 points from the edges, as in the iOS app, instead of the
+// default button padding
 .giftAction {
   flex-basis: 0;
   flex-grow: 1;
+  padding-inline: 0.5rem;
+
+  // The icon and label wrapper of the button keeps its content width, so it would not let the label shrink
+  :global(.with-icon-top) {
+    min-width: 0;
+    max-width: 100%;
+  }
 }
 
+// As in the iOS app, a gift of a collection that cannot color the card dims the action, which still explains why
+.giftActionRestricted {
+  opacity: 0.5;
+}
+
+// As in the iOS app, a label longer than its button is cut with an ellipsis
 .giftActionText {
+  overflow: hidden;
+
+  max-width: 100%;
+
   font-size: 0.875rem;
   font-weight: var(--font-weight-normal);
+  text-overflow: ellipsis;
   text-transform: lowercase;
+  white-space: nowrap;
 }
 
 .giftActionIcon {

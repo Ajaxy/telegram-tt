@@ -194,12 +194,14 @@ export type ApiWalletCollectible = {
   // The item's Fragment page, or the Fragment home page when the metadata names none
   fragmentUrl: string;
 } & (
-  // `gift` is set for a Telegram gift, which can move to the account and show on a profile
-  | { type: 'gift'; model?: string; backdrop?: string; gift?: ApiStarGiftUnique }
+  // `gift` is set for a Telegram gift, which can move to the account, show on a profile or go on the card
+  | { type: 'gift'; gift?: ApiStarGiftUnique }
   | { type: 'username' | 'number' | 'other' }
 );
 
 export interface ApiWalletCardSticker {
+  // The NFT address
+  address: string;
   coordinates: ApiMediaAreaCoordinates;
   gift: ApiStarGiftUnique;
 }
@@ -209,7 +211,8 @@ export interface ApiWalletCard {
   // Nanotons
   balance: bigint;
   stickers?: ApiWalletCardSticker[];
-  backgroundGift?: ApiStarGiftUnique;
+  // One of the stickers, whose gift colors the card
+  backgroundAddress?: string;
 }
 
 // The server's transfer of a gift NFT to its escrow, which puts the gift on the account. Amounts are in nanotons.
@@ -253,6 +256,11 @@ export type RotateWalletKeyResult = { state: ApiWalletStateResult } | { error: W
 export type ReplaceWalletError = 'PROOF_INVALID' | 'REPLACE_FAILED' | 'KEEP_FAILED' | 'WALLET_CHANGED'
   | WalletBackupError;
 export type ReplaceWalletResult = { state: ApiWalletStateResult } | { error: ReplaceWalletError };
+
+// `CARD_STICKER_INVALID` covers every reason a sticker NFT is rejected, as the iOS app shows them alike
+export type SetWalletCardStickersError = 'CARD_STICKER_LIMIT' | 'CARD_SAVED_PROFILE' | 'CARD_BACKGROUND_NOT_ALLOWED'
+  | 'CARD_STICKER_INVALID' | 'FLOOD' | 'CARD_SAVE_FAILED';
+export type SetWalletCardStickersResult = { card: ApiWalletCard } | { error: SetWalletCardStickersError };
 
 export interface ApiWalletTransferFee {
   // Nanotons

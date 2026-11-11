@@ -1,21 +1,33 @@
 import type { TeactNode } from '../../../lib/teact/teact';
-import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiUser, ApiWalletCollectible, ApiWalletSavedWallet, ApiWalletStatus, ApiWalletTransaction,
 } from '../../../api/types';
+import type { WalletCardLayout } from '../../../global/helpers/wallet';
+import type { ThemeKey } from '../../../types';
+import type { CardEditorRef } from './helpers/cardEditing';
 
 import { getUserFullName } from '../../../global/helpers';
 import { filterUnsentCollectibles } from '../../../global/helpers/wallet';
 import {
-  selectUser, selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate, selectWalletTransactions,
+  selectCanAnimateInterface, selectCanEditOwnWalletCard, selectOwnWalletCardDecoration, selectTheme, selectUser,
+  selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate, selectWalletTransactions,
 } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { formatTonAsIcon, formatTonNumber, formatTonTextFromNanos } from '../../../util/localization/format';
 import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
+import { getCanColorCard, getIsStickerOnCard } from './helpers/cardEditing';
+import { getStickerPose } from './helpers/cardStickers';
+import { getWalletCardStyle } from './helpers/cardStyleWave';
+import useCardButtonsColor from './useCardButtonsColor';
+import useCardStyleWave from './useCardStyleWave';
+import useWalletCardEditor from './useWalletCardEditor';
 
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -24,11 +36,14 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
+import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
 import Spinner from '../../ui/Spinner';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import WalletCard from './WalletCard';
-import WalletCollectibleItem from './WalletCollectibleItem';
+import WalletCardEditorOverlay from './WalletCardEditorOverlay';
+import WalletCollectibleTile from './WalletCollectibleTile';
 import WalletFeatures from './WalletFeatures';
 import WalletTransactionItem from './WalletTransactionItem';
 import Control, { ControlAfter, ControlBefore, ControlLabel } from '@gili/layout/Control';
@@ -40,6 +55,7 @@ import styles from './WalletMainScreen.module.scss';
 type OwnProps = {
   activeTab: number;
   scrollContainerClosest: string;
+  cardEditorRef: CardEditorRef;
   onProtect: NoneToVoidFunction;
   onProtectAccount: NoneToVoidFunction;
   onOpenSettings: NoneToVoidFunction;
@@ -65,6 +81,12 @@ type StateProps = {
   transactions?: ApiWalletTransaction[];
   transferMinNanos?: bigint;
   collectibles?: ApiWalletCollectible[];
+  cardDecoration?: WalletCardLayout;
+  canEditCard?: boolean;
+  isCardEdited?: boolean;
+  cardBackgroundCollections?: string[];
+  canAnimate?: boolean;
+  theme: ThemeKey;
   existingWaltBalanceUrl?: string;
   savedWallets?: ApiWalletSavedWallet[];
   earningsNanos?: bigint;
@@ -78,25 +100,34 @@ const NOTABLE_BALANCE_NANOS = 500_000_000n;
 const HISTORY_ITEM_CLASS = 'WalletHistoryItem';
 
 const WalletMainScreen = ({
-  activeTab, scrollContainerClosest,
+  activeTab, scrollContainerClosest, cardEditorRef,
   status, hasStateError, canEnableBackup, hasCloudPassword, address, currentUser, balance, tonUsdRate, currency,
   currencyRate,
-  transactions, transferMinNanos, collectibles,
+  transactions, transferMinNanos, collectibles, cardDecoration, isCardEdited, canEditCard, cardBackgroundCollections,
+  canAnimate, theme,
   existingWaltBalanceUrl, savedWallets, earningsNanos,
   onProtect, onProtectAccount, onOpenSettings, onOpenEarnings, onReceive, onSend, onSwitchTab,
   onTransactionClick, onCollectibleClick,
 }: OwnProps & StateProps) => {
   const {
-    openUrl, loadWalletTransactions, loadWalletCollectibles, loadWalletState, closeWalletModal,
+    openUrl, loadWalletTransactions, loadWalletCollectibles, loadWalletState, closeWalletModal, loadFullUser,
   } = getActions();
 
   const lang = useLang();
+
+  const faceRef = useRef<HTMLDivElement>();
+  const foldRef = useRef<HTMLDivElement>();
+  const gridRef = useRef<HTMLDivElement>();
+  const editorLayerRef = useRef<HTMLDivElement>();
+  const buttonsRef = useRef<HTMLDivElement>();
+  const [dialogElement, setDialogElement] = useState<HTMLElement>();
 
   const shownCollectibles = useMemo(
     () => filterUnsentCollectibles(collectibles, transactions),
     [collectibles, transactions],
   );
   const hasCollectibles = Boolean(shownCollectibles?.length);
+  const hasGifts = useMemo(() => shownCollectibles?.some(({ type }) => type === 'gift'), [shownCollectibles]);
   // As in the Android app, the collectibles tab exists only while there are collectibles
   const isCollectiblesTab = hasCollectibles && activeTab === COLLECTIBLES_TAB_INDEX;
   const shouldProtectAccount = hasCloudPassword === false && (balance ?? 0n) > NOTABLE_BALANCE_NANOS;
@@ -116,6 +147,38 @@ const WalletMainScreen = ({
     () => shownCollectibles && buildCollectionByKey(shownCollectibles, 'address'),
     [shownCollectibles],
   );
+
+  const editor = useWalletCardEditor({
+    faceRef,
+    foldRef,
+    gridRef,
+    decoration: cardDecoration,
+    backgroundCollections: cardBackgroundCollections,
+    cardEditorRef,
+    isEnabled: Boolean(address && canEditCard),
+    isFlat: !canAnimate,
+  });
+
+  const cardStyle = useMemo(
+    () => getWalletCardStyle(cardDecoration?.stickers, cardDecoration?.backgroundAddress),
+    [cardDecoration],
+  );
+  const stickerOrigins = useMemo(() => Object.fromEntries((cardDecoration?.stickers || []).map((sticker) => (
+    [sticker.address, getStickerPose(sticker.coordinates)]
+  ))), [cardDecoration]);
+  const styleWave = useCardStyleWave({
+    style: cardStyle,
+    isEdited: isCardEdited,
+    origins: stickerOrigins,
+    heldAddresses: editor.uncontactedAddresses,
+    faceRef,
+    buttonsRef,
+    isEnabled: canAnimate,
+  });
+
+  useCardButtonsColor({
+    buttonsRef, faceRef, style: cardStyle, styleWave, themeKey: theme,
+  });
 
   const handleLoadMoreTransactions = useLastCallback(() => {
     loadWalletTransactions();
@@ -151,6 +214,21 @@ const WalletMainScreen = ({
     if (!hasCollectibles && activeTab === COLLECTIBLES_TAB_INDEX) onSwitchTab(TRANSACTIONS_TAB_INDEX);
   }, [hasCollectibles, activeTab, onSwitchTab]);
 
+  useEffect(() => {
+    setDialogElement(faceRef.current?.closest('dialog') || undefined);
+  }, [address]);
+
+  const getEditorLayer = useLastCallback(() => editorLayerRef.current);
+  const getStickerMenuElement = useLastCallback(() => (
+    editorLayerRef.current?.querySelector<HTMLElement>('.bubble')
+  ));
+
+  // The own card with its stickers comes with the profile, which names the card of the current wallet only
+  const currentUserId = currentUser?.id;
+  useEffect(() => {
+    if (currentUserId && address) loadFullUser({ userId: currentUserId });
+  }, [currentUserId, address]);
+
   // Collectibles load with the screen rather than with their tab, and again after the address changes
   useEffect(() => {
     if (!address || collectibles) return;
@@ -160,6 +238,27 @@ const WalletMainScreen = ({
 
   const handleRetryState = useLastCallback(() => {
     loadWalletState();
+  });
+
+  const handleTileClick = useLastCallback((collectible: ApiWalletCollectible) => {
+    if (!editor.consumeTileClick()) onCollectibleClick(collectible);
+  });
+
+  // The closing menu keeps its items, while its choice already changes the card
+  const menuCollectible = editor.menu?.collectible;
+  const stickerMenu = useFrozenProps({
+    anchor: editor.menu?.anchor,
+    isOnCard: Boolean(menuCollectible && getIsStickerOnCard(cardDecoration, menuCollectible.address)),
+    isColored: Boolean(menuCollectible && cardDecoration?.backgroundAddress === menuCollectible.address),
+    canColor: Boolean(menuCollectible && getCanColorCard(menuCollectible.gift, cardBackgroundCollections)),
+  }, !editor.menu);
+
+  const handleAddToCard = useLastCallback(() => {
+    editor.handleMenuAction();
+  });
+
+  const handleApplyColor = useLastCallback(() => {
+    editor.handleMenuAction(true);
   });
 
   // The link leads to the former wallet bot, where the user leaves this wallet
@@ -204,26 +303,32 @@ const WalletMainScreen = ({
             </div>
           </div>
         )}
-        <Island>
-          {isCollectiblesTab ? (
-            <InfiniteScroll
-              items={collectibleViewportIds}
-              itemSelector={`.${HISTORY_ITEM_CLASS}`}
-              preloadBackwards={WALLET_COLLECTIBLES_LIMIT}
-              scrollContainerClosest={scrollContainerClosest}
-              noScrollRestoreOnTop
-              onLoadMore={getMoreCollectibles}
-            >
-              {collectibleViewportIds?.map((collectibleAddress) => (
-                <WalletCollectibleItem
-                  key={collectibleAddress}
-                  collectible={collectiblesByAddress![collectibleAddress]}
-                  className={HISTORY_ITEM_CLASS}
-                  onClick={onCollectibleClick}
-                />
-              ))}
-            </InfiniteScroll>
-          ) : (
+        {isCollectiblesTab ? (
+          <InfiniteScroll
+            ref={gridRef}
+            className={styles.collectibles}
+            items={collectibleViewportIds}
+            itemSelector={`.${HISTORY_ITEM_CLASS}`}
+            preloadBackwards={WALLET_COLLECTIBLES_LIMIT}
+            scrollContainerClosest={scrollContainerClosest}
+            noScrollRestoreOnTop
+            onLoadMore={getMoreCollectibles}
+          >
+            {collectibleViewportIds?.map((collectibleAddress) => (
+              <WalletCollectibleTile
+                key={collectibleAddress}
+                collectible={collectiblesByAddress![collectibleAddress]}
+                isOnCard={getIsStickerOnCard(cardDecoration, collectibleAddress)
+                  || editor.liftedAddresses.includes(collectibleAddress)}
+                className={HISTORY_ITEM_CLASS}
+                onPointerDown={editor.handleTilePointerDown}
+                onContextMenu={editor.handleTileContextMenu}
+                onClick={handleTileClick}
+              />
+            ))}
+          </InfiniteScroll>
+        ) : (
+          <Island>
             <Transition
               name="fade"
               activeKey={transactionViewportIds?.length ? 1 : 0}
@@ -254,14 +359,46 @@ const WalletMainScreen = ({
                 </InfiniteScroll>
               ) : <WalletFeatures className={styles.features} />}
             </Transition>
-          )}
-        </Island>
+          </Island>
+        )}
+        {isCollectiblesTab && hasGifts && (IS_TOUCH_ENV || !cardDecoration?.stickers?.length) && (
+          <IslandDescription>
+            {lang(IS_TOUCH_ENV ? 'WalletStickerGridFooter' : 'WalletStickerTutorialTile')}
+          </IslandDescription>
+        )}
         {!isCollectiblesTab && Boolean(transactions?.length && transferMinNanos) && (
           <IslandDescription>
             {lang('WalletTransactionsHidden', { amount: formatTonTextFromNanos(lang, transferMinNanos!, true) })}
           </IslandDescription>
         )}
       </div>
+    );
+  }
+
+  function renderStickerMenu() {
+    const {
+      anchor, isOnCard, isColored, canColor,
+    } = stickerMenu;
+
+    return (
+      <Menu
+        isOpen={Boolean(editor.menu)}
+        anchor={anchor}
+        autoClose
+        getTriggerElement={getEditorLayer}
+        getRootElement={getEditorLayer}
+        getMenuElement={getStickerMenuElement}
+        onClose={editor.closeMenu}
+      >
+        {(isColored || canColor) && (
+          <MenuItem icon={isColored ? 'eraser' : 'palette'} onClick={handleApplyColor}>
+            {lang(isColored ? 'WalletStickerRemoveColor' : 'WalletStickerApplyColor')}
+          </MenuItem>
+        )}
+        <MenuItem icon={isOnCard ? 'close-circle' : 'card-star'} onClick={handleAddToCard}>
+          {lang(isOnCard ? 'WalletStickerRemoveFromCard' : 'WalletStickerAddToCard')}
+        </MenuItem>
+      </Menu>
     );
   }
 
@@ -304,9 +441,31 @@ const WalletMainScreen = ({
         usdRate={tonUsdRate}
         currency={currency}
         currencyRate={currencyRate}
+        stickers={cardDecoration?.stickers}
+        backgroundAddress={cardDecoration?.backgroundAddress}
+        hiddenStickerAddresses={editor.hiddenAddresses}
+        playingStickerAddress={editor.playingAddress}
+        faceRef={faceRef}
+        foldRef={foldRef}
+        isTiltDisabled={editor.isActive}
+        styleWave={styleWave}
         onQrClick={onReceive}
+        onStickerPlayEnd={editor.handlePlayEnd}
       />
-      <div className={styles.buttons}>
+      <WalletCardEditorOverlay
+        container={dialogElement}
+        motionItems={editor.motionItems}
+        framePose={editor.framePose}
+        isCarrying={editor.isCarrying}
+        isFlat={!canAnimate}
+        frameRef={editor.frameRef}
+        layerRef={editorLayerRef}
+        onMotionViewChange={editor.registerMotionView}
+        onHandlePointerDown={editor.handleHandlePointerDown}
+      >
+        {renderStickerMenu()}
+      </WalletCardEditorOverlay>
+      <div ref={buttonsRef} className={styles.buttons}>
         <Button className={styles.actionButton} pill fluid onClick={onReceive}>{lang('WalletAddFunds')}</Button>
         <Button className={styles.actionButton} pill fluid onClick={onSend}>
           {lang('WalletSend')}
@@ -346,6 +505,7 @@ const WalletMainScreen = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
+    const cardDecoration = selectOwnWalletCardDecoration(global);
 
     return {
       status: global.wallet?.status,
@@ -361,6 +521,12 @@ export default memo(withGlobal<OwnProps>(
       transactions: selectWalletTransactions(global),
       transferMinNanos: global.appConfig.walletTransferMinNanos,
       collectibles: global.wallet?.collectibles,
+      cardDecoration,
+      isCardEdited: Boolean(cardDecoration) && cardDecoration === global.wallet?.cardDraft,
+      canEditCard: selectCanEditOwnWalletCard(global),
+      cardBackgroundCollections: global.appConfig.walletCardBackgroundCollections,
+      canAnimate: selectCanAnimateInterface(global),
+      theme: selectTheme(global),
       existingWaltBalanceUrl: global.wallet?.existingWaltBalanceUrl,
       savedWallets: global.wallet?.savedWallets,
       earningsNanos: global.ton?.balance.amount,

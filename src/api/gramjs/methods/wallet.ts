@@ -9,6 +9,7 @@ import type {
   ApiChat,
   ApiMessage,
   ApiUser,
+  ApiWalletCardSticker,
   ApiWalletGiftDeposit,
   ApiWalletStateResult,
   ApiWalletTransferFee,
@@ -19,6 +20,8 @@ import type {
   RotateWalletKeyResult,
   SendTonTransferError,
   SendTonTransferResult,
+  SetWalletCardStickersError,
+  SetWalletCardStickersResult,
   WalletBackupError,
   WalletBackupResult,
 } from '../../types';
@@ -29,7 +32,7 @@ import {
 } from '../../../config';
 import { unwatchAddressActivity, watchAddressActivity } from '../../../lib/ton/activityStream';
 import {
-  formatAddress, parseAddress, toNonBounceableAddress, toRawAddress,
+  formatAddress, parseAddress, toBounceableAddress, toNonBounceableAddress, toRawAddress,
 } from '../../../lib/ton/address';
 import {
   COMPOSITE_WORD_COUNT, deriveBip39MnemonicSeeds, deriveImportedWalletSeeds, deriveTonMnemonicSeeds,
@@ -69,12 +72,13 @@ import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
 import {
   buildApiOnrampSession,
+  buildApiWalletCard,
   buildApiWalletCollectible,
   buildApiWalletSentTransfer,
   buildApiWalletStateResult,
   buildApiWalletTransaction,
 } from '../apiBuilders/wallet';
-import { buildInputUser, buildInputUserFromLocalDb } from '../gramjsBuilders';
+import { buildInputUser, buildInputUserFromLocalDb, buildInputWalletCardSticker } from '../gramjsBuilders';
 import { deserializeBytes, serializeBytes, wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { getClient, invokeRequest } from './client';
@@ -340,6 +344,46 @@ export async function fetchWalletCollectibles({ offset = '', limit }: { offset?:
     collectibles: result.items.map(buildApiWalletCollectible),
     nextOffset: result.nextOffset,
   };
+}
+
+export async function setWalletCardStickers({ stickers, backgroundAddress }: {
+  stickers: ApiWalletCardSticker[];
+  backgroundAddress?: string;
+}): Promise<SetWalletCardStickersResult> {
+  try {
+    const result = await invokeRequest(new GramJs.wallet.SetCardStickers({
+      stickers: stickers.map(buildInputWalletCardSticker),
+      bgNftAddress: backgroundAddress && toBounceableAddress(backgroundAddress),
+    }), { shouldThrow: true });
+
+    return result ? { card: buildApiWalletCard(result) } : { error: 'CARD_SAVE_FAILED' };
+  } catch (err: unknown) {
+    return { error: mapCardStickersRpcError(err) };
+  }
+}
+
+function mapCardStickersRpcError(err: unknown): SetWalletCardStickersError {
+  if (!(err instanceof RPCError)) return 'CARD_SAVE_FAILED';
+
+  const { errorMessage } = err;
+  if (errorMessage.startsWith('FLOOD_WAIT')) return 'FLOOD';
+
+  switch (errorMessage) {
+    case 'WALLET_STICKER_LIMIT_EXCEEDED':
+      return 'CARD_STICKER_LIMIT';
+    case 'WALLET_STICKER_SAVED_PROFILE':
+      return 'CARD_SAVED_PROFILE';
+    case 'WALLET_CARD_BG_NOT_ALLOWED':
+      return 'CARD_BACKGROUND_NOT_ALLOWED';
+    case 'WALLET_STICKER_INVALID':
+    case 'WALLET_STICKER_DUPLICATE':
+    case 'WALLET_ADDRESS_INVALID':
+    case 'WALLET_NFT_NOT_OWNED':
+    case 'WALLET_NFT_INVALID':
+      return 'CARD_STICKER_INVALID';
+    default:
+      return 'CARD_SAVE_FAILED';
+  }
 }
 
 // `false` for a domain that points to no wallet; an answer with several records or another domain is not trusted

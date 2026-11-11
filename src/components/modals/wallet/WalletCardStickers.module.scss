@@ -15,5 +15,18 @@
 .sticker {
   position: absolute;
   translate: -50% -50%;
+}
+
+.lift,
+.cutout {
+  width: 100%;
+  height: 100%;
+}
+
+.cutout {
   filter: var(--sticker-cutout);
+}
+
+.hidden {
+  visibility: hidden;
 }

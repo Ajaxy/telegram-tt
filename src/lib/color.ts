@@ -1,8 +1,8 @@
 import {
-  ColorSpace, HSL, HSV, OKLab, P3, sRGB,
+  ColorSpace, HSL, HSV, OKLab, OKLCH, P3, sRGB, sRGB_Linear,
 } from 'colorjs.io/fn';
 
-[sRGB, HSL, HSV, P3, OKLab].forEach((space) => ColorSpace.register(space));
+[sRGB, sRGB_Linear, HSL, HSV, P3, OKLab, OKLCH].forEach((space) => ColorSpace.register(space));
 
 export {
   getColor as buildColor,

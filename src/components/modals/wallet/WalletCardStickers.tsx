@@ -1,8 +1,15 @@
 import { memo, useRef, useState } from '../../../lib/teact/teact';
 
 import type { ApiMediaAreaCoordinates, ApiStarGiftUnique, ApiWalletCardSticker } from '../../../api/types';
+import type { Size } from './helpers/cardStickers';
 
+import buildClassName from '../../../util/buildClassName';
 import { getStickerFromGift } from '../../common/helpers/gifts';
+import { getStickerSide } from './helpers/cardStickers';
+import {
+  CUTOUT_BLUR, CUTOUT_GAIN, CUTOUT_OFFSET, MAX_ALPHA, SOLID_ALPHA_FROM,
+} from './helpers/stickerTexture';
+import { CARD_STICKER_ATTRIBUTE, CARD_STICKER_LIFT_ATTRIBUTE } from './useStickerMotion';
 
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useUniqueId from '../../../hooks/useUniqueId';
@@ -13,20 +20,18 @@ import styles from './WalletCardStickers.module.scss';
 
 type OwnProps = {
   stickers: ApiWalletCardSticker[];
+  // The stickers in motion are drawn above the screen instead
+  hiddenAddresses?: string[];
+  playingAddress?: string;
+  onPlayEnd?: NoneToVoidFunction;
 };
 
-type Size = {
-  width: number;
-  height: number;
-};
+const SOLID_ALPHA = `0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${MAX_ALPHA} ${-SOLID_ALPHA_FROM}`;
+const CUTOUT_RAMP = `0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 ${CUTOUT_GAIN} ${-CUTOUT_OFFSET / MAX_ALPHA}`;
 
-// The die-cut of the iOS card: the solid part of the sticker is blurred by 1.5% of its side, and the alpha ramp
-// `alpha * 10 - 150 / 255` turns the blur into a white edge with round corners
-const CUTOUT_BLUR = 0.015;
-const CUTOUT_RAMP = '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 10 -0.588';
-const SOLID_ALPHA = '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 -127';
-
-const WalletCardStickers = ({ stickers }: OwnProps) => {
+const WalletCardStickers = ({
+  stickers, hiddenAddresses, playingAddress, onPlayEnd,
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
   const [cardSize, setCardSize] = useState<Size>();
   const cutoutId = useUniqueId();
@@ -53,36 +58,61 @@ const WalletCardStickers = ({ stickers }: OwnProps) => {
           </feMerge>
         </filter>
       </svg>
-      {cardSize && stickers.map(({ coordinates, gift }) => (
-        <WalletCardSticker key={gift.id} coordinates={coordinates} gift={gift} cardSize={cardSize} />
+      {cardSize && stickers.map(({ address, coordinates, gift }) => (
+        <WalletCardSticker
+          key={address}
+          address={address}
+          coordinates={coordinates}
+          gift={gift}
+          cardSize={cardSize}
+          isHidden={hiddenAddresses?.includes(address)}
+          isPlaying={address === playingAddress}
+          onPlayEnd={onPlayEnd}
+        />
       ))}
     </div>
   );
 };
 
-const WalletCardSticker = ({ coordinates, gift, cardSize }: {
+const WalletCardSticker = ({
+  address, coordinates, gift, cardSize, isHidden, isPlaying, onPlayEnd,
+}: {
+  address: string;
   coordinates: ApiMediaAreaCoordinates;
   gift: ApiStarGiftUnique;
   cardSize: Size;
+  isHidden?: boolean;
+  isPlaying?: boolean;
+  onPlayEnd?: NoneToVoidFunction;
 }) => {
   const ref = useRef<HTMLDivElement>();
 
   const sticker = getStickerFromGift(gift);
   if (!sticker) return undefined;
 
-  const {
-    x, y, width, height, rotation,
-  } = coordinates;
-  // The sticker is a square that fits its area, as on the native clients; `x` and `y` are its center
-  const size = Math.round(Math.min(width * cardSize.width, height * cardSize.height) / 100);
+  const { x, y, rotation } = coordinates;
+  const size = Math.round(getStickerSide(coordinates, cardSize));
 
   return (
     <div
       ref={ref}
-      className={styles.sticker}
+      className={buildClassName(styles.sticker, isHidden && styles.hidden)}
       style={`left: ${x}%; top: ${y}%; width: ${size}px; height: ${size}px; rotate: ${rotation}deg`}
+      {...{ [CARD_STICKER_ATTRIBUTE]: address }}
     >
-      <StickerView containerRef={ref} sticker={sticker} size={size} noPlay />
+      {/* A tapped sticker grows and casts a shadow here, outside the die-cut */}
+      <div className={styles.lift} {...{ [CARD_STICKER_LIFT_ATTRIBUTE]: true }}>
+        <div className={styles.cutout}>
+          <StickerView
+            containerRef={ref}
+            sticker={sticker}
+            size={size}
+            noPlay={!isPlaying}
+            onAnimatedStickerLoop={onPlayEnd}
+            onVideoEnded={onPlayEnd}
+          />
+        </div>
+      </div>
     </div>
   );
 };

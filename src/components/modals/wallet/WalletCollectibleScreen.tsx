@@ -1,14 +1,28 @@
-import { memo, useMemo, useState } from '../../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, getPromiseActions } from '../../../global';
 
 import type { ApiStarGiftAttributeRarity, ApiWalletCollectible } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
+import type { CardEditorRef } from './helpers/cardEditing';
 
-import { selectWalletAddress } from '../../../global/selectors';
+import {
+  selectCanEditOwnWalletCard, selectOwnWalletCardDecoration, selectWalletAddress,
+} from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
-import { getGiftAttributes } from '../../common/helpers/gifts';
+import { getGiftAttributes, getStickerFromGift } from '../../common/helpers/gifts';
+import {
+  getCanColorCard,
+  getIsStickerOnCard,
+  removeStickerFromCard,
+  saveCardDecoration,
+  showStickerLimitError,
+} from './helpers/cardEditing';
+import { planStickerChange } from './helpers/cardStickerCommands';
+import { loadStickerTexture } from './helpers/stickerTexture';
 
 import useSelector from '../../../hooks/data/useSelector';
+import useFrozenProps from '../../../hooks/useFrozenProps';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -21,21 +35,40 @@ import WalletAddressGroups from './WalletAddressGroups';
 import WalletCollectibleImage from './WalletCollectibleImage';
 import CheckboxField from '@gili/templates/CheckboxField';
 
+import giftHeaderStyles from '../gift/UniqueGiftHeader.module.scss';
 import styles from './WalletCollectibleScreen.module.scss';
 
 type OwnProps = {
   collectible: ApiWalletCollectible;
+  isActive: boolean;
+  // The editor of the card under this screen, which makes a change and animates it
+  cardEditorRef?: CardEditorRef;
   onTransfer: (collectible: ApiWalletCollectible) => void;
   onDone: NoneToVoidFunction;
 };
 
-const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) => {
-  const { openUrl, openGiftPreviewModal, openGiftInfoValueModal } = getActions();
+// Splits the collection slug into words, as `PlushPepe` names the Plush Pepe collection
+const SLUG_WORD_BOUNDARY = /(?<=[a-z])(?=[A-Z])/;
+
+const WalletCollectibleScreen = ({
+  collectible, isActive, cardEditorRef, onTransfer, onDone,
+}: OwnProps) => {
+  const {
+    openUrl, openGiftPreviewModal, openGiftInfoValueModal, showNotification,
+  } = getActions();
 
   const lang = useLang();
 
+  const rootRef = useRef<HTMLDivElement>();
+
   const currentUserId = useSelector(selectCurrentUserId);
   const walletAddress = useSelector(selectWalletAddress);
+  const currentDecoration = useSelector(selectOwnWalletCardDecoration);
+  const canEditCard = useSelector(selectCanEditOwnWalletCard);
+  const backgroundCollections = useSelector(selectCardBackgroundCollections);
+
+  // An action takes the screen back to the card, and the screen keeps its buttons while it slides away
+  const { decoration } = useFrozenProps({ decoration: currentDecoration }, !isActive);
 
   // The value asked of the server, shown until it answers
   const [shouldDisplayInGifts, setShouldDisplayInGifts] = useState<boolean | undefined>();
@@ -46,8 +79,17 @@ const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) 
   const gift = collectible.type === 'gift' ? collectible.gift : undefined;
   const isShownInGifts = Boolean(currentUserId && gift?.hostPeerId === currentUserId);
   const isDisplayPending = shouldDisplayInGifts !== undefined;
+  const isOnCard = getIsStickerOnCard(decoration, address);
+  const isColored = decoration?.backgroundAddress === address;
+  const canColor = Boolean(gift && getCanColorCard(gift, backgroundCollections));
 
   const giftAttributes = useMemo(() => gift && getGiftAttributes(gift), [gift]);
+
+  // Loads the texture for the flight of a sticker off the gift model
+  useEffect(() => {
+    const sticker = gift && getStickerFromGift(gift);
+    if (sticker) void loadStickerTexture(sticker);
+  }, [gift]);
   const { model, backdrop, pattern } = giftAttributes || {};
 
   const handleSell = useLastCallback(() => {
@@ -56,6 +98,51 @@ const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) 
 
   const handleTransfer = useLastCallback(() => {
     onTransfer(collectible);
+  });
+
+  // As in the iOS app, the screen goes back to the card, which shows the change. The editor of the card makes the
+  // change and animates it; without it, as on a gift screen opened alone, the screen saves the change itself.
+  const changeSticker = useLastCallback((isColor?: boolean) => {
+    const request = {
+      address, gift: gift!, isColor, source: findGiftModel(),
+    };
+    const editor = cardEditorRef?.current;
+    if (editor) {
+      editor.requestSticker(request);
+      onDone();
+      return;
+    }
+
+    const change = planStickerChange(decoration, request, backgroundCollections);
+    if (change.type === 'limit') {
+      showStickerLimitError();
+      return;
+    }
+
+    if (change.type === 'restricted') return;
+
+    saveCardDecoration(change.type === 'remove' ? removeStickerFromCard(decoration, address) : change.decoration);
+    onDone();
+  });
+
+  const handleToggleSticker = useLastCallback(() => {
+    changeSticker();
+  });
+
+  const handleToggleColor = useLastCallback(() => {
+    if (!isColored && !canColor) {
+      const collections = backgroundCollections?.map((slug) => (
+        lang('WalletStickerColorCollection', { collection: slug.split(SLUG_WORD_BOUNDARY).join(' ') })
+      ));
+      if (collections?.length) {
+        showNotification({
+          message: { key: 'WalletStickerColorRestricted', variables: { collections: lang.conjunction(collections) } },
+        });
+      }
+      return;
+    }
+
+    changeSticker(true);
   });
 
   const handleOpenPreview = useLastCallback(() => {
@@ -152,16 +239,34 @@ const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) 
             <span className={styles.giftActionText}>{lang('GiftInfoTransfer')}</span>
           </Button>
           <Button
-            className={styles.giftAction}
+            className={buildClassName(styles.giftAction, !isColored && !canColor && styles.giftActionRestricted)}
             color="transparentBlured"
-            iconName="sell"
+            iconName={isColored ? 'palette-crossed' : 'appearance-filled'}
             iconAlignment="top"
             iconClassName={styles.giftActionIcon}
             noForcedUpperCase
             fluid
-            onClick={handleSell}
+            disabled={!canEditCard}
+            onClick={handleToggleColor}
           >
-            <span className={styles.giftActionText}>{lang('Sell')}</span>
+            <span className={styles.giftActionText}>
+              {lang(isColored ? 'WalletStickerRemoveColor' : 'WalletStickerApplyColor')}
+            </span>
+          </Button>
+          <Button
+            className={styles.giftAction}
+            color="transparentBlured"
+            iconName={isOnCard ? 'card-crossed' : 'card-arrow'}
+            iconAlignment="top"
+            iconClassName={styles.giftActionIcon}
+            noForcedUpperCase
+            fluid
+            disabled={!canEditCard}
+            onClick={handleToggleSticker}
+          >
+            <span className={styles.giftActionText}>
+              {lang(isOnCard ? 'WalletStickerRemoveFromCard' : 'WalletStickerAddToCard')}
+            </span>
           </Button>
         </div>
       </UniqueGiftHeader>
@@ -186,8 +291,15 @@ const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) 
     );
   }
 
+  // The shown model of the gift header, which a new sticker flies from
+  function findGiftModel() {
+    const models = rootRef.current?.querySelectorAll<HTMLElement>(`.${giftHeaderStyles.sticker}`);
+
+    return models?.[models.length - 1];
+  }
+
   return (
-    <div className={styles.root}>
+    <div ref={rootRef} className={styles.root}>
       {model && backdrop && pattern ? renderGiftHeader() : renderHeader()}
       <TableInfo tableData={tableData} className={styles.table} />
       {gift && (
@@ -210,6 +322,10 @@ const WalletCollectibleScreen = ({ collectible, onTransfer, onDone }: OwnProps) 
 
 function selectCurrentUserId(global: GlobalState) {
   return global.currentUserId;
+}
+
+function selectCardBackgroundCollections(global: GlobalState) {
+  return global.appConfig.walletCardBackgroundCollections;
 }
 
 export default memo(WalletCollectibleScreen);

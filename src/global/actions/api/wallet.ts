@@ -10,8 +10,10 @@ import type {
   RotateWalletKeyResult,
   SendTonTransferError,
   SendTonTransferResult,
+  SetWalletCardStickersError,
   WalletBackupResult,
 } from '../../../api/types';
+import type { RegularLangKey } from '../../../types/language';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabState } from '../../types';
 
@@ -39,16 +41,19 @@ import { callApi } from '../../../api/gramjs';
 import { getStickerFromGift } from '../../../components/common/helpers/gifts';
 import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
 import {
-  buildWalletTransferFeeKey, getIsWalletGiftDepositConfirmed, keepRecipientUser, WALLET_ERROR_LANG_KEYS,
+  buildWalletTransferFeeKey, getAreWalletCardLayoutsEqual, getIsWalletGiftDepositConfirmed,
+  getSentCollectibleAddresses, keepRecipientUser, WALLET_ERROR_LANG_KEYS, WALLET_STICKER_LIMIT_MESSAGE,
 } from '../../helpers/wallet';
 import {
-  addActionHandler, getGlobal, getPromiseActions, setGlobal,
+  addActionHandler, getActions, getGlobal, getPromiseActions, setGlobal,
 } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
-import { addUsers } from '../../reducers/users';
+import { addUsers, updateUserFullInfo } from '../../reducers/users';
 import {
   addPendingWalletTransaction,
   clearWalletRecords,
+  filterSavedWalletCardStickers,
+  filterWalletCardStickers,
   markWalletTransactionFailed,
   replacePendingWalletTransaction,
   updateWallet,
@@ -58,10 +63,10 @@ import {
 import { selectChat, selectChatLastMessageId } from '../../selectors/chats';
 import { selectTabState } from '../../selectors/tabs';
 import { selectTheme } from '../../selectors/ui';
-import { selectUser } from '../../selectors/users';
+import { selectUser, selectUserFullInfo } from '../../selectors/users';
 import {
-  selectWalletAddress, selectWalletCollectibleGift, selectWalletPublicKey, selectWalletTransactions,
-  selectWalletTransferInFlight,
+  selectCanEditOwnWalletCard, selectWalletAddress, selectWalletCollectibleGift, selectWalletPublicKey,
+  selectWalletTransactions, selectWalletTransferInFlight,
 } from '../../selectors/wallet';
 import { fetchChatByUsername } from './chats';
 import { verifyPasscodeWithLimit } from './passcode';
@@ -74,6 +79,16 @@ const WALLET_BACKUP_LOCK_PREFIX = 'wallet-backup:';
 const SENT_LOOKUP_ATTEMPTS = 8;
 const SENT_LOOKUP_MIN_DELAY_MS = 1500;
 const SENT_LOOKUP_MAX_DELAY_MS = 15000;
+// As in the iOS app: the save waits for a pause in the edits, since the server allows 30 saves an hour
+const CARD_SAVE_DELAY_MS = 15000;
+// The limit error has a plural string of its own
+const CARD_ERROR_LANG_KEYS: Record<Exclude<SetWalletCardStickersError, 'CARD_STICKER_LIMIT'>, RegularLangKey> = {
+  CARD_SAVED_PROFILE: 'WalletStickerProfileError',
+  CARD_BACKGROUND_NOT_ALLOWED: 'WalletStickerBackgroundError',
+  CARD_STICKER_INVALID: 'WalletStickerInvalidError',
+  FLOOD: 'WalletStickerSaveErrorTitle',
+  CARD_SAVE_FAILED: 'WalletStickerSaveError',
+};
 
 addActionHandler('replaceWallet', async (global, actions, payload): Promise<void> => {
   const {
@@ -404,6 +419,9 @@ addActionHandler('loadWalletState', async (global): Promise<void> => {
   global = updateWalletServerState(global, result.status, result.state);
   global = updateWallet(global, { hasLocalSecret, hasStateError: false });
   setGlobal(global);
+
+  // A draft restored from the cache lost its save timer with the reload
+  if (global.wallet?.cardDraft && !cardSaveTimeout && !isCardSaving) scheduleWalletCardSave();
 });
 
 addActionHandler('openWalletTransaction', async (global, actions, payload): Promise<void> => {
@@ -564,6 +582,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   }
 
   global = updateWallet(global, { transactions, nextOffset });
+  global = removeSentCardStickers(global, current);
   setGlobal(global);
 
   if (!shouldRefresh) return;
@@ -592,7 +611,9 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
     if (selectWalletAddress(global) !== ownAddress) return;
 
+    const previous = selectWalletTransactions(global);
     global = replacePendingWalletTransaction(global, id, { ...confirmed, msgHash });
+    global = removeSentCardStickers(global, previous);
     setGlobal(global);
 
     if (getIsWalletGiftDepositConfirmed(confirmed)) {
@@ -676,6 +697,143 @@ addActionHandler('loadWalletCollectibles', async (global, actions, payload): Pro
   if (!shouldRefresh && global.wallet?.collectiblesNextOffset !== offset) return;
 
   global = updateWallet(global, { collectibles, collectiblesNextOffset: nextOffset });
+
+  // The server removes a gift that left the wallet from the saved card only. A cached card or draft would keep it, and
+  // every save of the draft would then fail with `WALLET_STICKER_INVALID`.
+  if (nextOffset === undefined) {
+    const owned = new Set(collectibles.filter(({ type }) => type === 'gift').map(({ address }) => address));
+    const getIsOwned = (nftAddress: string) => owned.has(nftAddress);
+    global = global.wallet?.cardDraft
+      ? dropCardStickers(global, getIsOwned)
+      : filterSavedWalletCardStickers(global, getIsOwned);
+  }
+
+  setGlobal(global);
+});
+
+let cardSaveTimeout: number | undefined;
+let isCardSaving = false;
+let shouldSaveCardAgain = false;
+
+function scheduleWalletCardSave() {
+  clearTimeout(cardSaveTimeout);
+  cardSaveTimeout = window.setTimeout(() => {
+    cardSaveTimeout = undefined;
+    getActions().saveWalletCardDraft();
+  }, CARD_SAVE_DELAY_MS);
+}
+
+// As in the iOS app, a gift leaves the card once its transfer is confirmed, while the server may still list the gift
+export function removeSentCardStickers<T extends GlobalState>(
+  global: T, previous: ApiWalletTransaction[] | undefined,
+): T {
+  const ownAddress = selectWalletAddress(global);
+  if (!ownAddress) return global;
+
+  const sent = getSentCollectibleAddresses(previous, selectWalletTransactions(global), ownAddress);
+  if (!sent.length) return global;
+
+  return dropCardStickers(global, (nftAddress) => !sent.includes(nftAddress));
+}
+
+function dropCardStickers<T extends GlobalState>(global: T, getIsKept: (nftAddress: string) => boolean): T {
+  const draft = global.wallet?.cardDraft;
+  global = filterWalletCardStickers(global, getIsKept);
+  if (global.wallet?.cardDraft !== draft) scheduleWalletCardSave();
+
+  return global;
+}
+
+addActionHandler('updateWalletCardDraft', (global, actions, payload): ActionReturnType => {
+  const { stickers, backgroundAddress } = payload;
+
+  const address = selectWalletAddress(global);
+  if (!address || !selectCanEditOwnWalletCard(global)) return undefined;
+
+  const layout = { stickers, backgroundAddress };
+  const card = selectUserFullInfo(global, global.currentUserId!)?.walletCard;
+  const draft = global.wallet?.cardDraft;
+  if (getAreWalletCardLayoutsEqual(draft ?? card, layout)) return undefined;
+
+  // An edit back to the saved card needs no save, unless a save under way may still change that card
+  if (!isCardSaving && card?.address === address && getAreWalletCardLayoutsEqual(card, layout)) {
+    clearTimeout(cardSaveTimeout);
+    return updateWallet(global, { cardDraft: undefined });
+  }
+
+  scheduleWalletCardSave();
+
+  return updateWallet(global, { cardDraft: { address, ...layout } });
+});
+
+// The draft stays after an error, as in the iOS app: the next edit or closing the wallet tries again. The error shows
+// only while the wallet is open.
+addActionHandler('saveWalletCardDraft', async (global, actions): Promise<void> => {
+  clearTimeout(cardSaveTimeout);
+  cardSaveTimeout = undefined;
+
+  const draft = global.wallet?.cardDraft;
+  if (!draft) return;
+
+  if (isCardSaving) {
+    shouldSaveCardAgain = true;
+    return;
+  }
+
+  isCardSaving = true;
+  // A transport error rejects the call, and it counts as a failed save
+  const result = await callApi('setWalletCardStickers', {
+    stickers: draft.stickers,
+    backgroundAddress: draft.backgroundAddress,
+  }).catch(() => undefined);
+  isCardSaving = false;
+
+  global = getGlobal();
+  const isDraftChanged = !getAreWalletCardLayoutsEqual(global.wallet?.cardDraft, draft);
+
+  if (shouldSaveCardAgain) {
+    shouldSaveCardAgain = false;
+    if (isDraftChanged) actions.saveWalletCardDraft();
+  }
+
+  if (!result || 'error' in result) {
+    const error = result?.error ?? 'CARD_SAVE_FAILED';
+    const tabId = getCurrentTabId();
+    if (!selectTabState(global, tabId).walletModal) return;
+
+    if (error === 'CARD_STICKER_LIMIT') {
+      actions.showNotification({
+        title: { key: 'WalletStickerSaveErrorTitle' },
+        message: WALLET_STICKER_LIMIT_MESSAGE,
+        tabId,
+      });
+    } else {
+      actions.showNotification({
+        title: error === 'FLOOD' ? undefined : { key: 'WalletStickerSaveErrorTitle' },
+        message: { key: CARD_ERROR_LANG_KEYS[error] },
+        tabId,
+      });
+    }
+
+    return;
+  }
+
+  const { card } = result;
+  if (card.address !== draft.address || selectWalletAddress(global) !== draft.address) return;
+
+  // A profile can only be stored whole, so without one the saved card comes with the profile
+  const userId = global.currentUserId!;
+  if (global.users.fullInfoById[userId]) {
+    const { state } = global.wallet || {};
+    global = updateUserFullInfo(global, userId, {
+      walletCard: { ...card, balance: state?.address === card.address ? state.balance : card.balance },
+    });
+  } else {
+    actions.loadFullUser({ userId });
+  }
+
+  if (!isDraftChanged) global = updateWallet(global, { cardDraft: undefined });
+
   setGlobal(global);
 });
 
@@ -1371,6 +1529,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
   }
 
   if (isSameWallet) {
+    const previous = selectWalletTransactions(global);
     global = replacePendingWalletTransaction(global, localId, result.transaction ? {
       ...result.transaction,
       peer: keepRecipientUser(result.transaction.peer, queuedRecord.peer),
@@ -1386,6 +1545,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
       comment: result.encryptedComment ? undefined : comment,
       encryptedComment: result.encryptedComment,
     });
+    global = removeSentCardStickers(global, previous);
   }
 
   if (giftDeposit && selectTabState(global, tabId).walletGiftDeposit === giftDepositState) {
@@ -1445,7 +1605,9 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
 
   if (selectWalletAddress(global) !== ownAddress) return;
 
+  const previous = selectWalletTransactions(global);
   global = replacePendingWalletTransaction(global, result.msgHash, { ...confirmed, msgHash: result.msgHash });
+  global = removeSentCardStickers(global, previous);
   setGlobal(global);
 });
 
