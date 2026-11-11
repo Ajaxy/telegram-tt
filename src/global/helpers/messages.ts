@@ -22,6 +22,7 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 import {
   LOCAL_MESSAGES_LIMIT,
   LOTTIE_STICKER_MIME_TYPE,
+  NSFW_RESTRICTION_REASON,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -73,6 +74,14 @@ export function getApplicableRestrictionReasons(
 
     return !ignoreRestrictionReasons?.includes(reason.reason);
   });
+}
+
+// Sensitive content is blurred per media and does not block access, same as in other clients
+export function getBlockingRestrictionReasons(
+  restrictionReasons?: ApiRestrictionReason[], ignoreRestrictionReasons?: string[],
+): ApiRestrictionReason[] {
+  return getApplicableRestrictionReasons(restrictionReasons, ignoreRestrictionReasons)
+    .filter((reason) => reason.reason !== NSFW_RESTRICTION_REASON);
 }
 
 export function getMessageOriginalId(message: ApiMessage) {

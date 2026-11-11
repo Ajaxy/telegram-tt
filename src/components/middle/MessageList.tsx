@@ -21,7 +21,7 @@ import {
 } from '../../config';
 import { forceMeasure, forceMutation, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  getApplicableRestrictionReasons,
+  getBlockingRestrictionReasons,
   getIsSavedDialog,
   getMessageHtmlId,
   getMessageOriginalId,
@@ -317,7 +317,7 @@ const MessageList = ({
   } = getActions();
   const lang = useLang();
 
-  const restrictionReasons = useMemo(() => getApplicableRestrictionReasons(
+  const restrictionReasons = useMemo(() => getBlockingRestrictionReasons(
     rawRestrictionReasons, ignoreRestrictionReasons,
   ), [ignoreRestrictionReasons, rawRestrictionReasons]);
   const isRestricted = restrictionReasons.length > 0;

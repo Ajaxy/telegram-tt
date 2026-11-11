@@ -12,7 +12,7 @@ import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
-  getApplicableRestrictionReasons,
+  getBlockingRestrictionReasons,
   getHasAdminRight,
   isChatAdmin,
   isChatChannel,
@@ -427,7 +427,7 @@ export function selectIsChatRestricted<T extends GlobalState>(global: T, chatId:
   const chat = selectChat(global, chatId);
   if (!chat) return false;
 
-  const activeRestrictions = getApplicableRestrictionReasons(
+  const activeRestrictions = getBlockingRestrictionReasons(
     chat.restrictionReasons, global.appConfig.ignoreRestrictionReasons,
   );
   return activeRestrictions.length > 0;

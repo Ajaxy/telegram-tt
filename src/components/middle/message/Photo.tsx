@@ -159,7 +159,7 @@ const Photo = <T,>({
     ref: spinnerRef,
     shouldRender: shouldRenderSpinner,
   } = useShowTransition({
-    isOpen: isTransferring,
+    isOpen: isTransferring && (isUploading || !isSpoilerShown),
     noMountTransition: wasLoadDisabled,
     className: 'slow',
     withShouldRender: true,

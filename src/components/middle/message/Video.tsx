@@ -187,7 +187,7 @@ const Video = <T,>({
     ref: spinnerRef,
     shouldRender: shouldRenderSpinner,
   } = useShowTransition({
-    isOpen: isTransferring && !isUnsupported,
+    isOpen: isTransferring && !isUnsupported && (isUploading || !isSpoilerShown),
     noMountTransition: wasLoadDisabled,
     withShouldRender: true,
   });
