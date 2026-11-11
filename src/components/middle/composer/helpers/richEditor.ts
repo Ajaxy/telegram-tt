@@ -76,7 +76,7 @@ import { buildRichEditorFormatting } from '../../../ui/textInput/richEditorForma
 import { buildRichEditorBlockquote } from './richEditorBlockquote';
 import { RichEditorBotApiHtml } from './richEditorBotApiHtml';
 import { RichEditorCaption } from './richEditorCaption';
-import { RichEditorMarkdown } from './richEditorMarkdown';
+import { RichEditorMarkdown, RichEditorReverseMarkdown } from './richEditorMarkdown';
 import { RichEditorPullquote } from './richEditorPullquote';
 import {
   buildRichEditorTableExtensions,
@@ -216,7 +216,12 @@ export function __createRichEditor({
       { sharedCanvasRef, sharedCanvasHqRef },
     ),
     editorProps: {
-      handleKeyDown: handleRichEditorKeyDown,
+      // Undo a just-applied input rule before structural `Backspace` handlers, since opener-last
+      // Markdown conversion can leave the caret at a quote, list, or details summary start
+      handleKeyDown: (view, event): boolean => (
+        (event.key === 'Backspace' && richEditor.commands.undoInputRule())
+        || handleRichEditorKeyDown(view, event)
+      ),
       handleDrop: (view, event) => handleRichEditorDrop(
         view, event, getIsRichInputExpanded, onMediaFiles,
       ),
@@ -296,6 +301,7 @@ function buildRichEditorExtensions(
       getIsRichInputExpanded, customEmojiOptions, onMediaEdit, onMediaFiles, onDateClick,
     ),
     RichEditorMarkdown,
+    RichEditorReverseMarkdown,
     RichEditorHistory,
     RichEditorTextReplacements,
     buildRichEditorFormatting(getIsRichInputExpanded),
