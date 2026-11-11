@@ -15,7 +15,7 @@ import type {
 } from '../../types';
 
 import { MAX_BUTTONS_PER_ROW, normalizeButtonText } from '../../../global/helpers/buttons';
-import { hasRichText } from '../../../util/text/richText';
+import { forEachPageBlocksRichText, forEachRichTextNode, hasRichText } from '../../../util/text/richText';
 import { buildInputUserFromLocalDb } from './index';
 import { buildInputDocument, buildInputPhoto } from './media';
 
@@ -45,13 +45,27 @@ export function buildInputRichMessage(value: ApiInputRichMessage): GramJs.InputR
     return undefined;
   }
 
+  const users = buildRichMessageUsers(value.blocks);
+
   return new GramJs.InputRichMessage({
     rtl: value.isRtl,
     noautolink: value.shouldDisableAutoLink,
     blocks: blocks as GramJs.TypePageBlock[],
     photos: media.photos.length ? media.photos : undefined,
     documents: media.documents.length ? media.documents : undefined,
+    users: users.length ? users : undefined,
   });
+}
+
+function buildRichMessageUsers(blocks: ApiPageBlock[]) {
+  const userIds = new Set<string>();
+  forEachPageBlocksRichText(blocks, (text) => forEachRichTextNode(text, (node) => {
+    if (node.type === 'mentionName') {
+      userIds.add(node.userId);
+    }
+  }));
+
+  return Array.from(userIds, (userId) => buildInputUserFromLocalDb(userId)).filter(Boolean);
 }
 
 function buildMtpPageBlocks(blocks: ApiPageBlock[]) {
@@ -368,7 +382,7 @@ export function buildMtpRichText(text: ApiRichText): GramJs.TypeRichText | undef
     case 'email':
       return buildEmailRichText(text);
     case 'mention':
-      return buildNestedRichText(text.text, GramJs.TextMention);
+      return buildMtpRichText(text.text);
     case 'hashtag':
       return buildNestedRichText(text.text, GramJs.TextHashtag);
     case 'botCommand':

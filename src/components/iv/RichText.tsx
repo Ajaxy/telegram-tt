@@ -13,6 +13,7 @@ import { getNestedRichText, getRichTextPlainText } from '../../global/helpers/ri
 import buildClassName from '../../util/buildClassName';
 import { getRichQuoteText } from '../../util/text/richQuote';
 import renderText from '../common/helpers/renderText';
+import { handleBotCommandClick, handleHashtagClick } from '../common/helpers/renderTextWithEntities';
 
 import CustomEmoji from '../common/CustomEmoji';
 import FormattedDate from '../common/FormattedDate';
@@ -245,8 +246,20 @@ const RichText = ({
       return <TonAddressLink address={address} noCopy={isProtected}>{renderNestedText()}</TonAddressLink>;
     }
     case 'hashtag':
+    case 'cashtag': {
+      const [tag, username] = getRichTextPlainText(text.text).split('@');
+      return (
+        <a onClick={() => handleHashtagClick(tag, username)} className="text-entity-link" dir="auto">
+          {renderNestedText()}
+        </a>
+      );
+    }
     case 'botCommand':
-    case 'cashtag':
+      return (
+        <a onClick={handleBotCommandClick} className="text-entity-link" dir="auto">
+          {renderNestedText()}
+        </a>
+      );
     case 'bankCard':
       return renderNestedText();
     case 'math':

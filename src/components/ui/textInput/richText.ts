@@ -144,7 +144,8 @@ function removeUnsupportedBlocks(blocks: ApiPageBlock[]): ApiPageBlock[] {
 
     switch (block.type) {
       case 'blockquoteBlocks': {
-        const nestedBlocks = removeUnsupportedBlocks(block.blocks);
+        // The editor trims the same paragraphs, and a quote without a body is dropped
+        const nestedBlocks = trimEdgeEmptyParagraphs(removeUnsupportedBlocks(block.blocks));
         if (nestedBlocks.length) return [{ ...block, blocks: nestedBlocks }];
 
         // A quote cannot be sent without a body, so its caption stays as a paragraph
@@ -1267,15 +1268,9 @@ function buildRichTextFromTiptapNode(node: TiptapJsonContent): ApiRichText {
 
   if (node.type === 'mention') {
     const userId = getTiptapStringAttr(node, 'userId');
-    const username = getTiptapStringAttr(node, 'username');
     const text = buildRichTextFromTiptapContent(node.content);
-    const plainText = getRichTextPlainText(text);
-    if (!plainText) {
+    if (!getRichTextPlainText(text)) {
       return EMPTY_RICH_TEXT;
-    }
-
-    if (username && plainText.toLowerCase() === `@${username.toLowerCase()}`) {
-      return { type: 'mention', text };
     }
 
     return userId
@@ -1318,8 +1313,6 @@ function applyTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
       return buildDateRichTextFromTiptapMark(text, mark);
     case 'link':
       return buildLinkRichTextFromTiptapMark(text, mark);
-    case 'mention':
-      return buildMentionRichTextFromTiptapMark(text, mark);
     default:
       return text;
   }
@@ -1328,16 +1321,6 @@ function applyTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
 function buildLinkRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
   const url = getTiptapMarkStringAttr(mark, 'href');
   return url ? { type: 'url', text, url } : text;
-}
-
-function buildMentionRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
-  const username = getTiptapMarkStringAttr(mark, 'username');
-  const plainText = getRichTextPlainText(text);
-  if (!username || plainText.toLowerCase() !== `@${username.toLowerCase()}`) {
-    return text;
-  }
-
-  return { type: 'mention', text };
 }
 
 function buildDateRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {

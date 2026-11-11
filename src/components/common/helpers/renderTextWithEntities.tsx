@@ -694,11 +694,11 @@ function getHtmlLinkUrl(entityContent: string, entity: ApiMessageEntity) {
   return escapeHtmlAttribute(ensureProtocol(getLinkUrl(entityContent, entity)));
 }
 
-function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
+export function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
   getActions().sendBotCommand({ command: e.currentTarget.innerText });
 }
 
-function handleHashtagClick(hashtag?: string, username?: string) {
+export function handleHashtagClick(hashtag?: string, username?: string) {
   if (!hashtag) return;
   if (username) {
     getActions().openChatByUsername({

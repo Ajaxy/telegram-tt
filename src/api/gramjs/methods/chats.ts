@@ -1590,18 +1590,21 @@ type ChannelMembersFilter =
   'kicked'
   | 'admin'
   | 'recent'
-  | 'search';
+  | 'search'
+  | 'mentions';
 
 export async function fetchMembers({
   chat,
   memberFilter = 'recent',
   offset,
   query = DEFAULT_PRIMITIVES.STRING,
+  topMsgId,
 }: {
   chat: ApiChat;
   memberFilter?: ChannelMembersFilter;
   offset?: number;
   query?: string;
+  topMsgId?: number;
 }) {
   let filter: GramJs.TypeChannelParticipantsFilter;
 
@@ -1614,6 +1617,9 @@ export async function fetchMembers({
       break;
     case 'search':
       filter = new GramJs.ChannelParticipantsSearch({ q: query });
+      break;
+    case 'mentions':
+      filter = new GramJs.ChannelParticipantsMentions({ q: query, topMsgId });
       break;
     default:
       filter = new GramJs.ChannelParticipantsRecent();
