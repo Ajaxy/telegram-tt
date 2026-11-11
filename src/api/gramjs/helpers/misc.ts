@@ -39,6 +39,8 @@ const ERROR_KEYS: Record<string, RegularLangKey> = {
   CODE_INVALID: 'ErrorEmailCodeInvalid',
   PASSWORD_MISSING: 'ErrorPasswordMissing',
   PASSKEY_CREDENTIAL_NOT_FOUND: 'ErrorPasskeyUnknown',
+  NO_PAID_MESSAGES_TOKEN_INVALID: 'NoPaidTokenInvalid',
+  IMPORT_TOKEN_INVALID: 'ContactLinkInvalid',
 };
 
 function resolveErrorKey(errorMessage: string) {

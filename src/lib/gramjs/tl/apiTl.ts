@@ -1833,9 +1833,12 @@ contacts.resolveUsername#725afbbc flags:# username:string referer:flags.0?string
 contacts.getTopPeers#973478b6 flags:# correspondents:flags.0?true bots_pm:flags.1?true bots_inline:flags.2?true phone_calls:flags.3?true forward_users:flags.4?true forward_chats:flags.5?true groups:flags.10?true channels:flags.15?true bots_app:flags.16?true bots_guestchat:flags.17?true offset:int limit:int hash:long = contacts.TopPeers;
 contacts.addContact#d9ba2e54 flags:# add_phone_privacy_exception:flags.0?true id:InputUser first_name:string last_name:string phone:string note:flags.1?TextWithEntities = Updates;
 contacts.resolvePhone#8af94344 phone:string = contacts.ResolvedPeer;
+contacts.importContactToken#13005788 token:string = User;
 contacts.editCloseFriends#ba6705f0 id:Vector<long> = Bool;
 contacts.getSponsoredPeers#b6c8c393 q:string = contacts.SponsoredPeers;
 contacts.updateContactNote#139f63fb id:InputUser note:TextWithEntities = Bool;
+contacts.exportNoPaidMessagesToken#83c586ae flags:# revoke:flags.0?true temporary:flags.1?true = ExportedNoPaidMessagesToken;
+contacts.importNoPaidMessagesToken#35a7c6ca user_id:InputUser token:string = User;
 messages.getMessages#63c66506 id:Vector<InputMessage> = messages.Messages;
 messages.getDialogs#a0f4cb4f flags:# exclude_pinned:flags.0?true folder_id:flags.1?int offset_date:int offset_id:int offset_peer:InputPeer limit:int hash:long = messages.Dialogs;
 messages.getHistory#4423e6c5 peer:InputPeer offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:long = messages.Messages;

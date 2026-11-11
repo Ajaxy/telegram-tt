@@ -189,6 +189,7 @@ export interface AccountSettings {
   shouldNewNonContactPeersRequirePremium?: boolean;
   defaultHistoryTtl?: number;
   nonContactPeersPaidStars?: number;
+  permanentFreeMessagesLink?: string;
   shouldDisplayGiftsButton?: boolean;
   disallowedGifts?: ApiDisallowedGiftsSettings;
   shouldHideReadMarks?: boolean;

@@ -586,6 +586,12 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       count,
     };
   }
+  if (action instanceof GramJs.MessageActionNoPaidMessagesTokenUsed) {
+    return {
+      mediaType: 'action',
+      type: 'noPaidMessagesTokenUsed',
+    };
+  }
   if (action instanceof GramJs.MessageActionSuggestedPostApproval) {
     const {
       rejected, balanceTooLow, rejectComment, scheduleDate, price,

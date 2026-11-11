@@ -19,7 +19,7 @@ type OwnProps = {
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   transformOriginX?: number;
   transformOriginY?: number;
-  positionX?: 'left' | 'right';
+  positionX?: 'left' | 'right' | 'center';
   positionY?: 'top' | 'bottom';
   footer?: string;
   forceOpen?: boolean;

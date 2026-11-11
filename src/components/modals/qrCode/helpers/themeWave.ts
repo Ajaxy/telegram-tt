@@ -3,6 +3,7 @@
 import type { LayerRect, Point } from './floatingLayer';
 
 import { clamp } from '../../../../util/math';
+import { getBounceScale } from './bounce';
 
 export type WaveFrame = {
   origin: Point;
@@ -114,15 +115,7 @@ function easeWave(elapsed: number) {
 }
 
 function getCardBounceScale(progress: number) {
-  if (progress < 0.25) {
-    return 1 + (CARD_BOUNCE_PEAK - 1) * Math.sin((Math.PI / 2) * (progress / 0.25));
-  }
-
-  if (progress < 0.6) {
-    return lerp(CARD_BOUNCE_PEAK, CARD_BOUNCE_DIP, smoothstep((progress - 0.25) / 0.35));
-  }
-
-  return lerp(CARD_BOUNCE_DIP, 1, smoothstep((progress - 0.6) / 0.4));
+  return getBounceScale(progress, CARD_BOUNCE_PEAK - 1, 1 - CARD_BOUNCE_DIP);
 }
 
 function getCardDipScale(progress: number) {
@@ -136,13 +129,4 @@ function buildCardAnimation(getScale: (progress: number) => number, duration: nu
   }
 
   return { keyframes, duration };
-}
-
-function lerp(from: number, till: number, progress: number) {
-  return from + (till - from) * progress;
-}
-
-function smoothstep(progress: number) {
-  const value = clamp(progress, 0, 1);
-  return value * value * (3 - 2 * value);
 }

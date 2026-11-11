@@ -365,6 +365,10 @@ export interface ApiMessageActionPaidMessagesRefunded extends ActionMediaType {
   stars: number;
 }
 
+export interface ApiMessageActionNoPaidMessagesTokenUsed extends ActionMediaType {
+  type: 'noPaidMessagesTokenUsed';
+}
+
 export interface ApiMessageActionPaidMessagesPrice extends ActionMediaType {
   type: 'paidMessagesPrice';
   stars: number;
@@ -472,7 +476,8 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch
   | ApiMessageActionGiveawayResults | ApiMessageActionPaymentRefunded | ApiMessageActionGiftStars
   | ApiMessageActionGiftTon | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
-  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice | ApiMessageActionSuggestedPostApproval
+  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionNoPaidMessagesTokenUsed | ApiMessageActionPaidMessagesPrice
+  | ApiMessageActionSuggestedPostApproval
   | ApiMessageActionSuggestedPostSuccess | ApiMessageActionSuggestedPostRefund | ApiMessageActionTodoCompletions
   | ApiMessageActionTodoAppendTasks | ApiMessageActionPollAppendAnswer | ApiMessageActionPollDeleteAnswer
   | ApiMessageActionStarGiftPurchaseOffer

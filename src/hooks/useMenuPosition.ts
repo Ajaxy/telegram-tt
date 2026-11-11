@@ -8,9 +8,11 @@ import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { useStateRef } from './useStateRef';
 import useWindow from './useWindow';
 
+type PositionX = 'left' | 'right' | 'center';
+
 interface StaticPositionOptions {
   anchor?: IAnchorPosition;
-  positionX?: 'left' | 'right';
+  positionX?: PositionX;
   positionY?: 'top' | 'bottom';
   transformOriginX?: number;
   transformOriginY?: number;
@@ -43,6 +45,7 @@ export interface Layout {
   isDense?: boolean; //  Allows you to place the menu as close to the edges of the area as possible
 }
 
+const POSITIONS_X: PositionX[] = ['left', 'right', 'center'];
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
 const MENU_POSITION_BOTTOM_MARGIN = 12;
 const EMPTY_RECT = {
@@ -118,7 +121,9 @@ function applyStaticOptions(
   }
 
   if (positionX) {
-    removeExtraClass(bubbleEl, positionX === 'left' ? 'right' : 'left');
+    POSITIONS_X.forEach((position) => {
+      if (position !== positionX) removeExtraClass(bubbleEl, position);
+    });
     addExtraClass(bubbleEl, positionX);
   }
 

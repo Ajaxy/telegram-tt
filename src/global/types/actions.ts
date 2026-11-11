@@ -497,6 +497,11 @@ export interface ActionPayloads {
     startAttach?: string | boolean;
     attach?: string;
     text?: string;
+    noPaidMessagesToken?: string;
+  } & WithTabId;
+  openChatByContactToken: {
+    token: string;
+    noPaidMessagesToken?: string;
   } & WithTabId;
   toggleSavedDialogPinned: {
     id: string;
@@ -792,6 +797,7 @@ export interface ActionPayloads {
     onChatChanged?: CallbackAction;
     linkContext?: LinkContext;
     isDirect?: boolean;
+    noPaidMessagesToken?: string;
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;

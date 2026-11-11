@@ -56,10 +56,13 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
+import useFreeMessagesCode from './hooks/useFreeMessagesCode';
+import useQrCodeSwap from './hooks/useQrCodeSwap';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Loading from '../../ui/Loading';
 import Modal from '../../ui/Modal';
+import QrCodeFeePill from './QrCodeFeePill';
 import QrCodeThemeEditor from './QrCodeThemeEditor';
 import QrFloatingLayer from './QrFloatingLayer';
 import QrThemeWave from './QrThemeWave';
@@ -80,12 +83,15 @@ type StateProps = {
   restrictedEmoji?: ApiStickerSet;
   isCurrentUserPremium?: boolean;
   isSelf?: boolean;
+  paidMessagesStars?: number;
+  permanentFreeLink?: string;
   canEditTheme?: boolean;
   canAnimate?: boolean;
   canPlayAnimatedEmojis?: boolean;
 };
 
 const QR_SIZE = 260;
+const QR_MARGIN = 0;
 const QR_PLANE_SIZE = 32;
 const CAN_COPY_QR_IMAGE = Boolean(CLIPBOARD_ITEM_SUPPORTED && navigator.clipboard.write);
 const CARD_TOP_MARGIN = REM;
@@ -104,6 +110,8 @@ const QrCodeModal = ({
   restrictedEmoji,
   isCurrentUserPremium,
   isSelf,
+  paidMessagesStars,
+  permanentFreeLink,
   canEditTheme,
   canAnimate,
   canPlayAnimatedEmojis,
@@ -117,10 +125,16 @@ const QrCodeModal = ({
     loadQrCodeUniqueGifts,
     setPeerShareTheme,
     openGiftModal,
+    loadGlobalPrivacySettings,
   } = getActions();
 
   const url = username ? formatUsername(username, true) : undefined;
   const isOpen = Boolean(modal) && Boolean(peer) && Boolean(url);
+  const {
+    mode: freeMode, timerEndsAt, link, isLinkPending, getIsCodeExpiring, removeFee, toggleTimer, resetCode, restoreFee,
+  } = useFreeMessagesCode({
+    isOpen, price: paidMessagesStars, plainLink: url, permanentLink: permanentFreeLink,
+  });
 
   const surfaceRef = useRef<HTMLDivElement>();
   const cardWrapperRef = useRef<HTMLDivElement>();
@@ -135,6 +149,8 @@ const QrCodeModal = ({
   }, [isOpen]);
   const usernameRef = useRef<HTMLDivElement>();
   const qrCodeRef = useRef<HTMLDivElement>();
+  const swapCanvasRef = useRef<HTMLCanvasElement>();
+  const shownLinkRef = useRef<string>();
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
   const [draftTheme, setDraftTheme] = useState<ShareThemeDraft>(shareTheme);
   const isDraftDirtyRef = useRef(false);
@@ -216,15 +232,29 @@ const QrCodeModal = ({
   }, [isOpen, shareTheme]);
 
   useEffect(() => {
+    if (isOpen && isSelf) loadGlobalPrivacySettings();
+  }, [isOpen, isSelf, loadGlobalPrivacySettings]);
+
+  useEffect(() => {
     if (activePanel === 'gifts' && !uniqueGifts) {
       loadQrCodeUniqueGifts();
     }
   }, [activePanel, uniqueGifts]);
 
+  const { holdQrCode, presentQrCode, releaseQrCode } = useQrCodeSwap({
+    isOpen,
+    canAnimate,
+    svgSize: QR_SIZE,
+    svgMargin: QR_MARGIN,
+    canvasRef: swapCanvasRef,
+    cardRef,
+    containerRef: qrCodeRef,
+  });
+
   const { result: qrCode, error: qrCodeError } = useAsync(async () => {
     if (!isOpen) return undefined;
 
-    return createStyledQrCode({ size: QR_SIZE, margin: 0, color: colors.ink });
+    return createStyledQrCode({ size: QR_SIZE, margin: QR_MARGIN, color: colors.ink });
   }, [isOpen, colors.ink]);
 
   useEffect(() => {
@@ -236,18 +266,21 @@ const QrCodeModal = ({
   useLayoutEffect(() => {
     if (!isOpen) {
       unmarkQrMounted();
+      shownLinkRef.current = undefined;
       return;
     }
 
-    if (!url || !qrCode) {
+    if (!link || !qrCode) {
       return;
     }
 
     const container = qrCodeRef.current!;
     let isCancelled = false;
+    const isSwap = holdQrCode(shownLinkRef.current, link);
+    shownLinkRef.current = link;
 
-    unmarkQrMounted();
-    qrCode.update({ data: url });
+    if (!isSwap) unmarkQrMounted();
+    qrCode.update({ data: link });
     // The container may be a fresh node after a close/reopen (Modal remounts its
     // children), so always clear and re-append to avoid a blank or duplicated QR
     container.replaceChildren();
@@ -255,11 +288,13 @@ const QrCodeModal = ({
     container.firstElementChild!.classList.add(styles.qrSvg);
 
     void qrCode.getRawData('svg').then(() => {
-      if (!isCancelled) {
-        markQrMounted();
-      }
+      if (isCancelled) return;
+
+      markQrMounted();
+      presentQrCode(link, container.firstElementChild as SVGSVGElement, qrCode._qr!.getModuleCount(), isSwap);
     }, () => {
       if (!isCancelled) {
+        releaseQrCode();
         showNotification({ message: lang('ErrorUnexpected') });
       }
     });
@@ -267,7 +302,7 @@ const QrCodeModal = ({
     return () => {
       isCancelled = true;
     };
-  }, [isOpen, url, qrCode, lang, showNotification]);
+  }, [isOpen, link, qrCode, lang, showNotification, holdQrCode, presentQrCode, releaseQrCode]);
 
   // The card shrinks into the space above an open panel
   const updateCardTransform = useLastCallback(() => {
@@ -361,7 +396,17 @@ const QrCodeModal = ({
   });
 
   const handleCopyQr = useLastCallback(() => {
-    if (!url) return;
+    if (!link) return;
+
+    if (isLinkPending) {
+      showNotification({ message: lang('PleaseWait') });
+      return;
+    }
+
+    if (getIsCodeExpiring()) {
+      showNotification({ message: lang('QrFreeToastExpiring') });
+      return;
+    }
 
     if (CAN_COPY_QR_IMAGE) {
       // The previous slide stays mounted while a wave reveals the new one
@@ -372,7 +417,7 @@ const QrCodeModal = ({
       );
       const blobPromise = generateQrCodeCard({
         snapshot,
-        link: url,
+        link,
         inkColor: colors.ink,
         gradientStops: colors.gradientStops,
       });
@@ -389,7 +434,7 @@ const QrCodeModal = ({
   });
 
   function copyLink() {
-    copyTextToClipboard(url!);
+    copyTextToClipboard(link!);
     showNotification({ message: lang('LinkCopied') });
   }
 
@@ -445,6 +490,7 @@ const QrCodeModal = ({
                 className={buildClassName(styles.qrContainer, isQrMounted && styles.qrContainerReady)}
                 data-stricterdom-ignore
               />
+              {canAnimate && <canvas ref={swapCanvasRef} className={styles.swapCanvas} />}
               <AnimatedIcon
                 tgsUrl={LOCAL_TGS_URLS.QrPlane}
                 size={QR_PLANE_SIZE}
@@ -460,6 +506,20 @@ const QrCodeModal = ({
             </div>
             {usernameText && <div ref={usernameRef} className={styles.username}>{usernameText}</div>}
           </div>
+          {Boolean(paidMessagesStars) && (
+            <QrCodeFeePill
+              price={paidMessagesStars}
+              mode={freeMode}
+              timerEndsAt={timerEndsAt}
+              ink={colors.ink}
+              foreground={colors.foreground}
+              canAnimate={canAnimate}
+              onRemoveFee={removeFee}
+              onToggleTimer={toggleTimer}
+              onReset={resetCode}
+              onRestoreFee={restoreFee}
+            />
+          )}
         </div>
         {canEditTheme && (
           <QrCodeThemeEditor
@@ -511,6 +571,8 @@ export default memo(withGlobal<OwnProps>(
       restrictedEmoji: global.restrictedEmoji,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isSelf,
+      paidMessagesStars: isSelf ? global.settings.byKey.nonContactPeersPaidStars : undefined,
+      permanentFreeLink: global.settings.byKey.permanentFreeMessagesLink,
       canEditTheme: isSelf || canEditChatTheme,
       canAnimate: selectCanAnimateInterface(global),
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),

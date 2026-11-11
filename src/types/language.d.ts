@@ -986,6 +986,19 @@ export interface LangPair {
   'QrCodeGiftsEmptyAbout': undefined;
   'QrCodeGiftsEmptyAboutChat': undefined;
   'QrCodeGiftsBrowse': undefined;
+  'QrFreeNoTimeLimit': undefined;
+  'QrFreeMenuReset': undefined;
+  'QrFreeMenuDisableTimer': undefined;
+  'QrFreeMenuDisableTimerAbout': undefined;
+  'QrFreeMenuEnableTimer': undefined;
+  'QrFreeMenuEnableTimerAbout': undefined;
+  'QrFreeMenuRestoreFee': undefined;
+  'QrFreeToastExpires': undefined;
+  'QrFreeToastPermanent': undefined;
+  'QrFreeToastReset': undefined;
+  'QrFreeToastRestored': undefined;
+  'QrFreeToastExpired': undefined;
+  'QrFreeToastExpiring': undefined;
   'NoOneJoined': undefined;
   'NoOneJoinedYet': undefined;
   'CopyLink': undefined;
@@ -1846,6 +1859,9 @@ export interface LangPair {
   'TitleConfirmPayment': undefined;
   'ButtonUndo': undefined;
   'ConfirmRemoveMessageFee': undefined;
+  'NoPaidTokenInvalid': undefined;
+  'NoPaidTokenUserInvalid': undefined;
+  'ContactLinkInvalid': undefined;
   'StoryTooltipGifSent': undefined;
   'StoryTooltipStickerSent': undefined;
   'StoryTooltipReactionSent': undefined;
@@ -3871,6 +3887,12 @@ export interface LangPairWithVariables<V = LangVariable> {
     'approvalInfo': V;
     'managedBy': V;
   };
+  'QrFreeRemoveFee': {
+    'amount': V;
+  };
+  'QrFreeExpiresIn': {
+    'time': V;
+  };
   'LinkExpiresIn': {
     'time': V;
   };
@@ -4772,6 +4794,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ConfirmDialogRemoveFeeRefundStars': {
     'amount': V;
   };
+  'NoPaidTokenImported': {
+    'user': V;
+  };
   'PaidMessageTransactionDescription': {
     'percent': V;
   };
@@ -4806,6 +4831,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ApiMessageActionPaidMessagesRefundedIncoming': {
     'user': V;
     'stars': V;
+  };
+  'ActionNoPaidTokenUsed': {
+    'user': V;
+  };
+  'ActionNoPaidTokenUsedYou': {
+    'user': V;
   };
   'NotificationGiftIsSale': {
     'gift': V;
@@ -6515,6 +6546,9 @@ export interface LangKeyGroups {
       | 'ActionSuggestedPhoto'
       | 'ActionSuggestedBirthdayYou'
       | 'ActionSuggestedBirthday'
+      | 'NoPaidTokenImported'
+      | 'ActionNoPaidTokenUsed'
+      | 'ActionNoPaidTokenUsedYou'
       | 'GiftInfoBuyGift'
       | 'ActionSuggestedPostIncoming'
       | 'ActionStarGiftPrepaidUpgraded'
@@ -6739,6 +6773,7 @@ export interface LangKeyGroups {
       | 'PollResultsTime'
       | 'TimeIn'
       | 'MessageMetaEditedAtTime'
+      | 'QrFreeExpiresIn'
       | 'LinkExpiresIn'
       | 'InviteLinkExpiresIn'
       | 'LastSeenTodayAt'
@@ -6963,6 +6998,7 @@ export interface LangKeyGroups {
   'amount': {
     keys:
       | 'CheckoutPayPrice'
+      | 'QrFreeRemoveFee'
       | 'GiftSend'
       | 'GiftInfoValueAmount'
       | 'GiftTransferConfirmButton'

@@ -85,6 +85,11 @@
       right: var(--offset-x);
     }
 
+    &.center {
+      left: 50%;
+      translate: -50%;
+    }
+
     &.with-footer {
       padding-bottom: 0;
     }

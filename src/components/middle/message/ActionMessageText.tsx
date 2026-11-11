@@ -963,6 +963,16 @@ const ActionMessageText = ({
         }, { withMarkdown: true });
       }
 
+      case 'noPaidMessagesTokenUsed': {
+        if (isOutgoing) {
+          return lang('ActionNoPaidTokenUsedYou', {
+            user: renderPeerLink(chat?.id, chatTitle || userFallbackText, asPreview),
+          }, { withNodes: true });
+        }
+
+        return lang('ActionNoPaidTokenUsed', { user: senderLink }, { withNodes: true });
+      }
+
       case 'paidMessagesRefunded': {
         const { stars } = action;
         const user = selectPeer(global, chatId);

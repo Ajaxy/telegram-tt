@@ -111,9 +111,16 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
           choose,
           originalParts: [parsedLink.username, parsedLink.appName],
           isDirect: parsedLink.isDirect,
+          noPaidMessagesToken: parsedLink.noPaidMessagesToken,
         });
         return true;
       }
+      case 'contactLink':
+        actions.openChatByContactToken({
+          token: parsedLink.token,
+          noPaidMessagesToken: parsedLink.noPaidMessagesToken,
+        });
+        return true;
       case 'privateChannelLink': {
         actions.openPrivateChannel({
           id: parsedLink.channelId,
@@ -241,7 +248,7 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
     case 'resolve': {
       const {
         domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
-        appname, startapp, mode, story, text,
+        appname, startapp, mode, story, text, free,
       } = params;
 
       const threadId = Number(thread) || Number(topic) || undefined;
@@ -266,6 +273,7 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
             startAttach: startattach,
             attach,
             text,
+            noPaidMessagesToken: free || undefined,
           });
         } else if (story) {
           openStoryViewerByUsername({ username: domain, storyId: Number(story) });
