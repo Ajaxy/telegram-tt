@@ -1048,7 +1048,6 @@ const Composer = ({
   }, [richMessage, canSendTyping, sendMessageAction]);
 
   const isAdmin = chat && isChatAdmin(chat);
-  const [inlineBotHelp, setInlineBotHelp] = useState<string | undefined>();
 
   const insertMention = useLastCallback((peer: ApiPeer, forceFocus = false) => {
     const username = getMainUsername(peer);
@@ -2195,7 +2194,6 @@ const Composer = ({
     inlineBot: isInMessageList ? {
       isEnabled: getIsInlineBotTooltipEnabled,
       onSelect: handleInlineBotSelect,
-      onHelpChange: setInlineBotHelp,
     } : undefined,
     formatter: {
       isEnabled: getIsFormatterEnabled,
@@ -2208,7 +2206,7 @@ const Composer = ({
     getIsEmojiTooltipEnabled, getIsFormatterEnabled, getIsInlineBotTooltipEnabled,
     getIsMentionTooltipEnabled, getIsStickerTooltipEnabled, getRichEditorTooltipContext,
     getTooltipBoundary, handleBotCommandSelect, handleInlineBotSelect, handleStickerSelect,
-    isInMessageList, setInlineBotHelp,
+    isInMessageList,
   ]);
 
   const handleToDoListSend = useLastCallback((todo: ApiNewMediaTodo) => {
@@ -3098,7 +3096,6 @@ const Composer = ({
             threadId={threadId}
             isActive={!hasAttachments}
             placeholder={placeholder}
-            forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && isForCurrentMessageList && !hasAttachments && isInMessageList}
             noFocusInterception={hasAttachments}
             shouldSuppressFocus={isMobile && isSymbolMenuOpen}

@@ -467,8 +467,7 @@
     padding-inline: 0;
   }
 
-  #message-input-text .placeholder-text,
-  #message-input-text .forced-placeholder {
+  #message-input-text .placeholder-text {
     left: 0;
   }
 
@@ -991,7 +990,6 @@
     margin-inline-end: 0.0625rem;
     line-height: 1;
   }
-  .forced-placeholder,
   .placeholder-text {
     pointer-events: none;
 
@@ -1029,12 +1027,15 @@
     }
   }
 
-  .forced-placeholder {
-    z-index: var(--z-below);
-    left: 0;
+  // Zero-size anchor at the caret, the absolute child keeps the editor layout intact and gets clipped by it
+  .inline-bot-help {
+    pointer-events: none;
+    position: relative;
 
-    @media (min-width: 600px) {
-      left: 0.5rem;
+    &-text {
+      position: absolute;
+      color: var(--color-placeholders);
+      white-space: pre;
     }
   }
 

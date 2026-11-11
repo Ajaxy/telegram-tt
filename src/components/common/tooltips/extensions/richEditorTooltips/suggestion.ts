@@ -67,7 +67,7 @@ export function buildBlockMatch($position: ResolvedPos, text: string, query: str
   };
 }
 
-export function getSolePlainTextAtCaret($position: ResolvedPos) {
+export function getSolePlainTextAtCaret($position: ResolvedPos, allowLeadingMention = false) {
   if (
     $position.depth !== 1
     || !$position.parent.isTextblock
@@ -79,8 +79,11 @@ export function getSolePlainTextAtCaret($position: ResolvedPos) {
   }
 
   let isPlainText = true;
-  $position.parent.forEach((node) => {
-    isPlainText &&= node.isText && !node.marks.length;
+  $position.parent.forEach((node, offset, index) => {
+    // The mention picker inserts `@username` as a mention node, which still works as an inline bot prefix
+    const isLeadingMention = allowLeadingMention && index === 0
+      && node.type.name === 'mention' && Boolean(node.attrs.username);
+    isPlainText &&= (node.isText || isLeadingMention) && !node.marks.length;
   });
   return isPlainText ? $position.parent.textContent : undefined;
 }

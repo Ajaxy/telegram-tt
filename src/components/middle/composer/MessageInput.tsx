@@ -35,7 +35,6 @@ import { CODE_HIGHLIGHTING_CHANGED_META, subscribeToCodeLanguageLoad } from '../
 import { debounce, fastRaf, throttleWith } from '../../../util/schedulers';
 import { getUtf8Length } from '../../../util/text/textFormat';
 import tiptapStyles from '../../../util/tiptap/styling.module.scss';
-import renderText from '../../common/helpers/renderText';
 import {
   getRichInputAsFormatted,
   hasUnsupportedRichBlocks,
@@ -77,7 +76,6 @@ export type OwnProps = {
   editableInputId?: string;
   isActive: boolean;
   placeholder: TeactNode | string;
-  forcedPlaceholder?: string;
   noFocusInterception?: boolean;
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
@@ -126,7 +124,6 @@ const MessageInput = ({
   editableInputId,
   isActive,
   placeholder,
-  forcedPlaceholder,
   canSendPlainText,
   isRichInputExpanded,
   canAutoFocus,
@@ -828,24 +825,22 @@ const MessageInput = ({
               onFocus={!isNeedPremium ? onFocusRef.current : undefined}
               onBlur={!isNeedPremium ? onBlurRef.current : undefined}
             />
-            {!forcedPlaceholder && (
-              <span
-                className={buildClassName(
-                  'placeholder-text',
-                  isMainInputLocked && 'with-icon',
-                  isNeedPremium && 'is-need-premium',
-                )}
-                dir="auto"
-              >
-                {isMainInputLocked && <Icon name="lock-filled" className="placeholder-icon" />}
-                {placeholder}
-                {isStoryInput && isNeedPremium && (
-                  <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
-                    {lang('StoryRepliesLockedButton')}
-                  </Button>
-                )}
-              </span>
-            )}
+            <span
+              className={buildClassName(
+                'placeholder-text',
+                isMainInputLocked && 'with-icon',
+                isNeedPremium && 'is-need-premium',
+              )}
+              dir="auto"
+            >
+              {isMainInputLocked && <Icon name="lock-filled" className="placeholder-icon" />}
+              {placeholder}
+              {isStoryInput && isNeedPremium && (
+                <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
+                  {lang('StoryRepliesLockedButton')}
+                </Button>
+              )}
+            </span>
           </div>
         </div>
       </div>
@@ -893,7 +888,6 @@ const MessageInput = ({
           onSubmit={handleFormattedDateSubmit}
         />
       )}
-      {forcedPlaceholder && <span className="forced-placeholder">{renderText(forcedPlaceholder)}</span>}
     </div>
   );
 };
