@@ -1,5 +1,5 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
-import { useLayoutEffect, useRef } from '../../lib/teact/teact';
+import { useLayoutEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { ApiWallpaper } from '../../api/types';
@@ -74,31 +74,15 @@ const Wallpaper = ({
   // With the send animation disabled the gradient never moves, so the 2D render is identical
   // and no WebGL context is spent
   const isStaticGradient = isStatic || !canAnimateGradient;
-  const backgroundChangeRef = useRef<{
-    chatId?: string;
-    theme: ThemeKey;
-    themeSettings?: IThemeSettings;
-    shouldSnap: boolean;
-  }>();
-  const previousBackground = backgroundChangeRef.current;
-  if (!previousBackground || previousBackground.chatId !== chatId
-    || previousBackground.theme !== theme || previousBackground.themeSettings !== themeSettings) {
-    backgroundChangeRef.current = {
-      chatId,
-      theme,
-      themeSettings,
-      shouldSnap: Boolean(chatId && previousBackground?.chatId !== chatId),
-    };
-  }
-  const shouldSnapBackground = backgroundChangeRef.current!.shouldSnap;
 
   const background = useChatBackground({
     theme,
+    chatId,
     wallpaper: themeSettings || EMPTY_THEME_SETTINGS,
     serverWallpaper,
     fallbackWallpaper: fallbackThemeSettings,
     isStatic: isStaticGradient,
-    canAnimatePatternSwap: !isStatic && canAnimateInterface && !shouldSnapBackground,
+    canAnimatePatternSwap: !isStatic && canAnimateInterface,
     source: backgroundMode === 'lockScreen' ? 'lockScreen' : undefined,
   });
   const shouldExtendWallpaper = shouldExtendChatWallpaper && hasChatWallpaper && background.isImage;
@@ -127,7 +111,7 @@ const Wallpaper = ({
       >
         <div
           className={buildClassName(background.backgroundClassNames,
-            shouldSnapBackground && backgroundStyles.noAnimation, bgClassName)}
+            background.shouldSnap && backgroundStyles.noAnimation, bgClassName)}
         >
           {background.hasGradient && (
             <canvas
@@ -138,6 +122,7 @@ const Wallpaper = ({
               className={backgroundStyles.gradientCanvas}
             />
           )}
+          <div ref={background.patternLayerRef} className={backgroundStyles.patternLayer} />
         </div>
         <div className={backgroundStyles.leftExtension} aria-hidden />
         <div className={backgroundStyles.rightExtension} aria-hidden />

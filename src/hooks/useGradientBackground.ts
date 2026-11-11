@@ -3,10 +3,13 @@ import { useEffect, useLayoutEffect, useRef } from '../lib/teact/teact';
 import type { GradientRenderer } from '../util/gradientBackground';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { timingFunctions } from '../util/animation';
 import { createGradientRenderer, renderStaticGradient } from '../util/gradientBackground';
 
 // The gradient is smooth, so a small canvas stretched by CSS keeps it cheap
 const CANVAS_SIZE = 100;
+// Matches `$wallpaper-transition` in `_patternBackground.module.scss`, so colors and doodles change together
+export const WALLPAPER_TRANSITION_MS = 300;
 
 export default function useGradientBackground(
   colors?: string[], shouldSnap?: boolean, isStatic?: boolean, rotation?: number,
@@ -42,7 +45,11 @@ export default function useGradientBackground(
 
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;
-    rendererRef.current = createGradientRenderer(canvas, colors, rotation, { aspectRatio: aspectRatioRef.current });
+    rendererRef.current = createGradientRenderer(canvas, colors, rotation, {
+      aspectRatio: aspectRatioRef.current,
+      colorMorphDurationMs: WALLPAPER_TRANSITION_MS,
+      colorMorphEasing: timingFunctions.easeInOut,
+    });
     if (!rendererRef.current) {
       renderStaticGradient(canvas, colors, rotation, aspectRatioRef.current);
     }

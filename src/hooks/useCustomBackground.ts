@@ -47,13 +47,12 @@ export default function useCustomBackground(
     resolveBackground()
       .then((url) => {
         if (isCancelled || !url) return;
-        const value = `url(${url})`;
-        setResolved((prev) => (prev?.slug === settingValue && prev.source === source && prev.value === value
+        setResolved((prev) => (prev?.slug === settingValue && prev.source === source && prev.value === url
           ? prev
           : {
             slug: settingValue,
             source,
-            value,
+            value: url,
             canKeepAsFallback: Boolean(shouldKeepPrevious),
           }));
       })
@@ -80,7 +79,7 @@ export default function useCustomBackground(
   if (!settingValue) return undefined;
   if (settingValue.startsWith('#')) return settingValue;
   const prefetchedUrl = getResolvedWallpaperUrl(settingValue, source);
-  if (prefetchedUrl) return `url(${prefetchedUrl})`;
+  if (prefetchedUrl) return prefetchedUrl;
   if (resolved?.slug === settingValue && resolved.source === source) return resolved.value;
   return shouldKeepPrevious && resolved && resolved.source === source && resolved.canKeepAsFallback
     ? resolved.value

@@ -1,3 +1,6 @@
+// Matches `WALLPAPER_TRANSITION_MS` and the `easeInOut` gradient morph, so the pattern and colors change together
+$wallpaper-transition: 0.3s cubic-bezier(0.37, 0, 0.63, 1);
+
 .frame {
   pointer-events: none;
   position: absolute;
@@ -78,7 +81,7 @@
   }
 
   :global(body:not(.no-page-transitions)) &.withTransition {
-    transition: background-color 0.2s;
+    transition: background-color $wallpaper-transition;
 
     &.customBgImage::before {
       transition: background-image var(--layer-transition);
@@ -107,42 +110,68 @@
     opacity: 1;
   }
 
-  // A masked pattern whose mask blob hasn't loaded yet: keep the ready canvas hidden so its full,
-  // unmasked gradient doesn't flash over the whole background before `withMaskedPattern` applies.
-  &.maskedPatternPending .gradientCanvas {
-    opacity: 0;
-  }
-
-  :global(body:not(.no-page-transitions)) & {
-    transition: background-color 0.3s ease;
-  }
-
-  :global(body:not(.no-page-transitions)) & .gradientCanvas {
-    transition: opacity 0.3s ease;
-  }
-
-  :global(body:not(.no-page-transitions)) &.withPattern::after {
-    transition: opacity 0.3s ease;
-  }
-
-  &.withPattern::after {
-    content: "";
-
+  .patternLayer {
+    isolation: isolate;
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
 
+    opacity: 0;
+  }
+
+  .patternCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+  }
+
+  // Crossfading layers add up to full opacity. With normal blending, a filled layer would let
+  // the gradient show through it mid-fade.
+  .patternCanvasEntering,
+  .patternCanvasLeaving {
+    mix-blend-mode: plus-lighter;
+  }
+
+  .patternCanvasEntering {
+    animation: pattern-fade-in $wallpaper-transition;
+  }
+
+  .patternCanvasLeaving {
+    animation: pattern-fade-out $wallpaper-transition forwards;
+  }
+
+  .wallpaperSnapshot {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    animation: pattern-fade-out $wallpaper-transition forwards;
+  }
+
+  :global(body:not(.no-page-transitions)) & {
+    transition: background-color $wallpaper-transition;
+  }
+
+  :global(body:not(.no-page-transitions)) & .gradientCanvas,
+  :global(body:not(.no-page-transitions)) &.withPattern .patternLayer {
+    transition: opacity $wallpaper-transition;
+  }
+
+  &.withPattern .patternLayer {
     opacity: var(--pattern-intensity, 0.5);
-    background-image: var(--custom-pattern, url("../assets/pattern.svg"));
-    background-repeat: repeat;
-    background-position: center;
-    background-size: 26.875rem auto;
     mix-blend-mode: soft-light;
   }
 
-  &.withPlainPattern::after {
+  &.withPlainPattern .patternLayer {
     mix-blend-mode: normal;
   }
 
@@ -153,30 +182,38 @@
     background: #000;
   }
 
-  // Masked mode: the pattern masks the animated gradient itself, so the doodles reveal the
-  // gradient over the black base in dark mode
-  &.withMaskedPattern .gradientCanvas {
-    mask-image: var(--custom-pattern, url("../assets/pattern.svg"));
-    mask-repeat: repeat;
-    mask-position: center;
-    mask-size: 26.875rem auto;
+  // Masked mode: the pattern canvas covers the gradient with the base color except for the doodles,
+  // which reveal the gradient over the black base in dark mode
+  &.withMaskedPattern .patternLayer {
+    opacity: 1;
   }
 
   &.withMaskedPattern .gradientCanvas[data-ready] {
     opacity: var(--pattern-intensity, 0.5);
   }
 
-  // The doodles dip out before the mask swaps and fade back in with the regular transition
-  :global(body:not(.no-page-transitions)) &.patternSwapping.withPattern::after,
-  :global(body:not(.no-page-transitions)) &.patternSwapping.withMaskedPattern .gradientCanvas {
+  // Keep the gradient hidden until the current pattern is drawn, so it doesn't flash over the whole background
+  &.maskedPatternPending .gradientCanvas,
+  &.maskedPatternPending .gradientCanvas[data-ready] {
     opacity: 0;
-    transition-duration: 0.15s;
   }
 
   &.noAnimation {
-    &, &::before, &::after, .gradientCanvas {
+    &, &::before, .gradientCanvas, .patternLayer {
       transition: none !important;
     }
+  }
+}
+
+@keyframes pattern-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pattern-fade-out {
+  to {
+    opacity: 0;
   }
 }
 

@@ -181,7 +181,13 @@ function setupWebGl(canvas: HTMLCanvasElement, context: WebGLRenderingContext): 
 
 export function createGradientRenderer(
   canvas: HTMLCanvasElement, colors: string[], rotation?: number,
-  options?: { noPositionAnimation?: boolean; aspectRatio?: number; onRender?: NoneToVoidFunction },
+  options?: {
+    noPositionAnimation?: boolean;
+    aspectRatio?: number;
+    colorMorphDurationMs?: number;
+    colorMorphEasing?: (t: number) => number;
+    onRender?: NoneToVoidFunction;
+  },
 ): GradientRenderer | undefined {
   const outputContext = canvas.getContext('2d');
   if (!outputContext) return undefined;
@@ -250,13 +256,14 @@ export function createGradientRenderer(
   // Eases the color stops and reports whether the morph is active
   function stepColors() {
     if (colorMorphStartedAt === undefined) return false;
-    const progress = Math.min((performance.now() - colorMorphStartedAt) / THEME_SWITCH_DURATION_MS, 1);
+    const duration = options?.colorMorphDurationMs ?? THEME_SWITCH_DURATION_MS;
+    const progress = Math.min((performance.now() - colorMorphStartedAt) / duration, 1);
     if (progress === 1) {
       colorVectors = targetColorVectors;
       colorMorphStartedAt = undefined;
       return false;
     }
-    const ratio = easeThemeSwitch(progress);
+    const ratio = (options?.colorMorphEasing ?? easeThemeSwitch)(progress);
     colorVectors = initialColorVectors.map((color, colorIndex) => color.map((channel, channelIndex) => (
       channel + (targetColorVectors[colorIndex][channelIndex] - channel) * ratio
     )));

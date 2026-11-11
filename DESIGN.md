@@ -347,7 +347,6 @@ Selected bubbles override [--background-color](#background-color) with [--messag
 | --- | --- | --- |
 | <a id="pattern-color"></a>`--pattern-color` | `Runtime wallpaper tint` | No CSS alias; built-in light #4A8E3A8C, dark #48576166 |
 | <a id="theme-background-color"></a>`--theme-background-color` | `Wallpaper model base color` | No; runtime value |
-| <a id="custom-pattern"></a>`--custom-pattern` | `url(resolvedPattern)` | No; inherited runtime URL, with assets/pattern.svg as the fallback; original image for light/single-color overlays, alpha mask for dark multicolor patterns |
 | <a id="pattern-mask"></a>`--pattern-mask` | `url(resolvedPattern)` | No; preview-local URL with no global default; supplies the original overlay image or the dark multicolor alpha mask |
 | <a id="pattern-intensity"></a>`--pattern-intensity` | `Runtime pattern opacity` | No; inherited scalar, consumer fallback 0.5; multicolor patterns use absolute server intensity times the user factor / 10000. The user factor defaults to 100 and preserves explicit saved values. Single-color overlays use the user factor / 100 in light mode and 1 in dark mode |
 | <a id="pattern-dimming"></a>`--pattern-dimming` | `Unset outside dark single-color patterns` | No; inherited runtime opacity for a black layer over the whole wallpaper, computed as 1 minus absolute server intensity times the user factor / 10000; previews use the same calculation |
