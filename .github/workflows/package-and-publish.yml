@@ -37,7 +37,7 @@ jobs:
       should-publish: ${{ steps.extract-version.outputs.should-publish }}
       release-name: ${{ steps.extract-version.outputs.release-name }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
 
       - name: Extract version and tag
         id: extract-version
@@ -137,16 +137,16 @@ jobs:
     runs-on: ${{ matrix.settings.platform }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       - name: Set Xcode version
         if: matrix.settings.platform == 'macos-latest'
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
           xcode-version: latest-stable
 
       - name: Setup Node.js ${{ vars.NODE_VERSION }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: ${{ vars.NODE_VERSION }}
 
@@ -163,7 +163,7 @@ jobs:
 
       - name: Cache node modules
         id: npm-cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6.1.0
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -196,13 +196,13 @@ jobs:
 
       - name: Install DigiCert Client tools (Windows)
         if: matrix.settings.platform == 'windows-latest'
-        uses: digicert/code-signing-software-trust-action@v1.2.0
+        uses: digicert/code-signing-software-trust-action@v1.2.1
         with:
           simple-signing-mode: true
 
       - name: Define Tauri configuration overrides
         id: config-overrides
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9.0.0
         env:
           BASE_URL: ${{ vars.BASE_URL }}
           UPDATER_PUBLIC_KEY: ${{ secrets.UPDATER_PUBLIC_KEY }}
@@ -220,7 +220,7 @@ jobs:
             core.setOutput("json", configJson);
 
       - name: Build, package and publish
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@action-v1.0.0
         id: build-tauri
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
@@ -235,9 +235,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.UPDATER_PRIVATE_KEY_PASSWORD }}
           WITH_UPDATER: ${{ needs.get-version.outputs.should-publish != '' && 'true' || 'false' }}
         with:
-          args: "-c ${{ steps.config-overrides.outputs.json }} ${{ matrix.settings.args }}"
-          includeDebug: ${{ needs.get-version.outputs.should-publish == '' && !inputs.forceRelease }}
-          includeRelease: ${{ needs.get-version.outputs.should-publish != '' || inputs.forceRelease }}
+          args: >-
+            -c ${{ steps.config-overrides.outputs.json }} ${{ matrix.settings.args }}
+            ${{ needs.get-version.outputs.should-publish == '' && !inputs.forceRelease && '--debug' || '' }}
           releaseId: ${{ needs.create-release.outputs.releaseId }}
           owner: ${{ steps.repository-info.outputs.owner }}
           repo: ${{ steps.repository-info.outputs.repo }}
@@ -278,7 +278,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: matrix.settings.platform == 'macos-latest'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ steps.file-info.outputs.name }}-${{ steps.file-info.outputs.architecture }}.dmg
           path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.name }}.dmg
@@ -286,7 +286,7 @@ jobs:
       # Windows release
       - name: Upload Windows artifact (Windows)
         if: matrix.settings.platform == 'windows-latest'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ steps.file-info.outputs.filename }}
           path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
@@ -294,7 +294,7 @@ jobs:
       # Linux release
       - name: Upload Linux artifact (Linux)
         if: matrix.settings.platform == 'ubuntu-22.04'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: ${{ steps.file-info.outputs.filename }}
           path: ${{ steps.file-info.outputs.path }}/${{ steps.file-info.outputs.filename }}
@@ -306,7 +306,7 @@ jobs:
     env:
       RELEASE_ID: ${{ needs.create-release.outputs.releaseId }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
 
       - name: Publish release
         run: |
