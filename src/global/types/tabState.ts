@@ -110,6 +110,7 @@ import type {
   ProfileEditProgress,
   ProfileTabType,
   ResaleGiftsFilterOptions,
+  RoundVideoMode,
   ScrollTargetPosition,
   SettingsConfirmation,
   SettingsHighlight,
@@ -487,6 +488,8 @@ export type TabState = {
       direction: 'next' | 'prev';
       isAuto?: boolean;
     };
+    // Round video leaves its message for the floating player even while the message is visible
+    roundVideoMode?: RoundVideoMode;
   };
 
   isAudioPlaylistModalOpen?: boolean;

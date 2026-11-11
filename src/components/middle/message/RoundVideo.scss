@@ -138,7 +138,8 @@
     animation: 1s linear loader-rectangle infinite;
   }
 
-  .transcribe-button {
+  .transcribe-button,
+  .upscale-button {
     position: absolute;
     top: 1.6875rem;
     left: 0.1875rem;
@@ -153,6 +154,18 @@
     &:hover {
       background: var(--message-service-background) !important;
     }
+  }
+
+  // Mirrors the duration badge and touches the circle edge at its height
+  .upscale-button {
+    top: 0.1875rem;
+    right: 1.8125rem;
+    left: auto;
+
+    width: 1.75rem;
+    height: 1.125rem;
+    padding: 0;
+    border-radius: 0.75rem;
   }
 
   .unread::after {

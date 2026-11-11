@@ -59,7 +59,9 @@ import {
   selectTabState,
   selectViewportIds,
 } from '../../selectors';
-import { makeMessageTrackKeyFrom, selectCurrentPlaylistKey } from '../../selectors/audioPlayer';
+import {
+  makeMessageTrackKeyFrom, selectCurrentPlaylistKey, selectPlaybackRoundVideo,
+} from '../../selectors/audioPlayer';
 import { selectMessageDownloadableMedia } from '../../selectors/media';
 import { selectDraft, selectReplyStack, selectThreadInfo } from '../../selectors/threads';
 import { getPeerStarsForMessage } from '../api/messages';
@@ -238,6 +240,8 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
       isMuted: isMuted || tabState.audioPlayer.isMuted,
       shuffle: hasSourceChanged ? undefined : selectTabState(global, tabId).audioPlayer.shuffle,
       pendingStep: undefined,
+      // Only consecutive round videos keep the enlarged or detached player
+      roundVideoMode: selectPlaybackRoundVideo(global, item) ? tabState.audioPlayer.roundVideoMode : undefined,
     },
   }, tabId);
 

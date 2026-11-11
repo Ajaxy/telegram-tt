@@ -52,6 +52,14 @@ export function selectPlaybackMessage<T extends GlobalState>(global: T, itemRef?
     : selectChatMessageOrEphemeral(global, itemRef.chatId, itemRef.messageId);
 }
 
+// Round videos without TTL are the ones that can leave their message for the floating player
+export function selectPlaybackRoundVideo<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
+  if (itemRef?.type !== 'message' || itemRef.documentId) return undefined;
+
+  const message = selectPlaybackMessage(global, itemRef);
+  return message?.content.video?.isRound && !hasMessageTtl(message) ? message : undefined;
+}
+
 export function selectPlaybackMedia<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
   switch (itemRef?.type) {
     case 'message':

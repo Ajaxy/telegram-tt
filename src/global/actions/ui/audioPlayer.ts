@@ -72,6 +72,17 @@ addActionHandler('setAudioPlaybackSource', (global, actions, payload): ActionRet
   return global;
 });
 
+addActionHandler('setRoundVideoMode', (global, actions, payload): ActionReturnType => {
+  const { mode, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    audioPlayer: {
+      ...selectTabState(global, tabId).audioPlayer,
+      roundVideoMode: mode,
+    },
+  }, tabId);
+});
+
 addActionHandler('handleAudioPlaybackEnded', (global, actions, payload): ActionReturnType => {
   const { withAutoAdvance, tabId = getCurrentTabId() } = payload;
   if (selectCurrentTrackKey(global, tabId) !== playbackController.getState().trackKey) return;

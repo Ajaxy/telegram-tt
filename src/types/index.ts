@@ -440,6 +440,8 @@ export type PlaybackCapabilities = {
   withAutoAdvance: boolean;
 };
 
+export type RoundVideoMode = 'mini' | 'large';
+
 export type RepeatMode = 'none' | 'one' | 'all';
 export type OrderMode = 'default' | 'reverse' | 'shuffle';
 

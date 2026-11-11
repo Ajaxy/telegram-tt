@@ -26,7 +26,6 @@ import * as playbackController from '../../../util/audioPlayback/playbackControl
 import { registerRoundVideoContainer } from '../../../util/audioPlayback/roundVideoContainers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dates/duration';
-import { clamp } from '../../../util/math';
 import safePlay from '../../../util/safePlay';
 import stopEvent from '../../../util/stopEvent';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
@@ -43,6 +42,7 @@ import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useRoundVideoSeek, { getRingPoint } from '../hooks/useRoundVideoSeek';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Icon from '../../common/icons/Icon';
@@ -78,26 +78,7 @@ const PROGRESS_CENTER = ROUND_VIDEO_DIMENSIONS_PX / 2;
 const PROGRESS_MARGIN = 6;
 const PROGRESS_CIRCUMFERENCE = (PROGRESS_CENTER - PROGRESS_MARGIN) * 2 * Math.PI;
 const PROGRESS_THROTTLE = 16; // Min period needed for `playerEl.currentTime` to update
-const FULL_TURN = Math.PI * 2;
-const QUARTER_TURN = Math.PI / 2;
-const PROGRESS_MIDPOINT = 0.5;
-const SEEK_STEP = 5;
-const SEEK_END_OFFSET = 0.01;
-const SEEK_WRAP_THRESHOLD = 0.9;
 const SINGLE_SOURCE: PlaybackSource = { type: 'single' };
-
-type SeekPoint = {
-  x: number;
-  y: number;
-};
-
-type SeekState = {
-  pointerId: number;
-  point: SeekPoint;
-  turns: number;
-  progress: number;
-  frameTime?: number;
-};
 
 const RoundVideo = ({
   message,
@@ -119,7 +100,7 @@ const RoundVideo = ({
 }: OwnProps) => {
   const {
     cancelMediaDownload, openOneTimeMediaModal, transcribeAudio,
-    openAudioPlayer,
+    openAudioPlayer, setRoundVideoMode,
   } = getActions();
 
   const lang = useLang();
@@ -129,7 +110,6 @@ const RoundVideo = ({
   const circleRef = useRef<SVGCircleElement>();
   const progressRef = useRef<HTMLDivElement>();
   const progressThumbRef = useRef<SVGCircleElement>();
-  const seekStateRef = useRef<SeekState>();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
@@ -147,6 +127,10 @@ const RoundVideo = ({
   ));
   const isMuted = useSelector(useCallback(
     (global: GlobalState) => isCurrent && Boolean(selectTabState(global).audioPlayer.isMuted),
+    [isCurrent],
+  ));
+  const isDetached = useSelector(useCallback(
+    (global: GlobalState) => isCurrent && Boolean(selectTabState(global).audioPlayer.roundVideoMode),
     [isCurrent],
   ));
   const isMediaUnread = message.isMediaUnread;
@@ -175,7 +159,8 @@ const RoundVideo = ({
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
   useMediaTransition({ hasMediaData: !noThumb, ref: thumbRef });
 
-  const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
+  // The current circle plays in the pooled player, so its paused preview is not awaited
+  const isTransferring = (isLoadAllowed && !isPlayerReady && !(isCurrent && fullMediaData)) || isDownloading;
   const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
@@ -204,7 +189,7 @@ const RoundVideo = ({
   });
   const isPaused = hasTtl ? isOneTimePaused : !isPlaying;
   const currentTime = hasTtl ? oneTimeCurrentTime : Math.floor(playProgress * duration);
-  const canSeek = isActivated && isPaused && !hasTtl && !isDownloading;
+  const canSeek = isActivated && isPaused && !hasTtl && !isDownloading && !isDetached;
 
   const {
     ref: playbackButtonRef,
@@ -244,65 +229,23 @@ const RoundVideo = ({
     circleRef.current.setAttribute('stroke-dashoffset', strokeDashOffset.toString());
     const thumb = progressThumbRef.current;
     if (thumb) {
-      const angle = progress * FULL_TURN - QUARTER_TURN;
-      const radius = PROGRESS_CENTER - PROGRESS_MARGIN;
-      thumb.setAttribute('cx', String(PROGRESS_CENTER + Math.cos(angle) * radius));
-      thumb.setAttribute('cy', String(PROGRESS_CENTER + Math.sin(angle) * radius));
+      const { x, y } = getRingPoint(progress, PROGRESS_CENTER, PROGRESS_CENTER - PROGRESS_MARGIN);
+      thumb.setAttribute('cx', String(x));
+      thumb.setAttribute('cy', String(y));
     }
   }, [isActivated, canSeek, getThrottledProgress]);
 
-  // Seeking only after the previous frame is shown keeps frames updating while the pointer moves
-  const seekFrame = useLastCallback(() => {
-    requestMutation(() => {
-      const seekState = seekStateRef.current;
-      const playerEl = getPlayer();
-      if (!seekState || playerEl.seeking || peek(trackKey) !== playerEl) return;
-
-      const time = getSeekTime(playerEl, seekState.progress);
-      if (time === seekState.frameTime) return;
-
-      seekState.frameTime = time;
-      playerEl.currentTime = time;
-    });
+  const {
+    handleSeekStart, handleSeekMove, handleSeekEnd, handleSeekCancel, handleSeekKeyDown,
+  } = useRoundVideoSeek({
+    ref: progressRef, trackKey, canSeek, getProgress, previewProgress,
   });
-
-  const handleSeekFrame = useLastCallback(() => {
-    const seekState = seekStateRef.current;
-    if (!seekState) return;
-
-    // Seek events report the shown frame, which lags behind the pointer
-    previewProgress(seekState.progress);
-    seekFrame();
-  });
-
-  useEffect(() => {
-    if (!canSeek) return undefined;
-
-    const progressEl = progressRef.current!;
-    const playerEl = getPlayer();
-    // Native listeners keep seeking away from message selection, swipe-to-reply and long press
-    progressEl.addEventListener('touchstart', stopEvent, { passive: false });
-    progressEl.addEventListener('mousedown', stopEvent);
-    progressEl.addEventListener('dblclick', stopEvent);
-    playerEl.addEventListener('seeking', handleSeekFrame);
-    playerEl.addEventListener('seeked', handleSeekFrame);
-
-    return () => {
-      seekStateRef.current = undefined;
-      progressEl.removeEventListener('touchstart', stopEvent);
-      progressEl.removeEventListener('mousedown', stopEvent);
-      progressEl.removeEventListener('dblclick', stopEvent);
-      playerEl.removeEventListener('seeking', handleSeekFrame);
-      playerEl.removeEventListener('seeked', handleSeekFrame);
-    };
-  }, [canSeek]);
 
   const shouldPlay = Boolean(fullMediaData && isIntersecting && (hasTtl || !isActivated));
 
   const stopPlaying = useLastCallback(() => {
     setIsOneTimeActivated(false);
     unmarkOneTimePaused();
-    seekStateRef.current = undefined;
     setOneTimeProgress(0);
     const playerEl = playerRef.current;
     if (!playerEl) return;
@@ -327,7 +270,6 @@ const RoundVideo = ({
     if (isActivated) return;
 
     unmarkOneTimePaused();
-    seekStateRef.current = undefined;
     setOneTimeProgress(0);
   }, [isActivated, setOneTimeProgress]);
 
@@ -360,6 +302,8 @@ const RoundVideo = ({
         };
       }
       if (!isActivated) {
+        // A circle started from the chat plays in place, even if the previous one was enlarged
+        if (selectTabState(getGlobal()).audioPlayer.roundVideoMode) setRoundVideoMode({ mode: undefined });
         openAudioPlayer({
           item: {
             type: 'message', chatId: message.chatId, messageId: message.id,
@@ -411,6 +355,11 @@ const RoundVideo = ({
       return;
     }
 
+    if (isDetached) {
+      setRoundVideoMode({ mode: undefined });
+      return;
+    }
+
     if (!fullMediaData && !isCurrent) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
 
@@ -438,8 +387,6 @@ const RoundVideo = ({
   }, [hasTtl, isActivated, isMediaUnread, onReadMedia]);
 
   const handleTimeUpdate = useLastCallback(() => {
-    if (seekStateRef.current) return;
-
     const playerEl = getPlayer();
     if (!Number.isFinite(playerEl.duration) || playerEl.duration <= 0) return;
 
@@ -451,102 +398,12 @@ const RoundVideo = ({
     if (isActivated) markOneTimePaused();
   });
 
-  const handleSeekStart = useLastCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const playerEl = getPlayer();
-    if (!canSeek || e.button !== 0 || !e.isPrimary || seekStateRef.current
-      || !Number.isFinite(playerEl.duration) || playerEl.duration <= 0) return;
-
-    stopEvent(e);
-    e.currentTarget.setPointerCapture(e.pointerId);
-    const point = getSeekPoint(e);
-    const angle = getSeekAngle(point);
-    const currentProgress = getProgress();
-    // The top of the ring represents both ends; grab the one nearest the current position
-    const turns = Math.abs(angle - currentProgress) > SEEK_WRAP_THRESHOLD ? Math.sign(currentProgress - angle) : 0;
-    const progress = clamp(angle + turns, 0, 1);
-    seekStateRef.current = {
-      pointerId: e.pointerId, point, turns, progress,
-    };
-    previewProgress(progress);
-    seekFrame();
-  });
-
-  const handleSeekMove = useLastCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const seekState = seekStateRef.current;
-    if (!seekState || seekState.pointerId !== e.pointerId) return;
-
-    stopEvent(e);
-    const point = getSeekPoint(e);
-    // Crossing the top past an end pins the progress there until the pointer crosses back
-    if (isCrossingTop(seekState.point, point)) {
-      seekState.turns = clamp(seekState.turns + (point.x < 0 ? -1 : 1), -1, 1);
-    }
-    seekState.point = point;
-    seekState.progress = clamp(getSeekAngle(point) + seekState.turns, 0, 1);
-    previewProgress(seekState.progress);
-    seekFrame();
-  });
-
-  const handleSeekEnd = useLastCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    const seekState = seekStateRef.current;
-    if (!seekState || seekState.pointerId !== e.pointerId) return;
-
-    handleSeekMove(e);
-    seekStateRef.current = undefined;
-    const playerEl = getPlayer();
-    const time = getSeekTime(playerEl, seekState.progress);
-    requestMutation(() => {
-      if (peek(trackKey) !== playerEl) return;
-
-      playerEl.currentTime = time;
-    });
-  });
-
-  const handleSeekCancel = useLastCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (seekStateRef.current?.pointerId !== e.pointerId) return;
-
-    seekStateRef.current = undefined;
-    const playerEl = getPlayer();
-    previewProgress(playerEl.currentTime / playerEl.duration);
-  });
-
-  const handleSeekKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!canSeek || seekStateRef.current) return;
-
-    const playerEl = getPlayer();
-    if (!Number.isFinite(playerEl.duration) || playerEl.duration <= 0) return;
-
-    let time: number;
-    switch (e.key) {
-      case 'ArrowLeft':
-      case 'ArrowDown':
-        time = playerEl.currentTime - SEEK_STEP;
-        break;
-      case 'ArrowRight':
-      case 'ArrowUp':
-        time = playerEl.currentTime + SEEK_STEP;
-        break;
-      case 'Home':
-        time = 0;
-        break;
-      case 'End':
-        time = playerEl.duration;
-        break;
-      default:
-        return;
-    }
-    stopEvent(e);
-    time = clamp(time, 0, Math.max(0, playerEl.duration - SEEK_END_OFFSET));
-    previewProgress(time / playerEl.duration);
-    requestMutation(() => {
-      if (peek(trackKey) !== playerEl) return;
-
-      playerEl.currentTime = time;
-    });
-  });
-
   const handleTranscribe = useLastCallback(() => {
     transcribeAudio({ chatId: message.chatId, messageId: message.id });
+  });
+
+  const handleUpscale = useLastCallback(() => {
+    setRoundVideoMode({ mode: 'large' });
   });
 
   function renderPlayWrapper() {
@@ -706,6 +563,17 @@ const RoundVideo = ({
           {(!isActivated || isPaused || isMuted) && <Icon name="muted" className="muted-icon" />}
         </MediaBadge>
       )}
+      {isActivated && !hasTtl && !isDetached && (
+        <Button
+          className="upscale-button"
+          ariaLabel={lang('AccSwitchToFullscreen')}
+          noFastClick
+          shouldStopPropagation
+          onClick={handleUpscale}
+        >
+          <Icon name="fullscreen" />
+        </Button>
+      )}
       {canTranscribe && (
         <Button
           onClick={handleButtonClick}
@@ -734,29 +602,5 @@ const RoundVideo = ({
     </div>
   );
 };
-
-function getSeekPoint(e: React.PointerEvent<HTMLDivElement>): SeekPoint {
-  const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-  return {
-    x: (e.clientX - left) / width - PROGRESS_MIDPOINT,
-    y: (e.clientY - top) / height - PROGRESS_MIDPOINT,
-  };
-}
-
-function getSeekAngle({ x, y }: SeekPoint) {
-  const angle = Math.atan2(x, -y) / FULL_TURN;
-  return angle < 0 ? angle + 1 : angle;
-}
-
-function getSeekTime(playerEl: HTMLMediaElement, progress: number) {
-  return Math.min(progress * playerEl.duration, Math.max(0, playerEl.duration - SEEK_END_OFFSET));
-}
-
-function isCrossingTop(from: SeekPoint, to: SeekPoint) {
-  if ((from.x < 0) === (to.x < 0)) return false;
-
-  // The segment between pointer events meets the vertical axis above the center
-  return from.y - (from.x * (to.y - from.y)) / (to.x - from.x) < 0;
-}
 
 export default RoundVideo;

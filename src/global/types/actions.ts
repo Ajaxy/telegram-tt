@@ -117,6 +117,7 @@ import type {
   ProfileTabType,
   RepeatMode,
   ResaleGiftsFilterOptions,
+  RoundVideoMode,
   ScrollTargetPosition,
   SendMessageParams,
   SettingsConfirmation,
@@ -2183,6 +2184,9 @@ export interface ActionPayloads {
   } & WithTabId;
   setAudioPlaybackSource: {
     source: PlaybackSource;
+  } & WithTabId;
+  setRoundVideoMode: {
+    mode?: RoundVideoMode;
   } & WithTabId;
   playNextTrack: {
     isAuto?: boolean;
