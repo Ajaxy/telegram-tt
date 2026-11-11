@@ -52,12 +52,13 @@ const DeleteProfilePhotoModal = ({
       onEnter={handleDeletePhoto}
       className="delete dialog-buttons-column"
       title={lang('AreYouSure')}
+      isNativeDialog
     >
       <div className="dialog-buttons mt-2">
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeletePhoto}>
           {lang('PreviewDeletePhoto')}
         </Button>
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose} autoFocus>{lang('Cancel')}</Button>
       </div>
     </Modal>
   );
