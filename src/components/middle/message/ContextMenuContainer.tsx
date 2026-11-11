@@ -46,6 +46,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectActiveDownloads,
+  selectAlbumMessageIdToEdit,
   selectAllowedMessageActionsSlow,
   selectBot,
   selectCanForwardMessage,
@@ -546,7 +547,8 @@ const ContextMenuContainer = ({
         messageId: message.id,
       });
     } else {
-      startEditingMessage({ messageId: message.id });
+      const messageId = message.isInAlbum ? selectAlbumMessageIdToEdit(getGlobal(), message) : message.id;
+      startEditingMessage({ messageId });
     }
     closeMenu();
   });
