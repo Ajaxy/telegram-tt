@@ -63,6 +63,7 @@ export interface ApiChat {
   isMonoforum?: boolean;
   isBotForum?: boolean;
   withForumTabs?: boolean;
+  withForumSidebar?: boolean;
   linkedMonoforumId?: string;
   linkedCommunityId?: string;
   isCollapsedInDialogs?: boolean;

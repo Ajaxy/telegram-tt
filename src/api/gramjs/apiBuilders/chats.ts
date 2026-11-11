@@ -142,6 +142,7 @@ function buildApiChatFieldsFromPeerEntity(
     level: channel?.level,
     hasAutoTranslation: channel?.autotranslation,
     withForumTabs: channel?.forumTabs,
+    withForumSidebar: channel?.forumSidebar,
 
     ...buildApiChatPermissions(peerEntity),
     ...buildApiChatRestrictions(peerEntity),

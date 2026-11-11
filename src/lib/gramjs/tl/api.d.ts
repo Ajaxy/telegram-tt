@@ -1671,6 +1671,7 @@ namespace Api {
     botCanManageBots?: true;
     botGuestchat?: true;
     botGuard?: true;
+    botForumSidebar?: true;
     id: long;
     accessHash?: long;
     firstName?: string;
@@ -1725,6 +1726,7 @@ namespace Api {
     botCanManageBots?: true;
     botGuestchat?: true;
     botGuard?: true;
+    botForumSidebar?: true;
     id: long;
     accessHash?: long;
     firstName?: string;
@@ -1936,6 +1938,7 @@ namespace Api {
     monoforum?: true;
     forumTabs?: true;
     inNews?: true;
+    forumSidebar?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -1991,6 +1994,7 @@ namespace Api {
     monoforum?: true;
     forumTabs?: true;
     inNews?: true;
+    forumSidebar?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -7508,6 +7512,7 @@ namespace Api {
     revokePmInbox?: true;
     blockedMode?: true;
     forceTryIpv6?: true;
+    fpnvAllowed?: true;
     date: int;
     expires: int;
     testMode: Bool;
@@ -7557,6 +7562,7 @@ namespace Api {
     revokePmInbox?: true;
     blockedMode?: true;
     forceTryIpv6?: true;
+    fpnvAllowed?: true;
     date: int;
     expires: int;
     testMode: Bool;
@@ -31658,10 +31664,12 @@ namespace Api {
       channel: Api.TypeInputChannel;
       enabled: Bool;
       tabs: Bool;
+      sidebar: Bool;
     }, Api.TypeUpdates> {
       channel: Api.TypeInputChannel;
       enabled: Bool;
       tabs: Bool;
+      sidebar: Bool;
     }
     export class ToggleAntiSpam extends Request<{
       channel: Api.TypeInputChannel;

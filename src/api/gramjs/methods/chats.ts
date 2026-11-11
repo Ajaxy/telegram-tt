@@ -2004,6 +2004,7 @@ export function toggleForum({
     channel: buildInputChannel(id, accessHash),
     enabled: isEnabled,
     tabs: Boolean(chat.withForumTabs),
+    sidebar: Boolean(chat.withForumSidebar),
   }), {
     shouldReturnTrue: true,
     shouldThrow: true,
