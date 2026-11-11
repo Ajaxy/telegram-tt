@@ -594,7 +594,8 @@ const Message = ({
     && !isLocalOnly
     && readMetricsMessage.viewsCount !== undefined;
   const hasMessageReply = isReplyToMessage(message) && !shouldHideReply
-    && (!isEphemeralReply || Boolean(replyMessage));
+    && (!isEphemeralReply || Boolean(replyMessage))
+    && (!isInDocumentGroup || isFirstInDocumentGroup);
 
   useMessageReadMetrics({
     messageRef: ref,
