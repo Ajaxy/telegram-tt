@@ -231,16 +231,16 @@ These roles are shared by incoming and outgoing messages. Fixed values remain se
 
 | Variable | Purpose | Default | Default reference / inheritance |
 | --- | --- | --- | --- |
-| <a id="action-message-bg"></a>`--action-message-bg` | Dates, service chips and other neutral translucent message surfaces | Light `#00000040`, dark `#00000080` | No CSS alias; assigned on the document root and copied into chat theme overrides from the active light/dark mode; independent of wallpaper and server theme colors |
+| <a id="action-message-bg"></a>`--action-message-bg` | Dates, service chips and other neutral translucent message surfaces | Wallpaper tint densified to 85% alpha against the wallpaper's average color; light `#00000040`, dark `#00000080` when no tint is known | No CSS alias; assigned on the document root from the global wallpaper and copied into chat theme overrides from the chat's wallpaper (custom, server theme or peer) |
 | <a id="message-service-background"></a>`--message-service-background` | Service chips, custom-shape content and inline-button surfaces | `var(--action-message-bg)` | Live CSS alias: [--action-message-bg](#action-message-bg), resolved on the document root for inherited modal/preview content and redeclared by chat theme overrides |
 | <a id="message-service-text"></a>`--message-service-text` | Text/icons on service surfaces | `#ffffff` | No; generated palette value |
 | <a id="message-media-background"></a>`--message-media-background` | Metadata/background overlay on photos and videos | `#000000b3` | No; generated palette value |
 | <a id="message-media-text"></a>`--message-media-text` | Text/icons on media overlays | `#ffffff` | No; generated palette value |
 | <a id="message-paid-background"></a>`--message-paid-background` | Paid-reaction fill | `#ffb727` | No; generated palette value |
-| <a id="message-paid-text"></a>`--message-paid-text` | Paid-reaction foreground | `#000000` | No; generated palette value |
+| <a id="message-paid-text"></a>`--message-paid-text` | Paid-reaction foreground | `#ffffff` | No; generated palette value |
 | <a id="message-color-transition-duration"></a>`--message-color-transition-duration` | Color transition duration of message surfaces | Unset; consumer fallback applies | No alias; theme application temporarily sets `0ms` for paired-color updates, then removes it |
 
-The stylesheet-only fallback for [--message-paid-text](#message-paid-text) is `#202124`; the initialized palette assigns black. Outside `.Message`, the document root assigns [--message-code-dark](#message-code-dark) from the incoming value, so composer and Instant View code blocks follow the app surface. Code text uses [--color-text](#color-text). Light code surfaces use the quote tint, so a code block in forwarded or quoted content matches the sender's peer-color bar. Service/date colors depend on the wallpaper and can be translucent. These tables describe the current color rules; they do not assert a numeric contrast bound.
+Outside `.Message`, the document root assigns [--message-code-dark](#message-code-dark) from the incoming value, so composer and Instant View code blocks follow the app surface. Code text uses [--color-text](#color-text). Light code surfaces use the quote tint, so a code block in forwarded or quoted content matches the sender's peer-color bar. Service/date colors depend on the wallpaper and can be translucent. These tables describe the current color rules; they do not assert a numeric contrast bound.
 
 ### Compatibility colors
 

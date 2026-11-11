@@ -86,6 +86,19 @@ export function buildHexFromColor(color: Color) {
   return serializeColor(color, { format: 'hex', collapse: false, alpha: false });
 }
 
+// Raises the alpha of a translucent tint, keeping its composite over the average backdrop color unchanged
+export function buildDenseTint(tintHex: string, backdropHexColors: string[], alpha: number) {
+  const tint = buildColorFromHex(tintHex);
+  const tintAlpha = tint.alpha ?? 1;
+  if (tintAlpha >= alpha || !backdropHexColors.length) return tintHex;
+
+  const backdrop = backdropHexColors.map(buildColorFromHex)
+    .reduce((average, color, i) => mixColors(average, color, 1 / (i + 1), { space: 'srgb' }));
+  const denseTint = mixColors(backdrop, { ...tint, alpha: 1 }, tintAlpha / alpha, { space: 'srgb' });
+
+  return serializeColor({ ...denseTint, alpha }, { format: 'hex', collapse: false, alpha: true });
+}
+
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
 export function getPatternColor(color: Color) {
   const [h, initialS, initialV] = convertColor(color, 'hsv').coords;

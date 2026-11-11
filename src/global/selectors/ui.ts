@@ -4,6 +4,7 @@ import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import memoized from '../../util/memoized';
 import { buildThemePalette } from '../../util/theme';
 import {
   buildThemeSettingsFromWallpaper, getActionMessageBg, getChatThemeEntry, getThemeWallpaper,
@@ -17,6 +18,7 @@ import { selectSharedSettings } from './sharedState';
 import { selectIsStatisticsShown } from './statistics';
 import { selectTabState } from './tabs';
 
+const getActionMessageBgMemo = memoized(getActionMessageBg);
 const WALLPAPER_SETTINGS = new WeakMap<ApiWallpaper, IThemeSettings>();
 const GLOBAL_WALLPAPER_SETTINGS = new WeakMap<IThemeSettings, IThemeSettings>();
 
@@ -85,8 +87,12 @@ export function selectThemeValues<T extends GlobalState>(global: T, themeKey: Th
   return selectSharedSettings(global).themes[themeKey];
 }
 
-export function selectActionMessageBg<T extends GlobalState>(global: T) {
-  return getActionMessageBg(selectTheme(global));
+export function selectActionMessageBg<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return getActionMessageBgMemo(selectTheme(global), selectChatWallpaperSettings(global, chatId, tabId));
 }
 
 export function selectChatThemeSettings<T extends GlobalState>(

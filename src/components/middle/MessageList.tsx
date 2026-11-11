@@ -1624,7 +1624,7 @@ export default memo(withGlobal<OwnProps>(
       shouldScrollToBottom,
       reactionPollingPause: global.reactionPollingPause,
       serverThemeSettings: selectChatThemeSettings(global, chatId),
-      actionMessageBg: selectActionMessageBg(global),
+      actionMessageBg: selectActionMessageBg(global, chatId),
       canAnimateTheme: selectCanAnimateInterface(global),
       areOwnGradientColorsAnimated: selectChatThemeSettings(global, chatId)?.areOutgoingColorsAnimated,
       theme: selectTheme(global),

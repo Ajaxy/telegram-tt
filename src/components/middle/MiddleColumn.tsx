@@ -761,7 +761,7 @@ export default memo(withGlobal<OwnProps>(
       customBackground,
       backgroundColor,
       patternColor,
-      actionMessageBg: selectActionMessageBg(global),
+      actionMessageBg: selectActionMessageBg(global, currentMessageList?.chatId),
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isBackgroundBlurred,

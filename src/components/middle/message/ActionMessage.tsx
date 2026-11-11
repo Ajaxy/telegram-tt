@@ -846,7 +846,7 @@ export default memo(withGlobal<OwnProps>(
     const shouldLoopStickers = isTransfer ? selectShouldLoopStickers(global) : undefined;
 
     return {
-      actionMessageBg: selectActionMessageBg(global),
+      actionMessageBg: selectActionMessageBg(global, message.chatId),
       sender,
       currentUserId: global.currentUserId,
       isCurrentUserPremium,

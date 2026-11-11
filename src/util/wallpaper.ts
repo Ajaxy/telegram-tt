@@ -6,7 +6,7 @@ import type {
 import type { IThemeSettings, ThemeKey } from '../types';
 
 import { DARK_THEME_BG_COLOR } from '../config';
-import { buildColorFromHex, getPatternColor } from './colors';
+import { buildColorFromHex, buildDenseTint, getPatternColor } from './colors';
 import int2hex from './int2hex';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
@@ -21,6 +21,7 @@ const LIGHT_BASE_THEMES: ApiBaseTheme[] = ['classic', 'day'];
 const DARK_BASE_THEMES: ApiBaseTheme[] = ['night', 'tinted'];
 const LIGHT_SERVICE_BACKGROUND = '#00000040';
 const DARK_SERVICE_BACKGROUND = '#00000080';
+const ACTION_MESSAGE_BG_ALPHA = 0.85;
 
 export type DefaultWallpaper = {
   colors: string[];
@@ -174,16 +175,13 @@ export function buildDefaultWallpaperSettings(theme: ThemeKey): Partial<IThemeSe
   };
 }
 
-export function getActionMessageBg(theme: ThemeKey): string {
-  return theme === 'dark' ? DARK_SERVICE_BACKGROUND : LIGHT_SERVICE_BACKGROUND;
-}
+// Chips follow the wallpaper tint, densified against its average color to hide the doodles beneath them
+export function getActionMessageBg(theme: ThemeKey, settings?: IThemeSettings): string {
+  const model = buildWallpaperRenderModel(theme, settings || {});
+  if (!model.patternColor) return theme === 'dark' ? DARK_SERVICE_BACKGROUND : LIGHT_SERVICE_BACKGROUND;
 
-const MULTI_STOP_ACTION_MESSAGE_BG = '#0000002D';
-
-// Multi-stop gradients use a neutral tint instead of deriving it from one stop
-export function getWallpaperTintColor(colors: string[]): string | undefined {
-  if (colors.length > 1) return MULTI_STOP_ACTION_MESSAGE_BG;
-  return colors[0] ? getWallpaperPatternColor(colors[0]) : undefined;
+  const backdropColors = model.isMaskedPattern ? [model.baseColor!] : model.colors;
+  return buildDenseTint(model.patternColor, backdropColors, ACTION_MESSAGE_BG_ALPHA);
 }
 
 // Derives the translucent wallpaper tint; the doodle overlay controls its own opacity and blend
@@ -245,7 +243,7 @@ export function buildThemeSettingsFromWallpaper(wallpaper: ApiWallpaper): Partia
   const [backgroundColor, secondBackgroundColor, thirdBackgroundColor, fourthBackgroundColor] = colors;
 
   const isPattern = Boolean(wallpaper.isPattern);
-  const patternColor = getWallpaperTintColor(colors);
+  const patternColor = backgroundColor ? getWallpaperPatternColor(backgroundColor) : undefined;
 
   return {
     background: wallpaper.document ? wallpaper.slug : undefined,

@@ -202,7 +202,7 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--message-media-background': '#000000b3',
     '--message-media-text': WHITE,
     '--message-paid-background': '#ffb727',
-    '--message-paid-text': BLACK,
+    '--message-paid-text': WHITE,
     '--message-code-dark': variables['--message-incoming-code-dark'],
   });
 
