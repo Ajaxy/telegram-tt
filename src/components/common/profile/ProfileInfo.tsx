@@ -17,7 +17,7 @@ import type { IconName } from '../../../types/icons/index';
 import type { AnimationLevel, ThemeKey } from '../../../types/index';
 import { MediaViewerOrigin } from '../../../types/index';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
+import { MIN_SHOWN_WALLET_NANOS, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
 import {
   getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
 } from '../../../global/helpers/index';
@@ -114,9 +114,6 @@ const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
 
 const PATTERN_Y_SHIFT = 8 * REM;
-
-// 0.01 Gram
-const MIN_SHOWN_WALLET_NANOS = 10_000_000n;
 
 const ProfileInfo = ({
   isExpanded,

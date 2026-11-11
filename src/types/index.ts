@@ -223,7 +223,7 @@ export type SettingsConfirmation = 'askQuestion' | 'logOut' | 'terminateAllSessi
 
 export type SettingsAction = SettingsConfirmation | 'openPremium' | 'openStars' | 'openTon' | 'sendGift' | 'openFaq'
   | 'openPrivacyPolicy' | 'uploadWallpaper' | 'resetWallpaper' | 'clearMediaCache' | 'openPasskeys' | 'setBirthday'
-  | 'setAccountTtl';
+  | 'setAccountTtl' | 'openWallet';
 
 export enum SettingsScreens {
   Main,

@@ -17,6 +17,7 @@ import { buildDefaultWallpaperSettings } from './wallpaper';
 const WALLPAPER_FILE_TYPES = 'image/jpeg';
 
 const SETTINGS_ACTIONS: [SettingsScreens, RegularLangKey, SettingsAction][] = [
+  [SettingsScreens.Main, 'WalletMenuItem', 'openWallet'],
   [SettingsScreens.Main, 'TelegramPremium', 'openPremium'],
   [SettingsScreens.Main, 'MenuStars', 'openStars'],
   [SettingsScreens.Main, 'GramEarnings', 'openTon'],
@@ -45,6 +46,9 @@ export function runSettingsAction(action: SettingsAction, tabId = getCurrentTabI
   const actions = getActions();
 
   switch (action) {
+    case 'openWallet':
+      actions.openWalletModal({ tabId });
+      break;
     case 'openPremium':
       actions.openPremiumModal({ tabId });
       break;

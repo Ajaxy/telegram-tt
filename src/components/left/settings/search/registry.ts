@@ -269,11 +269,14 @@ export const SETTINGS_SEARCH_SECTIONS: SettingsSearchSection[] = [
 ];
 
 export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
+  ...buildEntries(SettingsScreens.Main, ['WalletMenuItem'], {
+    requires: 'isWalletAvailable', icon: 'gram-filled', iconBg: 'blue',
+  }),
   ...buildEntries(SettingsScreens.Main, ['TelegramPremium'], {
     requires: 'canBuyPremium', icon: 'star', iconBg: 'premium',
   }),
   ...buildEntries(SettingsScreens.Main, ['MenuStars'], { icon: 'stars-filled', iconBg: 'orange' }),
-  ...buildEntries(SettingsScreens.Main, ['GramEarnings'], { icon: 'gram-filled', iconBg: 'blue' }),
+  ...buildEntries(SettingsScreens.Main, ['GramEarnings'], { icon: 'earnings', iconBg: 'blue' }),
   ...buildEntries(SettingsScreens.Main, ['MenuSendGift'], {
     requires: 'isGiveawayAvailable', icon: 'gift-filled', iconBg: 'orange',
   }),

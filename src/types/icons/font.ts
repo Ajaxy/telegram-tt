@@ -126,6 +126,7 @@ export type FontIconName =
   | 'down'
   | 'download'
   | 'dropdown-arrows'
+  | 'earnings'
   | 'eats'
   | 'edit'
   | 'email'

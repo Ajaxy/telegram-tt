@@ -379,6 +379,8 @@ export const WALLET_FIRST_TRANSFER_SUGGESTION = 'WALLET_FIRST_INCOMING_TRANSFER'
 // The item contract takes its fees from the attached amount, forwards the second one and returns the rest
 export const NFT_TRANSFER_ATTACHED_NANOS = 100_000_000n;
 export const NFT_TRANSFER_FORWARD_NANOS = 10_000_000n;
+// 0.01 Gram
+export const MIN_SHOWN_WALLET_NANOS = 10_000_000n;
 // The most a server-built gift deposit may attach; the item contract returns the unspent part
 export const GIFT_DEPOSIT_MAX_NANOS = 1_000_000_000n;
 // Errors with which the server refuses the password of a gift move, typed or temporary

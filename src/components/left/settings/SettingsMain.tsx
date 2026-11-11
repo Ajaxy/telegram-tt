@@ -4,14 +4,18 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiStarsAmount, ApiTonAmount } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
-import { FAQ_URL, PRIVACY_URL, TON_CURRENCY_CODE } from '../../../config';
+import {
+  FAQ_URL, MIN_SHOWN_WALLET_NANOS, PRIVACY_URL, TON_CURRENCY_CODE,
+} from '../../../config';
 import { formatStarsAmount } from '../../../global/helpers/payments';
 import {
+  selectIsCurrentUserFrozen,
   selectIsGiveawayGiftsPurchaseAvailable,
   selectIsPremiumPurchaseBlocked,
+  selectIsWalletAvailable,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
+import { formatStarsAsIcon, formatTonAsIcon, formatTonNumber } from '../../../util/localization/format';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -33,6 +37,9 @@ type StateProps = {
   currentUserId?: string;
   canBuyPremium?: boolean;
   isGiveawayAvailable?: boolean;
+  isWalletAvailable?: boolean;
+  isCurrentUserFrozen?: boolean;
+  walletBalance?: bigint;
   starsBalance?: ApiStarsAmount;
   tonBalance?: ApiTonAmount;
 };
@@ -43,16 +50,21 @@ const SettingsMain = ({
   sessionCount,
   canBuyPremium,
   isGiveawayAvailable,
+  isWalletAvailable,
+  isCurrentUserFrozen,
+  walletBalance,
   starsBalance,
   tonBalance,
   onReset,
 }: OwnProps & StateProps) => {
   const {
     loadMoreProfilePhotos,
+    loadWalletState,
     openPremiumModal,
     openUrl,
     openGiftRecipientPicker,
     openStarsBalanceModal,
+    openWalletModal,
     openSettingsScreen,
     openSettingsConfirmation,
   } = getActions();
@@ -64,6 +76,12 @@ const SettingsMain = ({
       loadMoreProfilePhotos({ peerId: currentUserId, isPreload: true });
     }
   }, [currentUserId]);
+
+  useEffect(() => {
+    if (isActive && isWalletAvailable && !isCurrentUserFrozen) {
+      loadWalletState();
+    }
+  }, [isActive, isWalletAvailable, isCurrentUserFrozen]);
 
   useHistoryBack({
     isActive,
@@ -89,6 +107,27 @@ const SettingsMain = ({
         )}
       </div>
       <div className={styles.menuSection}>
+        {isWalletAvailable && (
+          <Island>
+            <ListItem
+              icon="gram-filled"
+              iconBg="blue"
+              narrow
+              onClick={() => openWalletModal()}
+            >
+              {lang('WalletMenuItem')}
+              {walletBalance !== undefined && walletBalance >= MIN_SHOWN_WALLET_NANOS && (
+                <span className="settings-item__current-value">
+                  {formatTonAsIcon(lang, formatTonNumber(lang, walletBalance, true), {
+                    withIconLast: true,
+                    className: styles.balanceGem,
+                  })}
+                </span>
+              )}
+            </ListItem>
+          </Island>
+        )}
+
         <Island>
           <ListItem
             icon="account-filled"
@@ -237,7 +276,7 @@ const SettingsMain = ({
           </ListItem>
 
           <ListItem
-            icon="gram-filled"
+            icon="earnings"
             iconBg="blue"
             narrow
             onClick={() => openStarsBalanceModal({ currency: TON_CURRENCY_CODE })}
@@ -308,6 +347,9 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
       isGiveawayAvailable,
+      isWalletAvailable: selectIsWalletAvailable(global),
+      isCurrentUserFrozen: selectIsCurrentUserFrozen(global),
+      walletBalance: global.wallet?.state?.balance,
       starsBalance,
       tonBalance,
     };
