@@ -41,6 +41,7 @@ import { pushPlayedTrack } from '../../reducers/audioPlayer';
 import { updateTabState } from '../../reducers/tabs';
 import { replaceTabThreadParam, replaceThreadLocalStateParam, updateThreadReadState } from '../../reducers/threads';
 import {
+  selectAlbumMessageIdToEdit,
   selectAllowedMessageActionsSlow,
   selectCanForwardMessage,
   selectCanForwardMessages,
@@ -151,7 +152,12 @@ addActionHandler('editLastMessage', (global, actions, payload): ActionReturnType
     return undefined;
   }
 
-  actions.startEditingMessage({ messageId: lastOwnEditableMessageId, tabId });
+  const lastOwnEditableMessage = chatMessages[lastOwnEditableMessageId];
+  const messageId = lastOwnEditableMessage.isInAlbum
+    ? selectAlbumMessageIdToEdit(global, lastOwnEditableMessage)
+    : lastOwnEditableMessageId;
+
+  actions.startEditingMessage({ messageId, tabId });
   return undefined;
 });
 

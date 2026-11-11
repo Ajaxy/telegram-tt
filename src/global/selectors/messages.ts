@@ -1075,6 +1075,14 @@ export function selectMessageIdsByGroupId<T extends GlobalState>(global: T, chat
     .filter((id) => chatMessages[id].groupedId === groupedId);
 }
 
+// An album shows a single caption, which can belong to any of its items
+export function selectAlbumMessageIdToEdit<T extends GlobalState>(global: T, message: ApiMessage) {
+  const chatMessages = selectChatMessages(global, message.chatId);
+  const albumIds = selectMessageIdsByGroupId(global, message.chatId, message.groupedId!)!;
+
+  return albumIds.find((id) => chatMessages[id].content.text) ?? albumIds[0];
+}
+
 export function selectIsDocumentGroupSelected<T extends GlobalState>(
   global: T, chatId: string, groupedId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
