@@ -52,6 +52,7 @@ const AVATAR_SIZE = 80;
 const MAX_NAME_LENGTH = 64;
 const USERNAME_CHECK_DEBOUNCE = 200;
 const BOT_USERNAME_SUFFIX = 'bot';
+const HIDDEN_HINT_SUFFIX = 'gay';
 const USERNAME_ERROR_KEYS: Record<string, RegularLangKey> = {
   USERNAME_OCCUPIED: 'UsernameInUse',
   USERNAME_INVALID: 'UsernameInvalid',
@@ -190,10 +191,11 @@ const BotCreationModal = ({
   }
 
   function renderUsernameHint() {
-    if (!premiumSuffixes.length) return lang('CreateBotUsernameHelp');
+    const hintSuffixes = premiumSuffixes.filter((suffix) => suffix !== HIDDEN_HINT_SUFFIX);
+    if (!hintSuffixes.length) return lang('CreateBotUsernameHelp');
 
     return lang('CreateBotUsernameHint', {
-      suffixes: lang.disjunction(premiumSuffixes.map((suffix) => `'${suffix}'`)),
+      suffixes: lang.disjunction(hintSuffixes.map((suffix) => `'${suffix}'`)),
       premium: <Link isPrimary onClick={handlePremiumClick}>{lang('TelegramPremium')}</Link>,
     }, { withNodes: true });
   }
