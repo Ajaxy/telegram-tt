@@ -1,10 +1,11 @@
 import type { GlobalState } from '../global/types';
 import type { RegularLangKey } from '../types/language';
-import { type SettingsHighlight, SettingsScreens } from '../types';
+import { SettingsScreens } from '../types';
 
 import { selectAvailableSettingsScreen, selectSettingsSearchFlags } from '../global/selectors';
+import { getSettingsAction } from './settingsActions';
 
-type SettingsLinkOptions = Pick<SettingsHighlight, 'isInHeaderMenu'> & {
+type SettingsLinkOptions = {
   requires?: keyof ReturnType<typeof selectSettingsSearchFlags>;
 };
 
@@ -23,7 +24,7 @@ const SETTINGS_LINKS = new Map<string, SettingsLink>([
   ['edit/birthday', [SettingsScreens.EditProfile, 'SettingsBirthday']],
   ['edit/username', [SettingsScreens.EditProfile, 'Username']],
   ['edit/channel', [SettingsScreens.EditProfile, 'PersonalChannelTitle']],
-  ['edit/log-out', [SettingsScreens.Main, 'LogOutTitle', { isInHeaderMenu: true }]],
+  ['edit/log-out', [SettingsScreens.Main, 'LogOutTitle']],
 
   ['premium', [SettingsScreens.Main, 'TelegramPremium']],
   ['stars', [SettingsScreens.Main, 'MenuStars']],
@@ -31,7 +32,9 @@ const SETTINGS_LINKS = new Map<string, SettingsLink>([
   ['send-gift', [SettingsScreens.Main, 'MenuSendGift']],
 
   ['devices', [SettingsScreens.ActiveSessions]],
-  ['devices/terminate-sessions', [SettingsScreens.ActiveSessions, 'TerminateAllSessions']],
+  ['devices/terminate-sessions', [
+    SettingsScreens.ActiveSessions, 'TerminateAllSessions', { requires: 'hasOtherSessions' },
+  ]],
   ['devices/auto-terminate', [SettingsScreens.ActiveSessions, 'IfInactiveFor']],
 
   ['folders', [SettingsScreens.Folders]],
@@ -167,6 +170,7 @@ function buildTarget<T extends GlobalState>(global: T, [linkScreen, langKey, opt
 
   return {
     screen,
-    highlight: langKey ? { langKey, isInHeaderMenu: options?.isInHeaderMenu } : undefined,
+    highlight: langKey ? { langKey } : undefined,
+    action: langKey ? getSettingsAction(linkScreen, langKey) : undefined,
   };
 }

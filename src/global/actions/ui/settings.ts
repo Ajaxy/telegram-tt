@@ -324,6 +324,15 @@ addActionHandler('openPasskeyModal', (global, actions, payload): ActionReturnTyp
 });
 
 addTabStateResetterAction('closePasskeyModal', 'isPasskeyModalOpen');
+
+addActionHandler('openSettingsConfirmation', (global, actions, payload): ActionReturnType => {
+  const { confirmation, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    settingsConfirmation: confirmation,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeSettingsConfirmation', 'settingsConfirmation');
 addTabStateResetterAction('closeLanguageModal', 'languageModal');
 
 addActionHandler('removeCustomLanguage', (global, actions, payload): ActionReturnType => {

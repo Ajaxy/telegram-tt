@@ -4,8 +4,8 @@ import { getActions, withGlobal } from '../../../global';
 import type { AccountSettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
-import { purgeClearableCache } from '../../../util/cacheApi';
 import { pick } from '../../../util/iteratees';
+import { clearMediaCache } from '../../../util/settingsActions';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -54,13 +54,17 @@ const SettingsDataStorage = ({
   autoLoadFileMaxSizeMb,
   onReset,
 }: OwnProps & StateProps) => {
-  const { setSettingOption, showNotification } = getActions();
+  const { setSettingOption } = getActions();
 
   const lang = useLang();
 
   useHistoryBack({
     isActive,
     onBack: onReset,
+  });
+
+  const handleClearMediaCache = useLastCallback(() => {
+    clearMediaCache();
   });
 
   const renderFileSizeCallback = useLastCallback((value: number) => {
@@ -72,13 +76,6 @@ const SettingsDataStorage = ({
 
   const handleFileSizeChange = useLastCallback((value: number) => {
     setSettingOption({ autoLoadFileMaxSizeMb: AUTODOWNLOAD_FILESIZE_MB_LIMITS[value] });
-  });
-
-  const handlePurge = useLastCallback(() => {
-    purgeClearableCache();
-    showNotification({
-      message: { key: 'SettingsDataClearMediaDone' },
-    });
   });
 
   function renderContentSizeSlider() {
@@ -165,7 +162,7 @@ const SettingsDataStorage = ({
       )}
       <Island>
         <ListItem
-          onClick={handlePurge}
+          onClick={handleClearMediaCache}
           icon="delete"
           multiline
         >

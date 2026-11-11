@@ -1,128 +1,57 @@
-import {
-  memo, useCallback, useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
-import { getActions, getGlobal, getPromiseActions } from '../../../global';
+import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { Signal } from '../../../util/signals';
 import { SettingsScreens } from '../../../types';
 
-import {
-  selectHasLocalOnlyWalletPhrase, selectIsWalletAvailable, selectIsWalletKeyRotationPending,
-  selectWalletLocalOnlyNanos, selectWalletSavedWallets,
-} from '../../../global/selectors';
-import { formatTonAsIcon, formatTonNumber } from '../../../util/localization/format';
-import { pause } from '../../../util/schedulers';
-
-import useSelector from '../../../hooks/data/useSelector';
 import useAppLayout from '../../../hooks/useAppLayout';
-import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';
 import useMultiClick from '../../../hooks/useMultiClick';
 
 import Button from '../../ui/Button';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 import SettingsSearchInput from './search/SettingsSearchInput';
-
-const WALLET_CHECK_TIMEOUT = 10000;
 
 type OwnProps = {
   currentScreen: SettingsScreens;
   editedFolderId?: number;
   hasProfileBackground?: boolean;
-  isMenuForcedOpen?: boolean;
   searchSessionId: number;
   getSearchQuery: Signal<string>;
   onReset: () => void;
   onSearchOpen: NoneToVoidFunction;
   onSearchQueryChange: (query: string) => void;
-  onMenuClose: NoneToVoidFunction;
 };
 
 const SettingsHeader = ({
   currentScreen,
   editedFolderId,
   hasProfileBackground,
-  isMenuForcedOpen,
   searchSessionId,
   getSearchQuery,
   onReset,
   onSearchOpen,
   onSearchQueryChange,
-  onMenuClose,
 }: OwnProps) => {
   const {
-    signOut,
     openDeleteChatFolderModal,
     openSettingsScreen,
+    openSettingsConfirmation,
   } = getActions();
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
-  const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
-  const [isCheckingWallets, markCheckingWallets, unmarkCheckingWallets] = useFlag();
-  const [isWalletCheckTimedOut, setIsWalletCheckTimedOut] = useState(false);
-  const walletCheckIdRef = useRef(0);
-  const isWalletAvailable = useSelector(selectIsWalletAvailable);
-  const hasLocalOnlyWalletPhrase = useSelector(selectHasLocalOnlyWalletPhrase);
-  const localOnlyWalletNanos = useSelector(selectWalletLocalOnlyNanos);
-  const savedWallets = useSelector(selectWalletSavedWallets);
-  const isKeyRotationPending = useSelector(selectIsWalletKeyRotationPending);
-  const unbackedWalletNanos = useMemo(() => (
-    savedWallets?.reduce((sum, { balance }) => sum + (balance ?? 0n), localOnlyWalletNanos) ?? localOnlyWalletNanos
-  ), [savedWallets, localOnlyWalletNanos]);
-  // A wallet without Grams may still hold collectibles, which are not loaded here, so any wallet whose keys are
-  // only on this device is warned about, as in Telegram Desktop
-  const hasUnbackedWallet = isWalletAvailable && (hasLocalOnlyWalletPhrase || Boolean(savedWallets?.length));
-  const isKeyRotationWarned = isWalletAvailable && (isKeyRotationPending || isWalletCheckTimedOut);
 
   const handleMultiClick = useMultiClick(5, () => {
     openSettingsScreen({ screen: SettingsScreens.Experimental });
   });
-
-  // Until the checks answer, the dialog would offer a logout that deletes the local phrases, so the button waits,
-  // but no longer than `WALLET_CHECK_TIMEOUT` in case a check stalls
-  const openSignOutConfirmation = useLastCallback(async () => {
-    setIsSignOutDialogOpen(true);
-
-    if (!getGlobal().appConfig.isWalletAvailable) return;
-
-    const checkId = ++walletCheckIdRef.current;
-    markCheckingWallets();
-
-    const { loadWalletState, loadSavedWallets, loadWalletKeyRotationPending } = getPromiseActions();
-
-    const isChecked = await Promise.race([
-      (async () => {
-        await loadWalletState();
-        await Promise.all([loadSavedWallets(), loadWalletKeyRotationPending()]);
-        return true;
-      })(),
-      pause(WALLET_CHECK_TIMEOUT).then(() => false),
-    ]);
-
-    if (checkId === walletCheckIdRef.current) {
-      setIsWalletCheckTimedOut(!isChecked);
-      unmarkCheckingWallets();
-    }
-  });
-
-  const closeSignOutConfirmation = useCallback(() => {
-    setIsSignOutDialogOpen(false);
-  }, []);
 
   const openDeleteFolderConfirmation = useCallback(() => {
     if (!editedFolderId) return;
 
     openDeleteChatFolderModal({ folderId: editedFolderId });
   }, [editedFolderId, openDeleteChatFolderModal]);
-
-  const handleSignOutMessage = useCallback(() => {
-    closeSignOutConfirmation();
-    signOut({ forceInitApi: true });
-  }, [closeSignOutConfirmation, signOut]);
 
   const SettingsMenuButton = useMemo(() => {
     return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
@@ -362,10 +291,10 @@ const SettingsHeader = ({
               className="settings-more-menu"
               trigger={SettingsMenuButton}
               positionX="right"
-              forceOpen={isMenuForcedOpen}
-              onClose={onMenuClose}
             >
-              <MenuItem icon="logout" onClick={openSignOutConfirmation}>{lang('LogOutTitle')}</MenuItem>
+              <MenuItem icon="logout" onClick={() => openSettingsConfirmation({ confirmation: 'logOut' })}>
+                {lang('LogOutTitle')}
+              </MenuItem>
             </DropdownMenu>
           </div>
         );
@@ -385,24 +314,6 @@ const SettingsHeader = ({
         iconName="arrow-left"
       />
       {renderHeaderContent()}
-      <ConfirmDialog
-        isOpen={isSignOutDialogOpen}
-        onClose={closeSignOutConfirmation}
-        confirmLabel={lang('AccountSettingsLogout')}
-        confirmHandler={handleSignOutMessage}
-        confirmIsDestructive
-        isConfirmLoading={isCheckingWallets}
-      >
-        <p>
-          {hasUnbackedWallet && unbackedWalletNanos > 0 ? lang(
-            'AreYouSureLogoutGrams',
-            { amount: formatTonAsIcon(lang, formatTonNumber(lang, unbackedWalletNanos, true)) },
-            { withNodes: true, withMarkdown: true, renderTextFilters: ['br'] },
-          ) : lang('SureLogout')}
-        </p>
-        {hasUnbackedWallet && !unbackedWalletNanos && <p>{lang('WalletLogoutWarning')}</p>}
-        {isKeyRotationWarned && <p>{lang('WalletLogoutKeyRotation')}</p>}
-      </ConfirmDialog>
     </div>
   );
 };

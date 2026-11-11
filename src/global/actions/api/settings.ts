@@ -25,6 +25,7 @@ import {
 } from '../../../util/pushNotifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
+import { runSettingsAction } from '../../../util/settingsActions';
 import { resolveSettingsLink } from '../../../util/settingsLinks';
 import { getChatThemeEntry, RESET_WALLPAPER_SETTINGS } from '../../../util/wallpaper';
 import { callApi } from '../../../api/gramjs';
@@ -1209,11 +1210,11 @@ addActionHandler('deletePasskey', async (global, actions, payload): Promise<void
 
 addActionHandler('loadNestedSettingsData', async (global): Promise<void> => {
   const {
-    loadPasswordInfo, loadBlockedUsers, loadWebAuthorizations, loadPasskeys, loadDefaultHistoryTtl,
+    loadPasswordInfo, loadAuthorizations, loadBlockedUsers, loadWebAuthorizations, loadPasskeys, loadDefaultHistoryTtl,
     loadGlobalPrivacySettings,
   } = getPromiseActions();
 
-  const requests = [loadPasswordInfo()];
+  const requests = [loadPasswordInfo(), loadAuthorizations()];
   if (!selectIsCurrentUserFrozen(global)) {
     requests.push(
       loadBlockedUsers(), loadWebAuthorizations(), loadPasskeys(), loadDefaultHistoryTtl(),
@@ -1228,9 +1229,14 @@ addActionHandler('openSettingsLink', async (global, actions, payload): Promise<v
   const { path, tabId = getCurrentTabId() } = payload;
 
   const target = resolveSettingsLink(global, path);
+  if (target?.action) {
+    runSettingsAction(target.action, tabId);
+    return;
+  }
+
   const openedScreen = target ? target.screen : selectTabState(global, tabId).leftColumn.settingsScreen;
   if (target) {
-    actions.openSettingsScreen({ ...target, tabId });
+    actions.openSettingsScreen({ screen: target.screen, highlight: target.highlight, tabId });
   } else {
     actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings, tabId });
   }
@@ -1242,7 +1248,12 @@ addActionHandler('openSettingsLink', async (global, actions, payload): Promise<v
   if (contentKey !== LeftColumnContent.Settings || settingsScreen !== openedScreen) return;
 
   const loadedTarget = resolveSettingsLink(global, path);
+  if (loadedTarget?.action) {
+    runSettingsAction(loadedTarget.action, tabId);
+    return;
+  }
+
   if (!loadedTarget || loadedTarget.screen === openedScreen) return;
 
-  actions.openSettingsScreen({ ...loadedTarget, tabId });
+  actions.openSettingsScreen({ screen: loadedTarget.screen, highlight: loadedTarget.highlight, tabId });
 });

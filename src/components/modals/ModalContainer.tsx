@@ -80,6 +80,7 @@ import RankModal from './rank/RankModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
 import RequestPeerModal from './requestPeer/RequestPeerModal.async';
+import SettingsConfirmationModal from './settingsConfirmation/SettingsConfirmationModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
 import ChatRefundModal from './stars/chatRefund/ChatRefundModal.async';
 import StarsGiftModal from './stars/gift/StarsGiftModal.async';
@@ -183,10 +184,11 @@ type ModalKey = keyof Pick<TabState,
   'aiTonePreviewModal' |
   'languageModal' |
   'autoDeleteTimerModal' |
-  'botCreationModal'
+  'botCreationModal' |
+  'settingsConfirmation'
 >;
 type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal'
-  | 'botCreationModal';
+  | 'botCreationModal' | 'settingsConfirmation';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -331,6 +333,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   safeLinkModalUrl: SafeLinkModal,
   autoDeleteTimerModal: AutoDeleteTimerModal,
   botCreationModal: BotCreationModal,
+  settingsConfirmation: SettingsConfirmationModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];

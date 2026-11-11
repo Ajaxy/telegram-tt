@@ -165,6 +165,15 @@ export function getDefaultPatternColor(theme: ThemeKey): string {
   return theme === 'dark' ? DEFAULT_DARK_WALLPAPER.patternColor : DEFAULT_LIGHT_WALLPAPER.patternColor;
 }
 
+export function buildDefaultWallpaperSettings(theme: ThemeKey): Partial<IThemeSettings> {
+  return {
+    ...RESET_WALLPAPER_SETTINGS,
+    background: '',
+    isBlurred: true,
+    patternColor: getDefaultPatternColor(theme),
+  };
+}
+
 export function getActionMessageBg(theme: ThemeKey): string {
   return theme === 'dark' ? DARK_SERVICE_BACKGROUND : LIGHT_SERVICE_BACKGROUND;
 }

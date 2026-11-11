@@ -119,6 +119,7 @@ import type {
   ResaleGiftsFilterOptions,
   ScrollTargetPosition,
   SendMessageParams,
+  SettingsConfirmation,
   SettingsHighlight,
   SettingsScreens,
   SharedMediaType,
@@ -298,6 +299,10 @@ export interface ActionPayloads {
   };
   openPasskeyModal: WithTabId | undefined;
   closePasskeyModal: WithTabId | undefined;
+  openSettingsConfirmation: {
+    confirmation: SettingsConfirmation;
+  } & WithTabId;
+  closeSettingsConfirmation: WithTabId | undefined;
 
   loadPrivacySettings: {
     skipIfCached?: boolean;

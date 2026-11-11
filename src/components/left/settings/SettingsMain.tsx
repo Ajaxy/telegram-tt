@@ -13,15 +13,12 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 
-import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';
 
 import ChatExtra from '../../common/profile/ChatExtra';
 import ProfileInfo from '../../common/profile/ProfileInfo';
 import Island from '../../gili/layout/Island';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 
 import styles from './SettingsMain.module.scss';
@@ -53,14 +50,12 @@ const SettingsMain = ({
   const {
     loadMoreProfilePhotos,
     openPremiumModal,
-    openSupportChat,
     openUrl,
     openGiftRecipientPicker,
     openStarsBalanceModal,
     openSettingsScreen,
+    openSettingsConfirmation,
   } = getActions();
-
-  const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
 
   const lang = useLang();
 
@@ -73,11 +68,6 @@ const SettingsMain = ({
   useHistoryBack({
     isActive,
     onBack: onReset,
-  });
-
-  const handleOpenSupport = useLastCallback(() => {
-    openSupportChat();
-    closeSupportDialog();
   });
 
   return (
@@ -280,7 +270,7 @@ const SettingsMain = ({
             icon="support-filled"
             iconBg="red"
             narrow
-            onClick={openSupportDialog}
+            onClick={() => openSettingsConfirmation({ confirmation: 'askQuestion' })}
           >
             {lang('AskAQuestion')}
           </ListItem>
@@ -302,14 +292,6 @@ const SettingsMain = ({
           </ListItem>
         </Island>
       </div>
-      <ConfirmDialog
-        isOpen={isSupportDialogOpen}
-        confirmLabel={lang('OK')}
-        title={lang('AskAQuestion')}
-        textParts={lang('MenuAskText', undefined, { withNodes: true, renderTextFilters: ['br'] })}
-        confirmHandler={handleOpenSupport}
-        onClose={closeSupportDialog}
-      />
     </div>
   );
 };

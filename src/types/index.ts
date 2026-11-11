@@ -216,8 +216,13 @@ export interface ShippingOption {
 
 export type SettingsHighlight = {
   langKey: RegularLangKey;
-  isInHeaderMenu?: boolean;
 };
+
+export type SettingsConfirmation = 'askQuestion' | 'logOut' | 'terminateAllSessions' | 'terminateAllWebSessions';
+
+export type SettingsAction = SettingsConfirmation | 'openPremium' | 'openStars' | 'openTon' | 'sendGift' | 'openFaq'
+  | 'openPrivacyPolicy' | 'uploadWallpaper' | 'resetWallpaper' | 'clearMediaCache' | 'openPasskeys' | 'setBirthday'
+  | 'setAccountTtl';
 
 export enum SettingsScreens {
   Main,

@@ -1,8 +1,9 @@
 import type { IconName } from '../../../../types/icons';
 import type { LangFn } from '../../../../util/localization';
 import type { IconBackdropColor } from '../../../gili/primitives/IconBackdrop';
-import { type SettingsHighlight, SettingsScreens } from '../../../../types';
+import { type SettingsAction, type SettingsHighlight, SettingsScreens } from '../../../../types';
 
+import { getSettingsAction } from '../../../../util/settingsActions';
 import { getSettingsLink } from '../../../../util/settingsLinks';
 import {
   SETTINGS_SEARCH_ENTRIES,
@@ -23,6 +24,7 @@ export type SettingsSearchItem = {
   icon?: IconName;
   iconBg?: IconBackdropColor;
   highlight?: SettingsHighlight;
+  action?: SettingsAction;
   link?: string;
   isSection?: boolean;
   titleVariants: string[];
@@ -38,7 +40,7 @@ const SCORE_TITLE = 1;
 const SCORE_KEYWORDS = 2;
 
 const RE_COMBINING_MARKS = /\p{M}+/gu;
-const RE_NOT_WORD = /[^\p{L}\p{N}]+/u;
+const RE_WORD_BOUNDARY = /[^\p{L}\p{N}]+|(?<=\p{N})(?=\p{L})/u;
 const UNSEGMENTED_SCRIPTS = ['Han', 'Hiragana', 'Katakana', 'Thai', 'Lao', 'Khmer', 'Myanmar'];
 const RE_UNSEGMENTED_SCRIPT = new RegExp(
   `[${UNSEGMENTED_SCRIPTS.map((script) => `\\p{Script=${script}}`).join('')}]`, 'u',
@@ -128,6 +130,11 @@ export function buildSettingsSearchIndex(lang: LangFn, flags: SettingsSearchFlag
 
     const topSection = chain.length ? chain[0] : undefined;
     const section = chain.length ? chain[chain.length - 1] : undefined;
+    const keywordWords = buildKeywordWords(entry.keywordsKey);
+    if (entry.isSectionHeader && section) {
+      keywordWords.push(...splitWords(lang(section.titleKey)), ...buildKeywordWords(section.keywordsKey));
+    }
+
     items.push({
       id: `${SettingsScreens[entry.screen]}/${entry.titleKey}`,
       screen: entry.screen,
@@ -137,11 +144,12 @@ export function buildSettingsSearchIndex(lang: LangFn, flags: SettingsSearchFlag
       categoryScreen: topSection?.screen,
       icon: topSection ? topSection.icon : entry.icon,
       iconBg: topSection ? topSection.iconBg : entry.iconBg,
-      highlight: { langKey: entry.titleKey, isInHeaderMenu: entry.isInHeaderMenu },
+      highlight: { langKey: entry.titleKey },
+      action: getSettingsAction(entry.screen, entry.titleKey),
       link: getSettingsLink(entry.screen, entry.titleKey) || (section && getSettingsLink(section.screen)),
       titleVariants: [normalizedTitle],
       titleWords,
-      keywordWords: buildKeywordWords(entry.keywordsKey),
+      keywordWords,
     });
   });
 
@@ -200,5 +208,5 @@ export function searchSettings(index: SettingsSearchItem[], query: string) {
 }
 
 function splitWords(text: string) {
-  return text.toLowerCase().normalize('NFD').replace(RE_COMBINING_MARKS, '').split(RE_NOT_WORD).filter(Boolean);
+  return text.toLowerCase().normalize('NFD').replace(RE_COMBINING_MARKS, '').split(RE_WORD_BOUNDARY).filter(Boolean);
 }

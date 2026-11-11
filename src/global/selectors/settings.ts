@@ -1,5 +1,5 @@
 import type { GlobalState } from '../types';
-import { SettingsScreens } from '../../types';
+import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../types';
 
 import { IS_TRANSLATION_SUPPORTED, IS_WEBAUTHN_SUPPORTED } from '../../util/browser/windowEnvironment';
 import memoized from '../../util/memoized';
@@ -66,6 +66,10 @@ export function selectAvailableSettingsScreen<T extends GlobalState>(global: T, 
     default:
       return screen;
   }
+}
+
+export function selectIsWallpaperUploading<T extends GlobalState>(global: T) {
+  return global.settings.loadedWallpapers?.[0]?.slug === UPLOADING_WALLPAPER_SLUG;
 }
 
 export function selectSettingsSearchFlags<T extends GlobalState>(global: T) {

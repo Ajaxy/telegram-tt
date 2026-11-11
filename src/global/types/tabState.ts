@@ -114,6 +114,7 @@ import type {
   ProfileTabType,
   ResaleGiftsFilterOptions,
   ScrollTargetPosition,
+  SettingsConfirmation,
   SettingsHighlight,
   SettingsScreens,
   SharedMediaType,
@@ -1350,6 +1351,8 @@ export type TabState = {
   };
 
   isPasskeyModalOpen?: boolean;
+
+  settingsConfirmation?: SettingsConfirmation;
 
   leaveGroupModal?: {
     chatId: string;

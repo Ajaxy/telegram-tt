@@ -9,6 +9,7 @@ import { selectSettingsSearchFlags } from '../../../../global/selectors';
 import { IS_MOBILE } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
+import { runSettingsAction } from '../../../../util/settingsActions';
 import { buildSettingsSearchIndex, searchSettings } from './searchSettings';
 
 import { useShallowSelector } from '../../../../hooks/data/useSelector';
@@ -45,7 +46,7 @@ const SettingsSearch = ({
   onSelect,
   onReset,
 }: OwnProps & StateProps) => {
-  const { removeRecentlyFoundSettingId, showNotification } = getActions();
+  const { addRecentlyFoundSettingId, removeRecentlyFoundSettingId, showNotification } = getActions();
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
@@ -77,10 +78,21 @@ const SettingsSearch = ({
     return [...shownIds, ...newIds].map((id) => index.find((item) => item.id === id)).filter(Boolean);
   }, [hasQuery, index, query, recentIds]);
 
+  const handleSelect = useLastCallback((item: SettingsSearchItem) => {
+    if (!isActive) return;
+
+    addRecentlyFoundSettingId({ id: item.id });
+    if (item.action) {
+      runSettingsAction(item.action);
+    } else {
+      onSelect(item);
+    }
+  });
+
   const handleSelectWithEnter = useLastCallback(() => {
     const buttons = Array.from(containerRef.current!.querySelectorAll(ITEM_BUTTON_SELECTOR));
     const item = items[buttons.indexOf(document.activeElement!)];
-    if (item) onSelect(item);
+    if (item) handleSelect(item);
   });
 
   const handleKeyDown = useKeyboardListNavigation(
@@ -88,11 +100,10 @@ const SettingsSearch = ({
   );
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>, item: SettingsSearchItem) => {
-    onSelect(item);
+    handleSelect(item);
   });
 
-  function renderItem(item: SettingsSearchItem, i: number) {
-    const isFirstInGroup = item.categoryScreen === undefined || item.categoryScreen !== items[i - 1]?.categoryScreen;
+  function renderItem(item: SettingsSearchItem) {
     const { link } = item;
 
     const contextActions: MenuItemContextAction[] = [];
@@ -119,7 +130,6 @@ const SettingsSearch = ({
         key={item.id}
         icon={item.icon}
         iconBg={item.iconBg}
-        iconClassName={!isFirstInGroup ? styles.hiddenIcon : undefined}
         multiline={Boolean(item.path)}
         narrow
         contextActions={contextActions.length ? contextActions : undefined}

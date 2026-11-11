@@ -5,7 +5,7 @@ import type { ApiWallpaper } from '../api/types';
 import type { ThemeKey } from '../types';
 import type { WallpaperStorageSource } from '../util/wallpaperStorage';
 
-import { getDefaultPatternColor, RESET_WALLPAPER_SETTINGS } from '../util/wallpaper';
+import { buildDefaultWallpaperSettings } from '../util/wallpaper';
 import { acquireWallpaperUrl, cacheThemeWallpaper, getResolvedWallpaperUrl } from '../util/wallpaperStorage';
 
 type ResolvedBackground = {
@@ -64,13 +64,7 @@ export default function useCustomBackground(
           return;
         }
         // The cached blob is gone (e.g. evicted) — fully reset to the default wallpaper
-        setThemeSettings({
-          theme,
-          ...RESET_WALLPAPER_SETTINGS,
-          background: '',
-          isBlurred: true,
-          patternColor: getDefaultPatternColor(theme),
-        });
+        setThemeSettings({ theme, ...buildDefaultWallpaperSettings(theme) });
       });
 
     return () => {
