@@ -21,6 +21,21 @@
     visibility: visible;
     opacity: 1;
   }
+
+  &.snapping {
+    transition: opacity 150ms, transform 250ms cubic-bezier(0.33, 1, 0.68, 1);
+
+    :global(body.no-page-transitions) & {
+      transition: opacity 150ms;
+    }
+  }
+
+  &.closing {
+    pointer-events: none;
+    scale: 0.5;
+    opacity: 0;
+    transition: opacity 200ms, scale 200ms;
+  }
 }
 
 .surface {
@@ -91,7 +106,23 @@
 }
 
 .closeButton {
+  --button-background-color: var(--action-message-bg);
+  --button-active-background-color: var(--action-message-bg);
+  --button-no-ripple-background-color: var(--action-message-bg);
+
   position: absolute;
   top: 0;
   right: 0;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.closeIcon {
+  font-size: 1rem;
 }

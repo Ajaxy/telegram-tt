@@ -1,14 +1,14 @@
 import {
   memo, useEffect, useLayoutEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 import type { MessageList, PlaybackCapabilities, ThreadId } from '../../../types';
 import type { TrackKey } from '../../../util/audioPlayback/mediaPool';
 
 import { hasMessageTtl } from '../../../global/helpers';
-import { selectCurrentMessageList, selectTabState } from '../../../global/selectors';
+import { selectCanAnimateInterface, selectCurrentMessageList, selectTabState } from '../../../global/selectors';
 import {
   getPlaybackCapabilities, makeTrackKeyFromItem, selectPlaybackMessage, selectPlaybackSource,
 } from '../../../global/selectors/audioPlayer';
@@ -21,6 +21,7 @@ import buildClassName from '../../../util/buildClassName';
 import stopEvent from '../../../util/stopEvent';
 
 import useAudioPlayback from '../../../hooks/useAudioPlayback';
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useRoundVideoContainer from '../hooks/useRoundVideoContainer';
@@ -43,6 +44,7 @@ type StateProps = {
 const PROGRESS_RADIUS = 48;
 const PROGRESS_CIRCUMFERENCE = PROGRESS_RADIUS * 2 * Math.PI;
 const DOUBLE_TAP_DELAY = 300;
+const CLOSE_ANIMATION_DURATION = 200;
 
 function FloatingRoundVideo({
   message, threadId, isScheduled, trackKey, capabilities, isSourceChat, currentMessageList,
@@ -53,6 +55,8 @@ function FloatingRoundVideo({
   const surfaceRef = useRef<HTMLDivElement>();
   const progressRef = useRef<SVGCircleElement>();
   const tapTimeoutRef = useRef<number>();
+  const closeTimeoutRef = useRef<number>();
+  const [isClosing, markClosing, unmarkClosing] = useFlag();
   const { inlineContainer, isVisibilityResolved } = useRoundVideoContainer(trackKey, isSourceChat);
   const element = trackKey ? peek(trackKey) : undefined;
   const videoElement = element instanceof HTMLVideoElement ? element : undefined;
@@ -85,14 +89,27 @@ function FloatingRoundVideo({
   }, [getProgress, trackKey]);
 
   const handleClose = useLastCallback(() => {
+    if (isClosing) return;
+
     cancelPendingTap();
-    closeAudioPlayer();
+    if (!selectCanAnimateInterface(getGlobal())) {
+      closeAudioPlayer();
+      return;
+    }
+
+    markClosing();
+    closeTimeoutRef.current = window.setTimeout(() => closeAudioPlayer(), CLOSE_ANIMATION_DURATION);
   });
   const {
     handlePointerDown, handlePointerMove: movePointer, handlePointerUp, handlePointerCancel: cancelPointer,
-  } = useRoundVideoFloatPosition(ref, isFloating, currentMessageList, handleClose);
+  } = useRoundVideoFloatPosition(ref, isFloating, currentMessageList, styles.snapping, handleClose);
 
   useEffect(() => cancelPendingTap, [trackKey, isFloating]);
+
+  useEffect(() => () => {
+    window.clearTimeout(closeTimeoutRef.current);
+    unmarkClosing();
+  }, [trackKey]);
 
   const handlePointerMove = useLastCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (movePointer(e)) cancelPendingTap();
@@ -136,7 +153,7 @@ function FloatingRoundVideo({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.floating, isFloating && styles.shown)}
+      className={buildClassName(styles.floating, isFloating && styles.shown, isClosing && styles.closing)}
       aria-hidden={!isFloating}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -175,6 +192,7 @@ function FloatingRoundVideo({
         size="tiny"
         round
         iconName="close"
+        iconClassName={styles.closeIcon}
         ariaLabel={lang('AudioPlayerClose')}
         tabIndex={isFloating ? 0 : -1}
         noFastClick

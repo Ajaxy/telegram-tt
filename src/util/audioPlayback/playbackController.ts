@@ -386,7 +386,8 @@ function resetElement(key: TrackKey) {
   if (!element) return;
 
   stopElement(key);
-  element.currentTime = 0;
+  // Rewinding a finished video flashes its first frame before the view releases it; `play()` restarts it anyway
+  if (!(element instanceof HTMLVideoElement && element.ended)) element.currentTime = 0;
 }
 
 function updateState(patch: Partial<PlaybackControllerState>) {

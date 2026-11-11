@@ -8,6 +8,11 @@
     pointer-events: none;
   }
 
+  // Stays mounted under the transcription, so collapsing it shows the loaded video without a reload
+  &.under-transcription {
+    display: none;
+  }
+
   .video-wrapper {
     position: absolute;
     top: 0;

@@ -11,6 +11,7 @@ import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
 import {
   getMediaFormat,
   getMediaHash,
+  getMediaThumbUri,
   getWebPageAudio,
   hasMessageTtl,
   isMessageLocal,
@@ -150,6 +151,8 @@ const Audio = ({
 
   const coverHash = getMediaHash(media, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
+  // Round video shows its embedded thumbnail until the cover loads
+  const coverUrl = coverBlobUrl || (video ? getMediaThumbUri(video) : undefined);
 
   const mediaData = useMedia(
     getMediaHash(media, 'inline'),
@@ -208,7 +211,7 @@ const Audio = ({
       capabilities={capabilities}
       src={mediaData}
       originalDuration={mediaDuration!}
-      coverBlobUrl={coverBlobUrl}
+      coverBlobUrl={coverUrl}
       senderTitle={senderTitle}
       date={date}
       isOwn={isOwn}

@@ -1406,9 +1406,10 @@ const Message = ({
             chatId={chatId}
           />
         )}
-        {!isAlbum && isRoundVideo && !withVoiceTranscription && (
+        {!isAlbum && isRoundVideo && (
           <RoundVideo
             message={message}
+            className={withVoiceTranscription ? 'under-transcription' : undefined}
             threadId={threadId}
             isInScheduled={isScheduled}
             observeIntersection={observeIntersectionForLoading}

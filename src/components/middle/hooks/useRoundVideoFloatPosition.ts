@@ -1,6 +1,6 @@
 import type { ElementRef } from '../../../lib/teact/teact';
 import { useEffect, useRef } from '../../../lib/teact/teact';
-import { setExtraStyles } from '../../../lib/teact/teact-dom';
+import { addExtraClass, removeExtraClass, setExtraStyles } from '../../../lib/teact/teact-dom';
 
 import type { MessageList } from '../../../types';
 
@@ -15,6 +15,7 @@ import useThrottledCallback from '../../../hooks/useThrottledCallback';
 const FLOAT_MARGIN = 16;
 const DRAG_THRESHOLD = 6;
 const HALF = 0.5;
+const SNAP_DURATION = 250;
 
 type DragState = {
   pointerId: number;
@@ -25,14 +26,16 @@ type DragState = {
   x: number;
   y: number;
   isDragging: boolean;
+  hasInterruptedSnap: boolean;
 };
 
 export default function useRoundVideoFloatPosition(
   ref: ElementRef<HTMLDivElement>, isFloating: boolean, currentMessageList: MessageList | undefined,
-  onClose: NoneToVoidFunction,
+  snappingClassName: string, onClose: NoneToVoidFunction,
 ) {
   const cornerRef = useRef({ isRight: true, isBottom: false });
   const dragRef = useRef<DragState>();
+  const snapTimeoutRef = useRef<number>();
 
   const updatePosition = useLastCallback(() => {
     if (!isFloating || dragRef.current || !ref.current) return;
@@ -51,6 +54,27 @@ export default function useRoundVideoFloatPosition(
     requestMutation(() => {
       if (!ref.current) return;
       setExtraStyles(ref.current, { '--round-video-x': `${x}px`, '--round-video-y': `${y}px` });
+    });
+  }
+
+  function snapToCorner() {
+    startSnapping();
+    scheduleUpdate();
+  }
+
+  function startSnapping() {
+    window.clearTimeout(snapTimeoutRef.current);
+    requestMutation(() => {
+      if (ref.current) addExtraClass(ref.current, snappingClassName);
+    });
+    snapTimeoutRef.current = window.setTimeout(stopSnapping, SNAP_DURATION);
+  }
+
+  function stopSnapping() {
+    window.clearTimeout(snapTimeoutRef.current);
+    snapTimeoutRef.current = undefined;
+    requestMutation(() => {
+      if (ref.current) removeExtraClass(ref.current, snappingClassName);
     });
   }
 
@@ -85,8 +109,22 @@ export default function useRoundVideoFloatPosition(
     if (e.button !== 0 || !e.isPrimary || (e.target as HTMLElement).closest('button')) return;
     stopEvent(e);
     const { left, top } = e.currentTarget.getBoundingClientRect();
+    const hasInterruptedSnap = snapTimeoutRef.current !== undefined;
+    if (hasInterruptedSnap) {
+      // Catch the player where the snap has carried it
+      stopSnapping();
+      applyPosition(left, top);
+    }
     dragRef.current = {
-      pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, left, top, x: left, y: top, isDragging: false,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      left,
+      top,
+      x: left,
+      y: top,
+      isDragging: false,
+      hasInterruptedSnap,
     };
     e.currentTarget.setPointerCapture(e.pointerId);
   });
@@ -110,7 +148,10 @@ export default function useRoundVideoFloatPosition(
     if (!drag || drag.pointerId !== e.pointerId) return undefined;
     handlePointerMove(e);
     dragRef.current = undefined;
-    if (!drag.isDragging) return true;
+    if (!drag.isDragging) {
+      if (drag.hasInterruptedSnap) snapToCorner();
+      return true;
+    }
 
     const { offsetWidth: width, offsetHeight: height } = e.currentTarget;
     const centerX = drag.x + width * HALF;
@@ -124,14 +165,15 @@ export default function useRoundVideoFloatPosition(
         isRight: drag.x > (area.left + area.right) * HALF,
         isBottom: drag.y > (area.top + area.bottom) * HALF,
       };
-      scheduleUpdate();
+      snapToCorner();
     }
     return false;
   });
 
   const handlePointerCancel = useLastCallback(() => {
+    const drag = dragRef.current;
     dragRef.current = undefined;
-    scheduleUpdate();
+    if (drag?.isDragging || drag?.hasInterruptedSnap) snapToCorner();
   });
 
   return { handlePointerDown, handlePointerMove, handlePointerUp, handlePointerCancel };
@@ -140,9 +182,11 @@ export default function useRoundVideoFloatPosition(
 function getAvailableArea(width: number, height: number) {
   const columnElement = document.getElementById('MiddleColumn')!;
   const column = getMiddleColumnVisibleBounds(columnElement);
+  // A hidden middle column, such as behind the mobile chat list, leaves the whole screen width
+  const canFitColumn = column.right - column.left >= width + FLOAT_MARGIN * 2;
   const maxLeft = Math.max(FLOAT_MARGIN, window.innerWidth - width - FLOAT_MARGIN);
-  const left = clamp(column.left + FLOAT_MARGIN, FLOAT_MARGIN, maxLeft);
-  const right = clamp(column.right - width - FLOAT_MARGIN, left, maxLeft);
+  const left = canFitColumn ? clamp(column.left + FLOAT_MARGIN, FLOAT_MARGIN, maxLeft) : FLOAT_MARGIN;
+  const right = canFitColumn ? clamp(column.right - width - FLOAT_MARGIN, left, maxLeft) : maxLeft;
   const bottom = Math.max(FLOAT_MARGIN, column.bottom - height - FLOAT_MARGIN);
   const top = Math.min(column.top + FLOAT_MARGIN, bottom);
   return { left, right, top, bottom };
