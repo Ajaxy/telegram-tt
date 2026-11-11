@@ -120,10 +120,6 @@ export function selectOldWalletBotId<T extends GlobalState>(global: T) {
   return findAttachBotId(global.attachMenu.bots, global.users.byId, oldWalletBotUsername.toLowerCase());
 }
 
-export function selectOnrampProvider<T extends GlobalState>(global: T, providerId: string) {
-  return global.wallet?.onrampProviders?.find(({ id }) => id === providerId);
-}
-
 export function selectWalletCurrency<T extends GlobalState>(global: T) {
   return global.walletCurrency || USD_CURRENCY_CODE;
 }

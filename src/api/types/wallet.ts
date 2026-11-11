@@ -222,54 +222,6 @@ export interface ApiWalletGiftDeposit {
   fee?: bigint;
 }
 
-export interface ApiOnrampProvider {
-  id: string;
-  name: string;
-  cryptoCurrencies: string[];
-  hasBaseCurrencies?: boolean;
-  hasLimits?: boolean;
-  hasQuote?: boolean;
-}
-
-interface ApiOnrampMethod {
-  paymentMethod: string;
-  isAvailable?: boolean;
-}
-
-export interface ApiOnrampAvailability {
-  isAllowed?: boolean;
-  isBuyAllowed?: boolean;
-  // ISO alpha-2, e.g. `DE`
-  countryCode: string;
-  state?: string;
-  methods: ApiOnrampMethod[];
-}
-
-// Amounts are kept as the provider's decimal strings, so no precision is lost
-export interface ApiOnrampLimits {
-  baseCurrency: string;
-  baseMinAmount: string;
-  baseMaxAmount: string;
-  cryptoMinAmount: string;
-  cryptoMaxAmount: string;
-  paymentMethod: string;
-}
-
-export interface ApiOnrampQuote {
-  baseCurrency: string;
-  baseAmount: string;
-  cryptoCurrency: string;
-  cryptoAmount: string;
-  cryptoPrice: string;
-  feeAmount: string;
-  extraFeeAmount: string;
-  networkFeeAmount: string;
-  totalAmount: string;
-  paymentMethod: string;
-  // Unix seconds
-  expiresDate: number;
-}
-
 export interface ApiOnrampSession {
   provider: string;
   sessionId: string;

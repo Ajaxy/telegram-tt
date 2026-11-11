@@ -68,10 +68,6 @@ import { buildLocalMessage } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildApiOnrampAvailability,
-  buildApiOnrampLimits,
-  buildApiOnrampProvider,
-  buildApiOnrampQuote,
   buildApiOnrampSession,
   buildApiWalletCollectible,
   buildApiWalletSentTransfer,
@@ -139,7 +135,8 @@ type EstimateFeeResponse = ToncenterError & {
   };
 };
 
-// MoonPay rejects an uppercase coin code
+// The server id of the @walt bot, also @wallet, which sells Grams for cash and other crypto
+const ONRAMP_PROVIDER = 'wallet';
 const ONRAMP_CRYPTO_CURRENCY = 'gram';
 // Representation hash of the `WalletTg` trampoline code cell, as toncenter reports it
 const WALLET_TG_CODE_HASH = 'kUmuUcHkaJcQzr94MCl7Fqz7rbNjqSClN4k+f/7sp2g=';
@@ -362,104 +359,18 @@ export async function fetchWalletDomainAddress({ domain }: { domain: string }) {
   return wallet && parseTonTransferAddress(wallet) ? toNonBounceableAddress(wallet) : false;
 }
 
-export async function fetchOnrampProviders() {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampProviders({
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(buildApiOnrampProvider);
-}
-
-export async function fetchOnrampBaseCurrencies({ provider }: { provider: string }) {
-  return invokeRequest(new GramJs.payments.GetOnrampBaseCurrencies({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-  }));
-}
-
-export async function fetchOnrampAvailability({
-  provider, baseCurrency,
-}: {
-  provider: string;
-  baseCurrency?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampAvailability({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-  }));
-
-  return result && buildApiOnrampAvailability(result);
-}
-
-export async function fetchOnrampLimits({
-  provider, baseCurrency, paymentMethod,
-}: {
-  provider: string;
-  baseCurrency: string;
-  paymentMethod?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampLimits({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-    paymentMethod,
-  }));
-
-  return result && buildApiOnrampLimits(result);
-}
-
-// Exactly one of `baseAmount` and `cryptoAmount` must be set
-export async function fetchOnrampQuote({
-  provider, baseCurrency, baseAmount, cryptoAmount, paymentMethod,
-}: {
-  provider: string;
-  baseCurrency: string;
-  baseAmount?: string;
-  cryptoAmount?: string;
-  paymentMethod?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampQuote({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-    baseAmount,
-    cryptoAmount,
-    paymentMethod,
-  }));
-
-  return result && buildApiOnrampQuote(result);
-}
-
 export async function createOnrampSession({
-  provider, ownAddress, baseCurrency, baseAmount, paymentMethod, memo, theme, successReturnUrl, failReturnUrl,
+  ownAddress, theme,
 }: {
-  provider: string;
   ownAddress: string;
-  baseCurrency?: string;
-  baseAmount?: string;
-  paymentMethod?: string;
-  memo?: string;
   // `dark` or `light`
   theme?: string;
-  successReturnUrl?: string;
-  failReturnUrl?: string;
 }) {
   const result = await invokeRequest(new GramJs.payments.CreateOnrampSession({
-    provider,
+    provider: ONRAMP_PROVIDER,
     cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
     address: ownAddress,
-    baseCurrency,
-    baseAmount,
-    paymentMethod,
-    memo,
     theme,
-    successReturnUrl,
-    failReturnUrl,
   }));
 
   return result && buildApiOnrampSession(result);

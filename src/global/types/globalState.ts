@@ -20,7 +20,6 @@ import type {
   ApiMessage,
   ApiMessagePoll,
   ApiNotifyPeerType,
-  ApiOnrampProvider,
   ApiPaidReactionPrivacyType,
   ApiPasskey,
   ApiPasskeyOption,
@@ -560,7 +559,6 @@ export type GlobalState = {
       // Server time, seconds
       expiresAt: number;
     };
-    onrampProviders?: ApiOnrampProvider[];
     decryptedComments?: Record<string, string>;
     gaslessInfo?: ApiWalletGaslessInfo;
     // Nanotons

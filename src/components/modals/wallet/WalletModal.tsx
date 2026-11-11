@@ -43,8 +43,6 @@ import MenuItem from '../../ui/MenuItem';
 import Spinner from '../../ui/Spinner';
 import Transition from '../../ui/Transition';
 import WalletAddressGroups from './WalletAddressGroups';
-import WalletBuyAmountScreen from './WalletBuyAmountScreen';
-import WalletBuyScreen from './WalletBuyScreen';
 import WalletCollectibleScreen from './WalletCollectibleScreen';
 import WalletConnectedAppScreen from './WalletConnectedAppScreen';
 import WalletConnectedAppsScreen from './WalletConnectedAppsScreen';
@@ -110,8 +108,6 @@ const ACCENT_SCREENS = new Set([WalletScreen.Receive]);
 const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
   [WalletScreen.Main]: 'WalletTitle',
   [WalletScreen.Receive]: 'WalletReceiveTitle',
-  [WalletScreen.Buy]: 'WalletBuyTitle',
-  [WalletScreen.BuyAmount]: 'WalletBuyTitle',
   [WalletScreen.Currency]: 'WalletBuyCurrency',
   [WalletScreen.Send]: 'WalletSendTitle',
   [WalletScreen.SendAmount]: 'WalletSendTitle',
@@ -134,7 +130,7 @@ const WalletModal = ({
 }: OwnProps & StateProps) => {
   const {
     openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions,
-    loadWalletBuyContext, clearWalletBuy, decryptWalletComment,
+    openOnrampSession, decryptWalletComment,
     clearWalletCommentDecryption, dropWalletVaultSecrets, openSettingsScreen, openUrl,
     watchWalletActivity, unwatchWalletActivity, openStarsBalanceModal, loadWalletCollectibles,
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
@@ -302,7 +298,6 @@ const WalletModal = ({
     setSelectedSessionId(undefined);
     sendFlow.reset();
     setActiveTab(0);
-    clearWalletBuy();
 
     // An abandoned login sends nothing: the site's session expires on the server
     if (walletTonConnect?.oauth && walletTonConnect.status !== 'done') {
@@ -342,10 +337,6 @@ const WalletModal = ({
     if (screen === WalletScreen.Transaction) {
       clearWalletCommentDecryption();
       credentials.drop();
-    }
-
-    if (screen === WalletScreen.BuyAmount) {
-      clearWalletBuy();
     }
 
     sendFlow.handleBack();
@@ -571,16 +562,11 @@ const WalletModal = ({
   });
 
   const handleOpenBuy = useLastCallback(() => {
-    push(WalletScreen.Buy);
+    openOnrampSession();
   });
 
   const handleOpenCurrency = useLastCallback(() => {
     push(WalletScreen.Currency);
-  });
-
-  const handleProviderSelect = useLastCallback((provider: string) => {
-    loadWalletBuyContext({ provider });
-    push(WalletScreen.BuyAmount);
   });
 
   // Memoized: the phrase screen is a memo component, and a new node each render would re-render it while the user types
@@ -703,13 +689,7 @@ const WalletModal = ({
   function renderScreenContent(key: WalletScreen, isActive: boolean) {
     switch (key) {
       case WalletScreen.Receive:
-        return <WalletReceiveScreen address={address!} onBuyClick={handleOpenBuy} />;
-      case WalletScreen.Buy:
-        return (
-          <WalletBuyScreen onCurrencyClick={handleOpenCurrency} onProviderSelect={handleProviderSelect} />
-        );
-      case WalletScreen.BuyAmount:
-        return <WalletBuyAmountScreen />;
+        return <WalletReceiveScreen address={address!} isBuyPending={modal?.isBuyPending} onBuyClick={handleOpenBuy} />;
       case WalletScreen.Currency:
         return <WalletCurrencyScreen onSelect={handleBack} />;
       case WalletScreen.Send:
@@ -730,7 +710,7 @@ const WalletModal = ({
             collectible={sendFlow.collectible}
             onSubmit={sendFlow.handleSubmit}
             onDraftChange={sendFlow.setDraft}
-            onBuy={handleOpenBuy}
+            onDeposit={handleOpenReceive}
           />
         );
       case WalletScreen.Transaction:

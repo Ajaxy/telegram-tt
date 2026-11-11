@@ -1,5 +1,4 @@
 import type {
-  ApiOnrampProvider,
   ApiWalletCollectible,
   ApiWalletTransaction,
   DecryptWalletCommentError,
@@ -16,9 +15,10 @@ import type {
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabState } from '../../types';
 
-import { DEBUG, NFT_TRANSFER_FORWARD_NANOS, WALLET_FIRST_TRANSFER_SUGGESTION } from '../../../config';
+import {
+  DEBUG, NFT_TRANSFER_FORWARD_NANOS, RE_TME_LINK, WALLET_FIRST_TRANSFER_SUGGESTION,
+} from '../../../config';
 import { toNonBounceableAddress } from '../../../lib/ton/address';
-import { isDeepLink } from '../../../util/deepLinkParser';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
@@ -33,6 +33,7 @@ import {
 } from '../../../util/passcode';
 import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { callApi } from '../../../api/gramjs';
 import { getStickerFromGift } from '../../../components/common/helpers/gifts';
@@ -59,8 +60,8 @@ import { selectTabState } from '../../selectors/tabs';
 import { selectTheme } from '../../selectors/ui';
 import { selectUser } from '../../selectors/users';
 import {
-  selectOnrampProvider, selectWalletAddress, selectWalletCollectibleGift, selectWalletCurrency, selectWalletPublicKey,
-  selectWalletTransactions, selectWalletTransferInFlight,
+  selectWalletAddress, selectWalletCollectibleGift, selectWalletPublicKey, selectWalletTransactions,
+  selectWalletTransferInFlight,
 } from '../../selectors/wallet';
 import { fetchChatByUsername } from './chats';
 import { verifyPasscodeWithLimit } from './passcode';
@@ -807,239 +808,62 @@ addActionHandler('openWalletTransferLink', async (global, actions, payload): Pro
   });
 });
 
-addActionHandler('loadOnrampProviders', async (global): Promise<void> => {
-  const result = await callApi('fetchOnrampProviders');
-  if (!result) return;
-
-  global = getGlobal();
-  global = updateWallet(global, { onrampProviders: result });
-  setGlobal(global);
-});
-
-// The API takes fiat codes in lowercase ISO 4217
-function resolveBuyBaseCurrency(
-  providerInfo: ApiOnrampProvider | undefined, baseCurrencies: string[] | undefined, walletCurrency: string,
-): string {
-  const preferred = walletCurrency.toLowerCase();
-
-  if (!providerInfo?.hasBaseCurrencies || !baseCurrencies?.length) {
-    return preferred;
-  }
-
-  return baseCurrencies.includes(preferred) ? preferred : baseCurrencies[0];
-}
-
-addActionHandler('loadWalletBuyContext', async (global, actions, payload): Promise<void> => {
-  const { provider, tabId = getCurrentTabId() } = payload;
-
-  const providerInfo = selectOnrampProvider(global, provider);
-
-  global = updateTabState(global, { walletBuy: { provider, status: 'loading', baseCurrency: '' } }, tabId);
-  setGlobal(global);
-
-  const baseCurrencies = providerInfo?.hasBaseCurrencies
-    ? await callApi('fetchOnrampBaseCurrencies', { provider })
-    : undefined;
-
-  global = getGlobal();
-
-  if (selectTabState(global, tabId).walletBuy?.provider !== provider) return;
-
-  const baseCurrency = resolveBuyBaseCurrency(providerInfo, baseCurrencies || undefined, selectWalletCurrency(global));
-
-  // The server rejects a method under another currency with `ONRAMP_PAYMENT_METHOD_INVALID`
-  const availability = await callApi('fetchOnrampAvailability', { provider, baseCurrency });
-
-  global = getGlobal();
-
-  if (selectTabState(global, tabId).walletBuy?.provider !== provider) return;
-
-  if (!availability?.isBuyAllowed) {
-    global = updateTabState(global, {
-      walletBuy: {
-        provider, status: 'unavailable', baseCurrency, availability: availability || undefined,
-      },
-    }, tabId);
-
-    setGlobal(global);
-    return;
-  }
-
-  const limits = providerInfo?.hasLimits
-    ? await callApi('fetchOnrampLimits', { provider, baseCurrency })
-    : undefined;
-
-  global = getGlobal();
-
-  if (selectTabState(global, tabId).walletBuy?.provider !== provider) return;
-
-  global = updateTabState(global, {
-    walletBuy: {
-      provider,
-      status: 'ready',
-      baseCurrency,
-      availability,
-      baseCurrencies: baseCurrencies || undefined,
-      limits: limits || undefined,
-    },
-  }, tabId);
-
-  setGlobal(global);
-});
-
-addActionHandler('setWalletBuyCurrency', async (global, actions, payload): Promise<void> => {
-  const { baseCurrency, tabId = getCurrentTabId() } = payload;
-
-  const walletBuy = selectTabState(global, tabId).walletBuy;
-  if (!walletBuy || walletBuy.status === 'loading' || walletBuy.baseCurrency === baseCurrency) return;
-
-  const { provider } = walletBuy;
-  const providerInfo = selectOnrampProvider(global, provider);
-
-  global = updateTabState(global, {
-    walletBuy: {
-      ...walletBuy, status: 'loading', baseCurrency, availability: undefined, limits: undefined, quote: undefined,
-    },
-  }, tabId);
-
-  setGlobal(global);
-
-  const availability = await callApi('fetchOnrampAvailability', { provider, baseCurrency });
-  const limits = providerInfo?.hasLimits
-    ? await callApi('fetchOnrampLimits', { provider, baseCurrency })
-    : undefined;
-
-  global = getGlobal();
-
-  const current = selectTabState(global, tabId).walletBuy;
-  if (!current || current.provider !== provider || current.baseCurrency !== baseCurrency) return;
-
-  if (!availability?.isBuyAllowed) {
-    global = updateTabState(global, {
-      walletBuy: {
-        provider, status: 'unavailable', baseCurrency, availability,
-      },
-    }, tabId);
-
-    setGlobal(global);
-    return;
-  }
-
-  global = updateTabState(global, {
-    walletBuy: {
-      ...current, status: 'ready', availability, limits: limits || undefined,
-    },
-  }, tabId);
-
-  setGlobal(global);
-});
-
-const lastLimitsRequestIdByTab: Record<number, number> = {};
-
-// A provider may set different limits for a card and a bank transfer
-addActionHandler('loadOnrampLimits', async (global, actions, payload): Promise<void> => {
-  const { paymentMethod, tabId = getCurrentTabId() } = payload;
-
-  const walletBuy = selectTabState(global, tabId).walletBuy;
-  if (!walletBuy || walletBuy.status !== 'ready') return;
-
-  const { provider, baseCurrency } = walletBuy;
-
-  global = updateTabState(global, { walletBuy: { ...walletBuy, limits: undefined, quote: undefined } }, tabId);
-  setGlobal(global);
-
-  if (!selectOnrampProvider(global, provider)?.hasLimits) return;
-
-  const requestId = (lastLimitsRequestIdByTab[tabId] || 0) + 1;
-  lastLimitsRequestIdByTab[tabId] = requestId;
-
-  const limits = await callApi('fetchOnrampLimits', { provider, baseCurrency, paymentMethod });
-
-  global = getGlobal();
-
-  const current = selectTabState(global, tabId).walletBuy;
-
-  if (requestId !== lastLimitsRequestIdByTab[tabId] || !current || current.provider !== provider
-    || current.baseCurrency !== baseCurrency) return;
-
-  global = updateTabState(global, { walletBuy: { ...current, limits: limits || undefined } }, tabId);
-  setGlobal(global);
-});
-
-const lastQuoteRequestIdByTab: Record<number, number> = {};
-
-addActionHandler('loadOnrampQuote', async (global, actions, payload): Promise<void> => {
-  const {
-    baseCurrency, baseAmount, cryptoAmount, paymentMethod, tabId = getCurrentTabId(),
-  } = payload;
-
-  const walletBuy = selectTabState(global, tabId).walletBuy;
-  if (!walletBuy) return;
-
-  const { provider } = walletBuy;
-
-  const requestId = (lastQuoteRequestIdByTab[tabId] || 0) + 1;
-  lastQuoteRequestIdByTab[tabId] = requestId;
-
-  global = updateTabState(global, {
-    walletBuy: { ...walletBuy, isQuoteLoading: true, hasQuoteError: false },
-  }, tabId);
-
-  setGlobal(global);
-
-  const quote = await callApi('fetchOnrampQuote', {
-    provider, baseCurrency, baseAmount, cryptoAmount, paymentMethod,
-  });
-
-  global = getGlobal();
-
-  const current = selectTabState(global, tabId).walletBuy;
-
-  if (requestId !== lastQuoteRequestIdByTab[tabId] || !current || current.provider !== provider
-    || current.baseCurrency !== baseCurrency) return;
-
-  global = updateTabState(global, {
-    walletBuy: {
-      ...current,
-      quote,
-      quoteBaseAmount: baseAmount,
-      quotePaymentMethod: paymentMethod,
-      isQuoteLoading: false,
-      hasQuoteError: !quote,
-    },
-  }, tabId);
-
-  setGlobal(global);
-});
-
+// The amount and the payment method are chosen in the @walt mini app
 addActionHandler('openOnrampSession', async (global, actions, payload): Promise<void> => {
-  const {
-    provider, baseCurrency, baseAmount, paymentMethod, tabId = getCurrentTabId(),
-  } = payload;
+  const { tabId = getCurrentTabId() } = payload || {};
 
   const ownAddress = selectWalletAddress(global);
-  if (!ownAddress) return;
+  const modal = selectTabState(global, tabId).walletModal;
+  if (!ownAddress || !modal || modal.isBuyPending) return;
 
-  const session = await callApi('createOnrampSession', {
-    provider, ownAddress, baseCurrency, baseAmount, paymentMethod, theme: selectTheme(global),
-  });
+  global = updateTabState(global, { walletModal: { ...modal, isBuyPending: true } }, tabId);
+  setGlobal(global);
 
-  if (!session) {
+  // A method that throws or a malformed link must not leave the button spinning
+  const webApp = await fetchOnrampWebApp(global, ownAddress).catch(() => undefined);
+
+  global = getGlobal();
+
+  // The flag goes with the dialog, so a dialog closed while waiting, even if opened again, ignores the answer
+  const currentModal = selectTabState(global, tabId).walletModal;
+  if (!currentModal?.isBuyPending) return;
+
+  global = updateTabState(global, { walletModal: { ...currentModal, isBuyPending: undefined } }, tabId);
+  setGlobal(global);
+
+  if (selectWalletAddress(global) !== ownAddress) return;
+
+  if (!webApp) {
     actions.showNotification({ message: { key: 'WalletBuyError' }, tabId });
     return;
   }
 
-  global = getGlobal();
-
-  if (selectWalletAddress(global) !== ownAddress) return;
-
-  // A Telegram link opens a mini app, and the wallet dialog would cover it
-  if (isDeepLink(session.url)) {
-    actions.closeWalletModal({ tabId });
-  }
-
-  actions.openUrl({ url: session.url, shouldSkipModal: true, tabId });
+  // The wallet dialog would cover the mini app
+  actions.closeWalletModal({ tabId });
+  actions.requestAppWebView({ ...webApp, theme: extractCurrentThemeParams(), tabId });
 });
+
+// The session link is `t.me/<bot>/<app>`. Without the bot, `openUrl` would open the link in a browser tab.
+async function fetchOnrampWebApp<T extends GlobalState>(global: T, ownAddress: string) {
+  const session = await callApi('createOnrampSession', { ownAddress, theme: selectTheme(global) });
+  if (!session) return undefined;
+
+  const url = new URL(session.url);
+  // `<bot>.t.me/<app>` names the bot in the subdomain
+  const subdomain = url.hostname.split('.').slice(0, -2);
+  const [username, appName] = [...subdomain, ...url.pathname.split('/').filter(Boolean)];
+  if (!appName || !RE_TME_LINK.test(url.href)) return undefined;
+
+  global = getGlobal();
+  const bot = await fetchChatByUsername(global, username);
+
+  return bot && {
+    botId: bot.id,
+    appName,
+    startApp: url.searchParams.get('startapp') || undefined,
+    mode: url.searchParams.get('mode') || undefined,
+  };
+}
 
 const lastFeeRequestIdByTab: Record<number, number> = {};
 

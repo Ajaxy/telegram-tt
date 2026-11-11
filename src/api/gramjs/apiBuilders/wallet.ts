@@ -1,10 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiOnrampAvailability,
-  ApiOnrampLimits,
-  ApiOnrampProvider,
-  ApiOnrampQuote,
   ApiOnrampSession,
   ApiTonConnectRequest,
   ApiTonConnectSession,
@@ -281,62 +277,11 @@ function buildFragmentUrl(metadataUrl?: string): string | undefined {
   }
 }
 
-export function buildApiOnrampProvider(provider: GramJs.OnrampProviderInfo): ApiOnrampProvider {
-  return {
-    id: provider.id,
-    name: provider.name,
-    cryptoCurrencies: provider.cryptoCurrencies,
-    hasBaseCurrencies: provider.supportsBaseCurrencies,
-    hasLimits: provider.supportsLimits,
-    hasQuote: provider.supportsQuote,
-  };
-}
-
 export function buildApiOnrampSession(session: GramJs.OnrampSession): ApiOnrampSession {
   return {
     provider: session.provider,
     sessionId: session.sessionId,
     url: session.url,
     expiresDate: session.expiresDate,
-  };
-}
-
-export function buildApiOnrampAvailability(availability: GramJs.OnrampAvailability): ApiOnrampAvailability {
-  return {
-    isAllowed: availability.allowed,
-    isBuyAllowed: availability.buyAllowed,
-    countryCode: availability.countryCode,
-    state: availability.state,
-    methods: availability.methods.map((method) => ({
-      paymentMethod: method.paymentMethod,
-      isAvailable: method.available,
-    })),
-  };
-}
-
-export function buildApiOnrampLimits(limits: GramJs.OnrampLimits): ApiOnrampLimits {
-  return {
-    baseCurrency: limits.baseCurrency,
-    baseMinAmount: limits.baseMinAmount,
-    baseMaxAmount: limits.baseMaxAmount,
-    cryptoMinAmount: limits.cryptoMinAmount,
-    cryptoMaxAmount: limits.cryptoMaxAmount,
-    paymentMethod: limits.paymentMethod,
-  };
-}
-
-export function buildApiOnrampQuote(quote: GramJs.OnrampQuote): ApiOnrampQuote {
-  return {
-    baseCurrency: quote.baseCurrency,
-    baseAmount: quote.baseAmount,
-    cryptoCurrency: quote.cryptoCurrency,
-    cryptoAmount: quote.cryptoAmount,
-    cryptoPrice: quote.cryptoPrice,
-    feeAmount: quote.feeAmount,
-    extraFeeAmount: quote.extraFeeAmount,
-    networkFeeAmount: quote.networkFeeAmount,
-    totalAmount: quote.totalAmount,
-    paymentMethod: quote.paymentMethod,
-    expiresDate: quote.expiresDate,
   };
 }

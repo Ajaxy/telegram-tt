@@ -3,8 +3,6 @@ import type { ApiWalletGiftDeposit } from '../../../api/types';
 export enum WalletScreen {
   Main,
   Receive,
-  Buy,
-  BuyAmount,
   Currency,
   Send,
   SendAmount,

@@ -30,9 +30,6 @@ import type {
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiNotification,
-  ApiOnrampAvailability,
-  ApiOnrampLimits,
-  ApiOnrampQuote,
   ApiPaymentFormRegular,
   ApiPaymentFormStars,
   ApiPaymentStatus,
@@ -1041,6 +1038,7 @@ export type TabState = {
     shouldCloseOnBack?: boolean;
     initialTransactionId?: string;
     shouldShowIntro?: boolean;
+    isBuyPending?: boolean;
     // Moves the phrase out of the app passcode's keeping before that passcode goes
     shouldReleaseKey?: boolean;
     shouldOpenCollectibles?: boolean;
@@ -1131,21 +1129,6 @@ export type TabState = {
     transactionId: string;
     status: 'pending' | 'error';
     error?: DecryptWalletCommentError;
-  };
-
-  // `unavailable` when the region cannot buy
-  walletBuy?: {
-    provider: string;
-    status: 'loading' | 'ready' | 'unavailable';
-    baseCurrency: string;
-    availability?: ApiOnrampAvailability;
-    baseCurrencies?: string[];
-    limits?: ApiOnrampLimits;
-    quote?: ApiOnrampQuote;
-    quoteBaseAmount?: string;
-    quotePaymentMethod?: string;
-    isQuoteLoading?: boolean;
-    hasQuoteError?: boolean;
   };
 
   starsBalanceModal?: {

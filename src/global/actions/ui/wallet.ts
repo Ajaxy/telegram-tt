@@ -69,8 +69,6 @@ addTabStateResetterAction('clearWalletBackup', 'walletBackup');
 
 addTabStateResetterAction('clearWalletReplace', 'walletReplace');
 
-addTabStateResetterAction('clearWalletBuy', 'walletBuy');
-
 addTabStateResetterAction('clearWalletCommentDecryption', 'walletCommentDecryption');
 
 addTabStateResetterAction('clearWalletTonConnect', 'walletTonConnect');

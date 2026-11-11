@@ -28,6 +28,7 @@ import QrLogo from '../../../assets/wallet-qr-logo.svg';
 type OwnProps = {
   address: string;
   isPeer?: boolean;
+  isBuyPending?: boolean;
   onBuyClick?: NoneToVoidFunction;
 };
 
@@ -38,7 +39,7 @@ const QR_MARGIN = 0;
 const QR_HOLE_RATIO = 0.5;
 const BACK_GROUPS_PER_LINE = 3;
 
-const WalletReceiveScreen = ({ address, isPeer, onBuyClick }: OwnProps) => {
+const WalletReceiveScreen = ({ address, isPeer, isBuyPending, onBuyClick }: OwnProps) => {
   const { showNotification } = getActions();
 
   const lang = useLang();
@@ -143,6 +144,7 @@ const WalletReceiveScreen = ({ address, isPeer, onBuyClick }: OwnProps) => {
           pill
           iconName="cash-circle-filled"
           iconClassName={styles.buyIcon}
+          isLoading={isBuyPending}
           onClick={onBuyClick}
         >
           {lang('WalletReceiveBuy')}

@@ -2413,31 +2413,8 @@ export interface LangPair {
   'WalletReceiveShowQr': undefined;
   'WalletReceivePeerShowQr': undefined;
   'WalletReceivePeerNote': undefined;
-  'WalletBuyTitle': undefined;
-  'WalletBuyPayWith': undefined;
   'WalletBuyCurrency': undefined;
-  'WalletBuyBuyWith': undefined;
   'WalletBuyError': undefined;
-  'WalletBuyYouGet': undefined;
-  'WalletBuyFee': undefined;
-  'WalletBuyExtraFee': undefined;
-  'WalletBuyNetworkFee': undefined;
-  'WalletBuyTotal': undefined;
-  'WalletBuyUnavailable': undefined;
-  'WalletBuyContinue': undefined;
-  'WalletBuyMethodCard': undefined;
-  'WalletBuyMethodApplePay': undefined;
-  'WalletBuyMethodGooglePay': undefined;
-  'WalletBuyMethodPaypal': undefined;
-  'WalletBuyMethodVenmo': undefined;
-  'WalletBuyMethodAchBankTransfer': undefined;
-  'WalletBuyMethodSepaBankTransfer': undefined;
-  'WalletBuyMethodGbpBankTransfer': undefined;
-  'WalletBuyMethodOpenBanking': undefined;
-  'WalletBuyMethodPix': undefined;
-  'WalletBuyMethodWalletBalance': undefined;
-  'WalletBuyMethodCrossChain': undefined;
-  'WalletBuyMethodP2pExpress': undefined;
   'WalletSendTitle': undefined;
   'WalletSendRecipient': undefined;
   'WalletSendRecent': undefined;
@@ -5296,13 +5273,6 @@ export interface LangPairWithVariables<V = LangVariable> {
   'SettingsLanguageDesc': {
     'language': V;
   };
-  'WalletBuyAmountLabel': {
-    'currency': V;
-  };
-  'WalletBuyMinMax': {
-    'min': V;
-    'max': V;
-  };
   'WalletSendAddressLinked': {
     'name': V;
   };
@@ -7849,16 +7819,6 @@ export interface LangKeyGroups {
       | 'DoNotTranslateLanguage'
       | 'TranslateToButton';
     variables: 'language';
-  };
-  'currency': {
-    keys:
-      | 'WalletBuyAmountLabel';
-    variables: 'currency';
-  };
-  'max,min': {
-    keys:
-      | 'WalletBuyMinMax';
-    variables: 'max' | 'min';
   };
   'backdrop,model': {
     keys:

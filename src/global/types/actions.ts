@@ -1654,29 +1654,7 @@ export interface ActionPayloads {
   } & WithTabId;
   clearWalletCommentDecryption: WithTabId | undefined;
 
-  loadOnrampProviders: WithTabId | undefined;
-  loadWalletBuyContext: {
-    provider: string;
-  } & WithTabId;
-  setWalletBuyCurrency: {
-    baseCurrency: string;
-  } & WithTabId;
-  loadOnrampQuote: {
-    baseCurrency: string;
-    baseAmount?: string;
-    cryptoAmount?: string;
-    paymentMethod?: string;
-  } & WithTabId;
-  loadOnrampLimits: {
-    paymentMethod?: string;
-  } & WithTabId;
-  clearWalletBuy: WithTabId | undefined;
-  openOnrampSession: {
-    provider: string;
-    baseCurrency?: string;
-    baseAmount?: string;
-    paymentMethod?: string;
-  } & WithTabId;
+  openOnrampSession: WithTabId | undefined;
 
   checkChatlistInvite: {
     slug: string;

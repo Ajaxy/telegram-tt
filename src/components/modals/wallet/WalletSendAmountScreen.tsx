@@ -58,7 +58,7 @@ type OwnProps = {
   collectible?: ApiWalletCollectible;
   onSubmit: (payload: WalletTransferPayload) => void;
   onDraftChange: (draft: WalletSendDraft) => void;
-  onBuy: NoneToVoidFunction;
+  onDeposit: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -97,7 +97,7 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
     usdRate, currency, currencyRate, usersById, userAddresses, resolvedAddresses,
     walletTransfer, walletTransferFee, gaslessInfo, freeTransfersPerDay, minAmount, canAnimate,
     draft, collectible,
-    onSubmit, onDraftChange, onBuy,
+    onSubmit, onDraftChange, onDeposit,
   } = formProps;
 
   const isSubmitted = getIsWalletTransferSubmitted(walletTransfer);
@@ -395,7 +395,7 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
           <>
             {lang('WalletSendInsufficientFunds')}
             {' '}
-            <Link isPrimary onClick={onBuy}>{lang('WalletDepositFunds')}</Link>
+            <Link isPrimary onClick={onDeposit}>{lang('WalletDepositFunds')}</Link>
           </>
         ) : shownFee?.isFailed ? (
           lang('WalletSendFeeUnavailable')
