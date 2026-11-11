@@ -6,7 +6,7 @@ import type {
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { type LangFn } from '../../util/localization';
-import trimText from '../../util/trimText';
+import trimText from '../../util/text/trimText';
 import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
 import {
   getMessageTextWithFallback, getMessageTranscription,

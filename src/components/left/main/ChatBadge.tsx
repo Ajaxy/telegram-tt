@@ -11,7 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import { buildCollectionByCallback } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { isSignal } from '../../../util/signals';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 import useSelector, { useShallowSelector } from '../../../hooks/data/useSelector';

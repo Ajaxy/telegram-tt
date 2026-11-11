@@ -10,8 +10,8 @@ import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { extractMessageText, stripCustomEmoji } from '../../global/helpers';
-import trimText from '../../util/trimText';
-import { insertTextEntity, renderTextWithEntities } from './helpers/renderTextWithEntities';
+import trimText from '../../util/text/trimText';
+import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -26,7 +26,6 @@ interface OwnProps {
   forcedText?: ApiFormattedText;
   isForAnimation?: boolean;
   emojiSize?: number;
-  highlight?: string;
   asPreview?: boolean;
   truncateLength?: number;
   isProtected?: boolean;
@@ -36,8 +35,6 @@ interface OwnProps {
   shouldRenderAsHtml?: boolean;
   inChatList?: boolean;
   forcePlayback?: boolean;
-  focusedQuote?: string;
-  focusedQuoteOffset?: number;
   isInSelectMode?: boolean;
   canBeEmpty?: boolean;
   maxTimestamp?: number;
@@ -54,7 +51,6 @@ function MessageText({
   forcedText,
   isForAnimation,
   emojiSize,
-  highlight,
   asPreview,
   truncateLength,
   isProtected,
@@ -64,8 +60,6 @@ function MessageText({
   shouldRenderAsHtml,
   inChatList,
   forcePlayback,
-  focusedQuote,
-  focusedQuoteOffset,
   isInSelectMode,
   canBeEmpty,
   maxTimestamp,
@@ -86,44 +80,26 @@ function MessageText({
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
   const { text, entities } = adaptedFormattedText || {};
 
-  const entitiesWithFocusedQuote = useMemo(() => {
-    if (!text || !focusedQuote) return entities;
-
-    const offsetIndex = text.indexOf(focusedQuote, focusedQuoteOffset);
-    const index = offsetIndex >= 0 ? offsetIndex : text.indexOf(focusedQuote); // Fallback to first occurrence
-    const lendth = focusedQuote.length;
-    if (index >= 0) {
-      return insertTextEntity(entities || [], {
-        offset: index,
-        length: lendth,
-        type: ApiMessageEntityTypes.QuoteFocus,
-      });
-    }
-
-    return entities;
-  }, [text, entities, focusedQuote, focusedQuoteOffset]);
-
   const containerId = useUniqueId();
 
   useSyncEffect(() => {
     textCacheBusterRef.current += 1;
-  }, [text, entitiesWithFocusedQuote]);
+  }, [text, entities]);
 
   const withSharedCanvas = useMemo(() => {
     if (shouldAnimateTyping) {
       return false;
     }
 
-    const customEmojisCount = countCustomEmojis(entitiesWithFocusedQuote);
+    const customEmojisCount = countCustomEmojis(entities);
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS
-      && !hasSpoileredCustomEmojis(entitiesWithFocusedQuote);
-  }, [entitiesWithFocusedQuote, shouldAnimateTyping]);
+      && !hasSpoileredCustomEmojis(entities);
+  }, [entities, shouldAnimateTyping]);
 
   const renderText = useLastCallback((t: ApiFormattedText) => {
     return renderTextWithEntities({
       text: t.text,
       entities: t.entities,
-      highlight,
       emojiSize,
       shouldRenderAsHtml,
       containerId,
@@ -150,7 +126,7 @@ function MessageText({
 
   const textToRender: ApiFormattedText = {
     text: trimText(text || '', truncateLength),
-    entities: entitiesWithFocusedQuote,
+    entities,
   };
   const shouldRenderTypingPlaceholder = !('previousLocalId' in messageOrStory) || !messageOrStory.previousLocalId;
 

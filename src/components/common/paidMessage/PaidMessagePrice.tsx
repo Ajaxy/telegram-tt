@@ -8,7 +8,7 @@ import {
   MINIMUM_CHARGE_FOR_MESSAGES,
 } from '../../../config';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
-import { formatPercent } from '../../../util/textFormat';
+import { formatPercent } from '../../../util/text/textFormat';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';

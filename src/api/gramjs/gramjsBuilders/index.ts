@@ -51,6 +51,7 @@ import { getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 import { buildInputDocument, buildInputPhoto } from './media';
+import { buildMtpRichText } from './richContent';
 
 export { buildInputRichMessage } from './richContent';
 export { buildInputDocument, buildInputPhoto } from './media';
@@ -1039,16 +1040,23 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
 
   if (replyInfo.type === 'message') {
     const {
-      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteOffset, monoforumPeerId,
+      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteRich, quoteOffset, monoforumPeerId, todoItemId,
+      pollOption,
     } = replyInfo;
+    const mtpQuoteRich = quoteRich?.map(buildMtpRichText);
+    const validQuoteRich = mtpQuoteRich?.length && mtpQuoteRich.every((text) => text !== undefined)
+      ? mtpQuoteRich : undefined;
     return new GramJs.InputReplyToMessage({
       replyToMsgId,
       topMsgId: replyToTopId,
       replyToPeerId: replyToPeerId ? buildInputPeerFromLocalDb(replyToPeerId)! : undefined,
       monoforumPeerId: monoforumPeerId ? buildInputPeerFromLocalDb(monoforumPeerId)! : undefined,
-      quoteText: quoteText?.text,
-      quoteEntities: quoteText?.entities?.map(buildMtpMessageEntity),
-      quoteOffset,
+      quoteText: validQuoteRich ? undefined : quoteText?.text,
+      quoteEntities: validQuoteRich ? undefined : quoteText?.entities?.map(buildMtpMessageEntity),
+      quoteRich: validQuoteRich,
+      quoteOffset: validQuoteRich || quoteText ? quoteOffset : undefined,
+      todoItemId,
+      pollOption: pollOption !== undefined ? deserializeBytes(pollOption) : undefined,
     });
   }
 

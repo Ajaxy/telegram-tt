@@ -3,8 +3,8 @@ import type { MessageListType, ThreadId } from '../../../../types';
 import type { MessageCopyRequest } from '../../../../types/messageCopy';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
-import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
+import getMessageIdsForSelectedText from '../../../../util/selection/getMessageIdsForSelectedText';
+import parseHtmlAsFormattedText from '../../../../util/text/parseHtmlAsFormattedText';
 
 const selectionContainer = document.createElement('div');
 const SEMANTIC_COPY_TAGS = new Set([
@@ -22,7 +22,7 @@ const ALLOWED_QUOTE_ENTITIES = new Set([
 ]);
 
 export function getSelectionAsFormattedText(range: Range) {
-  const html = getSelectionAsHtml(range).replace(/<br\s*\/?>/gi, '\n');
+  const html = getSelectionAsHtml(range).replace(/<br\b[^>]*>/gi, '\n');
   const formattedText = parseHtmlAsFormattedText(html, false, true);
 
   return stripEntitiesForQuote(formattedText);

@@ -5,7 +5,7 @@ import type {
   ApiWebDocument,
 } from './bots';
 import type { ApiChatAdminRights } from './chats';
-import type { ApiInstantViewPage } from './instantView';
+import type { ApiInstantViewPage, ApiRichText } from './instantView';
 import type { ApiMessageAction } from './messageActions';
 import type { ApiAttachment, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
@@ -476,7 +476,11 @@ export interface ApiMessageReplyInfo {
   replyToTopId?: number;
   isForumTopic?: true;
   isQuote?: true;
+  todoItemId?: number;
+  pollOption?: string;
+  replyOptionText?: ApiFormattedText;
   quoteText?: ApiFormattedText;
+  quoteRich?: ApiRichText[];
   quoteOffset?: number;
 }
 
@@ -498,7 +502,10 @@ export interface ApiInputMessageReplyInfo {
   replyToPeerId?: string;
   monoforumPeerId?: string;
   quoteText?: ApiFormattedText;
+  quoteRich?: ApiRichText[];
   quoteOffset?: number;
+  todoItemId?: number;
+  pollOption?: string;
 }
 
 export interface ApiInputEphemeralReplyInfo {
@@ -663,7 +670,6 @@ export enum ApiMessageEntityTypes {
   Spoiler = 'MessageEntitySpoiler',
   CustomEmoji = 'MessageEntityCustomEmoji',
   Timestamp = 'MessageEntityTimestamp',
-  QuoteFocus = 'MessageEntityQuoteFocus',
   FormattedDate = 'MessageEntityFormattedDate',
   Unknown = 'MessageEntityUnknown',
   DiffInsert = 'MessageEntityDiffInsert',

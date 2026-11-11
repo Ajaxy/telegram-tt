@@ -28,7 +28,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getColorLuma } from '../../../util/colors';
-import { formatPercent } from '../../../util/textFormat';
+import { formatPercent } from '../../../util/text/textFormat';
 import windowSize from '../../../util/windowSize';
 
 import useInterval from '../../../hooks/schedulers/useInterval';

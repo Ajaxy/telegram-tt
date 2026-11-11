@@ -13,7 +13,7 @@ import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { resolveTransitionName } from '../../../util/resolveTransitionName.ts';
-import { formatInteger } from '../../../util/textFormat';
+import { formatInteger } from '../../../util/text/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
 import useLang from '../../../hooks/useLang';

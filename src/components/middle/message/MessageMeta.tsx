@@ -13,7 +13,7 @@ import {
 } from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { getRepeatPeriodText } from '../../../util/scheduledMessages';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';

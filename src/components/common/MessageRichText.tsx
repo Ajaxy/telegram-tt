@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef, useState } from '../../lib/teact/teact';
+import { memo, useEffect, useMemo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal, getPromiseActions } from '../../global';
 
 import type {
@@ -17,6 +17,7 @@ import { RICH_CONTENT_BODY_FONT_SIZE_PX } from '../../config';
 import { selectChatMessage } from '../../global/selectors';
 import { selectMessageTextSize } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
+import { findRichQuoteRange, getRichQuoteTexts } from '../../util/text/richQuote';
 
 import useSelector from '../../hooks/data/useSelector';
 import useLang from '../../hooks/useLang';
@@ -30,6 +31,8 @@ import styles from './MessageRichText.module.scss';
 type OwnProps = {
   message: ApiMessage;
   forcedRichMessage?: ApiRichMessage;
+  focusedQuote?: string;
+  focusedQuoteOffset?: number;
   threadId?: ThreadId;
   isOwn?: boolean;
   noAvatars?: boolean;
@@ -46,6 +49,8 @@ const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
 const MessageRichText = ({
   message,
   forcedRichMessage,
+  focusedQuote,
+  focusedQuoteOffset,
   threadId,
   isOwn,
   noAvatars,
@@ -71,7 +76,15 @@ const MessageRichText = ({
   const hasCutoff = cutoff !== undefined;
   const isExpanded = expandedMessageKey === messageKey && !richMessage?.isPart;
   const isLoadingFullMessage = loadingMessageKey === messageKey;
-  const shouldCollapse = !isExpanded && Boolean(richMessage?.isPart || hasCutoff);
+  const { quoteRange, shouldRevealQuote } = useMemo(() => {
+    if (!focusedQuote || !richMessage) return {};
+    const texts = getRichQuoteTexts(richMessage.blocks);
+    const range = findRichQuoteRange(texts, focusedQuote, focusedQuoteOffset);
+    const visibleCount = hasCutoff ? getRichQuoteTexts(richMessage.blocks.slice(0, cutoff)).length : texts.length;
+    // A partial message may contain the quote in its unloaded part
+    return { quoteRange: range, shouldRevealQuote: range ? range.last >= visibleCount : richMessage.isPart };
+  }, [cutoff, focusedQuote, focusedQuoteOffset, hasCutoff, richMessage]);
+  const shouldCollapse = !isExpanded && Boolean(richMessage?.isPart || (hasCutoff && !shouldRevealQuote));
   const shouldSliceBlocks = shouldCollapse && hasCutoff;
   const blocks = useMemo(() => {
     if (!richMessage) {
@@ -110,6 +123,10 @@ const MessageRichText = ({
     });
   });
 
+  useEffect(() => {
+    if (shouldRevealQuote) handleShowMore();
+  }, [shouldRevealQuote, handleShowMore]);
+
   if (!richMessage || !blocks) {
     return undefined;
   }
@@ -121,6 +138,8 @@ const MessageRichText = ({
         {withSharedCanvas && <canvas key="shared-canvas-hq" ref={sharedCanvasHqRef} className="shared-canvas" />}
         <RichContent
           blocks={blocks}
+          focusedQuoteRange={quoteRange}
+          noQuoting={Boolean(forcedRichMessage)}
           isRtl={richMessage.isRtl}
           isOwn={isOwn}
           noAvatars={noAvatars}

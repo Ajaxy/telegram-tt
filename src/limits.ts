@@ -150,6 +150,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   noForwardsRequestExpirePeriod: 86400,
   tonSuggestedPostCommissionPermille: 850,
   todoItemLengthMax: 64,
+  quoteLengthMax: 1024,
   todoItemsMax: 30,
   todoTitleLengthMax: 32,
   tonSuggestedPostAmountMax: 10_000_000_000_000n,

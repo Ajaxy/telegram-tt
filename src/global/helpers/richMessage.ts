@@ -19,9 +19,9 @@ import type {
 } from '../../api/types';
 
 import { getTranslationFn } from '../../util/localization';
-import { getUtf8Length } from '../../util/textFormat';
+import { getUtf8Length } from '../../util/text/textFormat';
 
-export { hasRichText } from '../../util/richText';
+export { hasRichText } from '../../util/text/richText';
 
 const PREVIEW_OVERFLOW_LENGTH = 1;
 const BLOCK_TEXT_SEPARATOR = '\n';

@@ -45,6 +45,7 @@ import type {
   ApiReactionWithPaid,
   ApiReceiptRegular,
   ApiRequestPeerType,
+  ApiRichText,
   ApiSavedGifts,
   ApiSavedStarGift,
   ApiSearchPostsFlood,
@@ -275,6 +276,8 @@ export type TabState = {
     isResizingContainer?: boolean;
     quote?: string;
     quoteOffset?: number;
+    todoItemId?: number;
+    pollOption?: string;
     scrollTargetPosition?: ScrollTargetPosition;
   };
 
@@ -502,6 +505,7 @@ export type TabState = {
     fromChatId?: string;
     messageId?: number;
     quoteText?: ApiFormattedText;
+    quoteRich?: ApiRichText[];
     quoteOffset?: number;
     toChatId?: string;
     toThreadId?: ThreadId;

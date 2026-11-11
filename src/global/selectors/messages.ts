@@ -6,6 +6,7 @@ import type {
   ApiMessageEntityCustomEmoji,
   ApiMessageForwardInfo,
   ApiMessageOutgoingStatus,
+  ApiMessageReplyInfo,
   ApiPeer, ApiSponsoredMessage,
   ApiStickerSetInfo,
   MediaContainer,
@@ -478,6 +479,19 @@ export function selectPoll<T extends GlobalState>(global: T, pollId: string) {
 export function selectPollFromMessage<T extends GlobalState>(global: T, message: MediaContainer) {
   if (!message.content.pollId) return undefined;
   return selectPoll(global, message.content.pollId);
+}
+
+export function selectReplyOptionText(
+  global: GlobalState, media: MediaContainer, { todoItemId, pollOption, replyOptionText }: ApiMessageReplyInfo,
+) {
+  if (todoItemId !== undefined) {
+    return media.content.todo?.todo.items.find((item) => item.id === todoItemId)?.title;
+  }
+  if (pollOption !== undefined) {
+    const poll = selectPollFromMessage(global, media);
+    return poll?.summary.answers.find((answer) => answer.option === pollOption)?.text ?? replyOptionText;
+  }
+  return undefined;
 }
 
 export function selectWebPage<T extends GlobalState>(global: T, webPageId: string) {

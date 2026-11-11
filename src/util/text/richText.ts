@@ -1,4 +1,4 @@
-import type { ApiRichText } from '../api/types';
+import type { ApiRichText } from '../../api/types';
 
 export function hasRichText(text: ApiRichText): boolean {
   switch (text.type) {

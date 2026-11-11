@@ -124,6 +124,23 @@
     vertical-align: middle;
   }
 
+  .embedded-option-icon {
+    margin-inline-end: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--accent-color);
+
+    &.is-incomplete::before {
+      content: '';
+
+      display: inline-block;
+
+      width: 0.75rem;
+      height: 0.75rem;
+      border: 0.0625rem solid currentColor;
+      border-radius: 50%;
+    }
+  }
+
   .message-text {
     overflow: hidden;
     display: flex;
@@ -175,9 +192,18 @@
       }
     }
 
+    .multiline.has-rich-quote {
+      white-space: pre-wrap;
+    }
+
     .multiline {
+      display: -webkit-box;
       flex: 1;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 5;
+
       padding-bottom: 0.0625rem;
+
       line-height: 1.0625rem;
     }
 

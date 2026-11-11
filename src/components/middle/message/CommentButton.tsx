@@ -5,7 +5,7 @@ import type { ApiCommentsInfo } from '../../../api/types';
 
 import { selectIsCurrentUserFrozen, selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';

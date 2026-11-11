@@ -29,14 +29,11 @@ interface IOrganizedEntity {
   organizedIndexes: Set<number>;
   nestedEntities: IOrganizedEntity[];
 }
-type RenderTextParams = Parameters<typeof renderText>[2];
-
 const HQ_EMOJI_THRESHOLD = 64;
 
 export function renderTextWithEntities({
   text,
   entities,
-  highlight,
   emojiSize,
   shouldRenderAsHtml,
   containerId,
@@ -58,7 +55,6 @@ export function renderTextWithEntities({
 }: {
   text: string;
   entities?: ApiMessageEntity[];
-  highlight?: string;
   emojiSize?: number;
   shouldRenderAsHtml?: boolean;
   containerId?: string;
@@ -81,7 +77,6 @@ export function renderTextWithEntities({
   if (!entities?.length) {
     return renderMessagePart({
       content: text,
-      highlight,
       emojiSize,
       shouldRenderAsHtml,
       asPreview,
@@ -115,7 +110,6 @@ export function renderTextWithEntities({
       if (textBefore) {
         renderResult.push(...renderMessagePart({
           content: textBefore,
-          highlight,
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
@@ -165,7 +159,6 @@ export function renderTextWithEntities({
         entity,
         entityContent,
         nestedEntityContent,
-        highlight,
         containerId,
         asPreview,
         isProtected,
@@ -201,7 +194,6 @@ export function renderTextWithEntities({
       if (textAfter) {
         renderResult.push(...renderMessagePart({
           content: textAfter,
-          highlight,
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
@@ -235,15 +227,11 @@ export function renderTextWithEntities({
 
 function renderMessagePart({
   content,
-  highlight,
-  focusedQuote,
   emojiSize,
   shouldRenderAsHtml,
   asPreview,
 }: {
   content: TextPart | TextPart[];
-  highlight?: string;
-  focusedQuote?: string;
   emojiSize?: number;
   shouldRenderAsHtml?: boolean;
   asPreview?: boolean;
@@ -254,8 +242,6 @@ function renderMessagePart({
     content.forEach((c) => {
       result.push(...renderMessagePart({
         content: c,
-        highlight,
-        focusedQuote,
         emojiSize,
         shouldRenderAsHtml,
         asPreview,
@@ -272,71 +258,11 @@ function renderMessagePart({
   const emojiFilter = emojiSize && emojiSize > HQ_EMOJI_THRESHOLD ? 'hq_emoji' : 'emoji';
 
   const filters: TextFilter[] = [emojiFilter];
-  const params: RenderTextParams = {};
   if (!asPreview) {
     filters.push('br');
   }
 
-  if (highlight) {
-    filters.push('highlight');
-    params.highlight = highlight;
-  }
-
-  return renderText(content, filters, params);
-}
-
-export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMessageEntity) {
-  const resultEntities: ApiMessageEntity[] = [];
-
-  const newEntityStart = newEntity.offset;
-  const newEntityEnd = newEntity.offset + newEntity.length;
-
-  for (const existingEntity of entities) {
-    const existingEntityStart = existingEntity.offset;
-    const existingEntityEnd = existingEntity.offset + existingEntity.length;
-    // Push as is if edges do not overlap
-    if (existingEntityEnd <= newEntityStart
-      || existingEntityStart > newEntityEnd
-      || (existingEntityStart > newEntityStart
-        && existingEntityEnd < newEntityEnd)
-      || (existingEntityStart === newEntityStart && existingEntityEnd === newEntityEnd)) {
-      resultEntities.push(existingEntity);
-      continue;
-    }
-
-    // If start edge overlaps
-    if (existingEntityStart < newEntityStart && existingEntityEnd > newEntityStart) {
-      // Split entity in two
-      resultEntities.push({
-        ...existingEntity,
-        length: newEntityStart - existingEntityStart,
-      });
-      resultEntities.push({
-        ...existingEntity,
-        offset: newEntityStart,
-        length: existingEntityEnd - newEntityStart,
-      });
-    }
-
-    // If end edge overlaps
-    if (existingEntityStart < newEntityEnd
-      && existingEntityEnd > newEntityEnd) {
-      // Split entity in two
-      resultEntities.push({
-        ...existingEntity,
-        offset: newEntityEnd,
-        length: existingEntityEnd - newEntityStart - newEntity.length,
-      });
-      resultEntities.push({
-        ...existingEntity,
-        length: newEntityEnd - existingEntityStart,
-      });
-    }
-  }
-
-  resultEntities.push(newEntity);
-  // Sort entities by offset, longer entities first
-  return resultEntities.sort((a, b) => a.offset - b.offset || b.length - a.length);
+  return renderText(content, filters);
 }
 
 // Organize entities in a tree-like structure to better represent how the text will be displayed
@@ -409,7 +335,6 @@ function processEntity({
   entity,
   entityContent,
   nestedEntityContent,
-  highlight,
   containerId,
   asPreview,
   isProtected,
@@ -431,8 +356,6 @@ function processEntity({
   entity: ApiMessageEntity;
   entityContent: TextPart;
   nestedEntityContent: TextPart[];
-  highlight?: string;
-  focusedQuote?: string;
   containerId?: string;
   asPreview?: boolean;
   isProtected?: boolean;
@@ -457,7 +380,6 @@ function processEntity({
   function renderNestedMessagePart() {
     return renderMessagePart({
       content: renderedContent,
-      highlight,
       emojiSize,
       asPreview,
     });
@@ -476,6 +398,7 @@ function processEntity({
     if (entity.type === ApiMessageEntityTypes.CustomEmoji) {
       return (
         <CustomEmoji
+          alt={entityText}
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
@@ -493,7 +416,9 @@ function processEntity({
     }
 
     if (entity.type === ApiMessageEntityTypes.FormattedDate && entity.date) { // Old entities can have missing fields
-      return <FormattedDate entity={entity} asPreview>{text}</FormattedDate>;
+      return (
+        <FormattedDate sourceText={entityText} entity={entity} asPreview>{text}</FormattedDate>
+      );
     }
 
     return text;
@@ -639,6 +564,7 @@ function processEntity({
     case ApiMessageEntityTypes.CustomEmoji:
       return (
         <CustomEmoji
+          alt={entityText}
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
@@ -653,13 +579,10 @@ function processEntity({
           noPlay={noCustomEmojiPlayback}
         />
       );
-    case ApiMessageEntityTypes.QuoteFocus:
-      return (
-        <span className="matching-text-highlight is-quote">{renderNestedMessagePart()}</span>
-      );
     case ApiMessageEntityTypes.FormattedDate:
       return (
         <FormattedDate
+          sourceText={entityText}
           entity={entity}
           chatId={chatId}
           messageId={messageId}

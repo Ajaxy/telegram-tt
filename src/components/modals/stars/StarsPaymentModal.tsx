@@ -12,7 +12,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon } from '../../../util/localization/format';
-import { formatInteger } from '../../../util/textFormat';
+import { formatInteger } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';

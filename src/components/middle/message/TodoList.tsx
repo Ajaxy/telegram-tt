@@ -134,6 +134,7 @@ const TodoList = ({
                 'readonly-item-label',
                 completedTasksSet.has(task.value) && 'completed-label',
               )}
+              data-todo-item-id={task.value}
             >
               {task.label}
             </div>

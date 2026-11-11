@@ -9,6 +9,7 @@ import { DEBUG } from '../../config';
 import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getNestedRichText, getRichTextPlainText } from '../../global/helpers/richMessage';
 import buildClassName from '../../util/buildClassName';
+import { getRichQuoteText } from '../../util/text/richQuote';
 import renderText from '../common/helpers/renderText';
 
 import CustomEmoji from '../common/CustomEmoji';
@@ -25,6 +26,7 @@ import styles from './RichContent.module.scss';
 
 export type RichTextProps = {
   text: ApiRichText;
+  asPreview?: boolean;
   isButtonLabel?: boolean;
   unsupportedText: string;
   containerId: string;
@@ -41,6 +43,7 @@ export type RichTextProps = {
 
 const RichText = ({
   text,
+  asPreview,
   isButtonLabel,
   unsupportedText,
   containerId,
@@ -82,6 +85,7 @@ const RichText = ({
           key={index}
           text={part}
           isButtonLabel={isButtonLabel}
+          asPreview={asPreview}
           unsupportedText={unsupportedText}
           containerId={containerId}
           pageUrl={pageUrl}
@@ -224,8 +228,9 @@ const RichText = ({
     case 'date':
       return (
         <FormattedDate
+          sourceText={getRichQuoteText(text)}
           entity={buildDateEntity(text)}
-          asPreview={isButtonLabel}
+          asPreview={isButtonLabel || asPreview}
           chatId={chatId}
           messageId={messageId}
         >
@@ -261,6 +266,7 @@ const RichText = ({
       <RichText
         text={getNestedRichText(text)}
         isButtonLabel={isButtonLabel}
+        asPreview={asPreview}
         unsupportedText={unsupportedText}
         containerId={containerId}
         pageUrl={pageUrl}
@@ -280,6 +286,7 @@ const RichText = ({
     if (customEmojiText.document) {
       return (
         <CustomEmoji
+          alt={customEmojiText.alt}
           sticker={customEmojiText.document}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -293,6 +300,7 @@ const RichText = ({
 
     return (
       <CustomEmoji
+        alt={customEmojiText.alt}
         documentId={customEmojiText.documentId}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}

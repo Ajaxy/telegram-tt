@@ -21,7 +21,7 @@ import buildClassName from '../../util/buildClassName';
 import { unique } from '../../util/iteratees';
 import { formatCalendarDate, secondsToDate } from '../../util/localization/dateFormat';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
-import { formatIntegerCompact } from '../../util/textFormat';
+import { formatIntegerCompact } from '../../util/text/textFormat';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useFlag from '../../hooks/useFlag';

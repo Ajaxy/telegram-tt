@@ -20,6 +20,8 @@ import { animateSingle, cancelSingleAnimation } from './animation';
 export type AnimateScrollArgs = {
   container: HTMLElement;
   element: HTMLElement;
+  // Part of `element` to scroll to, e.g. a quote inside a message
+  range?: Range;
   position: ScrollTargetPosition;
   margin?: number;
   topReserve?: number;
@@ -76,6 +78,7 @@ function createMutateFunction(args: AnimateScrollArgs) {
   const {
     container,
     element,
+    range,
     position,
     margin = 0,
     topReserve = 0,
@@ -95,9 +98,15 @@ function createMutateFunction(args: AnimateScrollArgs) {
     forceDuration = 0;
   }
 
-  const { offsetHeight: elementHeight } = element;
   const { scrollTop: currentScrollTop, clientHeight: containerHeight, scrollHeight } = container;
-  const elementTop = getOffsetToContainer(element, container).top;
+  let elementHeight = element.offsetHeight;
+  let elementTop = getOffsetToContainer(element, container).top;
+  if (range) {
+    // Ancestor transforms affect both rects equally, keeping the offset consistent with `getOffsetToContainer`
+    const rangeRect = range.getBoundingClientRect();
+    elementTop += rangeRect.top - element.getBoundingClientRect().top;
+    elementHeight = rangeRect.height;
+  }
 
   const targetContainerHeight = forceNormalContainerHeight && container.dataset.normalHeight
     ? Number(container.dataset.normalHeight)

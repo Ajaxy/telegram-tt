@@ -195,8 +195,8 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
 
   const isForwardingRendering = Boolean(frozenForwardedMessagesCount);
   const isShowingReplyRendering = Boolean(frozenReplyInfo) && !frozenShouldForceShowEditing;
-  const frozenReplyQuoteText = frozenReplyInfo?.type === 'message' ? frozenReplyInfo.quoteText : undefined;
-  const isReplyWithQuoteRendering = Boolean(frozenReplyQuoteText);
+  const isReplyWithQuoteRendering = frozenReplyInfo?.type === 'message'
+    && Boolean(frozenReplyInfo.quoteText || frozenReplyInfo.quoteRich?.length);
   const isShowingSuggestedPostRendering = Boolean(frozenSuggestedPostInfo) && !frozenShouldForceShowEditing;
 
   const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile;
@@ -263,7 +263,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const handleForwardToAnotherChatClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
   const handleShowMessageClick = useLastCallback(buildAutoCloseMenuItemHandler(focusMessageFromDraft));
   const handleRemoveQuoteClick = useLastCallback(buildAutoCloseMenuItemHandler(
-    () => updateDraftReplyInfo({ quoteText: undefined }),
+    () => updateDraftReplyInfo({ quoteText: undefined, quoteRich: undefined, quoteOffset: undefined }),
   ));
   const handleChangeReplyRecipientClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
   const handleReplyInSenderChat = useLastCallback(() => {
@@ -358,7 +358,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           onKeyDown={handleIconKeyDown}
         >
           {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
-          {Boolean(frozenReplyQuoteText) && (
+          {isReplyWithQuoteRendering && (
             <Icon name="quote" className="quote-reply" />
           )}
         </div>
@@ -551,8 +551,8 @@ export default memo(withGlobal<OwnProps>(
         sender = selectForwardedSender(global, message);
       }
 
-      const quoteText = replyInfo.type === 'message' ? replyInfo.quoteText : undefined;
-      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(quoteText))) {
+      const hasQuote = replyInfo.type === 'message' && Boolean(replyInfo.quoteText || replyInfo.quoteRich?.length);
+      if (!sender && (!forwardInfo?.hiddenUserName || hasQuote)) {
         sender = selectSender(global, message);
       }
     }

@@ -131,6 +131,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   todo_items_max?: number;
   todo_title_length_max?: number;
   todo_item_length_max?: number;
+  quote_length_max?: number;
   ignore_restriction_reasons?: string[];
   need_age_video_verification?: boolean;
   verify_age_bot_username?: string;
@@ -305,6 +306,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     todoItemsMax: appConfig.todo_items_max,
     todoTitleLengthMax: appConfig.todo_title_length_max,
     todoItemLengthMax: appConfig.todo_item_length_max,
+    quoteLengthMax: appConfig.quote_length_max,
     ignoreRestrictionReasons: appConfig.ignore_restriction_reasons,
     needAgeVideoVerification: appConfig.need_age_video_verification,
     verifyAgeBotUsername: appConfig.verify_age_bot_username,

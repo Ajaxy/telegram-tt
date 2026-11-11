@@ -1,4 +1,4 @@
-import { MESSAGE_CONTENT_CLASS_NAME } from '../config';
+import { MESSAGE_CONTENT_CLASS_NAME } from '../../config';
 
 const ELEMENT_NODE = 1;
 

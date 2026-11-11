@@ -1,10 +1,11 @@
-import { useMemo } from '../../../lib/teact/teact';
+import { Fragment, useCallback, useMemo } from '../../../lib/teact/teact';
 
 import type {
   ApiChat,
   ApiInputSuggestedPostInfo,
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatTranslatedMessages, TranslationTone } from '../../../types';
 import type { IconName } from '../../../types/icons';
@@ -20,16 +21,21 @@ import {
 import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getRichMessagePreviewText } from '../../../global/helpers/richMessage';
+import { selectReplyOptionText } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { formatCalendarDate, secondsToDate } from '../../../util/localization/dateFormat';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
+import { normalizeRichQuote } from '../../../util/text/richQuote';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useLang from '../../../hooks/useLang';
+import useUniqueId from '../../../hooks/useUniqueId';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
+import RichText from '../../iv/RichText';
 import RippleEffect from '../../ui/RippleEffect';
 import CompactMediaPreview, { canRenderCompactMediaPreview } from '../CompactMediaPreview';
 import Icon from '../icons/Icon';
@@ -93,6 +99,9 @@ const EmbeddedMessage = ({
   onClick,
   onPictogramClick,
 }: OwnProps) => {
+  const containerId = useUniqueId();
+  const quoteRich = replyInfo?.type === 'message' ? replyInfo.quoteRich : undefined;
+  const normalizedQuoteRich = useMemo(() => quoteRich?.map(normalizeRichQuote), [quoteRich]);
   const containedMedia: MediaContainer | undefined = useMemo(() => {
     const media = (replyInfo?.type === 'message' && replyInfo.replyMedia) || message?.content;
     if (!media) {
@@ -103,6 +112,17 @@ const EmbeddedMessage = ({
       content: media,
     };
   }, [message, replyInfo]);
+  const optionMedia = message || containedMedia;
+  const selectOptionText = useCallback((global: GlobalState) => (
+    optionMedia && replyInfo?.type === 'message'
+      ? selectReplyOptionText(global, optionMedia, replyInfo) : undefined
+  ), [optionMedia, replyInfo]);
+  const replyOptionText = useSelector(selectOptionText);
+  // Poll options always show a check, like in other clients; todo items reflect their completion
+  const isReplyOptionCompleted = replyInfo?.type === 'message' && (
+    replyInfo.pollOption !== undefined
+    || optionMedia?.content.todo?.completions?.some((completion) => completion.itemId === replyInfo.todoItemId)
+  );
   const hasPictogram = canRenderCompactMediaPreview(containedMedia?.content);
 
   const isRoundVideo = Boolean(containedMedia && getMessageRoundVideo(containedMedia));
@@ -174,6 +194,40 @@ const EmbeddedMessage = ({
           {scheduleText ? ` • ${scheduleText}` : ''}
         </span>
       );
+    }
+
+    if (replyOptionText) {
+      return (
+        <>
+          <Icon
+            name={isReplyOptionCompleted ? 'select-filled' : 'placeholder'}
+            className={buildClassName('embedded-option-icon in-text-icon', !isReplyOptionCompleted && 'is-incomplete')}
+          />
+          {renderTextWithEntities({
+            ...replyOptionText,
+            asPreview: true,
+            emojiSize: EMOJI_SIZE,
+            observeIntersectionForLoading,
+            observeIntersectionForPlaying,
+          })}
+        </>
+      );
+    }
+
+    if (normalizedQuoteRich?.length) {
+      return normalizedQuoteRich.map((text, index) => (
+        <Fragment key={index}>
+          {index > 0 && '\n'}
+          <RichText
+            text={text}
+            asPreview
+            unsupportedText={lang('MessageUnsupported')}
+            containerId={containerId}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+          />
+        </Fragment>
+      ));
     }
 
     if (replyInfo?.type === 'message' && replyInfo.quoteText) {
@@ -256,7 +310,8 @@ const EmbeddedMessage = ({
       }
     }
 
-    const isReplyToQuote = isInComposer && Boolean(replyInfo && 'quoteText' in replyInfo && replyInfo?.quoteText);
+    const isReplyToQuote = isInComposer && replyInfo?.type === 'message'
+      && Boolean(replyInfo.quoteText || replyInfo.quoteRich?.length);
 
     return (
       <span className="embedded-sender-wrapper">
@@ -328,7 +383,10 @@ const EmbeddedMessage = ({
         />
       )}
       <div className="message-text">
-        <p className={buildClassName('embedded-text-wrapper', isQuote && 'multiline')}>
+        <p className={buildClassName(
+          'embedded-text-wrapper', isQuote && 'multiline', Boolean(quoteRich?.length) && 'has-rich-quote',
+        )}
+        >
           {renderTextContent()}
         </p>
         <div className="message-title">

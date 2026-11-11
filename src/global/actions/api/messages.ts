@@ -1040,9 +1040,16 @@ addActionHandler('updateDraftReplyInfo', (global, actions, payload): ActionRetur
     const replyToMsgId = update.replyToMsgId || currentReplyInfo?.replyToMsgId;
     if (!replyToMsgId) return;
 
+    // A new reply target, even with the same id in another chat, drops the previous quote and target
+    const isNewTarget = update.replyToMsgId !== undefined;
+    const baseReplyInfo = currentReplyInfo && isNewTarget
+      ? omit(currentReplyInfo, [
+        'replyToPeerId', 'quoteText', 'quoteRich', 'quoteOffset', 'todoItemId', 'pollOption',
+      ]) : currentReplyInfo;
+
     updatedReplyInfo = {
       type: 'message',
-      ...currentReplyInfo,
+      ...baseReplyInfo,
       ...update,
       replyToMsgId,
     };
@@ -3213,6 +3220,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
     replyToPeerId: currentChatId,
     monoforumPeerId: replyingInfo.toThreadId,
     quoteText: replyingInfo.quoteText,
+    quoteRich: replyingInfo.quoteRich,
     quoteOffset: replyingInfo.quoteOffset,
   } as ApiInputMessageReplyInfo;
 

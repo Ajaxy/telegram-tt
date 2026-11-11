@@ -19,7 +19,7 @@ import {
   selectCanBanUsers, selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState,
 } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
-import { formatInteger } from '../../../util/textFormat';
+import { formatInteger } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';

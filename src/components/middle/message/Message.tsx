@@ -140,6 +140,7 @@ import { getMessageKey } from '../../../util/keys/messageKey';
 import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
+import { getRichQuoteTexts } from '../../../util/text/richQuote';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -159,6 +160,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import usePeerColor from '../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useTextHighlight from '../../../hooks/useTextHighlight';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
 import useFocusMessageListElement from './hooks/useFocusMessageListElement';
@@ -278,6 +280,8 @@ type StateProps = {
   focusDirection?: FocusDirection;
   focusedQuote?: string;
   focusedQuoteOffset?: number;
+  focusedTodoItemId?: number;
+  focusedPollOption?: string;
   noFocusHighlight?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
   isResizingContainer?: boolean;
@@ -411,6 +415,8 @@ const Message = ({
   focusDirection,
   focusedQuote,
   focusedQuoteOffset,
+  focusedTodoItemId,
+  focusedPollOption,
   noFocusHighlight,
   scrollTargetPosition,
   isResizingContainer,
@@ -894,6 +900,31 @@ const Message = ({
   const currentTranslatedText = shouldTranslate ? translatedText || previousTranslatedText : undefined;
   const currentTranslatedRichMessage = shouldTranslate
     ? translatedRichMessage || (isTranslationPending !== false ? previousTranslatedRichMessage : undefined) : undefined;
+  const forcedText = (isShowingSummary && summary?.text)
+    || (requestedTranslationLanguage ? currentTranslatedText : undefined);
+  const forcedRichMessage = requestedTranslationLanguage ? currentTranslatedRichMessage : undefined;
+  // Quote offsets refer to the original text, not a summary or translation
+  const quoteToHighlight = forcedText || forcedRichMessage ? undefined : focusedQuote;
+  const textRef = useRef<HTMLDivElement>();
+  const richMessage = forcedRichMessage || textMessage?.content.richMessage;
+  const shouldHighlight = Boolean(highlight || quoteToHighlight);
+  const richQuoteTexts = useMemo(
+    () => shouldHighlight && richMessage ? getRichQuoteTexts(richMessage.blocks) : undefined,
+    [richMessage, shouldHighlight],
+  );
+  const quoteSelector = focusedTodoItemId !== undefined
+    ? `.todo-list .Checkbox:has(input[value="${focusedTodoItemId}"]) .label, `
+    + `.todo-list [data-todo-item-id="${focusedTodoItemId}"]`
+    : focusedPollOption !== undefined ? `[data-poll-option="${btoa(focusedPollOption)}"]` : undefined;
+  const highlightedText = forcedText?.text ?? textForLanguageDetection;
+  useTextHighlight(textRef, { text: highlightedText, richTexts: richQuoteTexts, search: highlight });
+  const getQuoteRange = useTextHighlight(quoteSelector ? ref : textRef, {
+    text: highlightedText,
+    richTexts: richQuoteTexts,
+    quote: quoteToHighlight,
+    quoteOffset: focusedQuoteOffset,
+    quoteSelector,
+  });
 
   const phoneCall = action?.type === 'phoneCall' ? action : undefined;
 
@@ -1004,7 +1035,8 @@ const Message = ({
     noFocusHighlight,
     isResizingContainer,
     isJustAdded,
-    isQuote: Boolean(focusedQuote),
+    isQuotePending: Boolean(quoteToHighlight && richMessage?.isPart),
+    getQuoteRange,
     scrollTargetPosition,
   });
 
@@ -1103,7 +1135,9 @@ const Message = ({
       return (
         <MessageRichText
           message={textMessage}
-          forcedRichMessage={requestedTranslationLanguage ? currentTranslatedRichMessage : undefined}
+          forcedRichMessage={forcedRichMessage}
+          focusedQuote={quoteToHighlight}
+          focusedQuoteOffset={focusedQuoteOffset}
           isOwn={isOwn}
           noAvatars={noAvatars}
           canAutoLoadMedia={canAutoLoadMedia}
@@ -1117,17 +1151,12 @@ const Message = ({
       );
     }
 
-    const forcedText = (isShowingSummary && summary?.text)
-      || (requestedTranslationLanguage ? currentTranslatedText : undefined);
     return (
       <MessageText
         messageOrStory={textMessage}
         forcedText={forcedText}
         isForAnimation={isForAnimation}
-        focusedQuote={focusedQuote}
-        focusedQuoteOffset={focusedQuoteOffset}
         emojiSize={emojiSize}
-        highlight={highlight}
         isProtected={isProtected}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1508,7 +1537,7 @@ const Message = ({
           <>
             {renderInvertibleMediaContent(hasCustomAppendix)}
             {hasText && !hasAnimatedEmoji && (
-              <div className={textContentClass} dir="auto">
+              <div className={textContentClass} dir="auto" ref={textRef}>
                 {renderMessageText()}
                 {isNewTextPending && renderMessageTextAnimation()}
                 {hasFactCheck && (
@@ -1563,7 +1592,7 @@ const Message = ({
       <>
         {renderWebPage()}
         {hasText && !hasAnimatedEmoji && (
-          <div className={textContentClass} dir="auto">
+          <div className={textContentClass} dir="auto" ref={textRef}>
             {renderMessageText()}
             {isNewTextPending && renderMessageTextAnimation()}
             {!hasContentAfterText && isMetaInText && renderReactionsAndMeta()}
@@ -2196,6 +2225,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
       quote: focusedQuote, quoteOffset: focusedQuoteOffset, scrollTargetPosition,
+      todoItemId: focusedTodoItemId, pollOption: focusedPollOption,
     } = (isFocused && focusedMessage) || {};
 
     const middleSearch = selectCurrentMiddleSearch(global);
@@ -2368,6 +2398,8 @@ export default memo(withGlobal<OwnProps>(
       isResizingContainer: isFocused ? isResizingContainer : undefined,
       focusedQuote: isFocused ? focusedQuote : undefined,
       focusedQuoteOffset: isFocused ? focusedQuoteOffset : undefined,
+      focusedTodoItemId: isFocused ? focusedTodoItemId : undefined,
+      focusedPollOption: isFocused ? focusedPollOption : undefined,
       scrollTargetPosition: isFocused ? scrollTargetPosition : undefined,
       senderBoosts,
       tags: global.savedReactionTags?.byKey,

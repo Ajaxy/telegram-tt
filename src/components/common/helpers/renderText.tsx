@@ -19,17 +19,17 @@ import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';
 
 export type TextFilter = (
-  'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
+  'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'links' |
   'simple_markdown' | 'simple_markdown_html' | 'tg_links'
 );
 
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
+const LINE_BREAK_REGEX = /\r\n|\r|\n/g;
 
 export default function renderText(
   part: TextPart,
   filters: Array<TextFilter> = ['emoji'],
   params?: {
-    highlight?: string;
     markdownPostProcessor?: (part: string) => TeactNode;
   },
 ): TeactNode[] {
@@ -56,9 +56,6 @@ export default function renderText(
 
       case 'br_html':
         return addLineBreaks(text, 'html');
-
-      case 'highlight':
-        return addHighlight(text, params!.highlight, params?.markdownPostProcessor);
 
       case 'links':
         return addLinks(text, undefined, params?.markdownPostProcessor);
@@ -110,15 +107,23 @@ function replaceEmojis(
       return result;
     }
 
+    const source = part;
     part = fixNonStandardEmoji(part);
     const parts = part.split(EMOJI_REGEX);
     const emojis: string[] = part.match(EMOJI_REGEX) || [];
+    let sourceOffset = parts[0].length;
     result.push(postProcess(parts[0]));
 
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
+      // Normalization inserts variation selectors; keep the source spelling for copy and quote offsets
+      const sourceStart = sourceOffset;
+      for (const character of emoji) {
+        if (character !== '\ufe0f' || source[sourceOffset] === character) sourceOffset += character.length;
+      }
+      const sourceEmoji = source.slice(sourceStart, sourceOffset);
       const code = nativeToUnifiedExtendedWithCache(emoji);
       if (!code) {
-        emojiResult.push(postProcess(emoji));
+        emojiResult.push(postProcess(sourceEmoji));
       } else {
         const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
         const className = buildClassName(
@@ -133,7 +138,7 @@ function replaceEmojis(
             <img
               src={src}
               className={`${className}${!isLoaded ? ' opacity-transition slow shown' : ''}`}
-              alt={emoji}
+              alt={sourceEmoji}
               data-path={src}
               draggable={false}
               onLoad={!isLoaded ? handleEmojiLoad : undefined}
@@ -146,7 +151,7 @@ function replaceEmojis(
             draggable="false"\
             class="${className}"\
             src="${src}"\
-            alt="${emoji}"\
+            alt="${sourceEmoji}"\
           />`,
           );
         }
@@ -155,6 +160,7 @@ function replaceEmojis(
       const index = i * 2 + 2;
       if (parts[index]) {
         emojiResult.push(postProcess(parts[index]));
+        sourceOffset += parts[index].length;
       }
 
       return emojiResult;
@@ -173,8 +179,9 @@ function addLineBreaks(
       return result;
     }
 
+    const lineBreaks = part.match(LINE_BREAK_REGEX);
     const splittenParts = part
-      .split(/\r\n|\r|\n/g)
+      .split(LINE_BREAK_REGEX)
       .reduce((parts: TextPart[], line: string, i, source) => {
         // This adds non-breaking space if line was indented with spaces, to preserve the indentation
         const trimmedLine = line.trimStart();
@@ -184,7 +191,7 @@ function addLineBreaks(
 
         if (i !== source.length - 1) {
           parts.push(
-            type === 'jsx' ? <br /> : '<br />',
+            type === 'jsx' ? <br data-text-content={lineBreaks![i]} /> : '<br />',
           );
         }
 
@@ -192,37 +199,6 @@ function addLineBreaks(
       }, []);
 
     return [...result, ...splittenParts];
-  }, []);
-}
-
-function addHighlight(
-  textParts: TextPart[], highlight: string | undefined,
-  postProcessor?: (part: string) => TeactNode,
-): TextPart[] {
-  const postProcess = postProcessor || ((part: string) => part);
-
-  return textParts.reduce<TextPart[]>((result, part) => {
-    if (typeof part !== 'string' || !highlight) {
-      result.push(part);
-      return result;
-    }
-
-    const lowerCaseText = part.toLowerCase();
-    const queryPosition = lowerCaseText.indexOf(highlight.toLowerCase());
-    if (queryPosition < 0) {
-      result.push(postProcess(part));
-      return result;
-    }
-
-    const newParts: TextPart[] = [];
-    newParts.push(postProcess(part.substring(0, queryPosition)));
-    newParts.push(
-      <span className="matching-text-highlight">
-        {postProcess(part.substring(queryPosition, queryPosition + highlight.length))}
-      </span>,
-    );
-    newParts.push(postProcess(part.substring(queryPosition + highlight.length)));
-    return [...result, ...newParts];
   }, []);
 }
 

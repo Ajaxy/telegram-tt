@@ -16,7 +16,7 @@ import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment.ts';
 import buildClassName from '../../../../util/buildClassName';
 import { formatStarsAsText } from '../../../../util/localization/format';
 import { getServerTime } from '../../../../util/serverTime';
-import { formatIntegerCompact } from '../../../../util/textFormat';
+import { formatIntegerCompact } from '../../../../util/text/textFormat';
 import { getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import { renderPeerLink, translateWithYou } from '../helpers/messageActions';

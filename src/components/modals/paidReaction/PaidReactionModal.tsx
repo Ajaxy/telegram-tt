@@ -18,7 +18,7 @@ import {
   selectChat, selectChatMessage, selectPeer, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatInteger } from '../../../util/textFormat';
+import { formatInteger } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useAppLayout from '../../../hooks/useAppLayout';

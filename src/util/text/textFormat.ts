@@ -1,9 +1,9 @@
-import type { LangFn } from './localization';
+import type { LangFn } from '../localization';
 
-import EMOJI_REGEX from '../lib/twemojiRegex';
-import fixNonStandardEmoji from './emoji/fixNonStandardEmoji';
-import { floor } from './math';
-import withCache from './withCache';
+import EMOJI_REGEX from '../../lib/twemojiRegex';
+import fixNonStandardEmoji from '../emoji/fixNonStandardEmoji';
+import { floor } from '../math';
+import withCache from '../withCache';
 
 export function formatInteger(value: number) {
   return String(value).replace(/\d(?=(\d{3})+$)/g, '$& ');

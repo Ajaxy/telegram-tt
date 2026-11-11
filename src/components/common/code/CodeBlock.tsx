@@ -18,9 +18,10 @@ export type OwnProps = {
   text: string;
   language?: string;
   noCopy?: boolean;
+  richQuoteIndex?: number;
 };
 
-const CodeBlock = ({ text, language, noCopy }: OwnProps) => {
+const CodeBlock = ({ text, language, noCopy, richQuoteIndex }: OwnProps) => {
   const lang = useLang();
 
   const [isWordWrap, setIsWordWrap] = useState(true);
@@ -45,7 +46,12 @@ const CodeBlock = ({ text, language, noCopy }: OwnProps) => {
       className="CodeBlock"
     >
       {language && (<p className="code-title">{getPrettyCodeLanguageName(lang, language)}</p>)}
-      <pre className={blockClass} data-entity-type={ApiMessageEntityTypes.Pre} data-language={language}>
+      <pre
+        className={blockClass}
+        data-entity-type={ApiMessageEntityTypes.Pre}
+        data-language={language}
+        data-rich-quote-index={richQuoteIndex}
+      >
         {highlighted ?? text}
         <CodeOverlay
           text={text}

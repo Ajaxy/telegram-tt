@@ -10,10 +10,11 @@ Telegram web app using TypeScript and Teact, a custom React-like UI library. Fol
 - Only write tests when directly prompted to do so.
 - Review the change for the smallest coherent design that satisfies the requirements. Fix substantive findings and repeat until none remain; avoid speculative abstractions, unused exports, and unrelated cleanup.
 - Keep responses concise: summarize the result, verification, and any unresolved issue. If deeper debugging needs user involvement, provide concrete steps. Remove temporary debug code when resolved.
+- Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
 
 ## Friction log
 
-- Record concrete inefficiencies in code patterns, contributor practices, or tooling in [FRICTION_LOG.md](FRICTION_LOG.md) when resolving them exceeds the current task's scope. Keep the current task focused.
+- Record concrete inefficiencies in code patterns, contributor practices, or tooling in [FRICTION_LOG.md](FRICTION_LOG.md) when resolving them exceeds the current task's scope. Keep the current task focused. Do not report issues with agent-specific setup like sandbox or skills.
 - Read existing entries first and extend a matching entry instead of adding a duplicate.
 - Use a descriptive heading and one or two paragraphs explaining the current behavior, its impact, and representative code paths or reproduction details. Distinguish verified observations from reported symptoms and suspected causes. Resolution preferences or suggestions are optional; estimates and proposed fixes are not required.
 - Keep a flat list of open problems. Contributors with available time can pick an entry, recheck the relevant code, and work on it. Remove resolved entries in the same change, or update an entry to describe what remains.

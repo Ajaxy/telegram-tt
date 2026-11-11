@@ -1,6 +1,6 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import {
-  memo, useCallback, useMemo, useRef,
+  memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -41,6 +41,7 @@ import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
+import { getRichQuoteText, getRichQuoteTexts, type RichQuoteRange } from '../../util/text/richQuote';
 import {
   EMPTY_RICH_MEDIA_CAPTION,
   getRichMediaRef,
@@ -88,6 +89,8 @@ const SHOULD_HIDE_SCROLLBARS = IS_MAC_OS || IS_TOUCH_ENV;
 
 type OwnProps = {
   blocks: ApiPageBlock[];
+  focusedQuoteRange?: RichQuoteRange;
+  noQuoting?: boolean;
   isRtl?: boolean;
   isOwn?: boolean;
   noAvatars?: boolean;
@@ -129,6 +132,8 @@ const MAP_FALLBACK_HEIGHT = 360;
 
 const RichContent = ({
   blocks,
+  focusedQuoteRange,
+  noQuoting,
   isRtl,
   isOwn,
   noAvatars,
@@ -153,12 +158,30 @@ const RichContent = ({
   } = getActions();
 
   const lang = useLang();
+  const ref = useRef<HTMLDivElement>();
   const { shouldWarnAboutFiles } = useSelector(selectSharedSettings);
   const containerId = useUniqueId();
   const unsupportedText = lang('PageContentUnsupported');
   const embedTitle = lang('PageContentEmbed');
   const style = fontSizeAdjust !== undefined ? `--iv-font-size-scale: ${fontSizeAdjust}` : undefined;
   const isMessageContent = messageId !== undefined;
+  const quoteTexts = useMemo(
+    () => isMessageContent ? getRichQuoteTexts(blocks) : undefined, [blocks, isMessageContent],
+  );
+  const quoteIndexes = useMemo(() => quoteTexts
+    ? new Map(quoteTexts.map((text, index) => [text, index])) : undefined, [quoteTexts]);
+
+  useLayoutEffect(() => {
+    if (!focusedQuoteRange) return;
+    ref.current?.querySelectorAll<HTMLElement>('[data-rich-quote-index]').forEach((element) => {
+      if (!isInQuoteRange(focusedQuoteRange, Number(element.dataset.richQuoteIndex))) return;
+      let details = element.closest('details') || undefined;
+      while (details) {
+        details.open = true;
+        details = details.parentElement?.closest('details') || undefined;
+      }
+    });
+  }, [blocks, focusedQuoteRange]);
 
   const richMessageSource = useMemo<PlaybackSource | undefined>(() => (
     chatId !== undefined && messageId !== undefined && !noPlaylist
@@ -237,6 +260,8 @@ const RichContent = ({
   });
 
   const renderContext: RenderBlockContext = {
+    quoteIndexes,
+    focusedQuoteRange,
     richTextContext,
     unsupportedText,
     isOwn,
@@ -327,9 +352,10 @@ const RichContent = ({
       case 'preformatted':
         return (
           <CodeBlock
-            text={getRichTextPlainText(block.text)}
+            text={isMessageContent ? getRichQuoteText(block.text) : getRichTextPlainText(block.text)}
             language={block.language}
             noCopy={isProtected}
+            richQuoteIndex={quoteIndexes?.get(block.text)}
           />
         );
       case 'divider':
@@ -391,7 +417,7 @@ const RichContent = ({
         return renderVideoBlock(block, renderContext, sourceKey, shouldBreakoutMedia, handleOpenMedia);
       case 'math':
         return (
-          <MathBlock source={block.source} />
+          <MathBlock source={block.source} richQuoteIndex={quoteIndexes?.get(block)} />
         );
       case 'thinking':
         return renderTextBlock(block.text, styles.thinking, renderContext);
@@ -466,15 +492,21 @@ const RichContent = ({
   return (
     <div
       id={containerId}
+      ref={ref}
       className={styles.richContent}
       style={style}
       dir={isRtl ? 'rtl' : 'auto'}
       data-rich-copy-root
+      data-rich-quote-root={(isMessageContent && !noQuoting) || undefined}
     >
       {blocks.map(renderTopLevelBlock)}
     </div>
   );
 };
+
+function isInQuoteRange(range?: RichQuoteRange, index?: number) {
+  return Boolean(range && index !== undefined && index >= range.first && index <= range.last);
+}
 
 function getLinkContext(chatId?: string, messageId?: number, threadId?: ThreadId): LinkContext | undefined {
   if (!chatId || messageId === undefined) {
@@ -490,6 +522,8 @@ function getLinkContext(chatId?: string, messageId?: number, threadId?: ThreadId
 }
 
 type RenderBlockContext = {
+  quoteIndexes?: Map<ApiRichText, number>;
+  focusedQuoteRange?: RichQuoteRange;
   richTextContext: RichTextContext;
   unsupportedText: string;
   isOwn?: boolean;
@@ -573,7 +607,7 @@ function TableBlock({
   );
 }
 
-function MathBlock({ source }: { source: string }) {
+function MathBlock({ source, richQuoteIndex }: { source: string; richQuoteIndex?: number }) {
   const ref = useRef<HTMLDivElement>();
 
   useScrollableHint(ref);
@@ -582,6 +616,7 @@ function MathBlock({ source }: { source: string }) {
     <div
       ref={ref}
       data-rich-block-type="math"
+      data-rich-quote-index={richQuoteIndex}
       data-source={source}
       className={buildClassName(
         styles.block, styles.latexBlockWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar',
@@ -799,7 +834,11 @@ function renderTextBlock(
   }
 
   return (
-    <p className={buildClassName(styles.block, className)} data-rich-block-type={blockType}>
+    <p
+      className={buildClassName(styles.block, className)}
+      data-rich-block-type={blockType}
+      data-rich-quote-index={context.quoteIndexes?.get(text)}
+    >
       <RichText text={text} {...context.richTextContext} />
     </p>
   );
@@ -810,10 +849,21 @@ function renderQuoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Blockquote className={styles.block} contentClassName={styles.blockquote} canBeCollapsible={block.canCollapse}>
+    <Blockquote
+      className={styles.block}
+      contentClassName={styles.blockquote}
+      canBeCollapsible={block.canCollapse}
+      shouldExpand={isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.text))
+        || isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.caption))}
+      richQuoteIndex={context.quoteIndexes?.get(block.text)}
+    >
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
+        <footer
+          className={styles.quoteCaption}
+          data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
+        >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -826,12 +876,16 @@ function renderPullquoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Pullquote className={buildClassName(styles.block, styles.pullquote)}>
+    <Pullquote
+      className={buildClassName(styles.block, styles.pullquote)}
+      richQuoteIndex={context.quoteIndexes?.get(block.text)}
+    >
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer
           className={buildClassName(styles.quoteCaption, styles.pullquoteCaption)}
           data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
         >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
@@ -850,7 +904,11 @@ function renderBlockquoteBlocks(
     <Blockquote className={styles.block} contentClassName={styles.blockquote}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
+        <footer
+          className={styles.quoteCaption}
+          data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
+        >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -866,7 +924,7 @@ function renderDetailsBlock(
 ) {
   return (
     <details className={styles.details} open={block.isOpen}>
-      <summary className={styles.detailsSummary}>
+      <summary className={styles.detailsSummary} data-rich-quote-index={context.quoteIndexes?.get(block.title)}>
         <RichText text={block.title} {...context.richTextContext} />
       </summary>
       <div className={styles.detailsContent} data-rich-block-type="detailsContent">
@@ -931,6 +989,7 @@ function renderListItem(
   return (
     <li
       className={styles.listItem}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
     >
@@ -950,6 +1009,7 @@ function renderNativeOrderedListItem(
   return (
     <li
       className={styles.listItem}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
       value={item.value}
@@ -969,6 +1029,7 @@ function renderOrderedListItem(
   return (
     <li
       className={buildClassName(styles.listItem, styles.orderedListItem)}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
     >
@@ -1049,6 +1110,7 @@ function renderTableCell(
   return (
     <CellTag
       className={className}
+      data-rich-quote-index={cell.text && context.quoteIndexes?.get(cell.text)}
       colSpan={cell.colspan}
       rowSpan={cell.rowspan}
     >
@@ -1068,11 +1130,16 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext, isS
     <figcaption
       className={styles.caption}
       data-rich-block-type="mediaCaption"
+      data-rich-quote-index={context.quoteIndexes?.get(caption.text)}
       data-rich-media-block-caption={isSharedCaption}
     >
       {hasText && <RichText text={caption.text} {...context.richTextContext} />}
       {hasCredit && (
-        <span className={styles.credit} data-rich-block-type="mediaCredit">
+        <span
+          className={styles.credit}
+          data-rich-block-type="mediaCredit"
+          data-rich-quote-index={context.quoteIndexes?.get(caption.credit)}
+        >
           <RichText text={caption.credit} {...context.richTextContext} />
         </span>
       )}

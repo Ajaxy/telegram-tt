@@ -10,7 +10,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon } from '../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../util/objects/customPeer';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from '../helpers/gifts';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';

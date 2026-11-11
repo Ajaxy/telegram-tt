@@ -3,7 +3,7 @@ import type { LangFn } from '../../../../util/localization';
 
 import { STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '../../../../config';
 import { buildStarsTransactionCustomPeer, shouldUseCustomPeer } from '../../../../global/helpers/payments';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 
 export function getTransactionTitle(lang: LangFn, transaction: ApiStarsTransaction) {
   if (transaction.paidMessages) {

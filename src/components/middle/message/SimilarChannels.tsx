@@ -13,7 +13,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getServerTime } from '../../../util/serverTime';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAverageColor from '../../../hooks/useAverageColor';

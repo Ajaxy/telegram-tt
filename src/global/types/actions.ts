@@ -50,6 +50,7 @@ import type {
   ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestPeerType,
+  ApiRichText,
   ApiSavedStarGift,
   ApiSendMessageAction,
   ApiSessionData,
@@ -1122,6 +1123,8 @@ export interface ActionPayloads {
     noForumTopicPanel?: boolean;
     quote?: string;
     quoteOffset?: number;
+    todoItemId?: number;
+    pollOption?: string;
     scrollTargetPosition?: ScrollTargetPosition;
     timestamp?: number;
   } & WithTabId;
@@ -1300,6 +1303,8 @@ export interface ActionPayloads {
     shouldReplaceLast?: boolean;
     noForumTopicPanel?: boolean;
     focusMessageId?: number;
+    todoItemId?: number;
+    pollOption?: string;
   } & ({
     isComments: true;
     chatId?: string;
@@ -2342,6 +2347,7 @@ export interface ActionPayloads {
     fromChatId: string;
     messageId?: number;
     quoteText?: ApiFormattedText;
+    quoteRich?: ApiRichText[];
     quoteOffset?: number;
   } & WithTabId;
 

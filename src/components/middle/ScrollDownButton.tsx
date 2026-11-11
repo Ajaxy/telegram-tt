@@ -4,7 +4,7 @@ import type { IconName } from '../../types/icons';
 import type { RegularLangKey } from '../../types/language';
 
 import buildClassName from '../../util/buildClassName';
-import { formatIntegerCompact } from '../../util/textFormat';
+import { formatIntegerCompact } from '../../util/text/textFormat';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLang from '../../hooks/useLang';

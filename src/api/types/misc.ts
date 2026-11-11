@@ -392,6 +392,7 @@ export interface ApiAppConfig {
   todoItemsMax: number;
   todoTitleLengthMax: number;
   todoItemLengthMax: number;
+  quoteLengthMax: number;
   ignoreRestrictionReasons?: string[];
   needAgeVideoVerification?: boolean;
   verifyAgeBotUsername?: string;

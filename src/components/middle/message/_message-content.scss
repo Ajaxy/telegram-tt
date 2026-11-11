@@ -261,26 +261,16 @@
     }
   }
 
-  .matching-text-highlight:not(.is-quote) {
-    --color-text: #000;
-    --color-links: #000;
-
-    padding: 0 0.125rem;
-    border-radius: 0.25rem;
-    color: var(--color-text);
-    background: #cae3f7;
+  // Highlights tint the background with the bubble's link color and keep the text color
+  ::highlight(text-search),
+  ::highlight(message-quote) {
+    background-color: color-mix(in srgb, var(--color-links) 25%, transparent);
   }
 
-  .matching-text-highlight.is-quote {
-    border-radius: 0.25rem;
-    background: transparent;
-
-    &.animate {
-      color: var(--color-text);
-      background-color: var(--message-tint);
-      animation: quote-highlight 0.5s;
-      animation-delay: 1.5s;
-    }
+  // Emoji images need a lighter tint to stay visible
+  .emoji::highlight(text-search),
+  .emoji::highlight(message-quote) {
+    background-color: color-mix(in srgb, var(--color-links) 15%, transparent);
   }
 
   .message-title {
@@ -1141,15 +1131,5 @@ blockquote, .blockquote {
   100% {
     opacity: 1;
     background-position-x: var(--background-gradient-size);
-  }
-}
-
-@keyframes quote-highlight {
-  0% {
-    background-color: var(--message-tint);
-  }
-
-  100% {
-    background-color: transparent;
   }
 }

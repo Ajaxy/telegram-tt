@@ -23,6 +23,7 @@ import MenuItem from '../ui/MenuItem';
 type OwnProps = {
   children?: TeactNode;
   entity: ApiMessageEntityFormattedDate;
+  sourceText?: string;
   asPreview?: boolean;
   chatId?: string;
   messageId?: number;
@@ -33,6 +34,7 @@ const FormattedDate = ({
   chatId,
   messageId,
   entity,
+  sourceText,
   asPreview,
 }: OwnProps) => {
   const { showNotification, openForwardMenu, forwardToSavedMessages } = getActions();
@@ -112,6 +114,7 @@ const FormattedDate = ({
       dir="auto"
       data-entity-type={ApiMessageEntityTypes.FormattedDate}
       data-unix={entity.date}
+      data-text-content={sourceText}
       data-format={getFormattedDateFormatString(entity)}
       title={canonicalDate}
     >

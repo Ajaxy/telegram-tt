@@ -5,7 +5,7 @@ import type { RegularLangKey } from '../../types/language';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserId } from '../../util/entities/ids';
 import { getTranslationFn, type LangFn } from '../../util/localization';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { prepareSearchWordsForNeedle } from '../../util/text/searchWords';
 import { selectChat, selectPeer, selectUser } from '../selectors';
 import { getGlobal } from '..';
 import { getChatTitle } from './chats';

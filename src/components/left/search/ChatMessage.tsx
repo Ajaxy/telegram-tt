@@ -1,4 +1,4 @@
-import { memo } from '../../../lib/teact/teact';
+import { memo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -36,6 +36,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
+import useTextHighlight from '../../../hooks/useTextHighlight';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -89,6 +90,8 @@ const ChatMessage = ({
   const lang = useLang();
 
   const buttonRef = useSelectWithEnter(handleClick);
+  const textRef = useRef<HTMLDivElement>();
+  useTextHighlight(textRef, { search: peer ? searchQuery : undefined });
 
   if (!peer) {
     return undefined;
@@ -139,9 +142,9 @@ const ChatMessage = ({
 
         </div>
         <div className="subtitle">
-          <div className="message" dir="auto">
-            {senderName && <span className="sender-name">{renderText(senderName)}</span>}
-            {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, searchQuery, isRoundVideo)}
+          <div className="message" dir="auto" ref={textRef}>
+            {senderName && <span className="sender-name" data-text-content="">{renderText(senderName)}</span>}
+            {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
           </div>
         </div>
       </div>
@@ -150,10 +153,10 @@ const ChatMessage = ({
 };
 
 function renderSummary(
-  lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
+  lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean,
 ) {
   if (!blobUrl) {
-    return renderMessageSummary(lang, message, undefined, searchQuery);
+    return renderMessageSummary(lang, message);
   }
 
   const isSpoiler = getMessageIsSpoiler(message);
@@ -169,7 +172,7 @@ function renderSummary(
         draggable={false}
       />
       {getMessageVideo(message) && <Icon name="play" />}
-      {renderMessageSummary(lang, message, true, searchQuery)}
+      {renderMessageSummary(lang, message, true)}
     </span>
   );
 }

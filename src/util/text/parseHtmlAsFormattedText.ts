@@ -1,13 +1,13 @@
-import type { ApiFormattedText, ApiMessageEntity } from '../api/types';
-import { ApiMessageEntityTypes } from '../api/types';
+import type { ApiFormattedText, ApiMessageEntity } from '../../api/types';
+import { ApiMessageEntityTypes } from '../../api/types';
 
-import { RE_LINK_TEMPLATE } from '../config';
+import { RE_LINK_TEMPLATE } from '../../config';
 import {
   ENTITY_CLASS_BY_NODE_NAME,
   escapeHtmlAttribute,
   parseHtmlBody,
-} from '../components/middle/composer/helpers/cleanHtml';
-import { IS_EMOJI_SUPPORTED } from './browser/windowEnvironment';
+} from '../../components/middle/composer/helpers/cleanHtml';
+import { IS_EMOJI_SUPPORTED } from '../browser/windowEnvironment';
 
 const MAX_TAG_DEEPNESS = 3;
 

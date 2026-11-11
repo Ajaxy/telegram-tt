@@ -27,7 +27,7 @@ import { isApiPeerChat, isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { isUserId } from '../../util/entities/ids';
-import { getFirstLetters } from '../../util/textFormat';
+import { getFirstLetters } from '../../util/text/textFormat';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 

@@ -77,6 +77,7 @@ import {
   buildApiPhoto,
 } from './common';
 import { type OmitVirtualFields } from './helpers';
+import { buildApiRichText } from './instantView';
 import { buildApiMessageAction } from './messageActions';
 import {
   buildApiRichMessage,
@@ -353,7 +354,10 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
     replyToPeerId: replyTo.replyToPeerId && getApiChatIdFromMtpPeer(replyTo.replyToPeerId),
     monoforumPeerId: replyTo.monoforumPeerId && getApiChatIdFromMtpPeer(replyTo.monoforumPeerId),
     quoteText: replyTo.quoteText ? buildMessageTextContent(replyTo.quoteText, replyTo.quoteEntities) : undefined,
+    quoteRich: replyTo.quoteRich?.map((text) => buildApiRichText(text, { photosById: {}, documentsById: {} })),
     quoteOffset: replyTo.quoteOffset,
+    todoItemId: replyTo.todoItemId,
+    pollOption: replyTo.pollOption && serializeBytes(replyTo.pollOption),
   } satisfies ApiInputMessageReplyInfo : undefined;
 
   const suggestedPostInfo = suggestedPost instanceof GramJs.SuggestedPost ? {
@@ -429,8 +433,11 @@ function buildApiReplyInfo(
       quote,
       quoteText,
       quoteEntities,
+      quoteRich,
       quoteOffset,
       replyToEphemeral,
+      todoItemId,
+      pollOption,
     } = replyHeader;
 
     if (replyToEphemeral) {
@@ -439,6 +446,12 @@ function buildApiReplyInfo(
         replyToMsgId: getEphemeralMessageId(replyToMsgId!),
       };
     }
+
+    const serializedPollOption = pollOption && serializeBytes(pollOption);
+    const replyPollAnswer = serializedPollOption !== undefined && replyMedia instanceof GramJs.MessageMediaPoll
+      ? replyMedia.poll.answers.find((answer) => (
+        answer instanceof GramJs.PollAnswer && serializeBytes(answer.option) === serializedPollOption
+      )) : undefined;
 
     return {
       type: 'message',
@@ -449,7 +462,11 @@ function buildApiReplyInfo(
       replyToPeerId: replyToPeerId && getApiChatIdFromMtpPeer(replyToPeerId),
       replyMedia: replyMedia && buildMessageMediaContent(replyMedia, context),
       isQuote: quote,
+      todoItemId,
+      pollOption: serializedPollOption,
+      replyOptionText: replyPollAnswer && buildApiFormattedText(replyPollAnswer.text),
       quoteText: quoteText ? buildMessageTextContent(quoteText, quoteEntities) : undefined,
+      quoteRich: quoteRich?.map((text) => buildApiRichText(text, { photosById: {}, documentsById: {} })),
       quoteOffset,
     };
   }
@@ -753,9 +770,12 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
     replyToTopId: inputInfo.replyToTopId,
     replyToPeerId: inputInfo.replyToPeerId,
     quoteText: inputInfo.quoteText,
+    quoteRich: inputInfo.quoteRich,
     quoteOffset: inputInfo.quoteOffset,
+    todoItemId: inputInfo.todoItemId,
+    pollOption: inputInfo.pollOption,
     isForumTopic: isForum && inputInfo.replyToTopId ? true : undefined,
-    ...(Boolean(inputInfo.quoteText) && { isQuote: true }),
+    isQuote: inputInfo.quoteText || inputInfo.quoteRich?.length ? true : undefined,
   };
 }
 

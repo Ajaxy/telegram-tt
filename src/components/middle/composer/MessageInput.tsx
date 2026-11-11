@@ -33,7 +33,7 @@ import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import focusEditableElement from '../../../util/focusEditableElement';
 import { CODE_HIGHLIGHTING_CHANGED_META, subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
 import { debounce, fastRaf, throttleWith } from '../../../util/schedulers';
-import { getUtf8Length } from '../../../util/textFormat';
+import { getUtf8Length } from '../../../util/text/textFormat';
 import tiptapStyles from '../../../util/tiptap/styling.module.scss';
 import renderText from '../../common/helpers/renderText';
 import {

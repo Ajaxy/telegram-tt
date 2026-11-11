@@ -9,7 +9,7 @@ import type { LangFn } from '../../../../util/localization';
 import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatFileSize } from '../../../../util/textFormat';
+import { formatFileSize } from '../../../../util/text/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';

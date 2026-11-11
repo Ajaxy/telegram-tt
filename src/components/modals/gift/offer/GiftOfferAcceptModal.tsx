@@ -16,7 +16,7 @@ import {
 } from '../../../../util/localization/format';
 import { round } from '../../../../util/math';
 import { multiplyBigIntByPermille } from '../../../../util/numbers';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';

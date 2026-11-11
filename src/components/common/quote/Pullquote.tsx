@@ -8,14 +8,15 @@ import styles from './Pullquote.module.scss';
 
 type OwnProps = {
   className?: string;
+  richQuoteIndex?: number;
   children: TeactNode;
 };
 
-const Pullquote = ({ className, children }: OwnProps) => {
+const Pullquote = ({ className, richQuoteIndex, children }: OwnProps) => {
   return (
     <aside className={buildClassName(styles.root, 'pullquote', className)} data-pullquote>
       <Icon name="quote-open" className={buildClassName(styles.quote, styles.quoteOpen)} />
-      <div className={styles.content} data-rich-copy-wrapper>
+      <div className={styles.content} data-rich-copy-wrapper data-rich-quote-index={richQuoteIndex}>
         {children}
       </div>
       <Icon name="quote-close" className={buildClassName(styles.quote, styles.quoteClose)} />

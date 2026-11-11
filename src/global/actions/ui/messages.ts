@@ -182,7 +182,8 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
       : undefined;
   }
   actions.updateDraftReplyInfo({
-    replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, tabId,
+    replyToMsgId: messageId, replyToPeerId: undefined,
+    quoteText: undefined, quoteRich: undefined, quoteOffset: undefined, tabId,
   });
   actions.focusMessage({
     chatId,
@@ -402,7 +403,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
     replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote, quoteOffset,
-    scrollTargetPosition, timestamp, tabId = getCurrentTabId(),
+    scrollTargetPosition, timestamp, todoItemId, pollOption, tabId = getCurrentTabId(),
   } = payload;
 
   let { messageId } = payload;
@@ -450,6 +451,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     isResizingContainer,
     quote,
     quoteOffset,
+    todoItemId,
+    pollOption,
     scrollTargetPosition,
     direction: undefined,
   }, tabId);
@@ -595,13 +598,14 @@ addActionHandler('changeRichMediaUploadBlocking', (global, actions, payload): Ac
 
 addActionHandler('openReplyMenu', (global, actions, payload): ActionReturnType => {
   const {
-    fromChatId, messageId, quoteText, quoteOffset, tabId = getCurrentTabId(),
+    fromChatId, messageId, quoteText, quoteRich, quoteOffset, tabId = getCurrentTabId(),
   } = payload;
   return updateTabState(global, {
     replyingMessage: {
       fromChatId,
       messageId,
       quoteText,
+      quoteRich,
       quoteOffset,
     },
     isShareMessageModalShown: true,

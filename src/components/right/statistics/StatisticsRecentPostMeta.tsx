@@ -2,7 +2,7 @@ import { memo } from '../../../lib/teact/teact';
 
 import type { StatisticsMessageInteractionCounter, StatisticsStoryInteractionCounter } from '../../../api/types';
 
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 
 import useLang from '../../../hooks/useLang';
 
