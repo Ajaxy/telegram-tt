@@ -225,6 +225,7 @@ const EmojiSearch = ({
               onKeyDown={(e) => handleChipKeyDown(e, group)}
             >
               <CustomEmoji
+                className={styles.chipIcon}
                 documentId={group.iconEmojiId}
                 size={CHIP_ICON_SIZE}
                 isBig
