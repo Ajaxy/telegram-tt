@@ -379,11 +379,14 @@ addActionHandler('loadQrCodeUniqueGifts', async (global, actions, payload): Prom
   const gifts = result.gifts.filter(({ gift, inputGift }) => (
     gift.type === 'starGiftUnique' && !gift.isBurned && Boolean(inputGift)
   ));
+  const giftsById = buildCollectionByCallback((currentModal.uniqueGifts || []).concat(gifts), (savedGift) => (
+    [savedGift.gift.id, savedGift]
+  ));
 
   global = updateTabState(global, {
     qrCodeModal: {
       ...currentModal,
-      uniqueGifts: (currentModal.uniqueGifts || []).concat(gifts),
+      uniqueGifts: Object.values(giftsById),
       uniqueGiftsNextOffset: result.nextOffset,
     },
   }, tabId);

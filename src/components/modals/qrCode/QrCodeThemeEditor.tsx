@@ -15,6 +15,7 @@ import type { IconName } from '../../../types/icons';
 import type { ShareThemeBackdropOption, ShareThemeDraft } from './helpers/shareTheme';
 
 import { getReactionKey, isSameReaction } from '../../../global/helpers';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getGiftAttributes } from '../../common/helpers/gifts';
 import {
@@ -129,7 +130,7 @@ const QrCodeThemeEditor = ({
 
   function renderColors() {
     return (
-      <div className={styles.swatches}>
+      <div className={buildClassName(styles.swatches, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}>
         {backdropOptions.map((option) => (
           <button
             key={option.backdropId ?? 'default'}
@@ -205,7 +206,7 @@ const QrCodeThemeEditor = ({
 
     return (
       <InfiniteScroll
-        className={styles.gifts}
+        className={buildClassName(styles.gifts, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
         items={uniqueGifts}
         itemSelector={`.${styles.gift}`}
         onLoadMore={onLoadMoreGifts}
