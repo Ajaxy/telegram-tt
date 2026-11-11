@@ -7,7 +7,7 @@ demo libraries and alternative renderers are not part of this integration.
 
 The prebuilt QuickJS engine is the TelegramMessenger/quickjs fork, revision
 `b02310a11877829888888d67003a0de2eb927989` (`b02310a` in
-`quickjs/dist/QUICKJS_VERSION`), not the vanilla npm QuickJS binary.
+`quickjs/prebuilt/QUICKJS_VERSION`), not the vanilla npm QuickJS binary.
 The vendored WASM SHA-256 is
 `ded681862de45025ab778fec2bfd63b9eaae0e019d79b56b4dcb1a1ef3949a02`.
 Its MIT license and the quickjs-emscripten MIT license are retained in
@@ -27,14 +27,14 @@ Paths are relative to this directory; `host/`, `renderer/`, `sandbox/` and `shar
   (`DEPLOYMENT.md`).
 - The Shadow DOM renderer is the only one: the iframe renderer, its srcdoc and its bundle entry are removed. The
   native validator bundle is left out.
-- The `sourceMappingURL` comments of `quickjs/dist/index.mjs` and `ffi.mjs` are dropped: upstream does not ship
+- The `sourceMappingURL` comments of `quickjs/prebuilt/index.mjs` and `ffi.mjs` are dropped: upstream does not ship
   their maps.
 - The worker imports the sandbox bundle itself (`virtual:sandbox-bundle`, through `workerPlugin` in `vite.ts`), so
   `init` and `warm` do not carry it and the ~600 KB string stays out of the main thread's code.
 - The CSS sanitizer takes css-tree's parser, walker, generator and `List` from their entry points
   (`host/css-tree.ts`), which leaves out the lexer and its syntax data.
-- `quickjs/build.sh` takes the fork checkout as its argument, builds the browser module only, and `--check`
-  compares with `quickjs/dist.sha256`.
+- `quickjs/build.sh` takes the fork checkout as its argument, builds the browser module only into
+  `quickjs/prebuilt/` (upstream `dist/`), and `--check` compares with `quickjs/prebuilt.sha256`.
 
 ### No cross-origin isolation (`host/suspend.ts`, `host/widgetSandbox.worker.ts`)
 

@@ -13,7 +13,7 @@
 
 import type { QuickJSContext, QuickJSHandle, QuickJSRuntime } from 'quickjs-emscripten-core';
 // QuickJS built from the TelegramMessenger/quickjs fork (packages/quickjs-wasm, decisions.md).
-import wasmUrl from '../../quickjs/dist/emscripten-module.wasm?url';
+import wasmUrl from '../../quickjs/prebuilt/emscripten-module.wasm?url';
 import sandboxBundle from 'virtual:sandbox-bundle';
 import { AUTONOMOUS_EVENTS, CpuBudget, opsCostMs, queryLimitHit as queryLimitOf, queryLimitReason } from './cpu-budget';
 import { instantiateSuspendable, type RunExport, type Suspender } from './suspend';

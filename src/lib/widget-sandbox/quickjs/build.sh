@@ -5,13 +5,13 @@
 # its quickjs-ng-wasmfile-release-sync flags, so @jitl's FFI and
 # quickjs-emscripten-core work unchanged.
 #
-#   quickjs/build.sh [--docker] <fork checkout>           rebuild dist/ and dist.sha256
+#   quickjs/build.sh [--docker] <fork checkout>           rebuild prebuilt/ and prebuilt.sha256
 #   quickjs/build.sh --check [--docker] <fork checkout>   rebuild in a temporary directory and compare
-#                                                         every file with dist.sha256 (exit 1 on a difference)
+#                                                         every file with prebuilt.sha256 (exit 1 on a difference)
 #
 # The fork is a checkout of TelegramMessenger/quickjs at the revision of
-# dist/QUICKJS_VERSION (NOTICE.md). The output in dist/ is committed, so the web
-# build needs no emcc; dist.sha256 lists the sha256 of every dist/ file. Only the
+# prebuilt/QUICKJS_VERSION (NOTICE.md). The output in prebuilt/ is committed, so the web
+# build needs no emcc; prebuilt.sha256 lists the sha256 of every prebuilt/ file. Only the
 # browser build is made: the client ships no Node one (local patch, NOTICE.md).
 #
 # The build is reproducible: the same fork commit and the pinned emscripten
@@ -27,7 +27,7 @@
 # mapped away with -ffile-prefix-map; the fork's version string is the first 7
 # hex digits of its commit (not `git describe`, which a fetched tag changes).
 # A new emscripten is a deliberate change: bump both pins, rebuild, commit
-# dist/ and dist.sha256 together.
+# prebuilt/ and prebuilt.sha256 together.
 set -eu
 EMSDK_VERSION=6.0.12
 EMSDK_IMAGE=emscripten/emsdk:6.0.12@sha256:77638e6c215a65f25a704c0c831d5c2463a8c0468a58c6cb82489dbe621dfa05
@@ -50,7 +50,7 @@ fi
 FORK=$(cd "$FORK_ARG" && pwd)
 
 sha256() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$@"; else shasum -a 256 "$@"; fi; }
-# `<sha256>  <file>` for every file of a directory, sorted by name (the format of dist.sha256; `shasum -a 256 -c` reads it).
+# `<sha256>  <file>` for every file of a directory, sorted by name (the format of prebuilt.sha256; `shasum -a 256 -c` reads it).
 manifest() { (cd "$1" && for f in *; do [ -f "$f" ] && sha256 "$f"; done) | LC_ALL=C sort -k2; }
 
 # The fork's version string: the first 7 hex digits of its commit. Inside the
@@ -78,7 +78,7 @@ fi
 
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
-if [ "$CHECK" = 1 ]; then OUT="$WORK/out"; else OUT="$HERE/dist"; fi
+if [ "$CHECK" = 1 ]; then OUT="$WORK/out"; else OUT="$HERE/prebuilt"; fi
 mkdir -p "$OUT"
 
 GEN=
@@ -111,28 +111,28 @@ cp "$WORK/browser/emscripten-module.wasm" "$OUT/emscripten-module.wasm"
 echo "$QJS_VERSION" > "$OUT/QUICKJS_VERSION"
 
 if [ "$CHECK" = 0 ]; then
-  # The other dist/ files (index, ffi, the .d.ts) are quickjs-emscripten 0.32.0's, committed as they are.
-  manifest "$HERE/dist" > "$HERE/dist.sha256"
-  echo "built from $FORK ($QJS_VERSION) with emscripten $EMCC_VERSION; dist.sha256 updated"
+  # The other prebuilt/ files (index, ffi, the .d.ts) are quickjs-emscripten 0.32.0's, committed as they are.
+  manifest "$HERE/prebuilt" > "$HERE/prebuilt.sha256"
+  echo "built from $FORK ($QJS_VERSION) with emscripten $EMCC_VERSION; prebuilt.sha256 updated"
   exit 0
 fi
 
-# --check: dist/ is exactly what dist.sha256 lists, and the rebuilt files have the listed hashes.
+# --check: prebuilt/ is exactly what prebuilt.sha256 lists, and the rebuilt files have the listed hashes.
 FAIL=0
-if ! manifest "$HERE/dist" | cmp -s - "$HERE/dist.sha256"; then
-  echo "build.sh --check: dist/ differs from dist.sha256:" >&2
-  manifest "$HERE/dist" | diff "$HERE/dist.sha256" - >&2 || true
+if ! manifest "$HERE/prebuilt" | cmp -s - "$HERE/prebuilt.sha256"; then
+  echo "build.sh --check: prebuilt/ differs from prebuilt.sha256:" >&2
+  manifest "$HERE/prebuilt" | diff "$HERE/prebuilt.sha256" - >&2 || true
   FAIL=1
 fi
 for f in $(cd "$OUT" && ls); do
-  want=$(awk -v f="$f" '$2 == f { print $1 }' "$HERE/dist.sha256")
+  want=$(awk -v f="$f" '$2 == f { print $1 }' "$HERE/prebuilt.sha256")
   got=$(sha256 "$OUT/$f" | cut -d' ' -f1)
   if [ "$want" != "$got" ]; then
-    echo "build.sh --check: $f rebuilt as $got, dist.sha256 lists ${want:-nothing}" >&2
+    echo "build.sh --check: $f rebuilt as $got, prebuilt.sha256 lists ${want:-nothing}" >&2
     FAIL=1
   fi
 done
 if [ "$FAIL" = 0 ]; then
-  echo "build.sh --check: dist/ is reproducible from $FORK ($QJS_VERSION) with emscripten $EMCC_VERSION"
+  echo "build.sh --check: prebuilt/ is reproducible from $FORK ($QJS_VERSION) with emscripten $EMCC_VERSION"
 fi
 exit "$FAIL"

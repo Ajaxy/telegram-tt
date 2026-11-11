@@ -8,7 +8,7 @@
 // Nothing else runs in the instance meanwhile.
 
 import { newQuickJSWASMModuleFromVariant, newVariant, type QuickJSWASMModule } from 'quickjs-emscripten-core';
-import baseVariant from '../../quickjs/dist/index.mjs';
+import baseVariant from '../../quickjs/prebuilt/index.mjs';
 
 /** The exports through which code runs in the VM, the only calls that may wait. */
 export type RunExport = '_QTS_Call' | '_QTS_Eval' | '_QTS_ExecutePendingJob';
