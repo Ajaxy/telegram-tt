@@ -306,7 +306,7 @@ const ActionMessage = ({
   });
 
   const {
-    isContextMenuOpen, contextMenuAnchor, isContextMenuAltKeyPressed,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(
@@ -769,7 +769,6 @@ const ActionMessage = ({
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
-          isAltKeyPressed={isContextMenuAltKeyPressed}
           message={message}
           messageListType="thread"
           threadId={threadId}

@@ -27,6 +27,7 @@ import {
   groupStatefulContent,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
+import { IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
 import { disableScrolling } from '../../../util/scrollLock';
@@ -37,6 +38,7 @@ import { getPollCountryRestrictionMessage, getPollSubscriberRestrictionMessage }
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
+import useIsKeyPressed from '../../../hooks/useIsKeyPressed';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -62,7 +64,6 @@ type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   targetHref?: string;
-  isAltKeyPressed?: boolean;
   message: ApiMessage;
   threadId: ThreadId;
   messageListType: MessageListType;
@@ -160,6 +161,8 @@ type OwnProps = {
 const SCROLLBAR_WIDTH = 10;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
 const ANIMATION_DURATION = 200;
+// Option reveals alternate items on macOS, Shift reveals extended items on Windows
+const EXTENDED_MENU_KEY = IS_MAC_OS ? 'Alt' : 'Shift';
 
 const MessageContextMenu = ({
   isReactionPickerOpen,
@@ -181,7 +184,6 @@ const MessageContextMenu = ({
   reactionsLimit,
   anchor,
   targetHref,
-  isAltKeyPressed,
   canSendNow,
   canReschedule,
   canBuyPremium,
@@ -271,6 +273,7 @@ const MessageContextMenu = ({
   const scrollableRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
+  const isExtendedMenu = useIsKeyPressed(EXTENDED_MENU_KEY);
   const noReactions = !isPrivate && !enabledReactions;
   const areReactionsPossible = message.areReactionsPossible;
   const withReactions = (canShowReactionList && !noReactions) || areReactionsPossible;
@@ -545,7 +548,7 @@ const MessageContextMenu = ({
           <MenuItem icon="web" onClick={onSelectLanguage}>{lang('Language')}</MenuItem>
         )}
         {copyOptions.map((option) => (
-          isAltKeyPressed && option.canCopyWithFormat ? (
+          isExtendedMenu && option.canCopyWithFormat ? (
             <NestedMenuItem
               key={option.label}
               icon={option.icon}

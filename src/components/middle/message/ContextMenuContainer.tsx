@@ -102,7 +102,6 @@ export type OwnProps = {
   album?: IAlbum;
   anchor: IAnchorPosition;
   targetHref?: string;
-  isAltKeyPressed?: boolean;
   messageListType: MessageListType;
   threadId: ThreadId;
   noReplies?: boolean;
@@ -199,7 +198,6 @@ const ContextMenuContainer = ({
   story,
   anchor,
   targetHref,
-  isAltKeyPressed,
   noOptions,
   canSendNow,
   hasFullInfo,
@@ -812,7 +810,6 @@ const ContextMenuContainer = ({
         reactionsLimit={reactionsLimit}
         anchor={anchor}
         targetHref={targetHref}
-        isAltKeyPressed={isAltKeyPressed}
         chat={chat}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
