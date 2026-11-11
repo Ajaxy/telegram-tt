@@ -385,6 +385,7 @@ const ChatOrUserPicker = ({
             })}
             {Boolean(viewportFooter) && (
               <div
+                key="spacer"
                 className="picker-list-spacer"
                 style={`top: ${topicIds.length * TOPIC_ITEM_HEIGHT_PX}px`}
               />
@@ -518,7 +519,7 @@ function ChatListContent({
         >
           {viewportIds.map(renderItem)}
           {Boolean(viewportFooter) && (
-            <div className="picker-list-spacer" style={`top: ${maxHeight}px`} />
+            <div key="spacer" className="picker-list-spacer" style={`top: ${maxHeight}px`} />
           )}
         </InfiniteScroll>
       ) : viewportIds && !viewportIds.length ? (
