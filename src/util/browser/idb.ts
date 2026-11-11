@@ -67,5 +67,6 @@ class IdbStore {
 
 export const MAIN_IDB_STORE = new IdbStore('tt-data');
 export const PASSCODE_IDB_STORE = new IdbStore('tt-passcode');
+export const PUSH_IDB_STORE = new IdbStore('tt-push');
 export const TON_CONNECT_IDB_STORE = new IdbStore('tt-tonconnect');
 export const WALLET_IDB_STORE = new IdbStore('tt-wallet');

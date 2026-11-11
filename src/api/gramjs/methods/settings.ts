@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
+  ApiAccountConnection,
   ApiBirthday,
   ApiChat,
   ApiDisallowedGiftsSettings,
@@ -59,7 +60,7 @@ import {
 import { buildInputPasskeyCredential } from '../gramjsBuilders/passkeys';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
-import { getClient, invokeRequest, uploadFile } from './client';
+import { invokeRequest, invokeWithAccount, uploadFile } from './client';
 
 export function updateProfile({
   firstName,
@@ -559,24 +560,27 @@ export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
   };
 }
 
-export function registerDevice(token: string) {
-  const client = getClient();
-  const secret = client.session.getAuthKey().getKey()!;
-  return invokeRequest(new GramJs.account.RegisterDevice({
+export function registerDevice({ token, otherIds, secret, connection }: {
+  token: string; otherIds: string[]; secret: Uint8Array<ArrayBuffer>; connection?: ApiAccountConnection;
+}) {
+  return invokeWithAccount(new GramJs.account.RegisterDevice({
     tokenType: 10,
-    secret,
     appSandbox: false,
-    otherUids: [],
+    secret,
+    noMuted: true,
+    otherUids: otherIds.map(BigInt),
     token,
-  }));
+  }), connection);
 }
 
-export function unregisterDevice(token: string) {
-  return invokeRequest(new GramJs.account.UnregisterDevice({
+export function unregisterDevice({ token, otherIds, connection }: {
+  token: string; otherIds: string[]; connection?: ApiAccountConnection;
+}) {
+  return invokeWithAccount(new GramJs.account.UnregisterDevice({
     tokenType: 10,
-    otherUids: [],
+    otherUids: otherIds.map(BigInt),
     token,
-  }));
+  }), connection);
 }
 
 export async function setPrivacySettings(

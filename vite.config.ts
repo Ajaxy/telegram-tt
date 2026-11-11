@@ -181,6 +181,7 @@ export default defineConfig(({ mode }): UserConfig => {
     TG_MANIFEST: manifest,
     TG_TELEGRAM_API_ID: telegramApiId,
     TG_TELEGRAM_API_HASH: telegramApiHash,
+    TG_VAPID_KEY: env.VAPID_KEY || '',
     TG_TEST_SESSION: env.TEST_SESSION || '',
   });
 

@@ -1856,6 +1856,8 @@ export interface LangPair {
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
   'NotificationGiftDeleted': undefined;
   'NotificationMessageTextHidden': undefined;
+  'PushPreviewsWhenLocked': undefined;
+  'PushPreviewsWhenLockedInfo': undefined;
   'GiftRibbonSale': undefined;
   'StarsGiftBought': undefined;
   'Sell': undefined;
@@ -6745,6 +6747,9 @@ export interface LangKeyGroups {
       | 'ActionUserRegistered'
       | 'ActionRemovedPhoto'
       | 'ActionChangedPhoto'
+      | 'ActionDisabledTheme'
+      | 'ActionChangedWallpaper'
+      | 'ActionSetSameWallpaper'
       | 'ActionScreenshotTaken'
       | 'ActionSharingDisabled'
       | 'ActionSharingEnabled'
@@ -6761,6 +6766,7 @@ export interface LangKeyGroups {
       | 'GiftInfoPeerDescriptionFreeUpgradeOut'
       | 'GiftPeerUpgradeText'
       | 'PlaylistTitle'
+      | 'ActionChangedWallpaperBothYou'
       | 'ActionStarGiftTo'
       | 'ActionStarGiftFrom'
       | 'ActionStarGiftNoConvertText'
@@ -7278,6 +7284,17 @@ export interface LangKeyGroups {
       | 'ActionAddUsersMany'
       | 'ActionVideoInvitedMany';
     variables: 'from' | 'users';
+  };
+  'from,theme': {
+    keys:
+      | 'ActionChangedTheme';
+    variables: 'from' | 'theme';
+  };
+  'theme': {
+    keys:
+      | 'ActionChangedThemeYou'
+      | 'ActionChangedThemeChannel';
+    variables: 'theme';
   };
   'from,title': {
     keys:

@@ -13,6 +13,7 @@ import {
   INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
   MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
+  NOTIFICATION_MAX_VOLUME,
 } from '../config';
 import { IS_IOS, IS_MAC_OS } from '../util/browser/windowEnvironment';
 import { getDefaultPatternColor } from '../util/wallpaper';
@@ -316,9 +317,10 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       canAutoLoadFileInChannels: false,
       autoLoadFileMaxSizeMb: 10,
       hasWebNotifications: true,
-      hasPushNotifications: true,
+      hasPushNotifications: false,
+      shouldShowPushPreviewsWhenLocked: false,
       shouldNotifyAboutPinnedMessages: true,
-      notificationSoundVolume: 5,
+      notificationSoundVolume: NOTIFICATION_MAX_VOLUME / 2,
       shouldSuggestStickers: true,
       shouldSuggestCustomEmoji: true,
       shouldPaidMessageAutoApprove: false,

@@ -2494,6 +2494,8 @@
 "NotificationGiftIsUnlist" = "{gift} is removed from sale.";
 "NotificationGiftDeleted" = "Gift Deleted";
 "NotificationMessageTextHidden" = "New message";
+"PushPreviewsWhenLocked" = "Show previews when locked";
+"PushPreviewsWhenLockedInfo" = "Show chat names and message text in background notifications, even when Telegram is locked.";
 "GiftRibbonSale" = "sale";
 "ButtonBuyGift" = "Buy for {stars}";
 "GiftInfoBuyGift" = "{user} is selling this gift and you can buy it.";

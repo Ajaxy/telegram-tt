@@ -350,6 +350,9 @@ function pruneExpiredEphemeralMessages(cached: GlobalState) {
 
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   const untypedCached = cached as any;
+  // Push registrations are reconciled against the shared subscription registry
+  delete untypedCached.push;
+
   Object.values(cached.chats.fullInfoById).forEach((fullInfo) => {
     fullInfo.isCache = true;
   });
@@ -570,7 +573,6 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'recentEmojis',
       'recentCustomEmojis',
       'emojiGroups',
-      'push',
       'serviceNotifications',
       'attachmentSettings',
       'leftColumnWidth',

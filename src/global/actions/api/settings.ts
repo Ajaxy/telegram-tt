@@ -19,7 +19,10 @@ import { signalUnknownPasskey, toCredentialCreationOptions } from '../../../util
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { changeLanguage, getTranslationFn } from '../../../util/localization';
-import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
+import { requestPermission, subscribe } from '../../../util/notifications';
+import {
+  reconcilePushNotifications, suspendPushForPasscode, unregisterPushAccount,
+} from '../../../util/pushNotifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
 import { resolveSettingsLink } from '../../../util/settingsLinks';
@@ -450,7 +453,13 @@ addActionHandler('updateWebNotificationSettings', async (global, actions, payloa
     await subscribe();
   }
   if (oldSettings.hasPushNotifications && !hasPushNotifications) {
-    await unsubscribe();
+    await unregisterPushAccount();
+  }
+  if (oldSettings.shouldShowPushPreviewsWhenLocked !== global.settings.byKey.shouldShowPushPreviewsWhenLocked) {
+    if (global.passcode.hasPasscode && !global.settings.byKey.shouldShowPushPreviewsWhenLocked) {
+      await suspendPushForPasscode(true);
+    }
+    await reconcilePushNotifications();
   }
   if (!oldSettings.hasWebNotifications && hasWebNotifications) {
     const isGranted = await requestPermission();

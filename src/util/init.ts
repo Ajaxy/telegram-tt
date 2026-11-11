@@ -15,7 +15,6 @@ import { resetSessionStore } from './passcode/sessionStore';
 import { purgePasscodeCaches } from './cacheApi';
 import { cloneDeep } from './iteratees';
 import { ACCOUNT_SLOT } from './multiaccount';
-import { unsubscribeLocally } from './notifications';
 import { parseJsonWithBigInt } from './numbers';
 import {
   abortPasscodeDisable,
@@ -32,6 +31,7 @@ import {
   restoreMissingSessionsFromVault,
   setDek,
 } from './passcode';
+import { clearPrivatePushNotifications } from './pushNotifications';
 import { clearAllStoredSessions } from './sessions';
 import { clearLockScreenWallpaperBlobs, clearPlaintextWallpaperBlobs } from './wallpaperStorage';
 
@@ -183,7 +183,7 @@ async function applyPasscodeStateOnBootLocked<T extends GlobalState>(global: T):
     localStorage.setItem(IS_SCREEN_LOCKED_CACHE_KEY, 'true');
     await Promise.all([
       purgePasscodePlaintext(hasLegacy),
-      unsubscribeLocally().catch(() => undefined),
+      clearPrivatePushNotifications().catch(() => undefined),
     ]);
     if (didMarkLocked && meta) broadcastPasscodeState(undefined, meta.generation);
     global = clearGlobalForLockScreen(global);

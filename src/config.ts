@@ -15,6 +15,7 @@ export const PRODUCTION_URL = 'https://web.telegram.org/a';
 export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect to other versions
 export const BASE_URL = import.meta.env.TG_PUBLIC_URL;
 export const ACCOUNT_QUERY = 'account';
+export const VAPID_SERVER_KEY = import.meta.env.TG_VAPID_KEY;
 
 export const IS_TEST = APP_ENV === 'test';
 export const IS_PERF = APP_ENV === 'perf';
@@ -234,6 +235,8 @@ export const API_THROTTLE_RESET_UPDATES = new Set([
 ]);
 
 export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;
+
+export const NOTIFICATION_MAX_VOLUME = 10;
 
 export const STICKER_SIZE_INLINE_DESKTOP_FACTOR = 13;
 export const STICKER_SIZE_INLINE_MOBILE_FACTOR = 11;

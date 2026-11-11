@@ -34,6 +34,12 @@ export interface ApiInitialArgs {
   hasPasskeySupport?: boolean;
 }
 
+export type ApiAccountConnection = Pick<ApiInitialArgs,
+  'platform' | 'langCode' | 'shouldAllowHttpTransport' | 'shouldForceHttpTransport'
+> & {
+  sessionData: ApiSessionData;
+};
+
 export type ApiPasskeyOption = {
   publicKey: PublicKeyCredentialRequestOptionsJSON;
 };

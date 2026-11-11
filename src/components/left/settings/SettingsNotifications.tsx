@@ -3,9 +3,11 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiNotifyPeerType, ApiPeerNotifySettings } from '../../../api/types';
 
+import { NOTIFICATION_MAX_VOLUME } from '../../../config';
+import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import {
   checkIfNotificationsSupported,
-  checkIfOfflinePushFailed,
+  checkIfPushSupported,
   playNotifySound,
 } from '../../../util/notifications';
 
@@ -28,6 +30,8 @@ type StateProps = {
   shouldNotifyAboutPinnedMessages: boolean;
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
+  hasPasscode?: boolean;
+  shouldShowPushPreviewsWhenLocked: boolean;
   notificationSoundVolume: number;
 };
 
@@ -39,6 +43,8 @@ const SettingsNotifications = ({
   shouldNotifyAboutPinnedMessages,
   hasPushNotifications,
   hasWebNotifications,
+  hasPasscode,
+  shouldShowPushPreviewsWhenLocked,
   notificationSoundVolume,
 }: OwnProps & StateProps) => {
   const {
@@ -48,6 +54,7 @@ const SettingsNotifications = ({
     updateNotificationSettings,
     updateWebNotificationSettings,
   } = getActions();
+  const lang = useLang();
 
   useEffect(() => {
     loadNotificationSettings();
@@ -56,7 +63,8 @@ const SettingsNotifications = ({
   const runDebounced = useRunDebounced(500, true);
 
   const areNotificationsSupported = checkIfNotificationsSupported();
-  const areOfflineNotificationsSupported = areNotificationsSupported && !checkIfOfflinePushFailed();
+  const areOfflineNotificationsSupported = areNotificationsSupported
+    && checkIfPushSupported();
 
   const areChannelsMuted = Boolean(notifyDefaults?.channels?.mutedUntil);
   const areGroupsMuted = Boolean(notifyDefaults?.groups?.mutedUntil);
@@ -89,6 +97,10 @@ const SettingsNotifications = ({
     updateWebNotificationSettings({
       hasPushNotifications: e.target.checked,
     });
+  }, [updateWebNotificationSettings]);
+
+  const handlePushPreviewsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    updateWebNotificationSettings({ shouldShowPushPreviewsWhenLocked: e.target.checked });
   }, [updateWebNotificationSettings]);
 
   const handlePrivateChatsNotificationsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,8 +144,6 @@ const SettingsNotifications = ({
     runDebounced(() => playNotifySound(undefined, volume));
   }, [runDebounced, updateWebNotificationSettings]);
 
-  const lang = useLang();
-
   useHistoryBack({
     isActive,
     onBack: onReset,
@@ -161,14 +171,25 @@ const SettingsNotifications = ({
           checked={hasPushNotifications}
           onChange={handlePushNotificationsChange}
         />
-        <RangeSlider
-          label={lang('NotificationsSound')}
-          min={0}
-          max={10}
-          disabled={!areNotificationsSupported}
-          value={notificationSoundVolume}
-          onChange={handleVolumeChange}
-        />
+        {hasPasscode && (
+          <Checkbox
+            label={lang('PushPreviewsWhenLocked')}
+            subLabel={lang('PushPreviewsWhenLockedInfo')}
+            checked={shouldShowPushPreviewsWhenLocked}
+            disabled={!hasWebNotifications || !hasPushNotifications || !areOfflineNotificationsSupported}
+            onChange={handlePushPreviewsChange}
+          />
+        )}
+        {!IS_IOS && (
+          <RangeSlider
+            label={lang('NotificationsSound')}
+            min={0}
+            max={NOTIFICATION_MAX_VOLUME}
+            disabled={!areNotificationsSupported}
+            value={notificationSoundVolume}
+            onChange={handleVolumeChange}
+          />
+        )}
       </Island>
 
       <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>
@@ -251,6 +272,8 @@ export default memo(withGlobal<OwnProps>(
       shouldNotifyAboutPinnedMessages: global.settings.byKey.shouldNotifyAboutPinnedMessages,
       hasWebNotifications: global.settings.byKey.hasWebNotifications,
       hasPushNotifications: global.settings.byKey.hasPushNotifications,
+      hasPasscode: global.passcode.hasPasscode,
+      shouldShowPushPreviewsWhenLocked: global.settings.byKey.shouldShowPushPreviewsWhenLocked,
       notificationSoundVolume: global.settings.byKey.notificationSoundVolume,
       notifyDefaults: global.settings.notifyDefaults,
     };

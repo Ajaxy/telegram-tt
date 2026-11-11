@@ -275,6 +275,7 @@ export interface ActionPayloads {
   };
 
   updateWebNotificationSettings: {
+    shouldShowPushPreviewsWhenLocked?: boolean;
     hasWebNotifications?: boolean;
     hasPushNotifications?: boolean;
     notificationSoundVolume?: number;
@@ -336,8 +337,6 @@ export interface ActionPayloads {
   uploadWallpaper: File;
   loadChatThemes: undefined;
   applyChatTheme: { emoticon?: string } & WithTabId;
-  setDeviceToken: { token: string };
-  deleteDeviceToken: undefined;
   createServiceNotification: {
     message: ApiMessage;
   };

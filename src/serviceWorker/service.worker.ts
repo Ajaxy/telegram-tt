@@ -7,6 +7,7 @@ import {
   handleClientMessage as handleNotificationMessage,
   handleNotificationClick,
   handlePush,
+  handlePushSubscriptionChange,
 } from './pushNotification';
 import { handleClientMessage as handleShareMessage, respondForShare } from './share';
 
@@ -89,8 +90,14 @@ self.addEventListener('fetch', (e: FetchEvent) => {
 });
 
 self.addEventListener('push', handlePush);
+self.addEventListener('pushsubscriptionchange', handlePushSubscriptionChange);
 self.addEventListener('notificationclick', handleNotificationClick);
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'claimClient') {
+    event.waitUntil(self.clients.claim());
+    return;
+  }
+
   handleNotificationMessage(event);
   handleShareMessage(event);
 });

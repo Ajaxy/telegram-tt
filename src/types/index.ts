@@ -72,6 +72,7 @@ export type SessionUserInfo = {
 };
 
 export type SharedSessionData = {
+  pushKey?: string;
   date?: number;
   dcId: number;
   authKeyCreatedAt?: ApiSessionData['authKeyCreatedAt'];
@@ -160,6 +161,7 @@ export type TimeFormat = '24h' | '12h';
 export interface AccountSettings {
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
+  shouldShowPushPreviewsWhenLocked: boolean;
   hasContactJoinedNotifications?: boolean;
   shouldNotifyAboutPinnedMessages: boolean;
   notificationSoundVolume: number;

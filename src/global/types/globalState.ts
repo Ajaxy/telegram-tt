@@ -492,11 +492,6 @@ export type GlobalState = {
     passkeys?: ApiPasskey[];
   };
 
-  push?: {
-    deviceToken: string;
-    subscribedAt: number;
-  };
-
   transcriptions: Record<string, ApiTranscription>;
   trustedBotIds: string[];
 

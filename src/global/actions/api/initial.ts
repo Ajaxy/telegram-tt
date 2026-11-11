@@ -19,11 +19,11 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl, getFirstLoggedInAccountSlot,
 } from '../../../util/multiaccount';
-import { unsubscribe } from '../../../util/notifications';
 import {
   clearPasscodeStore, removeGlobalsVaultForSlot, removeWalletVaultSecrets, requestPasscodeStateLock,
 } from '../../../util/passcode';
 import { broadcastPasscodeReset } from '../../../util/passcode/channel';
+import { unregisterPushAccount } from '../../../util/pushNotifications';
 import {
   consumeInvalidWebLogin, getPendingWebLogin, resetInitialLocationHash, resetLocationHash,
 } from '../../../util/routing';
@@ -239,7 +239,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
   try {
     resetInitialLocationHash();
     resetLocationHash();
-    await unsubscribe();
+    await unregisterPushAccount();
     await Promise.race([callApi('destroy'), pause(API_DESTROY_TIMEOUT_MS)]);
     await forceWebsync(false);
   } catch (err) {
@@ -272,6 +272,7 @@ addActionHandler('reset', async (global, actions): Promise<void> => {
   void cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
 
   const hasAccounts = await resetStorage();
+  await unregisterPushAccount().catch(() => undefined);
   if (hasAccounts) {
     destroySharedStatePort();
   } else {
@@ -345,27 +346,9 @@ addActionHandler('loadNearestCountry', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('setDeviceToken', (global, actions, payload): ActionReturnType => {
-  const { token } = payload;
-  return {
-    ...global,
-    push: {
-      deviceToken: token,
-      subscribedAt: Date.now(),
-    },
-  };
-});
-
-addActionHandler('deleteDeviceToken', (global): ActionReturnType => {
-  return {
-    ...global,
-    push: undefined,
-  };
-});
-
 addActionHandler('signOutAllAccounts', async (): Promise<void> => {
   try {
-    await Promise.race([unsubscribe(), pause(API_DESTROY_TIMEOUT_MS)]);
+    await Promise.race([unregisterPushAccount(true), pause(API_DESTROY_TIMEOUT_MS)]);
     await Promise.race([callApi('destroy'), pause(API_DESTROY_TIMEOUT_MS)]);
   } catch (err) {
     // Do nothing

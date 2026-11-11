@@ -317,9 +317,11 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   ]),
 
   ...buildEntries(SettingsScreens.Notifications, [
-    'NotificationsWeb', 'NotificationsOffline', 'NotificationsSound', 'NotificationsForPrivateChats', 'MessagePreview',
+    'NotificationsWeb', 'NotificationsOffline', 'NotificationsForPrivateChats', 'MessagePreview',
     'NotificationsForGroups', 'NotificationsForChannels', 'ContactJoined', 'PinnedMessagesNotifications',
   ]),
+  ...buildEntries(SettingsScreens.Notifications, IS_IOS ? [] : ['NotificationsSound']),
+  ...buildEntries(SettingsScreens.Notifications, ['PushPreviewsWhenLocked'], { requires: 'hasPasscode' }),
   ...buildEntries(SettingsScreens.Notifications, ['AutodownloadPrivateChats'], {
     keywordsKey: 'SettingsKeywordsPrivateChats',
   }),
