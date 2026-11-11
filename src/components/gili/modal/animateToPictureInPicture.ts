@@ -53,8 +53,7 @@ export default function animateToPictureInPicture(
       ? `translate(${sourceRect.left - destinationRect.left}px, ${sourceRect.top - destinationRect.top}px) `
       + `scale(${sourceRect.width / destinationRect.width}, ${sourceRect.height / destinationRect.height})`
       : `scale(${ZOOM_SCALE})`;
-    const canAnimate = !sourceDocument.body.classList.contains('no-page-transitions')
-      && !sourceWindow.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canAnimate = !sourceDocument.body.classList.contains('no-page-transitions');
 
     requestMutation(() => {
       if (isCanceled || pictureInPictureWindow.closed) {

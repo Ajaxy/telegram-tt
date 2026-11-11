@@ -4,6 +4,7 @@ import { LeftColumnContent, NewChatMembersProgress, SettingsScreens } from '../t
 
 import {
   ANIMATION_LEVEL_DEFAULT,
+  ANIMATION_LEVEL_MIN,
   DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
   DEFAULT_MESSAGE_TEXT_SIZE_PX,
   DEFAULT_PLAYBACK_RATE,
@@ -76,6 +77,8 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
 
 export const SHARED_STATE_CACHE_VERSION = 4;
 
+const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export const INITIAL_SHARED_STATE: SharedState = {
   cacheVersion: SHARED_STATE_CACHE_VERSION,
   settings: {
@@ -95,11 +98,11 @@ export const INITIAL_SHARED_STATE: SharedState = {
       ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
       : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
     instantViewFontSizeAdjust: INSTANT_VIEW_FONT_SIZE_ADJUST_DEFAULT,
-    animationLevel: ANIMATION_LEVEL_DEFAULT,
+    animationLevel: PREFERS_REDUCED_MOTION ? ANIMATION_LEVEL_MIN : ANIMATION_LEVEL_DEFAULT,
     foldersPosition: FOLDERS_POSITION_DEFAULT,
     messageSendKeyCombo: 'enter',
     shouldReplaceTextShortcuts: true,
-    performance: INITIAL_PERFORMANCE_STATE_MAX,
+    performance: PREFERS_REDUCED_MOTION ? INITIAL_PERFORMANCE_STATE_MIN : INITIAL_PERFORMANCE_STATE_MAX,
     shouldSkipBrowserCloseConfirmation: false,
     language: 'en',
     timeFormat: '24h',
