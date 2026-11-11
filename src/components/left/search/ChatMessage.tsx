@@ -15,6 +15,7 @@ import {
   getMessageVideo,
 } from '../../../global/helpers';
 import { getMessageSenderName, isApiPeerUser } from '../../../global/helpers/peers';
+import { isMessageInForumTopic } from '../../../global/helpers/replies';
 import {
   selectChat,
   selectPeer,
@@ -182,7 +183,8 @@ export default memo(withGlobal<OwnProps>(
     const peer = selectPeer(global, chatId);
     const chat = selectChat(global, chatId);
 
-    const isForumTopicMode = Boolean(withTopic && chat?.isForum && !chat.isBotForum);
+    const isForumTopicMode = Boolean(withTopic && chat?.isForum
+      && (!chat.isBotForum || isMessageInForumTopic(message)));
     const threadId = isForumTopicMode ? selectThreadIdFromMessage(global, message) : undefined;
     const topic = threadId !== undefined ? selectTopic(global, chatId, threadId) : undefined;
     const sender = topic ? selectSender(global, message) : undefined;

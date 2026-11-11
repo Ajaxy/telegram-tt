@@ -89,6 +89,7 @@ type OwnProps = {
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
+  forceRound?: boolean;
   asMessageBubble?: boolean;
   storyCircleStyle?: string;
   observeIntersection?: ObserveFn;
@@ -123,6 +124,7 @@ const Avatar = ({
   storyViewerMode = 'single-peer',
   loopIndefinitely,
   noPersonalPhoto,
+  forceRound,
   asMessageBubble,
   storyCircleStyle,
   onClick,
@@ -271,7 +273,7 @@ const Avatar = ({
 
   const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
     || isCommunity
-    || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
+    || (isForum && !forceRound && !((withStory || withStorySolid) && realPeer?.hasStories));
   const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
   const customColor = isCustomPeer && peer.customPeerAvatarColor;
 
