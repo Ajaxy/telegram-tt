@@ -152,6 +152,16 @@ addActionHandler('updateShouldDebugExportedSenders', (global): ActionReturnType 
   callApi('setShouldDebugExportedSenders', Boolean(settings.shouldDebugExportedSenders));
 });
 
+addActionHandler('updateMediaEditorSettings', (global, actions, payload): ActionReturnType => {
+  return {
+    ...global,
+    mediaEditorSettings: {
+      ...global.mediaEditorSettings,
+      ...payload,
+    },
+  };
+});
+
 addActionHandler('setSettingOption', (global, actions, payload): ActionReturnType => {
   return replaceSettings(global, payload);
 });

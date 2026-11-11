@@ -3,6 +3,7 @@ import { memo } from '@teact';
 import type { CropState } from '../../../../types/mediaEditor';
 import type { ResizeHandle } from '../crop';
 import type { Size } from '../render/transform';
+import type { AvatarShape } from '../types';
 
 import buildClassName from '../../../../util/buildClassName';
 import buildStyle from '../../../../util/buildStyle';
@@ -13,6 +14,7 @@ type OwnProps = {
   cropState: CropState;
   displaySize: Size;
   scale: number;
+  avatarShape?: AvatarShape;
   onCropperDragStart: (e: React.MouseEvent | React.TouchEvent) => void;
   onCornerResizeStart: (e: React.MouseEvent | React.TouchEvent, handle: ResizeHandle) => void;
 };
@@ -23,6 +25,7 @@ function CropOverlay({
   cropState,
   displaySize,
   scale,
+  avatarShape,
   onCropperDragStart,
   onCornerResizeStart,
 }: OwnProps) {
@@ -45,6 +48,9 @@ function CropOverlay({
       onMouseDown={onCropperDragStart}
       onTouchStart={onCropperDragStart}
     >
+      {avatarShape && (
+        <div className={buildClassName(styles.avatarMask, avatarShape === 'roundedSquare' && styles.roundedSquare)} />
+      )}
       <div className={styles.cropGrid} />
       {CORNERS.map((corner) => (
         <div

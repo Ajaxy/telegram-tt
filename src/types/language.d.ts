@@ -1799,8 +1799,6 @@ export interface LangPair {
   'GiftOfferRejectTitle': undefined;
   'GiftOfferAcceptTitle': undefined;
   'ActionSuggestedPhotoButton': undefined;
-  'ActionSuggestedVideoTitle': undefined;
-  'ActionSuggestedVideoText': undefined;
   'ActionSuggestedPhotoUpdatedTitle': undefined;
   'ActionSuggestedPhotoUpdatedDescription': undefined;
   'ActionAttachMenuBotAllowed': undefined;
@@ -2070,6 +2068,9 @@ export interface LangPair {
   'EditorCoverInvalidFile': undefined;
   'EditorTrimStart': undefined;
   'EditorTrimEnd': undefined;
+  'AvatarChooseFrame': undefined;
+  'AvatarChooseFrameOther': undefined;
+  'AvatarVideoUnsupported': undefined;
   'AccActionPause': undefined;
   'VideoProcessingFailed': undefined;
   'VideoEditorLoadFailed': undefined;

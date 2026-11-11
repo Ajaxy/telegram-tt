@@ -2355,8 +2355,6 @@
 "ActionSuggestedBirthdayYou" = "You suggested {user} to add a birthday";
 "ActionSuggestedBirthday" = "{user} suggested you add your birthday";
 "ActionSuggestedPhotoButton" = "View Photo";
-"ActionSuggestedVideoTitle" = "Suggested Video";
-"ActionSuggestedVideoText" = "Do you want to use this photo for your profile?";
 "ActionSuggestedPhotoUpdatedTitle" = "Photo Updated";
 "ActionSuggestedPhotoUpdatedDescription" = "You can change it in Settings";
 "ActionAttachMenuBotAllowed" = "You allowed this bot to message you when you added it to your attachment menu.";
@@ -2812,6 +2810,9 @@
 "EditorCoverInvalidFile" = "This file can't be used as a cover.";
 "EditorTrimStart" = "Trim start";
 "EditorTrimEnd" = "Trim end";
+"AvatarChooseFrame" = "Choose a frame for your profile photo";
+"AvatarChooseFrameOther" = "Choose a frame for this video";
+"AvatarVideoUnsupported" = "Sorry, Telegram can't process that type of video.";
 "AccActionPause" = "Pause";
 "VideoProcessingFailed" = "Couldn't process the video.";
 "VideoEditorLoadFailed" = "Couldn't open this video for editing.";

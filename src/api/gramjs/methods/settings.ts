@@ -3,6 +3,7 @@ import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
   ApiAccountConnection,
+  ApiAvatarUpload,
   ApiBirthday,
   ApiChat,
   ApiDisallowedGiftsSettings,
@@ -63,7 +64,9 @@ import {
 import { buildInputPasskeyCredential } from '../gramjsBuilders/passkeys';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
-import { invokeRequest, invokeWithAccount, uploadFile } from './client';
+import {
+  invokeRequest, invokeWithAccount, uploadAvatar, uploadFile,
+} from './client';
 
 export function updateProfile({
   firstName,
@@ -154,14 +157,20 @@ export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean)
   return undefined;
 }
 
-export async function uploadProfilePhoto(
-  file: File, isFallback?: boolean, isVideo = false, videoTs = 0, bot?: ApiUser,
-) {
-  const inputFile = await uploadFile(file);
+export async function uploadProfilePhoto({
+  photo, isFallback, bot,
+}: {
+  photo: ApiAvatarUpload;
+  isFallback?: boolean;
+  bot?: ApiUser;
+}) {
+  const { file, video, videoStartTs } = await uploadAvatar(photo);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    ...(bot ? { bot: buildInputUser(bot.id, bot.accessHash) } : undefined),
-    ...(isVideo ? { video: inputFile, videoStartTs: videoTs } : { file: inputFile }),
-    ...(isFallback ? { fallback: true } : undefined),
+    file,
+    video,
+    videoStartTs,
+    bot: bot ? buildInputUser(bot.id, bot.accessHash) : undefined,
+    fallback: isFallback || undefined,
   }));
 
   if (!result) return undefined;
@@ -176,17 +185,20 @@ export async function uploadProfilePhoto(
 }
 
 export async function uploadContactProfilePhoto({
-  file, isSuggest, user,
+  photo, isSuggest, user,
 }: {
-  file?: File;
+  photo?: ApiAvatarUpload;
   isSuggest?: boolean;
   user: ApiUser;
 }) {
-  const inputFile = file ? await uploadFile(file) : undefined;
+  const inputPhoto = photo && await uploadAvatar(photo);
   const result = await invokeRequest(new GramJs.photos.UploadContactProfilePhoto({
     userId: buildInputUser(user.id, user.accessHash),
-    file: inputFile,
-    ...(isSuggest ? { suggest: true } : { save: true }),
+    file: inputPhoto?.file,
+    video: inputPhoto?.video,
+    videoStartTs: inputPhoto?.videoStartTs,
+    suggest: isSuggest || undefined,
+    save: !isSuggest || undefined,
   }));
 
   if (!result) return undefined;

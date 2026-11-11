@@ -3,6 +3,7 @@ import { PasswordFreshError, RPCError, SessionFreshError } from '../../../lib/gr
 
 import type { ChatListType, ThreadReadState } from '../../../types';
 import {
+  type ApiAvatarUpload,
   type ApiChat,
   type ApiChatAdminRights,
   type ApiChatBannedRights,
@@ -97,7 +98,9 @@ import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {
   applyState, updateChannelState,
 } from '../updates/updateManager';
-import { dispatchErrorUpdate, handleGramJsUpdate, invokeRequest, uploadFile } from './client';
+import {
+  dispatchErrorUpdate, handleGramJsUpdate, invokeRequest, uploadAvatar,
+} from './client';
 import { getPassword } from './twoFaSettings';
 
 type FullChatData = {
@@ -1181,17 +1184,14 @@ export async function createGroupChat({
 }
 
 export async function editChatPhoto({
-  chatId, accessHash, photo,
+  chat, photo,
 }: {
-  chatId: string; accessHash?: string; photo?: File | ApiPhoto;
+  chat: ApiChat; photo?: ApiAvatarUpload | ApiPhoto;
 }) {
-  const chatType = getEntityTypeById(chatId);
+  const chatType = getEntityTypeById(chat.id);
   let inputPhoto: GramJs.TypeInputChatPhoto;
-  if (photo instanceof File) {
-    const uploadedPhoto = await uploadFile(photo);
-    inputPhoto = new GramJs.InputChatUploadedPhoto({
-      file: uploadedPhoto,
-    });
+  if (photo && !('mediaType' in photo)) {
+    inputPhoto = new GramJs.InputChatUploadedPhoto(await uploadAvatar(photo));
   } else if (photo) {
     const photoId = buildInputPhoto(photo);
     if (!photoId) return false;
@@ -1204,11 +1204,11 @@ export async function editChatPhoto({
   return invokeRequest(
     chatType === 'channel'
       ? new GramJs.channels.EditPhoto({
-        channel: buildInputChannel(chatId, accessHash),
+        channel: buildInputChannel(chat.id, chat.accessHash),
         photo: inputPhoto,
       })
       : new GramJs.messages.EditChatPhoto({
-        chatId: buildInputChat(chatId),
+        chatId: buildInputChat(chat.id),
         photo: inputPhoto,
       }),
     {

@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiAvatarUpload, ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { MUTE_INDEFINITE_TIMESTAMP, SERVICE_NOTIFICATIONS_USER_ID, UNMUTE_TIMESTAMP } from '../../../config';
@@ -212,9 +212,9 @@ const ManageUser = ({
     uploadContactProfilePhoto({ userId });
   }, [closeResetPersonalPhotoDialog, uploadContactProfilePhoto, userId]);
 
-  const handleSelectAvatar = useCallback((file: File) => {
+  const handleSelectAvatar = useCallback((photo: ApiAvatarUpload) => {
     markProfileFieldsTouched();
-    uploadContactProfilePhoto({ userId, file, isSuggest: isSuggestRef.current });
+    uploadContactProfilePhoto({ userId, photo, isSuggest: isSuggestRef.current });
   }, [uploadContactProfilePhoto, userId]);
 
   const handleSuggestBirthday = useCallback(() => {

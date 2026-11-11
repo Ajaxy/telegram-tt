@@ -871,7 +871,7 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
     return;
   }
 
-  const { id: channelId, accessHash } = createdChannel;
+  const { id: channelId } = createdChannel;
 
   global = getGlobal();
   global = updateChat(global, channelId, createdChannel);
@@ -897,8 +897,8 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
     setGlobal(global);
   }
 
-  if (channelId && accessHash && photo) {
-    await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
+  if (photo) {
+    await callApi('editChatPhoto', { chat: createdChannel, photo });
   }
 });
 
@@ -1210,11 +1210,8 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
       setGlobal(global);
     }
 
-    if (chatId && photo) {
-      await callApi('editChatPhoto', {
-        chatId,
-        photo,
-      });
+    if (photo) {
+      await callApi('editChatPhoto', { chat: createdChat, photo });
     }
   } catch (err) {
     if ((err as ApiError).message === 'USERS_TOO_FEW') {
@@ -2416,7 +2413,7 @@ addActionHandler('updateChat', async (global, actions, payload): Promise<void> =
       ? callApi('updateChatAbout', chat, about)
       : undefined,
     photo
-      ? callApi('editChatPhoto', { chatId, accessHash: chat.accessHash, photo })
+      ? callApi('editChatPhoto', { chat, photo })
       : undefined,
   ]);
 
@@ -2434,11 +2431,7 @@ addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<vo
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  await callApi('editChatPhoto', {
-    chatId,
-    accessHash: chat.accessHash,
-    photo,
-  });
+  await callApi('editChatPhoto', { chat, photo });
   actions.loadFullChat({ chatId, withPhotos: true });
 });
 
@@ -2449,10 +2442,7 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<vo
 
   let isDeleted;
   if (photo.id === chat.avatarPhotoId) {
-    isDeleted = await callApi('editChatPhoto', {
-      chatId,
-      accessHash: chat.accessHash,
-    });
+    isDeleted = await callApi('editChatPhoto', { chat });
   } else {
     isDeleted = await callApi('deleteProfilePhotos', [photo]);
   }

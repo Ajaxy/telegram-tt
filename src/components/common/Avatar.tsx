@@ -1,5 +1,7 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
-import { memo, useMemo, useRef } from '../../lib/teact/teact';
+import {
+  memo, useMemo, useRef, useState,
+} from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type {
@@ -17,6 +19,7 @@ import {
   getPeerStoryHtmlId,
   getUserFullName,
   getVideoProfilePhotoMediaHash,
+  getVideoProfilePhotoStartTs,
   getWebDocumentHash,
   isAnonymousForwardsChat,
   isChatCommunity,
@@ -24,7 +27,7 @@ import {
   isDeletedUser,
 } from '../../global/helpers';
 import { isApiPeerChat, isApiPeerUser } from '../../global/helpers/peers';
-import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
+import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { isUserId } from '../../util/entities/ids';
 import { getFirstLetters } from '../../util/text/textFormat';
@@ -43,6 +46,7 @@ import AvatarStoryCircle from './AvatarStoryCircle';
 import Icon from './icons/Icon';
 
 import './Avatar.scss';
+import styles from './Avatar.module.scss';
 
 const LOOP_COUNT = 3;
 
@@ -60,9 +64,11 @@ export const AVATAR_SIZES = {
 export type AvatarSize =
   'micro' | 'mini' | 'tiny' | 'small' | 'medium' | 'large' | 'giant' | 'jumbo' | number;
 
-const cn = createClassNameBuilder('Avatar');
-cn.media = cn('media');
-cn.icon = cn('icon');
+type LoadedImage = {
+  peerId?: string;
+  url: string;
+  replacedUrl?: string;
+};
 
 type OwnProps = {
   containerRef?: ElementRef<HTMLDivElement>;
@@ -135,6 +141,8 @@ const Avatar = ({
   const { openStoryViewer } = getActions();
 
   const videoLoopCountRef = useRef(0);
+  const loadedImageRef = useRef<LoadedImage>();
+  const [fadingImgUrl, setFadingImgUrl] = useState<string | undefined>();
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
   const user = realPeer && isApiPeerUser(realPeer) ? realPeer : undefined;
@@ -163,11 +171,12 @@ const Avatar = ({
       imageHash = getChatAvatarHash(peer as ApiPeer, isBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
-      if (photo.isVideo && withVideo) {
-        videoHash = getVideoProfilePhotoMediaHash(photo);
-      }
     } else if (webPhoto) {
       imageHash = getWebDocumentHash(webPhoto);
+    }
+
+    if (withVideo && photo?.isVideo) {
+      videoHash = getVideoProfilePhotoMediaHash(photo);
     }
   }
 
@@ -197,12 +206,36 @@ const Avatar = ({
 
   const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl);
-  const imgUrl = imgBlobUrl || previewUrl;
+
+  const peerId = realPeer?.id;
+  if (!imageHash) {
+    loadedImageRef.current = undefined;
+  } else if (imgBlobUrl && imgBlobUrl !== loadedImageRef.current?.url) {
+    const prevImage = loadedImageRef.current;
+    loadedImageRef.current = {
+      peerId,
+      url: imgBlobUrl,
+      replacedUrl: peerId && prevImage?.peerId === peerId ? prevImage.url : undefined,
+    };
+  }
+  const peerImage = peerId && loadedImageRef.current?.peerId === peerId ? loadedImageRef.current : undefined;
+  const imgUrl = imgBlobUrl || previewUrl || peerImage?.url;
+  const replacedImgUrl = imgBlobUrl && peerImage?.replacedUrl;
   const hasBlobUrl = Boolean(imgUrl || videoBlobUrl);
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
   const { ref: mediaRef } = useMediaTransition<HTMLImageElement>({ hasMediaData: hasBlobUrl });
+
+  const handleImgLoad = useLastCallback(() => {
+    if (replacedImgUrl) setFadingImgUrl(replacedImgUrl);
+    onLoad?.();
+  });
+
+  const handleVideoLoadedMetadata = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const startTs = photo && getVideoProfilePhotoStartTs(photo);
+    if (startTs) e.currentTarget.currentTime = startTs;
+  });
 
   const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
@@ -225,7 +258,7 @@ const Avatar = ({
     content = (
       <Icon
         name={specialIcon}
-        className={cn.icon}
+        className={styles.icon}
         role="img"
         ariaLabel={author}
       />
@@ -236,24 +269,36 @@ const Avatar = ({
         <img
           ref={mediaRef}
           src={imgUrl}
-          className={buildClassName(cn.media, 'avatar-media', videoBlobUrl && 'poster')}
+          className={buildClassName(styles.media, 'avatar-media', videoBlobUrl && 'poster')}
           alt={author}
           decoding="async"
           draggable={false}
-          onLoad={onLoad}
+          onLoad={handleImgLoad}
         />
         {shouldPlayVideo && (
           <OptimizedVideo
             canPlay
             src={videoBlobUrl}
-            className={buildClassName(cn.media, 'avatar-media', 'poster')}
+            className={buildClassName(styles.media, 'avatar-media', 'poster')}
             muted
             loop={loopIndefinitely}
             autoPlay
             disablePictureInPicture
             playsInline
             draggable={false}
+            onLoadedMetadata={handleVideoLoadedMetadata}
             onEnded={handleVideoEnded}
+          />
+        )}
+        {replacedImgUrl && (
+          <img
+            key={replacedImgUrl}
+            src={replacedImgUrl}
+            className={buildClassName(
+              styles.media, 'avatar-media', styles.replaced, replacedImgUrl === fadingImgUrl && styles.fadeOut,
+            )}
+            alt=""
+            draggable={false}
           />
         )}
       </>
@@ -291,7 +336,7 @@ const Avatar = ({
     isRoundedRect && 'forum',
     isCommunity && 'community',
     asMessageBubble && 'message-bubble',
-    (photo || webPhoto) && 'force-fit',
+    (photo || webPhoto) && styles.forceFit,
     ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && realPeer?.hasStories && 'with-story-solid',
     withStorySolid && forceFriendStorySolid && 'close-friend',

@@ -65,6 +65,7 @@ export default function useEditHistory(initialDocument: MediaEditDocument) {
 
   return {
     doc: history.draft || history.present,
+    presentDoc: history.present,
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
     getDoc,

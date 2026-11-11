@@ -1,26 +1,31 @@
-import type { ElementRef, FC } from '../../lib/teact/teact';
+import type { ElementRef } from '../../lib/teact/teact';
 import { memo, useCallback, useState } from '../../lib/teact/teact';
 
+import type { ApiAvatarUpload } from '../../api/types';
+
+import { SUPPORTED_AVATAR_CONTENT_TYPES } from '../../config';
 import { openSystemFilesDialog } from '../../util/systemFilesDialog';
 
-import CropModal from './CropModal';
+import AvatarEditor from './AvatarEditor';
 
 import styles from './SelectAvatar.module.scss';
 
 type OwnProps = {
-  onChange: (file: File) => void;
   inputRef: ElementRef<HTMLInputElement>;
+  isOwn?: boolean;
+  onChange: (avatar: ApiAvatarUpload) => void;
 };
 
-const SelectAvatar: FC<OwnProps> = ({
-  onChange,
+const SelectAvatar = ({
   inputRef,
-}) => {
+  isOwn,
+  onChange,
+}: OwnProps) => {
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
 
-  const handleAvatarCrop = useCallback((croppedImg: File) => {
+  const handleAvatarChange = useCallback((avatar: ApiAvatarUpload) => {
     setSelectedFile(undefined);
-    onChange(croppedImg);
+    onChange(avatar);
   }, [onChange]);
 
   const handleModalClose = useCallback(() => {
@@ -28,7 +33,7 @@ const SelectAvatar: FC<OwnProps> = ({
   }, []);
 
   const handleClick = useCallback(() => {
-    openSystemFilesDialog('image/png, image/jpeg', (event) => {
+    openSystemFilesDialog(SUPPORTED_AVATAR_CONTENT_TYPES, (event) => {
       const target = event.target as HTMLInputElement;
       if (!target?.files?.[0]) {
         return;
@@ -40,7 +45,7 @@ const SelectAvatar: FC<OwnProps> = ({
   return (
     <>
       <input ref={inputRef} className={styles.input} onClick={handleClick} />
-      <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
+      <AvatarEditor file={selectedFile} isOwn={isOwn} onChange={handleAvatarChange} onClose={handleModalClose} />
     </>
   );
 };

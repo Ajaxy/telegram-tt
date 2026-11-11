@@ -171,14 +171,14 @@ addActionHandler('loginWithPasskey', async (global, actions, payload): Promise<v
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
-    file, isFallback, isVideo, videoTs, bot,
+    photo, isFallback, bot,
     tabId = getCurrentTabId(),
   } = payload;
 
   global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
   setGlobal(global);
 
-  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs, bot);
+  const result = await callApi('uploadProfilePhoto', { photo, isFallback, bot });
   if (!result) return;
 
   global = getGlobal();

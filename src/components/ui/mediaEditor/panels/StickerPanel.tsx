@@ -35,8 +35,6 @@ function StickerPanel({
     });
   });
 
-  if (!chatId) return undefined;
-
   return (
     <div className={styles.stickerPanel}>
       <Island className={styles.stickerIsland}>

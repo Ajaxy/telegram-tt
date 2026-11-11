@@ -1,25 +1,27 @@
-import { memo, useMemo, useState } from '../../../../lib/teact/teact';
+import {
+  memo, useMemo, useRef, useState,
+} from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiMessageActionSuggestProfilePhoto } from '../../../../api/types/messageActions';
-import { type ApiMessage, type ApiPeer, MAIN_THREAD_ID } from '../../../../api/types';
+import {
+  type ApiAvatarUpload, ApiMediaFormat, type ApiMessage, type ApiPeer, MAIN_THREAD_ID,
+} from '../../../../api/types';
 import { MediaViewerOrigin, SettingsScreens } from '../../../../types';
 
-import { getPhotoMediaHash, getVideoProfilePhotoMediaHash } from '../../../../global/helpers';
+import { getPhotoMediaHash, getVideoProfilePhotoStartTs } from '../../../../global/helpers';
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { fetchBlob } from '../../../../util/files';
+import * as mediaLoader from '../../../../util/mediaLoader';
 import { renderPeerLink } from '../helpers/messageActions';
 
-import useFlag from '../../../../hooks/useFlag';
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useMedia from '../../../../hooks/useMedia';
 
 import Avatar from '../../../common/Avatar';
-import ConfirmDialog from '../../../ui/ConfirmDialog';
-import CropModal from '../../../ui/CropModal';
+import AvatarEditor from '../../../ui/AvatarEditor';
 
 import styles from '../ActionMessage.module.scss';
 
@@ -44,12 +46,11 @@ const SuggestedPhotoAction = ({
   const photo = action.photo;
 
   const lang = useLang();
-  const [cropModalBlob, setCropModalBlob] = useState<Blob | undefined>();
-  const [isVideoModalOpen, openVideoModal, closeVideoModal] = useFlag(false);
+  const [editorBlob, setEditorBlob] = useState<Blob | undefined>();
+  const editorRequestIdRef = useRef(0);
 
-  const suggestedPhotoUrl = useMedia(getPhotoMediaHash(photo, 'full'));
-  const suggestedVideoUrl = useMedia(getVideoProfilePhotoMediaHash(photo));
   const isVideo = photo.isVideo;
+  const mediaHash = getPhotoMediaHash(photo, 'download');
 
   const text = useMemo(() => {
     const peerName = (peer && getPeerTitle(lang, peer)) || lang('ActionFallbackUser');
@@ -76,47 +77,32 @@ const SuggestedPhotoAction = ({
     });
   });
 
-  const handleSetSuggestedAvatar = useLastCallback((file: File) => {
-    setCropModalBlob(undefined);
-    uploadProfilePhoto({ file });
+  const handleSetSuggestedAvatar = useLastCallback((avatar: ApiAvatarUpload) => {
+    setEditorBlob(undefined);
+    uploadProfilePhoto({ photo: avatar });
     showAvatarNotification();
   });
 
-  const handleCloseCropModal = useLastCallback(() => {
-    setCropModalBlob(undefined);
+  const handleCloseEditor = useLastCallback(() => {
+    setEditorBlob(undefined);
   });
 
-  const handleSetVideo = useLastCallback(async () => {
-    if (!suggestedVideoUrl) return;
-
-    closeVideoModal();
-    showAvatarNotification();
-
-    // TODO Once we support uploading video avatars, add crop/trim modal here
-    const blob = await fetchBlob(suggestedVideoUrl);
-    uploadProfilePhoto({
-      file: new File([blob], 'avatar.mp4'),
-      isVideo: true,
-      videoTs: photo.videoSizes?.find((l) => l.videoStartTs !== undefined)?.videoStartTs,
-    });
-  });
-
-  const handleViewSuggestedAvatar = async () => {
-    if (!isOutgoing && suggestedPhotoUrl) {
-      if (isVideo) {
-        openVideoModal();
-      } else {
-        setCropModalBlob(await fetchBlob(suggestedPhotoUrl));
-      }
-    } else {
+  const handleViewSuggestedAvatar = useLastCallback(async () => {
+    if (isOutgoing || !mediaHash) {
       openMediaViewer({
         chatId: message.chatId,
         messageId: message.id,
         threadId: MAIN_THREAD_ID,
         origin: MediaViewerOrigin.SuggestedAvatar,
       });
+      return;
     }
-  };
+
+    const requestId = ++editorRequestIdRef.current;
+    const url = await mediaLoader.fetch(mediaHash, ApiMediaFormat.BlobUrl);
+    const blob = url && await fetchBlob(url);
+    if (blob && requestId === editorRequestIdRef.current) setEditorBlob(blob);
+  });
 
   return (
     <div className={styles.contentBox} tabIndex={0} role="button" onClick={handleViewSuggestedAvatar}>
@@ -134,17 +120,12 @@ const SuggestedPhotoAction = ({
       <div className={styles.actionButton}>
         {lang('ActionSuggestedPhotoButton')}
       </div>
-      <CropModal
-        file={cropModalBlob}
-        onClose={handleCloseCropModal}
+      <AvatarEditor
+        file={editorBlob}
+        isOwn
+        initialCoverTime={isVideo ? getVideoProfilePhotoStartTs(photo) : undefined}
         onChange={handleSetSuggestedAvatar}
-      />
-      <ConfirmDialog
-        isOpen={isVideoModalOpen}
-        title={lang('ActionSuggestedVideoTitle')}
-        confirmHandler={handleSetVideo}
-        onClose={closeVideoModal}
-        text={lang('ActionSuggestedVideoText')}
+        onClose={handleCloseEditor}
       />
     </div>
   );

@@ -12,6 +12,7 @@ import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import type { ThreadId } from '../../../types';
 import type {
   ApiAccountConnection,
+  ApiAvatarUpload,
   ApiInitialArgs,
   ApiMediaFormat,
   ApiOnProgress,
@@ -463,6 +464,12 @@ export async function downloadMedia(
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {
   return client.uploadFile({ file, onProgress, workers: UPLOAD_WORKERS });
+}
+
+export async function uploadAvatar({ file, video, videoStartTs }: ApiAvatarUpload) {
+  const [inputFile, inputVideo] = await Promise.all([uploadFile(file), video ? uploadFile(video) : undefined]);
+
+  return { file: inputFile, video: inputVideo, videoStartTs: inputVideo ? videoStartTs : undefined };
 }
 
 export function updateTwoFaSettings(params: TwoFaParams) {

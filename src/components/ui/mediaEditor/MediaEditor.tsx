@@ -4,15 +4,19 @@ import {
 import { setExtraStyles } from '@teact/teact-dom';
 import { getActions, getGlobal } from '../../../global';
 
+import type { ApiAvatarUpload } from '../../../api/types';
 import type {
   CropState, DrawAction, DrawSettings, EditorLayer, MediaEditDocument, MediaEditState, TextSettings,
   VideoProcessingParams, VideoQualityLevel, VideoTrim,
 } from '../../../types/mediaEditor';
+import type { CancellableCallback } from '../../../util/PostMessageConnector';
 import type { LayerFrames } from './render/layers';
 import type { Size } from './render/transform';
-import type { EditorTabId, VideoQualityControl } from './types';
+import type { AvatarShape, EditorTabId, VideoQualityControl } from './types';
 
 import {
+  AVATAR_VIDEO_MAX_DURATION,
+  AVATAR_VIDEO_MAX_FRAME_RATE,
   MAX_EDITABLE_VIDEO_OUTPUT_SIZE,
   MAX_EDITABLE_VIDEO_PIXELS,
   MAX_EDITABLE_VIDEO_SOURCE_SIZE,
@@ -26,6 +30,7 @@ import {
 import { requestForcedReflow, requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { selectAnimationLevel } from '../../../global/selectors/sharedState';
 import { selectCanAnimateInterface } from '../../../global/selectors/ui';
+import { selectCurrentUserId } from '../../../global/selectors/users';
 import { areRecordsShallowEqual } from '../../../util/areShallowEqual';
 import { getEditStateCoverUrls } from '../../../util/attachments';
 import { IS_WINDOWS } from '../../../util/browser/windowEnvironment';
@@ -34,14 +39,14 @@ import buildStyle from '../../../util/buildStyle';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getPointerPosition from '../../../util/events/getPointerPosition';
 import isTextInputTarget from '../../../util/events/isTextInputTarget';
-import { blobToFile } from '../../../util/files';
+import { blobToFile, fetchBlob } from '../../../util/files';
 import forceReflow from '../../../util/forceReflow';
 import generateUniqueId from '../../../util/generateUniqueId';
 import { omit } from '../../../util/iteratees';
-import { requestVideoProcessing } from '../../../util/launchVideoProcessingWorker';
-import { clamp } from '../../../util/math';
+import { cancelVideoProcessing, requestVideoProcessing } from '../../../util/launchVideoProcessingWorker';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { formatFileSize } from '../../../util/text/textFormat';
+import { exportEditedMedia } from '../../../util/videoProcessingQueue';
 import { REM } from '../../common/helpers/mediaDimensions';
 import {
   discardMediaEditorGhost,
@@ -58,6 +63,7 @@ import {
   estimateVideoSize,
   getAudioBitrateEstimate,
   getAvailableLevels,
+  getAvatarSize,
   getCropSize,
   getGifLevel,
   getMaxLevel,
@@ -76,7 +82,8 @@ import { closeLayerFrames, getIsLayerVisible, TEXT_FONTS } from './render/layers
 import { computeRotationZoom, fitCropToMaxSide, getEffectiveDimensions } from './render/transform';
 import { getTotalRotation } from './crop';
 import {
-  applyCrop, applyTrim, createEditDocument, EMPTY_EDIT_DOCUMENT, getVideoProcessingMode,
+  applyCrop, applyTrim, clampCoverTime, createAvatarVideoDocument, createEditDocument, EMPTY_EDIT_DOCUMENT,
+  getVideoProcessingMode,
 } from './editDocument';
 import { getAvailableTabs } from './tabs';
 
@@ -135,6 +142,9 @@ export type MediaEditorResult = {
   previewBlob?: Blob;
   cover?: { blob: Blob; width: number; height: number };
   isGif?: boolean;
+} | {
+  kind: 'avatar';
+  avatar: ApiAvatarUpload;
 };
 
 export type OwnProps = {
@@ -149,6 +159,9 @@ export type OwnProps = {
   canSendGifs?: boolean;
   isAsFile?: boolean;
   lockedAspectRatio?: number;
+  avatarShape?: AvatarShape;
+  isOwnAvatar?: boolean;
+  initialCoverTime?: number;
   chatId?: string;
   onClose: VoidFunction;
   onApply: (result: MediaEditorResult) => void;
@@ -159,10 +172,16 @@ type VideoFrameRequest = {
   doc: MediaEditDocument;
   maxSide: number;
   quality: number;
+  outputFrameRate?: number;
   layerFrames?: LayerFrames;
 };
 
-type RenderedFrame = { blob: Blob; width: number; height: number };
+type RenderedFrame = {
+  blob: Blob;
+  width: number;
+  height: number;
+  time: number;
+};
 
 type CropTransition = 'enter' | 'leave';
 
@@ -177,6 +196,7 @@ const DEFAULT_DRAW_COLOR = PREDEFINED_COLORS[1];
 const THUMB_QUALITY = 0.8;
 const CONTROLS_RESERVED_HEIGHT = 6.5 * REM;
 const VIDEO_COVER_CONTROLS_RESERVED_HEIGHT = 7 * REM;
+const AVATAR_VIDEO_CONTROLS_RESERVED_HEIGHT = 13.5 * REM;
 const CANVAS_ANIMATION_FALLBACK = 1000;
 const QUARTER_TURN_DEGREES = 90;
 const GHOST_LANDING_MAX_WAIT = 1500;
@@ -217,6 +237,9 @@ const MediaEditor = ({
   canSendGifs,
   isAsFile,
   lockedAspectRatio,
+  avatarShape,
+  isOwnAvatar,
+  initialCoverTime,
   chatId,
   onClose,
   onApply,
@@ -230,6 +253,7 @@ const MediaEditor = ({
   const renderingWindow = useWindow();
   const animationLevel = useSelector(selectAnimationLevel);
   const canAnimateInterface = useSelector(selectCanAnimateInterface);
+  const currentUserId = useSelector(selectCurrentUserId);
 
   const {
     ref: rootRef,
@@ -244,7 +268,9 @@ const MediaEditor = ({
   const canvasAreaRef = useRef<HTMLDivElement>();
 
   const isVideo = Boolean(editorSource && SUPPORTED_VIDEO_CONTENT_TYPES.has(editorSource.mimeType));
-  const defaultTabId: EditorTabId = lockedAspectRatio ? 'crop' : 'adjust';
+  const isAvatar = Boolean(avatarShape);
+  const fixedAspectRatio = isAvatar ? 1 : lockedAspectRatio;
+  const defaultTabId: EditorTabId = fixedAspectRatio && !isVideo ? 'crop' : 'adjust';
   const [activeTabId, setActiveTabId] = useState<EditorTabId>(defaultTabId);
 
   const [ghostPhase, setGhostPhase] = useState<GhostPhase | undefined>();
@@ -270,6 +296,7 @@ const MediaEditor = ({
 
   const {
     doc,
+    presentDoc,
     canUndo,
     canRedo,
     getDoc,
@@ -284,9 +311,11 @@ const MediaEditor = ({
   const { crop } = doc;
 
   const [canEncodeVideo, setCanEncodeVideo] = useState<boolean | undefined>();
-  const encodedSize = layoutSourceSize && (isVideo || canSendGifs)
-    ? getOutputSize(layoutSourceSize, 'transcode', isVideo ? undefined : getGifLevel(layoutSourceSize))
-    : undefined;
+  const encodedSize = layoutSourceSize && (isVideo || canSendGifs || isAvatar) ? (
+    isAvatar
+      ? getAvatarSize(layoutSourceSize)
+      : getOutputSize(layoutSourceSize, 'transcode', isVideo ? undefined : getGifLevel(layoutSourceSize))
+  ) : undefined;
   const encodedWidth = encodedSize?.width;
   const encodedHeight = encodedSize?.height;
   useEffect(() => {
@@ -319,11 +348,12 @@ const MediaEditor = ({
   const isTooLargeForGif = Boolean(videoSource && videoSource.blob.size > VIDEO_GIF_MAX_SOURCE_SIZE);
   const canSendAsGif = canConvertToGif && !isTooLargeForGif;
   const isGif = Boolean(canSendAsGif && doc.isGif);
-  const canPhotoBecomeGif = Boolean(!isVideo && canSendGifs && canEncodeVideo !== false);
+  const canPhotoAnimate = Boolean(!isVideo && (canSendGifs || isAvatar) && canEncodeVideo !== false);
 
+  const canAddStickers = Boolean(chatId || (isAvatar && currentUserId));
   const availableTabs = useMemo(() => getAvailableTabs({
-    isVideo, canProcessVideo: shouldShowProcessingTools, canAddStickers: Boolean(chatId),
-  }), [isVideo, shouldShowProcessingTools, chatId]);
+    isVideo, canProcessVideo: shouldShowProcessingTools, canAddStickers,
+  }), [isVideo, shouldShowProcessingTools, canAddStickers]);
   const activeTab = availableTabs.find((tab) => tab.id === activeTabId) || availableTabs[0];
   const activeTabIndex = availableTabs.indexOf(activeTab);
   const isCropMode = Boolean(activeTab.isCropMode);
@@ -334,7 +364,8 @@ const MediaEditor = ({
   const isTextMode = activeTab.id === 'text';
   const isLayerMode = isTextMode || activeTab.id === 'stickers';
   const isCoverAvailable = Boolean(isVideo && canSetCover && !isGif);
-  const reservedHeight = isVideo && canSetCover ? VIDEO_COVER_CONTROLS_RESERVED_HEIGHT : CONTROLS_RESERVED_HEIGHT;
+  const reservedHeight = isVideo && isAvatar ? AVATAR_VIDEO_CONTROLS_RESERVED_HEIGHT
+    : isVideo && canSetCover ? VIDEO_COVER_CONTROLS_RESERVED_HEIGHT : CONTROLS_RESERVED_HEIGHT;
   const canAnimate = animationLevel > 0 && canAnimateInterface;
 
   const tabs = useMemo(() => availableTabs.map((tab) => ({
@@ -344,12 +375,12 @@ const MediaEditor = ({
   useEffect(() => (isOpen ? dispatchPriorityPlaybackEvent() : undefined), [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || !chatId) return;
+    if (!isOpen || !canAddStickers) return;
 
     loadRecentStickers();
     loadFeaturedStickers();
     loadEmojiStickerGroups();
-  }, [isOpen, chatId]);
+  }, [isOpen, canAddStickers]);
 
   const [isShowingOriginal, setIsShowingOriginal] = useState(false);
   const [isDiscardDialogOpen, openDiscardDialog, closeDiscardDialog] = useFlag();
@@ -374,8 +405,12 @@ const MediaEditor = ({
   const [coverThumbUrl, setCoverThumbUrl] = useState<string | undefined>();
   const createdCoverUrlsRef = useRef<string[]>([]);
   const sessionTokenRef = useRef(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const exportCallbackRef = useRef<CancellableCallback>();
 
-  const canMute = Boolean(probe && videoSource);
+  const canMute = Boolean(probe && videoSource && !isAvatar);
+  const isAvatarVideoBlocked = isAvatar && isVideo && !canProcessVideo;
+  const isAvatarVideoUnsupported = isAvatarVideoBlocked && !isVideoSupportPending && !isSourceError && !isVideoTooLarge;
   const isRestricted = Boolean(
     probe && !isVideoSupportPending && !canProcessVideo && !isVideoTooLarge && !isAudioUnsupported,
   );
@@ -429,7 +464,7 @@ const MediaEditor = ({
 
   const [qualityLevel, setQualityLevel] = useState<VideoQualityLevel | undefined>();
   const cropSize = useMemo(() => getCropSize(crop), [crop]);
-  const canChooseQuality = canProcessVideo && !isAsFile;
+  const canChooseQuality = canProcessVideo && !isAsFile && !isAvatar;
   const isProcessed = videoSource ? getVideoProcessingMode(doc, videoSource.size) !== 'none' : false;
   const qualityLevels = useMemo(() => (
     canChooseQuality ? getAvailableLevels(cropSize, isProcessed) : []
@@ -438,15 +473,17 @@ const MediaEditor = ({
   const effectiveQualityLevel = isGif ? getGifLevel(cropSize)
     : userQualityLevel ?? (canProcessVideo && isProcessed ? getMaxLevel(cropSize) : undefined);
 
-  const processingMode = videoSource
-    ? getVideoProcessingMode(doc, videoSource.size, effectiveQualityLevel, probe?.audioHandling === 'transcode')
-    : 'none';
+  const processingMode = !videoSource ? 'none'
+    : isAvatar ? 'transcode'
+      : getVideoProcessingMode(doc, videoSource.size, effectiveQualityLevel, probe?.audioHandling === 'transcode');
   const outputSize = useMemo(
-    () => getOutputSize(cropSize, processingMode, effectiveQualityLevel),
-    [cropSize, processingMode, effectiveQualityLevel],
+    () => (isAvatar ? getAvatarSize(cropSize) : getOutputSize(cropSize, processingMode, effectiveQualityLevel)),
+    [isAvatar, cropSize, processingMode, effectiveQualityLevel],
   );
   const outputDuration = doc.trim ? doc.trim.end - doc.trim.start : duration;
-  const outputFrameRate = getOutputFrameRate(frameRate, effectiveQualityLevel);
+  const outputFrameRate = isAvatar
+    ? Math.min(frameRate, AVATAR_VIDEO_MAX_FRAME_RATE)
+    : getOutputFrameRate(frameRate, effectiveQualityLevel);
   const videoBitrate = probe ? getVideoBitrate(outputSize, outputFrameRate, probe.videoBitrate) : 0;
   const estimatedSize = probe && videoSource ? estimateVideoSize({
     mode: processingMode,
@@ -549,7 +586,7 @@ const MediaEditor = ({
     sourceSize,
     displayScale,
     getDisplayCoordinates,
-    lockedAspectRatio,
+    lockedAspectRatio: fixedAspectRatio,
     getCrop,
     onPreview: handlePreviewCrop,
     onCommit: handleCommitCrop,
@@ -669,21 +706,26 @@ const MediaEditor = ({
   const hasCanvasFrame = Boolean(source) && crop.cropperWidth > 0 && canvasSize.width > 0;
 
   const handleTrimPreview = useLastCallback((trim: VideoTrim) => {
-    preview(applyTrim(getDoc(), trim, duration));
+    preview(applyTrim(getDoc(), trim, duration, 1 / frameRate));
   });
 
   const handleTrimCommit = useLastCallback((trim: VideoTrim) => {
-    commit(applyTrim(getDoc(), trim, duration));
+    commit(applyTrim(getDoc(), trim, duration, 1 / frameRate));
   });
 
   const handleCoverUseCurrentFrame = useLastCallback(() => {
     const currentDoc = getDoc();
     const { start, end } = currentDoc.trim ?? { start: 0, end: duration };
-    commit({ ...currentDoc, cover: { type: 'frame', time: clamp(getCurrentTime(), start, end) } });
+    const time = clampCoverTime(getCurrentTime(), start, end, 1 / frameRate);
+    commit({ ...currentDoc, cover: { type: 'frame', time } });
   });
 
   const handleCoverClear = useLastCallback(() => {
     commit({ ...getDoc(), cover: undefined });
+  });
+
+  const handleAvatarCoverChange = useLastCallback((time: number) => {
+    commit({ ...getDoc(), cover: { type: 'frame', time } });
   });
 
   const handleCoverFileChoose = useLastCallback((file: File) => {
@@ -741,35 +783,56 @@ const MediaEditor = ({
   });
 
   const { cover } = doc;
+  const avatarCoverTime = cover?.type === 'frame' ? cover.time : undefined;
+  const {
+    cover: committedCover, crop: committedCrop, paint: committedPaint, layers: committedLayers,
+    trim: committedTrim, adjustments, tint, curves,
+  } = presentDoc;
+  const coverThumbDoc = useMemo(() => ({
+    crop: committedCrop,
+    paint: committedPaint,
+    layers: committedLayers,
+    trim: committedTrim,
+    adjustments,
+    tint,
+    curves,
+  }), [committedCrop, committedPaint, committedLayers, committedTrim, adjustments, tint, curves]);
+  const coverOutputFrameRate = isAvatar ? outputFrameRate : undefined;
   useEffect(() => {
-    if (!cover || !videoSource) {
+    if (!committedCover || !videoSource) {
       setCoverThumbUrl(undefined);
       return undefined;
     }
 
-    if (cover.type === 'image') {
-      setCoverThumbUrl(cover.blobUrl);
+    if (committedCover.type === 'image') {
+      setCoverThumbUrl(committedCover.blobUrl);
       return undefined;
     }
 
     let thumbUrl: string | undefined;
     let isCancelled = false;
-    void renderVideoFrame({
-      time: cover.time,
-      doc: createEditDocument(videoSource.size),
-      maxSide: VIDEO_THUMB_MAX_SIDE,
-      quality: THUMB_QUALITY,
-    }).then((frame) => {
+    void (async () => {
+      const thumbSize = fitCropToMaxSide(coverThumbDoc.crop, VIDEO_THUMB_MAX_SIDE);
+      const layerFrames = await loadLayerFrames(coverThumbDoc.layers, thumbSize, { shouldRenderText: true });
+      const frame = isCancelled ? undefined : await renderVideoFrame({
+        time: committedCover.time,
+        doc: coverThumbDoc,
+        maxSide: VIDEO_THUMB_MAX_SIDE,
+        quality: THUMB_QUALITY,
+        outputFrameRate: coverOutputFrameRate,
+        layerFrames,
+      });
+      closeLayerFrames(layerFrames);
       if (isCancelled || !frame) return;
       thumbUrl = URL.createObjectURL(frame.blob);
       setCoverThumbUrl(thumbUrl);
-    });
+    })();
 
     return () => {
       isCancelled = true;
       if (thumbUrl) URL.revokeObjectURL(thumbUrl);
     };
-  }, [cover, videoSource, renderVideoFrame]);
+  }, [committedCover, coverThumbDoc, coverOutputFrameRate, videoSource, renderVideoFrame]);
 
   const resetSession = useLastCallback(() => {
     revokeCreatedCoverUrls();
@@ -825,7 +888,9 @@ const MediaEditor = ({
     if (initialEditState) {
       restore(initialEditState);
     } else {
-      reset(createEditDocument(source.size, lockedAspectRatio));
+      reset(isAvatar && source.kind === 'video'
+        ? createAvatarVideoDocument(source.size, duration, 1 / frameRate, initialCoverTime)
+        : createEditDocument(source.size, fixedAspectRatio));
     }
     initialDocRef.current = getDoc();
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
@@ -928,8 +993,19 @@ const MediaEditor = ({
     return () => clearTimeout(timeout);
   }, [isAboveMediaViewer, ghostPhase]);
 
+  const cancelExport = useLastCallback(() => {
+    if (!exportCallbackRef.current) return;
+
+    cancelVideoProcessing(exportCallbackRef.current);
+    finishExport();
+  });
+
+  useEffect(() => (isOpen ? cancelExport : undefined), [isOpen, cancelExport]);
+
   const handleCloseRequest = useLastCallback(() => {
-    if (isDirty) {
+    if (isExporting) {
+      cancelExport();
+    } else if (isDirty) {
       openDiscardDialog();
     } else {
       onClose();
@@ -964,7 +1040,7 @@ const MediaEditor = ({
 
   // Keyboard shortcuts (undo/redo)
   useEffect(() => {
-    if (!isOpen || coverImageSource || isDiscardDialogOpen) return undefined;
+    if (!isOpen || coverImageSource || isDiscardDialogOpen || isExporting) return undefined;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTextInputTarget(e.target)) return;
@@ -990,7 +1066,10 @@ const MediaEditor = ({
 
     renderingWindow.document.addEventListener('keydown', handleKeyDown);
     return () => renderingWindow.document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, coverImageSource, isDiscardDialogOpen, selectedLayerId, editingLayerId, getDoc, renderingWindow]);
+  }, [
+    isOpen, coverImageSource, isDiscardDialogOpen, isExporting, selectedLayerId, editingLayerId, getDoc,
+    renderingWindow,
+  ]);
 
   const handleQuarterRotateAnimated = useLastCallback(() => {
     if (canAnimate && sourceSize) {
@@ -1067,8 +1146,18 @@ const MediaEditor = ({
   }, [cropTransition]);
 
   const handleSave = useLastCallback(async () => {
+    if (exportCallbackRef.current) {
+      cancelExport();
+      return;
+    }
+
     endTextEditing();
     if (!source || !editorSource) return;
+
+    if (isAvatar) {
+      await (videoSource ? saveAvatarVideo() : saveAvatarPhoto());
+      return;
+    }
 
     const sessionToken = sessionTokenRef.current;
 
@@ -1149,6 +1238,132 @@ const MediaEditor = ({
     });
     onClose();
   });
+
+  const saveAvatarPhoto = useLastCallback(async () => {
+    const sessionToken = sessionTokenRef.current;
+    const progressCallback = startExport();
+    const avatarDoc = getEditState().document;
+    const avatarCropSize = getCropSize(avatarDoc.crop);
+    const size = getAvatarSize(avatarCropSize);
+    const layerFrames = await loadLayerFrames(avatarDoc.layers, size, { isFirstFrameOnly: true });
+    if (progressCallback.isCanceled) {
+      closeLayerFrames(layerFrames);
+      return;
+    }
+    if (hasMissingStickerFrames(avatarDoc.layers, layerFrames)) {
+      closeLayerFrames(layerFrames);
+      finishExport();
+      showNotification({ message: { key: 'EditorStickersLoadFailed' } });
+      return;
+    }
+    const blob = await exportImage(source!.frame, source!.size, avatarDoc, 'image/jpeg', layerFrames, size);
+    closeLayerFrames(layerFrames);
+    if (progressCallback.isCanceled || sessionToken !== sessionTokenRef.current) return;
+    if (!blob) {
+      finishExport();
+      return;
+    }
+
+    const file = blobToFile(blob, 'avatar.jpg');
+    const visibleLayers = avatarDoc.layers?.filter((layer) => getIsLayerVisible(layer, avatarCropSize));
+    if (!canEncodeVideo || !hasAnimatedStickers(visibleLayers)) {
+      finishExport();
+      onApply({ kind: 'avatar', avatar: { file } });
+      onClose();
+      return;
+    }
+
+    const processing: VideoProcessingParams = {
+      mode: 'transcode',
+      sourceSize: source!.size,
+      outputSize: size,
+      bitrate: getVideoBitrate(size, AVATAR_VIDEO_MAX_FRAME_RATE, Infinity),
+      frameRate: AVATAR_VIDEO_MAX_FRAME_RATE,
+    };
+    const sourceBlob = await fetchBlob(editorSourceUrl!);
+    if (progressCallback.isCanceled || sessionToken !== sessionTokenRef.current) return;
+    const video = await exportEditedMedia(sourceBlob, avatarDoc, processing, progressCallback, true)
+      .catch(() => undefined);
+    if (progressCallback.isCanceled || sessionToken !== sessionTokenRef.current) return;
+
+    finishExport();
+    if (!video) {
+      showNotification({ message: { key: 'VideoProcessingFailed' } });
+      return;
+    }
+
+    onApply({ kind: 'avatar', avatar: { file, video: blobToFile(video.blob, 'avatar.mp4') } });
+    onClose();
+  });
+
+  const saveAvatarVideo = useLastCallback(async () => {
+    const sessionToken = sessionTokenRef.current;
+    const avatarDoc = getEditState().document;
+    const { trim, cover: avatarCover } = avatarDoc;
+    const coverTime = avatarCover?.type === 'frame' ? avatarCover.time : trim?.start ?? 0;
+    const processing: VideoProcessingParams = {
+      mode: 'transcode',
+      sourceSize: videoSource!.size,
+      outputSize,
+      bitrate: videoBitrate,
+      frameRate: outputFrameRate,
+    };
+    const progressCallback = startExport();
+
+    const coverLayerFrames = await loadLayerFrames(avatarDoc.layers, outputSize, { shouldRenderText: true });
+    if (progressCallback.isCanceled) {
+      closeLayerFrames(coverLayerFrames);
+      return;
+    }
+    if (hasMissingStickerFrames(avatarDoc.layers, coverLayerFrames)) {
+      closeLayerFrames(coverLayerFrames);
+      finishExport();
+      showNotification({ message: { key: 'EditorStickersLoadFailed' } });
+      return;
+    }
+
+    const [coverFrame, video] = await Promise.all([
+      renderVideoFrame({
+        time: coverTime,
+        doc: avatarDoc,
+        maxSide: outputSize.width,
+        quality: VIDEO_COVER_JPEG_QUALITY,
+        outputFrameRate,
+        layerFrames: coverLayerFrames,
+      }),
+      exportEditedMedia(videoSource!.blob, avatarDoc, processing, progressCallback).catch(() => undefined),
+    ]);
+    closeLayerFrames(coverLayerFrames);
+    if (progressCallback.isCanceled || sessionToken !== sessionTokenRef.current) return;
+
+    finishExport();
+    if (!coverFrame || !video) {
+      showNotification({ message: { key: 'VideoProcessingFailed' } });
+      return;
+    }
+
+    onApply({
+      kind: 'avatar',
+      avatar: {
+        file: blobToFile(coverFrame.blob, 'avatar.jpg'),
+        video: blobToFile(video.blob, 'avatar.mp4'),
+        videoStartTs: coverFrame.time,
+      },
+    });
+    onClose();
+  });
+
+  function startExport() {
+    const progressCallback: CancellableCallback = () => undefined;
+    exportCallbackRef.current = progressCallback;
+    setIsExporting(true);
+    return progressCallback;
+  }
+
+  function finishExport() {
+    exportCallbackRef.current = undefined;
+    setIsExporting(false);
+  }
 
   const renderCover = useLastCallback(async (document: MediaEditDocument, coverLayerFrames: LayerFrames) => {
     const { cover: coverSource } = document;
@@ -1302,7 +1517,8 @@ const MediaEditor = ({
         videoQuality={videoQuality}
         isVideo={isVideo}
         canAdjustColors={(!isVideo || shouldShowProcessingTools) && getCanRenderAdjustments()}
-        isAspectRatioLocked={Boolean(lockedAspectRatio)}
+        isAspectRatioLocked={Boolean(fixedAspectRatio)}
+        isAvatar={isAvatar}
         chatId={chatId}
         textSettings={panelTextSettings}
         getDoc={getDoc}
@@ -1341,6 +1557,7 @@ const MediaEditor = ({
           <div
             className={buildClassName(styles.canvasContainer, isCanvasHiddenForGhost && styles.hiddenForGhost)}
             style={cropOffsetStyle}
+            inert={isExporting}
           >
             <canvas
               ref={canvasRef}
@@ -1365,7 +1582,7 @@ const MediaEditor = ({
                   editingId={editingLayerId}
                   isInteractive={isLayerMode && !isCropView}
                   isCropView={isCropView}
-                  shouldAnimateStickers={isVideo || canPhotoBecomeGif}
+                  shouldAnimateStickers={isVideo || canPhotoAnimate}
                   onSelect={handleLayerSelect}
                   onEmptyClick={isTextMode ? handleTextLayerCreate : undefined}
                   onLayersPreview={handleLayersPreview}
@@ -1375,9 +1592,20 @@ const MediaEditor = ({
                 />
               </div>
             )}
+            {avatarShape && !isCropView && displaySize.width > 0 && (
+              <div
+                className={buildClassName(
+                  styles.avatarMask,
+                  styles.canvasAvatarMask,
+                  avatarShape === 'roundedSquare' && styles.roundedSquare,
+                )}
+                style={`width: ${canvasCssWidth}px; height: ${canvasCssHeight}px`}
+              />
+            )}
             {isCropView && displaySize.width > 0 && (
               <CropOverlay
                 cropState={crop}
+                avatarShape={avatarShape}
                 displaySize={displaySize}
                 scale={displayScale}
                 onCropperDragStart={handleCropperDragStart}
@@ -1389,7 +1617,7 @@ const MediaEditor = ({
           <div
             className={buildClassName(styles.canvasControls, !isCropMode && styles.hidden)}
             aria-hidden={!isCropMode}
-            inert={!isCropMode}
+            inert={!isCropMode || isExporting}
           >
             <Button
               round
@@ -1423,9 +1651,11 @@ const MediaEditor = ({
               frameRate={frameRate}
               canDecodeVideo={Boolean(probe?.canDecodeVideo)}
               isHidden={!isAdjustMode}
+              isDisabled={isExporting}
               trim={doc.trim}
               isPlaying={!isPausedByUser}
               canTrim={canProcessVideo && duration >= MIN_TRIMMABLE_VIDEO_DURATION}
+              maxTrimDuration={isAvatar ? AVATAR_VIDEO_MAX_DURATION : undefined}
               canMute={canMute}
               isMuted={doc.isMuted}
               isGif={isGif}
@@ -1444,6 +1674,9 @@ const MediaEditor = ({
               onCoverFileChoose={handleCoverFileChoose}
               onCoverUseCurrentFrame={handleCoverUseCurrentFrame}
               onCoverClear={handleCoverClear}
+              avatarCoverTime={isAvatar ? avatarCoverTime : undefined}
+              hint={isAvatar ? lang(isOwnAvatar ? 'AvatarChooseFrame' : 'AvatarChooseFrameOther') : undefined}
+              onAvatarCoverChange={handleAvatarCoverChange}
             />
           )}
 
@@ -1457,10 +1690,11 @@ const MediaEditor = ({
           )}
 
           <FloatingActionButton
-            isShown={isDirty || Boolean(lockedAspectRatio)}
+            isShown={isDirty || Boolean(fixedAspectRatio)}
             iconName="check"
             className={styles.saveButton}
-            disabled={isResultTooLarge || isAudioLost}
+            disabled={isResultTooLarge || isAudioLost || isAvatarVideoBlocked}
+            isLoading={isExporting}
             onClick={handleSave}
             ariaLabel={lang('Save')}
           />
@@ -1471,8 +1705,10 @@ const MediaEditor = ({
             <Button round color="translucent" size="smaller" onClick={handleCloseRequest}>
               <Icon name="close" />
             </Button>
-            <div className={styles.headerTitle}>{lang(lockedAspectRatio ? 'EditorSetCover' : 'EditMedia')}</div>
-            <div className={styles.headerActions}>
+            <div className={styles.headerTitle}>
+              {lang(isAvatar ? 'ChatSetPhotoOrVideo' : lockedAspectRatio ? 'EditorSetCover' : 'EditMedia')}
+            </div>
+            <div className={styles.headerActions} inert={isExporting}>
               <ShowTransition isOpen={hasAdjustments && isAdjustMode} isCustom className={styles.scaleFade}>
                 <Button
                   round
@@ -1507,10 +1743,11 @@ const MediaEditor = ({
           {(isVideoTooLarge || isResultTooLarge) && (
             <div className={styles.panelNote}>{lang('VideoTooLargeToEdit')}</div>
           )}
-          {isAudioUnsupported && <div className={styles.panelNote}>{lang('VideoAudioUnsupported')}</div>}
+          {isAudioUnsupported && !isAvatar && <div className={styles.panelNote}>{lang('VideoAudioUnsupported')}</div>}
+          {isAvatarVideoUnsupported && <div className={styles.panelNote}>{lang('AvatarVideoUnsupported')}</div>}
           {restrictedNoteKey && <div className={styles.panelNote}>{lang(restrictedNoteKey)}</div>}
 
-          <div className={styles.panelTabs}>
+          <div className={styles.panelTabs} inert={isExporting}>
             <Transition
               ref={transitionRef}
               name={resolveTransitionName('slideOptimized', animationLevel, undefined, lang.isRtl)}

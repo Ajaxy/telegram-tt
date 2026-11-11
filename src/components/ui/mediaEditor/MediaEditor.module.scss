@@ -314,6 +314,37 @@ $column-layout: "(max-width: 600px), (max-width: 1024px) and (min-height: 601px)
   }
 }
 
+.avatarMask {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    border-radius: 50%;
+
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+  }
+
+  &.roundedSquare::after {
+    border-radius: var(--border-radius-forum-avatar);
+  }
+}
+
+.canvasAvatarMask {
+  inset: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  border-radius: 0.25rem;
+}
+
 // Right panel (bottom on mobile)
 .editPanel {
   display: flex;
@@ -793,6 +824,14 @@ $mode-tabs-gap: 0.5rem;
   }
 }
 
+.withHint {
+  bottom: 3.25rem;
+
+  @media #{$column-layout} {
+    bottom: 3.75rem;
+  }
+}
+
 .videoButton {
   flex-shrink: 0;
   margin-bottom: 0.25rem;
@@ -823,8 +862,23 @@ $mode-tabs-gap: 0.5rem;
 }
 
 .timelineWrapper {
+  position: relative;
   flex: 1;
   min-width: 0;
+}
+
+.timelineHint {
+  pointer-events: none;
+
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  left: 0;
+
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
 }
 
 .trimTimeline {
@@ -904,6 +958,7 @@ $mode-tabs-gap: 0.5rem;
   cursor: ew-resize;
 
   position: absolute;
+  z-index: 2;
   top: -2px;
   bottom: -2px;
 
@@ -961,6 +1016,54 @@ $mode-tabs-gap: 0.5rem;
 
   background-color: var(--color-white);
   box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.5);
+}
+
+.coverMarker {
+  cursor: ew-resize;
+
+  position: absolute;
+  z-index: 1;
+  top: -0.375rem;
+  transform: translateX(-50%);
+
+  width: 0.25rem;
+  height: 3.75rem;
+  border-radius: 0.125rem;
+
+  background-color: var(--color-white);
+  box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.5);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 -0.5rem;
+  }
+}
+
+.coverMarkerThumb {
+  pointer-events: none;
+
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  left: 50%;
+  transform: translateX(-50%);
+
+  overflow: hidden;
+
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0.125rem solid var(--color-white);
+  border-radius: 50%;
+
+  background-color: #000;
+  box-shadow: 0 0 0.25rem rgba(0, 0, 0, 0.5);
+}
+
+.coverMarkerImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .trimLength {

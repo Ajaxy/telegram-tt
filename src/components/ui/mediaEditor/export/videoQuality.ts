@@ -1,7 +1,10 @@
 import type { CropState, VideoProcessingParams, VideoQualityLevel } from '../../../../types/mediaEditor';
 import type { Size } from '../render/transform';
 
-import { VIDEO_GIF_LEVEL, VIDEO_LOW_LEVEL_MAX_FRAME_RATE, VIDEO_MAX_FRAME_RATE } from '../../../../config';
+import {
+  AVATAR_MAX_SIDE, AVATAR_MIN_SIDE, VIDEO_GIF_LEVEL, VIDEO_LOW_LEVEL_MAX_FRAME_RATE, VIDEO_MAX_FRAME_RATE,
+} from '../../../../config';
+import { clamp } from '../../../../util/math';
 
 export type VideoProcessingMode = 'none' | 'remux' | 'transcode';
 
@@ -38,6 +41,11 @@ function getLevelScale(size: Size, level: number) {
 export function getOutputSize(cropSize: Size, mode: VideoProcessingMode, level?: VideoQualityLevel) {
   if (mode !== 'transcode') return cropSize;
   return fitIntoLevel(cropSize, level ?? MAX_PROCESSED_LEVEL);
+}
+
+export function getAvatarSize(cropSize: Size): Size {
+  const side = toEven(clamp(Math.min(cropSize.width, cropSize.height), AVATAR_MIN_SIDE, AVATAR_MAX_SIDE));
+  return { width: side, height: side };
 }
 
 export function getAvailableLevels(cropSize: Size, isProcessed: boolean) {

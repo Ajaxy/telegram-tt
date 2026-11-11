@@ -25,9 +25,11 @@ type OwnProps = {
   frameRate: number;
   canDecodeVideo: boolean;
   isHidden?: boolean;
+  isDisabled?: boolean;
   trim?: VideoTrim;
   isPlaying: boolean;
   canTrim: boolean;
+  maxTrimDuration?: number;
   canMute?: boolean;
   isMuted?: boolean;
   isGif?: boolean;
@@ -35,6 +37,8 @@ type OwnProps = {
   canSetCover?: boolean;
   cover?: VideoCoverSource;
   coverThumbUrl?: string;
+  avatarCoverTime?: number;
+  hint?: string;
   getCurrentTime: Signal<number>;
   onTogglePlay: NoneToVoidFunction;
   onSeek: (time: number) => void;
@@ -46,6 +50,7 @@ type OwnProps = {
   onCoverFileChoose: (file: File) => void;
   onCoverUseCurrentFrame: NoneToVoidFunction;
   onCoverClear: NoneToVoidFunction;
+  onAvatarCoverChange: (time: number) => void;
 };
 
 const STRIP_HEIGHT = 3 * REM;
@@ -60,9 +65,11 @@ function VideoControls({
   frameRate,
   canDecodeVideo,
   isHidden,
+  isDisabled,
   trim,
   isPlaying,
   canTrim,
+  maxTrimDuration,
   canMute,
   isMuted,
   isGif,
@@ -70,6 +77,8 @@ function VideoControls({
   canSetCover,
   cover,
   coverThumbUrl,
+  avatarCoverTime,
+  hint,
   getCurrentTime,
   onTogglePlay,
   onSeek,
@@ -81,6 +90,7 @@ function VideoControls({
   onCoverFileChoose,
   onCoverUseCurrentFrame,
   onCoverClear,
+  onAvatarCoverChange,
 }: OwnProps) {
   const lang = useLang();
   const stripRef = useRef<HTMLDivElement>();
@@ -105,9 +115,9 @@ function VideoControls({
 
   return (
     <div
-      className={buildClassName(styles.videoControls, isHidden && styles.hidden)}
+      className={buildClassName(styles.videoControls, hint && styles.withHint, isHidden && styles.hidden)}
       aria-hidden={isHidden}
-      inert={isHidden}
+      inert={isHidden || isDisabled}
     >
       <Button
         round
@@ -137,13 +147,18 @@ function VideoControls({
             frameSize={frameSize}
             getCurrentTime={getCurrentTime}
             canTrim={canTrim}
+            maxTrimDuration={maxTrimDuration}
+            coverTime={avatarCoverTime}
+            coverThumbUrl={avatarCoverTime !== undefined ? coverThumbUrl : undefined}
             frameDuration={1 / frameRate}
             onSeek={onSeek}
             onScrubStart={onScrubStart}
             onScrubEnd={onScrubEnd}
             onTrimPreview={onTrimPreview}
             onTrimCommit={onTrimCommit}
+            onCoverChange={onAvatarCoverChange}
           />
+          {hint && <div className={styles.timelineHint}>{hint}</div>}
         </div>
       </div>
       {canMute && (

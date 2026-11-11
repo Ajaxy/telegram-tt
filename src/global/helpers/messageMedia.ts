@@ -267,6 +267,10 @@ export function getVideoProfilePhotoMediaHash(photo: ApiPhoto) {
   return `photo${photo.id}?size=u`;
 }
 
+export function getVideoProfilePhotoStartTs(photo: ApiPhoto) {
+  return photo.videoSizes?.find((size) => size.videoStartTs !== undefined)?.videoStartTs;
+}
+
 export function getVideoMediaHash(video: ApiVideo | ApiDocument, target: SizeTarget) {
   const base = `document${video.id}`;
 

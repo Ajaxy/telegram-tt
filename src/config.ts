@@ -199,6 +199,10 @@ export const VIDEO_MAX_FRAME_RATE = 60;
 export const VIDEO_LOW_LEVEL_MAX_FRAME_RATE = 30;
 export const VIDEO_GIF_LEVEL = 720;
 export const VIDEO_GIF_MAX_SOURCE_SIZE = 10 * 1024 * 1024;
+export const AVATAR_MIN_SIDE = 256; // px
+export const AVATAR_MAX_SIDE = 800; // px
+export const AVATAR_VIDEO_MAX_DURATION = 10; // s
+export const AVATAR_VIDEO_MAX_FRAME_RATE = 30;
 
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
@@ -317,6 +321,10 @@ export const SUPPORTED_PHOTO_CONTENT_TYPES = new Set([
 export const SUPPORTED_VIDEO_CONTENT_TYPES = new Set([
   'video/mp4', 'video/quicktime',
 ]);
+
+export const SUPPORTED_AVATAR_CONTENT_TYPES = [
+  ...SUPPORTED_PHOTO_CONTENT_TYPES, ...SUPPORTED_VIDEO_CONTENT_TYPES,
+].join(', ');
 
 export const SUPPORTED_AUDIO_CONTENT_TYPES = new Set([
   'audio/mp3',

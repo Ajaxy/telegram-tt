@@ -4,20 +4,22 @@ import {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiAvailableReaction, ApiChat, ApiChatFullInfo, ApiExportedInvite,
+  ApiAvailableReaction, ApiAvatarUpload, ApiChat, ApiChatFullInfo, ApiExportedInvite, ApiPhoto,
 } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 import { ManagementProgress, ManagementScreens } from '../../../types';
 
-import { getChatAvatarHash, getHasAdminRight, isChatChannel, isChatPublic } from '../../../global/helpers';
-import { selectChat, selectChatFullInfo, selectIsChatRestricted, selectTabState } from '../../../global/selectors';
+import {
+  getChatAvatarHash, getHasAdminRight, isChatChannel, isChatPublic,
+} from '../../../global/helpers';
+import {
+  selectChat, selectChatFullInfo, selectIsChatRestricted, selectPeerAvatarPhoto, selectTabState,
+} from '../../../global/selectors';
 import { formatInteger } from '../../../util/text/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 
 import Island from '../../gili/layout/Island';
 import Switch from '../../gili/primitives/Switch';
@@ -40,6 +42,7 @@ type OwnProps = {
 type StateProps = {
   chat: ApiChat;
   chatFullInfo?: ApiChatFullInfo;
+  currentAvatarPhoto?: ApiPhoto;
   progress?: ManagementProgress;
   canChangeInfo?: boolean;
   canInvite?: boolean;
@@ -56,6 +59,7 @@ const ManageChannel = ({
   chatId,
   chat,
   chatFullInfo,
+  currentAvatarPhoto,
   progress,
   canChangeInfo,
   canInvite,
@@ -86,10 +90,9 @@ const ManageChannel = ({
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [title, setTitle] = useState(currentTitle);
   const [about, setAbout] = useState(currentAbout);
-  const [photo, setPhoto] = useState<File | undefined>();
+  const [photo, setPhoto] = useState<ApiAvatarUpload | undefined>();
   const [error, setError] = useState<string | undefined>();
   const imageHash = chat && getChatAvatarHash(chat);
-  const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const lang = useLang();
 
   const hasAutoTranslationAvailable = chat && isChatChannel(chat);
@@ -146,8 +149,8 @@ const ManageChannel = ({
     onScreenSelect(ManagementScreens.JoinRequests);
   });
 
-  const handleSetPhoto = useLastCallback((file: File) => {
-    setPhoto(file);
+  const handleSetPhoto = useLastCallback((newPhoto: ApiAvatarUpload) => {
+    setPhoto(newPhoto);
     setIsProfileFieldsTouched(true);
   });
 
@@ -225,9 +228,11 @@ const ManageChannel = ({
     <div className="Management">
       <div className="panel-content custom-scroll">
         <AvatarEditable
-          currentAvatarBlobUrl={currentAvatarBlobUrl}
+          currentAvatarHash={imageHash}
+          currentAvatarPhoto={currentAvatarPhoto}
           onChange={handleSetPhoto}
           disabled={!canChangeInfo}
+          isLoading={isLoading}
         />
         <Island>
           <div className="settings-edit">
@@ -383,6 +388,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       chatFullInfo: selectChatFullInfo(global, chatId),
+      currentAvatarPhoto: selectPeerAvatarPhoto(global, chatId),
       progress,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),

@@ -72,7 +72,7 @@ import StickerSetCover from './StickerSetCover';
 import styles from './StickerPicker.module.scss';
 
 type OwnProps = {
-  chatId: string;
+  chatId?: string;
   threadId?: ThreadId;
   className: string;
   isHidden?: boolean;
@@ -118,6 +118,7 @@ const RESULTS_INTERSECTION_THROTTLE = 200;
 const LOAD_MORE_THRESHOLD = 500;
 
 const StickerPicker = ({
+  chatId,
   chat,
   threadId,
   className,
@@ -507,7 +508,7 @@ const StickerPicker = ({
     selectGroup(group);
   });
 
-  if (!chat) return undefined;
+  if (chatId && !chat) return undefined;
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
@@ -891,9 +892,10 @@ export default memo(withGlobal<OwnProps>(
       featured,
     } = global.stickers;
 
-    const isSavedMessages = selectIsChatWithSelf(global, chatId);
-    const chat = selectChat(global, chatId);
-    const chatStickerSetId = !isUserId(chatId) ? selectChatFullInfo(global, chatId)?.stickerSet?.id : undefined;
+    const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+    const chatStickerSetId = chatId && !isUserId(chatId)
+      ? selectChatFullInfo(global, chatId)?.stickerSet?.id : undefined;
 
     const language = selectLanguageCode(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];

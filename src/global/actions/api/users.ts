@@ -73,7 +73,7 @@ addActionHandler('loadFullUser', async (global, actions, payload): Promise<void>
   global = addUserStatuses(global, result.userStatusesById);
 
   setGlobal(global);
-  if (withPhotos || (profilePhotos?.count && hasChangedPhoto)) {
+  if (withPhotos || (profilePhotos && hasChangedPhoto)) {
     actions.loadMoreProfilePhotos({ peerId: userId, shouldInvalidateCache: true });
   }
 });
@@ -433,8 +433,8 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   const peerFullInfo = userFullInfo || chatFullInfo;
   if (!peerFullInfo) return;
 
-  const offset = profilePhotos?.nextOffset;
-  const limit = !offset || isPreload || shouldInvalidateCache ? PROFILE_PHOTOS_FIRST_LOAD_LIMIT : undefined;
+  const offset = shouldInvalidateCache ? undefined : profilePhotos?.nextOffset;
+  const limit = !offset || isPreload ? PROFILE_PHOTOS_FIRST_LOAD_LIMIT : undefined;
 
   const result = await callApi('fetchProfilePhotos', {
     peer,

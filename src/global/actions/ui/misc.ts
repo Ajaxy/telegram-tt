@@ -542,16 +542,6 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
   };
 });
 
-addActionHandler('updateMediaEditorSettings', (global, actions, payload): ActionReturnType => {
-  return {
-    ...global,
-    mediaEditorSettings: {
-      ...global.mediaEditorSettings,
-      ...payload,
-    },
-  };
-});
-
 addActionHandler('updateShouldSaveAttachmentsCompression', (global, actions, payload): ActionReturnType => {
   const { shouldSave, tabId = getCurrentTabId() } = payload;
 

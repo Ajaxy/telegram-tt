@@ -1,4 +1,5 @@
 import type { ApiAttachment } from '../api/types';
+import type { MediaEditDocument, VideoProcessingParams } from '../types/mediaEditor';
 import type { CancellableCallback } from './PostMessageConnector';
 
 import { SUPPORTED_PHOTO_CONTENT_TYPES } from '../config';
@@ -9,6 +10,13 @@ import { closeLayerFrames } from '../components/ui/mediaEditor/render/layers';
 import { revokeAttachmentUrls } from './attachments';
 import { fetchBlob } from './files';
 import { cancelVideoProcessing, requestVideoProcessing } from './launchVideoProcessingWorker';
+
+type ExportedMedia = {
+  blob: Blob;
+  width: number;
+  height: number;
+  duration?: number;
+};
 
 type Job = {
   key: string;
@@ -84,33 +92,10 @@ async function exportAttachment(job: Job) {
   const blob = isPhoto
     ? await fetchBlob(attachment.sourceBlobUrl!)
     : attachment.blob || await fetchBlob(attachment.blobUrl);
-  const layerFrames = await loadLayerFrames(editState.document.layers, videoProcessing.outputSize, {
-    shouldRenderText: true,
-  });
-  if (progressCallback.isCanceled) {
-    closeLayerFrames(layerFrames);
-    return undefined;
-  }
-  if (hasMissingStickerFrames(editState.document.layers, layerFrames)) {
-    closeLayerFrames(layerFrames);
-    throw new Error('decodeFailed');
-  }
-  const duration = isPhoto ? getLayerFramesDuration(layerFrames) : attachment.quick?.duration;
-  const params = { ...videoProcessing, doc: editState.document, layerFrames };
-  const result = await (requestVideoProcessing(isPhoto ? {
-    name: 'exportAnimation',
-    args: [blob, { ...params, duration: duration! }, progressCallback],
-  } : {
-    name: 'exportVideo',
-    args: [blob, {
-      ...params,
-      trim: editState.document.trim,
-      isMuted: editState.document.isMuted,
-    }, progressCallback],
-  }) as Promise<{ blob: Blob; width: number; height: number } | undefined>).finally(() => {
-    closeLayerFrames(layerFrames);
-  });
+  const result = await exportEditedMedia(blob, editState.document, videoProcessing, progressCallback, isPhoto);
   if (!result || progressCallback.isCanceled) return undefined;
+
+  const duration = result.duration ?? attachment.quick?.duration;
 
   const processedAttachment: ApiAttachment = {
     ...attachment,
@@ -127,6 +112,38 @@ async function exportAttachment(job: Job) {
   revokeAttachmentUrls(attachment, [processedAttachment]);
 
   return processedAttachment;
+}
+
+export async function exportEditedMedia(
+  blob: Blob,
+  doc: MediaEditDocument,
+  processing: VideoProcessingParams,
+  progressCallback: CancellableCallback,
+  isAnimation?: boolean,
+): Promise<ExportedMedia | undefined> {
+  const layerFrames = await loadLayerFrames(doc.layers, processing.outputSize, { shouldRenderText: true });
+  if (progressCallback.isCanceled) {
+    closeLayerFrames(layerFrames);
+    return undefined;
+  }
+  if (hasMissingStickerFrames(doc.layers, layerFrames)) {
+    closeLayerFrames(layerFrames);
+    throw new Error('decodeFailed');
+  }
+
+  const params = { ...processing, doc, layerFrames };
+  const animationDuration = isAnimation ? getLayerFramesDuration(layerFrames) : undefined;
+  const result = await (requestVideoProcessing(isAnimation ? {
+    name: 'exportAnimation',
+    args: [blob, { ...params, duration: animationDuration! }, progressCallback],
+  } : {
+    name: 'exportVideo',
+    args: [blob, { ...params, trim: doc.trim, isMuted: doc.isMuted }, progressCallback],
+  }) as Promise<Omit<ExportedMedia, 'duration'> | undefined>).finally(() => {
+    closeLayerFrames(layerFrames);
+  });
+
+  return result && { ...result, duration: animationDuration };
 }
 
 function handleBeforeUnload(e: BeforeUnloadEvent) {

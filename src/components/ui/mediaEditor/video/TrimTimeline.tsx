@@ -9,10 +9,13 @@ import buildClassName from '../../../../util/buildClassName';
 import { formatMediaDuration } from '../../../../util/dates/duration';
 import getPointerPosition from '../../../../util/events/getPointerPosition';
 import { clamp } from '../../../../util/math';
+import { clampCoverTime } from '../editDocument';
 
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useWindow from '../../../../hooks/useWindow';
+
+import ShowTransition from '../../ShowTransition';
 
 import styles from '../MediaEditor.module.scss';
 
@@ -23,15 +26,19 @@ type OwnProps = {
   frameSize: Size;
   getCurrentTime: Signal<number>;
   canTrim: boolean;
+  maxTrimDuration?: number;
+  coverTime?: number;
+  coverThumbUrl?: string;
   frameDuration: number;
   onSeek: (time: number) => void;
   onScrubStart: NoneToVoidFunction;
   onScrubEnd: NoneToVoidFunction;
   onTrimPreview: (trim: VideoTrim) => void;
   onTrimCommit: (trim: VideoTrim) => void;
+  onCoverChange: (time: number) => void;
 };
 
-type DragTarget = 'start' | 'end' | 'segment' | 'scrub';
+type DragTarget = 'start' | 'end' | 'segment' | 'scrub' | 'cover';
 
 const MOVE_THRESHOLD = 2; // px
 const SEEK_STEP = 1; // s
@@ -45,21 +52,44 @@ function TrimTimeline({
   frameSize,
   getCurrentTime,
   canTrim,
+  maxTrimDuration,
+  coverTime,
+  coverThumbUrl,
   frameDuration,
   onSeek,
   onScrubStart,
   onScrubEnd,
   onTrimPreview,
   onTrimCommit,
+  onCoverChange,
 }: OwnProps) {
   const lang = useLang();
   const renderingWindow = useWindow();
   const rootRef = useRef<HTMLDivElement>();
   const playheadRef = useRef<HTMLDivElement>();
   const [draggedTrim, setDraggedTrim] = useState<VideoTrim | undefined>();
+  const [draggedCoverTime, setDraggedCoverTime] = useState<number | undefined>();
+  const [shownCoverThumbUrl, setShownCoverThumbUrl] = useState<string | undefined>();
+  const isCoverMode = coverTime !== undefined;
 
   const start = trim?.start ?? 0;
   const end = trim?.end ?? duration;
+
+  useLayoutEffect(() => {
+    setShownCoverThumbUrl(undefined);
+  }, [coverTime]);
+
+  useLayoutEffect(() => {
+    setShownCoverThumbUrl(coverThumbUrl);
+  }, [coverThumbUrl]);
+
+  function getMinTrimStart(trimEnd: number) {
+    return maxTrimDuration ? Math.max(0, trimEnd - maxTrimDuration) : 0;
+  }
+
+  function getMaxTrimEnd(trimStart: number) {
+    return maxTrimDuration ? Math.min(duration, trimStart + maxTrimDuration) : duration;
+  }
 
   useLayoutEffect(() => {
     if (!playheadRef.current) return;
@@ -80,6 +110,7 @@ function TrimTimeline({
     const initialTime = getCurrentTime();
     const length = end - start;
     let lastTrim = initialTrim;
+    let lastCoverTime = coverTime;
     let hasMoved = false;
 
     onScrubStart();
@@ -92,15 +123,26 @@ function TrimTimeline({
 
       const time = getTimeAt(x);
       if (target === 'start') {
-        lastTrim = { start: Math.min(time, initialTrim.end - MIN_VIDEO_TRIM_DURATION), end: initialTrim.end };
+        lastTrim = {
+          start: clamp(time, getMinTrimStart(initialTrim.end), initialTrim.end - MIN_VIDEO_TRIM_DURATION),
+          end: initialTrim.end,
+        };
         onSeek(lastTrim.start);
       } else if (target === 'end') {
-        lastTrim = { start: initialTrim.start, end: Math.max(time, initialTrim.start + MIN_VIDEO_TRIM_DURATION) };
+        lastTrim = {
+          start: initialTrim.start,
+          end: clamp(time, initialTrim.start + MIN_VIDEO_TRIM_DURATION, getMaxTrimEnd(initialTrim.start)),
+        };
         onSeek(lastTrim.end);
       } else if (target === 'segment') {
         const newStart = clamp(initialTrim.start + ((x - startX) / rect.width) * duration, 0, duration - length);
         lastTrim = { start: newStart, end: newStart + length };
         onSeek(lastTrim.start);
+      } else if (target === 'cover') {
+        lastCoverTime = clampCoverTime(time, start, end, frameDuration);
+        onSeek(lastCoverTime);
+        setDraggedCoverTime(lastCoverTime);
+        return;
       } else {
         onSeek(clamp(time, start, end));
         return;
@@ -117,9 +159,21 @@ function TrimTimeline({
       targetDocument.removeEventListener('touchend', handleUp);
       targetDocument.removeEventListener('touchcancel', handleUp);
       setDraggedTrim(undefined);
+      setDraggedCoverTime(undefined);
 
       if (!hasMoved) {
-        if (target === 'segment' || target === 'scrub') onSeek(clamp(getTimeAt(startX), start, end));
+        if (target !== 'start' && target !== 'end') {
+          const time = clamp(getTimeAt(startX), start, end);
+          if (isCoverMode) {
+            const coverTimeAt = clampCoverTime(time, start, end, frameDuration);
+            onSeek(coverTimeAt);
+            onCoverChange(coverTimeAt);
+          } else {
+            onSeek(time);
+          }
+        }
+      } else if (target === 'cover') {
+        onCoverChange(lastCoverTime!);
       } else if (target !== 'scrub') {
         onTrimCommit(lastTrim);
         onSeek(clamp(initialTime, lastTrim.start, lastTrim.end));
@@ -141,7 +195,8 @@ function TrimTimeline({
 
     const rect = root.getBoundingClientRect();
     const time = clamp((getPointerPosition(e).x - rect.left) / rect.width, 0, 1) * duration;
-    handlePointerDown(e, trim && time >= start && time <= end ? 'segment' : 'scrub');
+    const isInTrim = trim && time >= start && time <= end;
+    handlePointerDown(e, isInTrim ? 'segment' : isCoverMode ? 'cover' : 'scrub');
   });
 
   const handleHandleKeyDown = useLastCallback((e: React.KeyboardEvent, target: 'start' | 'end') => {
@@ -152,8 +207,8 @@ function TrimTimeline({
 
     const delta = (e.shiftKey ? frameDuration : SEEK_STEP) * (e.key === 'ArrowLeft' ? -1 : 1);
     const newTrim = target === 'start'
-      ? { start: clamp(start + delta, 0, end - MIN_VIDEO_TRIM_DURATION), end }
-      : { start, end: clamp(end + delta, start + MIN_VIDEO_TRIM_DURATION, duration) };
+      ? { start: clamp(start + delta, getMinTrimStart(end), end - MIN_VIDEO_TRIM_DURATION), end }
+      : { start, end: clamp(end + delta, start + MIN_VIDEO_TRIM_DURATION, getMaxTrimEnd(start)) };
 
     onTrimCommit(newTrim);
     onSeek(target === 'start' ? newTrim.start : newTrim.end);
@@ -207,7 +262,23 @@ function TrimTimeline({
         {canTrim && renderHandle('start')}
         {canTrim && renderHandle('end')}
       </div>
-      <div ref={playheadRef} className={styles.playhead} />
+      {isCoverMode ? (
+        <div
+          className={styles.coverMarker}
+          style={`left: ${((draggedCoverTime ?? coverTime) / duration) * 100}%`}
+          onMouseDown={(e) => handlePointerDown(e, 'cover')}
+          onTouchStart={(e) => handlePointerDown(e, 'cover')}
+        >
+          <ShowTransition
+            isOpen={Boolean(shownCoverThumbUrl) && draggedCoverTime === undefined}
+            className={styles.coverMarkerThumb}
+          >
+            <img className={styles.coverMarkerImage} src={shownCoverThumbUrl} alt="" draggable={false} />
+          </ShowTransition>
+        </div>
+      ) : (
+        <div ref={playheadRef} className={styles.playhead} />
+      )}
       {draggedTrim && (
         <div className={styles.trimLength}>{formatTrimLength(draggedTrim.end - draggedTrim.start)}</div>
       )}

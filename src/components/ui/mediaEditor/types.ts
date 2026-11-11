@@ -8,6 +8,8 @@ import type { Size } from './render/transform';
 
 export type VideoAudioHandling = 'none' | 'copy' | 'transcode' | 'unsupported';
 
+export type AvatarShape = 'circle' | 'roundedSquare';
+
 export type VideoProbe = {
   width: number;
   height: number;
@@ -38,6 +40,7 @@ export type EditorPanelProps = {
   isVideo?: boolean;
   canAdjustColors?: boolean;
   isAspectRatioLocked?: boolean;
+  isAvatar?: boolean;
   chatId?: string;
   textSettings: TextSettings;
   getDoc: () => MediaEditDocument;

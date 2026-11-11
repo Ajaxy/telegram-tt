@@ -111,6 +111,12 @@ export interface ApiAttachment {
   gif?: ApiVideo;
 }
 
+export interface ApiAvatarUpload {
+  file: File;
+  video?: File;
+  videoStartTs?: number;
+}
+
 export interface ApiWallpaperSettings {
   backgroundColor?: number;
   secondBackgroundColor?: number;

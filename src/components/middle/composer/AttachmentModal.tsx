@@ -574,7 +574,7 @@ const AttachmentModal = ({
   });
 
   const handleApplyEdit = useLastCallback(async (result: MediaEditorResult) => {
-    if (editingAttachmentIndex === undefined) return;
+    if (editingAttachmentIndex === undefined || result.kind === 'avatar') return;
 
     wasOpenedAsEditorRef.current = false;
     setEditingAttachmentIndex(undefined);

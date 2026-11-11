@@ -4,7 +4,7 @@ import type {
 import type { VideoProcessingMode } from './export/videoQuality';
 import type { Size } from './render/transform';
 
-import { MIN_VIDEO_TRIM_DURATION } from '../../../config';
+import { AVATAR_VIDEO_MAX_DURATION, MIN_VIDEO_TRIM_DURATION } from '../../../config';
 import { compact, uniqueByField } from '../../../util/iteratees';
 import { clamp } from '../../../util/math';
 import { getCropSize } from './export/videoQuality';
@@ -27,16 +27,38 @@ export function createEditDocument(sourceSize: Size, lockedAspectRatio?: number)
   };
 }
 
-export function applyTrim(doc: MediaEditDocument, trim: VideoTrim, duration: number): MediaEditDocument {
+export function clampCoverTime(time: number, start: number, end: number, frameDuration: number) {
+  return clamp(time, start, Math.max(start, end - frameDuration));
+}
+
+export function createAvatarVideoDocument(
+  sourceSize: Size, duration: number, frameDuration: number, coverTime = 0,
+): MediaEditDocument {
+  const trim = duration > AVATAR_VIDEO_MAX_DURATION ? { start: 0, end: AVATAR_VIDEO_MAX_DURATION } : undefined;
+
+  return {
+    ...createEditDocument(sourceSize, 1),
+    trim,
+    cover: { type: 'frame', time: clampCoverTime(coverTime, 0, trim?.end ?? duration, frameDuration) },
+    isMuted: true,
+  };
+}
+
+export function applyTrim(
+  doc: MediaEditDocument, trim: VideoTrim, duration: number, frameDuration: number,
+): MediaEditDocument {
   const start = clamp(trim.start, 0, duration - MIN_VIDEO_TRIM_DURATION);
   const end = clamp(trim.end, start + MIN_VIDEO_TRIM_DURATION, duration);
-  const { cover } = doc;
+  let { cover } = doc;
+  if (cover?.type === 'frame') {
+    const time = clampCoverTime(cover.time, start, end, frameDuration);
+    if (time !== cover.time) cover = { type: 'frame', time };
+  }
 
   return {
     ...doc,
     trim: start <= 0 && end >= duration ? undefined : { start, end },
-    cover: cover?.type === 'frame' && (cover.time < start || cover.time > end)
-      ? { type: 'frame', time: clamp(cover.time, start, end) } : cover,
+    cover,
   };
 }
 

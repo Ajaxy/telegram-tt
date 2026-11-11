@@ -42,6 +42,10 @@ export function selectIsUserChatProtected<T extends GlobalState>(global: T, user
   return Boolean(fullInfo.noForwardsMyEnabled || fullInfo.noForwardsPeerEnabled);
 }
 
+export function selectCurrentUserId<T extends GlobalState>(global: T) {
+  return global.currentUserId;
+}
+
 export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {
   if (!global.currentUserId) return false;
 

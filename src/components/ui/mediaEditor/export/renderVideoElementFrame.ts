@@ -29,6 +29,7 @@ export async function renderVideoElementFrame(src: string, {
 
     const size = fitCropToMaxSide(doc.crop, maxSide);
     const canvas = new OffscreenCanvas(size.width, size.height);
+    const frameTime = time - (doc.trim?.start ?? 0);
     composeFrame({
       ctx: canvas.getContext('2d')!,
       frame: video,
@@ -36,10 +37,10 @@ export async function renderVideoElementFrame(src: string, {
       doc,
       scratch: createFrameScratch(),
       layerFrames,
-      time: time - (doc.trim?.start ?? 0),
+      time: frameTime,
     });
 
-    return { blob: await canvas.convertToBlob({ type: mimeType, quality }), ...size };
+    return { blob: await canvas.convertToBlob({ type: mimeType, quality }), ...size, time: frameTime };
   } finally {
     video.removeAttribute('src');
     video.load();

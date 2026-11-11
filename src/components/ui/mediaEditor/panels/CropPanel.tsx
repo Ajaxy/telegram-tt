@@ -36,7 +36,7 @@ const FULL_WIDTH_RATIOS = ASPECT_RATIOS.slice(0, 3);
 const PAIRED_RATIOS = ASPECT_RATIOS.slice(3);
 
 function CropPanel({
-  doc, sourceSize, isAspectRatioLocked, getDoc, onCommit,
+  doc, sourceSize, isAspectRatioLocked, isAvatar, getDoc, onCommit,
 }: EditorPanelProps) {
   const lang = useLang();
   const currentRatio = doc.crop.aspectRatio;
@@ -99,7 +99,7 @@ function CropPanel({
   };
 
   if (isAspectRatioLocked) {
-    return <div className={styles.panelNote}>{lang('EditorCoverAspectHint')}</div>;
+    return <div className={styles.panelNote}>{lang(isAvatar ? 'CropperTitle' : 'EditorCoverAspectHint')}</div>;
   }
 
   return (

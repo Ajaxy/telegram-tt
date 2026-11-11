@@ -1,6 +1,6 @@
 import { memo, useState } from '../../../lib/teact/teact';
 
-import type { ApiChat } from '../../../api/types/index';
+import type { ApiAvatarUpload, ApiChat } from '../../../api/types/index';
 import type { ManagementScreens } from '../../../types/index';
 import { ChatCreationProgress } from '../../../types/index';
 
@@ -44,7 +44,7 @@ const NewDiscussionGroup = ({
   });
 
   const [title, setTitle] = useState(() => lang('NewDiscussionChatTitle', { name: chat?.title }));
-  const [photo, setPhoto] = useState<File | undefined>();
+  const [photo, setPhoto] = useState<ApiAvatarUpload | undefined>();
   const [error, setError] = useState<string | undefined>();
 
   const isLoading = creationProgress === ChatCreationProgress.InProgress;
@@ -89,6 +89,7 @@ const NewDiscussionGroup = ({
             <AvatarEditable
               onChange={setPhoto}
               title={lang('AddPhoto')}
+              isLoading={isLoading}
             />
             <InputText
               value={title}

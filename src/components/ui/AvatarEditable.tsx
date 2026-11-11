@@ -1,41 +1,77 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 
+import type { ApiAvatarUpload, ApiPhoto } from '../../api/types';
+import { ApiMediaFormat } from '../../api/types';
+
+import { SUPPORTED_AVATAR_CONTENT_TYPES } from '../../config';
+import { getVideoProfilePhotoMediaHash, getVideoProfilePhotoStartTs } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
 
 import Icon from '../common/icons/Icon';
-import CropModal from './CropModal';
+import AvatarEditor from './AvatarEditor';
+import OptimizedVideo from './OptimizedVideo';
 
 import './AvatarEditable.scss';
 
 interface OwnProps {
   title?: string;
   disabled?: boolean;
+  isLoading?: boolean;
   isForForum?: boolean;
-  currentAvatarBlobUrl?: string;
-  onChange: (file: File) => void;
+  isOwn?: boolean;
+  currentAvatarHash?: string;
+  currentAvatarPhoto?: ApiPhoto;
+  onChange: (avatar: ApiAvatarUpload) => void;
 }
 
-const AvatarEditable: FC<OwnProps> = ({
+type SelectedAvatar = {
+  blobUrl: string;
+  videoUrl?: string;
+  videoStartTs?: number;
+  replacedAvatarHash?: string;
+};
+
+const AvatarEditable = ({
   title,
   disabled,
+  isLoading,
   isForForum,
-  currentAvatarBlobUrl,
+  isOwn,
+  currentAvatarHash,
+  currentAvatarPhoto,
   onChange,
-}) => {
+}: OwnProps) => {
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
-  const [croppedBlobUrl, setCroppedBlobUrl] = useState<string | undefined>(currentAvatarBlobUrl);
+  const [selectedAvatar, setSelectedAvatar] = useState<SelectedAvatar | undefined>();
 
   const lang = useLang();
 
-  useEffect(() => {
-    setCroppedBlobUrl(currentAvatarBlobUrl);
-  }, [currentAvatarBlobUrl]);
+  const currentAvatarBlobUrl = useMedia(currentAvatarHash, false, ApiMediaFormat.BlobUrl);
+  const currentAvatarPhotoUrl = useMedia(
+    currentAvatarPhoto && getVideoProfilePhotoMediaHash(currentAvatarPhoto), false, ApiMediaFormat.BlobUrl,
+  );
+  const isSelectedAvatarReplaced = selectedAvatar && selectedAvatar.replacedAvatarHash !== currentAvatarHash
+    && (!currentAvatarHash || currentAvatarBlobUrl);
+  const isSelectedAvatarShown = selectedAvatar && !isSelectedAvatarReplaced;
+  const blobUrl = isSelectedAvatarShown ? selectedAvatar.blobUrl : currentAvatarBlobUrl;
+  const videoUrl = isSelectedAvatarShown
+    ? selectedAvatar.videoUrl
+    : (currentAvatarBlobUrl ? currentAvatarPhotoUrl : undefined);
+  const videoStartTs = isSelectedAvatarShown
+    ? selectedAvatar.videoStartTs
+    : (currentAvatarPhoto && getVideoProfilePhotoStartTs(currentAvatarPhoto));
+
+  useEffect(() => (selectedAvatar ? () => {
+    URL.revokeObjectURL(selectedAvatar.blobUrl);
+    if (selectedAvatar.videoUrl) URL.revokeObjectURL(selectedAvatar.videoUrl);
+  } : undefined), [selectedAvatar]);
 
   function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
     const target = event.target;
@@ -48,23 +84,29 @@ const AvatarEditable: FC<OwnProps> = ({
     target.value = '';
   }
 
-  const handleAvatarCrop = useCallback((croppedImg: File) => {
+  const handleAvatarChange = useLastCallback((avatar: ApiAvatarUpload) => {
     setSelectedFile(undefined);
-    onChange(croppedImg);
+    setSelectedAvatar({
+      blobUrl: URL.createObjectURL(avatar.file),
+      videoUrl: avatar.video && URL.createObjectURL(avatar.video),
+      videoStartTs: avatar.videoStartTs,
+      replacedAvatarHash: currentAvatarHash,
+    });
+    onChange(avatar);
+  });
 
-    if (croppedBlobUrl && croppedBlobUrl !== currentAvatarBlobUrl) {
-      URL.revokeObjectURL(croppedBlobUrl);
-    }
-    setCroppedBlobUrl(URL.createObjectURL(croppedImg));
-  }, [croppedBlobUrl, currentAvatarBlobUrl, onChange]);
+  const handleVideoLoadedMetadata = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (videoStartTs) e.currentTarget.currentTime = videoStartTs;
+  });
 
   const handleModalClose = useCallback(() => {
     setSelectedFile(undefined);
   }, []);
 
   const labelClassName = buildClassName(
-    croppedBlobUrl && 'filled',
+    blobUrl && 'filled',
     disabled && 'disabled',
+    isLoading && 'loading',
     isForForum && 'rounded-square',
   );
 
@@ -79,12 +121,30 @@ const AvatarEditable: FC<OwnProps> = ({
         <input
           type="file"
           onChange={handleSelectFile}
-          accept="image/png, image/jpeg"
+          accept={SUPPORTED_AVATAR_CONTENT_TYPES}
         />
         <Icon name="camera-add" />
-        {croppedBlobUrl && <img src={croppedBlobUrl} draggable={false} alt="" />}
+        {blobUrl && <img src={blobUrl} draggable={false} alt="" />}
+        {videoUrl && (
+          <OptimizedVideo
+            canPlay
+            src={videoUrl}
+            className="avatar-video"
+            muted
+            loop
+            disablePictureInPicture
+            playsInline
+            onLoadedMetadata={handleVideoLoadedMetadata}
+          />
+        )}
       </label>
-      <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
+      <AvatarEditor
+        file={selectedFile}
+        isForForum={isForForum}
+        isOwn={isOwn}
+        onChange={handleAvatarChange}
+        onClose={handleModalClose}
+      />
     </div>
   );
 };

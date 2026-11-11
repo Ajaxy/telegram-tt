@@ -3,6 +3,7 @@ import type {
   ApiAttachBot,
   ApiAttachment,
   ApiAudio,
+  ApiAvatarUpload,
   ApiBirthday,
   ApiChat,
   ApiChatAdminRights,
@@ -171,13 +172,10 @@ export interface ActionPayloads {
   setAuthRememberMe: { value: boolean };
   clearAuthErrorKey: undefined;
   uploadProfilePhoto: {
-    file: File;
+    photo: ApiAvatarUpload;
     isFallback?: boolean;
-    videoTs?: number;
-    isVideo?: boolean;
     bot?: ApiUser;
-    tabId?: number;
-  };
+  } & WithTabId;
   goToAuthQrCode: undefined;
   loginWithPasskey: undefined;
 
@@ -863,7 +861,7 @@ export interface ActionPayloads {
   createChannel: {
     title: string;
     about?: string;
-    photo?: File;
+    photo?: ApiAvatarUpload;
     memberIds?: string[];
     discussionChannelId?: string;
   } & (
@@ -872,7 +870,7 @@ export interface ActionPayloads {
   createGroupChat: {
     title: string;
     memberIds: string[];
-    photo?: File;
+    photo?: ApiAvatarUpload;
   } & WithTabId;
   resetChatCreation: WithTabId | undefined;
 
@@ -1290,7 +1288,7 @@ export interface ActionPayloads {
     chatId: string;
     title: string;
     about: string;
-    photo?: File;
+    photo?: ApiAvatarUpload;
   } & WithTabId;
   updateChatDetectedLanguage: {
     chatId: string;
@@ -2236,7 +2234,7 @@ export interface ActionPayloads {
 
   loadCurrentUser: undefined;
   updateProfile: {
-    photo?: File;
+    photo?: ApiAvatarUpload;
     firstName?: string;
     lastName?: string;
     bio?: string;
@@ -2257,11 +2255,6 @@ export interface ActionPayloads {
     isFromSuggestion?: boolean;
   } & WithTabId;
   closeBirthdaySetupModal: WithTabId | undefined;
-  updateBotProfile: {
-    photo?: File;
-    firstName?: string;
-    bio?: string;
-  } & WithTabId;
   setBotInfo: {
     bot?: ApiUser | undefined;
     langCode?: string;
@@ -3692,7 +3685,7 @@ export interface ActionPayloads {
 
   uploadContactProfilePhoto: {
     userId: string;
-    file?: File;
+    photo?: ApiAvatarUpload;
     isSuggest?: boolean;
   } & WithTabId;
 

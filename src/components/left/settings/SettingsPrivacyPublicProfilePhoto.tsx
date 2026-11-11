@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiPhoto } from '../../../api/types';
+import type { ApiAvatarUpload, ApiPhoto } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -43,9 +43,9 @@ const SettingsPrivacyPublicProfilePhoto = ({
     }
   }, [hasCurrentUserFullInfo, currentUserId, loadFullUser]);
 
-  const handleSelectFile = useCallback((file: File) => {
+  const handleSelectAvatar = useCallback((photo: ApiAvatarUpload) => {
     uploadProfilePhoto({
-      file,
+      photo,
       isFallback: true,
     });
     showNotification({
@@ -71,7 +71,8 @@ const SettingsPrivacyPublicProfilePhoto = ({
           onClick={handleOpenFileSelector}
         >
           <SelectAvatar
-            onChange={handleSelectFile}
+            isOwn
+            onChange={handleSelectAvatar}
             inputRef={inputRef}
           />
           {lang(currentUserFallbackPhoto

@@ -66,7 +66,7 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   if (photo) {
-    await callApi('uploadProfilePhoto', photo);
+    await callApi('uploadProfilePhoto', { photo });
   }
 
   if (firstName || lastName || about) {
