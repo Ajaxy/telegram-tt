@@ -27,7 +27,6 @@ export default defineConfig(
   globalIgnores([
     '.cache/',
     'src/lib/video-preview/polyfill',
-    'src/lib/fasttextweb/**',
     'src/lib/gramjs/tl/',
     'src/lib/lovely-chart/**',
     'src/lib/music-metadata-browser',

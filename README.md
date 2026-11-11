@@ -51,7 +51,7 @@ await invoke(new GramJs.help.GetAppConfig())
 * [marked](https://github.com/markedjs/marked) ([MIT License](https://github.com/markedjs/marked/blob/master/LICENSE.md))
 * [lowlight](https://github.com/wooorm/lowlight) ([MIT License](https://github.com/wooorm/lowlight/blob/main/license))
 * [idb-keyval](https://github.com/jakearchibald/idb-keyval) ([Apache License 2.0](https://github.com/jakearchibald/idb-keyval/blob/main/LICENCE))
-* [fasttextweb](https://github.com/karmdesai/fastTextWeb)
+* [fastText](https://github.com/facebookresearch/fastText) ([MIT License](https://github.com/facebookresearch/fastText/blob/main/LICENSE)) and its [language identification model](https://fasttext.cc/docs/en/language-identification.html) ([CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/))
 * fastblur
 
 ## Bug reports and Suggestions
