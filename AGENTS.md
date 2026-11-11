@@ -119,7 +119,7 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 ## Telegram API
 
 - GramJS runs in a web worker; UI and global state use plain `Api*` objects from `src/api/types`.
-- Read the TL schema in `src/lib/gramjs/tl/static/api.tl`; do not edit it. Add needed method names to `src/lib/gramjs/tl/static/api.json` and run `npm run gramjs:tl` to regenerate `src/lib/gramjs/tl/api.d.ts` and schema modules.
+- Read the TL schema in `src/lib/gramjs/tl/static/api.tl`; do not edit it without receiving updated schema beforehand. Add needed method names to `src/lib/gramjs/tl/static/api.json` and run `npm run gramjs:tl` to regenerate `src/lib/gramjs/tl/api.d.ts` and schema modules.
 - Implement methods under `src/api/gramjs/methods/` using destructured parameter objects and `invokeRequest(new GramJs.namespace.MethodName(...))`. Name TL `get*` fetchers `fetch*`.
 - Convert results using `apiBuilders` (`buildApi*`) and inputs using `gramjsBuilders` (`buildInput*`). Return `undefined` when `invokeRequest` returns `undefined`.
 - Global actions call methods through `callApi` and check for `undefined` before updating state. Pass full `ApiPeer`, `ApiChat`, or `ApiUser` objects across this boundary; do not add separate `id`/`accessHash` method parameters. Extract fields for `buildInput*` inside the GramJS method.

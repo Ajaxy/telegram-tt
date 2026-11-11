@@ -178,7 +178,7 @@ function buildArgConfig(name: string, argType: string) {
         ) {
             currentConfig.isBareType = true;
             if (!PRIMITIVE_TYPES.has(currentConfig.type)) {
-                currentConfig.type = snakeToCamelCase(currentConfig.type);
+                currentConfig.type = currentConfig.type.replace(/[^.]+$/, snakeToCamelCase);
             }
         }
 
