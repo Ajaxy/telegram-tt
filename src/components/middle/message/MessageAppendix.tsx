@@ -20,7 +20,7 @@ function MessageAppendix({ isOwn }: OwnProps) {
       </defs>
       <g className="appendix-parts" fill="none" fill-rule="evenodd">
         <path d={path} fill="#000" filter="url(#messageAppendix)" />
-        <path d={path} fill={isOwn ? '#EEFFDE' : 'FFF'} className="corner" />
+        <path d={path} fill={isOwn ? '#E1FFC7' : 'FFF'} className="corner" />
       </g>
     </svg>
   );

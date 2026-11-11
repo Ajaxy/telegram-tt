@@ -359,8 +359,22 @@
 }
 
 .inlineCode {
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.25rem;
+
   font-family: var(--font-family-monospace);
-  font-size: 0.875em;
+  // Keep monospace font metrics from growing the line
+  line-height: 0;
+
+  background-color: var(--color-code-bg);
+
+  // Size the background from cap height and baseline, as monospace ascent/descent differ from the text font
+  @supports (text-box: trim-both cap alphabetic) {
+    padding-top: 0.1875em;
+    padding-bottom: 0.25em;
+
+    text-box: trim-both cap alphabetic;
+  }
 }
 
 .clone .customEmoji {

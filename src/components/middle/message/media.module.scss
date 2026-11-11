@@ -132,12 +132,12 @@
     height: 3.375rem;
     border-radius: 50%;
 
-    background: var(--message-media-background);
+    background: #00000073;
   }
 
   &:hover {
     &::before {
-      background: #000000cc;
+      background: #00000099;
     }
   }
 

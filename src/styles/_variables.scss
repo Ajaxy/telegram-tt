@@ -27,7 +27,7 @@
 
   $color-text-green: #4fae4e;
   $color-green: #00c73e;
-  $color-light-green: #eeffde;
+  $color-light-green: #e1ffc7;
 
   $color-error: #e53935;
 
@@ -192,8 +192,8 @@
 
     --message-incoming-background: #ffffff;
     --message-incoming-selected: #e6e6e6;
-    --message-outgoing-background: #eeffde;
-    --message-outgoing-selected: #d6e6c8;
+    --message-outgoing-background: #{$color-light-green};
+    --message-outgoing-selected: #cbe6b3;
     --message-service-background: var(--action-message-bg);
     --message-service-text: #ffffff;
     --message-call-success: #63da6e;
@@ -223,10 +223,6 @@
     --color-reply-active: #{blend-normal(rgba($color-text-secondary, 0.16), $color-white)};
     --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
     --color-reply-own-active: #{blend-normal(rgba($color-text-green, 0.24), $color-light-green)};
-
-    --color-background-own-apple: #dcf8c5;
-    --color-reply-own-hover-apple: #cbefb7;
-    --color-reply-own-active-apple: #bae6a8;
 
     --color-white: #{$color-white};
     --color-gray: #{$color-gray};

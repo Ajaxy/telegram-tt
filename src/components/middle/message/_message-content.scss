@@ -999,7 +999,27 @@
 }
 
 .text-entity-code {
+  margin: 0;
+  padding: 1px 2px;
+  border-radius: 4px;
+
+  // Keep monospace font metrics from growing the line
+  line-height: 0;
   white-space: pre-wrap;
+
+  background: var(--color-code-bg);
+
+  .Message.own & {
+    background: var(--color-code-own-bg);
+  }
+
+  // Size the background from cap height and baseline, as monospace ascent/descent differ from the text font
+  @supports (text-box: trim-both cap alphabetic) {
+    padding-top: 0.1875em;
+    padding-bottom: 0.25em;
+
+    text-box: trim-both cap alphabetic;
+  }
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
@@ -1066,6 +1086,11 @@
 
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
+}
+
+// Native clients render inline code at the message text size
+.text-entity-code {
+  font-size: inherit;
 }
 
 .pullquote, blockquote, .blockquote {

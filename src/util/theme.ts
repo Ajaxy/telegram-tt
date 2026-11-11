@@ -42,6 +42,12 @@ const NIGHT_ACCENT_MIN_BRIGHTNESS = 55;
 const TINTED_ACCENT_MIN_BRIGHTNESS = 18;
 const LIGHT_ACCENT_SATURATION_WEIGHT = 1.1;
 const OUTGOING_SECONDARY_HSV_MULTIPLIERS = [1.344 * 0.75, 4.554 * 1.1, 0.549];
+// Bubble secondary text keeps the translucency iOS and macOS use
+const LIGHT_INCOMING_SECONDARY = '#52525299';
+const DARK_TEXT_SECONDARY_ALPHA = 'cc';
+const LIGHT_TEXT_SECONDARY_ALPHA = 'a6';
+// Day bubble links keep the default theme blue regardless of the theme accent, like iOS
+const DAY_LINK_COLOR = themeColors['--color-links'][0];
 const CLASSIC_SATURATION = 14;
 const CLASSIC_BASE_BRIGHTNESS = 79;
 const CLASSIC_ACCENT_BRIGHTNESS_WEIGHT = 0.21;
@@ -130,11 +136,14 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
   const primaryForeground = isDark
     ? getFilledForeground(accent, isTinted ? TINTED_BRIGHTNESS_THRESHOLD : NIGHT_BRIGHTNESS_THRESHOLD) : WHITE;
   const incoming = buildBubblePalette([incomingFill], appText, accent,
-    isTinted ? secondary : isDark ? `${WHITE}80` : '#525252');
-  if (!isDark) incoming.fileDescription = '#999999';
+    isTinted ? secondary : isDark ? `${WHITE}80` : LIGHT_INCOMING_SECONDARY);
+  if (!isDark) {
+    incoming.fileDescription = '#999999';
+    incoming.links = DAY_LINK_COLOR;
+  }
   incoming.accentForeground = primaryForeground;
   incoming.controlForeground = primaryForeground;
-  const outgoing = buildOutgoingBubblePalette(outgoingFills);
+  const outgoing = buildOutgoingBubblePalette(outgoingFills, isDark, settings?.outboxAccentColor);
   const variables: Record<string, string> = {};
   buildBubbleVariables(variables, 'incoming', incoming);
   buildBubbleVariables(variables, 'outgoing', outgoing);
@@ -175,7 +184,6 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--color-active': accent,
     '--color-active-darker': shade,
     '--color-background-own': outgoing.fill,
-    '--color-background-own-apple': outgoing.fill,
     '--color-background-own-selected': outgoing.selected,
     '--color-text-own': outgoing.text,
     '--color-text-own-rgb': toRgbTriplet(buildColorFromHex(outgoing.text)),
@@ -185,7 +193,7 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--color-accent-own-rgb': toRgbTriplet(buildColorFromHex(outgoing.accent)),
     '--color-poll-check-own': outgoing.accentForeground,
     '--color-message-meta-own': outgoing.secondary,
-    '--color-own-links': outgoing.accent,
+    '--color-own-links': outgoing.links,
     '--color-code-own': outgoing.accent,
     '--color-message-reaction-chosen-hover-own': outgoing.accent,
     '--message-incoming-checkbox-fill': accent,
@@ -259,12 +267,14 @@ function buildBubbleVariables(
   });
 }
 
-function buildOutgoingBubblePalette(colors: string[]): BubblePalette {
+function buildOutgoingBubblePalette(colors: string[], isDark: boolean, outboxAccent?: string): BubblePalette {
   const fill = deriveOutgoingBubbleFill(colors)!;
   const hasDarkText = getPerceivedBrightness(fill) > OUTGOING_BRIGHTNESS_THRESHOLD;
   const text = hasDarkText ? BLACK : WHITE;
-  const secondary = hasDarkText ? multiplyHsv(fill, OUTGOING_SECONDARY_HSV_MULTIPLIERS) : WHITE;
-  return buildBubblePalette(colors, text, secondary, secondary);
+  const accent = hasDarkText ? multiplyHsv(fill, OUTGOING_SECONDARY_HSV_MULTIPLIERS) : WHITE;
+  const secondary = `${accent}${hasDarkText ? DARK_TEXT_SECONDARY_ALPHA : LIGHT_TEXT_SECONDARY_ALPHA}`;
+  const links = isDark || !hasDarkText ? text : outboxAccent || DAY_LINK_COLOR;
+  return buildBubblePalette(colors, text, accent, secondary, accent, links);
 }
 
 function buildBubblePalette(

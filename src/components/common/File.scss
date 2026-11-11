@@ -5,6 +5,11 @@
   display: flex;
   align-items: center;
 
+  .Message.own & {
+    --color-primary: var(--message-incoming-control);
+    --color-primary-foreground: var(--message-incoming-control-foreground);
+  }
+
   .content-inner & {
     min-width: 14rem;
 

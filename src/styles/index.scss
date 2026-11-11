@@ -525,7 +525,6 @@ body:not(.is-ios) {
   --color-background-secondary: rgb(15, 15, 15);
   --color-background-secondary-accent: rgb(25, 25, 25);
   --color-background-own: rgb(118, 106, 200);
-  --color-background-own-apple: rgb(118, 106, 200);
   --color-background-selected: rgb(44, 44, 44);
   --color-background-own-selected: rgb(101, 73, 212);
   --color-chat-hover: rgb(44, 44, 44);
@@ -554,9 +553,7 @@ body:not(.is-ios) {
   --color-reply-hover: rgb(39, 39, 39);
   --color-reply-active: rgb(46, 47, 47);
   --color-reply-own-hover: rgb(135, 117, 218);
-  --color-reply-own-hover-apple: rgb(135, 117, 218);
   --color-reply-own-active: rgb(145, 125, 234);
-  --color-reply-own-active-apple: rgb(145, 125, 234);
   --color-accent-own: rgb(255, 255, 255);
   --color-accent-own-rgb: 255, 255, 255;
   --color-message-meta-own: rgb(255, 255, 255, 0.533);
