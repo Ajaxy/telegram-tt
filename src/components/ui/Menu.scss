@@ -1,3 +1,9 @@
+.MenuPortal {
+  position: absolute;
+  inset: 0;
+  height: 0;
+}
+
 .Menu {
   &.fluid .bubble {
     width: auto;
@@ -82,6 +88,11 @@
     &.with-footer {
       padding-bottom: 0;
     }
+
+    @media (display-mode: picture-in-picture) {
+      overflow-y: auto;
+      max-height: calc(100dvh - 2rem);
+    }
   }
 
   body.has-open-dialog &:not(.with-menu-transitions) .bubble {
@@ -128,6 +139,10 @@
   &.in-portal {
     position: absolute;
     z-index: var(--z-portal-menu);
+
+    .backdrop {
+      inset: 0;
+    }
   }
 }
 

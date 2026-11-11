@@ -171,6 +171,20 @@ interface Document {
   webkitExitFullscreen?: () => Promise<void>;
 }
 
+interface DocumentPictureInPictureOptions {
+  width?: number;
+  height?: number;
+}
+
+interface DocumentPictureInPicture extends EventTarget {
+  readonly window?: Window;
+  requestWindow(options?: DocumentPictureInPictureOptions): Promise<Window>;
+}
+
+interface Window {
+  readonly documentPictureInPicture?: DocumentPictureInPicture;
+}
+
 interface HTMLElement {
   mozRequestFullScreen?: () => Promise<void>;
   webkitEnterFullscreen?: () => Promise<void>;

@@ -11,6 +11,7 @@ import { captureEvents } from '../../../util/captureEvents';
 import { clamp } from '../../../util/math';
 
 import useLastCallback from '../../../hooks/useLastCallback';
+import useWindow from '../../../hooks/useWindow';
 
 import styles from './PlayerSeekLine.module.scss';
 
@@ -31,6 +32,7 @@ const PlayerSeekLine = ({
   getProgress,
   onSeek,
 }: OwnProps) => {
+  const targetWindow = useWindow();
   const containerRef = useRef<HTMLDivElement>();
   const fillRef = useRef<HTMLDivElement>();
   const thumbRef = useRef<HTMLDivElement>();
@@ -134,11 +136,12 @@ const PlayerSeekLine = ({
     container.addEventListener('touchcancel', handleTouchCancel, { passive: true });
 
     return () => {
+      handleCancelSeek();
       cleanupCaptureEvents();
       container.removeEventListener('touchend', handleTouchEnd);
       container.removeEventListener('touchcancel', handleTouchCancel);
     };
-  }, [handleCapture, handleDrag, handleRelease]);
+  }, [handleCapture, handleDrag, handleRelease, handleCancelSeek, targetWindow]);
 
   return (
     <div className={buildClassName(styles.root, isCentered && styles.centered, className)}>

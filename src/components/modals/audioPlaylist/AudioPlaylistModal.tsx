@@ -14,7 +14,7 @@ import {
 } from '../../../global/selectors';
 import {
   selectCurrentPlaylistKey, selectPlaybackItem, selectPlaybackMedia, selectPlaybackSource, selectPlaylistKeys,
-  selectRichMessageAudios,
+  selectRichMessageAudios, selectUpcomingTrackKey,
 } from '../../../global/selectors/audioPlayer';
 import { selectUserSavedMusic } from '../../../global/selectors/users';
 import { ensureAudioContext } from '../../../util/audioPlayback/audioAnalyser';
@@ -24,6 +24,7 @@ import { getState, subscribe } from '../../../util/audioPlayback/playbackControl
 import buildClassName from '../../../util/buildClassName';
 import { isSearchResultKey, parseSearchResultKey } from '../../../util/keys/searchResultKey';
 
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLang from '../../../hooks/useLang';
@@ -33,13 +34,21 @@ import useReorderableList from '../../../hooks/useReorderableList';
 import Icon from '../../common/icons/Icon';
 import PlayableAudio from '../../common/PlayableAudio';
 import ProfileMusic from '../../common/ProfileMusic';
-import Island from '../../gili/layout/Island';
+import Island, { IslandTitle } from '../../gili/layout/Island';
+import Modal, {
+  ModalCloseButton, ModalHeader, ModalHeaderAction, ModalPictureInPictureButton, ModalTitle,
+} from '../../gili/modal/Modal';
 import InfiniteScroll from '../../ui/InfiniteScroll';
-import Modal from '../../ui/Modal';
 import PlaylistControls from './PlaylistControls';
 import PlaylistTrack from './PlaylistTrack';
 
 import styles from './AudioPlaylistModal.module.scss';
+
+const AUDIO_PLAYLIST_PICTURE_IN_PICTURE_ID = 'audio-playlist';
+const PICTURE_IN_PICTURE_OPTIONS: DocumentPictureInPictureOptions = { width: 360, height: 400 };
+const FULL_QUEUE_MIN_TRACKS = 2;
+
+type QueueLayout = 'full' | 'next' | 'none';
 
 export type OwnProps = {
   modal: TabState['isAudioPlaylistModalOpen'];
@@ -50,6 +59,7 @@ type StateProps = {
   chatId?: string;
   messageId?: number;
   currentKey?: PlaylistKey;
+  nextKey?: PlaylistKey;
   playlistIds?: readonly PlaylistKey[];
   savedMusicById?: Record<string, ApiAudio>;
   isSavedMusicFullyLoaded?: boolean;
@@ -68,6 +78,7 @@ const AudioPlaylistModal = ({
   chatId,
   messageId,
   currentKey,
+  nextKey,
   playlistIds,
   savedMusicById,
   isSavedMusicFullyLoaded,
@@ -87,8 +98,16 @@ const AudioPlaylistModal = ({
   const isOpen = Boolean(modal);
 
   const scrollRef = useRef<HTMLDivElement>();
+  const layoutRef = useRef<HTMLDivElement>();
+  const controlsRef = useRef<HTMLDivElement>();
+  const queueTitleRef = useRef<HTMLDivElement>();
   const forceUpdate = useForceUpdate();
   const lang = useLang();
+
+  const [queueLayout, setQueueLayout] = useState<QueueLayout>('full');
+  // Modal mounts its body after the parent's effects
+  layoutRef.onChange = forceUpdate;
+  scrollRef.onChange = forceUpdate;
 
   const [previewOrder, setPreviewOrder] = useState<string[] | undefined>();
   const lastDraggedIdRef = useRef<string | undefined>();
@@ -191,7 +210,9 @@ const AudioPlaylistModal = ({
     loadSavedMusicIds();
   }, [isOpen, hasAudioTrack, isSavedMusicStatusLoaded, loadSavedMusicIds]);
 
-  const shouldShowModal = isOpen && isPlaylistLoaded && (!isAudioTrack || isSavedMusicStatusLoaded);
+  const isDataReady = isPlaylistLoaded && (!isAudioTrack || isSavedMusicStatusLoaded);
+  // A new source loading keeps the shown modal in place, including picture-in-picture
+  const shouldShowModal = Boolean(useCurrentOrPrev(isOpen ? (isDataReady || undefined) : false, true));
 
   const canReorder = Boolean(isOwnPlaylist && displayedIds && displayedIds.length > 1);
 
@@ -324,19 +345,21 @@ const AudioPlaylistModal = ({
   });
 
   const revealedForRef = useRef<PlaylistKey>();
-  useEffect(() => {
+  const revealCurrentTrack = useLastCallback(() => {
     if (!shouldShowModal || currentKey === undefined) {
       revealedForRef.current = undefined;
       return;
     }
     if (revealedForRef.current === currentKey || !viewportIds) return;
 
-    revealedForRef.current = currentKey;
     const list = scrollRef.current;
     const element = list?.querySelector<HTMLElement>(`[data-track-id="${currentKey}"]`);
     if (!list || !element) return;
 
     requestMeasure(() => {
+      if (!list.clientHeight) return;
+
+      revealedForRef.current = currentKey;
       const listRect = list.getBoundingClientRect();
       const elementRect = element.getBoundingClientRect();
       const scrollTop = list.scrollTop + elementRect.top - listRect.top - (listRect.height - elementRect.height) / 2;
@@ -345,7 +368,8 @@ const AudioPlaylistModal = ({
         list.scrollTop = scrollTop;
       });
     });
-  }, [shouldShowModal, currentKey, viewportIds]);
+  });
+  useEffect(revealCurrentTrack, [shouldShowModal, currentKey, viewportIds, revealCurrentTrack]);
 
   function renderTrack(trackId: PlaylistKey) {
     switch (source?.type) {
@@ -359,6 +383,68 @@ const AudioPlaylistModal = ({
   }
 
   const hasList = Boolean(displayedIds && displayedIds.length > 1);
+
+  const updateQueueLayout = useLastCallback(() => {
+    revealCurrentTrack();
+
+    requestMeasure(() => {
+      const layout = layoutRef.current;
+      const controls = controlsRef.current;
+      if (!layout || !controls) return;
+
+      const list = scrollRef.current;
+      const row = list?.firstElementChild;
+      const nextRow = row?.nextElementSibling;
+      if (!list || !row || !nextRow) {
+        setQueueLayout('none');
+        return;
+      }
+
+      const ownerWindow = layout.ownerDocument.defaultView!;
+      const layoutStyle = ownerWindow.getComputedStyle(layout);
+      const listStyle = ownerWindow.getComputedStyle(list);
+      const titleStyle = ownerWindow.getComputedStyle(queueTitleRef.current!);
+      const queueStyle = ownerWindow.getComputedStyle(queueTitleRef.current!.parentElement!);
+      const maxHeight = parseFloat(layoutStyle.maxHeight);
+      const availableHeight = (Number.isNaN(maxHeight) ? layout.clientHeight : maxHeight)
+        - parseFloat(layoutStyle.paddingTop) - parseFloat(layoutStyle.paddingBottom)
+        - controls.offsetHeight - parseFloat(layoutStyle.rowGap);
+      const rowHeight = parseFloat(ownerWindow.getComputedStyle(row).height);
+      const rowGap = parseFloat(ownerWindow.getComputedStyle(nextRow).marginTop);
+      const listPadding = parseFloat(listStyle.paddingTop) + parseFloat(listStyle.paddingBottom);
+      const headingHeight = parseFloat(titleStyle.lineHeight) + parseFloat(queueStyle.rowGap);
+      const nextHeight = rowHeight + listPadding + headingHeight;
+      const fullHeight = rowHeight * FULL_QUEUE_MIN_TRACKS + rowGap + listPadding
+        + (ownerWindow.matchMedia('(display-mode: picture-in-picture)').matches ? headingHeight : 0);
+
+      setQueueLayout(availableHeight >= fullHeight ? 'full'
+        : availableHeight >= nextHeight && nextKey !== undefined ? 'next' : 'none');
+    });
+  });
+
+  // Observers run with their window's rendering, which pauses for a hidden opener while picture-in-picture is shown
+  const [layoutWindow, setLayoutWindow] = useState<Window & typeof globalThis>();
+  const handleAdopt = useLastCallback(() => {
+    setLayoutWindow(layoutRef.current?.ownerDocument.defaultView || undefined);
+  });
+
+  const hasLayout = Boolean(layoutRef.current);
+  const hasScroll = Boolean(scrollRef.current);
+  useEffect(() => {
+    if (!hasLayout || !layoutWindow) return undefined;
+
+    const observer = new layoutWindow.ResizeObserver(updateQueueLayout);
+    observer.observe(layoutRef.current!);
+    observer.observe(controlsRef.current!);
+    if (hasScroll) observer.observe(scrollRef.current!);
+    layoutWindow.addEventListener('resize', updateQueueLayout);
+
+    return () => {
+      observer.disconnect();
+      layoutWindow.removeEventListener('resize', updateQueueLayout);
+    };
+  }, [hasLayout, hasScroll, layoutWindow, updateQueueLayout]);
+  useEffect(updateQueueLayout, [viewportIds, nextKey, updateQueueLayout]);
 
   const title = source?.type === 'savedMusic'
     ? (isOwnPlaylist
@@ -416,45 +502,86 @@ const AudioPlaylistModal = ({
   return (
     <Modal
       isOpen={shouldShowModal}
-      className={styles.modal}
+      dialogClassName={styles.modal}
       contentClassName={styles.content}
-      title={title}
-      hasCloseButton
-      isCondensedHeader
-      onClose={closeAudioPlaylistModal}
-    >
-      {hasList && (
-        <Island className={styles.listIsland}>
-          <InfiniteScroll
-            ref={scrollRef}
-            items={viewportIds}
-            itemSelector=".scroll-item"
-            onLoadMore={handleScrollLoadMore}
-            className={buildClassName('custom-scroll', styles.list)}
-          >
-            {canReorder ? renderSortableTracks() : viewportIds?.map((trackId) => (
-              <div
-                key={trackId}
-                className={buildClassName(
-                  styles.trackRow,
-                  trackId === currentKey && styles.activeTrackRow,
-                  'scroll-item',
-                )}
-                data-track-id={trackId}
-              >
-                {renderTrack(trackId)}
-              </div>
-            ))}
-          </InfiniteScroll>
-        </Island>
+      height="auto"
+      noScrollable
+      noContentInlinePadding
+      pictureInPictureId={AUDIO_PLAYLIST_PICTURE_IN_PICTURE_ID}
+      pictureInPictureOptions={PICTURE_IN_PICTURE_OPTIONS}
+      noHeaderInPictureInPicture
+      ariaLabel={title}
+      header={(
+        <ModalHeader noMask>
+          <ModalCloseButton />
+          <ModalTitle>{title}</ModalTitle>
+          <ModalHeaderAction>
+            <ModalPictureInPictureButton />
+          </ModalHeaderAction>
+        </ModalHeader>
       )}
-
-      <PlaylistControls
-        isPlaying={isPlaying}
-        duration={duration}
-        onPlayPause={handlePlayPause}
-        onSeek={playbackController.seek}
-      />
+      onClose={closeAudioPlaylistModal}
+      onAdopt={handleAdopt}
+    >
+      <div
+        ref={layoutRef}
+        className={buildClassName(
+          styles.layout,
+          queueLayout === 'next' && styles.compactQueue,
+          queueLayout === 'none' && styles.noQueue,
+        )}
+      >
+        {hasList && (
+          <div
+            className={styles.listContainer}
+            style={`--playlist-track-count: ${viewportIds?.length || displayedIds!.length};`}
+          >
+            <div className={styles.queue}>
+              <IslandTitle ref={queueTitleRef} className={styles.queueTitle}>
+                {queueLayout === 'next' ? lang('AudioUpNext') : title}
+              </IslandTitle>
+              <Island className={styles.listIsland}>
+                <InfiniteScroll
+                  ref={scrollRef}
+                  items={viewportIds}
+                  itemSelector=".scroll-item"
+                  onLoadMore={handleScrollLoadMore}
+                  className={buildClassName('custom-scroll', styles.list, styles.fullList)}
+                >
+                  {canReorder ? renderSortableTracks() : viewportIds?.map((trackId) => (
+                    <div
+                      key={trackId}
+                      className={buildClassName(
+                        styles.trackRow,
+                        trackId === currentKey && styles.activeTrackRow,
+                        'scroll-item',
+                      )}
+                      data-track-id={trackId}
+                    >
+                      {renderTrack(trackId)}
+                    </div>
+                  ))}
+                </InfiniteScroll>
+                {queueLayout === 'next' && nextKey !== undefined && (
+                  <div className={styles.list}>
+                    <div className={styles.trackRow} data-track-id={nextKey}>
+                      {renderTrack(nextKey)}
+                    </div>
+                  </div>
+                )}
+              </Island>
+            </div>
+          </div>
+        )}
+        <div ref={controlsRef} className={styles.controlsContainer}>
+          <PlaylistControls
+            isPlaying={isPlaying}
+            duration={duration}
+            onPlayPause={handlePlayPause}
+            onSeek={playbackController.seek}
+          />
+        </div>
+      </div>
     </Modal>
   );
 };
@@ -475,6 +602,7 @@ export default memo(withGlobal<OwnProps>(
       chatId,
       messageId,
       currentKey: selectCurrentPlaylistKey(global),
+      nextKey: selectUpcomingTrackKey(global),
       playlistIds: selectPlaylistKeys(global),
       savedMusicById: savedMusic?.byId,
       isSavedMusicFullyLoaded: savedMusic?.isFullyLoaded,

@@ -15,6 +15,7 @@ import {
 } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import * as playbackController from '../../../util/audioPlayback/playbackController';
+import { focusDocumentPictureInPicture } from '../../../util/documentPictureInPicture';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { isSearchResultKey, parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { hasMessageTtl } from '../../helpers/messages';
@@ -241,6 +242,10 @@ addActionHandler('settlePendingPlaylistStep', (global, actions, payload): Action
 
 addActionHandler('openAudioPlaylistModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
+
+  if (tabId === getCurrentTabId()) {
+    focusDocumentPictureInPicture('audio-playlist');
+  }
 
   return updateTabState(global, { isAudioPlaylistModalOpen: true }, tabId);
 });

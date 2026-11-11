@@ -43,7 +43,6 @@ type DOMElement = HTMLElement | SVGElement;
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-const HAS_MOVE_BEFORE_SUPPORT = typeof Element !== 'undefined' && 'moveBefore' in Element.prototype;
 
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
@@ -459,7 +458,7 @@ function unmountRealTree($element: VirtualElement) {
 }
 
 function insertBefore(parentEl: DOMElement | DocumentFragment, node: Node, nextSibling?: ChildNode) {
-  if (HAS_MOVE_BEFORE_SUPPORT && node.isConnected && node.parentNode === parentEl) {
+  if (parentEl.moveBefore && node.isConnected && node.parentNode === parentEl) {
     parentEl.moveBefore(node, nextSibling!);
   } else if (nextSibling) {
     parentEl.insertBefore(node, nextSibling);

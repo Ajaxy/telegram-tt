@@ -91,6 +91,7 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
+export const IS_DOCUMENT_PICTURE_IN_PICTURE_SUPPORTED = Boolean(window.documentPictureInPicture?.requestWindow);
 export const ARE_CALLS_SUPPORTED = true;
 
 export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE

@@ -1623,6 +1623,8 @@ export interface LangPair {
   'ProfileTabGifts': undefined;
   'Playlist': undefined;
   'PlaylistYourTitle': undefined;
+  'AudioUpNext': undefined;
+  'PictureInPictureResizeHint': undefined;
   'ProfileTabMembers': undefined;
   'ProfileTabBotPreview': undefined;
   'ProfileTabMedia': undefined;

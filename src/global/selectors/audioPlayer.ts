@@ -517,6 +517,15 @@ export function selectCanGoPrev<T extends GlobalState>(
     || selectIsWrapTargetMissing(global, false, tabId);
 }
 
+export function selectUpcomingTrackKey<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (!selectCanGoNext(global, tabId)) return undefined;
+
+  return selectIsShuffling(global, tabId)
+    ? selectShuffleForwardKey(global, tabId) : selectNextTrackKey(global, tabId);
+}
+
 export function selectHasPlaylistWindow<T extends GlobalState>(
   global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {

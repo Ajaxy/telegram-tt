@@ -101,10 +101,17 @@ let fastRafFallbackTimeout: number | undefined;
 // (and therefore is executed) earlier than RAF callback scheduled by `fastRaf`
 export function fastRaf(callback: NoneToVoidFunction, withTimeoutFallback = false) {
   if (!fastRafCallbacks) {
-    fastRafCallbacks = new Set([callback]);
+    const callbacks = new Set([callback]);
+    fastRafCallbacks = callbacks;
 
-    requestAnimationFrame(() => {
-      const currentCallbacks = fastRafCallbacks!;
+    const pictureInPictureWindow = window.documentPictureInPicture?.window;
+
+    const runCallbacks = () => {
+      if (fastRafCallbacks !== callbacks) return;
+
+      // A hidden opener keeps its frame queued, so the losing frame must not retain the callbacks
+      cancelAnimationFrame(mainFrameId);
+      if (pictureInPictureFrameId !== undefined) pictureInPictureWindow!.cancelAnimationFrame(pictureInPictureFrameId);
 
       fastRafCallbacks = undefined;
       fastRafFallbackCallbacks = undefined;
@@ -114,8 +121,12 @@ export function fastRaf(callback: NoneToVoidFunction, withTimeoutFallback = fals
         fastRafFallbackTimeout = undefined;
       }
 
-      currentCallbacks.forEach((cb) => cb());
-    });
+      callbacks.forEach((cb) => cb());
+    };
+
+    const mainFrameId = requestAnimationFrame(runCallbacks);
+    // The visible PiP window keeps rendering when the opener's animation frames are suspended
+    const pictureInPictureFrameId = pictureInPictureWindow?.requestAnimationFrame(runCallbacks);
   } else {
     fastRafCallbacks.add(callback);
   }

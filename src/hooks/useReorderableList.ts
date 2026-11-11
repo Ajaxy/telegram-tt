@@ -11,6 +11,7 @@ import buildStyle from '../util/buildStyle';
 import getPointerPosition from '../util/events/getPointerPosition';
 import { REM } from '../components/common/helpers/mediaDimensions';
 import useLastCallback from './useLastCallback';
+import useWindow from './useWindow';
 
 type ReorderableId = number | string;
 
@@ -58,6 +59,7 @@ export default function useReorderableList<T extends ReorderableId>({
   withAutoscroll,
   onReorder,
 }: ReorderableListOptions<T>) {
+  const renderingWindow = useWindow();
   const rowElementsRef = useRef(new Map<T, HTMLElement>());
   const dragElementsRef = useRef(new Map<T, HTMLElement>());
   const handleElementsRef = useRef(new Map<T, HTMLElement>());
@@ -225,8 +227,8 @@ export default function useReorderableList<T extends ReorderableId>({
     restartAutoscrollIfNeeded(y);
   });
 
-  const handleVisibilityChange = useLastCallback(() => {
-    if (document.visibilityState === 'hidden') {
+  const handleVisibilityChange = useLastCallback((event: Event) => {
+    if ((event.currentTarget as Document).visibilityState === 'hidden') {
       handleRelease();
     }
   });
@@ -263,22 +265,32 @@ export default function useReorderableList<T extends ReorderableId>({
       return undefined;
     }
 
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', handleRelease);
-    document.addEventListener('touchmove', handleDrag, { passive: true });
-    document.addEventListener('touchend', handleRelease);
-    document.addEventListener('touchcancel', handleRelease);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const rowElement = rowElementsRef.current.get(draggedId);
+    if (!rowElement) {
+      handleRelease();
+      return undefined;
+    }
+
+    const targetDocument = rowElement.ownerDocument;
+    const targetWindow = targetDocument.defaultView!;
+    targetDocument.addEventListener('mousemove', handleDrag);
+    targetDocument.addEventListener('mouseup', handleRelease);
+    targetDocument.addEventListener('touchmove', handleDrag, { passive: true });
+    targetDocument.addEventListener('touchend', handleRelease);
+    targetDocument.addEventListener('touchcancel', handleRelease);
+    targetDocument.addEventListener('visibilitychange', handleVisibilityChange);
+    targetWindow.addEventListener('pagehide', handleRelease);
 
     return () => {
-      document.removeEventListener('mousemove', handleDrag);
-      document.removeEventListener('mouseup', handleRelease);
-      document.removeEventListener('touchmove', handleDrag);
-      document.removeEventListener('touchend', handleRelease);
-      document.removeEventListener('touchcancel', handleRelease);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      targetDocument.removeEventListener('mousemove', handleDrag);
+      targetDocument.removeEventListener('mouseup', handleRelease);
+      targetDocument.removeEventListener('touchmove', handleDrag);
+      targetDocument.removeEventListener('touchend', handleRelease);
+      targetDocument.removeEventListener('touchcancel', handleRelease);
+      targetDocument.removeEventListener('visibilitychange', handleVisibilityChange);
+      targetWindow.removeEventListener('pagehide', handleRelease);
     };
-  }, [draggedId]);
+  }, [draggedId, renderingWindow]);
 
   const startDrag = useLastCallback((event: React.MouseEvent | React.TouchEvent, itemId: T) => {
     if (isDisabled || itemIdsRef.current.length < 2) {
@@ -515,7 +527,7 @@ function getVerticalBounds<T extends ReorderableId>(
 
 function getVisibleBounds(scrollContainer: HTMLElement) {
   const { top, bottom } = scrollContainer.getBoundingClientRect();
-  const { paddingTop, paddingBottom } = getComputedStyle(scrollContainer);
+  const { paddingTop, paddingBottom } = scrollContainer.ownerDocument.defaultView!.getComputedStyle(scrollContainer);
 
   return {
     top: top + parseFloat(paddingTop),

@@ -11,6 +11,7 @@ type HandlerName =
   | 'onSpace';
 type Handler = (e: KeyboardEvent) => void | boolean;
 type CaptureOptions = Partial<Record<HandlerName, Handler>>;
+type Handlers = Record<HandlerName, Handler[]>;
 
 const keyToHandlerName: Record<string, HandlerName> = {
   Enter: 'onEnter',
@@ -26,22 +27,25 @@ const keyToHandlerName: Record<string, HandlerName> = {
   ' ': 'onSpace',
 };
 
-const handlers: Record<HandlerName, Handler[]> = {
-  onEnter: [],
-  onDelete: [],
-  onBackspace: [],
-  onEsc: [],
-  onUp: [],
-  onDown: [],
-  onLeft: [],
-  onRight: [],
-  onTab: [],
-  onSpace: [],
-};
+const handlersByDocument = new WeakMap<Document, Handlers>();
 
-export default function captureKeyboardListeners(options: CaptureOptions) {
-  if (!hasActiveHandlers()) {
-    document.addEventListener('keydown', handleKeyDown, true);
+export default function captureKeyboardListeners(options: CaptureOptions, targetDocument = document) {
+  const handlers: Handlers = handlersByDocument.get(targetDocument) || {
+    onEnter: [],
+    onDelete: [],
+    onBackspace: [],
+    onEsc: [],
+    onUp: [],
+    onDown: [],
+    onLeft: [],
+    onRight: [],
+    onTab: [],
+    onSpace: [],
+  };
+  handlersByDocument.set(targetDocument, handlers);
+
+  if (!hasActiveHandlers(handlers)) {
+    targetDocument.addEventListener('keydown', handleKeyDown, true);
   }
 
   (Object.keys(options) as Array<HandlerName>).forEach((handlerName) => {
@@ -57,17 +61,17 @@ export default function captureKeyboardListeners(options: CaptureOptions) {
   });
 
   return () => {
-    releaseKeyboardListener(options);
+    releaseKeyboardListener(options, targetDocument, handlers);
   };
 }
 
-function hasActiveHandlers() {
+function hasActiveHandlers(handlers: Handlers) {
   return Object.values(handlers).some((keyHandlers) => Boolean(keyHandlers.length));
 }
 
-export function hasActiveHandler(key: string) {
+export function hasActiveHandler(key: string, targetDocument = document) {
   const handlerName = keyToHandlerName[key];
-  return handlerName ? Boolean(handlers[handlerName].length) : false;
+  return handlerName ? Boolean(handlersByDocument.get(targetDocument)?.[handlerName].length) : false;
 }
 
 function handleKeyDown(e: KeyboardEvent) {
@@ -80,6 +84,7 @@ function handleKeyDown(e: KeyboardEvent) {
     return;
   }
 
+  const handlers = handlersByDocument.get(e.currentTarget as Document)!;
   const { length } = handlers[handlerName];
   if (!length) {
     return;
@@ -94,7 +99,7 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
-function releaseKeyboardListener(options: CaptureOptions) {
+function releaseKeyboardListener(options: CaptureOptions, targetDocument: Document, handlers: Handlers) {
   (Object.keys(options) as Array<HandlerName>).forEach((handlerName) => {
     const handler = options[handlerName];
     const currentEventHandlers = handlers[handlerName];
@@ -106,7 +111,7 @@ function releaseKeyboardListener(options: CaptureOptions) {
     }
   });
 
-  if (!hasActiveHandlers()) {
-    document.removeEventListener('keydown', handleKeyDown, true);
+  if (!hasActiveHandlers(handlers)) {
+    targetDocument.removeEventListener('keydown', handleKeyDown, true);
   }
 }

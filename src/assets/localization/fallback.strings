@@ -2054,6 +2054,8 @@
 "Playlist" = "Playlist";
 "PlaylistTitle" = "{peer}'s Playlist";
 "PlaylistYourTitle" = "Your Playlist";
+"AudioUpNext" = "Up Next";
+"PictureInPictureResizeHint" = "Make this window larger to see its contents.";
 "ProfileTabMembers" = "Members";
 "ProfileTabBotPreview" = "Preview";
 "ProfileTabMedia" = "Media";

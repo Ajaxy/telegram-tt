@@ -2,7 +2,6 @@ import { IS_IOS, IS_WINDOWS } from './browser/windowEnvironment';
 import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';
-import windowSize from './windowSize';
 
 export enum SwipeDirection {
   Up,
@@ -103,6 +102,7 @@ const lethargy = new Lethargy({
 
 export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   let captureEvent: MouseEvent | RealTouchEvent | WheelEvent | undefined;
+  let captureDocument: Document | undefined;
   let hasMoved = false;
   let hasSwiped = false;
   let isZooming = false;
@@ -116,10 +116,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     x: false,
     y: false,
   };
-  const currentWindowSize = windowSize.get();
+  const currentWindow = element.ownerDocument.defaultView!;
   let initialTouchCenter = {
-    x: currentWindowSize.width / 2,
-    y: currentWindowSize.height / 2,
+    x: currentWindow.innerWidth / 2,
+    y: currentWindow.innerHeight / 2,
   };
   let initialSwipeAxis: TSwipeAxis | undefined;
   const minZoom = options.minZoom ?? 1;
@@ -155,18 +155,20 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     captureEvent = e;
+    captureDocument = element.ownerDocument;
 
     if (e.type === 'mousedown') {
       if (!withNativeDrag && onDrag) {
         e.preventDefault();
       }
 
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onRelease);
+      captureDocument.addEventListener('mousemove', onMove);
+      captureDocument.addEventListener('mouseup', onRelease);
     } else if (e.type === 'touchstart') {
       if (IS_IOS) {
         const x = (e as RealTouchEvent).touches[0].pageX;
-        isNearEdge = x <= IOS_SCREEN_EDGE_THRESHOLD || x >= windowSize.get().width - IOS_SCREEN_EDGE_THRESHOLD;
+        isNearEdge = x <= IOS_SCREEN_EDGE_THRESHOLD
+          || x >= captureDocument.defaultView!.innerWidth - IOS_SCREEN_EDGE_THRESHOLD;
       }
 
       // We need to always listen on `touchstart` target:
@@ -192,7 +194,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     if (withCursor) {
-      document.body.classList.add('cursor-grabbing');
+      captureDocument.body.classList.add('cursor-grabbing');
     }
 
     options.onCapture?.(e);
@@ -201,17 +203,17 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   function onRelease(e?: MouseEvent | TouchEvent) {
     if (captureEvent) {
       if (options.withCursor) {
-        document.body.classList.remove('cursor-grabbing');
+        captureDocument!.body.classList.remove('cursor-grabbing');
       }
 
-      document.removeEventListener('mouseup', onRelease);
-      document.removeEventListener('mousemove', onMove);
+      captureDocument!.removeEventListener('mouseup', onRelease);
+      captureDocument!.removeEventListener('mousemove', onMove);
       (captureEvent.target as HTMLElement).removeEventListener('touchcancel', onRelease);
       (captureEvent.target as HTMLElement).removeEventListener('touchend', onRelease);
       (captureEvent.target as HTMLElement).removeEventListener('touchmove', onMove);
 
       if (IS_IOS && options.selectorToPreventScroll) {
-        Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll))
+        Array.from(captureDocument!.querySelectorAll<HTMLElement>(options.selectorToPreventScroll))
           .forEach((scrollable) => {
             scrollable.style.overflow = '';
           });
@@ -250,12 +252,13 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       x: false,
       y: false,
     };
-    const newWindowSize = windowSize.get();
+    const targetWindow = element.ownerDocument.defaultView!;
     initialTouchCenter = {
-      x: newWindowSize.width / 2,
-      y: newWindowSize.height / 2,
+      x: targetWindow.innerWidth / 2,
+      y: targetWindow.innerHeight / 2,
     };
     captureEvent = undefined;
+    captureDocument = undefined;
     isNearEdge = false;
   }
 
@@ -312,7 +315,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       }
 
       if (IS_IOS && shouldPreventScroll && options.selectorToPreventScroll) {
-        Array.from(document.querySelectorAll<HTMLElement>(options.selectorToPreventScroll))
+        Array.from(captureDocument!.querySelectorAll<HTMLElement>(options.selectorToPreventScroll))
           .forEach((scrollable) => {
             scrollable.style.overflow = 'hidden';
           });
@@ -437,11 +440,11 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
   }
 
   element.addEventListener('mousedown', onCapture);
-  document.body.addEventListener('touchstart', onCapture, { passive: !options.isNotPassive });
+  element.addEventListener('touchstart', onCapture, { passive: !options.isNotPassive });
 
   return () => {
     onRelease();
-    document.body.removeEventListener('touchstart', onCapture);
+    element.removeEventListener('touchstart', onCapture);
     element.removeEventListener('mousedown', onCapture);
     element.removeEventListener('wheel', onWheel);
   };

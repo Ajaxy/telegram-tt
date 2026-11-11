@@ -30,6 +30,7 @@ import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useThrottledCallback from '../../hooks/useThrottledCallback';
 import useUniqueId from '../../hooks/useUniqueId';
+import useWindow from '../../hooks/useWindow';
 import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
 
 export type OwnProps = {
@@ -97,6 +98,7 @@ const AnimatedSticker = ({
   }
 
   const viewId = useUniqueId();
+  const targetWindow = useWindow();
   const rendererId = renderId && fitzModifier ? `${renderId}_${fitzModifier}` : renderId;
 
   const [animation, setAnimation] = useState<TLottieInstance>();
@@ -203,6 +205,10 @@ const AnimatedSticker = ({
   useEffect(() => {
     animation?.setColor(colorRef.current);
   }, [color, animation]);
+
+  useEffect(() => {
+    animation?.redrawView(viewId);
+  }, [animation, targetWindow, viewId]);
 
   useEffect(() => {
     if (typeof speed === 'number') {

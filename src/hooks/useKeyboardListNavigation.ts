@@ -43,7 +43,7 @@ const useKeyboardListNavigation = (
 
     e.preventDefault();
 
-    const focusedElement = document.activeElement;
+    const focusedElement = element.ownerDocument.activeElement;
     const elementChildren = Array.from(itemSelector ? element.querySelectorAll(itemSelector) : element.children);
 
     const activeIndex = focusedElement ? elementChildren.indexOf(focusedElement) : -1;
