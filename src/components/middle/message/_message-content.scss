@@ -551,11 +551,6 @@
       .message-content.no-text & {
         margin-bottom: calc(0.5rem - 0.375rem);
       }
-
-      .theme-dark & {
-        --color-primary: var(--color-selection-highlight);
-        --color-primary-foreground: var(--color-white);
-      }
     }
 
     .CommentButton {

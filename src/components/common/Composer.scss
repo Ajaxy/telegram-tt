@@ -971,7 +971,6 @@
 
     background: transparent !important;
     box-shadow: none !important;
-    caret-color: var(--color-text);
 
     &.touched {
       & ~ .placeholder-text {

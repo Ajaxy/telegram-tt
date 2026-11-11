@@ -14,6 +14,8 @@ const COLOR_PERCENT_MAX = 100;
 const HUE_MAX = 360;
 const RGB_CHANNEL_MAX = 255;
 const MESSAGE_SELECTION_OPACITY = 0.1;
+const TEXT_SELECTION_ALPHA = '4d';
+const TEXT_SELECTION_EMOJI_ALPHA = 'b3';
 const PRIMARY_SHADE_WEIGHT = 0.08;
 const PRIMARY_DARKER_SHADE_WEIGHT = 0.16;
 const PRIMARY_GREYED_WEIGHT = 0.2;
@@ -27,6 +29,7 @@ const ERROR_BACKGROUND = '#b3261e';
 const LIGHT_INCOMING_COLOR = WHITE;
 const NIGHT_INCOMING_COLOR = '#1d1d1d';
 const DEFAULT_CLASSIC_OUTGOING_COLOR = '#e1ffc7';
+const DEFAULT_OUTGOING_TEXT_SELECTION = '#bbde9f';
 const MONOCHROME_NIGHT_OUTGOING_COLOR = '#313131';
 const DEFAULT_NIGHT_ACCENT = '#3e88f7';
 const DEFAULT_NIGHT_OUTGOING_COLORS = ['#a256bf', '#9047ff', '#0771ff'];
@@ -42,6 +45,7 @@ const NIGHT_ACCENT_MIN_BRIGHTNESS = 55;
 const TINTED_ACCENT_MIN_BRIGHTNESS = 18;
 const LIGHT_ACCENT_SATURATION_WEIGHT = 1.1;
 const OUTGOING_SECONDARY_HSV_MULTIPLIERS = [1.344 * 0.75, 4.554 * 1.1, 0.549];
+const OUTGOING_SELECTION_HSV_MULTIPLIERS = [1.013 * 0.75, 1.292, 0.871];
 // Bubble secondary text keeps the translucency iOS and macOS use
 const LIGHT_INCOMING_SECONDARY = '#52525299';
 const DARK_TEXT_SECONDARY_ALPHA = 'cc';
@@ -144,6 +148,9 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
   incoming.accentForeground = primaryForeground;
   incoming.controlForeground = primaryForeground;
   const outgoing = buildOutgoingBubblePalette(outgoingFills, isDark, settings?.outboxAccentColor);
+  // Same as iOS: a deeper bubble shade under dark text, translucent white under light text
+  const outgoingTextSelection = outgoing.text !== BLACK ? `${WHITE}${TEXT_SELECTION_ALPHA}`
+    : settings ? multiplyHsv(outgoing.fill, OUTGOING_SELECTION_HSV_MULTIPLIERS) : DEFAULT_OUTGOING_TEXT_SELECTION;
   const variables: Record<string, string> = {};
   buildBubbleVariables(variables, 'incoming', incoming);
   buildBubbleVariables(variables, 'outgoing', outgoing);
@@ -178,6 +185,8 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--color-primary-opacity': `${accent}1e`,
     '--color-primary-opacity-hover': `${accent}40`,
     '--color-primary-tint': `${accent}1a`,
+    '--color-text-selection': `${accent}${TEXT_SELECTION_ALPHA}`,
+    '--color-selection-highlight-emoji': `${accent}${TEXT_SELECTION_ALPHA}`,
     '--color-chat-active': chatActive,
     '--color-chat-active-greyed': greyed,
     '--color-links': accent,
@@ -204,6 +213,10 @@ export function buildThemePalette(theme: ThemeKey, settings?: ApiThemeSettings):
     '--message-incoming-table-border': isDark ? `${incoming.control}40` : '#0000001a',
     '--message-outgoing-table-background': `${outgoing.control}1a`,
     '--message-outgoing-table-border': `${outgoing.control}40`,
+    '--message-outgoing-text-selection': outgoingTextSelection,
+    // Emoji are painted under the selection, so an opaque one turns see-through over them
+    '--message-outgoing-text-selection-emoji': outgoing.text === BLACK
+      ? `${outgoingTextSelection}${TEXT_SELECTION_EMOJI_ALPHA}` : outgoingTextSelection,
     '--message-service-background': 'var(--action-message-bg)',
     '--message-service-text': WHITE,
     '--message-call-success': isDark ? '#49ad51' : '#63da6e',

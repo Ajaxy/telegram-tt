@@ -161,6 +161,10 @@ body.cursor-ew-resize {
   top: -99999px;
 }
 
+::selection {
+  background-color: var(--color-text-selection);
+}
+
 .allow-selection {
   user-select: text;
 }

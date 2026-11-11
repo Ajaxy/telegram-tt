@@ -34,7 +34,7 @@
     height: 3.375rem;
     border-radius: var(--border-radius-messages-small);
 
-    background: var(--color-primary);
+    background: #3993fb;
   }
 
   .file-progress {
@@ -53,7 +53,7 @@
 
     padding: 1rem 0.75rem 0.5rem;
 
-    color: var(--color-primary-foreground);
+    color: var(--color-white);
 
     clip-path: polygon(0 0, calc(100% - 1.125rem) 0, 100% 1.125rem, 100% 100%, 0 100%);
 
@@ -282,7 +282,7 @@
 // Document extension colors
 .File .file-progress,
 .File .file-icon {
-  color: var(--color-primary-foreground);
+  color: var(--color-white);
 
   &.red {
     color: var(--color-error-foreground);
@@ -295,6 +295,7 @@
   }
 
   &.green {
+    color: var(--color-primary-foreground);
     background-color: var(--color-primary);
   }
 }

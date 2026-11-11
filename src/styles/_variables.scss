@@ -52,7 +52,6 @@
   $color-item-active: #ededed;
   $color-chat-hover: #f4f4f5;
   $color-chat-active: #3390ec;
-  $color-selection: #3993fb;
 
   $color-message-reaction: #ebf3fd;
   $color-message-reaction-hover: #c5def9;
@@ -194,6 +193,8 @@
     --message-incoming-selected: #e6e6e6;
     --message-outgoing-background: #{$color-light-green};
     --message-outgoing-selected: #cbe6b3;
+    --message-outgoing-text-selection: #bbde9f;
+    --message-outgoing-text-selection-emoji: #bbde9fb3;
     --message-service-background: var(--action-message-bg);
     --message-service-text: #ffffff;
     --message-call-success: #63da6e;
@@ -233,8 +234,8 @@
     --color-item-hover: #{$color-item-hover};
     --color-item-active: #{$color-item-active};
 
-    --color-selection-highlight: #{$color-selection};
-    --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, 0.7);
+    --color-text-selection: rgba(#{toRGB($color-primary)}, 0.3);
+    --color-selection-highlight-emoji: var(--color-text-selection);
 
     --color-avatar-story-unread-from: #34c578;
     --color-avatar-story-unread-to: #3ca3f3;

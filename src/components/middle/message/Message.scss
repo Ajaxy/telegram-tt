@@ -234,6 +234,9 @@
       --message-#{$role}: var(--message-outgoing-#{$role});
     }
 
+    --color-text-selection: var(--message-outgoing-text-selection);
+    --color-selection-highlight-emoji: var(--message-outgoing-text-selection-emoji);
+
     --max-width: 30rem;
     --deleting-translate-x: 50%;
 
