@@ -2,7 +2,7 @@ import type {
   ChatMediaSearchParams, ChatMediaSearchSegment, LoadingState, SharedMediaType, ThreadId,
 } from '../../../types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { type ApiPeer, MAIN_THREAD_ID } from '../../../api/types';
+import { type ApiMessage, type ApiPeer, MAIN_THREAD_ID } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
@@ -18,7 +18,9 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, isInsideSortedArrayRange } from '../../../util/iteratees';
 import { getSearchResultKey } from '../../../util/keys/searchResultKey';
 import { callApi } from '../../../api/gramjs';
-import { getIsSavedDialog, getMessageContentIds, isSameReaction } from '../../helpers';
+import {
+  getIsSavedDialog, getSharedMediaKeys, isSameReaction, parseSharedMediaKey,
+} from '../../helpers';
 import { isApiPeerChat } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -48,6 +50,9 @@ import {
 } from '../../selectors';
 import { selectPlaybackSource } from '../../selectors/audioPlayer';
 import { selectThreadIdFromMessage } from '../../selectors/threads';
+
+// Searched for the media viewer, not the audio player
+const VIEWER_MEDIA_TYPES = new Set<SharedMediaType>(['media', 'gif']);
 
 addActionHandler('performMiddleSearch', async (global, actions, payload): Promise<void> => {
   const {
@@ -354,10 +359,18 @@ async function searchSharedMedia<T extends GlobalState>(
     global, resultChatId, threadId, type, newFoundIds, totalCount, nextOffsetId, tabId,
   );
   setGlobal(global);
+  loadPartialRichMessages(resultChatId, messages);
 
   if (!isBudgetPreload) {
     void searchSharedMedia(global, peer, threadId, type, nextOffsetId, true, isSavedDialog, tabId);
   }
+}
+
+// Search returns long rich messages cut short, and their matching media can be past the cutoff
+function loadPartialRichMessages(chatId: string, messages: ApiMessage[]) {
+  messages.forEach(({ id, content }) => {
+    if (content.richMessage?.isPart) getActions().loadRichMessage({ chatId, messageId: id });
+  });
 }
 
 function findChatMediaSearchSegment(
@@ -545,7 +558,11 @@ async function searchChatMedia<T extends GlobalState>(
     if (currentMediaMessageId === PLAYLIST_NEWEST_ANCHOR_ID) loadingState.areAllItemsLoadedForwards = true;
   }
 
-  const filteredIds = getMessageContentIds(byId, newFoundIds, mediaType);
+  const matchingIds = new Set(
+    getSharedMediaKeys(byId, newFoundIds, mediaType).map((key) => parseSharedMediaKey(key).messageId),
+  );
+  // The server matched partial rich messages by media that can be past their cutoff
+  const filteredIds = newFoundIds.filter((id) => matchingIds.has(id) || byId[id].content.richMessage?.isPart);
   currentSegment = mergeWithChatMediaSearchSegment(
     filteredIds,
     loadingState,
@@ -559,10 +576,11 @@ async function searchChatMedia<T extends GlobalState>(
   );
   global = setChatMediaSearchLoading(global, resultChatId, threadId, mediaType, false, tabId);
   setGlobal(global);
+  loadPartialRichMessages(resultChatId, messages);
 
   const hasQueuedRequest = runPendingChatMediaRequest(global, sourceChatId, resultChatId, threadId, mediaType, tabId);
 
-  if (mediaType === 'media') return;
+  if (VIEWER_MEDIA_TYPES.has(mediaType)) return;
 
   if (global.audioPlayer.orderMode === 'shuffle') {
     getActions().loadShufflePlaylist({ tabId });
@@ -605,7 +623,7 @@ function settlePlayerStepForSearch(
   tabId: number,
   shouldContinue: boolean,
 ) {
-  if (mediaType === 'media') return;
+  if (VIEWER_MEDIA_TYPES.has(mediaType)) return;
 
   const global = getGlobal();
   const source = selectPlaybackSource(global, tabId);

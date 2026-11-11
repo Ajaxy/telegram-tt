@@ -509,7 +509,7 @@ export default memo(withGlobal<OwnProps>(
     const canPost = Boolean(currentMessageList && selectCanPostInMessageList(
       global, currentMessageList.chatId, currentMessageList.threadId, currentMessageList.type,
     ));
-    const viewableMedia = selectViewableMedia(global, origin, item);
+    const viewableMedia = selectViewableMedia(global, item);
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
     return {

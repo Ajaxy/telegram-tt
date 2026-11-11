@@ -14,6 +14,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey, ThreadId } from '../../types';
 
 import { RICH_CONTENT_BODY_FONT_SIZE_PX } from '../../config';
+import { isRichMediaMessage } from '../../global/helpers';
 import { selectChatMessage } from '../../global/selectors';
 import { selectMessageTextSize } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
@@ -146,6 +147,9 @@ const MessageRichText = ({
           canAutoLoadMedia={canAutoLoadMedia}
           isProtected={isProtected}
           noPlaylist={noPlaylist}
+          // Scheduled, ephemeral and draft messages have no media list, a translation can't be mapped to original blocks
+          withMediaNavigation={isRichMediaMessage(message) && !forcedRichMessage
+            && !message.isScheduled && !message.isEphemeral && !message.isTypingDraft}
           theme={theme}
           fontSizeAdjust={messageTextSize / RICH_CONTENT_BODY_FONT_SIZE_PX}
           chatId={message.chatId}

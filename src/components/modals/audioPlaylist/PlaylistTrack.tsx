@@ -6,7 +6,7 @@ import type {
   ActiveDownloads, PlaybackSource, ThemeKey, ThreadId,
 } from '../../../types';
 
-import { getIsDownloading, getMessageContent } from '../../../global/helpers';
+import { getIsDownloading, getMessageContent, getRichMediaMessage } from '../../../global/helpers';
 import {
   selectActiveDownloads, selectChatMessage, selectIsChatProtected, selectTheme,
 } from '../../../global/selectors';
@@ -16,9 +16,10 @@ import Audio from '../../common/Audio';
 type OwnProps = {
   chatId: string;
   messageId: number;
+  mediaIndex?: number;
   threadId?: ThreadId;
   playbackSource: PlaybackSource;
-  onPlay: (messageId: number, chatId: string) => void;
+  onPlay: (messageId: number, chatId: string, documentId?: string) => void;
 };
 
 type StateProps = {
@@ -29,6 +30,7 @@ type StateProps = {
 };
 
 const PlaylistTrack = ({
+  mediaIndex,
   threadId,
   playbackSource,
   message,
@@ -47,6 +49,7 @@ const PlaylistTrack = ({
     <Audio
       theme={theme}
       message={message}
+      mediaIndex={mediaIndex}
       variant="sharedMedia"
       threadId={threadId}
       playbackSource={playbackSource}
@@ -60,11 +63,13 @@ const PlaylistTrack = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, messageId }): Complete<StateProps> => {
+  (global, { chatId, messageId, mediaIndex }): Complete<StateProps> => {
     const message = selectChatMessage(global, chatId, messageId);
 
     return {
-      message,
+      message: message?.content.richMessage && mediaIndex !== undefined
+        ? getRichMediaMessage(message, mediaIndex)
+        : message,
       theme: selectTheme(global),
       activeDownloads: selectActiveDownloads(global),
       isChatProtected: selectIsChatProtected(global, chatId),

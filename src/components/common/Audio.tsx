@@ -31,6 +31,8 @@ import TrackRow from './TrackRow';
 type OwnProps = {
   theme: ThemeKey;
   message: ApiMessage;
+  // Set when `message` is a rich message track from `getRichMediaMessage`
+  mediaIndex?: number;
   senderTitle?: string;
   uploadProgress?: number;
   variant: AudioVariant;
@@ -54,7 +56,7 @@ type OwnProps = {
   isTranscriptionError?: boolean;
   autoPlay?: boolean;
   onHideTranscription?: (isHidden: boolean) => void;
-  onPlay?: (messageId: number, chatId: string) => void;
+  onPlay?: (messageId: number, chatId: string, documentId?: string) => void;
   onPause?: NoneToVoidFunction;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
@@ -75,6 +77,7 @@ const PRELOAD = true;
 const Audio = ({
   theme,
   message,
+  mediaIndex,
   senderTitle,
   uploadProgress,
   variant,
@@ -127,7 +130,8 @@ const Audio = ({
   const mediaType: PlaybackMediaType = isVoice ? 'voice' : 'audio';
   const isOwn = isOwnMessage(message);
   const isScheduled = isInScheduled || message.isScheduled;
-  const trackKey = makeMessageTrackKeyFrom(message, isScheduled);
+  const documentId = mediaIndex !== undefined ? audio?.id : undefined;
+  const trackKey = makeMessageTrackKeyFrom(message, isScheduled, documentId);
 
   const source = useMemo<PlaybackSource>(() => {
     if (playbackSource) return playbackSource;
@@ -169,7 +173,7 @@ const Audio = ({
   const handleBeforePlay = useLastCallback(() => {
     if (source.type === 'globalSearch') prepareTrackSwitch(trackKey);
     setAudioPlaybackSource({ source });
-    onPlay?.(message.id, message.chatId);
+    onPlay?.(message.id, message.chatId, documentId);
   });
 
   const handleLockedClick = useLastCallback(() => {

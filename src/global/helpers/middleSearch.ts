@@ -8,4 +8,4 @@ export function buildMediaSearchKey(chatId: string, threadId: ThreadId, mediaTyp
   return `${chatId}_${threadId}_${mediaType}`;
 }
 
-export const WINDOWED_MEDIA_SEARCH_TYPES: SharedMediaType[] = ['media', 'audio', 'voice'];
+export const WINDOWED_MEDIA_SEARCH_TYPES: SharedMediaType[] = ['media', 'gif', 'audio', 'voice'];

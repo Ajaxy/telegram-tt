@@ -35,11 +35,12 @@ import {
 } from '../../types';
 
 import { DEBUG, TME_LINK_PREFIX } from '../../config';
-import { getPageBlocksAudios } from '../../global/helpers/buildPageAudioById';
+import { getPageBlocksAudios, getPageBlocksWithMedia } from '../../global/helpers/buildPageAudioById';
 import { getRichTextPlainText, hasRichText } from '../../global/helpers/richMessage';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
+import { isLocalMessageId } from '../../util/keys/messageKey';
 import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import { getRichQuoteText, getRichQuoteTexts, type RichQuoteRange } from '../../util/text/richQuote';
 import {
@@ -97,6 +98,7 @@ type OwnProps = {
   canAutoLoadMedia?: boolean;
   isProtected?: boolean;
   noPlaylist?: boolean;
+  withMediaNavigation?: boolean;
   theme: ThemeKey;
   fontSizeAdjust?: number;
   pageUrl?: string;
@@ -140,6 +142,7 @@ const RichContent = ({
   canAutoLoadMedia,
   isProtected,
   noPlaylist,
+  withMediaNavigation,
   theme,
   fontSizeAdjust,
   pageUrl,
@@ -154,7 +157,7 @@ const RichContent = ({
   onTelegramChannelClick,
 }: OwnProps) => {
   const {
-    openMapModal, openMediaViewer, openUrl,
+    openMapModal, openMediaViewer, openUrl, searchChatMediaMessages,
   } = getActions();
 
   const lang = useLang();
@@ -183,13 +186,15 @@ const RichContent = ({
     });
   }, [blocks, focusedQuoteRange]);
 
-  const richMessageSource = useMemo<PlaybackSource | undefined>(() => (
-    chatId !== undefined && messageId !== undefined && !noPlaylist
+  // Tracks of a sent message play through the chat playlist, like regular audio messages
+  const audioSource = useMemo<PlaybackSource>(() => (
+    withMediaNavigation && !noPlaylist && chatId !== undefined && messageId !== undefined
+    && !isLocalMessageId(messageId)
       ? {
-        type: 'richMessage', chatId, threadId: threadId ?? MAIN_THREAD_ID, messageId,
+        type: 'chat', chatId, threadId: threadId ?? MAIN_THREAD_ID, mediaType: 'audio',
       }
-      : undefined
-  ), [chatId, messageId, threadId, noPlaylist]);
+      : SINGLE_SOURCE
+  ), [withMediaNavigation, chatId, messageId, threadId, noPlaylist]);
 
   const audioItemsById = useMemo(() => {
     const itemsById = new Map<string, PlaybackItemRef>();
@@ -244,6 +249,26 @@ const RichContent = ({
   });
 
   const handleOpenMedia = useLastCallback((mediaBlocks: PageMediaBlock[], sourceIds: string[], mediaIndex: number) => {
+    const block = mediaBlocks[mediaIndex];
+    const messageMediaIndex = withMediaNavigation ? getPageBlocksWithMedia(blocks).indexOf(block) : -1;
+    if (chatId && messageId && messageMediaIndex !== -1) {
+      searchChatMediaMessages({
+        chatId,
+        threadId,
+        currentMediaMessageId: messageId,
+        mediaType: block.type === 'video' && block.video.isGif ? 'gif' : 'media',
+      });
+      openMediaViewer({
+        chatId,
+        threadId,
+        messageId,
+        mediaIndex: messageMediaIndex,
+        origin: MediaViewerOrigin.Inline,
+        withDynamicLoading: true,
+      });
+      return;
+    }
+
     openMediaViewer({
       origin: messageId ? MediaViewerOrigin.RichPageBlock : MediaViewerOrigin.IVPageBlock,
       mediaIndex,
@@ -474,7 +499,7 @@ const RichContent = ({
               <PlayableAudio
                 audio={block.audio}
                 item={item}
-                source={richMessageSource || SINGLE_SOURCE}
+                source={audioSource}
                 variant="inline"
                 isOwn={isOwn}
                 canDownload={!isProtected}

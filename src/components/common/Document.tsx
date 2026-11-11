@@ -43,12 +43,13 @@ type OwnProps = {
   noDownload?: boolean;
   shouldWarnAboutFiles?: boolean;
   id?: string;
+  mediaIndex?: number;
   onCancelUpload?: NoneToVoidFunction;
   contextActions?: MenuItemContextAction[];
 } & ({
   message: ApiMessage;
   onDateClick: (arg: ApiMessage) => void;
-  onMediaClick?: (messageId: number) => void;
+  onMediaClick?: (messageId: number, chatId: string, mediaIndex?: number) => void;
 } | {
   message?: ApiMessage;
   onDateClick?: never;
@@ -74,6 +75,7 @@ const Document = ({
   noDownload,
   message,
   id,
+  mediaIndex,
   onCancelUpload,
   onMediaClick,
   onDateClick,
@@ -170,7 +172,7 @@ const Document = ({
 
     if (withMediaViewer) {
       if (message) {
-        onMediaClick?.(message.id);
+        onMediaClick?.(message.id, message.chatId, mediaIndex);
       } else if (onMediaClick) {
         (onMediaClick as NoneToVoidFunction)();
       }

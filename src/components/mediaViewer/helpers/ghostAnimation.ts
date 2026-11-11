@@ -5,7 +5,7 @@ import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getMessageHtmlId } from '../../../global/helpers';
+import { getMessageHtmlId, getRichMessageMediaBlocks, isRichMediaMessage } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import { lerp } from '../../../util/math';
@@ -19,6 +19,7 @@ import {
   MEDIA_VIEWER_MEDIA_QUERY,
   REM,
 } from '../../common/helpers/mediaDimensions';
+import { getPageMediaBlockId, isPageMediaBlock } from '../../iv/helpers/pageMedia';
 
 type Rect = Pick<DOMRectReadOnly, 'left' | 'top' | 'width' | 'height'>;
 
@@ -673,21 +674,19 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   let containerSelector;
   let mediaSelector;
 
+  if ((origin === MediaViewerOrigin.Inline || origin === MediaViewerOrigin.Album)
+    && message && isRichMediaMessage(message)) {
+    const block = getRichMessageMediaBlocks(message.content.richMessage!)[index || 0];
+    return getPageBlockNodes(block && isPageMediaBlock(block)
+      // eslint-disable-next-line @stylistic/max-len
+      ? document.querySelector<HTMLElement>(`.Transition_slide-active > .MessageList #${getMessageHtmlId(message.id)} [id*="-page-media-"][id$="-${getPageMediaBlockId(block)}"]`) || undefined
+      : undefined);
+  }
+
   switch (origin) {
     case MediaViewerOrigin.RichPageBlock:
-    case MediaViewerOrigin.IVPageBlock: {
-      const container = sourceId ? document.getElementById(sourceId) : undefined;
-      const pageBlockMediaSelector = 'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), '
-        + 'canvas.thumbnail:not(.blurred-bg), img, video';
-      const mediaEls = container?.querySelectorAll<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement>(
-        pageBlockMediaSelector,
-      );
-
-      return {
-        container,
-        mediaEl: mediaEls?.[0],
-      };
-    }
+    case MediaViewerOrigin.IVPageBlock:
+      return getPageBlockNodes(sourceId ? document.getElementById(sourceId) || undefined : undefined);
 
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
@@ -761,6 +760,17 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   const container = document.querySelector<HTMLElement>(containerSelector)!;
   const mediaEls = mediaSelector
     ? container?.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector) : undefined;
+
+  return {
+    container,
+    mediaEl: mediaEls?.[0],
+  };
+}
+
+function getPageBlockNodes(container?: HTMLElement) {
+  const mediaEls = container?.querySelectorAll<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement>(
+    'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), canvas.thumbnail:not(.blurred-bg), img, video',
+  );
 
   return {
     container,

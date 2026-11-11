@@ -3,18 +3,19 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiAudio, ApiPeer } from '../../../api/types';
 import type { TabState } from '../../../global/types';
-import type { PlaybackItemRef, PlaybackSource, PlaylistKey } from '../../../types';
+import type { PlaybackSource, PlaylistKey } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { parseSharedMediaKey } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
-  selectChatMessageOrEphemeral, selectIsMessageProtected, selectPeer, selectTabState,
+  selectPeer, selectTabState,
 } from '../../../global/selectors';
 import {
   selectCurrentPlaylistKey, selectPlaybackItem, selectPlaybackMedia, selectPlaybackSource, selectPlaylistKeys,
-  selectRichMessageAudios, selectUpcomingTrackKey,
+  selectUpcomingTrackKey,
 } from '../../../global/selectors/audioPlayer';
 import { selectUserSavedMusic } from '../../../global/selectors/users';
 import { ensureAudioContext } from '../../../util/audioPlayback/audioAnalyser';
@@ -32,7 +33,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useReorderableList from '../../../hooks/useReorderableList';
 
 import Icon from '../../common/icons/Icon';
-import PlayableAudio from '../../common/PlayableAudio';
 import ProfileMusic from '../../common/ProfileMusic';
 import Island, { IslandTitle } from '../../gili/layout/Island';
 import Modal, {
@@ -68,8 +68,6 @@ type StateProps = {
   isPlaylistLoaded?: boolean;
   isAudioTrack?: boolean;
   isSavedMusicStatusLoaded?: boolean;
-  richMessageAudioById?: Record<string, ApiAudio>;
-  isRichMessageProtected?: boolean;
 };
 
 const AudioPlaylistModal = ({
@@ -87,8 +85,6 @@ const AudioPlaylistModal = ({
   isPlaylistLoaded,
   isAudioTrack,
   isSavedMusicStatusLoaded,
-  richMessageAudioById,
-  isRichMessageProtected,
 }: OwnProps & StateProps) => {
   const {
     closeAudioPlaylistModal, openAudioPlayer, searchChatMediaMessages, loadSavedMusic, searchMessagesGlobal,
@@ -125,21 +121,6 @@ const AudioPlaylistModal = ({
 
     return isChatSource ? playlistIds.slice().reverse() : playlistIds.slice();
   }, [playlistIds, isChatSource, source?.type, savedMusicById]);
-
-  const richMessageTracks = useMemo(() => {
-    if (source?.type !== 'richMessage' || !richMessageAudioById) return undefined;
-
-    return new Map(Object.values(richMessageAudioById).map((audio) => [audio.id, {
-      audio,
-      item: {
-        type: 'message',
-        chatId: source.chatId,
-        threadId: source.threadId,
-        messageId: source.messageId,
-        documentId: audio.id,
-      } satisfies PlaybackItemRef,
-    }]));
-  }, [source, richMessageAudioById]);
 
   const loadMoreChatTracks = useLastCallback((direction: LoadMoreDirection) => {
     if (source?.type !== 'chat' || messageId === undefined) return;
@@ -268,12 +249,12 @@ const AudioPlaylistModal = ({
     });
   }, [draggedId, previewOrder, displayedIds, reorderSavedMusic]);
 
-  const handleTrackClick = useLastCallback((trackMessageId: number, trackChatId: string) => {
+  const handleTrackClick = useLastCallback((trackMessageId: number, trackChatId: string, documentId?: string) => {
     if (source?.type === 'chat') {
-      playbackController.prepareTrackSwitch(makeMessageTrackKey(source.chatId, trackMessageId));
+      playbackController.prepareTrackSwitch(makeMessageTrackKey(source.chatId, trackMessageId, documentId));
       openAudioPlayer({
         item: {
-          type: 'message', chatId: source.chatId, threadId: source.threadId, messageId: trackMessageId,
+          type: 'message', chatId: source.chatId, threadId: source.threadId, messageId: trackMessageId, documentId,
         },
       });
       return;
@@ -291,34 +272,19 @@ const AudioPlaylistModal = ({
 
   function renderMessageTrack(trackId: PlaylistKey) {
     const parsedKey = isSearchResultKey(trackId) ? parseSearchResultKey(trackId) : undefined;
+    const sharedMediaKey = source?.type === 'chat' ? parseSharedMediaKey(trackId) : undefined;
     const trackChatId = parsedKey ? parsedKey[0] : chatId;
-    const trackMessageId = parsedKey ? parsedKey[1] : trackId;
-    if (!trackChatId || typeof trackMessageId !== 'number') return undefined;
+    const trackMessageId = parsedKey ? parsedKey[1] : sharedMediaKey?.messageId;
+    if (!trackChatId || trackMessageId === undefined) return undefined;
 
     return (
       <PlaylistTrack
         chatId={trackChatId}
         messageId={trackMessageId}
+        mediaIndex={sharedMediaKey?.mediaIndex}
         threadId={source?.type === 'chat' ? source.threadId : undefined}
         playbackSource={source!}
         onPlay={handleTrackClick}
-      />
-    );
-  }
-
-  function renderRichMessageTrack(trackId: PlaylistKey) {
-    const track = typeof trackId === 'string' ? richMessageTracks?.get(trackId) : undefined;
-    if (!track || source?.type !== 'richMessage') return undefined;
-
-    return (
-      <PlayableAudio
-        audio={track.audio}
-        item={track.item}
-        source={source}
-        variant="sharedMedia"
-        noProgress
-        withPlayingRing
-        canDownload={!isRichMessageProtected}
       />
     );
   }
@@ -375,8 +341,6 @@ const AudioPlaylistModal = ({
     switch (source?.type) {
       case 'savedMusic':
         return renderSavedMusicTrack(trackId);
-      case 'richMessage':
-        return renderRichMessageTrack(trackId);
       default:
         return renderMessageTrack(trackId);
     }
@@ -594,8 +558,6 @@ export default memo(withGlobal<OwnProps>(
     const source = selectPlaybackSource(global);
     const savedMusic = source?.type === 'savedMusic' ? selectUserSavedMusic(global, source.peerId) : undefined;
     const currentMedia = selectPlaybackMedia(global, selectPlaybackItem(global));
-    const richMessage = source?.type === 'richMessage'
-      ? selectChatMessageOrEphemeral(global, source.chatId, source.messageId) : undefined;
 
     return {
       source,
@@ -611,9 +573,6 @@ export default memo(withGlobal<OwnProps>(
       isPlaylistLoaded: source?.type !== 'savedMusic' || Boolean(savedMusic?.isLoaded),
       isAudioTrack: currentMedia?.mediaType === 'audio',
       isSavedMusicStatusLoaded: Boolean(global.users.savedMusicById),
-      richMessageAudioById: source?.type === 'richMessage'
-        ? selectRichMessageAudios(global, source.chatId, source.messageId)?.byId : undefined,
-      isRichMessageProtected: richMessage && selectIsMessageProtected(global, richMessage),
     };
   },
 )(AudioPlaylistModal));

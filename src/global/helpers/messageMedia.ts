@@ -16,6 +16,7 @@ import type {
   ApiWebDocument,
   ApiWebPage,
   MediaContainer,
+  MediaContent,
   SizeTarget,
   StatefulMediaContent,
 } from '../../api/types';
@@ -32,16 +33,21 @@ import {
 } from '../../util/browser/windowEnvironment';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
-import { getPageBlocksAudios } from './buildPageAudioById';
+import { getPageMediaBlockMedia } from '../../components/iv/helpers/pageMedia';
+import { getPageBlocksAudios, getPageBlocksWithMedia, type PageBlockWithMedia } from './buildPageAudioById';
 import { getAttachmentMediaType, matchLinkInMessageText } from './messages';
 import { WINDOWED_MEDIA_SEARCH_TYPES } from './middleSearch';
 
 export type MediaWithThumbs = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiMediaExtendedPreview;
 export type DownloadableMedia = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiAudio | ApiVoice | ApiWebDocument;
+export type SharedMediaKey = number | string;
 
 const MIN_STATIC_MAP_ZOOM = 13;
 const MAX_STATIC_MAP_ZOOM = 20;
 const FALLBACK_MEDIA_DIMENSIONS: ApiDimensions = { width: 100, height: 100 };
+const RICH_MEDIA_KEY_SEPARATOR = ':';
+const MEDIA_BLOCKS_BY_RICH_MESSAGE = new WeakMap<ApiRichMessage, PageBlockWithMedia[]>();
+const RICH_MEDIA_MESSAGES_BY_MESSAGE = new WeakMap<ApiMessage, ApiMessage[]>();
 
 export function getMessageContent(message: MediaContainer) {
   return message.content;
@@ -574,49 +580,8 @@ export function getMediaSearchType(media: DownloadableMedia):
 export function getMessageContentIds(
   messages: Record<number, ApiMessage>, messageIds: number[], contentType: ApiMessageSearchType,
 ) {
-  let validator: (message: ApiMessage) => unknown;
-
-  switch (contentType) {
-    case 'media':
-      validator = (message: ApiMessage) => {
-        const video = getMessageVideo(message);
-        return getMessagePhoto(message) || (video && !video.isRound && !video.isGif);
-      };
-      break;
-
-    case 'documents':
-      validator = getMessageDocument;
-      break;
-
-    case 'gif':
-      validator = (message: ApiMessage) => {
-        const video = getMessageVideo(message);
-        return video?.isGif;
-      };
-      break;
-
-    case 'links':
-      validator = (message: ApiMessage) => getMessageWebPage(message) || matchLinkInMessageText(message);
-      break;
-
-    case 'audio':
-      validator = getMessageAudio;
-      break;
-
-    case 'voice':
-      validator = (message: ApiMessage) => {
-        const video = getMessageVideo(message);
-        return getMessageVoice(message) || (video && video.isRound);
-      };
-      break;
-
-    case 'polls':
-      validator = getMessagePollId;
-      break;
-
-    default:
-      return [] as Array<number>;
-  }
+  const validator = getMessageContentValidator(contentType);
+  if (!validator) return [] as Array<number>;
 
   return messageIds.reduce((result, messageId) => {
     if (messages[messageId] && validator(messages[messageId])) {
@@ -627,19 +592,171 @@ export function getMessageContentIds(
   }, [] as Array<number>);
 }
 
+// One entry per shared media tile. A plain message is its numeric id. A rich message has a `messageId:blockIndex`
+// string per matching media, so a tab virtualizes tiles instead of messages.
+export function getSharedMediaKeys(
+  messages: Record<number, ApiMessage>, messageIds: number[], contentType: ApiMessageSearchType,
+) {
+  const validator = getMessageContentValidator(contentType);
+  const keys: SharedMediaKey[] = [];
+  if (!validator) return keys;
+
+  messageIds.forEach((messageId) => {
+    const message = messages[messageId];
+    if (!message) return;
+
+    if (validator(message)) {
+      keys.push(messageId);
+      return;
+    }
+
+    if (!isRichMediaMessage(message)) return;
+
+    getRichMessageMediaBlocks(message.content.richMessage!).forEach((block, index) => {
+      if (doesPageBlockMatchSearchType(block, contentType)) {
+        keys.push(buildRichMediaKey(messageId, index));
+      }
+    });
+  });
+
+  return keys;
+}
+
+export function parseSharedMediaKey(key: SharedMediaKey): { messageId: number; mediaIndex?: number } {
+  if (typeof key === 'number') return { messageId: key };
+
+  const [messageId, mediaIndex] = key.split(RICH_MEDIA_KEY_SEPARATOR).map(Number);
+  return { messageId, mediaIndex };
+}
+
+export function getSharedMediaKey(message: ApiMessage, mediaIndex?: number): SharedMediaKey {
+  return isRichMediaMessage(message) ? buildRichMediaKey(message.id, mediaIndex || 0) : message.id;
+}
+
+// Rich messages keep their media in page blocks. The ones that also have regular media are shown by that media.
+export function isRichMediaMessage(message: ApiMessage) {
+  const {
+    richMessage, photo, video, document, audio,
+  } = message.content;
+
+  return Boolean(richMessage && !photo && !video && !document && !audio);
+}
+
+// A partial rich message lists only the media before its cutoff, until media search loads it in full
+export function getRichMessageMediaBlocks(richMessage: ApiRichMessage) {
+  let blocks = MEDIA_BLOCKS_BY_RICH_MESSAGE.get(richMessage);
+  if (!blocks) {
+    blocks = getPageBlocksWithMedia(richMessage.blocks);
+    MEDIA_BLOCKS_BY_RICH_MESSAGE.set(richMessage, blocks);
+  }
+
+  return blocks;
+}
+
+// Returns a copy of the message holding only one media, which lets shared media components render it as a regular one.
+// It is derived on demand and never stored in the global state.
+export function getRichMediaMessage(message: ApiMessage, mediaIndex: number): ApiMessage | undefined {
+  let mediaMessages = RICH_MEDIA_MESSAGES_BY_MESSAGE.get(message);
+  if (!mediaMessages) {
+    mediaMessages = getRichMessageMediaBlocks(message.content.richMessage!).map((block) => ({
+      ...message,
+      content: buildPageBlockMediaContent(block),
+    }));
+    RICH_MEDIA_MESSAGES_BY_MESSAGE.set(message, mediaMessages);
+  }
+
+  return mediaMessages[mediaIndex];
+}
+
+function buildRichMediaKey(messageId: number, mediaIndex: number) {
+  return `${messageId}${RICH_MEDIA_KEY_SEPARATOR}${mediaIndex}`;
+}
+
+function buildPageBlockMediaContent(block: PageBlockWithMedia): MediaContent {
+  switch (block.type) {
+    case 'photo':
+      return { photo: getPageMediaBlockMedia(block) };
+    case 'video':
+      return { video: getPageMediaBlockMedia(block) };
+    case 'audio':
+      return { audio: block.audio };
+    case 'document':
+      return { document: block.document };
+  }
+}
+
+function doesPageBlockMatchSearchType(block: PageBlockWithMedia, contentType: ApiMessageSearchType) {
+  switch (contentType) {
+    case 'media':
+      return block.type === 'photo' || (block.type === 'video' && !block.video.isRound && !block.video.isGif);
+    case 'gif':
+      return block.type === 'video' && block.video.isGif;
+    case 'documents':
+      return block.type === 'document';
+    case 'audio':
+      return block.type === 'audio';
+    default:
+      return false;
+  }
+}
+
+function getMessageContentValidator(contentType: ApiMessageSearchType): ((message: ApiMessage) => unknown) | undefined {
+  switch (contentType) {
+    case 'media':
+      return (message: ApiMessage) => {
+        const video = getMessageVideo(message);
+        return getMessagePhoto(message) || (video && !video.isRound && !video.isGif);
+      };
+
+    case 'documents':
+      return getMessageDocument;
+
+    case 'gif':
+      return (message: ApiMessage) => {
+        const video = getMessageVideo(message);
+        return video?.isGif;
+      };
+
+    case 'links':
+      return (message: ApiMessage) => getMessageWebPage(message) || matchLinkInMessageText(message);
+
+    case 'audio':
+      return getMessageAudio;
+
+    case 'voice':
+      return (message: ApiMessage) => {
+        const video = getMessageVideo(message);
+        return getMessageVoice(message) || (video && video.isRound);
+      };
+
+    case 'polls':
+      return getMessagePollId;
+
+    default:
+      return undefined;
+  }
+}
+
 export function isMediaLoadableInViewer(newMessage: ApiMessage) {
   if (!newMessage.content) return false;
   if (newMessage.content.photo) return true;
   if (newMessage.content.video && !newMessage.content.video.isRound && !newMessage.content.video.isGif) return true;
-  return false;
+  return hasRichMediaOfType(newMessage, 'media');
+}
+
+function hasRichMediaOfType(message: ApiMessage, contentType: ApiMessageSearchType) {
+  return isRichMediaMessage(message) && getRichMessageMediaBlocks(message.content.richMessage!)
+    .some((block) => doesPageBlockMatchSearchType(block, contentType));
 }
 
 export function isMessageInMediaWindow(message: ApiMessage, mediaType: SharedMediaType) {
   switch (mediaType) {
     case 'media':
       return isMediaLoadableInViewer(message);
+    case 'gif':
+      return Boolean(message.content?.video?.isGif) || hasRichMediaOfType(message, 'gif');
     case 'audio':
-      return Boolean(message.content?.audio);
+      return Boolean(message.content?.audio) || hasRichMediaOfType(message, 'audio');
     case 'voice':
       return Boolean(message.content?.voice || message.content?.video?.isRound);
     default:

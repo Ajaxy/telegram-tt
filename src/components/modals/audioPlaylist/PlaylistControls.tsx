@@ -373,7 +373,7 @@ export default memo(withGlobal<OwnProps>(
       isMessageProtected: selectIsMessageProtected(global, message),
       playbackItem: activeItem,
       savedMusicPeerId: source?.type === 'savedMusic' ? source.peerId : undefined,
-      threadId: source?.type === 'chat' || source?.type === 'richMessage' ? source.threadId : undefined,
+      threadId: source?.type === 'chat' ? source.threadId : undefined,
     };
   },
 )(PlaylistControls));

@@ -417,7 +417,6 @@ export type PlaybackSource =
   | { type: 'chat'; chatId: string; threadId: ThreadId; mediaType: PlaybackMediaType }
   | { type: 'globalSearch'; mediaType: PlaybackMediaType }
   | { type: 'savedMusic'; peerId: string }
-  | { type: 'richMessage'; chatId: string; threadId: ThreadId; messageId: number }
   | { type: 'single' };
 
 export type PlaybackContextType = 'message' | 'savedMusic' | 'instantView' | 'musicSearch';

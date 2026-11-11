@@ -1,24 +1,41 @@
-import type { ApiAudio, ApiInstantViewPage, ApiPageBlock } from '../../api/types';
+import type {
+  ApiAudio,
+  ApiInstantViewPage,
+  ApiPageBlock,
+  ApiPageBlockAudio,
+  ApiPageBlockDocument,
+  ApiPageBlockPhoto,
+  ApiPageBlockVideo,
+} from '../../api/types';
 
 import { buildCollectionByKey } from '../../util/iteratees';
 
-export function getPageBlocksAudios(blocks: ApiPageBlock[]): ApiAudio[] {
+export type PageBlockWithMedia = ApiPageBlockPhoto | ApiPageBlockVideo | ApiPageBlockAudio | ApiPageBlockDocument;
+
+export function getPageBlocksWithMedia(blocks: ApiPageBlock[]): PageBlockWithMedia[] {
   return blocks.flatMap((block) => {
     switch (block.type) {
+      case 'photo':
+      case 'video':
       case 'audio':
-        return [block.audio];
+      case 'document':
+        return [block];
       case 'cover':
-        return getPageBlocksAudios([block.cover]);
+        return getPageBlocksWithMedia([block.cover]);
       case 'collage':
       case 'slideshow':
-        return getPageBlocksAudios(block.items);
+        return getPageBlocksWithMedia(block.items);
       case 'list':
       case 'orderedList':
-        return block.items.flatMap((item) => (item.type === 'blocks' ? getPageBlocksAudios(item.blocks) : []));
+        return block.items.flatMap((item) => (item.type === 'blocks' ? getPageBlocksWithMedia(item.blocks) : []));
       default:
-        return 'blocks' in block ? getPageBlocksAudios(block.blocks) : [];
+        return 'blocks' in block ? getPageBlocksWithMedia(block.blocks) : [];
     }
   });
+}
+
+export function getPageBlocksAudios(blocks: ApiPageBlock[]): ApiAudio[] {
+  return getPageBlocksWithMedia(blocks).flatMap((block) => (block.type === 'audio' ? [block.audio] : []));
 }
 
 export function buildPageAudioById(page: ApiInstantViewPage): Record<string, ApiAudio> | undefined {

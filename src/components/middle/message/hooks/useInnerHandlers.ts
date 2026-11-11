@@ -158,7 +158,9 @@ export default function useInnerHandlers({
   const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
     if (paidMedia && !paidMedia.isBought) return;
     if (withDynamicLoading && !message.isEphemeral) {
-      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
+      searchChatMediaMessages({
+        chatId, threadId, currentMediaMessageId: messageId, mediaType: video?.isGif ? 'gif' : 'media',
+      });
     }
 
     const parsedLink = webPage?.url && tryParseDeepLink(webPage.url);
@@ -182,8 +184,7 @@ export default function useInnerHandlers({
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
   const handleVideoMediaClick = useLastCallback(() => {
-    const isGif = message.content?.video?.isGif;
-    const withDynamicLoading = !message.isEphemeral && !isGif && !isScheduled && !paidMedia;
+    const withDynamicLoading = !message.isEphemeral && !isScheduled && !paidMedia;
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
 

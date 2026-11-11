@@ -34,17 +34,19 @@ import './Media.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  mediaIndex?: number;
   idPrefix?: string;
   className?: string;
   isProtected?: boolean;
   canAutoPlay?: boolean;
   observeIntersection?: ObserveFn;
-  onClick?: (messageId: number, chatId: string) => void;
+  onClick?: (messageId: number, chatId: string, mediaIndex?: number) => void;
   contextActions?: MenuItemContextAction[];
 };
 
 const Media = ({
   message,
+  mediaIndex,
   idPrefix = 'shared-media',
   className,
   isProtected,
@@ -86,13 +88,13 @@ const Media = ({
     if (isContextMenuOpen) return;
 
     hideSpoiler();
-    onClick!(message.id, message.chatId);
+    onClick!(message.id, message.chatId, mediaIndex);
   });
 
   return (
     <div
       ref={ref}
-      id={`${idPrefix}${getMessageHtmlId(message.id)}`}
+      id={`${idPrefix}${getMessageHtmlId(message.id, mediaIndex)}`}
       className={buildClassName('Media scroll-item', className, contextMenuAnchor && 'has-menu-open')}
       onClick={onClick ? handleClick : undefined}
       onMouseDown={handleBeforeContextMenu}

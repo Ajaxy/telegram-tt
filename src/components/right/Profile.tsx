@@ -34,11 +34,14 @@ import {
   getIsSavedDialog,
   getMessageDocument,
   getMessageHtmlId,
+  getRichMediaMessage,
   isChatBasicGroup,
   isChatChannel,
   isChatGroup,
   isUserBot,
   isUserRightBanned,
+  parseSharedMediaKey,
+  type SharedMediaKey,
 } from '../../global/helpers';
 import { getSavedGiftKey } from '../../global/helpers/stars';
 import {
@@ -731,11 +734,12 @@ const Profile = ({
     setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.InProgress });
   });
 
-  const handleSelectMedia = useLastCallback((messageId: number) => {
+  const handleSelectMedia = useLastCallback((messageId: number, messageChatId: string, mediaIndex?: number) => {
     openMediaViewer({
       chatId: profileId,
       threadId: MAIN_THREAD_ID,
       messageId,
+      mediaIndex,
       origin: MediaViewerOrigin.SharedMedia,
     });
   });
@@ -749,10 +753,10 @@ const Profile = ({
     });
   });
 
-  const handlePlayAudio = useLastCallback((messageId: number, messageChatId: string) => {
+  const handlePlayAudio = useLastCallback((messageId: number, messageChatId: string, documentId?: string) => {
     openAudioPlayer({
       item: {
-        type: 'message', chatId: messageChatId, threadId: threadId ?? MAIN_THREAD_ID, messageId,
+        type: 'message', chatId: messageChatId, threadId: threadId ?? MAIN_THREAD_ID, messageId, documentId,
       },
     });
   });
@@ -994,6 +998,18 @@ const Profile = ({
     return undefined;
   }
 
+  function getViewportMediaItems() {
+    return (viewportIds as SharedMediaKey[]).flatMap((key) => {
+      const { messageId, mediaIndex } = parseSharedMediaKey(key);
+      const sourceMessage = messagesById?.[messageId];
+      const message = sourceMessage && mediaIndex !== undefined
+        ? getRichMediaMessage(sourceMessage, mediaIndex)
+        : sourceMessage;
+
+      return message ? [{ key, message, mediaIndex }] : [];
+    });
+  }
+
   function renderSpinnerOrContentBase(noContent: boolean, noSpinner: boolean) {
     if (noContent) {
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
@@ -1078,16 +1094,17 @@ const Profile = ({
         teactFastList
       >
         {resultType === 'media' || resultType === 'gif' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id, i, ids) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }, i, items) => (
             <Media
-              key={id}
-              message={messagesById[id]}
-              className={getGridCornerClassName(i, ids.length)}
-              isProtected={isChatProtected || messagesById[id].isProtected}
+              key={key}
+              message={message}
+              mediaIndex={mediaIndex}
+              className={getGridCornerClassName(i, items.length)}
+              isProtected={isChatProtected || message.isProtected}
               canAutoPlay={canAutoPlayGifs}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
-              contextActions={getMessageContextActions(messagesById[id])}
+              contextActions={getMessageContextActions(message)}
             />
           ))
         ) : (resultType === 'stories' || resultType === 'storiesArchive') ? (
@@ -1101,21 +1118,23 @@ const Profile = ({
             />
           ))
         ) : resultType === 'documents' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }) => (
             <Document
-              key={id}
-              id={`shared-media${getMessageHtmlId(id)}`}
-              document={getMessageDocument(messagesById[id])!}
-              datetime={messagesById[id].date}
+              key={key}
+              id={`shared-media${getMessageHtmlId(message.id, mediaIndex)}`}
+              document={getMessageDocument(message)!}
+              datetime={message.date}
               fileSize="small"
               className="scroll-item"
-              isDownloading={getIsDownloading(activeDownloads, getMessageDocument(messagesById[id])!)}
+              noDownload={isChatProtected || message.isProtected}
+              isDownloading={getIsDownloading(activeDownloads, getMessageDocument(message)!)}
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
-              message={messagesById[id]}
+              message={message}
               shouldWarnAboutFiles={shouldWarnAboutFiles}
+              mediaIndex={mediaIndex}
               onMediaClick={handleSelectMedia}
-              contextActions={getMessageContextActions(messagesById[id])}
+              contextActions={getMessageContextActions(message)}
             />
           ))
         ) : resultType === 'links' ? (
@@ -1130,20 +1149,21 @@ const Profile = ({
             />
           ))
         ) : resultType === 'audio' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }) => (
             <Audio
-              key={id}
+              key={key}
               theme={theme}
-              message={messagesById[id]}
+              message={message}
+              mediaIndex={mediaIndex}
               variant="sharedMedia"
               threadId={threadId}
-              date={messagesById[id].date}
+              date={message.date}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
-              contextActions={getMessageContextActions(messagesById[id])}
-              canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.audio!)}
+              contextActions={getMessageContextActions(message)}
+              canDownload={!isChatProtected && !message.isProtected}
+              isDownloading={getIsDownloading(activeDownloads, message.content.audio!)}
             />
           ))
         ) : resultType === 'voice' ? (

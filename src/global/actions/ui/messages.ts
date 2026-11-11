@@ -228,8 +228,9 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
     });
   }
 
-  if (effectiveSource?.type === 'richMessage') {
-    const { chatId, messageId } = effectiveSource;
+  // A partial rich message lists only some of its tracks
+  if (item?.type === 'message' && item.documentId && !item.isScheduled) {
+    const { chatId, messageId } = item;
     if (selectChatMessage(global, chatId, messageId)?.content.richMessage?.isPart) {
       actions.loadRichMessage({ chatId, messageId });
     }

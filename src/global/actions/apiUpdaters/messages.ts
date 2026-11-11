@@ -37,6 +37,7 @@ import {
   isDeletedUser,
   isMessageLocal,
   isUserBot,
+  parseSharedMediaKey,
   pickMatchingTypingDraftMessage,
   runForAllTabs,
   WINDOWED_MEDIA_SEARCH_TYPES,
@@ -341,10 +342,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
 
         const playbackSource = selectPlaybackSource(global, tabId);
-        if (playbackSource?.type === 'chat' && playbackSource.chatId === chatId
+        const newKeys = playbackSource?.type === 'chat' && playbackSource.chatId === chatId
           && playbackSource.threadId === messageThreadId
-          && selectPlaylistKeys(global, tabId)?.includes(newMessage.id)) {
-          global = appendShufflePlaylist(global, [newMessage.id], selectIsPlaylistFullyLoaded(global, tabId), tabId);
+          ? selectPlaylistKeys(global, tabId)?.filter((key) => parseSharedMediaKey(key).messageId === newMessage.id)
+          : undefined;
+        if (newKeys?.length) {
+          global = appendShufflePlaylist(global, newKeys, selectIsPlaylistFullyLoaded(global, tabId), tabId);
         }
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message, tabId)) {
@@ -808,19 +811,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           );
         }
         const { voice, video } = message.content;
-        const nextSource = source?.type === 'richMessage' && source.messageId === localId
-          ? { ...source, messageId: message.id }
-          : source;
         global = updateTabState(global, {
           audioPlayer: {
             ...selectTabState(global, tabId).audioPlayer,
             activeItem: { ...activeItem, messageId: message.id },
-            source: nextSource?.type === 'single' ? {
+            source: source?.type === 'single' ? {
               type: 'chat',
               chatId,
               threadId: activeItem.threadId,
               mediaType: (voice || video) ? 'voice' : 'audio',
-            } : nextSource,
+            } : source,
           },
         }, tabId);
       });

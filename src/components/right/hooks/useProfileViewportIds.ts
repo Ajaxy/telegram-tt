@@ -8,7 +8,7 @@ import type { ProfileTabType, SharedMediaType, ThreadId } from '../../../types';
 import {
   MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, PROFILE_POLLS_SLICE, SHARED_MEDIA_SLICE,
 } from '../../../config';
-import { getMessageContentIds, sortUserIds } from '../../../global/helpers';
+import { getSharedMediaKeys, type SharedMediaKey, sortUserIds } from '../../../global/helpers';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -148,7 +148,7 @@ export default function useProfileViewportIds({
     shouldResetToTop, loadStoriesArchive, archiveStoryIds,
   );
 
-  let viewportIds: number[] | string[] | undefined;
+  let viewportIds: SharedMediaKey[] | number[] | string[] | undefined;
   let getMore: AnyToVoidFunction | undefined;
 
   switch (resultType) {
@@ -236,15 +236,15 @@ function useInfiniteScrollForSharedMedia(
   foundIds?: number[],
   threadId?: ThreadId,
 ) {
-  const messageIdsRef = useRef<number[]>();
+  const mediaKeysRef = useRef<SharedMediaKey[]>();
 
   useSyncEffect(() => {
-    messageIdsRef.current = undefined;
+    mediaKeysRef.current = undefined;
   }, [threadId]);
 
   useSyncEffect(() => {
     if (currentResultType === forSharedMediaType && chatMessages && foundIds) {
-      messageIdsRef.current = getMessageContentIds(
+      mediaKeysRef.current = getSharedMediaKeys(
         chatMessages,
         foundIds,
         forSharedMediaType,
@@ -254,10 +254,10 @@ function useInfiniteScrollForSharedMedia(
 
   return useInfiniteScroll(
     handleLoadMore,
-    messageIdsRef.current,
+    mediaKeysRef.current,
     undefined,
     getListSlice(forSharedMediaType),
-    shouldResetToTop ? messageIdsRef.current?.[0] : undefined,
+    shouldResetToTop ? mediaKeysRef.current?.[0] : undefined,
   );
 }
 
