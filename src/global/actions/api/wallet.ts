@@ -24,7 +24,7 @@ import { toNonBounceableAddress } from '../../../lib/ton/address';
 import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { buildCollectionByKey, omit, uniqueByField } from '../../../util/iteratees';
 import { ACCOUNT_SLOT } from '../../../util/multiaccount';
 import {
   hasWalletVaultSecret,
@@ -554,7 +554,8 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
   const current = selectWalletTransactions(global) || [];
   const known = new Map(current.map((item) => [item.id, item]));
-  const page = result.transactions.map((transaction) => {
+  // The server may list one transaction twice, with different fees
+  const page = uniqueByField(result.transactions, 'id').map((transaction) => {
     const { peer: knownPeer, localId } = known.get(transaction.id) || {};
     const peer = keepRecipientUser(transaction.peer, knownPeer);
 
@@ -578,7 +579,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
 
     if (isTailKept) nextOffset = global.wallet!.nextOffset;
   } else {
-    transactions = current.concat(page);
+    transactions = current.concat(page.filter(({ id }) => !known.has(id)));
   }
 
   global = updateWallet(global, { transactions, nextOffset });
