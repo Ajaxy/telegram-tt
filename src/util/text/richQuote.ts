@@ -1,6 +1,15 @@
 import type { ApiPageBlock, ApiRichText } from '../../api/types';
 
+import { forEachPageBlocksRichText } from './richText';
+
 export const MAX_RICH_QUOTE_FRAGMENTS = 32;
+
+// Blocks the rich quote spec lists as quotable; others are skipped along with their nested blocks
+const QUOTABLE_BLOCK_TYPES = new Set<ApiPageBlock['type']>([
+  'paragraph', 'heading1', 'heading2', 'heading3', 'heading4', 'heading5', 'heading6', 'footer', 'thinking',
+  'preformatted', 'math', 'blockquote', 'blockquoteBlocks', 'pullquote', 'list', 'orderedList', 'table', 'details',
+  'photo', 'video', 'audio', 'map', 'collage', 'slideshow',
+]);
 
 export type RichQuoteRange = { first: number; last: number };
 
@@ -33,7 +42,7 @@ export function findRichQuoteRange(
 
 export function getRichQuoteTexts(blocks: ApiPageBlock[]): ApiRichText[] {
   const texts: ApiRichText[] = [];
-  blocks.forEach((block) => appendBlockQuoteTexts(block, texts));
+  forEachPageBlocksRichText(blocks, (text) => texts.push(text), (block) => QUOTABLE_BLOCK_TYPES.has(block.type));
   return texts.filter((text) => getRichQuoteText(text).length > 0);
 }
 
@@ -148,61 +157,5 @@ export function normalizeRichQuote(text: ApiRichText): ApiRichText {
       return { ...text, text: normalizeRichQuote(text.text) };
     default:
       return normalizeRichQuote(text.text);
-  }
-}
-
-function appendBlockQuoteTexts(block: ApiPageBlock, texts: ApiRichText[]) {
-  switch (block.type) {
-    case 'paragraph':
-    case 'heading1':
-    case 'heading2':
-    case 'heading3':
-    case 'heading4':
-    case 'heading5':
-    case 'heading6':
-    case 'footer':
-    case 'thinking':
-    case 'preformatted':
-      texts.push(block.text);
-      break;
-    case 'math':
-      texts.push(block);
-      break;
-    case 'blockquote':
-    case 'pullquote':
-      texts.push(block.text, block.caption);
-      break;
-    case 'blockquoteBlocks':
-      block.blocks.forEach((nested) => appendBlockQuoteTexts(nested, texts));
-      texts.push(block.caption);
-      break;
-    case 'list':
-    case 'orderedList':
-      block.items.forEach((item) => {
-        if (item.type === 'text') texts.push(item.text);
-        else item.blocks.forEach((nested) => appendBlockQuoteTexts(nested, texts));
-      });
-      break;
-    case 'table':
-      texts.push(block.title);
-      block.rows.forEach((row) => row.cells.forEach((cell) => {
-        if (cell.text) texts.push(cell.text);
-      }));
-      break;
-    case 'details':
-      texts.push(block.title);
-      block.blocks.forEach((nested) => appendBlockQuoteTexts(nested, texts));
-      break;
-    case 'collage':
-    case 'slideshow':
-      block.items.forEach((nested) => appendBlockQuoteTexts(nested, texts));
-      texts.push(block.caption.text, block.caption.credit);
-      break;
-    case 'photo':
-    case 'video':
-    case 'audio':
-    case 'map':
-      texts.push(block.caption.text, block.caption.credit);
-      break;
   }
 }

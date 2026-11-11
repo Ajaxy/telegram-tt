@@ -1,5 +1,5 @@
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -10,11 +10,11 @@ import type { ApiAvailableReaction,
   ApiMessagePoll,
   ApiReaction,
   ApiStickerSet,
-  ApiStickerSetInfo,
   ApiThreadInfo,
   ApiTypeStory,
   ApiUser,
   ApiWebPage } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type {
   ActiveDownloads,
   IAlbum,
@@ -33,7 +33,9 @@ import {
   getCanReplyToEphemeralMessage,
   getIsDownloading,
   getMessageAudio,
+  getMessageCustomEmojis,
   getMessageVideo,
+  getUniqueStickerSetsInfo,
   getUserFullName,
   hasMessageTtl,
   isActionMessage,
@@ -57,13 +59,13 @@ import {
   selectCanTranslateMessage,
   selectChat,
   selectChatFullInfo,
+  selectCustomEmoji,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
-  selectMessageCustomEmojiSets,
   selectMessageTranslations,
   selectPeerStory,
   selectPollFromMessage,
@@ -83,10 +85,12 @@ import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { isUserId } from '../../../util/entities/ids';
 import { getTranslationCacheKey, parseTranslationCacheKey } from '../../../util/keys/translationKey';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { getSelectionAsRichQuote } from './helpers/getSelectionAsRichQuote';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
+import { useShallowSelector } from '../../../hooks/data/useSelector';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -129,8 +133,6 @@ type StateProps = {
   canShowReactionsCount?: boolean;
   canBuyPremium?: boolean;
   canShowReactionList?: boolean;
-  customEmojiSetsInfo?: ApiStickerSetInfo[];
-  customEmojiSets?: ApiStickerSet[];
   canUnpin?: boolean;
   canDelete?: boolean;
   canReport?: boolean;
@@ -191,8 +193,6 @@ const ContextMenuContainer = ({
   isOpen,
   messageListType,
   message,
-  customEmojiSetsInfo,
-  customEmojiSets,
   album,
   poll,
   webPage,
@@ -328,6 +328,26 @@ const ContextMenuContainer = ({
     message.date,
     message.scheduleRepeatPeriod,
   );
+
+  const customEmojis = useMemo(() => (
+    message.isEphemeral ? MEMO_EMPTY_ARRAY : getMessageCustomEmojis(message)
+  ), [message]);
+  const customEmojiDocumentsSelector = useCallback((global: GlobalState) => customEmojis.map((emoji) => (
+    ('document' in emoji && emoji.document) || selectCustomEmoji(global, emoji.documentId)
+  )), [customEmojis]);
+  const customEmojiDocuments = useShallowSelector(customEmojiDocumentsSelector);
+  const customEmojiSetsInfo = useMemo(() => (
+    // If some emoji are still loading, do not return an empty array
+    customEmojiDocuments.every(Boolean)
+      ? getUniqueStickerSetsInfo(customEmojiDocuments.map((document) => document.stickerSetInfo))
+      : undefined
+  ), [customEmojiDocuments]);
+  const customEmojiSetsSelector = useCallback((global: GlobalState) => (
+    customEmojiSetsInfo?.map((set) => selectStickerSet(global, set))
+  ), [customEmojiSetsInfo]);
+  const customEmojiSetsNotFiltered = useShallowSelector(customEmojiSetsSelector);
+  const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
+    ? customEmojiSetsNotFiltered : undefined;
 
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = !message.isEphemeral
@@ -1004,11 +1024,6 @@ export default memo(withGlobal<OwnProps>(
     const canCopyNumber = Boolean(message.content.contact);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
-    const customEmojiSetsInfo = selectMessageCustomEmojiSets(global, message);
-    const customEmojiSetsNotFiltered = customEmojiSetsInfo?.map((set) => selectStickerSet(global, set));
-    const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
-      ? customEmojiSetsNotFiltered : undefined;
-
     const translationRequestLanguage = selectRequestedMessageTranslationLanguage(global, message.chatId, message.id);
     const chatTranslationLanguage = selectRequestedChatTranslationLanguage(global, message.chatId);
     const chatTranslationTone = selectRequestedChatTranslationTone(global, message.chatId);
@@ -1088,8 +1103,6 @@ export default memo(withGlobal<OwnProps>(
       canShowReactionList: !message.isEphemeral && !isLocal && !isAction && !isScheduled && !hasTtl
         && !(chat && !isPrivate && !isChatAdmin(chat) && isUserRightBanned(chat, 'sendReactions', chatFullInfo)),
       canBuyPremium: !message.isEphemeral && !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
-      customEmojiSetsInfo: message.isEphemeral ? undefined : customEmojiSetsInfo,
-      customEmojiSets: message.isEphemeral ? undefined : customEmojiSets,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
       canTranslate: !message.isEphemeral && canTranslate,
       canShowOriginal: !message.isEphemeral && hasTranslation && !isChatTranslated,

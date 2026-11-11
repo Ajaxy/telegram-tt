@@ -3,12 +3,10 @@ import type {
   ApiInputDraftReplyInfo,
   ApiInputMessageReplyInfo,
   ApiMessage,
-  ApiMessageEntityCustomEmoji,
   ApiMessageForwardInfo,
   ApiMessageOutgoingStatus,
   ApiMessageReplyInfo,
   ApiPeer, ApiSponsoredMessage,
-  ApiStickerSetInfo,
   MediaContainer,
 } from '../../api/types';
 import type {
@@ -22,7 +20,7 @@ import type { IAllowedAttachmentOptions } from '../helpers';
 import type {
   GlobalState, TabArgs,
 } from '../types';
-import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   GENERAL_TOPIC_ID,
@@ -36,7 +34,6 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
 import { getTranslationCacheKey, parseTranslationCacheKey } from '../../util/keys/translationKey';
 import { isIpRevealingMedia } from '../../util/media/ipRevealingMedia';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
 import { getDocumentExtension } from '../../components/common/helpers/documentInfo';
 import { API_GENERAL_ID_LIMIT } from '../../limits';
@@ -90,7 +87,7 @@ import { selectCurrentLimit } from './limits';
 import { selectMessageDownloadableMedia } from './media';
 import { selectPeer, selectPeerPaidMessagesStars } from './peers';
 import { selectPeerStory } from './stories';
-import { selectCustomEmoji, selectIsStickerFavorite } from './symbols';
+import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import {
   selectDraft,
@@ -1463,40 +1460,6 @@ export function selectCanScheduleUntilOnline<T extends GlobalState>(global: T, i
   const paidMessagesStars = selectPeerPaidMessagesStars(global, id);
   return Boolean(!paidMessagesStars
     && !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline);
-}
-
-export function selectCustomEmojis(message: ApiMessage) {
-  const entities = message.content.text?.entities;
-  return entities?.filter((entity): entity is ApiMessageEntityCustomEmoji => (
-    entity.type === ApiMessageEntityTypes.CustomEmoji
-  ));
-}
-
-export function selectMessageCustomEmojiSets<T extends GlobalState>(
-  global: T, message: ApiMessage,
-): ApiStickerSetInfo[] | undefined {
-  const customEmojis = selectCustomEmojis(message);
-  if (!customEmojis) return MEMO_EMPTY_ARRAY;
-  const documents = customEmojis.map((entity) => selectCustomEmoji(global, entity.documentId));
-  // If some emoji still loading, do not return empty array
-  if (!documents.every(Boolean)) return undefined;
-  const sets = documents.map((doc) => doc.stickerSetInfo);
-
-  return sets.reduce((acc, set) => {
-    if ('shortName' in set) {
-      if (acc.some((s) => 'shortName' in s && s.shortName === set.shortName)) {
-        return acc;
-      }
-    }
-
-    if ('id' in set) {
-      if (acc.some((s) => 'id' in s && s.id === set.id)) {
-        return acc;
-      }
-    }
-    acc.push(set); // Optimization
-    return acc;
-  }, [] as ApiStickerSetInfo[]);
 }
 
 export function selectForwardsContainVoiceMessages<T extends GlobalState>(

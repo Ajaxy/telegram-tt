@@ -4,9 +4,6 @@ import { getGlobal, getPromiseActions } from '../../global';
 import type {
   ApiMessage,
   ApiPageBlock,
-  ApiPageCaption,
-  ApiPageListItem,
-  ApiPageListOrderedItem,
   ApiRichMessage,
   ApiRichText,
 } from '../../api/types';
@@ -19,6 +16,7 @@ import { selectChatMessage } from '../../global/selectors';
 import { selectMessageTextSize } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import { findRichQuoteRange, getRichQuoteTexts } from '../../util/text/richQuote';
+import { forEachPageBlocksRichText, forEachRichTextNode } from '../../util/text/richText';
 
 import useSelector from '../../hooks/data/useSelector';
 import useLang from '../../hooks/useLang';
@@ -100,9 +98,8 @@ const MessageRichText = ({
       return false;
     }
 
-    const customEmojisCount = countPageBlocksCustomEmojis(blocks);
-    return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS
-      && !hasPageBlocksSpoileredCustomEmojis(blocks);
+    const { count, hasSpoilered } = getCustomEmojisInfo(blocks);
+    return count >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS && !hasSpoilered;
   }, [blocks, message.isTypingDraft]);
 
   const handleShowMore = useLastCallback(() => {
@@ -181,266 +178,24 @@ const MessageRichText = ({
   );
 };
 
-function countRichTextCustomEmojis(text: ApiRichText): number {
-  switch (text.type) {
-    case 'customEmoji':
-      return 1;
-    case 'concat':
-      return text.texts.reduce((total, childText) => total + countRichTextCustomEmojis(childText), 0);
-    case 'bold':
-    case 'italic':
-    case 'underline':
-    case 'strike':
-    case 'fixed':
-    case 'url':
-    case 'email':
-    case 'subscript':
-    case 'superscript':
-    case 'marked':
-    case 'phone':
-    case 'anchor':
-    case 'spoiler':
-    case 'mention':
-    case 'hashtag':
-    case 'botCommand':
-    case 'cashtag':
-    case 'autoUrl':
-    case 'autoEmail':
-    case 'autoPhone':
-    case 'bankCard':
-    case 'tonAddress':
-    case 'mentionName':
-    case 'date':
-    case 'button':
-      return countRichTextCustomEmojis(text.text);
-    default:
-      return 0;
-  }
-}
+function getCustomEmojisInfo(blocks: ApiPageBlock[]) {
+  let count = 0;
+  let hasSpoilered = false;
 
-function countPageBlocksCustomEmojis(blocks: ApiPageBlock[]): number {
-  return sumPageBlocksMatchingRichText(blocks, countRichTextCustomEmojis);
-}
-
-function hasPageBlocksSpoileredCustomEmojis(blocks: ApiPageBlock[]): boolean {
-  return hasPageBlocksMatchingRichText(blocks, hasRichTextSpoileredCustomEmojis);
-}
-
-function sumPageBlocksMatchingRichText(
-  blocks: ApiPageBlock[],
-  predicate: (text: ApiRichText) => number,
-): number {
-  return blocks.reduce((total, block) => total + sumPageBlockMatchingRichText(block, predicate), 0);
-}
-
-function hasPageBlocksMatchingRichText(
-  blocks: ApiPageBlock[],
-  predicate: (text: ApiRichText) => boolean,
-): boolean {
-  return blocks.some((block) => hasPageBlockMatchingRichText(block, predicate));
-}
-
-function sumPageBlockMatchingRichText(block: ApiPageBlock, predicate: (text: ApiRichText) => number): number {
-  switch (block.type) {
-    case 'buttonRow':
-      return block.buttons.reduce((total, button) => total + predicate(button.text), 0);
-    case 'unsupported':
-    case 'divider':
-    case 'anchor':
-    case 'channel':
-    case 'math':
-      return 0;
-    case 'title':
-    case 'subtitle':
-    case 'header':
-    case 'subheader':
-    case 'paragraph':
-    case 'preformatted':
-    case 'footer':
-    case 'kicker':
-    case 'heading1':
-    case 'heading2':
-    case 'heading3':
-    case 'heading4':
-    case 'heading5':
-    case 'heading6':
-    case 'thinking':
-      return predicate(block.text);
-    case 'authorDate':
-      return predicate(block.author);
-    case 'list':
-    case 'orderedList':
-      return sumPageListItemsMatchingRichText(block.items, predicate);
-    case 'blockquote':
-    case 'pullquote':
-      return predicate(block.text) + predicate(block.caption);
-    case 'blockquoteBlocks':
-      return predicate(block.caption) + sumPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'photo':
-    case 'video':
-    case 'map':
-    case 'audio':
-    case 'document':
-    case 'embed':
-      return sumPageCaptionMatchingRichText(block.caption, predicate);
-    case 'cover':
-      return sumPageBlockMatchingRichText(block.cover, predicate);
-    case 'embedPost':
-      return sumPageCaptionMatchingRichText(block.caption, predicate)
-        + sumPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'collage':
-    case 'slideshow':
-      return sumPageCaptionMatchingRichText(block.caption, predicate)
-        + block.items.reduce((total, item) => total + sumPageBlockMatchingRichText(item, predicate), 0);
-    case 'details':
-      return predicate(block.title) + sumPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'relatedArticles':
-      return predicate(block.title);
-    case 'table':
-      return predicate(block.title) + block.rows.reduce((rowsTotal, row) => {
-        return rowsTotal + row.cells.reduce((cellsTotal, cell) => {
-          return cellsTotal + (cell.text ? predicate(cell.text) : 0);
-        }, 0);
-      }, 0);
-  }
-}
-
-function hasPageBlockMatchingRichText(
-  block: ApiPageBlock,
-  predicate: (text: ApiRichText) => boolean,
-): boolean {
-  switch (block.type) {
-    case 'buttonRow':
-      return block.buttons.some((button) => predicate(button.text));
-    case 'unsupported':
-    case 'divider':
-    case 'anchor':
-    case 'channel':
-    case 'math':
+  const visit = (text: ApiRichText, isInSpoiler?: boolean) => forEachRichTextNode(text, (node) => {
+    if (node.type === 'customEmoji') {
+      count++;
+      hasSpoilered ||= Boolean(isInSpoiler);
+    } else if (node.type === 'spoiler' && !isInSpoiler) {
+      visit(node.text, true);
       return false;
-    case 'title':
-    case 'subtitle':
-    case 'header':
-    case 'subheader':
-    case 'paragraph':
-    case 'preformatted':
-    case 'footer':
-    case 'kicker':
-    case 'heading1':
-    case 'heading2':
-    case 'heading3':
-    case 'heading4':
-    case 'heading5':
-    case 'heading6':
-    case 'thinking':
-      return predicate(block.text);
-    case 'authorDate':
-      return predicate(block.author);
-    case 'list':
-    case 'orderedList':
-      return hasPageListItemsMatchingRichText(block.items, predicate);
-    case 'blockquote':
-    case 'pullquote':
-      return predicate(block.text) || predicate(block.caption);
-    case 'blockquoteBlocks':
-      return predicate(block.caption)
-        || hasPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'photo':
-    case 'video':
-    case 'map':
-    case 'audio':
-    case 'document':
-    case 'embed':
-      return hasPageCaptionMatchingRichText(block.caption, predicate);
-    case 'cover':
-      return hasPageBlockMatchingRichText(block.cover, predicate);
-    case 'embedPost':
-      return hasPageCaptionMatchingRichText(block.caption, predicate)
-        || hasPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'collage':
-    case 'slideshow':
-      return hasPageCaptionMatchingRichText(block.caption, predicate)
-        || block.items.some((item) => hasPageBlockMatchingRichText(item, predicate));
-    case 'details':
-      return predicate(block.title) || hasPageBlocksMatchingRichText(block.blocks, predicate);
-    case 'relatedArticles':
-      return predicate(block.title);
-    case 'table':
-      return predicate(block.title) || block.rows.some((row) => {
-        return row.cells.some((cell) => Boolean(cell.text && predicate(cell.text)));
-      });
-  }
-}
+    }
 
-function hasPageCaptionMatchingRichText(
-  caption: ApiPageCaption,
-  predicate: (text: ApiRichText) => boolean,
-): boolean {
-  return predicate(caption.text) || predicate(caption.credit);
-}
-
-function sumPageCaptionMatchingRichText(
-  caption: ApiPageCaption,
-  predicate: (text: ApiRichText) => number,
-): number {
-  return predicate(caption.text) + predicate(caption.credit);
-}
-
-function hasPageListItemsMatchingRichText(
-  items: (ApiPageListItem | ApiPageListOrderedItem)[],
-  predicate: (text: ApiRichText) => boolean,
-): boolean {
-  return items.some((item) => {
-    return item.type === 'text'
-      ? predicate(item.text)
-      : hasPageBlocksMatchingRichText(item.blocks, predicate);
+    return true;
   });
-}
+  forEachPageBlocksRichText(blocks, (text) => visit(text));
 
-function sumPageListItemsMatchingRichText(
-  items: (ApiPageListItem | ApiPageListOrderedItem)[],
-  predicate: (text: ApiRichText) => number,
-): number {
-  return items.reduce((total, item) => {
-    return total + (item.type === 'text'
-      ? predicate(item.text)
-      : sumPageBlocksMatchingRichText(item.blocks, predicate));
-  }, 0);
-}
-
-function hasRichTextSpoileredCustomEmojis(text: ApiRichText): boolean {
-  switch (text.type) {
-    case 'spoiler':
-      return countRichTextCustomEmojis(text.text) > 0;
-    case 'concat':
-      return text.texts.some(hasRichTextSpoileredCustomEmojis);
-    case 'bold':
-    case 'italic':
-    case 'underline':
-    case 'strike':
-    case 'fixed':
-    case 'url':
-    case 'email':
-    case 'subscript':
-    case 'superscript':
-    case 'marked':
-    case 'phone':
-    case 'anchor':
-    case 'mention':
-    case 'hashtag':
-    case 'botCommand':
-    case 'cashtag':
-    case 'autoUrl':
-    case 'autoEmail':
-    case 'autoPhone':
-    case 'bankCard':
-    case 'tonAddress':
-    case 'mentionName':
-    case 'date':
-      return hasRichTextSpoileredCustomEmojis(text.text);
-    default:
-      return false;
-  }
+  return { count, hasSpoilered };
 }
 
 export default memo(MessageRichText);

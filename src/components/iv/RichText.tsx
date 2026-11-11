@@ -1,6 +1,8 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMessageEntityFormattedDate, ApiRichText, ApiRichTextDate } from '../../api/types';
+import type {
+  ApiMessageEntityFormattedDate, ApiRichText, ApiRichTextCustomEmoji, ApiRichTextDate,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
@@ -282,7 +284,7 @@ const RichText = ({
     );
   }
 
-  function renderCustomEmoji(customEmojiText: Extract<ApiRichText, { type: 'customEmoji' }>) {
+  function renderCustomEmoji(customEmojiText: ApiRichTextCustomEmoji) {
     if (customEmojiText.document) {
       return (
         <CustomEmoji

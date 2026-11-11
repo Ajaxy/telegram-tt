@@ -9,6 +9,13 @@ import type {
   ApiVideo,
 } from './messages';
 
+export type ApiRichTextCustomEmoji = {
+  type: 'customEmoji';
+  documentId: string;
+  document?: ApiSticker;
+  alt: string;
+};
+
 export type ApiRichTextDate = {
   type: 'date';
   text: ApiRichText;
@@ -56,7 +63,7 @@ export type ApiRichText =
   | { type: 'image'; document: ApiDocument; width: number; height: number }
   | { type: 'anchor'; text: ApiRichText; name: string }
   | { type: 'math'; source: string }
-  | { type: 'customEmoji'; documentId: string; document?: ApiSticker; alt: string }
+  | ApiRichTextCustomEmoji
   | { type: 'spoiler'; text: ApiRichText }
   | { type: 'mention'; text: ApiRichText }
   | { type: 'hashtag'; text: ApiRichText }
