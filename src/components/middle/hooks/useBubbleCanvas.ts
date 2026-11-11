@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ThemeKey } from '../../../types';
+import type { ThemePalette } from '../../../util/theme';
 import type { GradientRenderer } from '../../../util/wallpaper/gradient';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
@@ -29,7 +30,11 @@ const OWN_MESSAGE_SELECTOR = '.Message.own';
 const OWN_BUBBLE_SELECTOR = `${OWN_MESSAGE_SELECTOR} .message-content.has-solid-background:not(.has-widget), `
   + `${OWN_MESSAGE_SELECTOR} .message-content.has-background:not(.has-widget), `
   + `${OWN_MESSAGE_SELECTOR}.is-album .message-content`;
-const ANIMATED_ELEMENT_SELECTOR = '.Message.own, .Message.own > .message-content-wrapper';
+// A top-level unsupported block tears its bubble, which only the canvas can draw
+const TORN_BUBBLE_SELECTOR = '.message-content.has-solid-background:has([data-bubble-tear])';
+const TORN_MESSAGE_SELECTOR = '.Message:has([data-bubble-tear])';
+const ANIMATED_ELEMENT_SELECTOR = `${OWN_MESSAGE_SELECTOR}, ${OWN_MESSAGE_SELECTOR} > .message-content-wrapper, `
+  + `${TORN_MESSAGE_SELECTOR}, ${TORN_MESSAGE_SELECTOR} > .message-content-wrapper`;
 
 const BUFFER_SCREENS = 2;
 const BUFFER_EDGE_FRACTION = 0.1;
@@ -40,14 +45,30 @@ const MEDIA_TOP_INSET_DEVICE_PX = 0.5;
 const SHADOW_OFFSET_Y_PX = 1;
 const SHADOW_BLUR_PX = 2;
 
-// Mirrors the `.svg-appendix` metrics and the own path from `MessageAppendix.tsx`
+// Mirrors the `.svg-appendix` metrics and the paths from `MessageAppendix.tsx`
 const APPENDIX_WIDTH_PX = 9;
 const APPENDIX_HEIGHT_PX = 18;
 const APPENDIX_RIGHT_OVERHANG_PX = 8.816;
+const APPENDIX_LEFT_OVERHANG_PX = 8.992;
 const APPENDIX_BOTTOM_OVERHANG_PX = 1;
 const OWN_APPENDIX_PATH = 'M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z';
+const APPENDIX_PATH = 'M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z';
+
+// The torn edge mirrors Android's `TornEdge`: one unsmoothed sample per step reads as paper fibre, not a wave
+const TEAR_STEP_PX = 2.5;
+const TEAR_JITTER_PX = 1.9;
+const TEAR_SEEDS_PER_MESSAGE = 100;
+// Distance from a plate to the tear line around it
+const TEAR_GAP_PX = 12;
+// A run of bubble this short next to a tear is not drawn
+const TEAR_SLIVER_PX = 8;
+// Kept pieces reach past the bubble, so its tail and shadow are cut only at the tears
+const TEAR_OVERHANG_PX = 24;
 
 type BubbleRadii = [number, number, number, number];
+
+// Bubble-relative tear lines; a missing one means the band runs off the bubble's edge
+type TearBand = { top?: number; bottom?: number };
 
 type BubbleGeometry = {
   x: number;
@@ -60,12 +81,25 @@ type BubbleGeometry = {
   hasTail: boolean;
   hasShadow: boolean;
   hasTopMedia: boolean;
+  isOwn: boolean;
+  messageId: number;
+  tearBands?: TearBand[];
+};
+
+type TornPath = {
+  path: Path2D;
+  clip: Path2D;
+  opacity: number;
+  hasShadow: boolean;
+  isOwn: boolean;
 };
 
 // All coordinates live in `.messages-container` space (the canvas parent); the scroller's
 // `scrollTop` is converted through `contentOffsetTop`
 type CanvasState = {
   geometry: BubbleGeometry[];
+  // The own bubbles are measured only for a gradient theme
+  isGradientMeasured: boolean;
   contentWidth: number;
   contentHeight: number;
   viewportHeight: number;
@@ -73,10 +107,13 @@ type CanvasState = {
   bufferTop: number;
   scrollTop: number;
   shadowColor: string;
+  incomingColor: string;
+  outgoingColor: string;
   path?: Path2D;
   shadowPath?: Path2D;
   shadowCanvas?: HTMLCanvasElement;
   translucentPaths: { path: Path2D; opacity: number; hasShadow: boolean }[];
+  tornPaths: TornPath[];
   gradientCanvas?: HTMLCanvasElement;
 };
 
@@ -84,18 +121,23 @@ type BubbleStyle = { radii: BubbleRadii; hasShadow: boolean };
 type ColorStop = ReturnType<typeof buildColorFromHex>;
 type BubbleStyleCache = WeakMap<HTMLElement, { key: string; style: BubbleStyle }>;
 
+let ownTailPath: Path2D | undefined;
 let tailPath: Path2D | undefined;
 
-export default function useOwnBubbleGradientCanvas(
+// Paints the own bubbles of a gradient theme and every bubble torn around an unsupported block
+export default function useBubbleCanvas(
   containerRef: ElementRef<HTMLDivElement>,
   canvasRef: ElementRef<HTMLCanvasElement>,
-  colors?: string[],
+  palette: ThemePalette,
+  hasTornBubbles?: boolean,
   messageIds?: number[],
   theme?: ThemeKey,
   areColorsAnimated?: boolean,
   shouldSnapColors?: boolean,
 ) {
-  const isEnabled = Boolean(colors && colors.length > 1);
+  const colors = palette.outgoingColors;
+  const isGradient = Boolean(colors && colors.length > 1);
+  const isEnabled = isGradient || Boolean(hasTornBubbles);
   const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement>();
   const updateCanvasElement = useLastCallback(() => setCanvasElement(canvasRef.current));
   useSyncEffect(() => {
@@ -104,6 +146,7 @@ export default function useOwnBubbleGradientCanvas(
 
   const stateRef = useRef<CanvasState>({
     geometry: [],
+    isGradientMeasured: false,
     contentWidth: 0,
     contentHeight: 0,
     viewportHeight: 0,
@@ -111,7 +154,10 @@ export default function useOwnBubbleGradientCanvas(
     bufferTop: 0,
     scrollTop: 0,
     shadowColor: '',
+    incomingColor: palette.incomingColor,
+    outgoingColor: palette.outgoingColor,
     translucentPaths: [],
+    tornPaths: [],
   });
   // The stops currently on the canvas: the theme colors, or an interpolation while they morph
   const renderColorsRef = useRef<string[]>();
@@ -161,7 +207,9 @@ export default function useOwnBubbleGradientCanvas(
 
     const styleCache = styleCacheRef.current;
     const contentBounds = content.getBoundingClientRect();
-    state.geometry = Array.from(content.querySelectorAll<HTMLElement>(OWN_BUBBLE_SELECTOR)).map((bubble) => {
+    const selector = isGradient ? `${OWN_BUBBLE_SELECTOR}, ${TORN_BUBBLE_SELECTOR}` : TORN_BUBBLE_SELECTOR;
+    state.isGradientMeasured = isGradient;
+    state.geometry = Array.from(content.querySelectorAll<HTMLElement>(selector)).map((bubble) => {
       const width = bubble.offsetWidth;
       const height = bubble.offsetHeight;
       const bounds = bubble.getBoundingClientRect();
@@ -171,6 +219,14 @@ export default function useOwnBubbleGradientCanvas(
         : undefined;
       const message = bubble.closest<HTMLElement>('.Message')!;
       const wrapper = bubble.closest<HTMLElement>('.message-content-wrapper')!;
+      const isOwn = message.classList.contains('own');
+      const tearZones = Array.from(bubble.querySelectorAll('[data-bubble-tear]'), (element) => {
+        const zone = element.getBoundingClientRect();
+        return [zone.top - bounds.top, zone.bottom - bounds.top] as const;
+      });
+      // Tears stay within the rich content, clear of the header and the meta around it
+      const richBounds = tearZones.length
+        ? getRichContentBounds(bubble.querySelector<HTMLElement>('[data-rich-copy-root]')) : undefined;
       trackResize(bubble, width, height);
       return {
         x: bounds.left - contentBounds.left,
@@ -183,6 +239,15 @@ export default function useOwnBubbleGradientCanvas(
         hasTail: bubble.classList.contains('has-appendix') && !bubble.hasAttribute(CUSTOM_APPENDIX_ATTRIBUTE),
         hasTopMedia: mediaBounds?.top === bounds.top && mediaBounds.left === bounds.left
           && mediaBounds.right === bounds.right,
+        isOwn,
+        messageId: Number(message.dataset.messageId),
+        tearBands: tearZones.length ? resolveTearBands(
+          tearZones,
+          bounds.height,
+          width ? bounds.width / width : 1,
+          richBounds ? richBounds.top - bounds.top : 0,
+          richBounds ? richBounds.bottom - bounds.top : bounds.height,
+        ) : undefined,
       };
     });
 
@@ -202,7 +267,7 @@ export default function useOwnBubbleGradientCanvas(
     const canvas = canvasRef.current;
     const renderColors = renderColorsRef.current;
     // The canvas can disappear between the measure and mutation phases
-    if (!isEnabled || !canvas || !renderColors) return;
+    if (!isEnabled || !canvas) return;
 
     const state = stateRef.current;
     state.scrollTop = scrollTop;
@@ -211,7 +276,7 @@ export default function useOwnBubbleGradientCanvas(
     syncCanvasSize(canvas, state);
     recenterBuffer(canvas, state, scrollTop, renderColors, true);
     isShadowDirtyRef.current = false;
-    drawGradient(canvas, state, scrollTop, renderColors);
+    drawBubbles(canvas, state, scrollTop, renderColors);
   });
 
   // Runs in the measure phase and defers the writes to the mutation phase
@@ -242,14 +307,14 @@ export default function useOwnBubbleGradientCanvas(
       isDrawPendingRef.current = false;
       const canvas = canvasRef.current;
       const state = stateRef.current;
-      if (!canvas || !renderColorsRef.current) return;
+      if (!canvas) return;
       const previousPath = state.path;
       recenterBuffer(canvas, state, state.scrollTop, renderColorsRef.current);
       if (isShadowDirtyRef.current && state.path === previousPath) {
         renderShadowLayer(canvas, state, renderColorsRef.current);
       }
       isShadowDirtyRef.current = false;
-      drawGradient(canvas, state, state.scrollTop, renderColorsRef.current);
+      drawBubbles(canvas, state, state.scrollTop, renderColorsRef.current);
     });
   });
 
@@ -364,7 +429,7 @@ export default function useOwnBubbleGradientCanvas(
 
   useLayoutEffect(() => {
     const previous = renderColorsRef.current;
-    if (!isEnabled || !previous || shouldSnapColors || document.visibilityState !== 'visible'
+    if (!isGradient || !previous || shouldSnapColors || document.visibilityState !== 'visible'
       || !document.hasFocus() || !selectCanAnimateInterface(getGlobal())) {
       morphRef.current?.cancel();
       morphRef.current = undefined;
@@ -382,7 +447,7 @@ export default function useOwnBubbleGradientCanvas(
     startColorsMorph(previous, colors!);
     // `colorsKey` stands in for `colors`, whose identity changes without its content
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [colorsKey, isEnabled, isFreeform, shouldSnapColors, startColorsMorph]);
+  }, [colorsKey, isGradient, isFreeform, shouldSnapColors, startColorsMorph]);
 
   useLayoutEffect(() => {
     return () => {
@@ -487,15 +552,22 @@ export default function useOwnBubbleGradientCanvas(
       return;
     }
 
-    if (isDrawnRef.current) {
-      stateRef.current.shadowColor = themeColors['--color-default-shadow'][theme === 'dark' ? 1 : 0];
+    const state = stateRef.current;
+    // Solid torn bubbles snap to the target colors, which the CSS bubbles animate towards
+    state.incomingColor = palette.incomingColor;
+    state.outgoingColor = palette.outgoingColor;
+    if (isDrawnRef.current && state.isGradientMeasured === isGradient) {
+      state.shadowColor = themeColors['--color-default-shadow'][theme === 'dark' ? 1 : 0];
       isShadowDirtyRef.current = true;
       scheduleDraw();
       return;
     }
 
     requestForcedReflow(measureForReflow);
-  }, [isEnabled, colorsKey, theme, measureForReflow, scheduleDraw]);
+  }, [
+    isEnabled, isGradient, colorsKey, theme, palette.incomingColor, palette.outgoingColor, measureForReflow,
+    scheduleDraw,
+  ]);
 
   useResizeObserver(containerRef, scheduleMeasure, !isEnabled);
 
@@ -555,7 +627,7 @@ function syncCanvasSize(canvas: HTMLCanvasElement, state: CanvasState) {
 }
 
 function recenterBuffer(
-  canvas: HTMLCanvasElement, state: CanvasState, scrollTop: number, colors: string[], force = false,
+  canvas: HTMLCanvasElement, state: CanvasState, scrollTop: number, colors?: string[], force = false,
 ) {
   const contentScrollTop = scrollTop - state.contentOffsetTop;
   const bufferHeight = getBufferHeight(state);
@@ -574,14 +646,15 @@ function recenterBuffer(
 
 // The blur is expensive, so the shadow is pre-rendered here and only composited on scroll.
 // The path is filled along with the shadow: the body is covered by the gradient afterwards,
-// and a mid-gradient fill keeps the blended edge pixels in the palette.
-function renderShadowLayer(canvas: HTMLCanvasElement, state: CanvasState, colors: string[]) {
+// and a mid-gradient fill keeps the blended edge pixels in the palette. Torn bubbles cast their
+// shadows as they are drawn.
+function renderShadowLayer(canvas: HTMLCanvasElement, state: CanvasState, colors?: string[]) {
   const layer = state.shadowCanvas ||= document.createElement('canvas');
   if (layer.width !== canvas.width) layer.width = canvas.width;
   if (layer.height !== canvas.height) layer.height = canvas.height;
 
   const ctx = layer.getContext('2d');
-  if (!ctx || !state.shadowPath) return;
+  if (!ctx || !state.shadowPath || !colors) return;
 
   const dpr = window.devicePixelRatio || 1;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -600,10 +673,12 @@ function buildBubblePaths(state: CanvasState) {
   const bufferHeight = getBufferHeight(state);
   const dpr = window.devicePixelRatio || 1;
   state.translucentPaths = [];
-  tailPath ||= new Path2D(OWN_APPENDIX_PATH);
+  state.tornPaths = [];
+  ownTailPath ||= new Path2D(OWN_APPENDIX_PATH);
+  tailPath ||= new Path2D(APPENDIX_PATH);
 
   state.geometry.forEach(({
-    x, y, width, height, scale, opacity, radii, hasTail, hasShadow, hasTopMedia,
+    x, y, width, height, scale, opacity, radii, hasTail, hasShadow, hasTopMedia, isOwn, messageId, tearBands,
   }) => {
     const top = y - state.bufferTop;
     if (!opacity || !width || !height || top + height < 0 || top > bufferHeight) return;
@@ -616,12 +691,22 @@ function buildBubblePaths(state: CanvasState) {
       const matrix = new DOMMatrix();
       matrix.a = scale;
       matrix.d = scale;
-      matrix.e = x + width + (APPENDIX_RIGHT_OVERHANG_PX - APPENDIX_WIDTH_PX) * scale;
+      matrix.e = isOwn
+        ? x + width + (APPENDIX_RIGHT_OVERHANG_PX - APPENDIX_WIDTH_PX) * scale
+        : x - APPENDIX_LEFT_OVERHANG_PX * scale;
       matrix.f = top + height + (APPENDIX_BOTTOM_OVERHANG_PX - APPENDIX_HEIGHT_PX) * scale;
-      bubblePath.addPath(tailPath!, matrix);
+      bubblePath.addPath(isOwn ? ownTailPath! : tailPath!, matrix);
     }
 
-    if (opacity < 1) {
+    if (tearBands) {
+      state.tornPaths.push({
+        path: bubblePath,
+        clip: buildTearClip(x, top, width, height, tearBands, scale, messageId),
+        opacity,
+        hasShadow,
+        isOwn,
+      });
+    } else if (opacity < 1) {
       state.translucentPaths.push({ path: bubblePath, opacity, hasShadow });
     } else {
       path.addPath(bubblePath);
@@ -633,7 +718,7 @@ function buildBubblePaths(state: CanvasState) {
   state.shadowPath = shadowPath;
 }
 
-function drawGradient(canvas: HTMLCanvasElement, state: CanvasState, scrollTop: number, colors: string[]) {
+function drawBubbles(canvas: HTMLCanvasElement, state: CanvasState, scrollTop: number, colors?: string[]) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
@@ -643,30 +728,14 @@ function drawGradient(canvas: HTMLCanvasElement, state: CanvasState, scrollTop: 
   ctx.clearRect(0, 0, state.contentWidth, bufferHeight);
   if (!state.path) return;
 
-  if (state.shadowCanvas) {
+  if (state.shadowCanvas && colors) {
     ctx.drawImage(state.shadowCanvas, 0, 0, state.contentWidth, bufferHeight);
   }
 
-  const viewportY = scrollTop - state.contentOffsetTop - state.bufferTop;
-  if (state.gradientCanvas) {
-    const source = state.gradientCanvas;
-    const pattern = ctx.createPattern(source, 'repeat');
-    if (!pattern) return;
-    pattern.setTransform(new DOMMatrix([
-      state.contentWidth / source.width, 0, 0, state.viewportHeight / source.height, 0, viewportY,
-    ]));
-    ctx.fillStyle = pattern;
-  } else {
-    const gradient = ctx.createLinearGradient(0, viewportY, 0, viewportY + state.viewportHeight);
-    // The first server color belongs at the bottom of the viewport
-    colors.forEach((color, index) => {
-      gradient.addColorStop(1 - index / (colors.length - 1), color);
-    });
-    ctx.fillStyle = gradient;
-  }
-  ctx.fill(state.path);
-  state.translucentPaths.forEach(({ path, opacity, hasShadow }) => {
+  const gradientFill = colors && buildGradientFill(ctx, state, scrollTop, colors);
+  const drawPath = (path: Path2D, opacity: number, hasShadow: boolean, clip?: Path2D) => {
     ctx.save();
+    if (clip) ctx.clip(clip);
     ctx.globalAlpha = opacity;
     if (hasShadow) {
       ctx.shadowColor = state.shadowColor;
@@ -675,5 +744,147 @@ function drawGradient(canvas: HTMLCanvasElement, state: CanvasState, scrollTop: 
     }
     ctx.fill(path);
     ctx.restore();
+  };
+
+  if (gradientFill) {
+    ctx.fillStyle = gradientFill;
+    ctx.fill(state.path);
+    state.translucentPaths.forEach(({ path, opacity, hasShadow }) => drawPath(path, opacity, hasShadow));
+  }
+
+  state.tornPaths.forEach(({
+    path, clip, opacity, hasShadow, isOwn,
+  }) => {
+    ctx.fillStyle = (isOwn && gradientFill) || (isOwn ? state.outgoingColor : state.incomingColor);
+    drawPath(path, opacity, hasShadow, clip);
   });
+}
+
+function buildGradientFill(ctx: CanvasRenderingContext2D, state: CanvasState, scrollTop: number, colors: string[]) {
+  const viewportY = scrollTop - state.contentOffsetTop - state.bufferTop;
+  if (state.gradientCanvas) {
+    const source = state.gradientCanvas;
+    const pattern = ctx.createPattern(source, 'repeat');
+    pattern?.setTransform(new DOMMatrix([
+      state.contentWidth / source.width, 0, 0, state.viewportHeight / source.height, 0, viewportY,
+    ]));
+    return pattern || undefined;
+  }
+
+  const gradient = ctx.createLinearGradient(0, viewportY, 0, viewportY + state.viewportHeight);
+  // The first server color belongs at the bottom of the viewport
+  colors.forEach((color, index) => {
+    gradient.addColorStop(1 - index / (colors.length - 1), color);
+  });
+  return gradient;
+}
+
+// The edge margins of the first and last blocks collapse through the content root, so they are added back
+function getRichContentBounds(root?: HTMLElement | null) {
+  if (!root) return undefined;
+
+  const { top, bottom } = root.getBoundingClientRect();
+  const first = root.firstElementChild;
+  const last = root.lastElementChild;
+  return {
+    top: top - (first ? parseFloat(getComputedStyle(first).marginTop) || 0 : 0),
+    bottom: bottom + (last ? parseFloat(getComputedStyle(last).marginBottom) || 0 : 0),
+  };
+}
+
+// Grows the zones of the plates into bands, within the content bounds; runs of bubble too short to draw join
+// the band next to them. Zones come in document order, from top to bottom.
+function resolveTearBands(
+  zones: (readonly [number, number])[], height: number, scale: number, contentTop: number, contentBottom: number,
+): TearBand[] {
+  const gap = TEAR_GAP_PX * scale;
+  const sliver = TEAR_SLIVER_PX * scale;
+  const bands: [number, number][] = [];
+  zones.forEach(([zoneTop, zoneBottom]) => {
+    const top = Math.max(zoneTop - gap, contentTop);
+    const bottom = Math.min(zoneBottom + gap, contentBottom);
+    const last = bands[bands.length - 1];
+    if (last && top - last[1] <= sliver) {
+      last[1] = Math.max(last[1], bottom);
+    } else {
+      bands.push([top, bottom]);
+    }
+  });
+
+  return bands.map(([top, bottom]) => ({
+    top: top > sliver ? top : undefined,
+    bottom: height - bottom > sliver ? bottom : undefined,
+  }));
+}
+
+// The kept runs of a torn bubble, each with a torn edge facing a band. As on Android, a band's seed comes from
+// the message and the band's index, and both of its edges share it.
+function buildTearClip(
+  x: number, top: number, width: number, height: number, bands: TearBand[], scale: number, messageId: number,
+) {
+  const clip = new Path2D();
+  const overhang = TEAR_OVERHANG_PX * scale;
+  let pieceTop = top - overhang;
+  let pieceTopSeed: number | undefined;
+  for (let index = 0; index < bands.length; index++) {
+    const band = bands[index];
+    const seed = messageId * TEAR_SEEDS_PER_MESSAGE + index;
+    if (band.top !== undefined) {
+      addTornPiece(clip, x, width, pieceTop, pieceTopSeed, top + band.top, seed, scale);
+    }
+    if (band.bottom === undefined) return clip;
+
+    pieceTop = top + band.bottom;
+    pieceTopSeed = seed;
+  }
+
+  addTornPiece(clip, x, width, pieceTop, pieceTopSeed, top + height + overhang, undefined, scale);
+  return clip;
+}
+
+// An edge without a seed is straight
+function addTornPiece(
+  path: Path2D,
+  x: number,
+  width: number,
+  top: number,
+  topSeed: number | undefined,
+  bottom: number,
+  bottomSeed: number | undefined,
+  scale: number,
+) {
+  const overhang = TEAR_OVERHANG_PX * scale;
+  const step = TEAR_STEP_PX * scale;
+  // Samples are indexed from the bubble's left edge, so the pattern does not depend on its width
+  const first = Math.floor(-overhang / step);
+  const last = Math.ceil((width + overhang) / step);
+
+  if (topSeed !== undefined) {
+    path.moveTo(x + first * step, top + getTearOffset(first, topSeed) * scale);
+    for (let i = first + 1; i <= last; i++) {
+      path.lineTo(x + i * step, top + getTearOffset(i, topSeed) * scale);
+    }
+  } else {
+    path.moveTo(x + first * step, top);
+    path.lineTo(x + last * step, top);
+  }
+
+  if (bottomSeed !== undefined) {
+    for (let i = last; i >= first; i--) {
+      path.lineTo(x + i * step, bottom + getTearOffset(i, bottomSeed) * scale);
+    }
+  } else {
+    path.lineTo(x + last * step, bottom);
+    path.lineTo(x + first * step, bottom);
+  }
+
+  path.closePath();
+}
+
+// Ports the integer hash of Android's `TornEdge`, so the samples are uncorrelated yet stable
+function getTearOffset(index: number, seed: number) {
+  let hash = (Math.imul(index, 374761393) + Math.imul(seed, 668265263)) | 0;
+  hash = Math.imul(hash ^ (hash >>> 13), 1274126177);
+  hash ^= hash >>> 16;
+  return ((hash >>> 8) / 16777216 - 0.5) * 2 * TEAR_JITTER_PX;
 }

@@ -71,6 +71,7 @@ import {
   isMessageLocal,
   isMessageLocalOnly,
   isMessageTranslatable,
+  isMessageUnsupported,
   isOwnMessage,
   isReplyToMessage,
   isSystemBot,
@@ -186,6 +187,7 @@ import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Sparkles from '../../common/Sparkles';
+import UnsupportedPlate from '../../common/UnsupportedPlate';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import InputText from '../../ui/InputText';
@@ -625,6 +627,7 @@ const Message = ({
 
   const hasStoryReply = Boolean(storyReplyInfo);
   const hasThread = Boolean(repliesThreadInfo) && messageListType === 'thread';
+  const isUnsupported = isMessageUnsupported(message);
   const isCustomShape = !withVoiceTranscription && getMessageCustomShape(message);
   const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
@@ -848,7 +851,8 @@ const Message = ({
   );
 
   const text = textMessage && getMessageContent(textMessage).text;
-  const isInvertedMedia = Boolean(message.isInvertedMedia);
+  // Unsupported media can keep the flag, but its plate has no caption to put above it
+  const isInvertedMedia = Boolean(message.isInvertedMedia) && !isUnsupported;
 
   const replyToMsgId = messageReplyInfo?.replyToMsgId;
   const replyToPeerId = messageReplyInfo?.type === 'message' ? messageReplyInfo.replyToPeerId : undefined;
@@ -997,6 +1001,9 @@ const Message = ({
     metaPosition = 'none';
   } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
+  } else if (isUnsupported) {
+    // The plate replaces the text, so the meta stands over its corner, as on a sticker
+    metaPosition = 'standalone';
   } else if (hasText && !webPage && !emojiSize && !isInvertedMedia) {
     metaPosition = 'in-text';
   } else if (isInvertedMedia && !emojiSize && (hasFactCheck || webPage)) {
@@ -1544,7 +1551,14 @@ const Message = ({
         {!isInvertedMedia && (
           <>
             {renderInvertibleMediaContent(hasCustomAppendix)}
-            {hasText && !hasAnimatedEmoji && (
+            {isUnsupported && (
+              <UnsupportedPlate
+                className="unsupported-plate"
+                title={lang('UnsupportedMessageTitle')}
+                text={lang('MessageUnsupported')}
+              />
+            )}
+            {hasText && !hasAnimatedEmoji && !isUnsupported && (
               <div className={textContentClass} dir="auto" ref={textRef}>
                 {renderMessageText()}
                 {isNewTextPending && renderMessageTextAnimation()}

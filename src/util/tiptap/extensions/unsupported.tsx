@@ -1,7 +1,12 @@
 import { Node } from '@tiptap/core';
 
-import { addLocalizationCallback, getTranslationFn } from '../../localization';
+import { getTranslationFn } from '../../localization';
 import { UNSUPPORTED_NODE_NAME } from '../constants';
+
+import useLang from '../../../hooks/useLang';
+
+import UnsupportedPlate from '../../../components/common/UnsupportedPlate';
+import TeactNodeViewRenderer from '../TeactNodeViewRenderer';
 
 import styles from '../styling.module.scss';
 
@@ -16,25 +21,18 @@ export const UnsupportedNode = Node.create({
 
   renderHTML() {
     return ['div', {
-      class: styles.unsupported,
       contenteditable: 'false',
       'data-rich-text-type': UNSUPPORTED_NODE_NAME,
     }, getTranslationFn()('PageContentUnsupported')];
   },
 
   addNodeView() {
-    return () => {
-      const dom = document.createElement('div');
-      dom.className = styles.unsupported;
-      dom.contentEditable = 'false';
-      dom.dataset.richTextType = UNSUPPORTED_NODE_NAME;
-
-      function updateLabel() {
-        dom.textContent = getTranslationFn()('PageContentUnsupported');
-      }
-
-      updateLabel();
-      return { dom, destroy: addLocalizationCallback(updateLabel) };
-    };
+    return TeactNodeViewRenderer(UnsupportedView, { className: styles.unsupportedNode });
   },
 });
+
+function UnsupportedView() {
+  const lang = useLang();
+
+  return <UnsupportedPlate title={lang('UnsupportedBlockTitle')} text={lang('UnsupportedBlockMessage')} />;
+}

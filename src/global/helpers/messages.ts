@@ -205,7 +205,14 @@ export function getMessageTextWithFallback(lang: LangFn, message: MediaContainer
   return { text: richMessageText || lang('MessageUnsupported') };
 }
 
+export function isMessageUnsupported(message: MediaContainer) {
+  return !Object.keys(message.content).length;
+}
+
 export function getMessageCustomShape(message: ApiMessage): boolean {
+  // An unsupported message is a standalone plate, with no bubble of its own
+  if (isMessageUnsupported(message)) return true;
+
   const {
     text, sticker, photo, video, audio, voice,
     document, pollId, webPage, contact, action,

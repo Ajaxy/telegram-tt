@@ -168,7 +168,9 @@ import { armSendCollapseReserve } from '../middle/helpers/messageListReserves';
 import {
   buildRichMessageFromFormatted,
   getRichInputAsFormatted,
+  hasUnsupportedRichBlocks,
   isValidInputRichMessage,
+  removeUnsupportedRichBlocks,
 } from '../ui/textInput/richText';
 import renderText from './helpers/renderText';
 import { hasActiveRichEditorTooltip } from './tooltips/helpers';
@@ -222,6 +224,7 @@ import WebPagePreview from '../middle/composer/WebPagePreview';
 import MessageEffect from '../middle/message/MessageEffect';
 import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import MediaEditor from '../ui/mediaEditor/MediaEditor.async';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
@@ -585,6 +588,11 @@ const Composer = ({
     closeRemoveFormattingModal,
   ] = useFlag();
   const shouldFocusAfterFormattingRemovalRef = useRef(false);
+  const [
+    isRemoveUnsupportedDialogOpen,
+    openRemoveUnsupportedDialog,
+    closeRemoveUnsupportedDialog,
+  ] = useFlag();
 
   const canMediaBeReplaced = isEditingMedia && canEditMedia(editingMessage!);
 
@@ -764,6 +772,11 @@ const Composer = ({
       return false;
     }
 
+    if (hasUnsupportedRichBlocks(richEditor.getValue())) {
+      openRemoveUnsupportedDialog();
+      return false;
+    }
+
     if (!isInMessageList || isCurrentUserPremium) {
       return true;
     }
@@ -796,6 +809,12 @@ const Composer = ({
     richEditor.replaceValue(buildRichMessageFromFormatted(formattedValue));
     shouldFocusAfterFormattingRemovalRef.current = true;
     closeRemoveFormattingModal();
+  });
+
+  // The message is not sent right away, so the user can review what remains
+  const handleRemoveUnsupported = useLastCallback(() => {
+    richEditor.replaceValue(removeUnsupportedRichBlocks(richEditor.getValue()));
+    closeRemoveUnsupportedDialog();
   });
 
   const handleSubscribeToPremium = useLastCallback(() => {
@@ -1463,6 +1482,11 @@ const Composer = ({
     }
 
     const currentRichMessage = richEditor.getValue();
+    if (hasUnsupportedRichBlocks(currentRichMessage)) {
+      openRemoveUnsupportedDialog();
+      return false;
+    }
+
     const formattedRichMessage = currentRichMessage.blocks.length
       ? getRichInputAsFormatted(currentRichMessage) : undefined;
     if (currentRichMessage.blocks.length && !formattedRichMessage) {
@@ -3391,6 +3415,15 @@ const Composer = ({
         shouldAutoApprove={shouldPaidMessageAutoApprove}
         setAutoApprove={setShouldPaidMessageAutoApprove}
         confirmHandler={paymentMessageConfirmDialogHandler}
+      />
+      <ConfirmDialog
+        isOpen={isRemoveUnsupportedDialogOpen}
+        title={lang('RemoveUnsupportedBlocksTitle')}
+        text={lang('RemoveUnsupportedBlocksText')}
+        confirmLabel={lang('RemoveUnsupportedBlocks')}
+        confirmIsDestructive
+        confirmHandler={handleRemoveUnsupported}
+        onClose={closeRemoveUnsupportedDialog}
       />
       {isInMessageList && (
         <RemoveFormattingModal

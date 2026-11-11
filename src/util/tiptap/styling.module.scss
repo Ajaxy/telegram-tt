@@ -152,6 +152,10 @@
   border-top: 0.0625rem solid var(--color-borders);
 }
 
+.unsupportedNode {
+  margin-block: 0.375rem;
+}
+
 .mathNode:global(.ProseMirror-selectednode) {
   outline: none;
 }
@@ -219,25 +223,6 @@
 
 .highlightedTableCell {
   background-color: var(--color-code-bg);
-}
-
-.unsupported {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin: 0.375rem 0.5rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 0.0625rem solid var(--color-error);
-  border-radius: 0.5rem;
-
-  color: var(--color-error);
-
-  background: var(--color-background-secondary);
-}
-
-.unsupportedDelete {
-  flex-shrink: 0;
 }
 
 .emoji {

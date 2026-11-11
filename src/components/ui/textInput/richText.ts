@@ -133,8 +133,48 @@ export function hasUnsupportedRichBlocks(value: ApiInputRichMessage) {
 export function removeUnsupportedRichBlocks(value: ApiInputRichMessage): ApiInputRichMessage {
   return {
     ...value,
-    blocks: value.blocks.filter((block) => !hasUnsupportedRichBlock(block)),
+    blocks: removeUnsupportedBlocks(value.blocks),
   };
+}
+
+// Drops unsupported blocks at any depth. A container that held one goes only once it has nothing left to show.
+function removeUnsupportedBlocks(blocks: ApiPageBlock[]): ApiPageBlock[] {
+  return blocks.flatMap((block): ApiPageBlock[] => {
+    if (!hasUnsupportedRichBlock(block)) return [block];
+
+    switch (block.type) {
+      case 'blockquoteBlocks': {
+        const nestedBlocks = removeUnsupportedBlocks(block.blocks);
+        if (nestedBlocks.length) return [{ ...block, blocks: nestedBlocks }];
+
+        // A quote cannot be sent without a body, so its caption stays as a paragraph
+        return hasRichText(block.caption) ? [{ type: 'paragraph', text: block.caption }] : [];
+      }
+      case 'details': {
+        const nestedBlocks = removeUnsupportedBlocks(block.blocks);
+        return nestedBlocks.length || hasRichText(block.title) ? [{ ...block, blocks: nestedBlocks }] : [];
+      }
+      case 'list': {
+        const items = removeUnsupportedListItems(block.items);
+        return items.length ? [{ ...block, items }] : [];
+      }
+      case 'orderedList': {
+        const items = removeUnsupportedListItems(block.items);
+        return items.length ? [{ ...block, items }] : [];
+      }
+      default:
+        return [];
+    }
+  });
+}
+
+function removeUnsupportedListItems<T extends ApiPageListItem | ApiPageListOrderedItem>(items: T[]): T[] {
+  return items.flatMap((item) => {
+    if (item.type !== 'blocks' || !item.blocks.some(hasUnsupportedRichBlock)) return [item];
+
+    const blocks = removeUnsupportedBlocks(item.blocks);
+    return blocks.length ? [{ ...item, blocks }] : [];
+  });
 }
 
 export function getRichInputAsFormatted(

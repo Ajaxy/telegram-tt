@@ -62,6 +62,12 @@ export interface LangPair {
   'WidgetUnavailable': undefined;
   'WidgetUnsupportedBrowser': undefined;
   'PageContentUnsupported': undefined;
+  'UnsupportedBlockTitle': undefined;
+  'UnsupportedBlockMessage': undefined;
+  'UnsupportedMessageTitle': undefined;
+  'RemoveUnsupportedBlocksTitle': undefined;
+  'RemoveUnsupportedBlocksText': undefined;
+  'RemoveUnsupportedBlocks': undefined;
   'PageContentEmbed': undefined;
   'ConversationDefaultRestrictedMedia': undefined;
   'AccDescrVoiceMessage': undefined;

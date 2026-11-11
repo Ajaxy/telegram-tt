@@ -71,6 +71,7 @@ import PlayableAudio from '../common/PlayableAudio';
 import Blockquote from '../common/quote/Blockquote';
 import Pullquote from '../common/quote/Pullquote';
 import SafeLink from '../common/SafeLink';
+import UnsupportedPlate from '../common/UnsupportedPlate';
 import { Breakout } from '../gili/layout/Surface';
 import Photo from '../middle/message/Photo';
 import Video from '../middle/message/Video';
@@ -300,6 +301,10 @@ const RichContent = ({
     onTelegramChannelClick,
   };
   function renderTopLevelBlock(block: ApiPageBlock, index: number) {
+    if (block.type === 'unsupported') {
+      return renderUnsupportedPlate(true);
+    }
+
     const sourceKey = String(index);
     const content = renderBlock(block, sourceKey, true);
 
@@ -510,8 +515,25 @@ const RichContent = ({
         );
       }
       case 'unsupported':
-        return renderUnsupportedBlock(unsupportedText, block.type);
+        return renderUnsupportedPlate();
     }
+  }
+
+  function renderUnsupportedPlate(isTopLevel?: boolean) {
+    return (
+      <div
+        className={styles.unsupportedBlock}
+        data-rich-copy-ignore
+        // The bubble canvas tears a message around its top-level plates
+        data-bubble-tear={(isTopLevel && isMessageContent) || undefined}
+      >
+        <UnsupportedPlate
+          title={lang('UnsupportedBlockTitle')}
+          text={lang('UnsupportedBlockMessage')}
+          className={isMessageContent ? undefined : styles.unsupportedPlateStatic}
+        />
+      </div>
+    );
   }
 
   return (
@@ -929,7 +951,7 @@ function renderBlockquoteBlocks(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <Blockquote className={styles.block} contentClassName={styles.blockquote}>
+    <Blockquote className={styles.block} contentClassName={buildClassName(styles.blockquote, styles.blockquoteBlocks)}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
         <footer

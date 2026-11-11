@@ -38,7 +38,6 @@ import tiptapStyles from '../../../util/tiptap/styling.module.scss';
 import {
   getRichInputAsFormatted,
   hasUnsupportedRichBlocks,
-  removeUnsupportedRichBlocks,
 } from '../../ui/textInput/richText';
 import { RICH_INPUT_MODE_CHANGED_META } from './helpers/richEditorMode';
 
@@ -646,16 +645,6 @@ const MessageInput = ({
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
 
-  function handleDeleteUnsupported() {
-    if (!richValue) {
-      return;
-    }
-
-    const nextValue = removeUnsupportedRichBlocks(richValue);
-    richEditor.setValue(nextValue.blocks.length ? nextValue : undefined);
-    syncCloneWithSource(editor?.view.dom);
-  }
-
   useEffect(() => {
     if (IS_TOUCH_ENV) {
       return;
@@ -768,20 +757,6 @@ const MessageInput = ({
       onClick={shouldSuppressFocus ? onSuppressedFocus : undefined}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      {hasUnsupportedRichContent && (
-        <div className={tiptapStyles.unsupported}>
-          <span>{lang('PageContentUnsupported')}</span>
-          <Button
-            isText
-            size="smaller"
-            color="danger"
-            className={tiptapStyles.unsupportedDelete}
-            onClick={handleDeleteUnsupported}
-          >
-            {lang('Delete')}
-          </Button>
-        </div>
-      )}
       <div className="shared-canvas-container">
         {canRenderRichEditor && (
           <>

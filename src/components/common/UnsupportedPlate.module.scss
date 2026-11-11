@@ -1,0 +1,80 @@
+.root {
+  user-select: none;
+
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+
+  min-width: 0;
+  padding: 0.375rem 0.75rem 0.5rem;
+  border-radius: 1.375rem;
+
+  color: var(--message-service-text);
+
+  background-color: var(--message-service-background);
+
+  // Puts the plate's baseline at its middle, so a list marker centers on it
+  &::before {
+    content: "\200B";
+    align-self: center;
+    width: 0;
+    margin-inline-end: -0.75rem;
+  }
+}
+
+.badge {
+  position: relative;
+
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  width: 2.75rem;
+  height: 2.75rem;
+
+  // The topic bubble's silhouette, darkened behind the plane
+  &::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background-color: #00000026;
+
+    mask-image: url("../../assets/icons/forumTopic/blue.svg");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: 100%;
+  }
+
+  :global(.theme-dark) &::before {
+    background-color: #00000033;
+  }
+}
+
+.icon {
+  position: relative;
+  font-size: 1.5rem;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.title {
+  overflow: hidden;
+
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  opacity: 0.6;
+}

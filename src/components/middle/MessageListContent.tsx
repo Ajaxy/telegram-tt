@@ -74,7 +74,8 @@ interface OwnProps {
   isComments?: boolean;
   noAvatars: boolean;
   containerRef: ElementRef<HTMLDivElement>;
-  ownGradientCanvasRef?: ElementRef<HTMLCanvasElement>;
+  bubbleCanvasRef?: ElementRef<HTMLCanvasElement>;
+  hasOwnGradient?: boolean;
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
@@ -157,7 +158,8 @@ const MessageListContent = ({
   isBotForum,
   noAvatars,
   containerRef,
-  ownGradientCanvasRef,
+  bubbleCanvasRef,
+  hasOwnGradient,
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
@@ -740,11 +742,13 @@ const MessageListContent = ({
   return (
     <div
       ref={messagesContainerRef}
-      className={buildClassName('messages-container', ownGradientCanvasRef && 'with-own-gradient')}
+      className={buildClassName(
+        'messages-container', bubbleCanvasRef && 'with-bubble-canvas', hasOwnGradient && 'with-own-gradient',
+      )}
       teactFastList
     >
-      {ownGradientCanvasRef && (
-        <canvas ref={ownGradientCanvasRef} key="own-gradient-canvas" className="own-gradient-canvas" />
+      {bubbleCanvasRef && (
+        <canvas ref={bubbleCanvasRef} key="bubble-canvas" className="bubble-canvas" />
       )}
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo

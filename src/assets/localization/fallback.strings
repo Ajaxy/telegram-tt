@@ -94,6 +94,12 @@
 "WidgetUnavailable" = "Widget unavailable";
 "WidgetUnsupportedBrowser" = "Unsupported browser";
 "PageContentUnsupported" = "Unsupported content";
+"UnsupportedBlockTitle" = "Unsupported Block";
+"UnsupportedBlockMessage" = "This part of the message is not supported on the web version of Telegram";
+"UnsupportedMessageTitle" = "Unsupported Message";
+"RemoveUnsupportedBlocksTitle" = "Remove Unsupported Blocks?";
+"RemoveUnsupportedBlocksText" = "This message contains blocks that the web version of Telegram can't send. Remove them to send the message.";
+"RemoveUnsupportedBlocks" = "Remove";
 "PageContentEmbed" = "Embedded content";
 "ConversationDefaultRestrictedMedia" = "Sending media isn't allowed in this group.";
 "AccDescrVoiceMessage" = "Record voice message";

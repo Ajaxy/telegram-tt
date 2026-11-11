@@ -20,12 +20,32 @@
 .figure,
 .authorDate,
 .details,
-.relatedArticles {
+.relatedArticles,
+.unsupportedBlock {
   margin: 0 0 0.75rem;
 
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+// Leaves room for the torn bubble edges around the plate. At the edges of the content, the canvas keeps the
+// tear within it, so the plate keeps the tear gap there.
+.unsupportedBlock[data-bubble-tear] {
+  margin-block: 1.75rem;
+
+  &:first-child {
+    margin-top: 0.75rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.unsupportedPlateStatic {
+  color: var(--color-text);
+  background-color: var(--color-background-secondary);
 }
 
 .mediaBreakout {
@@ -86,6 +106,11 @@
 
 .blockquote {
   font-size: var(--iv-font-size-compact);
+}
+
+// Block content lacks the half-leading that spaces text from the quote's edges
+.blockquoteBlocks {
+  padding-block: 0.25rem;
 }
 
 .heading1 {

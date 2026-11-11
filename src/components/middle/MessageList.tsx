@@ -104,8 +104,8 @@ import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
+import useBubbleCanvas from './hooks/useBubbleCanvas';
 import useContainerHeight from './hooks/useContainerHeight';
-import useOwnBubbleGradientCanvas from './hooks/useOwnBubbleGradientCanvas';
 import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
@@ -329,11 +329,11 @@ const MessageList = ({
   const isRestricted = restrictionReasons.length > 0;
 
   const containerRef = useRef<HTMLDivElement>();
-  const ownGradientCanvasRef = useRef<HTMLCanvasElement>();
+  const bubbleCanvasRef = useRef<HTMLCanvasElement>();
   const { palette, shouldSnapColors } = useChatTheme(
     containerRef, chatId, theme, serverThemeSettings, canAnimateTheme, actionMessageBg,
   );
-  const ownGradientColors = palette.outgoingColors;
+  const hasOwnGradient = Boolean(palette.outgoingColors);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -711,11 +711,16 @@ const MessageList = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
+  // Only the bubble canvas can tear a bubble around a top-level unsupported block
+  const hasTornBubbles = useMemo(() => Boolean(messageIds?.some((id) => (
+    messagesById?.[id]?.content.richMessage?.blocks.some((block) => block.type === 'unsupported')
+  ))), [messageIds, messagesById]);
+
   const {
-    scheduleMeasure: scheduleOwnGradientMeasure,
-    updateOnScroll: updateOwnGradientScroll,
-  } = useOwnBubbleGradientCanvas(
-    containerRef, ownGradientCanvasRef, ownGradientColors, messageIds, theme, areOwnGradientColorsAnimated,
+    scheduleMeasure: scheduleBubbleCanvasMeasure,
+    updateOnScroll: updateBubbleCanvasScroll,
+  } = useBubbleCanvas(
+    containerRef, bubbleCanvasRef, palette, hasTornBubbles, messageIds, theme, areOwnGradientColorsAnimated,
     shouldSnapColors,
   );
 
@@ -772,7 +777,7 @@ const MessageList = ({
     }
 
     // Programmatic scrolls are skipped below, but the gradient must follow them too
-    updateOwnGradientScroll(container);
+    updateBubbleCanvasScroll(container);
 
     if (isScrollTopJustUpdatedRef.current) {
       isScrollTopJustUpdatedRef.current = false;
@@ -821,7 +826,7 @@ const MessageList = ({
   const isMessageSendPendingRef = useRef(false);
 
   const handleContentResize = useLastCallback((growth: number) => {
-    scheduleOwnGradientMeasure();
+    scheduleBubbleCanvasMeasure();
 
     const container = containerRef.current;
     if (!container || growth <= 0) return;
@@ -1456,7 +1461,8 @@ const MessageList = ({
         withUsers={withUsers}
         noAvatars={noAvatars}
         containerRef={containerRef}
-        ownGradientCanvasRef={ownGradientColors ? ownGradientCanvasRef : undefined}
+        bubbleCanvasRef={hasOwnGradient || hasTornBubbles ? bubbleCanvasRef : undefined}
+        hasOwnGradient={hasOwnGradient}
         anchorIdRef={anchorIdRef}
         memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
         memoFirstUnreadIdRef={memoFirstUnreadIdRef}

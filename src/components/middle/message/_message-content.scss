@@ -55,6 +55,11 @@
     }
   }
 
+  // Keeps the bottom corner free for the standalone meta
+  .unsupported-plate {
+    padding-bottom: 1.375rem;
+  }
+
   .text-content,
   .transcription {
     position: relative;
@@ -464,10 +469,12 @@
   }
 
   // The canvas follows the bubble's transforms and opacity, including its tail and shadow. A widget's bubble keeps its
-  // one colour, which the widget paints its background in (widget-sandbox sdk-v1 §5.1)
+  // one colour, which the widget paints its background in (widget-sandbox sdk-v1 §5.1). A bubble torn around its
+  // top-level unsupported blocks is drawn by the canvas in any theme.
   .with-own-gradient .Message.own &.has-solid-background:not(.has-widget),
   .with-own-gradient .Message.own &.has-background:not(.has-widget),
-  .with-own-gradient .Message.own.is-album & {
+  .with-own-gradient .Message.own.is-album &,
+  .with-bubble-canvas &.has-solid-background:has([data-bubble-tear]) {
     background-color: transparent;
     box-shadow: none;
 

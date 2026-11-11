@@ -2,7 +2,7 @@ import type { ApiMessage, ApiMessagePoll, ApiWebPage } from '../../../../api/typ
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
-import { getMessageContent, getRichMessageAudios } from '../../../../global/helpers';
+import { getMessageContent, getRichMessageAudios, isMessageUnsupported } from '../../../../global/helpers';
 import getSingularPaidMedia from './getSingularPaidMedia';
 
 export function buildContentClassName(
@@ -95,7 +95,7 @@ export function buildContentClassName(
     classNames.push('no-text');
   }
 
-  if (!Object.keys(content).length) {
+  if (isMessageUnsupported(message)) {
     classNames.push('unsupported');
   }
 
