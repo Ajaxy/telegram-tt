@@ -1,2 +1,0 @@
-import e from"./rsl-Da8STgqx.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/rsl" instead of "highlight.js/lib/languages/rsl.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=rsl.js-BPBWMyuv.js.map

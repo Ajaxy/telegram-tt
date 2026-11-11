@@ -1,2 +1,0 @@
-import e from"./handlebars-DJqXWVRL.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/handlebars" instead of "highlight.js/lib/languages/handlebars.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=handlebars.js-qLthiM1w.js.map

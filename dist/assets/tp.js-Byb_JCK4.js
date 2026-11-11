@@ -1,2 +1,0 @@
-import e from"./tp-BkW-mzl-.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/tp" instead of "highlight.js/lib/languages/tp.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=tp.js-Byb_JCK4.js.map

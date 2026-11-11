@@ -1,2 +1,0 @@
-import e from"./irpf90-Wu2ux-Fn.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/irpf90" instead of "highlight.js/lib/languages/irpf90.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=irpf90.js-zTYZo2fp.js.map

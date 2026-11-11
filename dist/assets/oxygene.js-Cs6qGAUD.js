@@ -1,2 +1,0 @@
-import e from"./oxygene-upDuL0ca.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/oxygene" instead of "highlight.js/lib/languages/oxygene.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=oxygene.js-Cs6qGAUD.js.map

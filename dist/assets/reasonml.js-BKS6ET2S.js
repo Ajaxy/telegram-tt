@@ -1,2 +1,0 @@
-import e from"./reasonml-CJ1TLoQF.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/reasonml" instead of "highlight.js/lib/languages/reasonml.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=reasonml.js-BKS6ET2S.js.map

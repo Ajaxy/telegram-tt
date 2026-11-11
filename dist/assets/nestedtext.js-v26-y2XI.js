@@ -1,2 +1,0 @@
-import e from"./nestedtext-DGs-X5Vp.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/nestedtext" instead of "highlight.js/lib/languages/nestedtext.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=nestedtext.js-v26-y2XI.js.map

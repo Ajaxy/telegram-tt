@@ -1,2 +1,0 @@
-import e from"./axapta-p7Fa3A78.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/axapta" instead of "highlight.js/lib/languages/axapta.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=axapta.js-CL42vNEu.js.map

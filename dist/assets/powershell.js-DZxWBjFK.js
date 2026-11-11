@@ -1,2 +1,0 @@
-import e from"./powershell-BUe16zE4.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/powershell" instead of "highlight.js/lib/languages/powershell.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=powershell.js-DZxWBjFK.js.map

@@ -1,2 +1,0 @@
-import e from"./mathematica-FGVCSpsQ.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/mathematica" instead of "highlight.js/lib/languages/mathematica.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=mathematica.js-B7ioR5xC.js.map

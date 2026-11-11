@@ -1,2 +1,0 @@
-import e from"./gcode-DVi5cKOT.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/gcode" instead of "highlight.js/lib/languages/gcode.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=gcode.js-0r_HcdnO.js.map

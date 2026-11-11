@@ -1,2 +1,0 @@
-import e from"./julia-repl-Hj_vmM07.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/julia-repl" instead of "highlight.js/lib/languages/julia-repl.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=julia-repl.js-Iohug9ge.js.map

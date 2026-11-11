@@ -1,2 +1,0 @@
-import e from"./parser3-BpsPHbGc.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/parser3" instead of "highlight.js/lib/languages/parser3.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=parser3.js-D-L__0Cc.js.map

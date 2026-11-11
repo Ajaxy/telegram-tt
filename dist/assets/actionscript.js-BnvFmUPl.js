@@ -1,2 +1,0 @@
-import e from"./actionscript-1l-8ymtB.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/actionscript" instead of "highlight.js/lib/languages/actionscript.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=actionscript.js-BnvFmUPl.js.map

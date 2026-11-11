@@ -1,2 +1,0 @@
-import e from"./applescript-BcBB30ub.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/applescript" instead of "highlight.js/lib/languages/applescript.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=applescript.js-DmuZR64h.js.map

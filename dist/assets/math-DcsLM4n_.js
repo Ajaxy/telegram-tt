@@ -1,2 +1,0 @@
-var e=(e,t,n)=>Math.min(n,Math.max(t,e)),t=(e,t,n)=>e>=t&&e<=n,n=(e,t=0)=>Math.round(e*10**t)/10**t,r=(e,t=0)=>Math.floor(e*10**t)/10**t,i=(e,t,n)=>(1-n)*e+n*t;function a(e){return Math.round(e/2)*2}export{n as a,i,r as n,a as o,t as r,e as t};
-//# sourceMappingURL=math-DcsLM4n_.js.map

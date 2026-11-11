@@ -1,2 +1,0 @@
-import e from"./wasm-hBR4I1od.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/wasm" instead of "highlight.js/lib/languages/wasm.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=wasm.js-BXkC92rO.js.map

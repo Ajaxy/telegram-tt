@@ -1,2 +1,0 @@
-import e from"./objectivec-DLXDdhyK.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/objectivec" instead of "highlight.js/lib/languages/objectivec.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=objectivec.js-erEahuZq.js.map

@@ -1,2 +1,0 @@
-import e from"./scss-gOyOKiXd.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/scss" instead of "highlight.js/lib/languages/scss.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=scss.js-XkEpvQg8.js.map

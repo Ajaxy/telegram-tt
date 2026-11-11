@@ -1,2 +1,0 @@
-import e from"./gauss-Cu9sx8W2.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/gauss" instead of "highlight.js/lib/languages/gauss.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=gauss.js-Bd7fNvhR.js.map

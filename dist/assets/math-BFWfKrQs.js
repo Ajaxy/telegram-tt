@@ -1,0 +1,2 @@
+var e=(e,t,n)=>Math.min(n,Math.max(t,e)),t=(e,t,n)=>e>=t&&e<=n,n=(e,t=0)=>Math.round(e*10**t)/10**t,r=(e,t=0)=>Math.floor(e*10**t)/10**t,i=(e,t,n)=>(1-n)*e+n*t;function a(t){let n=e(t,0,1);return n*n*(3-2*n)}function o(e){return Math.round(e/2)*2}export{i as a,t as i,r as n,n as o,a as r,o as s,e as t};
+//# sourceMappingURL=math-BFWfKrQs.js.map

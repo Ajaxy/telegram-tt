@@ -1,2 +1,0 @@
-import e from"./brainfuck-CkSV9Luo.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/brainfuck" instead of "highlight.js/lib/languages/brainfuck.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=brainfuck.js-D1WEVDmI.js.map

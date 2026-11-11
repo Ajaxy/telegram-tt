@@ -1,2 +1,0 @@
-import e from"./vbnet-BiMsFFN_.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/vbnet" instead of "highlight.js/lib/languages/vbnet.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=vbnet.js-D3TJRgw3.js.map

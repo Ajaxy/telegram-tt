@@ -1,2 +1,0 @@
-import e from"./taggerscript-YlWmQdSJ.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/taggerscript" instead of "highlight.js/lib/languages/taggerscript.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=taggerscript.js-BMJqNeN_.js.map
