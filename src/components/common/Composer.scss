@@ -376,6 +376,7 @@
   // `ComposerEmbeddedMessage` / `WebPagePreview` are full-width flex children that
   // wrap into their own row above the input row
   flex-wrap: wrap;
+  margin-bottom: 0;
   box-shadow: var(--shadow-footer);
 
   .select-mode-active + .middle-column-footer & {
@@ -874,6 +875,28 @@
   position: absolute;
   bottom: 0;
   left: -1rem;
+}
+
+.symbol-menu-slot {
+  --slide-transition: var(--app-slide-transition);
+
+  position: relative;
+  z-index: var(--z-symbol-menu-mobile);
+
+  flex-shrink: 0;
+
+  width: calc(100% + 2 * var(--footer-side-inset));
+  margin-inline: calc(-1 * var(--footer-side-inset));
+
+  transition: opacity var(--layer-transition);
+
+  &.keyboard-open {
+    opacity: 0;
+  }
+
+  body.no-message-composer-animations & {
+    transition: none;
+  }
 }
 
 .input-scroller {

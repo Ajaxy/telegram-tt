@@ -1279,6 +1279,7 @@ export interface LangPair {
   'AriaOpenSymbolMenu': undefined;
   'AriaComposerOpenScheduled': undefined;
   'AriaComposerBotKeyboard': undefined;
+  'AriaComposerHideBotKeyboard': undefined;
   'AriaComposerSilentPostingEnable': undefined;
   'AriaComposerSilentPostingDisable': undefined;
   'ComposerSilentPostingEnabledTootlip': undefined;

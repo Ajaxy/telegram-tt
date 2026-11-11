@@ -73,7 +73,7 @@ import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from 
 import { IS_FIREFOX } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
-import { buildCollectionByKey } from '../../util/iteratees';
+import { areSortedArraysEqual, buildCollectionByKey } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
@@ -189,6 +189,12 @@ type StateProps = {
   canAnimateTheme?: boolean;
   areOwnGradientColorsAnimated?: boolean;
   theme: ThemeKey;
+};
+
+type RenderData = {
+  renderMessageIds?: number[];
+  renderMessagesById?: Record<number, ApiMessage>;
+  addedMessageInfo?: ReturnType<typeof getAddedMessageInfo>;
 };
 
 enum Content {
@@ -371,7 +377,7 @@ const MessageList = ({
 
   const areMessagesLoaded = Boolean(messageIds);
 
-  const renderData = useMemo(() => {
+  const latestRenderData = useMemo(() => {
     if (type !== 'thread' || !messageIds || !messagesById) {
       return {
         renderMessageIds: messageIds,
@@ -401,13 +407,27 @@ const MessageList = ({
       renderMessagesById: buildCollectionByKey(renderMessages, 'id'),
     };
   }, [anchoredById, ephemeralById, isViewportNewest, messageIds, messagesById, threadId, type]);
-  const { renderMessageIds, renderMessagesById } = renderData;
-  const previousRenderMessageIds = usePrevious(renderMessageIds);
-  const addedMessageInfo = useMemo(() => (isViewportNewest ? getAddedMessageInfo(
-    renderMessageIds,
-    renderMessagesById,
-    previousRenderMessageIds,
-  ) : undefined), [isViewportNewest, previousRenderMessageIds, renderMessageIds, renderMessagesById]);
+  const renderDataRef = useRef<RenderData>();
+  const renderData = useMemo((): RenderData => {
+    const { renderMessageIds, renderMessagesById } = latestRenderData;
+    const prevRenderData = renderDataRef.current;
+    if (
+      renderMessageIds && prevRenderData?.renderMessageIds
+      && areSortedArraysEqual(renderMessageIds, prevRenderData.renderMessageIds)
+    ) {
+      return { ...prevRenderData, renderMessagesById };
+    }
+
+    return {
+      renderMessageIds,
+      renderMessagesById,
+      addedMessageInfo: isViewportNewest
+        ? getAddedMessageInfo(renderMessageIds, renderMessagesById, prevRenderData?.renderMessageIds)
+        : undefined,
+    };
+  }, [isViewportNewest, latestRenderData]);
+  renderDataRef.current = renderData;
+  const { renderMessageIds, renderMessagesById, addedMessageInfo } = renderData;
   const { addedMessageIds, areAddedMessagesOutgoing, previousLastCurrentMessageId } = addedMessageInfo || {};
 
   const isPrivate = isUserId(chatId);
@@ -821,18 +841,14 @@ const MessageList = ({
       return;
     }
 
-    // Retarget active glides before ignoring send-pending resizes
     if (isAnimatingScroll(container)) {
       restartCurrentScrollAnimation();
       return;
     }
 
-    if (isMessageSendPendingRef.current) {
-      return;
-    }
-
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - effectiveGrowth <= BOTTOM_THRESHOLD;
+    const bottomThreshold = isMessageSendPendingRef.current ? BOTTOM_SNAP_THRESHOLD : BOTTOM_THRESHOLD;
+    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - effectiveGrowth <= bottomThreshold;
     if (!wasAtBottom || !isViewportNewest) return;
 
     forceMutation(() => {
@@ -916,7 +932,22 @@ const MessageList = ({
       });
     },
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
-    [renderMessageIds, isViewportNewest, effectiveLiveTailStartOriginalId, rememberScrollPositionRef],
+    [
+      messageIds,
+      renderMessageIds,
+      isViewportNewest,
+      effectiveLiveTailStartOriginalId,
+      currentLastMessageOriginalId,
+      currentLastMessageId,
+      addedMessageIds,
+      areAddedMessagesOutgoing,
+      previousLastCurrentMessageId,
+      isCurrentLastMessageTypingDraft,
+      isCurrentLastMessageIncomingTypingDraft,
+      isCurrentLastMessageOwnSent,
+      noMessageSendingAnimation,
+      rememberScrollPositionRef,
+    ],
   );
   useEffect(
     () => rememberScrollPositionRef.current(),
@@ -968,6 +999,7 @@ const MessageList = ({
     );
 
     const wasMessageAdded = hasLoadedMessageIds
+      && renderMessageIds !== prevRenderMessageIds
       && Boolean(addedMessageIds?.length)
       && !hasViewportShifted;
     const wasLiveTailCreated = Boolean(
@@ -1151,6 +1183,7 @@ const MessageList = ({
           maxDistance: Number.MAX_SAFE_INTEGER,
           forceDuration: noMessageSendingAnimation ? 0 : undefined,
           shouldReturnMutationFn: true,
+          noEndShift: true,
         })
         : undefined;
       const typingDraftTop = shouldRevealTypingDraft && lastItemElement
@@ -1229,7 +1262,7 @@ const MessageList = ({
       } else if (unreadDivider) {
         newScrollTop = Math.min(
           getOffsetToContainer(unreadDivider, container).top - UNREAD_DIVIDER_TOP,
-          scrollHeight - scrollOffset,
+          effectiveScrollHeight - scrollOffset,
         );
       } else {
         newScrollTop = scrollHeight - scrollOffset;

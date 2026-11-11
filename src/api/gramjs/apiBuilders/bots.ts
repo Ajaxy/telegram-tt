@@ -60,6 +60,7 @@ export function buildReplyButtons(
     keyboardPlaceholder: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.placeholder : undefined,
     isKeyboardSingleUse: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.singleUse : undefined,
     isKeyboardSelective: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.selective : undefined,
+    isKeyboardFullHeight: replyMarkup instanceof GramJs.ReplyKeyboardMarkup && !replyMarkup.resize ? true : undefined,
   };
 }
 

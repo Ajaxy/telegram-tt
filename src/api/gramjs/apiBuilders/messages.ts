@@ -258,7 +258,7 @@ export function buildApiMessageWithChatId(
 
   const isEdited = Boolean(mtpMessage.editDate) && !mtpMessage.editHide;
   const {
-    inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
+    inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective, isKeyboardFullHeight,
   } = buildReplyButtons(mtpMessage.replyMarkup) || {};
   const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId !== undefined ? String(mtpMessage.groupedId) : undefined;
@@ -314,7 +314,7 @@ export function buildApiMessageWithChatId(
     }),
     inlineButtons,
     ...(keyboardButtons && {
-      keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
+      keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective, isKeyboardFullHeight,
     }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons, isHideKeyboardSelective }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),

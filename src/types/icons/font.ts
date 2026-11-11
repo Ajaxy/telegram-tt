@@ -61,6 +61,7 @@ export type FontIconName =
   | 'boosts'
   | 'bot-command'
   | 'bot-commands-filled'
+  | 'bot-keyboard'
   | 'bots'
   | 'brush'
   | 'bug'

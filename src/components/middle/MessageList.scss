@@ -680,7 +680,7 @@
       transform: translate3d(0, 0, 0);
     }
 
-    body.is-symbol-menu-open & {
+    body.has-symbol-menu-shift & {
       transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
     }
   }

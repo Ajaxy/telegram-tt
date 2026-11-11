@@ -32,6 +32,7 @@ export type AnimateScrollArgs = {
   forceNormalContainerHeight?: boolean;
   shouldReturnMutationFn?: boolean;
   noHeavyAnimation?: boolean;
+  noEndShift?: boolean;
 };
 
 let isAnimating = false;
@@ -49,6 +50,17 @@ export default function animateScroll(args: AnimateScrollArgs) {
 
   requestMutation(mutate);
   return undefined;
+}
+
+export function shiftCurrentScrollAnimationEnd(container: HTMLElement, delta: number) {
+  if (
+    !isAnimating || activeArgs?.container !== container || activeArgs.position !== 'end' || activeArgs.noEndShift
+  ) {
+    return false;
+  }
+
+  activeArgs.margin = (activeArgs.margin || 0) + delta;
+  return true;
 }
 
 export function restartCurrentScrollAnimation() {
@@ -200,11 +212,12 @@ function createMutateFunction(args: AnimateScrollArgs) {
     animateSingle(() => {
       const t = Math.min((Date.now() - startAt) / duration, 1);
       const currentPath = path * (1 - transition(t));
-      const newScrollTop = Math.round(target - currentPath);
+      const shiftedTarget = target + (args.margin || 0) - margin;
+      const newScrollTop = Math.round(shiftedTarget - currentPath);
 
       container.scrollTop = newScrollTop;
 
-      isAnimating = t < 1 && newScrollTop !== target;
+      isAnimating = t < 1 && newScrollTop !== shiftedTarget;
 
       if (!isAnimating) {
         currentArgs = undefined;

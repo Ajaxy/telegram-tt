@@ -1574,6 +1574,7 @@
 "AriaOpenSymbolMenu" = "Choose emoji, sticker or GIF";
 "AriaComposerOpenScheduled" = "Open scheduled messages";
 "AriaComposerBotKeyboard" = "Show bot keyboard";
+"AriaComposerHideBotKeyboard" = "Hide bot keyboard";
 "AriaComposerSilentPostingEnable" = "Enable silent notifications.";
 "AriaComposerSilentPostingDisable" = "Disable silent notifications.";
 "ComposerSilentPostingEnabledTootlip" = "Subscribers will receive a silent notification.";

@@ -17,7 +17,7 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
   TMP_CHAT_ID,
 } from '../../config';
-import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { forceMutation, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getCanPostInChat,
   getForumComposerPlaceholder,
@@ -319,12 +319,15 @@ function MiddleColumn({
     if (!footer.offsetParent) return;
 
     const contentHeight = measureFooterContentHeight(footer);
-    requestMutation(() => {
-      footer.style.setProperty('--middle-footer-content-height', `${contentHeight}px`);
-    });
-
     const scroller = footer.parentElement?.querySelector<HTMLElement>('.MessageList');
     if (scroller) syncMessageListBottomReserve(scroller, getIsKeyboardAnimating());
+
+    const floatingActionButtons = footer.querySelector<HTMLElement>('[data-floating-action-buttons]');
+    if (!floatingActionButtons) return;
+
+    forceMutation(() => {
+      floatingActionButtons.style.setProperty('--middle-footer-content-height', `${contentHeight}px`);
+    }, floatingActionButtons);
   });
 
   const updateFooterHeight = useLastCallback(() => {

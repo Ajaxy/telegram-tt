@@ -819,6 +819,7 @@ export interface ApiMessage {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
+  isKeyboardFullHeight?: boolean;
   viaBotId?: string;
   viaBusinessBotId?: string;
   guestChatViaId?: string;
@@ -1105,6 +1106,7 @@ export type ApiReplyKeyboard = {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
+  isKeyboardFullHeight?: boolean;
 } & Partial<Record<'inlineButtons' | 'keyboardButtons', ApiKeyboardButtons>>;
 
 export type ApiTranscription = {

@@ -97,6 +97,7 @@ import {
   selectChatMessageOrEphemeral,
   selectChatType,
   selectCurrentMessageList,
+  selectCurrentMiddleSearch,
   selectCustomEmoji,
   selectEditingMessage,
   selectEphemeralMessage,
@@ -132,10 +133,11 @@ import {
   selectEditingDraft,
   selectEditingScheduledDraft,
   selectNoWebPage,
+  selectTabThreadParam,
 } from '../../global/selectors/threads';
 import { revokeAttachmentUrls } from '../../util/attachments';
 import {
-  IS_IOS, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
+  IS_IOS, IS_TOUCH_ENV, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
 } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -204,7 +206,7 @@ import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 import AttachmentModal from '../middle/composer/AttachmentModal.async';
 import AttachMenu from '../middle/composer/AttachMenu';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
-import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
+import BotKeyboard from '../middle/composer/BotKeyboard';
 import BotMenuButton from '../middle/composer/BotMenuButton';
 import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
@@ -285,6 +287,8 @@ type StateProps = {
   aiMessageEditorPendingResult: TabState['aiMessageEditorPendingResult'];
   botKeyboardMessageId?: number;
   botKeyboardPlaceholder?: string;
+  hiddenBotKeyboardId?: number;
+  hasActiveMiddleSearch?: boolean;
   withScheduledButton?: boolean;
   autoDeletePeriod?: number;
   isInScheduledList?: boolean;
@@ -431,6 +435,8 @@ const Composer = ({
   aiMessageEditorPendingResult,
   botKeyboardMessageId,
   botKeyboardPlaceholder,
+  hiddenBotKeyboardId,
+  hasActiveMiddleSearch,
   inputPlaceholder,
   withScheduledButton,
   autoDeletePeriod,
@@ -544,6 +550,7 @@ const Composer = ({
     setSettingOption,
     openPremiumModal,
     openAiMessageEditorModal,
+    setHiddenBotKeyboardId,
   } = getActions();
 
   const lang = useLang();
@@ -551,6 +558,7 @@ const Composer = ({
 
   const inputRef = useRef<HTMLDivElement>();
   const composerRef = useRef<HTMLDivElement>();
+  const symbolMenuSlotRef = useRef<HTMLDivElement>();
   const counterRef = useRef<HTMLSpanElement>();
 
   const storyReactionRef = useRef<HTMLButtonElement>();
@@ -933,9 +941,9 @@ const Composer = ({
     };
   }, [mediaEditorMessage, handleSetAttachments]);
 
-  const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
+  const [isSymbolMenuLoaded, markSymbolMenuLoaded] = useFlag();
   const [isSendAsMenuOpen, openSendAsMenu, closeSendAsMenu] = useFlag();
   const [isHoverDisabled, disableHover, enableHover] = useFlag();
 
@@ -973,6 +981,34 @@ const Composer = ({
 
   const activeRecording = activeVoiceRecording || activeVideoRecording;
   const [isEmbeddedMessageOpen, setIsEmbeddedMessageOpen] = useState(false);
+
+  const hasBotKeyboard = Boolean(botKeyboardMessageId) && isInMessageList && messageListType === 'thread';
+  const canShowBotKeyboard = hasBotKeyboard && !editingMessage && !isSelectModeActive && !activeRecording;
+  const canShowSymbolMenu = (!isComposerBlocked || canSendGifs || canSendStickers)
+    && !isNeedPremium && !isAccountFrozen;
+  const isSymbolMenuShown = canShowSymbolMenu && (isSymbolMenuOpen || isSymbolMenuForced) && isSymbolMenuLoaded;
+  const isSymbolMenuInKeyboardSlot = Boolean(isMobile && hasBotKeyboard);
+  const isBotKeyboardSuppressed = (IS_TOUCH_ENV && isInputHasFocus) || hasInputContent
+    || Boolean(isMobile && (isSymbolMenuShown || hasActiveMiddleSearch));
+  const isBotKeyboardShown = canShowBotKeyboard && botKeyboardMessageId !== hiddenBotKeyboardId
+    && !isBotKeyboardSuppressed;
+  const isBotKeyboardOpen = isBotKeyboardShown && !isRichInputExpansionActive;
+  const isKeyboardSlotOpen = isBotKeyboardShown || (isSymbolMenuInKeyboardSlot && isSymbolMenuShown);
+
+  const hideBotKeyboard = useLastCallback(() => {
+    setHiddenBotKeyboardId({ chatId, threadId, messageId: botKeyboardMessageId });
+  });
+
+  const showBotKeyboard = useLastCallback(() => {
+    setHiddenBotKeyboardId({ chatId, threadId, messageId: undefined });
+  });
+
+  useEffectWithPrevDeps(([prevHasInputContent, wasBotKeyboardOpen, prevChatId, prevThreadId]) => {
+    if (!hasInputContent || prevHasInputContent || !wasBotKeyboardOpen) return;
+    if (chatId !== prevChatId || threadId !== prevThreadId) return;
+
+    hideBotKeyboard();
+  }, [hasInputContent, isBotKeyboardOpen, chatId, threadId]);
 
   useEffect(() => {
     if (!activeRecording) return;
@@ -1082,7 +1118,7 @@ const Composer = ({
 
   const resetComposer = useLastCallback((shouldPreserveInput = false, shouldSkipCollapseLatch = false) => {
     if (!shouldPreserveInput) {
-      if (!shouldSkipCollapseLatch) {
+      if (!shouldSkipCollapseLatch && !isKeyboardSlotOpen) {
         const footer = inputRef.current?.closest<HTMLElement>('.middle-column-footer');
         const scroller = footer?.parentElement?.querySelector<HTMLElement>(':scope > .MessageList');
         if (scroller) {
@@ -2271,6 +2307,19 @@ const Composer = ({
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
   });
 
+  const handleToggleBotKeyboard = useLastCallback(() => {
+    if (isBotKeyboardOpen) {
+      hideBotKeyboard();
+      return;
+    }
+
+    if (IS_TOUCH_ENV) {
+      document.querySelector<HTMLDivElement>(editableInputCssSelector)?.blur();
+    }
+    closeSymbolMenu();
+    showBotKeyboard();
+  });
+
   useEffect(() => {
     if (!isComposerBlocked) return;
 
@@ -2423,7 +2472,7 @@ const Composer = ({
 
     if (!isComposerBlocked) {
       if (slowModePlaceholder) return slowModePlaceholder;
-      if (botKeyboardPlaceholder) return botKeyboardPlaceholder;
+      if (isBotKeyboardOpen && botKeyboardPlaceholder) return botKeyboardPlaceholder;
       if (inputPlaceholder) return inputPlaceholder;
       if (paidMessagesStars) {
         return lang('ComposerPlaceholderPaidMessage', {
@@ -2466,7 +2515,7 @@ const Composer = ({
 
     return lang('ComposerPlaceholderNoText');
   }, [
-    activeRecording, botKeyboardPlaceholder, chat, inputPlaceholder, isChannel, isComposerBlocked,
+    activeRecording, botKeyboardPlaceholder, chat, inputPlaceholder, isBotKeyboardOpen, isChannel, isComposerBlocked,
     isInStoryViewer, isSilentPosting, lang, replyToTopic, isReplying, threadId, windowWidth, paidMessagesStars,
     hasSuggestedPost, slowModePlaceholder, stealthMode?.activeUntil, user?.canManageBotForumTopics,
   ]);
@@ -2788,7 +2837,7 @@ const Composer = ({
     });
   }, [shouldRenderPaidStars, starsForAllMessages, paidStarsRef, mainButtonRef]);
 
-  return (
+  const composer = (
     <div ref={composerRef} className={fullClassName}>
       {isInMessageList && canAttachMedia && !hasRichOnlyContent && isReady && !isRichInputExpansionActive && (
         <DropArea
@@ -3143,27 +3192,17 @@ const Composer = ({
                         iconName="cash-circle"
                       />
                     )}
-                    {Boolean(botKeyboardMessageId) && !activeRecording && !editingMessage && (
-                      <>
-                        <ResponsiveHoverButton
-                          className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
-                          round
-                          color="translucent"
-                          noClickActivation
-                          onActivate={openBotKeyboard}
-                          ariaLabel={lang('AriaComposerBotKeyboard')}
-                        >
-                          <Icon name="bot-command" />
-                        </ResponsiveHoverButton>
-                        {!isMobile && (
-                          <BotKeyboardMenu
-                            messageId={botKeyboardMessageId}
-                            threadId={threadId}
-                            isOpen={isBotKeyboardOpen}
-                            onClose={closeBotKeyboard}
-                          />
-                        )}
-                      </>
+                    {canShowBotKeyboard && (
+                      <Button
+                        className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
+                        round
+                        color="translucent"
+                        noFastClick
+                        onClick={handleToggleBotKeyboard}
+                        ariaLabel={lang(isBotKeyboardOpen ? 'AriaComposerHideBotKeyboard' : 'AriaComposerBotKeyboard')}
+                      >
+                        <Icon name="bot-keyboard" />
+                      </Button>
                     )}
                   </>
                 )}
@@ -3196,7 +3235,7 @@ const Composer = ({
               getPlaybackEl={renderedVideoRecording?.getPlaybackEl}
             />
           )}
-          {((!isComposerBlocked || canSendGifs || canSendStickers) && !isNeedPremium && !isAccountFrozen) && (
+          {canShowSymbolMenu && (
             <SymbolMenuButton
               chatId={chatId}
               threadId={threadId}
@@ -3216,7 +3255,9 @@ const Composer = ({
               onEmojiSelect={insertTextAndUpdateCursor}
               closeBotCommandMenu={closeBotCommandMenu}
               closeSendAsMenu={closeSendAsMenu}
+              onLoad={markSymbolMenuLoaded}
               isSymbolMenuForced={isSymbolMenuForced}
+              keyboardSlotElement={isSymbolMenuInKeyboardSlot ? symbolMenuSlotRef.current : undefined}
               canSendPlainText={!isComposerBlocked}
               inputCssSelector={editableInputCssSelector}
               idPrefix={type}
@@ -3249,14 +3290,6 @@ const Composer = ({
                 />
               )}
             </Button>
-          )}
-          {isMobile && isInMessageList && Boolean(botKeyboardMessageId) && (
-            <BotKeyboardMenu
-              messageId={botKeyboardMessageId}
-              threadId={threadId}
-              isOpen={isBotKeyboardOpen}
-              onClose={closeBotKeyboard}
-            />
           )}
           {isInMessageList && botCommands && (
             <BotCommandMenu
@@ -3372,6 +3405,28 @@ const Composer = ({
         />
       )}
     </div>
+  );
+
+  if (!isInMessageList) return composer;
+
+  return (
+    <>
+      {composer}
+      <div
+        ref={symbolMenuSlotRef}
+        className={buildClassName('symbol-menu-slot', isBotKeyboardOpen && 'keyboard-open')}
+        inert={isBotKeyboardOpen}
+      />
+      <BotKeyboard
+        key={`${chatId}_${threadId}`}
+        chatId={chatId}
+        threadId={threadId}
+        messageId={botKeyboardMessageId}
+        isOpen={isBotKeyboardOpen}
+        isSymbolMenuOpen={isSymbolMenuInKeyboardSlot && isSymbolMenuShown}
+        onClose={hideBotKeyboard}
+      />
+    </>
   );
 };
 
@@ -3503,6 +3558,8 @@ export default memo(withGlobal<OwnProps>(
       isInScheduledList,
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
+      hiddenBotKeyboardId: selectTabThreadParam(global, chatId, threadId, 'hiddenBotKeyboardId'),
+      hasActiveMiddleSearch: Boolean(selectCurrentMiddleSearch(global)),
       isForwarding,
       isReplying,
       hasSuggestedPost,

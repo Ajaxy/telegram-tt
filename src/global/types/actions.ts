@@ -809,6 +809,11 @@ export interface ActionPayloads {
     threadId: ThreadId;
     scrollOffset: number;
   } & WithTabId;
+  setHiddenBotKeyboardId: {
+    chatId: string;
+    threadId: ThreadId;
+    messageId?: number;
+  } & WithTabId;
   unpinAllMessages: {
     chatId: string;
     threadId: ThreadId;

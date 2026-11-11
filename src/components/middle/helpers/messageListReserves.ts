@@ -3,7 +3,7 @@ import { addExtraClass, removeExtraClass } from '../../../lib/teact/teact-dom';
 import {
   forceMeasure, forceMutation, requestForcedReflow, requestMeasure,
 } from '../../../lib/fasterdom/fasterdom';
-import { isAnimatingScroll } from '../../../util/animateScroll';
+import { isAnimatingScroll, shiftCurrentScrollAnimationEnd } from '../../../util/animateScroll';
 import buildStyle from '../../../util/buildStyle';
 import { REM } from '../../common/helpers/mediaDimensions';
 
@@ -37,11 +37,11 @@ export function consumePendingTopGrowth(scroller: HTMLElement) {
 }
 
 function getMessageListBottomReserve(scroller: HTMLElement) {
+  const footer = scroller.parentElement?.querySelector<HTMLElement>(':scope > .middle-column-footer');
   if (scroller.classList.contains(SELECT_MODE_CLASS)) {
-    return getSettledBottomReserve();
+    return getSettledBottomReserve() + (footer ? measureBotKeyboardExtraHeight(footer) : 0);
   }
   if (scroller.classList.contains(NO_FOOTER_CLASS)) return 0;
-  const footer = scroller.parentElement?.querySelector<HTMLElement>(':scope > .middle-column-footer');
   if (!footer) return 0;
   if (getComputedStyle(footer).position !== 'absolute') return 0;
   return Math.max(measureFooterContentHeight(footer) + MESSAGE_LIST_COMPOSER_GAP, getMinBottomInset());
@@ -50,6 +50,11 @@ function getMessageListBottomReserve(scroller: HTMLElement) {
 export function measureFooterContentHeight(footer: HTMLElement) {
   const actionBar = footer.querySelector<HTMLElement>('[data-footer-action-bar]');
   return Math.max(footer.offsetHeight, actionBar?.offsetHeight ?? 0);
+}
+
+function measureBotKeyboardExtraHeight(footer: HTMLElement) {
+  const botKeyboard = footer.querySelector<HTMLElement>('[data-bot-keyboard]');
+  return botKeyboard ? botKeyboard.offsetHeight - parseFloat(getComputedStyle(botKeyboard).minHeight) : 0;
 }
 
 // While armed, the reserve stays latched at the settled value for the whole composer collapse
@@ -150,9 +155,16 @@ export function syncMessageListBottomReserve(
       return;
     }
   }
+  const { scrollTop } = scroller;
   const isAtBottom = forceKeepAtBottom
-    || scroller.scrollHeight - scroller.scrollTop - scroller.offsetHeight <= AT_BOTTOM_THRESHOLD;
+    || scroller.scrollHeight - scrollTop - scroller.offsetHeight <= AT_BOTTOM_THRESHOLD;
   const canKeepAtBottom = !shouldSkipKeepAtBottom && !isAnimatingScroll(scroller);
+  const reserveDelta = bottomReserve
+    - (parseFloat(scroller.style.getPropertyValue('--message-list-bottom-inset')) || 0);
+  const messagesContainer = scroller.querySelector<HTMLElement>('.messages-container');
+  const isContentBottomAligned = !messagesContainer || messagesContainer.offsetHeight <= scroller.clientHeight;
+  const isAnimationShifted = reserveDelta > 0 && !isContentBottomAligned
+    && shiftCurrentScrollAnimationEnd(scroller, reserveDelta);
 
   const insetTargets: HTMLElement[] = [
     // `applyMessageListBottomInset` writes the reserve/fade vars on the scroller itself, so it must be allowed too.
@@ -165,6 +177,8 @@ export function syncMessageListBottomReserve(
     applyMessageListBottomInset(scroller, bottomReserve);
     if (isAtBottom && canKeepAtBottom) {
       scroller.scrollTop = SCROLL_BOTTOM_SENTINEL;
+    } else if (isAnimationShifted) {
+      scroller.scrollTop = scrollTop + reserveDelta;
     }
   }, insetTargets);
 }

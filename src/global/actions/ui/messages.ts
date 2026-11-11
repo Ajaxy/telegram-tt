@@ -85,6 +85,14 @@ addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType
   return replaceTabThreadParam(global, chatId, threadId, 'scrollOffset', scrollOffset, tabId);
 });
 
+addActionHandler('setHiddenBotKeyboardId', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, threadId, messageId, tabId = getCurrentTabId(),
+  } = payload;
+
+  return replaceTabThreadParam(global, chatId, threadId, 'hiddenBotKeyboardId', messageId, tabId);
+});
+
 addActionHandler('setEditingId', (global, actions, payload): ActionReturnType => {
   const { messageId, tabId = getCurrentTabId() } = payload;
   if (messageId !== undefined && selectTabState(global, tabId).richMediaUploadBlockingCount) {

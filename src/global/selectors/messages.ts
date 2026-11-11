@@ -26,6 +26,7 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   GENERAL_TOPIC_ID,
+  MESSAGE_LIST_VIEWPORT_LIMIT,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
@@ -1065,43 +1066,45 @@ export function selectNewestMessageWithBotKeyboardButtons<T extends GlobalState>
 
   const chatMessages = selectChatMessages(global, chatId);
   const ephemeralMessages = selectChatEphemeralMessages(global, chatId);
-  const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
-  if (!chatMessages || !viewportIds) {
+  const listedIds = selectListedIds(global, chatId, threadId);
+  if (!chatMessages || !listedIds) {
     return undefined;
   }
 
   let keyboardMessage: ApiMessage | undefined;
   let hideKeyboardMessage: ApiMessage | undefined;
   let oldestDate: number | undefined;
-  let newestDate: number | undefined;
 
-  viewportIds.forEach((id) => {
-    const message = selectChatMessageOrEphemeral(global, chatId, id);
-    if (!message) return;
+  function scanHistoryTail(ids: number[], newerThan?: ApiMessage) {
+    for (let i = Math.max(ids.length - MESSAGE_LIST_VIEWPORT_LIMIT, 0); i < ids.length; i++) {
+      const message = selectChatMessageOrEphemeral(global, chatId, ids[i]);
+      if (!message || (newerThan && !isMessageNewer(message, newerThan))) continue;
 
-    if (oldestDate === undefined || message.date < oldestDate) oldestDate = message.date;
-    if (newestDate === undefined || message.date > newestDate) newestDate = message.date;
-    if (selectShouldDisplayReplyKeyboard(global, message) && isMessageNewer(message, keyboardMessage)) {
-      keyboardMessage = message;
+      if (oldestDate === undefined || message.date < oldestDate) oldestDate = message.date;
+      if (selectShouldDisplayReplyKeyboard(global, message) && isMessageNewer(message, keyboardMessage)) {
+        keyboardMessage = message;
+      }
+      if (selectShouldHideReplyKeyboard(global, message) && isMessageNewer(message, hideKeyboardMessage)) {
+        hideKeyboardMessage = message;
+      }
     }
-    if (selectShouldHideReplyKeyboard(global, message) && isMessageNewer(message, hideKeyboardMessage)) {
-      hideKeyboardMessage = message;
-    }
-  });
+  }
 
-  const isViewportNewest = selectIsViewportNewest(global, chatId, threadId, tabId);
+  scanHistoryTail(listedIds);
+
+  const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
+  if (viewportIds) {
+    const newestListedMessage = selectChatMessageOrEphemeral(global, chatId, listedIds[listedIds.length - 1]);
+    scanHistoryTail(viewportIds, newestListedMessage);
+  }
+
   const topicId = Number(threadId);
   Object.values(ephemeralMessages || {}).forEach((message) => {
     if (message.anchorMsgId) return;
     const isInThread = topicId === MAIN_THREAD_ID
       ? message.ephemeralTopMsgId === undefined
       : message.ephemeralTopMsgId === topicId;
-    if (!isInThread) return;
-    if (oldestDate === undefined) {
-      if (!isViewportNewest) return;
-    } else if (message.date < oldestDate || (!isViewportNewest && message.date > newestDate!)) {
-      return;
-    }
+    if (!isInThread || (oldestDate !== undefined && message.date < oldestDate)) return;
 
     if (selectShouldDisplayReplyKeyboard(global, message) && isMessageNewer(message, keyboardMessage)) {
       keyboardMessage = message;

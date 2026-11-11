@@ -719,6 +719,7 @@ export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
   viewportIds?: number[];
+  hiddenBotKeyboardId?: number;
 }
 
 export interface ThreadReadState {
