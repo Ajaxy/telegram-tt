@@ -811,7 +811,7 @@ export default memo(withGlobal<OwnProps>(
     const canStartBot = !canRestartBot && isBotNotStarted;
     const canUnblock = isUserBlocked && !bot;
     const shouldLoadFullChat = Boolean(
-      chat && isChatGroup(chat) && !chatFullInfo,
+      chat && (isChatGroup(chat) || isChannel) && !chatFullInfo,
     );
     const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
     const shouldBlockSendInForum = chat?.isForum

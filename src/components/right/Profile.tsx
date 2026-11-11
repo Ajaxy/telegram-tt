@@ -34,6 +34,7 @@ import {
   getIsSavedDialog,
   getMessageDocument,
   getMessageHtmlId,
+  isChatBasicGroup,
   isChatChannel,
   isChatGroup,
   isUserBot,
@@ -50,6 +51,7 @@ import {
   selectChatMessages,
   selectCurrentSharedMediaSearch,
   selectIsChatRestricted,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
   selectMonoforumChannel,
@@ -94,6 +96,7 @@ import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps.ts';
 import useAsyncRendering from './hooks/useAsyncRendering';
@@ -158,6 +161,7 @@ type StateProps = {
   hasMembersTab?: boolean;
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
+  areProfileTabsKnown?: boolean;
   gifts?: ApiSavedStarGift[];
   storyAlbums?: ApiStoryAlbum[];
   giftCollections?: ApiStarGiftCollection[];
@@ -289,6 +293,7 @@ const Profile = ({
   hasMembersTab,
   hasPreviewMediaTab,
   hasGiftsTab,
+  areProfileTabsKnown,
   gifts,
   storyAlbums,
   giftCollections,
@@ -473,6 +478,10 @@ const Profile = ({
     setSharedMediaSearchType({ mediaType: SHARED_MEDIA_TYPES.has(type) ? type as SharedMediaType : undefined });
   });
 
+  const isSharedMediaReady = Boolean(profileTab || areProfileTabsKnown);
+  const { ref: sharedMediaTabsRef } = useMediaTransition({ hasMediaData: isSharedMediaReady });
+  const { ref: sharedMediaRef } = useMediaTransition({ hasMediaData: isSharedMediaReady });
+
   useEffect(() => {
     if (isClosed) return;
     if (profileTab) {
@@ -482,13 +491,10 @@ const Profile = ({
       return;
     }
 
-    setActiveTab(tabs[0].type); // Set default tab
-  }, [isClosed, profileTab, tabs, forceScrollProfileTab]);
+    if (!areProfileTabsKnown) return;
 
-  useEffectWithPrevDeps(([prevPeerFullInfo]) => {
-    if (prevPeerFullInfo || !peerFullInfo?.mainTab) return;
-    setActiveTab(peerFullInfo.mainTab); // Only focus when loading full info
-  }, [peerFullInfo]);
+    setActiveTab(tabs[0].type); // Set default tab
+  }, [isClosed, profileTab, tabs, forceScrollProfileTab, areProfileTabsKnown]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
     startAutoScrollToTabsIfNeeded();
@@ -649,7 +655,7 @@ const Profile = ({
     if (getMore && !viewportIds && isSynced) {
       getMore({ direction: LoadMoreDirection.Backwards });
     }
-  }, [getMore, viewportIds, resultType, isSynced]);
+  }, [getMore, viewportIds, resultType, mediaSearchType, isSynced]);
 
   const shouldRenderProfileInfo = !noProfileInfo && !isSavedMessages;
 
@@ -1417,6 +1423,7 @@ const Profile = ({
       {!isRestricted && (
         <>
           <div
+            ref={sharedMediaTabsRef}
             className={buildClassName(styles.sharedMediaTabs, 'shared-media-tabs')}
           >
             <TabList
@@ -1426,6 +1433,7 @@ const Profile = ({
             />
           </div>
           <div
+            ref={sharedMediaRef}
             className={styles.sharedMedia}
           >
             <Transition
@@ -1510,6 +1518,7 @@ export default memo(withGlobal<OwnProps>(
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const { similarBotsIds } = selectSimilarBotsIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    const isCurrentUserFrozen = selectIsCurrentUserFrozen(global);
 
     const peer = user || chat;
     const peerFullInfo = userFullInfo || chatFullInfo;
@@ -1525,14 +1534,19 @@ export default memo(withGlobal<OwnProps>(
       && !isSavedMessages;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
     const selectedStoryAlbumId = selectActiveStoriesCollectionId(global);
+    const profileStoryIds = peerStories?.profileIds.length || peerStories?.isFullyLoaded || isCurrentUserFrozen
+      ? peerStories?.profileIds
+      : undefined;
     const storyIds = selectedStoryAlbumId !== 'all'
       ? peerStories?.idsByAlbumId?.[selectedStoryAlbumId]?.ids
-      : peerStories?.profileIds;
+      : profileStoryIds;
     const pinnedStoryIds = peerStories?.pinnedIds;
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedMessages;
+    const areProfileTabsKnown = isCurrentUserFrozen || (chat && isChatBasicGroup(chat))
+      || peerFullInfo?.hasPinnedStories !== undefined;
 
     const activeCollectionId = selectActiveGiftsCollectionId(global, chatId);
     const peerGifts = savedGifts.collectionsByPeerId[chatId]?.[activeCollectionId];
@@ -1574,6 +1588,7 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       storyIds,
       hasGiftsTab,
+      areProfileTabsKnown,
       gifts: peerGifts?.gifts,
       storyAlbums,
       giftCollections,
