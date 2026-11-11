@@ -8,18 +8,11 @@
     %TG_APP_TITLE%
   </title>
 
-  <meta name="title" content="%TG_APP_TITLE%">
   <meta name="description"
     content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
   <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-title" content="%TG_APP_TITLE%">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="%TG_APP_TITLE%">
+        content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="application-name" content="%TG_APP_TITLE%">
-  <meta name="msapplication-TileColor" content="#2b5797">
-  <meta name="msapplication-config" content="./browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
   <meta name="google" content="notranslate">
 
@@ -31,24 +24,21 @@
   <meta property="og:title" content="%TG_APP_TITLE%">
   <meta property="og:description"
         content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
-  <meta property="og:image" content="./%TG_MAIN_ICON%.png">
+  <meta property="og:image" content="%TG_SOCIAL_IMAGE_URL%">
 
   <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:card" content="summary">
   <meta property="twitter:url" content="%TG_PUBLIC_URL%">
   <meta property="twitter:title" content="%TG_APP_TITLE%">
   <meta property="twitter:description"
     content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
-  <meta property="twitter:image" content="./%TG_MAIN_ICON%.png">
+  <meta property="twitter:image" content="%TG_SOCIAL_IMAGE_URL%">
 
   <link rel="canonical" href="%TG_PUBLIC_URL%">
   <link rel="apple-touch-icon" sizes="180x180" href="./%TG_APPLE_ICON%.png">
+  <link rel="icon" href="./favicon.ico" sizes="32x32">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./%TG_MAIN_ICON%.png">
-  <link rel="alternate icon" href="./favicon.ico" type="image/x-icon">
-  <link rel="manifest" id="the-manifest-placeholder" href="./%TG_MANIFEST%">
+  <link rel="manifest" id="the-manifest-placeholder" href="./site.webmanifest" vite-ignore>
 
   <!-- Navigation opt-in must apply before parser-blocking scripts allow the first render -->
   <link rel="stylesheet" href="./view-transitions.css">

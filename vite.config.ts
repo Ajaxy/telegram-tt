@@ -9,6 +9,7 @@ import { type Target, viteStaticCopy } from 'vite-plugin-static-copy';
 import { watchAndRun } from 'vite-plugin-watch-and-run';
 
 import buildGitInfoPlugin from './plugins/gitInfo.ts';
+import buildWebManifestPlugin from './plugins/webManifest.ts';
 import packageJson from './package.json' with { type: 'json' };
 
 const DIR_NAME = dirname(fileURLToPath(import.meta.url));
@@ -82,8 +83,8 @@ export default defineConfig(({ mode }): UserConfig => {
   const appTitle = env.APP_TITLE || defaultAppTitle;
   const isProductionApp = appEnv === 'production';
   const appleIcon = isProductionApp ? 'apple-touch-icon' : 'apple-touch-icon-dev';
-  const mainIcon = isProductionApp ? 'icon-192x192' : 'icon-dev-192x192';
-  const manifest = isProductionApp ? 'site.webmanifest' : 'site_dev.webmanifest';
+  const publicUrl = new URL(baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`);
+  const socialImageUrl = new URL(isProductionApp ? 'icon-512x512.png' : 'icon-dev-512x512.png', publicUrl).href;
   const csp = buildCsp(appEnv);
   const isDevelopmentMode = mode === 'development';
   const telegramApiId = env.TELEGRAM_API_ID || '';
@@ -95,6 +96,11 @@ export default defineConfig(({ mode }): UserConfig => {
       head: HEAD,
       isDevelopmentMode,
       rootDir: DIR_NAME,
+    }),
+    buildWebManifestPlugin({
+      // Matches the identity browsers already derive from `start_url` for installed production apps
+      id: isProductionApp ? publicUrl.pathname : undefined,
+      isProductionApp,
     }),
     viteStaticCopy({ targets: WATCHED_STATIC_COPY_TARGETS }),
     viteStaticCopy({
@@ -177,8 +183,7 @@ export default defineConfig(({ mode }): UserConfig => {
     TG_PUBLIC_URL: baseUrl,
     TG_CSP: csp,
     TG_APPLE_ICON: appleIcon,
-    TG_MAIN_ICON: mainIcon,
-    TG_MANIFEST: manifest,
+    TG_SOCIAL_IMAGE_URL: socialImageUrl,
     TG_TELEGRAM_API_ID: telegramApiId,
     TG_TELEGRAM_API_HASH: telegramApiHash,
     TG_VAPID_KEY: env.VAPID_KEY || '',
