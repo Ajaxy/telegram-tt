@@ -594,15 +594,15 @@ export async function requestChatUpdate({
   const readState = buildThreadReadState(dialog);
   const threadInfo = buildApiThreadInfoFromDialog(chat.id, dialog);
   sendApiUpdate({
+    '@type': 'updateThreadInfo',
+    threadInfo,
+  });
+
+  sendApiUpdate({
     '@type': 'updateThreadReadState',
     chatId: id,
     threadId: MAIN_THREAD_ID,
     readState,
-  });
-
-  sendApiUpdate({
-    '@type': 'updateThreadInfo',
-    threadInfo,
   });
 
   sendApiUpdate({

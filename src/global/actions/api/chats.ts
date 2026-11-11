@@ -44,6 +44,7 @@ import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
+import { notifyAboutMessage } from '../../../util/notifications';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -685,10 +686,23 @@ addActionHandler('invalidateFullInfo', (global, actions, payload): ActionReturnT
   };
 });
 
-addActionHandler('loadTopChats', (): ActionReturnType => {
-  runThrottledForLoadTopChats(() => {
-    loadChats('active', undefined, true);
-    loadChats('archived', undefined, true);
+addActionHandler('loadTopChats', (global, actions, payload): ActionReturnType => {
+  const message = payload?.messageToNotify;
+
+  // shortcut: throttling keeps only the latest pending call, upgrade if bursts need separate notifications
+  runThrottledForLoadTopChats(async () => {
+    await Promise.all([
+      loadChats('active', undefined, true),
+      loadChats('archived', undefined, true),
+    ]);
+
+    if (!message) return;
+
+    global = getGlobal();
+    const chat = selectChat(global, message.chatId);
+    if (chat) {
+      void notifyAboutMessage({ chat, message });
+    }
   });
 });
 
@@ -3830,6 +3844,17 @@ async function loadChats(
       if (result.threadReadStatesById) {
         chunkGlobal = updateMainThreadReadStates(chunkGlobal, result.threadReadStatesById);
       }
+    } else {
+      // Chats seen for the first time have no local thread to count unread messages in
+      result.threadInfos.forEach((threadInfo) => {
+        const { chatId } = threadInfo;
+        if (selectThreadInfo(chunkGlobal, chatId, MAIN_THREAD_ID)) return;
+
+        chunkGlobal = updateThreadInfo(chunkGlobal, threadInfo);
+        chunkGlobal = updateThreadReadState(
+          chunkGlobal, chatId, MAIN_THREAD_ID, result.threadReadStatesById![chatId],
+        );
+      });
     }
 
     if (listType === 'active' || listType === 'archived') {

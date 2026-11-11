@@ -1114,7 +1114,7 @@ export interface ActionPayloads {
     offsetUserId?: string;
     limit?: number;
   };
-  loadTopChats: undefined;
+  loadTopChats: { messageToNotify?: ApiMessage } | undefined;
   showDialog: {
     data: TabState['dialogs'][number];
   } & WithTabId;

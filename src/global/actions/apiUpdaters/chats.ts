@@ -231,6 +231,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const isLocal = isLocalMessageId(id);
 
       const chat = selectChat(global, chatId);
+      // A new dialog needs its server mute settings and read state before notifying
+      if (!isLocal && !chat?.isListed && !chat?.isNotJoined) {
+        actions.loadTopChats({ messageToNotify: message });
+      }
+
       if (!chat) {
         return undefined;
       }
