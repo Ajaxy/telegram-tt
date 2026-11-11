@@ -2,6 +2,7 @@ import { IS_IOS, IS_WINDOWS } from './browser/windowEnvironment';
 import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';
+import windowSize from './windowSize';
 
 export enum SwipeDirection {
   Up,
@@ -116,10 +117,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     x: false,
     y: false,
   };
-  const currentWindow = element.ownerDocument.defaultView!;
+  const currentWindowSize = windowSize.get(element.ownerDocument.defaultView!);
   let initialTouchCenter = {
-    x: currentWindow.innerWidth / 2,
-    y: currentWindow.innerHeight / 2,
+    x: currentWindowSize.width / 2,
+    y: currentWindowSize.height / 2,
   };
   let initialSwipeAxis: TSwipeAxis | undefined;
   const minZoom = options.minZoom ?? 1;
@@ -168,7 +169,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       if (IS_IOS) {
         const x = (e as RealTouchEvent).touches[0].pageX;
         isNearEdge = x <= IOS_SCREEN_EDGE_THRESHOLD
-          || x >= captureDocument.defaultView!.innerWidth - IOS_SCREEN_EDGE_THRESHOLD;
+          || x >= windowSize.get(captureDocument.defaultView!).width - IOS_SCREEN_EDGE_THRESHOLD;
       }
 
       // We need to always listen on `touchstart` target:
@@ -252,10 +253,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       x: false,
       y: false,
     };
-    const targetWindow = element.ownerDocument.defaultView!;
+    const newWindowSize = windowSize.get(element.ownerDocument.defaultView!);
     initialTouchCenter = {
-      x: targetWindow.innerWidth / 2,
-      y: targetWindow.innerHeight / 2,
+      x: newWindowSize.width / 2,
+      y: newWindowSize.height / 2,
     };
     captureEvent = undefined;
     captureDocument = undefined;
