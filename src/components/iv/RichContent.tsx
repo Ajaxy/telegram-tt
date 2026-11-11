@@ -721,7 +721,10 @@ function renderSlideshowBlock(
         observeIntersectionForPlaying={context.observeIntersectionForPlaying}
         className={shouldBreakoutMedia ? styles.noBorderRadius : undefined}
         onMediaClick={(index) => onOpenMedia(items, sourceIds, index)}
-        renderCaption={(caption) => renderCaption(caption, context)}
+        // Print-only copies stay out of quote lookups, which take the first element with a matching index
+        renderCaption={(caption, isPrintOnly) => renderCaption(
+          caption, isPrintOnly ? { ...context, quoteIndexes: undefined } : context,
+        )}
       />
       {renderCaption(block.caption, context, true)}
     </figure>

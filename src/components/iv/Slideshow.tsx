@@ -39,7 +39,7 @@ type OwnProps = {
   sourceIds: string[];
   className?: string;
   getUploadProgress?: (item: SlideshowItem, index: number) => number | undefined;
-  renderCaption: (caption: ApiPageCaption) => TeactNode;
+  renderCaption: (caption: ApiPageCaption, isPrintOnly?: boolean) => TeactNode;
   renderOverlay?: (item: SlideshowItem, index: number) => TeactNode;
   onCancelUpload?: (index: number) => void;
   onMediaClick: (index: number) => void;
@@ -61,6 +61,7 @@ const Slideshow = ({
   onCancelUpload,
   onMediaClick,
 }: OwnProps) => {
+  const rootRef = useRef<HTMLDivElement>();
   const scrollerRef = useRef<HTMLDivElement>();
   const dotsRef = useRef<HTMLDivElement>();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -118,6 +119,11 @@ const Slideshow = ({
     e.preventDefault();
   });
 
+  // The scroller clips hidden slides, so photos load once the whole slideshow is visible
+  const observeRootForLoading = useLastCallback<ObserveFn>((_target, callback) => (
+    observeIntersectionForLoading!(rootRef.current!, callback)
+  ));
+
   if (!items.length) {
     return undefined;
   }
@@ -126,6 +132,7 @@ const Slideshow = ({
   return (
     <>
       <div
+        ref={rootRef}
         className={buildClassName(styles.root, className)}
         style={buildStyle(`--slideshow-aspect-ratio: ${aspectRatio}`)}
       >
@@ -145,13 +152,16 @@ const Slideshow = ({
                 isProtected,
                 noSpoilerReveal,
                 theme,
-                observeIntersectionForLoading,
+                observeIntersectionForLoading: item.type === 'photo' && observeIntersectionForLoading
+                  ? observeRootForLoading
+                  : observeIntersectionForLoading,
                 observeIntersectionForPlaying,
                 getUploadProgress,
                 renderOverlay,
                 onCancelUpload,
                 onMediaClick,
               })}
+              {hasMultipleSlides && <div className={styles.slideCaption}>{renderCaption(item.caption, true)}</div>}
             </div>
           ))}
         </div>
@@ -191,7 +201,9 @@ const Slideshow = ({
           </>
         )}
       </div>
-      {renderCaption(activeItem.caption)}
+      {hasMultipleSlides
+        ? <div className={styles.activeCaption}>{renderCaption(activeItem.caption)}</div>
+        : renderCaption(activeItem.caption)}
     </>
   );
 };

@@ -119,6 +119,10 @@
     color: black;
     // Solid color for filter
     background-color: black;
+
+    @media print {
+      display: none;
+    }
   }
 
   .textContent {
@@ -244,6 +248,11 @@
     border-radius: calc(var(--border-radius-messages) + 0.25rem);
 
     background-color: var(--message-service-background);
+  }
+
+  // The card keeps its backdrop in print, so its text must stay light
+  @media print {
+    --message-service-text: #fff;
   }
 }
 

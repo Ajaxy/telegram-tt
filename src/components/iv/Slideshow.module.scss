@@ -129,3 +129,51 @@
   transform: scale(1.125);
   opacity: 1;
 }
+
+.slideCaption {
+  display: none;
+}
+
+// Paper cannot scroll, so every slide is laid out in a grid with its own caption
+@media print {
+  .root {
+    aspect-ratio: auto;
+    max-height: none;
+    background: none;
+  }
+
+  .scroller {
+    overflow: visible;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    align-items: flex-start;
+
+    height: auto;
+  }
+
+  .slide {
+    flex-basis: calc(50% - 0.125rem);
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+
+    &:only-child {
+      flex-basis: 100%;
+    }
+  }
+
+  .media {
+    aspect-ratio: var(--slideshow-aspect-ratio);
+    height: auto !important;
+  }
+
+  .slideCaption {
+    display: block;
+  }
+
+  .navButton,
+  .dots,
+  .activeCaption {
+    display: none;
+  }
+}

@@ -152,6 +152,10 @@
 
 .downloadButton {
   font-size: 1.5rem;
+
+  @media print {
+    display: none;
+  }
 }
 
 .playButton {

@@ -44,4 +44,9 @@
   display: block;
   color: var(--color-primary);
   text-decoration: none;
+
+  // Messages clear their control color in print
+  @media print {
+    color: var(--color-links);
+  }
 }

@@ -6,6 +6,10 @@ $wallpaper-transition: 0.3s cubic-bezier(0.37, 0, 0.63, 1);
   position: absolute;
   z-index: -1;
   inset: 0;
+
+  @media print {
+    display: none;
+  }
 }
 
 .chatWallpaperFrame {

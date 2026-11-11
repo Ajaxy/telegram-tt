@@ -339,6 +339,27 @@ These are the actual CSS aliases declared on `.Message` in addition to the direc
 
 Selected bubbles override [--background-color](#background-color) with [--message-selected](#message-selected); story-mention service content uses [--message-service-background](#message-service-background). Peer-color wrappers can supply author accents. Outgoing content with `noUserColors` uses the outgoing message accents. In the dark theme, document file tiles override [--color-primary](#message-alias-color-primary) with [--color-selection-highlight](#color-selection-highlight) and [--color-primary-foreground](#message-alias-color-primary-foreground) with [--color-white](#color-white).
 
+### Print overrides
+
+[Print styles](src/styles/print.scss) replace the theme and chat palettes with a light, fill-free palette. Theme and chat palettes are inline, so every override below is `!important` and wins in any theme.
+
+| Scope | Variables | Print value |
+| --- | --- | --- |
+| Document root, `#MiddleColumn`, `.MessageList` | [--color-background](#color-background) / [--color-text](#color-text) | `#fff` / `#000` |
+| Same | [--color-text-secondary](#color-text-secondary), [--color-text-meta](#color-text-meta) | `#555` |
+| Same | [--color-links](#color-links) | `#000` |
+| Same | [--action-message-bg](#action-message-bg), [--message-service-background](#message-service-background) | `transparent` |
+| Same | [--message-service-text](#message-service-text) | `#000` |
+| `.MessageList` | `--message-{direction}-background`, `-control`, `-tint`, `-tint-hover`, `-table-background` | `transparent` |
+| Same | `--message-{direction}-text`, `-accent`, `-links`, `-control-foreground`, `-file-title` and their `-rgb` channels | `#000` |
+| Same | `--message-{direction}-secondary`, `-meta`, `-file-description` and their `-rgb` channels | `#555` |
+| Same | `--message-{direction}-links-decoration` / `-table-border` / `-code-dark` | `underline` / `#999` / `0` |
+| Peer-color wrappers in `.MessageList` | [--accent-background-color](#accent-background-color) | `transparent` |
+| `.Message` | [--color-reaction-chosen](#color-reaction-chosen) / [--text-color-reaction-chosen](#text-color-reaction-chosen) | `transparent` / `#000` |
+| Custom-shape content (stickers, round videos) | [--message-media-text](#message-media-text) | `#555`, since badges sit on the cleared service surface |
+
+The cleared [--message-incoming-control](#message-incoming-control) also clears its [--color-primary](#message-alias-color-primary) alias, so diff insertions, incoming voice durations and embed sources get explicit print colors. Exceptions keep their screen colors: the unique gift card keeps its backdrop and sets [--message-service-text](#message-service-text) back to `#fff`, and media metadata and duration overlays keep [--message-media-background](#message-media-background) and [--message-media-text](#message-media-text) with exact color printing.
+
 ### Wallpaper inputs
 
 [Wallpaper rendering](src/hooks/useChatBackground.ts) defines these on the wrapper shared by the backdrop and chat content; the image URL is on the background layer. Missing values use the renderer's defaults rather than a global root declaration.
