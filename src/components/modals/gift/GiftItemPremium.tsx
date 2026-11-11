@@ -10,6 +10,7 @@ import {
   selectCanPlayAnimatedEmojis,
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
+import { getDays, MONTH } from '../../../util/dates/units';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 
@@ -102,7 +103,7 @@ function GiftItemPremium({
 
 export default memo(withGlobal<OwnProps>(
   (global, { option }): Complete<StateProps> => {
-    const sticker = selectGiftStickerForDuration(global, option.months);
+    const sticker = selectGiftStickerForDuration(global, getDays(option.months * MONTH));
     const canPlayAnimatedEmojis = selectCanPlayAnimatedEmojis(global);
 
     return {
