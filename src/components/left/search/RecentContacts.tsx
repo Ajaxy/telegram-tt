@@ -6,8 +6,13 @@ import { getActions, withGlobal } from '../../../global';
 
 import { throttle } from '../../../util/schedulers';
 
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+
 import ListTopPeers from '../../common/ListTopPeers';
 import Island from '../../gili/layout/Island';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 import RecentContactsList from './RecentContactsList';
 
 import './RecentContacts.scss';
@@ -35,6 +40,10 @@ const RecentContacts = ({
     addRecentlyFoundChatId, clearRecentlyFoundChats,
   } = getActions();
 
+  const lang = useLang();
+
+  const [isClearConfirmOpen, openClearConfirm, closeClearConfirm] = useFlag();
+
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
   useEffect(() => {
@@ -51,9 +60,10 @@ const RecentContacts = ({
     }, SEARCH_CLOSE_TIMEOUT_MS);
   }, [openChat, addRecentlyFoundChatId, onReset]);
 
-  const handleClearRecentlyFoundChats = useCallback(() => {
+  const handleClearRecentlyFoundChats = useLastCallback(() => {
+    closeClearConfirm();
     clearRecentlyFoundChats();
-  }, [clearRecentlyFoundChats]);
+  });
 
   return (
     <div className="RecentContacts custom-scroll">
@@ -67,9 +77,17 @@ const RecentContacts = ({
           chatIds={recentlyFoundChatIds}
           noTopBorder={!topPeerIds?.length}
           onChatClick={handleClick}
-          onClear={handleClearRecentlyFoundChats}
+          onClear={openClearConfirm}
         />
       )}
+      <ConfirmDialog
+        isOpen={isClearConfirmOpen}
+        text={lang('ClearSearchAlert')}
+        confirmLabel={lang('Clear')}
+        confirmIsDestructive
+        confirmHandler={handleClearRecentlyFoundChats}
+        onClose={closeClearConfirm}
+      />
     </div>
   );
 };

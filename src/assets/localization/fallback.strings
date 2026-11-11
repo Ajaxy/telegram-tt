@@ -3846,6 +3846,7 @@
 "ClearHistoryTitleSingle2" = "Unsave messages";
 "ClearRecentReactionsAlertMessage" = "Do you want to clear your recent reaction emoji from suggestions?";
 "ClearRecentStickersAlertMessage" = "Do you want to clear all your recent stickers?";
+"ClearSearchAlert" = "Are you sure you want to clear your search history?";
 "StoryPrivacyOptionCloseFriends" = "Close Friends";
 "Yes" = "Yes";
 "ConnectedAccountsLimitSubtitle" = "Connect {count} accounts with different mobile numbers";

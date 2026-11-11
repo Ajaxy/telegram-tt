@@ -2860,6 +2860,7 @@ export interface LangPair {
   'ClearHistoryTitleSingle2': undefined;
   'ClearRecentReactionsAlertMessage': undefined;
   'ClearRecentStickersAlertMessage': undefined;
+  'ClearSearchAlert': undefined;
   'StoryPrivacyOptionCloseFriends': undefined;
   'Yes': undefined;
   'ConnectedAccountsLimitTitle': undefined;
