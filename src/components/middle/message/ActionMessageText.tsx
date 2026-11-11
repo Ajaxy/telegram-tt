@@ -34,10 +34,10 @@ import {
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
 import { formatCountdown, formatShortDuration } from '../../../util/dates/duration';
-import { formatCurrency, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { formatCurrency, formatTonInFiat } from '../../../util/formatCurrency';
 import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import {
-  formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText,
+  formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText, formatTonTextFromNanos,
 } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
@@ -524,12 +524,7 @@ const ActionMessageText = ({
         return lang('WalletConnectRequest');
 
       case 'gramTransfer': {
-        const formattedAmount = formatTonFromNanos(action.amount);
-        const [whole, fraction] = formattedAmount.split('.');
-        const groupedAmount = fraction ? `${lang.number(Number(whole))}.${fraction}` : lang.number(Number(whole));
-        const amount = renderStrong(
-          lang('GramAmountText', { amount: groupedAmount }, { pluralValue: Number(formattedAmount) }),
-        );
+        const amount = renderStrong(formatTonTextFromNanos(lang, action.amount));
         const fiat = formatTonInFiat(action.amount, tonUsdRate, walletCurrency!, walletCurrencyRate, lang.code);
         const worth = fiat ? `${NBSP}${lang('ActionGramTransferWorth', { fiat })}` : '';
 

@@ -44,7 +44,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
-import { formatTonShortParts } from '../../../util/localization/format';
+import { formatTonParts } from '../../../util/localization/format';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { REM } from '../helpers/mediaDimensions.ts';
@@ -448,7 +448,7 @@ const ProfileInfo = ({
   }
 
   function renderWalletBalance() {
-    const [whole, fraction] = formatTonShortParts(lang, walletBalance!);
+    const [whole, fraction] = formatTonParts(lang, walletBalance!, true);
 
     return (
       <button

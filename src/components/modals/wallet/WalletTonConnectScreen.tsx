@@ -7,7 +7,7 @@ import { TON_CONNECT_MANIFEST_CONTENT_ERROR_CODE } from '../../../config';
 import { WALLET_ERROR_LANG_KEYS } from '../../../global/helpers/wallet';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatTonFromNanos } from '../../../util/formatCurrency';
+import { formatTonTextFromNanos } from '../../../util/localization/format';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
 
@@ -124,12 +124,10 @@ const WalletTonConnectScreen = ({
         slideClassName={styles.contentSlide}
       >
         {preview?.transaction?.messages.map((message, index) => {
-          const amount = formatTonFromNanos(BigInt(message.amount));
-
           return (
             <Island key={index} className={styles.message}>
               <Control>
-                <ControlLabel>{lang('GramAmountText', { amount }, { pluralValue: Number(amount) })}</ControlLabel>
+                <ControlLabel>{formatTonTextFromNanos(lang, BigInt(message.amount))}</ControlLabel>
                 <ControlDescription className={styles.data}>{message.address}</ControlDescription>
               </Control>
               {message.comment !== undefined && (

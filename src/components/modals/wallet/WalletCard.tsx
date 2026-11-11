@@ -91,7 +91,13 @@ const WalletCard = ({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.root, isPressed && styles.pressed, backdrop && styles.withBackdrop, className)}
+      className={buildClassName(
+        styles.root,
+        isPressed && styles.pressed,
+        backdrop && styles.withBackdrop,
+        Boolean(stickers?.length) && styles.withStickers,
+        className,
+      )}
       style={backdrop && `--card-edge-color: ${backdrop.edgeColor}; --card-accent-color: ${backdrop.textColor}`}
       onPointerDown={handlePointerDown}
       onPointerUp={unmarkPressed}

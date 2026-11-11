@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .address {
   cursor: var(--custom-cursor, pointer);
 
@@ -20,6 +22,8 @@
   &:hover {
     background-color: var(--color-interactive-element-hover);
   }
+
+  @include mixins.no-pointer-focus-ring;
 }
 
 .addressGroupMuted {

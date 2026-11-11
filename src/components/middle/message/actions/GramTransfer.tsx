@@ -1,19 +1,23 @@
-import { memo, useEffect, useMemo, useRef } from '../../../../lib/teact/teact';
+import {
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../../../lib/teact/teact';
 
 import type { ApiMessageActionGramTransfer } from '../../../../api/types/messageActions';
 
-import { getHasPendingWalletTransfer } from '../../../../global/helpers/wallet';
+import { getIsWalletTransferConfirmed, getPendingWalletTransfer } from '../../../../global/helpers/wallet';
 import { selectWalletTransactions } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
-import { formatTonShortFromNanos } from '../../../../util/formatCurrency';
+import { formatTonParts } from '../../../../util/localization/format';
 import { splitAddressInHalves } from '../../../../util/tonAddress';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useTimeout from '../../../../hooks/schedulers/useTimeout';
 import useClickable from '../../../../hooks/useClickable';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useShowTransition from '../../../../hooks/useShowTransition';
 import useShrinkToFit from '../../../../hooks/useShrinkToFit';
 
@@ -57,6 +61,8 @@ const GramTransfer = ({
 
   const amountRef = useRef<HTMLDivElement>();
   const amountContentRef = useRef<HTMLDivElement>();
+  const peerRef = useRef<HTMLDivElement>();
+  const addressRef = useRef<HTMLDivElement>();
 
   useShrinkToFit(amountRef, amountContentRef);
 
@@ -86,11 +92,27 @@ const GramTransfer = ({
 
   const walletTransactions = useSelector(selectWalletTransactions);
   // As in the native apps, a clock replaces the ribbon until the chain confirms the transfer
-  const isAwaitingChain = useMemo(
-    () => localMessageId !== undefined && !isFailed && getHasPendingWalletTransfer(walletTransactions, localMessageId),
+  const pendingTransfer = useMemo(
+    () => (localMessageId !== undefined && !isFailed
+      ? getPendingWalletTransfer(walletTransactions, localMessageId)
+      : undefined),
     [isFailed, walletTransactions, localMessageId],
   );
-  const isInProgress = isSending || isAwaitingChain;
+  const isInProgress = isSending || Boolean(pendingTransfer);
+
+  const [burstKey, setBurstKey] = useState(0);
+
+  useEffectWithPrevDeps(([prevPendingTransfer]) => {
+    if (!prevPendingTransfer?.localId || pendingTransfer) return;
+
+    if (getIsWalletTransferConfirmed(walletTransactions, prevPendingTransfer.localId)) {
+      setBurstKey((key) => key + 1);
+    }
+  }, [pendingTransfer, walletTransactions]);
+
+  const getLensText = useLastCallback(() => (
+    [amountContentRef.current, peerRef.current, addressRef.current].filter(Boolean)
+  ));
 
   const { ref: clockRef, shouldRender: shouldRenderClock } = useShowTransition({
     isOpen: isInProgress, withShouldRender: true, noMountTransition: true,
@@ -99,8 +121,7 @@ const GramTransfer = ({
     isOpen: !isInProgress, withShouldRender: true, noMountTransition: true,
   });
 
-  const [whole, fraction] = formatTonShortFromNanos(amount).split('.');
-  const groupedWhole = lang.number(Number(whole));
+  const [whole, fraction] = formatTonParts(lang, amount, true);
   const [addressStart, addressEnd] = splitAddressInHalves(peerAddress);
 
   // The server cannot read an encrypted comment, so the spoiler length is estimated from the payload size
@@ -126,19 +147,21 @@ const GramTransfer = ({
           className={styles.icon}
           isHovered={isHover}
           shouldLoopStickers={shouldLoopStickers}
+          burstKey={burstKey}
+          getLensText={getLensText}
         />
         <div ref={amountRef} className={styles.amount}>
           <div ref={amountContentRef} className={styles.amountContent}>
             <span>
               {isOutgoing ? EN_DASH : '+'}
-              {groupedWhole}
-              {fraction && <span className={styles.amountFraction}>{`.${fraction}`}</span>}
+              {whole}
+              {fraction && <span className={styles.amountFraction}>{fraction}</span>}
             </span>
             <span className={styles.ticker}>{lang('ActionGramTransferTicker')}</span>
           </div>
         </div>
-        {peerName && <div className={styles.peer}>{peerName}</div>}
-        <div className={styles.address} aria-hidden>
+        {peerName && <div ref={peerRef} className={styles.peer}>{peerName}</div>}
+        <div ref={addressRef} className={styles.address} aria-hidden>
           <span className={styles.addressLine}>{addressStart}</span>
           <span className={styles.addressLine}>{addressEnd}</span>
         </div>

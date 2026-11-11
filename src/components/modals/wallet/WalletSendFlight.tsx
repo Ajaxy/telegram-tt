@@ -52,6 +52,7 @@ const WalletSendFlight = ({ canLaunch, onReadyChange }: OwnProps) => {
     const layer = layerRef.current!;
     const gem = gemRef.current!;
     const fromSpeed = flight.diamond.speed;
+    const fromScale = flight.scale;
     let hasAdopted = false;
     let frameId = 0;
     // A row that fails or confirms mid-flight goes away, and the diamond still lands where it stood
@@ -69,7 +70,7 @@ const WalletSendFlight = ({ canLaunch, onReadyChange }: OwnProps) => {
 
       if (diamond) {
         const growth = 1 + APEX_GROWTH * Math.sin(Math.PI * Math.min(1, progress / APEX_GROWTH_SHARE));
-        diamond.setScale((1 + (ROW_SCALE - 1) * progress) * growth);
+        diamond.setScale((fromScale + (ROW_SCALE - fromScale) * progress) * growth);
         diamond.speed = fromSpeed + (SEND_DIAMOND_SPIN - fromSpeed) * Math.min(1, progress / SPIN_SHARE);
       }
 

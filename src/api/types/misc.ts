@@ -228,6 +228,7 @@ export type ApiDialogContact = {
 
 export type ApiDialogLocalizedMessage = {
   type: 'localized';
+  title?: RegularLangFnParameters;
   text: AdvancedLangFnParameters;
 };
 

@@ -26,8 +26,14 @@ export function getIsWalletTransferSubmitted(walletTransfer?: TabState['walletTr
   return walletTransfer?.status === 'pending' || walletTransfer?.status === 'queued';
 }
 
-export function getHasPendingWalletTransfer(transactions: ApiWalletTransaction[] | undefined, localMessageId: number) {
-  return Boolean(transactions?.some((item) => item.isPending && item.localMessageId === localMessageId));
+export function getPendingWalletTransfer(transactions: ApiWalletTransaction[] | undefined, localMessageId: number) {
+  return transactions?.find((item) => item.isPending && item.localMessageId === localMessageId);
+}
+
+// A confirmed transfer takes over the `localId` of its pending row, while a row that expires or goes with the wallet
+// leaves nothing behind
+export function getIsWalletTransferConfirmed(transactions: ApiWalletTransaction[] | undefined, localId: string) {
+  return Boolean(transactions?.some((item) => item.localId === localId && !item.isPending && !item.isFailed));
 }
 
 // Hides items whose transfer is still pending, so the user cannot send them again. The toncenter list of owners is

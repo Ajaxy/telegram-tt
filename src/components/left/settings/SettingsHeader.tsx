@@ -10,8 +10,7 @@ import {
   selectHasLocalOnlyWalletPhrase, selectIsWalletAvailable, selectIsWalletKeyRotationPending,
   selectWalletLocalOnlyNanos, selectWalletSavedWallets,
 } from '../../../global/selectors';
-import { formatTonShortFromNanos } from '../../../util/formatCurrency';
-import { formatTonAsIcon } from '../../../util/localization/format';
+import { formatTonAsIcon, formatTonNumber } from '../../../util/localization/format';
 import { pause } from '../../../util/schedulers';
 
 import useSelector from '../../../hooks/data/useSelector';
@@ -397,7 +396,7 @@ const SettingsHeader = ({
         <p>
           {hasUnbackedWallet && unbackedWalletNanos > 0 ? lang(
             'AreYouSureLogoutGrams',
-            { amount: formatTonAsIcon(lang, formatTonShortFromNanos(unbackedWalletNanos)) },
+            { amount: formatTonAsIcon(lang, formatTonNumber(lang, unbackedWalletNanos, true)) },
             { withNodes: true, withMarkdown: true, renderTextFilters: ['br'] },
           ) : lang('SureLogout')}
         </p>

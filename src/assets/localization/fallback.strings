@@ -3318,6 +3318,8 @@
 "WalletSendSuccess" = "Grams sent";
 "WalletSendSuccessGasless" = "Grams sent, no fee charged";
 "WalletSendError" = "Failed to send Grams. Please try again.";
+"WalletSendFailedTitle" = "Transfer Failed";
+"WalletSendPasswordRequired" = "Two-Step Verification is on. Send again and enter your password.";
 "WalletSendPending" = "The transfer may have been sent. Don’t send it again while its status is being checked.";
 "WalletExportError" = "Failed to export the recovery phrase. Please try again.";
 "WalletBackupDisabledError" = "Backup is disabled for this wallet";

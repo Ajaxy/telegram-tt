@@ -9,9 +9,14 @@
 }
 
 .diamond {
+  position: relative;
   width: 7.5rem;
   height: 7.5rem;
   margin-bottom: -0.5rem;
+}
+
+.diamondHandle {
+  @include mixins.diamond-grab-handle;
 }
 
 // 3/4 of `.amountValue`

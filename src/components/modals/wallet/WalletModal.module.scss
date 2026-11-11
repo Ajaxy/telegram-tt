@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .dialog {
   --modal-content-block-padding: 0;
 }
@@ -233,6 +235,8 @@
   &:hover {
     background-color: var(--color-interactive-element-hover);
   }
+
+  @include mixins.no-pointer-focus-ring;
 }
 
 .headerBalanceLabel {

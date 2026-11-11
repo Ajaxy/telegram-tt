@@ -8,6 +8,7 @@ const COAST_DECAY = 4.2;
 const COAST_SWING = 5.6;
 const PULSE_DECAY = 0.3;
 const LINEAR_EASING_STEPS = 28;
+const MS_PER_SECOND = 1000;
 // An older browser throws on an unknown easing in `animate()`, so it gets a plain curve instead
 const IS_LINEAR_EASING_SUPPORTED = Boolean(window.CSS?.supports('animation-timing-function', 'linear(0, 1)'));
 export const FRAME_DURATION = 1000 / 60;
@@ -29,6 +30,11 @@ export function coast(t: number) {
 
 export function pulse(t: number) {
   return Math.sin(Math.PI * t) * (1 - PULSE_DECAY * t);
+}
+
+// A wave of `frequency` hertz at `time` milliseconds that fades `e` times every `decay` milliseconds
+export function getDampedWave(time: number, frequency: number, decay: number) {
+  return Math.sin((2 * Math.PI * frequency * time) / MS_PER_SECOND) * Math.exp(-time / decay);
 }
 
 // For curves too sharp for the steps of `linear()` easing

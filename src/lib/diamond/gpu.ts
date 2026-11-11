@@ -1,6 +1,8 @@
+import type { GpuLensRenderer } from './lensGpu';
 import type { DiamondPalette } from './model';
 import type { GpuDiamondScene, GpuDiamondTarget, GpuStarRenderer } from './sceneGpu';
 
+import { createGpuLensRenderer } from './lensGpu';
 import { getFrameTime, loadModel } from './model';
 import { createFrameWatchdog, getIsDiamond3dDegraded, markDiamond3dDegraded } from './performance';
 import {
@@ -18,6 +20,9 @@ export type GpuRenderer = {
   format: GPUTextureFormat;
   scene: GpuDiamondScene;
   stars: GpuStarRenderer;
+  // Only a held diamond shows the lens, so it comes after the first frames, and the diamonds draw without it until then
+  // or if it fails
+  lens?: GpuLensRenderer;
 };
 
 export type GpuCanvas = {
@@ -114,6 +119,9 @@ async function createRenderer(): Promise<GpuRenderer | undefined> {
 
     renderer = current;
     scheduleRelease();
+    createGpuLensRenderer(device, format).then((lens) => {
+      current.lens = lens;
+    }, () => undefined);
 
     return current;
   } catch {

@@ -4,6 +4,8 @@
 struct Salutes {
     // Salute age, opacity, salute seed, star count of one salute
     items: array<vec4f, 3>,
+    // x: light stars for a colored backdrop, as the cool palette of the iOS app has over a dark background
+    style: vec4f,
 }
 
 struct StarRaster {
@@ -75,9 +77,13 @@ fn starVertex(@builtin(vertex_index) vertex: u32, @builtin(instance_index) insta
     let point = mat2x2f(cos(rotation), sin(rotation), -sin(rotation), cos(rotation)) * uv * radius;
 
     let choice = starRandom(seed + 10u);
+    let iridescence = smoothstep(0.12, 1.0, shine);
     var tone = select(select(select(vec3f(0.145, 0.792, 1.0), vec3f(0.0, 0.639, 1.0), choice < 0.82),
         vec3f(0.0, 0.451, 1.0), choice < 0.50), vec3f(0.045, 0.36, 1.0), choice < 0.22);
-    tone = mix(tone, vec3f(0.247, 0.894, 1.0), smoothstep(0.12, 1.0, shine) * 0.30) * 0.78;
+    tone = mix(tone, vec3f(0.247, 0.894, 1.0), iridescence * 0.30) * 0.78;
+    if (salutes.style.x > 0.5) {
+        tone = mix(vec3f(0.52, 0.84, 1.0), vec3f(1.0), choice * 0.8 + iridescence * 0.2);
+    }
 
     var result: StarRaster;
     result.position = vec4f((center + point + vec2f(0.0, FIELD_SHIFT)) * FIELD_SCALE, 0.0, 1.0);

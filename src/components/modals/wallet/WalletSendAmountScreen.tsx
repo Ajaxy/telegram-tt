@@ -24,7 +24,8 @@ import areShallowEqual from '../../../util/areShallowEqual';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { bufferFromUtf8 } from '../../../util/encoding/buffer';
-import { formatTonFromNanos, formatTonInFiat, parseTonToNanos } from '../../../util/formatCurrency';
+import { formatTonInFiat, parseTonToNanos } from '../../../util/formatCurrency';
+import { formatTonNumber } from '../../../util/localization/format';
 import { getBigIntMax } from '../../../util/numbers';
 import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { REFUSAL_VIBRATION } from './helpers/amountFrames';
@@ -335,7 +336,9 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
   const isLaunching = isSubmitted && canAnimate && Boolean(diamondRef.current);
   const submitText = collectibleAddress ? lang('WalletSendCollectibleTitle')
     : amountNanos > 0n
-      ? lang('WalletSendAmountButton', { amount: `${formatTonFromNanos(amountNanos)} ${lang('WalletCurrencyTicker')}` })
+      ? lang('WalletSendAmountButton', {
+        amount: `${formatTonNumber(lang, amountNanos)} ${lang('WalletCurrencyTicker')}`,
+      })
       : lang('WalletSendTitle');
   const shownAddress = normalizedRecipient || toAddress;
   const recipientName = recipientUser && getUserFullName(lang, recipientUser);

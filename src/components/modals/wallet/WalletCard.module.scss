@@ -1,7 +1,8 @@
 @use 'sass:math';
 
 $card-width: 336;
-$card-height: 205;
+// As the iOS card, 370 by 220
+$card-height: math.div($card-width * 220, 370);
 
 $tilt-angle: 8deg;
 // About 2.2 card widths away. An absolute length, tuned to the card's own width.
@@ -302,9 +303,11 @@ $fold-steps: 20;
 
   overflow: hidden;
 
-  font-family: var(--font-family-monospace);
+  // As the iOS card
+  font-family: var(--font-family-rounded);
   font-size: cq(22);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
   line-height: cq(28);
   white-space: nowrap;
 }
@@ -375,13 +378,15 @@ $fold-steps: 20;
   white-space: nowrap;
 }
 
+// As on the iOS card, the lines take the whole card height: a line of six groups is wider than the height without the
+// margins and would overflow to one side
 .address {
   pointer-events: none;
 
   position: absolute;
-  top: cq(18);
+  top: 0;
   right: cq(12);
-  bottom: cq(18);
+  bottom: 0;
   translate: parallax(0.125rem);
 
   display: flex;
@@ -398,7 +403,7 @@ $fold-steps: 20;
   display: flex;
   flex-direction: column;
 
-  width: cq(#{$card-height - 36});
+  width: cq($card-height);
   height: cq(22);
 }
 
@@ -412,6 +417,19 @@ $fold-steps: 20;
   text-shadow: cq(1) 0 0 rgb(255 255 255 / 10%);
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+// As on the iOS card, the labels stand out from the stickers
+.withStickers {
+  .amountContent,
+  .fiat,
+  .ownerName {
+    text-shadow: 0 cq(0.73) cq(4) rgb(0 0 0 / 80%);
+  }
+
+  .addressLine {
+    text-shadow: 0 0 cq(2.5) rgb(255 255 255 / 70%);
+  }
 }
 
 .qrButton {

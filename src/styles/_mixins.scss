@@ -28,6 +28,28 @@
     drop-shadow((-$width) (-$width) 0 $color);
 }
 
+// A round handle over a diamond, by which it is grabbed and turned
+@mixin diamond-grab-handle {
+  touch-action: none;
+  cursor: var(--custom-cursor, grab);
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+
+  &:active {
+    cursor: var(--custom-cursor, grabbing);
+  }
+}
+
+// `reboot.css` rings an element focused by a click or a tap too, and the ring stays only for the keyboard
+@mixin no-pointer-focus-ring {
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
 @mixin gradient-border-top($width, $cutout: 0px) {
   mask-image: linear-gradient(transparent $cutout, black $width);
 }

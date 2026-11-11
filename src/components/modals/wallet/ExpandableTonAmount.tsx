@@ -2,6 +2,7 @@ import { memo, useState } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos, formatTonFromNanos, formatTonShortFromNanos } from '../../../util/formatCurrency';
+import { formatTonParts } from '../../../util/localization/format';
 
 import useClickable from '../../../hooks/useClickable';
 import useLang from '../../../hooks/useLang';
@@ -38,8 +39,8 @@ const ExpandableTonAmount = ({
 
   const clickableProps = useClickable<HTMLSpanElement>(canExpand ? toggleExpanded : undefined);
 
-  const text = isExpanded ? expanded : collapsed;
-  const [whole, fraction] = fractionClassName ? text.split('.') : [text];
+  const parts = formatTonParts(lang, nanos, !isExpanded);
+  const [whole, fraction] = fractionClassName ? parts : [parts.join('')];
 
   // Expanding is not a change of the amount, so it starts fresh counters rather than rolling every digit
   const counterKey = isExpanded ? 'expanded' : 'collapsed';
@@ -48,8 +49,8 @@ const ExpandableTonAmount = ({
     <span className={buildClassName(canExpand && styles.expandable, className)} {...clickableProps}>
       {isAnimated ? <AnimatedCounter key={`whole-${counterKey}`} text={whole} /> : whole}
       {fraction && (isAnimated
-        ? <AnimatedCounter key={`fraction-${counterKey}`} text={`.${fraction}`} className={fractionClassName} />
-        : <span className={fractionClassName}>{`.${fraction}`}</span>)}
+        ? <AnimatedCounter key={`fraction-${counterKey}`} text={fraction} className={fractionClassName} />
+        : <span className={fractionClassName}>{fraction}</span>)}
     </span>
   );
 

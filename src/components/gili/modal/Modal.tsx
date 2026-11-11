@@ -179,6 +179,10 @@ const Modal = ({
   const dialogRef = useRef<HTMLDialogElement>();
   const panelRef = useRef<HTMLDivElement>();
   const closeAnimationCleanupRef = useRef<NoneToVoidFunction>();
+  // A press that starts or ends on the panel, such as a drag, gets its click on the dialog itself, as the closest element
+  // common to both ends, so the click alone looks like one on the backdrop. Both ends are caught in the capture phase,
+  // before the panel content can stop them.
+  const isPressOutsideRef = useRef(false);
   const hasFinishedCloseRef = useRef(!isOpen);
   const pictureInPictureAdoptionRef = useRef<Deferred<void>>();
 
@@ -481,9 +485,18 @@ const Modal = ({
     onBack: handleRequestClose,
   });
 
+  const handleDialogPointerDown = useLastCallback((event: React.PointerEvent<HTMLDialogElement>) => {
+    isPressOutsideRef.current = event.target === event.currentTarget;
+  });
+
+  const handleDialogPointerUp = useLastCallback((event: React.PointerEvent<HTMLDialogElement>) => {
+    if (event.target !== event.currentTarget) isPressOutsideRef.current = false;
+  });
+
   const handleDialogClick = useLastCallback((event: React.MouseEvent<HTMLDialogElement>) => {
     if (
       event.target !== event.currentTarget
+      || !isPressOutsideRef.current
       || noLightDismiss
       || !isOpen
       || isClosing
@@ -526,6 +539,8 @@ const Modal = ({
           aria-label={!hasTitle ? frozenProps.ariaLabel : undefined}
           aria-labelledby={hasTitle ? titleId : undefined}
           aria-describedby={hasSubtitle ? subtitleId : undefined}
+          onPointerDownCapture={handleDialogPointerDown}
+          onPointerUpCapture={handleDialogPointerUp}
           onClick={handleDialogClick}
         >
           <div ref={panelRef} className={styles.panel}>

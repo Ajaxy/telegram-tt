@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .root {
   position: relative;
 
@@ -102,6 +104,8 @@
   white-space: pre;
 
   background: none;
+
+  @include mixins.no-pointer-focus-ring;
 }
 
 .addressAccent {

@@ -1436,6 +1436,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         pendingValidUntil: inFlight?.validUntil,
         words: secret.words,
         password,
+        hasPassword: global.settings.byKey.hasPassword,
       }, (localMessageId?: number) => {
         isQueued = true;
         queuedRecord = { ...queuedRecord, localMessageId };
@@ -1481,19 +1482,34 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
       return;
     }
 
-    // A queued transfer has left the form, so its row and the notification tell of the failure, as in the native apps
+    // A queued transfer has left the form, so its row and a dialog that waits for the user tell of the failure, as in
+    // the iOS app
     if (isQueued) {
       global = markWalletTransactionFailed(global, localId);
       setGlobal(global);
+
+      // The 2FA state was stale, and the export it asked for went after the form had closed. The fresh state sends
+      // the next try through the password screen.
+      const isPasswordMissing = error === 'PASSWORD_MISSING';
+      if (isPasswordMissing) actions.loadPasswordInfo();
+
+      actions.showDialog({
+        data: {
+          type: 'localized',
+          title: { key: 'WalletSendFailedTitle' },
+          text: { key: isPasswordMissing ? 'WalletSendPasswordRequired' : WALLET_ERROR_LANG_KEYS[error] },
+        },
+        tabId,
+      });
     } else {
       if (selectTabState(global, tabId).walletTransfer !== pending) return;
 
       global = updateTabState(global, { walletTransfer: { status: 'error', error } }, tabId);
       setGlobal(global);
-    }
 
-    if (error !== 'PASSWORD_INVALID' && error !== 'PASSWORD_MISSING' && error !== 'PASSCODE_INVALID') {
-      actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS[error] }, tabId });
+      if (error !== 'PASSWORD_INVALID' && error !== 'PASSWORD_MISSING' && error !== 'PASSCODE_INVALID') {
+        actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS[error] }, tabId });
+      }
     }
 
     // The key was rotated on another device; the fresh state re-checks the stored phrase

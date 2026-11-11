@@ -5,6 +5,7 @@ import type { ApiMediaAreaCoordinates, ApiStarGiftUnique, ApiWalletCardSticker }
 import { getStickerFromGift } from '../../common/helpers/gifts';
 
 import useResizeObserver from '../../../hooks/useResizeObserver';
+import useUniqueId from '../../../hooks/useUniqueId';
 
 import StickerView from '../../common/StickerView';
 
@@ -19,16 +20,39 @@ type Size = {
   height: number;
 };
 
+// The die-cut of the iOS card: the solid part of the sticker is blurred by 1.5% of its side, and the alpha ramp
+// `alpha * 10 - 150 / 255` turns the blur into a white edge with round corners
+const CUTOUT_BLUR = 0.015;
+const CUTOUT_RAMP = '0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 10 -0.588';
+const SOLID_ALPHA = '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255 -127';
+
 const WalletCardStickers = ({ stickers }: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
   const [cardSize, setCardSize] = useState<Size>();
+  const cutoutId = useUniqueId();
 
   useResizeObserver(ref, ({ contentRect: { width, height } }) => {
     setCardSize({ width, height });
   });
 
   return (
-    <div ref={ref} className={styles.root} aria-hidden>
+    <div
+      ref={ref}
+      className={styles.root}
+      style={`--sticker-cutout: url(#${cutoutId})`}
+      aria-hidden
+    >
+      <svg className={styles.filters}>
+        <filter id={cutoutId} primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feColorMatrix in="SourceAlpha" values={SOLID_ALPHA} />
+          <feGaussianBlur stdDeviation={CUTOUT_BLUR} />
+          <feColorMatrix values={CUTOUT_RAMP} />
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </svg>
       {cardSize && stickers.map(({ coordinates, gift }) => (
         <WalletCardSticker key={gift.id} coordinates={coordinates} gift={gift} cardSize={cardSize} />
       ))}

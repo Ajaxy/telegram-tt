@@ -264,5 +264,6 @@ declare const GPUShaderStage: {
 declare const GPUTextureUsage: {
   readonly COPY_SRC: GPUTextureUsageFlags;
   readonly COPY_DST: GPUTextureUsageFlags;
+  readonly TEXTURE_BINDING: GPUTextureUsageFlags;
   readonly RENDER_ATTACHMENT: GPUTextureUsageFlags;
 };

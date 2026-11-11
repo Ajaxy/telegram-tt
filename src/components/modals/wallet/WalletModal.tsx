@@ -18,7 +18,7 @@ import {
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
-import { formatTonShortFromNanos } from '../../../util/formatCurrency';
+import { formatTonNumber } from '../../../util/localization/format';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import useWalletCredentials from './useWalletCredentials';
 import useWalletKeyFlows from './useWalletKeyFlows';
@@ -662,7 +662,7 @@ const WalletModal = ({
             <span className={styles.headerBalanceLabel}>{lang('StarsBalance')}</span>
             <span className={styles.headerBalanceAmount}>
               <GramIcon />
-              {formatTonShortFromNanos(balance)}
+              {formatTonNumber(lang, balance, true)}
             </span>
           </button>
         </ModalHeaderAction>

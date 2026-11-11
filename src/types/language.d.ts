@@ -2449,6 +2449,8 @@ export interface LangPair {
   'WalletSendSuccess': undefined;
   'WalletSendSuccessGasless': undefined;
   'WalletSendError': undefined;
+  'WalletSendFailedTitle': undefined;
+  'WalletSendPasswordRequired': undefined;
   'WalletSendPending': undefined;
   'WalletExportError': undefined;
   'WalletBackupDisabledError': undefined;

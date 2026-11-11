@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .root {
   display: flex;
   flex: 1;
@@ -55,18 +57,9 @@
 }
 
 .gemHandle {
-  touch-action: none;
-  cursor: var(--custom-cursor, grab);
-
-  position: absolute;
   z-index: 1;
-  inset: 0;
 
-  border-radius: 50%;
-
-  &:active {
-    cursor: var(--custom-cursor, grabbing);
-  }
+  @include mixins.diamond-grab-handle;
 }
 
 .glow,
@@ -207,10 +200,7 @@
 
   transition: background-color 0.15s;
 
-  // The ring is for the keyboard; a click or a tap focuses the pill without one
-  &:focus:not(:focus-visible) {
-    outline: none;
-  }
+  @include mixins.no-pointer-focus-ring;
 
   &:hover:not(:disabled) {
     background-color: var(--color-interactive-element-hover);

@@ -1,8 +1,12 @@
-import { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import {
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPeer, ApiWalletTransaction } from '../../../api/types';
+import type StandaloneDiamond from '../../../lib/diamond/standalone';
 
+import { TURN_DURATION } from '../../../lib/diamond/model';
 import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { getWalletGiftMoveKey } from '../../../global/helpers/wallet';
 import {
@@ -10,10 +14,13 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { convertTonFromNanos, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { convertTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
+import { formatTonNumber } from '../../../util/localization/format';
 import { formatAddressInGroups } from '../../../util/tonAddress';
 import renderText from '../../common/helpers/renderText';
+import useDiamondLens from './useDiamondLens';
+import useDiamondThrow from './useDiamondThrow';
 
 import useClickable from '../../../hooks/useClickable';
 import useFlag from '../../../hooks/useFlag';
@@ -29,6 +36,7 @@ import ExpandableTonAmount from './ExpandableTonAmount';
 import WalletCollectibleImage from './WalletCollectibleImage';
 import WalletDiamond from './WalletDiamond';
 import WalletFeesInfoDialog from './WalletFeesInfoDialog';
+import WalletStandaloneDiamond from './WalletStandaloneDiamond';
 
 import styles from './WalletTransactionScreen.module.scss';
 
@@ -63,6 +71,10 @@ type DomainCellOwnProps = {
 };
 
 const DIAMOND_SIZE = 120;
+// Room for the held diamond to grow and swing past its size
+const DIAMOND_CANVAS_SIZE = 260;
+const DIAMOND_GROWTH = 1;
+const DIAMOND_SPIN = (2 * Math.PI) / TURN_DURATION;
 
 const WalletTransactionScreen = ({
   transaction, isRoot, currency, tonUsdRate, currencyRate, counterparty, decryptedComment, isDecryptingComment,
@@ -71,7 +83,13 @@ const WalletTransactionScreen = ({
   const { loadWalletUserAddresses } = getActions();
   const lang = useLang();
 
+  const rootRef = useRef<HTMLDivElement>();
+  const diamondSlotRef = useRef<HTMLDivElement>();
+  const diamondFaceRef = useRef<HTMLDivElement>();
+  const diamondRef = useRef<StandaloneDiamond>();
+
   const [isFeesInfoOpen, openFeesInfo, closeFeesInfo] = useFlag();
+  const [isDiamondReady, setIsDiamondReady] = useState(false);
 
   const {
     isIncoming, peer, amount, timestamp, comment, encryptedComment, fee, isGasless, isKeyChange, isPending,
@@ -151,7 +169,7 @@ const WalletTransactionScreen = ({
           <GramIcon className={styles.feeIcon} />
           {isFeeFree ? lang('WalletTransactionFeeFree') : (
             <>
-              {formatTonFromNanos(fee)}
+              {formatTonNumber(lang, fee)}
               {fiatFee && <span className={styles.fiatFee}>{` ~ ${fiatFee}`}</span>}
             </>
           )}
@@ -201,13 +219,29 @@ const WalletTransactionScreen = ({
     encryptedComment, isDecryptingComment, canShowFeesInfo, onDecryptComment, onSend,
   ]);
 
+  // The grown diamond does not reach the amount, so there is nothing to see through it
+  const holdDiamond = useDiamondLens(
+    diamondRef,
+    {
+      blockRef: rootRef,
+      slotRef: diamondSlotRef,
+      gemFaceRef: diamondFaceRef,
+      size: DIAMOND_SIZE,
+      growth: DIAMOND_GROWTH,
+    },
+    isDiamondReady,
+  );
+  const diamondThrow = useDiamondThrow(diamondRef, holdDiamond);
+
+  const diamondFallback = useMemo(() => <WalletDiamond size={DIAMOND_SIZE} />, []);
+
   const fiatAmount = formatTonInFiat(amount, tonUsdRate, currency, currencyRate, lang.code);
   const giftMoveKey = getWalletGiftMoveKey(transaction);
 
   const sign = amount === 0n ? '' : isIncoming ? '+' : '−';
 
   return (
-    <div className={styles.root}>
+    <div ref={rootRef} className={styles.root}>
       {isKeyChange ? (
         <>
           <div className={styles.keyIcon}>
@@ -224,8 +258,27 @@ const WalletTransactionScreen = ({
       ) : (
         <>
           {/* The diamond stays invisible until it loads, so the wrapper reserves its space and the amount does not jump */}
-          <div className={styles.diamond}>
-            <WalletDiamond size={DIAMOND_SIZE} />
+          <div ref={diamondSlotRef} className={styles.diamond}>
+            <div ref={diamondFaceRef}>
+              <WalletStandaloneDiamond
+                diamondRef={diamondRef}
+                size={DIAMOND_SIZE}
+                canvasSize={DIAMOND_CANVAS_SIZE}
+                speed={DIAMOND_SPIN}
+                palette="regular"
+                fallback={diamondFallback}
+                onReadyChange={setIsDiamondReady}
+              />
+            </div>
+            {isDiamondReady && (
+              <div
+                className={styles.diamondHandle}
+                onPointerDown={diamondThrow.handlePointerDown}
+                onPointerMove={diamondThrow.handlePointerMove}
+                onPointerUp={diamondThrow.handlePointerUp}
+                onPointerCancel={diamondThrow.handlePointerUp}
+              />
+            )}
           </div>
           <div className={buildClassName(styles.amount, isIncoming && styles.positive)}>
             {lang('GramAmountText', {

@@ -37,6 +37,8 @@ type Options = {
 };
 
 const SEND_SCREENS = new Set([WalletScreen.Send, WalletScreen.SendAmount]);
+// As `closeAfterTransferRegistration` of the iOS app
+const LAUNCH_SPIN_DURATION = 180;
 
 export default function useWalletSendFlow({
   modal, navigation, credentials, isKeyMissing, address, balance, collectibles, walletTransfer, isFlightReady,
@@ -66,6 +68,7 @@ export default function useWalletSendFlow({
   // Whether the queued transfer closes the wallet: only the form a chat opened does, until the user leaves it for the
   // main screen, as in the iOS app
   const shouldCloseAfterSendRef = useRef(false);
+  const launchedAtRef = useRef<number>();
   const isOpenRef = useStateRef(Boolean(modal));
   const stackRef = useStateRef(stack);
 
@@ -134,19 +137,30 @@ export default function useWalletSendFlow({
 
   // A transfer started from a chat closes the wallet, leaving the chat where the message appears
   useEffect(() => {
-    if (walletTransfer?.status !== 'queued') return;
+    if (walletTransfer?.status !== 'queued') return undefined;
 
-    clearWalletTransfer();
-    setDraft(EMPTY_SEND_DRAFT);
-    dropCredentials();
+    // The transfer is queued at once, so the diamond spins up for a moment before it leaves
+    const launchedAt = launchedAtRef.current;
+    const wait = launchedAt === undefined ? 0 : Math.max(0, launchedAt + LAUNCH_SPIN_DURATION - performance.now());
 
-    if (shouldCloseAfterSendRef.current) {
-      closeWalletModal();
-    } else {
-      if (canFlightLand && startSendFlight()) onFlightStart();
-      resetNavigation();
-    }
-  }, [walletTransfer?.status, canFlightLand, dropCredentials, resetNavigation, onFlightStart]);
+    const timeout = window.setTimeout(() => {
+      clearWalletTransfer();
+      setDraft(EMPTY_SEND_DRAFT);
+      dropCredentials();
+
+      // The wallet may have been closed while the diamond spun up
+      if (!isOpenRef.current) return;
+
+      if (shouldCloseAfterSendRef.current) {
+        closeWalletModal();
+      } else {
+        if (canFlightLand && startSendFlight()) onFlightStart();
+        resetNavigation();
+      }
+    }, wait);
+
+    return () => window.clearTimeout(timeout);
+  }, [walletTransfer?.status, canFlightLand, dropCredentials, resetNavigation, onFlightStart, isOpenRef]);
 
   const handleBack = useLastCallback(() => {
     if (!isSendScreen) return;
@@ -235,13 +249,15 @@ export default function useWalletSendFlow({
     // that closes after the transfer has no history for it to land in
     credentials.ask({
       intent: 'send',
-      run: (entered) => sendWalletTransfer({
-        ...payload,
-        ...entered,
-        isAnimated: payload.isAnimated && canFlightLand && !entered.passcode && !entered.password
-          && !shouldCloseAfterSendRef.current,
-        fromAddress: draft.fromAddress!,
-      }),
+      run: (entered) => {
+        const isAnimated = payload.isAnimated && canFlightLand && !entered.passcode && !entered.password
+          && !shouldCloseAfterSendRef.current;
+        launchedAtRef.current = isAnimated ? performance.now() : undefined;
+
+        sendWalletTransfer({
+          ...payload, ...entered, isAnimated, fromAddress: draft.fromAddress!,
+        });
+      },
     });
   });
 

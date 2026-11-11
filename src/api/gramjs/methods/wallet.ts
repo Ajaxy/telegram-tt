@@ -22,6 +22,7 @@ import type {
   WalletBackupError,
   WalletBackupResult,
 } from '../../types';
+import type { ApiMessageActionGramTransfer } from '../../types/messageActions';
 
 import {
   DEBUG, GIFT_DEPOSIT_MAX_NANOS, GRAM_TRANSFER_FEE_RESERVE, NFT_TRANSFER_ATTACHED_NANOS, NFT_TRANSFER_FORWARD_NANOS,
@@ -1189,6 +1190,7 @@ async function fetchWalletKeyChanges(ownAddress: string): Promise<WalletKeyChang
 export async function sendTonTransfer({
   toAddress, toUser, chat, lastMessageId, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
   collectiblePayload, isGasless, ownAddress, ownPublicKey, pendingSeqno, pendingValidUntil, words, password,
+  hasPassword,
 }: {
   toAddress: string;
   // Once the chain shows the transfer reached them, the server names each side to the other
@@ -1213,6 +1215,8 @@ export async function sendTonTransfer({
   pendingValidUntil?: number;
   words?: string[];
   password?: string;
+  // As last loaded, so it may be out of date
+  hasPassword?: boolean;
 }, onQueued?: (localMessageId?: number) => void): Promise<SendTonTransferResult | undefined> {
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
@@ -1240,54 +1244,30 @@ export async function sendTonTransfer({
     return { error: 'NFT_UNAVAILABLE' };
   }
 
-  const exported = await exportWalletSecretPhrase({
-    ownAddress, ownPublicKey, words, password,
-  });
+  // The server asks for the 2FA password only on the export, and only an answer to the form opens the password screen.
+  // So with 2FA, or when it is unknown, the export goes before the transfer is queued.
+  const exportedFirst = !words && (Boolean(password) || hasPassword !== false) ? await exportWalletSecretPhrase({
+    ownAddress, ownPublicKey, password,
+  }) : undefined;
 
-  if ('error' in exported) {
-    return exported;
+  if (exportedFirst && 'error' in exportedFirst) {
+    return exportedFirst;
   }
 
-  const seeds = await deriveWalletSeeds(exported.words, ownAddress, ownPublicKey);
-
-  if (!seeds) {
-    return { error: 'UNSUPPORTED_WALLET' };
-  }
-
-  const keys = { seed: seeds.signing, publicKey: await getEd25519PublicKey(seeds.signing) };
-
-  // The address, and so the state init of a wallet not deployed yet, comes from the anchor key
-  const anchorPublicKey = await getEd25519PublicKey(seeds.anchor);
-
-  let encryptedComment: Uint8Array<ArrayBuffer> | undefined;
-
-  if (comment && shouldEncryptComment && !collectible) {
-    const theirPublicKey = await fetchRecipientPublicKey(toAddress);
-
-    if (!theirPublicKey) {
-      return { error: 'COMMENT_ENCRYPTION_UNAVAILABLE' };
-    }
-
-    // The receiver checks the salt as the bounceable address, see `decryptWalletComment`
-    const salt = new TextEncoder().encode(formatAddress(own.workchain, own.hash, true));
-    encryptedComment = await encryptMessageComment(comment, keys.publicKey, keys.seed, theirPublicKey, salt);
-  }
-
-  const encryptedCommentBase64 = encryptedComment && bufferToBase64(encryptedComment);
+  const isCommentEncrypted = Boolean(comment && shouldEncryptComment && !collectible);
   const randomId = generateRandomBigInt();
-  const localMessage = chat && buildLocalMessage({
-    chat,
-    lastMessageId,
-    action: {
-      mediaType: 'action',
-      type: 'gramTransfer',
-      amount,
-      peerAddress: toAddress,
-      transactionId: '',
-      comment: encryptedComment ? undefined : comment,
-      encryptedComment: encryptedCommentBase64,
-    },
-    isPending: true,
+
+  // An encrypted comment joins the message once it is encrypted
+  const transferAction: ApiMessageActionGramTransfer = {
+    mediaType: 'action',
+    type: 'gramTransfer',
+    amount,
+    peerAddress: toAddress,
+    transactionId: '',
+    comment: isCommentEncrypted ? undefined : comment,
+  };
+  let localMessage = chat && buildLocalMessage({
+    chat, lastMessageId, action: transferAction, isPending: true,
   }).message;
 
   if (localMessage) {
@@ -1296,6 +1276,7 @@ export async function sendTonTransfer({
     });
   }
 
+  // As in the iOS app, the transfer is queued before the keys and the comment are prepared, so the form closes at once
   onQueued?.(localMessage?.id);
 
   // The wait is counted from the moment the transfer is queued. Otherwise a transfer that waits for the lock could wait
@@ -1304,6 +1285,49 @@ export async function sendTonTransfer({
   const sending = runWalletSend<SendTonTransferResult | undefined>(ownAddress, async () => {
     if (Date.now() >= waitUntil) {
       return { error: 'TRANSFER_PENDING' };
+    }
+
+    const exported = exportedFirst ?? await exportWalletSecretPhrase({ ownAddress, ownPublicKey, words });
+
+    if ('error' in exported) {
+      return exported;
+    }
+
+    const seeds = await deriveWalletSeeds(exported.words, ownAddress, ownPublicKey);
+
+    if (!seeds) {
+      return { error: 'UNSUPPORTED_WALLET' };
+    }
+
+    const keys = { seed: seeds.signing, publicKey: await getEd25519PublicKey(seeds.signing) };
+
+    // The address, and so the state init of a wallet not deployed yet, comes from the anchor key
+    const anchorPublicKey = await getEd25519PublicKey(seeds.anchor);
+
+    let encryptedComment: Uint8Array<ArrayBuffer> | undefined;
+
+    if (isCommentEncrypted) {
+      const theirPublicKey = await fetchRecipientPublicKey(toAddress);
+
+      if (!theirPublicKey) {
+        return { error: 'COMMENT_ENCRYPTION_UNAVAILABLE' };
+      }
+
+      // The receiver checks the salt as the bounceable address, see `decryptWalletComment`
+      const salt = new TextEncoder().encode(formatAddress(own.workchain, own.hash, true));
+      encryptedComment = await encryptMessageComment(comment!, keys.publicKey, keys.seed, theirPublicKey, salt);
+    }
+
+    const encryptedCommentBase64 = encryptedComment && bufferToBase64(encryptedComment);
+
+    if (localMessage && encryptedCommentBase64) {
+      const action = { ...transferAction, encryptedComment: encryptedCommentBase64 };
+      const content = { ...localMessage.content, action };
+      localMessage = { ...localMessage, content };
+
+      sendApiUpdate({
+        '@type': 'updateMessage', chatId: localMessage.chatId, id: localMessage.id, message: { content },
+      });
     }
 
     let state = await fetchToncenterWalletState(ownAddress);

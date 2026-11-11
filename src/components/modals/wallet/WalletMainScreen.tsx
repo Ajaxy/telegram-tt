@@ -12,9 +12,8 @@ import {
   selectUser, selectWalletAddress, selectWalletCurrency, selectWalletCurrencyRate, selectWalletTransactions,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatTonShortFromNanos } from '../../../util/formatCurrency';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { formatTonAsIcon, formatTonTextFromNanos } from '../../../util/localization/format';
+import { formatTonAsIcon, formatTonNumber, formatTonTextFromNanos } from '../../../util/localization/format';
 import { WALLET_COLLECTIBLES_LIMIT, WALLET_TRANSACTIONS_LIMIT } from '../../../limits';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -267,7 +266,7 @@ const WalletMainScreen = ({
   }
 
   function formatGramAmount(nanos: bigint) {
-    return formatTonAsIcon(lang, formatTonShortFromNanos(nanos));
+    return formatTonAsIcon(lang, formatTonNumber(lang, nanos, true));
   }
 
   function renderBanner(label: TeactNode, onClick: NoneToVoidFunction) {
