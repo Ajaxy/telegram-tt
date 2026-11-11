@@ -563,6 +563,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       return undefined;
     }
 
+    case 'updateTopicEdit': {
+      const { chatId, topicId, topicEdit } = update;
+
+      global = updateTopic(global, chatId, topicId, topicEdit);
+      setGlobal(global);
+
+      return undefined;
+    }
+
     case 'updateTopics': {
       const { chatId } = update;
 

@@ -37,6 +37,7 @@ import {
   buildApiMessageEntity,
   buildApiPhoto, buildApiUsernames, buildPrivacyRules,
 } from '../apiBuilders/common';
+import { buildApiTopicEdit } from '../apiBuilders/forums';
 import { buildApiStarGiftAuctionUserState, buildApiTypeStarGiftAuctionState } from '../apiBuilders/gifts';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
@@ -1177,6 +1178,13 @@ export function updater(update: Update) {
       '@type': 'updatePinnedTopicsOrder',
       chatId: getApiChatIdFromMtpPeer(update.peer),
       order: update.order || [],
+    });
+  } else if (update instanceof GramJs.UpdateEditForumTopic) {
+    sendApiUpdate({
+      '@type': 'updateTopicEdit',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      topicId: update.topicId,
+      topicEdit: buildApiTopicEdit(update),
     });
   } else if (update instanceof GramJs.UpdateRecentEmojiStatuses) {
     sendApiUpdate({ '@type': 'updateRecentEmojiStatuses' });

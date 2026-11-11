@@ -494,12 +494,12 @@ updateSentWalletTransaction#b1434d4a flags:# gasless:flags.0?true msg_hash:strin
 updateWalletGaslessInfo#a8ae1cac flags:# available:flags.0?true left:int reset_at:int min_amount:long relayer_address:string = Update;
 updateWalletTonConnectSession#50a38e0e session:TonConnectSession = Update;
 updateWalletTonConnectPendingDisconnect#d1ee8199 session_ids:Vector<long> = Update;
-updateReadFeed#74585fb1 flags:# filter_id:int max_position:FeedPosition unread_count:flags.0?int unread_muted_count:flags.0?int = Update;
-updateBotWidgetQuery#26816906 flags:# query_id:long user_id:long peer:Peer msg_id:int chat_instance:long chat_type:string data:bytes widget_id:flags.0?long = Update;
-updateInlineBotWidgetQuery#ab6fb64b flags:# query_id:long user_id:long inline_message_id:InputBotInlineMessageID chat_instance:long chat_type:string data:bytes widget_id:flags.0?long = Update;
-updateBotWidgetCopyQuery#b3323f58 flags:# query_id:long user_id:long data:bytes widget_id:long = Update;
+updateEditForumTopic#2366665c flags:# peer:Peer topic_id:int title:flags.0?string icon_emoji_id:flags.1?long closed:flags.2?Bool hidden:flags.3?Bool = Update;
+updateBotWidgetQuery#b373fe68 flags:# query_id:long query_type:WidgetQueryType user_id:long peer:Peer msg_id:int chat_instance:long chat_type:string data:bytes widget_id:flags.0?long wallet_card:flags.1?wallet.Card = Update;
+updateInlineBotWidgetQuery#a5f07e08 flags:# query_id:long query_type:WidgetQueryType user_id:long inline_message_id:InputBotInlineMessageID chat_instance:long chat_type:string data:bytes widget_id:flags.0?long wallet_card:flags.1?wallet.Card = Update;
+updateBotWidgetCopyQuery#fa89bef7 flags:# query_id:long query_type:WidgetQueryType user_id:long data:bytes widget_id:long wallet_card:flags.1?wallet.Card = Update;
 updateMessageWidgetData#bbb078dd flags:# peer:Peer msg_id:int public_data:flags.0?string public_data_hash:flags.0?long chat_data:flags.1?string pts:int pts_count:int = Update;
-updateAgentSettings#9434e98d settings:agent.settings = Update;
+updateTranscribedAudioFile#734c2e7b flags:# pending:flags.0?true transcription_id:long text:string = Update;
 
 updates.state#a56c2a3e pts:int qts:int date:int seq:int unread_count:int = updates.State;
 
@@ -2389,35 +2389,16 @@ wallet.card#8ed043b1 flags:# stickers:flags.0?Vector<wallet.CardSticker> bg_nft_
 
 payments.starGiftDepositPayload#725bb4eb nft_address:string payload:bytes amount:long = payments.StarGiftDepositPayload;
 
-feedPosition#5059dc73 date:int peer:Peer id:int = FeedPosition;
+userWallet#454d2737 flags:# address:string balance:long public_key:flags.0?bytes state_init:flags.0?bytes = UserWallet;
 
-feed.feedMessagesNotModified#db1a3503 = feed.FeedMessages;
-feed.feedMessages#dcf754b9 flags:# max_position:flags.0?FeedPosition min_position:flags.1?FeedPosition read_max_position:flags.2?FeedPosition messages:Vector<Message> chats:Vector<Chat> users:Vector<User> = feed.FeedMessages;
-
-feedItemMessage#7e73b3a5 message:Message = FeedItem;
-feedItemMessageGroup#652f4c71 messages:Vector<Message> = FeedItem;
-feedItemInterestCategories#6be7187b = FeedItem;
-
-feed.forYouFeed#52577805 flags:# items:Vector<FeedItem> chats:Vector<Chat> users:Vector<User> = feed.ForYouFeed;
-
-feed.interestCategory#6c4666e3 flags:# id:int title:string emoji:flags.0?string emoji_document_id:flags.1?long = feed.InterestCategory;
-
-feed.interestCategoriesNotModified#79cf2195 = feed.InterestCategories;
-feed.interestCategories#ecb62fa0 categories:Vector<feed.InterestCategory> selected:Vector<int> = feed.InterestCategories;
+widgetQueryTypeData#16d8cf0b flags:# with_wallet:flags.0?true = WidgetQueryType;
+widgetQueryTypeSignData#192047dc wallet:UserWallet sign_data:DataJSON = WidgetQueryType;
+widgetQueryTypeSentTransaction#ff3b33b4 wallet:UserWallet msg_hash:string = WidgetQueryType;
 
 messages.botWidgetQueryAnswer#95b73023 flags:# result:flags.0?string = messages.BotWidgetQueryAnswer;
 
 messages.widgetPublicDataNotModified#b9196e57 period:int = messages.WidgetPublicData;
 messages.widgetPublicData#4493bff hash:long data:string period:int = messages.WidgetPublicData;
-
-agentProvider#47327c87 flags:# models_searchable:flags.0?true id:string title:string vendor:string key_url:string icon_emoji_id:flags.1?long = agent.Provider;
-
-agent.providersNotModified#43f756ad = agent.Providers;
-agent.providers#872297f2 hash:long providers:Vector<agent.Provider> = agent.Providers;
-
-agent.providerKey#784d7e10 provider:string key_last4:string date_connected:int = agent.ProviderKey;
-
-agent.settings#fcc362b5 flags:# keys:Vector<agent.ProviderKey> active_provider:flags.0?string = agent.Settings;
 
 ---functions---
 
@@ -2893,12 +2874,14 @@ messages.composeRichMessageWithAI#8d7ae6af flags:# proofread:flags.0?true emojif
 messages.requestChatJoinWebView#ba9ee679 flags:# query_id:long theme_params:flags.0?DataJSON platform:string = WebViewResult;
 messages.setShareTheme#698a9b1a peer:InputPeer theme:ShareTheme = Bool;
 messages.getShareThemeBackdrops#f4599ef2 hash:int = ShareThemeBackdrops;
-messages.getBotWidgetQueryAnswer#d78dba1a peer:InputPeer msg_id:int data:bytes = messages.BotWidgetQueryAnswer;
+messages.getBotWidgetQueryAnswer#5c550579 peer:InputPeer msg_id:int query_type:WidgetQueryType data:bytes = messages.BotWidgetQueryAnswer;
 messages.setBotWidgetQueryAnswer#f8cdec6a flags:# query_id:long result:flags.0?string = Bool;
 messages.editMessageWidgetData#f624bc1e flags:# peer:InputPeer id:int public_data:flags.0?string chat_data:flags.1?string = Updates;
 messages.editInlineBotMessageWidgetData#6396ce2b flags:# id:InputBotInlineMessageID public_data:flags.0?string chat_data:flags.1?string = Bool;
 messages.editWidgetData#eac343c0 flags:# widget_id:long public_data:string cache_time:flags.0?int = Bool;
 messages.getWidgetPublicData#6fc53181 peer:InputPeer msg_id:int hash:long = messages.WidgetPublicData;
+messages.transcribeAudioFile#72d2ef7 file:InputFile = messages.TranscribedAudio;
+messages.getTranscriptionLangs#ba6cd9aa flags:# peer:flags.0?InputPeer = Vector<string>;
 
 updates.getState#edd4882a = updates.State;
 updates.getDifference#19c2f763 flags:# pts:int pts_limit:flags.1?int pts_total_limit:flags.0?int date:int qts:int qts_limit:flags.2?int = updates.Difference;
@@ -2959,7 +2942,7 @@ channels.editTitle#566decd0 channel:InputChannel title:string = Updates;
 channels.editPhoto#f12e57c9 channel:InputChannel photo:InputChatPhoto = Updates;
 channels.checkUsername#10e6bd2c channel:InputChannel username:string = Bool;
 channels.updateUsername#3514b3de channel:InputChannel username:string = Bool;
-channels.joinChannel#416cb50c flags:# for_news:flags.0?true channel:InputChannel = messages.ChatInviteJoinResult;
+channels.joinChannel#7f6a1e22 channel:InputChannel = messages.ChatInviteJoinResult;
 channels.leaveChannel#f836aa95 channel:InputChannel = Updates;
 channels.inviteToChannel#c9e33d54 channel:InputChannel users:Vector<InputUser> = messages.InvitedUsers;
 channels.deleteChannel#c0111fe3 channel:InputChannel = Updates;
@@ -3003,7 +2986,6 @@ channels.toggleAutotranslation#167fc0a1 channel:InputChannel enabled:Bool = Upda
 channels.getMessageAuthor#ece2a0e6 channel:InputChannel id:int = User;
 channels.checkSearchPostsFlood#22567115 flags:# query:flags.0?string = SearchPostsFlood;
 channels.setMainProfileTab#3583fcb1 channel:InputChannel tab:ProfileTab = Bool;
-channels.editChannelNews#d704f985 channel:InputChannel news:Bool = Updates;
 
 bots.sendCustomRequest#aa2769ed custom_method:string params:DataJSON = DataJSON;
 bots.answerWebhookJSONQuery#e6213f4d query_id:long data:DataJSON = Bool;
@@ -3314,19 +3296,5 @@ wallet.tonConnectNextEventId#775d7244 session_id:long = TonConnectNextEventId;
 wallet.tonConnectCloseSession#d63f61ce flags:# session_id:long body:flags.0?bytes = Bool;
 wallet.tonConnectGetSessions#a7ffb56e = wallet.TonConnectSessions;
 wallet.setCardStickers#68509ac flags:# stickers:Vector<InputWalletCardSticker> bg_nft_address:flags.0?string = wallet.Card;
-
-feed.getFeed#7e76d7d3 flags:# offset_to_max_read:flags.3?true filter_id:int offset_position:flags.0?FeedPosition add_offset:int limit:int max_position:flags.1?FeedPosition min_position:flags.2?FeedPosition hash:long = feed.FeedMessages;
-feed.readFeed#b436c1ff filter_id:int max_position:FeedPosition = Updates;
-feed.getForYou#33b8e5eb flags:# query:flags.0?string limit:int = feed.ForYouFeed;
-feed.getInterestCategories#ba7a1dba hash:long = feed.InterestCategories;
-feed.setInterestCategories#9f2958dc category_ids:Vector<int> = Bool;
-feed.likePost#1b4b627e peer:InputPeer msg_id:int = Bool;
-feed.dislikePost#4d70175c peer:InputPeer msg_id:int = Bool;
-
-agent.getProviders#ce0e7413 hash:long = agent.Providers;
-agent.getSettings#fb0f9757 = agent.Settings;
-agent.connect#ff2471ec provider:string key:string = agent.Settings;
-agent.disconnect#9abcf719 provider:string = agent.Settings;
-agent.setActiveProvider#bcb25188 provider:string = agent.Settings;
 
 // LAYER 233

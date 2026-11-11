@@ -32,6 +32,7 @@ import type {
   ApiReactions,
   ApiStickerSet,
   ApiThreadInfo,
+  ApiTopic,
   ApiWebPage,
   BoughtPaidMedia,
 } from './messages';
@@ -833,6 +834,13 @@ export type ApiUpdateTopic = {
   topicId: number;
 };
 
+export type ApiUpdateTopicEdit = {
+  '@type': 'updateTopicEdit';
+  chatId: string;
+  topicId: number;
+  topicEdit: Partial<ApiTopic>;
+};
+
 export type ApiUpdateTopics = {
   '@type': 'updateTopics';
   chatId: string;
@@ -1082,7 +1090,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifySettings | ApiUpdatePinnedTopic |
-  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
+  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopicEdit | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
