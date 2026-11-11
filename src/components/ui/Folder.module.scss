@@ -65,8 +65,8 @@
   .badge {
     position: absolute;
     z-index: 1;
+    inset-inline-end: calc((100% - var(--folders-sidebar-width)) / 2 + 0.625rem);
     top: -0.25rem;
-    left: 1.25rem;
 
     display: flex;
     align-items: flex-start;

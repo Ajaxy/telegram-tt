@@ -8,7 +8,7 @@
 .chatWallpaperFrame {
   @media (max-width: 925px) {
     :global(#Main.left-column-open) & {
-      transform: translate3d(33.5rem, 0, 0);
+      transform: translate3d(calc(var(--folders-sidebar-width) + 28.5rem), 0, 0);
     }
 
     :global(#Main.left-column-animating) & {

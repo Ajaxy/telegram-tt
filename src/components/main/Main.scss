@@ -266,7 +266,7 @@
     }
 
     #Main.left-column-open & {
-      transform: translate3d(calc(33.5rem), 0, 0);
+      transform: translate3d(calc(var(--folders-sidebar-width) + 28.5rem), 0, 0);
     }
 
     body.no-right-column-animations #Main.right-column-open &,
