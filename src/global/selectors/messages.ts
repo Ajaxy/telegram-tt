@@ -28,6 +28,7 @@ import {
   GENERAL_TOPIC_ID,
   MESSAGE_LIST_VIEWPORT_LIMIT,
   SERVICE_NOTIFICATIONS_USER_ID,
+  TMP_CHAT_ID,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
@@ -77,9 +78,11 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatLastMessageId,
+  selectIsChatBotNotStarted,
   selectIsChatRestricted,
   selectIsChatWithBot,
   selectIsChatWithSelf,
+  selectIsMonoforumAdmin,
   selectRequestedChatTranslationLanguage,
   selectRequestedChatTranslationTone,
 } from './chats';
@@ -90,6 +93,7 @@ import { selectPeerStory } from './stories';
 import { selectCustomEmoji, selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import {
+  selectDraft,
   selectEditingId,
   selectEditingScheduledId,
   selectTabThreadParam,
@@ -101,7 +105,7 @@ import {
 } from './threads';
 import { selectTopic, selectTopicFromMessage } from './topics';
 import {
-  selectBot, selectIsUserChatProtected, selectUser, selectUserStatus,
+  selectBot, selectIsCurrentUserFrozen, selectIsUserChatProtected, selectUser, selectUserFullInfo, selectUserStatus,
 } from './users';
 
 export function selectCurrentMessageList<T extends GlobalState>(
@@ -569,6 +573,44 @@ export function selectCanReplyToMessage<T extends GlobalState>(global: T, messag
 
   const messageTopic = selectTopicFromMessage(global, message);
   return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
+}
+
+export function selectCanPostInMessageList<T extends GlobalState>(
+  global: T, chatId: string, threadId: ThreadId, messageListType: MessageListType,
+) {
+  if (chatId === TMP_CHAT_ID || messageListType === 'pinned'
+    || getIsSavedDialog(chatId, threadId, global.currentUserId)) return false;
+  if (selectIsChatBotNotStarted(global, chatId)) return false;
+  if (selectShouldBlockSendInMonoforum(global, chatId, threadId)) return false;
+
+  const userFullInfo = selectUserFullInfo(global, chatId);
+  if (userFullInfo?.isBlocked || userFullInfo?.isContactRequirePremium) return false;
+
+  const chat = selectChat(global, chatId);
+  if (selectIsCurrentUserFrozen(global) && (!chat || chatId !== global.botFreezeAppealId)) return false;
+  if (!chat) return true;
+
+  const threadInfo = selectThreadInfo(global, chatId, threadId);
+  const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+  const topic = selectTopic(global, chatId, threadId);
+  if (!getCanPostInChat(chat, topic, isMessageThread, selectChatFullInfo(global, chatId))) return false;
+  if (chat.isNotJoined && (chat.isJoinToSend || chat.isJoinRequest || (chat.isForum && !chat.isMonoforum))) {
+    return false;
+  }
+
+  return !(chat.isForum && threadId === MAIN_THREAD_ID && !selectDraft(global, chatId, threadId)?.replyInfo
+    && selectTopic(global, chatId, GENERAL_TOPIC_ID)?.isClosed);
+}
+
+export function selectShouldBlockSendInMonoforum<T extends GlobalState>(
+  global: T, chatId: string, threadId: ThreadId,
+) {
+  return Boolean(
+    selectChat(global, chatId)?.isMonoforum
+    && !selectDraft(global, chatId, threadId)?.replyInfo
+    && selectIsMonoforumAdmin(global, chatId)
+    && !selectEditingId(global, chatId, threadId),
+  );
 }
 
 export function selectCanForwardMessage<T extends GlobalState>(global: T, message: ApiMessage) {

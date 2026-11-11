@@ -12,14 +12,12 @@ import {
   ANONYMOUS_USER_ID,
   EDITABLE_INPUT_CSS_SELECTOR,
   EDITABLE_INPUT_ID,
-  GENERAL_TOPIC_ID,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   TMP_CHAT_ID,
 } from '../../config';
 import { forceMutation, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  getCanPostInChat,
   getForumComposerPlaceholder,
   getHasAdminRight,
   getIsSavedDialog,
@@ -34,6 +32,7 @@ import {
   selectActionMessageBg,
   selectBot,
   selectCanAnimateInterface, selectCanAnimateRightColumn,
+  selectCanPostInMessageList,
   selectChat,
   selectChatFullInfo,
   selectChatThemeSettings,
@@ -43,21 +42,20 @@ import {
   selectIsChatBotNotStarted,
   selectIsCurrentUserFrozen,
   selectIsInSelectMode,
-  selectIsMonoforumAdmin,
   selectIsRightColumnShown,
   selectIsUserBlocked,
   selectNotifyDefaults,
   selectNotifyException,
   selectPeerPaidMessagesStars,
   selectPinnedIds,
+  selectShouldBlockSendInMonoforum,
   selectTabState,
   selectTheme,
-  selectTopic,
   selectTopics,
   selectUserFullInfo,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
-import { selectDraft, selectEditingId, selectThreadInfo } from '../../global/selectors/threads';
+import { selectDraft, selectThreadInfo } from '../../global/selectors/threads';
 import {
   IS_ANDROID, IS_IOS, IS_SAFARI, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/browser/windowEnvironment';
@@ -285,9 +283,7 @@ function MiddleColumn({
   const renderingCanStartBot = usePrevDuringAnimation(canStartBot, closeAnimationDuration);
   const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, closeAnimationDuration);
   const renderingCanUnblock = usePrevDuringAnimation(canUnblock, closeAnimationDuration);
-  const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
-    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
-    && chatId !== TMP_CHAT_ID && !isContactRequirePremium;
+  const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration);
   const renderingIsScrollDownShown = usePrevDuringAnimation(
     isScrollDownShown, closeAnimationDuration,
   ) && chatId !== TMP_CHAT_ID;
@@ -793,12 +789,8 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
     const userFullInfo = chatId ? selectUserFullInfo(global, chatId) : undefined;
 
-    const editingId = selectEditingId(global, chatId, threadId);
-
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-    const topic = selectTopic(global, chatId, threadId);
-    const canPost = chat && getCanPostInChat(chat, topic, isMessageThread, chatFullInfo);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
@@ -812,16 +804,12 @@ export default memo(withGlobal<OwnProps>(
     const isUserBlocked = isPrivate ? selectIsUserBlocked(global, chatId) : false;
     const canRestartBot = Boolean(bot && isUserBlocked);
     const canStartBot = !canRestartBot && isBotNotStarted;
-    const canUnblock = isUserBlocked && !bot;
+    const canUnblock = Boolean(isUserBlocked && !bot);
     const shouldLoadFullChat = Boolean(
       chat && (isChatGroup(chat) || isChannel) && !chatFullInfo,
     );
     const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
-    const shouldBlockSendInForum = chat?.isForum
-      ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (selectTopic(global, chatId, GENERAL_TOPIC_ID)?.isClosed)
-      : false;
-    const isMonoforumAdmin = selectIsMonoforumAdmin(global, chatId);
-    const shouldBlockSendInMonoforum = Boolean(chat?.isMonoforum && !draftReplyInfo && isMonoforumAdmin && !editingId);
+    const shouldBlockSendInMonoforum = selectShouldBlockSendInMonoforum(global, chatId, threadId);
     const topics = selectTopics(global, chatId);
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
@@ -845,20 +833,13 @@ export default memo(withGlobal<OwnProps>(
     const freezeAppealChat = botFreezeAppealId
       ? selectChat(global, botFreezeAppealId) : undefined;
 
-    const canPostFooter = !isPinnedMessageList
-      && (!chat || canPost)
-      && !isBotNotStarted
-      && !(shouldJoinToSend && chat?.isNotJoined)
-      && !shouldBlockSendInForum
-      && !shouldBlockSendInMonoforum
-      && !isSavedDialog
-      && (!isAccountFrozen || freezeAppealChat?.id === chatId);
+    const canPost = selectCanPostInMessageList(global, chatId, threadId, messageListType);
     const isMuted = chat
       ? getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chatId))
       : undefined;
     const linkedMonoforumId = chat?.linkedMonoforumId;
     const areGiftsAvailable = chatFullInfo?.areStarGiftsAvailable;
-    const isChannelMuteBar = Boolean(isChannel && !chat?.isNotJoined && isMainThread && !canPostFooter);
+    const isChannelMuteBar = Boolean(isChannel && !chat?.isNotJoined && isMainThread && !canPost);
 
     return {
       ...state,
@@ -870,7 +851,7 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       arePeerSettingsLoaded: Boolean(userFullInfo?.settings),
       isComments: isMessageThread,
-      canPost: canPostFooter,
+      canPost,
       isPinnedMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
