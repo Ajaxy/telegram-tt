@@ -211,8 +211,8 @@ export async function respondTonConnectConnection({
 
       await submitTonConnectConnectResult({
         sessionId: session.id, traceId, isError: isDeclined || isTooLarge,
-        challengeAnswer: answerTonConnectChallenge(challenge, keys.secretKey),
-        body: encryptTonConnectMessage(event, session.dappClientId, keys.secretKey),
+        challengeAnswer: await answerTonConnectChallenge(challenge, keys.secretKey),
+        body: await encryptTonConnectMessage(event, session.dappClientId, keys.secretKey),
       });
 
       return { success: true, responseError: getConnectResponseError(isDeclined, isTooLarge) };
@@ -262,8 +262,8 @@ export async function prepareTonConnectOauthSession({
 
       rememberOauthSession(sessionId, new GramJs.InputTonConnectOauthSession({
         sessionId: BigInt(sessionId),
-        challengeAnswer: answerTonConnectChallenge(challenge, keys.secretKey),
-        body: encryptTonConnectMessage(event, clientId, keys.secretKey),
+        challengeAnswer: await answerTonConnectChallenge(challenge, keys.secretKey),
+        body: await encryptTonConnectMessage(event, clientId, keys.secretKey),
         proof: new GramJs.WalletOwnershipProof({ timestamp, signature: proofSignature! }),
       }));
 
@@ -346,7 +346,7 @@ export function disconnectTonConnectSession({ session, ...credentials }: TonConn
       const keys = await deriveTonConnectKeys(session, credentials);
       const id = await fetchTonConnectNextEventId(session.id);
 
-      await closeTonConnectSession(session.id, encryptTonConnectMessage(
+      await closeTonConnectSession(session.id, await encryptTonConnectMessage(
         { event: 'disconnect', id, payload: {} }, session.dappClientId, keys.secretKey,
       ));
     } catch {
@@ -368,7 +368,7 @@ export function decryptTonConnectRequest({
     if (request.expires <= getServerTime()) throw new TonConnectError('REQUEST_EXPIRED');
 
     const keys = await deriveTonConnectKeys(session, credentials);
-    const appRequest = parseTonConnectRequest(decryptTonConnectMessage(
+    const appRequest = parseTonConnectRequest(await decryptTonConnectMessage(
       deserializeBytes(request.body), session.dappClientId, keys.secretKey,
     ));
     const preview: ApiTonConnectRequestPreview = { request: appRequest, expires: request.expires };
@@ -458,7 +458,7 @@ async function processTonConnectRequest({
   if (request.expires <= getServerTime()) throw new TonConnectError('REQUEST_EXPIRED');
 
   const keys = await deriveTonConnectKeys(session, credentials);
-  const appRequest = parseTonConnectRequest(decryptTonConnectMessage(
+  const appRequest = parseTonConnectRequest(await decryptTonConnectMessage(
     deserializeBytes(request.body), session.dappClientId, keys.secretKey,
   ));
   let transaction: ApiTonConnectTransaction | undefined;
@@ -573,7 +573,7 @@ async function processTonConnectRequest({
 
   if (!isSessionClosed) {
     const { challenge } = await registerTonConnectKey(session.id, keys.clientId);
-    challengeAnswer = answerTonConnectChallenge(challenge, keys.secretKey);
+    challengeAnswer = await answerTonConnectChallenge(challenge, keys.secretKey);
   }
 
   if (request.expires <= getServerTime()) throw new TonConnectError('REQUEST_EXPIRED');
@@ -665,7 +665,7 @@ async function processTonConnectRequest({
   }
 
   const finalResponse = response!;
-  const body = serializeBytes(encryptTonConnectMessage(finalResponse, session.dappClientId, keys.secretKey));
+  const body = serializeBytes(await encryptTonConnectMessage(finalResponse, session.dappClientId, keys.secretKey));
 
   const responseError = 'error' in finalResponse ? finalResponse.error.code : undefined;
 

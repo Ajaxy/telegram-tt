@@ -109,6 +109,7 @@
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
     "@jitl/quickjs-ffi-types": "0.32.0",
+    "@noble/ciphers": "2.4.0",
     "@tauri-apps/api": "^2.12.2",
     "@tauri-apps/plugin-notification": "^2.5.1",
     "@tauri-apps/plugin-process": "^2.4.0",
@@ -147,8 +148,7 @@
     "parse5": "8.0.0",
     "qr-code-styling": "^1.9.2",
     "quickjs-emscripten-core": "0.32.0",
-    "temml": "^0.14.0",
-    "tweetnacl": "1.0.3"
+    "temml": "^0.14.0"
   },
   "browserslist": [
     "baseline widely available"

@@ -84,20 +84,33 @@ export async function getEd25519PublicKey(seed: Uint8Array): Promise<Uint8Array<
 export async function getX25519SharedSecret(
   seed: Uint8Array, theirPublicKey: Uint8Array,
 ): Promise<Uint8Array<ArrayBuffer>> {
-  const { scalar, scalarBytes } = await expandSeed(seed);
+  const { scalarBytes } = await expandSeed(seed);
   const y = bytesToNumberLe(theirPublicKey) & U_COORDINATE_MASK;
   const u = mod((1n + y) * modPow(mod(1n - y), P - 2n));
 
+  return getX25519(scalarBytes, numberToBytesLe(u));
+}
+
+export function getX25519PublicKey(scalarBytes: Uint8Array<ArrayBuffer>) {
+  return getX25519(scalarBytes, numberToBytesLe(X25519_BASE_POINT_U));
+}
+
+// RFC 7748 X25519; the scalar is clamped on the way, as WebCrypto does
+export async function getX25519(
+  scalarBytes: Uint8Array<ArrayBuffer>, theirU: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
   if (await checkNativeX25519()) {
     try {
-      return await deriveX25519Native(scalarBytes, numberToBytesLe(u));
-    } catch {
-      // WebCrypto refuses a small-order key, which is the sender's fault, not the platform's
-      throw new Error('Invalid public key');
+      return await deriveX25519Native(scalarBytes, theirU);
+    } catch (err) {
+      // The platform check passed, so this is most likely a small-order key, which is the sender's fault
+      throw new Error('Invalid public key', { cause: err });
     }
   }
 
-  const shared = multiplyMontgomery(scalar, u);
+  const shared = multiplyMontgomery(
+    bytesToNumberLe(clampX25519Scalar(scalarBytes.slice())), bytesToNumberLe(theirU) & U_COORDINATE_MASK,
+  );
 
   // A small-order key yields an all-zero secret, which native WebCrypto rejects; the fallback matches it
   if (!shared) {
@@ -105,6 +118,14 @@ export async function getX25519SharedSecret(
   }
 
   return numberToBytesLe(shared);
+}
+
+export function clampX25519Scalar<T extends Uint8Array>(scalarBytes: T): T {
+  scalarBytes[0] &= 248;
+  scalarBytes[31] &= 127;
+  scalarBytes[31] |= 64;
+
+  return scalarBytes;
 }
 
 async function deriveX25519Native(
@@ -135,10 +156,7 @@ async function checkNativeX25519(): Promise<boolean> {
 async function expandSeed(seed: Uint8Array) {
   const hash = await sha512(seed);
 
-  const scalarBytes = hash.slice(0, 32);
-  scalarBytes[0] &= 248;
-  scalarBytes[31] &= 127;
-  scalarBytes[31] |= 64;
+  const scalarBytes = clampX25519Scalar(hash.slice(0, 32));
 
   return {
     scalar: bytesToNumberLe(scalarBytes),
