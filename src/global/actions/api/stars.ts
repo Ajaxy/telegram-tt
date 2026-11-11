@@ -47,6 +47,8 @@ import {
   selectTabState,
 } from '../../selectors';
 
+const loadingQrCodeGiftsKeys = new Set<string>();
+
 addActionHandler('loadStarStatus', async (global): Promise<void> => {
   const currentStarsStatus = global.stars;
   const needsTopupOptions = !currentStarsStatus?.topupOptions;
@@ -335,6 +337,57 @@ addActionHandler('resetResaleGifts', (global, actions, payload): ActionReturnTyp
       gifts: [],
     },
   }, tabId);
+});
+
+addActionHandler('loadQrCodeUniqueGifts', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const modal = selectTabState(global, tabId).qrCodeModal;
+  if (!modal || (modal.uniqueGifts && !modal.uniqueGiftsNextOffset)) return;
+
+  const loadingKey = `${tabId}_${modal.peerId}`;
+  const peer = selectPeer(global, modal.peerId);
+  if (!peer || loadingQrCodeGiftsKeys.has(loadingKey)) return;
+
+  loadingQrCodeGiftsKeys.add(loadingKey);
+  const result = await callApi('fetchSavedStarGifts', {
+    peer,
+    offset: modal.uniqueGiftsNextOffset,
+    filter: {
+      sortType: 'byDate',
+      shouldIncludeUnique: true,
+      shouldIncludeUnlimited: false,
+      shouldIncludeUpgradable: false,
+      shouldIncludeLimited: false,
+      shouldIncludeDisplayed: true,
+      shouldIncludeHidden: true,
+    },
+  });
+  loadingQrCodeGiftsKeys.delete(loadingKey);
+  if (!result) return;
+
+  global = getGlobal();
+  const currentModal = selectTabState(global, tabId).qrCodeModal;
+  if (currentModal?.peerId !== modal.peerId) return;
+  // The modal was reopened while a later page was loading
+  if (currentModal.uniqueGiftsNextOffset !== modal.uniqueGiftsNextOffset) {
+    actions.loadQrCodeUniqueGifts({ tabId });
+    return;
+  }
+
+  // A gift without an input can't be set as a theme
+  const gifts = result.gifts.filter(({ gift, inputGift }) => (
+    gift.type === 'starGiftUnique' && !gift.isBurned && Boolean(inputGift)
+  ));
+
+  global = updateTabState(global, {
+    qrCodeModal: {
+      ...currentModal,
+      uniqueGifts: (currentModal.uniqueGifts || []).concat(gifts),
+      uniqueGiftsNextOffset: result.nextOffset,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise<void> => {

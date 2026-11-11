@@ -487,6 +487,8 @@
     "communities.toggleCommunityCollapsedInDialogs",
     "messages.requestChatJoinWebView",
     "messages.sendBotRequestedPeer",
+    "messages.setShareTheme",
+    "messages.getShareThemeBackdrops",
     "ephemeral.sendMessage",
     "ephemeral.deleteMessage",
     "ephemeral.reportMessage",

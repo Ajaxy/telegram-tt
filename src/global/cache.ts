@@ -586,6 +586,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'peerColors',
       'savedReactionTags',
       'timezones',
+      'shareThemeBackdrops',
       'availableEffectById',
       'walletCurrency',
       'currencyRates',

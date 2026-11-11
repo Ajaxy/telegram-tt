@@ -1,4 +1,4 @@
-import type { ElementRef, FC } from '../../../lib/teact/teact';
+import type { ElementRef } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -19,6 +19,7 @@ import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDepre
 
 import AnimatedIconWithPreview from '../AnimatedIconWithPreview';
 import CustomEmoji from '../CustomEmoji';
+import SelectionOrderBadge from '../SelectionOrderBadge';
 
 import styles from './ReactionEmoji.module.scss';
 
@@ -27,6 +28,7 @@ type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
   className?: string;
   isSelected?: boolean;
+  selectionOrder?: number;
   loadAndPlay?: boolean;
   observeIntersection?: ObserveFn;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
@@ -36,10 +38,11 @@ type OwnProps = {
   onContextMenu?: (reaction: ApiReactionWithPaid) => void;
 };
 
-const ReactionEmoji: FC<OwnProps> = ({
+const ReactionEmoji = ({
   reaction,
   availableReactions,
   isSelected,
+  selectionOrder,
   loadAndPlay,
   observeIntersection,
   sharedCanvasRef,
@@ -47,7 +50,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   forcePlayback,
   onClick,
   onContextMenu,
-}) => {
+}: OwnProps) => {
   const ref = useRef<HTMLDivElement>();
   const isCustom = reaction.type === 'custom';
   const availableReaction = useMemo(() => (
@@ -126,6 +129,7 @@ const ReactionEmoji: FC<OwnProps> = ({
           forceAlways={forcePlayback}
         />
       )}
+      {selectionOrder !== undefined && <SelectionOrderBadge order={selectionOrder} />}
     </div>
   );
 };

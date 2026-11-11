@@ -1,0 +1,14 @@
+.root {
+  overflow: hidden;
+}
+
+.slides,
+.slide,
+.ring {
+  position: absolute;
+  inset: 0;
+}
+
+.ring {
+  pointer-events: none;
+}

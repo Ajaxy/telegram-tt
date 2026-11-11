@@ -978,6 +978,14 @@ export interface LangPair {
   'QrCodeTitle': undefined;
   'QrCodeCopy': undefined;
   'QrCodeCopied': undefined;
+  'QrCodeColors': undefined;
+  'QrCodeDefaultColor': undefined;
+  'QrCodeEmoji': undefined;
+  'QrCodeGifts': undefined;
+  'QrCodeGiftsEmptyTitle': undefined;
+  'QrCodeGiftsEmptyAbout': undefined;
+  'QrCodeGiftsEmptyAboutChat': undefined;
+  'QrCodeGiftsBrowse': undefined;
   'NoOneJoined': undefined;
   'NoOneJoinedYet': undefined;
   'CopyLink': undefined;

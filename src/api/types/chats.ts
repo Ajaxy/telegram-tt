@@ -9,6 +9,7 @@ import type {
   ApiFakeType,
   ApiProfileTab,
   ApiSendAsPeerId,
+  ApiShareTheme,
   ApiTypePeerColor,
 } from './peers';
 import type { ApiInputRichMessage } from './richMessage';
@@ -191,6 +192,7 @@ export interface ApiChatFullInfo {
   botVerification?: ApiBotVerification;
   mainTab?: ApiProfileTab;
   guardBotId?: string;
+  shareTheme?: ApiShareTheme;
 
   // Community
   linkedPeers?: ApiCommunityLinkedPeer[];

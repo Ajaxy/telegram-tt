@@ -911,6 +911,21 @@ addActionHandler('loadTimezones', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadShareThemeBackdrops', async (global): Promise<void> => {
+  const result = await callApi('fetchShareThemeBackdrops', global.shareThemeBackdrops?.hash);
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    shareThemeBackdrops: {
+      list: result.backdrops,
+      hash: result.hash,
+    },
+  };
+  setGlobal(global);
+});
+
 addActionHandler('loadGlobalPrivacySettings', async (global): Promise<void> => {
   const globalSettings = await callApi('fetchGlobalPrivacySettings');
   if (!globalSettings) {

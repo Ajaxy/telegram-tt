@@ -38,6 +38,7 @@ import type {
   ApiSavedReactionTag,
   ApiSavedStarGift,
   ApiSession,
+  ApiShareThemeBackdrop,
   ApiSponsoredMessage,
   ApiStarGiftAuctionState,
   ApiStarGiftCollection,
@@ -105,6 +106,10 @@ export type GlobalState = {
   peerColors?: ApiPeerColors;
   timezones?: {
     byId: Record<string, ApiTimezone>;
+    hash: number;
+  };
+  shareThemeBackdrops?: {
+    list: ApiShareThemeBackdrop[];
     hash: number;
   };
   aiComposeTones?: {

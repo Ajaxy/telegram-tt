@@ -55,6 +55,7 @@ import {
   getPeerKey,
 } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiShareTheme } from '../apiBuilders/gifts';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiWallpaper } from '../apiBuilders/misc';
 import {
@@ -779,6 +780,7 @@ async function getFullChannelInfo(
     ttlPeriod,
     themeEmoticon,
     wallpaper,
+    shareTheme,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -883,6 +885,7 @@ async function getFullChannelInfo(
       arePaidMessagesAvailable: paidMessagesAvailable,
       mainTab: mainTab && buildApiProfileTab(mainTab),
       guardBotId: guardBotId ? buildApiPeerId(guardBotId, 'user') : undefined,
+      shareTheme: shareTheme && buildApiShareTheme(shareTheme),
     },
     chats,
     userStatusesById: statusesById,

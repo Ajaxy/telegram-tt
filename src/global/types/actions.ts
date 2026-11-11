@@ -54,6 +54,8 @@ import type {
   ApiSavedStarGift,
   ApiSendMessageAction,
   ApiSessionData,
+  ApiShareThemeEmojiBackdrop,
+  ApiShareThemeGift,
   ApiStarGift,
   ApiStarGiftAttributeOriginalDetails,
   ApiStarGiftRegular,
@@ -1258,6 +1260,10 @@ export interface ActionPayloads {
   setMainProfileTab: {
     chatId: string;
     tab: ApiProfileTab;
+  };
+  setPeerShareTheme: {
+    peerId: string;
+    theme?: ApiShareThemeEmojiBackdrop | ApiShareThemeGift & { inputGift: ApiInputSavedStarGift };
   };
 
   updateChat: {
@@ -2906,6 +2912,7 @@ export interface ActionPayloads {
     peerId: string;
   } & WithTabId;
   closeQrCodeModal: WithTabId | undefined;
+  loadQrCodeUniqueGifts: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {
@@ -3001,6 +3008,7 @@ export interface ActionPayloads {
   } & WithTabId;
   loadPeerColors: undefined;
   loadTimezones: undefined;
+  loadShareThemeBackdrops: undefined;
   loadAiComposeTones: undefined;
   openLeftColumnContent: {
     contentKey?: LeftColumnContent;

@@ -10,9 +10,11 @@ import type {
   ApiLanguage,
   ApiNotifyPeerType,
   ApiPasskeyRegistrationOption,
+  ApiPeer,
   ApiPeerNotifySettings,
   ApiPhoto,
   ApiPrivacyKey,
+  ApiRequestInputShareTheme,
   ApiUser,
 } from '../../types';
 
@@ -27,7 +29,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { BLOCKED_LIST_LIMIT } from '../../../limits';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
-import { buildApiDisallowedGiftsSettings } from '../apiBuilders/gifts';
+import { buildApiDisallowedGiftsSettings, buildApiShareThemeBackdrop } from '../apiBuilders/gifts';
 import {
   buildApiChatTheme,
   buildApiCountryList,
@@ -54,6 +56,7 @@ import {
   buildInputPhoto,
   buildInputPrivacyKey,
   buildInputPrivacyRules,
+  buildInputShareTheme,
   buildInputUser,
   DEFAULT_PRIMITIVES,
 } from '../gramjsBuilders';
@@ -655,6 +658,25 @@ export async function fetchPeerProfileColors(hash?: number) {
     colors,
     hash: newHash,
   };
+}
+
+export async function fetchShareThemeBackdrops(hash?: number) {
+  const result = await invokeRequest(new GramJs.messages.GetShareThemeBackdrops({
+    hash: hash ?? DEFAULT_PRIMITIVES.INT,
+  }));
+  if (!result || result instanceof GramJs.ShareThemeBackdropsNotModified) return undefined;
+
+  return {
+    backdrops: result.backdrops.map(buildApiShareThemeBackdrop),
+    hash: result.hash,
+  };
+}
+
+export function setShareTheme({ peer, theme }: { peer: ApiPeer; theme?: ApiRequestInputShareTheme }) {
+  return invokeRequest(new GramJs.messages.SetShareTheme({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    theme: buildInputShareTheme(theme),
+  }));
 }
 
 export async function fetchTimezones(hash?: number) {

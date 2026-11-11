@@ -1022,6 +1022,8 @@ export type TabState = {
 
   qrCodeModal?: {
     peerId: string;
+    uniqueGifts?: ApiSavedStarGift[];
+    uniqueGiftsNextOffset?: string;
   };
 
   loadingWalletTransactionId?: string;

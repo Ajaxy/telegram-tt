@@ -32,6 +32,7 @@ import type {
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiRequestInputSavedStarGift,
+  ApiRequestInputShareTheme,
   ApiSendMessageAction,
   ApiSticker,
   ApiStory,
@@ -1158,6 +1159,22 @@ export function buildInputSavedStarGift(inputGift: ApiRequestInputSavedStarGift)
     peer: buildInputPeer(inputGift.chat.id, inputGift.chat.accessHash),
     savedId: BigInt(inputGift.savedId),
   });
+}
+
+export function buildInputShareTheme(theme?: ApiRequestInputShareTheme) {
+  switch (theme?.type) {
+    case 'emojiBackdrop':
+      return new GramJs.ShareThemeEmojiBackdrop({
+        backdropId: theme.backdropId,
+        emojis: theme.emojis.length ? theme.emojis.map(buildInputReaction) : undefined,
+      });
+    case 'gift':
+      return new GramJs.InputShareThemeGift({
+        stargift: buildInputSavedStarGift(theme.inputGift),
+      });
+    default:
+      return new GramJs.ShareThemeDefault();
+  }
 }
 
 export function buildInputProfileTab(profileTab: ApiProfileTab) {

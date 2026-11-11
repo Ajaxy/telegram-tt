@@ -1201,6 +1201,14 @@
 "QrCodeTitle" = "QR Code";
 "QrCodeCopy" = "Copy QR";
 "QrCodeCopied" = "QR code copied to clipboard.";
+"QrCodeColors" = "Colors";
+"QrCodeDefaultColor" = "Default";
+"QrCodeEmoji" = "Emoji";
+"QrCodeGifts" = "Gifts";
+"QrCodeGiftsEmptyTitle" = "No gifts yet";
+"QrCodeGiftsEmptyAbout" = "Use any collectible gift you own to style your QR code.";
+"QrCodeGiftsEmptyAboutChat" = "There are no collectible gifts here yet.";
+"QrCodeGiftsBrowse" = "Browse Gifts";
 "PeopleJoined_one" = "{count} person joined";
 "PeopleJoined_other" = "{count} people joined";
 "NoOneJoined" = "No one joined";

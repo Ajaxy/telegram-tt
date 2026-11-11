@@ -9,6 +9,7 @@ import type {
   ApiFakeType,
   ApiPeerSettings,
   ApiProfileTab,
+  ApiShareTheme,
   ApiTypePeerColor,
 } from './peers';
 import type { ApiSavedStarGift, ApiStarsRating } from './stars';
@@ -100,6 +101,7 @@ export interface ApiUserFullInfo {
   isUnofficialSecurityRisk?: boolean;
   botManagerId?: string;
   walletCard?: ApiWalletCard;
+  shareTheme?: ApiShareTheme;
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

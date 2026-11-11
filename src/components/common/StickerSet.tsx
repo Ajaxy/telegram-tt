@@ -56,6 +56,7 @@ type OwnProps = {
   isCurrentUserPremium?: boolean;
   shouldHideHeader?: boolean;
   selectedReactionIds?: string[];
+  withSelectionOrder?: boolean;
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
   isChatEmojiSet?: boolean;
@@ -102,6 +103,7 @@ const StickerSet = ({
   shouldHideHeader,
   withDefaultTopicIcon,
   selectedReactionIds,
+  withSelectionOrder,
   withDefaultStatusIcon,
   isChatEmojiSet,
   isChatStickerSet,
@@ -351,13 +353,14 @@ const StickerSet = ({
         )}
         {shouldRender && stickerSet.reactions?.map((reaction) => {
           const reactionId = getReactionKey(reaction);
-          const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
+          const selectionIndex = selectedReactionIds?.indexOf(reactionId) ?? -1;
 
           return (
             <ReactionEmoji
               key={`${stickerSet.id}_${reactionId}`}
               reaction={reaction}
-              isSelected={isSelected}
+              isSelected={selectionIndex !== -1}
+              selectionOrder={withSelectionOrder && selectionIndex !== -1 ? selectionIndex + 1 : undefined}
               loadAndPlay={loadAndPlay}
               availableReactions={availableReactions}
               observeIntersection={observeIntersectionForPlayingItems}
@@ -376,8 +379,10 @@ const StickerSet = ({
             const canvasRef = (canCut && i >= itemsBeforeCutout) || isHqEmoji
               ? sharedCanvasHqRef
               : sharedCanvasRef;
-            const reactionId = sticker.isCustomEmoji ? sticker.id : sticker.emoji;
-            const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
+            const reactionId = sticker.isCustomEmoji
+              ? getReactionKey({ type: 'custom', documentId: sticker.id })
+              : sticker.emoji && getReactionKey({ type: 'emoji', emoticon: sticker.emoji });
+            const selectionIndex = reactionId ? selectedReactionIds?.indexOf(reactionId) ?? -1 : -1;
 
             const withSparkles = stickerSet.id === COLLECTIBLE_STATUS_SET_ID
               || collectibleEmojiIdsSet?.has(sticker.id);
@@ -401,7 +406,8 @@ const StickerSet = ({
                 onClick={onStickerSelect}
                 clickArg={sticker}
                 noIcons={isEmoji && !isRecent}
-                isSelected={isSelected}
+                isSelected={selectionIndex !== -1}
+                selectionOrder={withSelectionOrder && selectionIndex !== -1 ? selectionIndex + 1 : undefined}
                 onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
                 onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
                 onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}

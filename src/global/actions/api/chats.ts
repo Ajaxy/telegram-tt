@@ -57,6 +57,7 @@ import {
   isChatSuperGroup,
   isUserBot,
 } from '../../helpers';
+import { getRequestInputSavedStarGift } from '../../helpers/payments';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -3638,6 +3639,33 @@ addActionHandler('setMainProfileTab', async (global, actions, payload): Promise<
   if (!result) {
     global = getGlobal();
     global = updatePeerFullInfo(global, chatId, { mainTab: oldMainTab });
+    setGlobal(global);
+  }
+});
+
+addActionHandler('setPeerShareTheme', async (global, actions, payload): Promise<void> => {
+  const { peerId, theme } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
+
+  const inputGift = theme?.type === 'gift' ? getRequestInputSavedStarGift(global, theme.inputGift) : undefined;
+  if (theme?.type === 'gift' && !inputGift) return;
+
+  const oldShareTheme = selectPeerFullInfo(global, peerId)?.shareTheme;
+  const shareTheme = theme?.type === 'gift' ? { type: 'gift' as const, gift: theme.gift } : theme;
+
+  global = updatePeerFullInfo(global, peerId, { shareTheme });
+  setGlobal(global);
+
+  const result = await callApi('setShareTheme', {
+    peer,
+    theme: inputGift ? { type: 'gift', inputGift } : shareTheme?.type === 'emojiBackdrop' ? shareTheme : undefined,
+  });
+
+  global = getGlobal();
+  // Skip the rollback if a newer save has replaced this theme
+  if (!result && selectPeerFullInfo(global, peerId)?.shareTheme === shareTheme) {
+    global = updatePeerFullInfo(global, peerId, { shareTheme: oldShareTheme });
     setGlobal(global);
   }
 });
