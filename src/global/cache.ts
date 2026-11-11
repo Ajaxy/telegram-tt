@@ -114,11 +114,26 @@ export function loadCachedGlobal() {
 }
 
 export function loadCachedGlobalForSlot(slot: number | undefined) {
-  return MAIN_IDB_STORE.get<GlobalState>(getGlobalStateCacheKey(slot));
+  return readCachedState<GlobalState>(getGlobalStateCacheKey(slot));
 }
 
 export function loadCachedSharedState() {
-  return MAIN_IDB_STORE.get<SharedState>(SHARED_STATE_CACHE_KEY);
+  return readCachedState<SharedState>(SHARED_STATE_CACHE_KEY);
+}
+
+async function readCachedState<T>(key: string): Promise<T | undefined> {
+  try {
+    return await MAIN_IDB_STORE.get<T>(key);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'NotReadableError') {
+      // A missing backing file invalidates only this disposable cache record.
+      // Cleanup failure must not prevent startup from using fresh state.
+      await MAIN_IDB_STORE.del(key).catch(() => undefined);
+      return undefined;
+    }
+
+    throw err;
+  }
 }
 
 export function removeGlobalFromCache() {
