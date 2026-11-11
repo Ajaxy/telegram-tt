@@ -631,6 +631,7 @@ const Main = ({
       className={className}
       bgClassName={bgClassName}
       shouldExtendChatWallpaper={!isMobile}
+      withSnapshot
       browserColorMode={!IS_IOS || !isMobile ? undefined
         : isMiddleColumnOpen && !isLeftColumnOpen && !isRightColumnOpen ? 'wallpaper' : 'surface'}
     >

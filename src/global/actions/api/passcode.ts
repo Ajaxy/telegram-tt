@@ -76,7 +76,7 @@ import {
   encryptWallpaperBlobs,
   restoreWallpaperBlobsFromPasscode,
   syncLockScreenWallpaperBlobs,
-} from '../../../util/wallpaperStorage';
+} from '../../../util/wallpaper/storage';
 import { interruptWebLogin } from '../../../util/webLogin';
 import { handoffWebLogin } from '../../../util/webLoginHandoff';
 import { closeApi } from '../../../api/gramjs';

@@ -42,6 +42,8 @@
 
   <!-- Navigation opt-in must apply before parser-blocking scripts allow the first render -->
   <link rel="stylesheet" href="./view-transitions.css">
+  <!-- The last main wallpaper, served by the service worker, so the first paint already has it -->
+  <link rel="stylesheet" href="./wallpaper-snapshot.css">
   <script vite-ignore src="./redirect.js"></script>
   <style>
     @layer reset, variables, ui, components;

@@ -51,7 +51,7 @@ import { getServerTime } from '../util/serverTime';
 import { hasStoredSession } from '../util/sessions';
 import { getSystemTheme } from '../util/systemTheme';
 import { getDefaultPatternColor, getThemeWallpaper } from '../util/wallpaper';
-import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaperStorage';
+import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaper/storage';
 import { buildPageAudioById } from './helpers/buildPageAudioById';
 import { selectSharedSettings } from './selectors/sharedState';
 import { selectThreadInfo } from './selectors/threads';

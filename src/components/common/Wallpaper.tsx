@@ -9,6 +9,7 @@ import {
   selectCanAnimateInterface, selectChatWallpaper, selectChatWallpaperSettings,
   selectPeerWallpaper, selectPerformanceSettingsValue, selectTheme, selectThemeValues,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { updateBrowserThemeColors } from '../../util/switchTheme';
@@ -32,6 +33,7 @@ type OwnProps = {
   backgroundMode?: 'default' | 'lockScreen';
   browserColorMode?: 'wallpaper' | 'surface';
   shouldExtendChatWallpaper?: boolean;
+  withSnapshot?: boolean;
   chatId?: string;
   onClick?: NoneToVoidFunction;
 };
@@ -44,6 +46,9 @@ type StateProps = {
   serverWallpaper?: ApiWallpaper;
   fallbackThemeSettings?: IThemeSettings;
   hasChatWallpaper: boolean;
+  isGlobalWallpaper: boolean;
+  globalWallpaper?: IThemeSettings;
+  shouldUseSystemTheme?: boolean;
 };
 
 const EMPTY_THEME_SETTINGS: IThemeSettings = {};
@@ -61,6 +66,7 @@ const Wallpaper = ({
   backgroundMode,
   browserColorMode,
   shouldExtendChatWallpaper,
+  withSnapshot,
   chatId,
   onClick,
   theme,
@@ -70,6 +76,9 @@ const Wallpaper = ({
   serverWallpaper,
   fallbackThemeSettings,
   hasChatWallpaper,
+  isGlobalWallpaper,
+  globalWallpaper,
+  shouldUseSystemTheme,
 }: OwnProps & StateProps) => {
   // With the send animation disabled the gradient never moves, so the 2D render is identical
   // and no WebGL context is spent
@@ -84,6 +93,10 @@ const Wallpaper = ({
     isStatic: isStaticGradient,
     canAnimatePatternSwap: !isStatic && canAnimateInterface,
     source: backgroundMode === 'lockScreen' ? 'lockScreen' : undefined,
+    withSnapshot,
+    isGlobalWallpaper,
+    globalWallpaper,
+    shouldUseSystemTheme,
   });
   const shouldExtendWallpaper = shouldExtendChatWallpaper && hasChatWallpaper && background.isImage;
 
@@ -123,6 +136,9 @@ const Wallpaper = ({
             />
           )}
           <div ref={background.patternLayerRef} className={backgroundStyles.patternLayer} />
+          {background.isSnapshotShown && (
+            <div className={buildClassName('wallpaper-snapshot', backgroundStyles.snapshot)} aria-hidden />
+          )}
         </div>
         <div className={backgroundStyles.leftExtension} aria-hidden />
         <div className={backgroundStyles.rightExtension} aria-hidden />
@@ -149,6 +165,10 @@ export default withGlobal<OwnProps>(
       serverWallpaper: backgroundMode ? undefined : selectChatWallpaper(global, chatId),
       fallbackThemeSettings: selectThemeValues(global, theme),
       hasChatWallpaper: Boolean(selectPeerWallpaper(global, chatId)),
+      // Chat wallpapers and chat themes resolve to other settings objects
+      isGlobalWallpaper: themeSettings === globalSettings,
+      globalWallpaper: globalSettings,
+      shouldUseSystemTheme: selectSharedSettings(global).shouldUseSystemTheme,
     };
   },
 )(Wallpaper);

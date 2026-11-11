@@ -19,7 +19,7 @@ import {
   getDefaultPatternColor, getWallpaperColors, getWallpaperKey,
   isRenderableWallpaper, isWallpaperSelected, RESET_WALLPAPER_SETTINGS,
 } from '../../../util/wallpaper';
-import { removeWallpaperBlobIfUnused } from '../../../util/wallpaperStorage';
+import { removeWallpaperBlobIfUnused } from '../../../util/wallpaper/storage';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';

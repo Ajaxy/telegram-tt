@@ -149,6 +149,16 @@ $wallpaper-transition: 0.3s cubic-bezier(0.37, 0, 0.63, 1);
     animation: pattern-fade-out $wallpaper-transition forwards;
   }
 
+  // The layers come from the cached `wallpaper-snapshot.css`, which is empty until one is saved
+  .snapshot {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
   .wallpaperSnapshot {
     position: absolute;
     z-index: 2;

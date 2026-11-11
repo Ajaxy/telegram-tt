@@ -1,4 +1,4 @@
-import { easeThemeSwitch, THEME_SWITCH_DURATION_MS } from './switchTheme';
+import { easeThemeSwitch, THEME_SWITCH_DURATION_MS } from '../switchTheme';
 
 // Matches Telegram macOS's `SoftwareGradientBackground` and `BackgroundGradientView`
 

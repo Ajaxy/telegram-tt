@@ -10,7 +10,7 @@ import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { buildThemeSettingsFromWallpaper, buildWallpaperRenderModel } from '../../../util/wallpaper';
-import { cacheWallpaperMedia } from '../../../util/wallpaperStorage';
+import { cacheWallpaperMedia } from '../../../util/wallpaper/storage';
 
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useGradientBackground from '../../../hooks/useGradientBackground';

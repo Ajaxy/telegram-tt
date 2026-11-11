@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ThemeKey } from '../../../types';
-import type { GradientRenderer } from '../../../util/gradientBackground';
+import type { GradientRenderer } from '../../../util/wallpaper/gradient';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
 import { mixColors } from '../../../lib/color';
@@ -13,9 +13,9 @@ import {
 import { selectCanAnimateInterface } from '../../../global/selectors';
 import { animate } from '../../../util/animation';
 import { buildColorFromHex, buildHexFromColor } from '../../../util/colors';
-import { createGradientRenderer, renderStaticGradient } from '../../../util/gradientBackground';
 import { easeThemeSwitch, THEME_SWITCH_DURATION_MS } from '../../../util/switchTheme';
 import getOffsetToContainer from '../../../util/visibility/getOffsetToContainer';
+import { createGradientRenderer, renderStaticGradient } from '../../../util/wallpaper/gradient';
 import themeColors from '../../../styles/themes.json';
 import { requestAfterMessageListReflow } from '../helpers/messageListReflow';
 

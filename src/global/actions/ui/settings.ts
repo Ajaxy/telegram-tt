@@ -12,7 +12,7 @@ import { loadAndChangeLanguage, setTimeFormat } from '../../../util/localization
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme, { hasActiveThemeTransition } from '../../../util/switchTheme';
 import { buildThemePalette, isThemePaletteTransitionSafe, updatePeerColors } from '../../../util/theme';
-import { removeWallpaperBlobIfUnused, updateSelectedWallpaperBlobs } from '../../../util/wallpaperStorage';
+import { removeWallpaperBlobIfUnused, updateSelectedWallpaperBlobs } from '../../../util/wallpaper/storage';
 import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import {

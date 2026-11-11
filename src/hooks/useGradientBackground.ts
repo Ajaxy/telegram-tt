@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef } from '../lib/teact/teact';
 
-import type { GradientRenderer } from '../util/gradientBackground';
+import type { GradientRenderer } from '../util/wallpaper/gradient';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { timingFunctions } from '../util/animation';
-import { createGradientRenderer, renderStaticGradient } from '../util/gradientBackground';
+import { createGradientRenderer, renderStaticGradient } from '../util/wallpaper/gradient';
 
 // The gradient is smooth, so a small canvas stretched by CSS keeps it cheap
 const CANVAS_SIZE = 100;

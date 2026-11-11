@@ -63,6 +63,9 @@ export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const ASSET_CACHE_NAME = 'tt-assets';
+// The stylesheet `index.html` links: the service worker serves it from this cache before any script runs
+export const WALLPAPER_SNAPSHOT_CACHE_NAME = 'tt-wallpaper-snapshot';
+export const WALLPAPER_SNAPSHOT_PATH = 'wallpaper-snapshot.css';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_PREFIX = 'tt-global';
 export const ESTABLISH_BROADCAST_CHANNEL_PREFIX = 'tt-establish';

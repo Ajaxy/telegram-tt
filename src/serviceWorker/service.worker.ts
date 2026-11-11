@@ -1,4 +1,4 @@
-import { DEBUG } from '../config';
+import { DEBUG, WALLPAPER_SNAPSHOT_CACHE_NAME, WALLPAPER_SNAPSHOT_PATH } from '../config';
 import { pause } from '../util/schedulers';
 import { clearAssetCache, respondWithCache, respondWithCacheNetworkFirst } from './assetCache';
 import { respondForDownload } from './download';
@@ -60,6 +60,11 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   const { pathname, protocol } = new URL(url);
   const { pathname: scopePathname } = new URL(scope);
 
+  if (pathname.endsWith(`/${WALLPAPER_SNAPSHOT_PATH}`)) {
+    e.respondWith(respondWithWallpaperSnapshot(e.request));
+    return true;
+  }
+
   if (pathname.includes('/progressive/')) {
     e.respondWith(respondForProgressive(e));
     return true;
@@ -88,6 +93,12 @@ self.addEventListener('fetch', (e: FetchEvent) => {
 
   return false;
 });
+
+// The page saves it, and the empty file from `public` stands in until then
+async function respondWithWallpaperSnapshot(request: Request) {
+  const cached = await self.caches.match(request, { cacheName: WALLPAPER_SNAPSHOT_CACHE_NAME });
+  return cached || fetch(request);
+}
 
 self.addEventListener('push', handlePush);
 self.addEventListener('pushsubscriptionchange', handlePushSubscriptionChange);

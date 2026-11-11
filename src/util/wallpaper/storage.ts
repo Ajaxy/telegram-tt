@@ -1,18 +1,17 @@
 // Wallpaper blobs live in account-independent IDB storage. Cache API entries are legacy fallbacks
 // that can be evicted by the browser and are moved to IDB when found.
-import type { ApiWallpaper } from '../api/types';
-import type { IThemeSettings, ThemeKey } from '../types';
-import { ApiMediaFormat } from '../api/types';
+import type { ApiWallpaper } from '../../api/types';
+import type { IThemeSettings, ThemeKey } from '../../types';
+import { ApiMediaFormat } from '../../api/types';
 
-import { CUSTOM_BG_CACHE_NAME } from '../config';
-import { MAIN_IDB_STORE } from './browser/idb';
-import { IS_IOS } from './browser/windowEnvironment';
-import { isSessionStoreLocked } from './passcode/sessionStore';
-import * as cacheApi from './cacheApi';
-import { sampleImageEdgeColors } from './colors';
-import { fetchBlob, preloadImage } from './files';
-import * as mediaLoader from './mediaLoader';
-import { getAccountSlots } from './multiaccount';
+import { CUSTOM_BG_CACHE_NAME, WALLPAPER_SNAPSHOT_CACHE_NAME } from '../../config';
+import { MAIN_IDB_STORE } from '../browser/idb';
+import { IS_IOS } from '../browser/windowEnvironment';
+import * as cacheApi from '../cacheApi';
+import { sampleImageEdgeColors } from '../colors';
+import { fetchBlob, preloadImage } from '../files';
+import * as mediaLoader from '../mediaLoader';
+import { getAccountSlots } from '../multiaccount';
 import {
   clearWallpaperVaultBlobs,
   loadPasscodeMeta,
@@ -21,8 +20,9 @@ import {
   removeWallpaperVaultBlob,
   requestPasscodeStateLock,
   writeWallpaperVaultBlob,
-} from './passcode';
-import { decodeWallpaperPatternBlob } from './wallpaper';
+} from '../passcode';
+import { isSessionStoreLocked } from '../passcode/sessionStore';
+import { decodeWallpaperPatternBlob } from './index';
 
 type WallpaperUrlEntry = {
   promise: Promise<string>;
@@ -162,6 +162,7 @@ export async function clearWallpaperBlobs() {
       clearLockScreenWallpaperBlobs(),
       clearWallpaperVaultBlobs(),
       cacheApi.clearShared(CUSTOM_BG_CACHE_NAME),
+      cacheApi.clearShared(WALLPAPER_SNAPSHOT_CACHE_NAME),
       cacheApi.clearAccountScopes(CUSTOM_BG_CACHE_NAME),
     ]);
   } catch (err) {

@@ -36,7 +36,7 @@ import {
   loadStoredSession,
   storeSession,
 } from '../../../util/sessions';
-import { clearWallpaperBlobs } from '../../../util/wallpaperStorage';
+import { clearWallpaperBlobs } from '../../../util/wallpaper/storage';
 import { interruptWebLogin, rejectWebLogin, resolveWebLogin } from '../../../util/webLogin';
 import { webLoginHandoffPromise } from '../../../util/webLoginHandoff';
 import { forceWebsync } from '../../../util/websync';

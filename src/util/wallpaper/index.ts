@@ -2,18 +2,20 @@ import { decompressSync } from 'fflate';
 
 import type {
   ApiBaseTheme, ApiThemeSettings, ApiWallpaper, ApiWallpaperSettings,
-} from '../api/types';
-import type { IThemeSettings, ThemeKey } from '../types';
+} from '../../api/types';
+import type { IThemeSettings, ThemeKey } from '../../types';
 
-import { DARK_THEME_BG_COLOR } from '../config';
-import { buildColorFromHex, buildDenseTint, getPatternColor } from './colors';
-import int2hex from './int2hex';
+import { DARK_THEME_BG_COLOR } from '../../config';
+import { buildColorFromHex, buildDenseTint, getPatternColor } from '../colors';
+import int2hex from '../int2hex';
 
 const DEFAULT_PATTERN_INTENSITY = 50;
 const DEFAULT_LIGHT_PATTERN_COLOR = '#4A8E3A8C';
 const DEFAULT_DARK_PATTERN_COLOR = '#48576166';
 // The user slider scales the wallpaper's own intensity: 100 keeps it as is, 0 hides the pattern
 const MAX_PATTERN_INTENSITY_FACTOR = 100;
+// Multicolor patterns are drawn as tall as the view, but not shorter than this
+export const MIN_PATTERN_VIEW_HEIGHT = 500;
 export const DEFAULT_PATTERN_INTENSITY_FACTOR = 100;
 const SVG_MIME = 'image/svg+xml';
 const XML_OPEN_BRACKET = 0x3C; // `<`

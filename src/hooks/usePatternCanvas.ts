@@ -4,10 +4,12 @@ import type { WallpaperRenderModel } from '../util/wallpaper';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { preloadImage } from '../util/files';
+import { MIN_PATTERN_VIEW_HEIGHT } from '../util/wallpaper';
 import useDevicePixelRatio from './window/useDevicePixelRatio';
 import useDebouncedCallback from './useDebouncedCallback';
 import useForceUpdate from './useForceUpdate';
 import { WALLPAPER_TRANSITION_MS } from './useGradientBackground';
+import useLastCallback from './useLastCallback';
 import useResizeObserver from './useResizeObserver';
 
 import backgroundStyles from '../styles/_patternBackground.module.scss';
@@ -32,7 +34,6 @@ type DrawOptions = {
   snapshotModel?: WallpaperRenderModel;
 };
 
-const MIN_VIEW_HEIGHT = 500;
 const RESIZE_DEBOUNCE_MS = 100;
 // Sub-pixel doodle lines have low edge coverage and break into dots. A second pass raises it without
 // changing fully covered pixels.
@@ -138,8 +139,17 @@ export default function usePatternCanvas(
     updateSize(entry.contentRect.width, entry.contentRect.height);
   });
 
+  // The tile as this layer draws it. Tiles are shared with previews of other sizes, so it is re-fetched by size.
+  const getDrawnTile = useLastCallback(() => (
+    pattern && size ? getPatternTile(pattern, getPatternTileSize(pattern, size.width, size.height, dpr, shouldCover))
+      : undefined
+  ));
+
   return {
     patternLayerRef: layerRef,
+    layerSize: size,
+    isPatternDrawn: !patternKey || hasPatternFailed || Boolean(pattern && size),
+    getDrawnTile,
     // Doodles are already cut out of the fill, or will be by the layout effect of this render
     isPatternFillReady: !hasPatternFailed
       && (Boolean(pattern && size) || (Boolean(fillColor) && drawnFillRef.current === fillColor)),
@@ -260,7 +270,7 @@ async function loadPatternImage(url: string) {
   }
 }
 
-// Matches the macOS layout. Multicolor patterns use a tile as tall as the view (at least `MIN_VIEW_HEIGHT`), repeated
+// Matches the macOS layout. Multicolor patterns use a tile as tall as the view (at least `MIN_PATTERN_VIEW_HEIGHT`), repeated
 // from the left edge when narrower than the view and centered otherwise. Single-color ones cover the view once.
 function drawPattern(
   canvas: HTMLCanvasElement,
@@ -282,11 +292,8 @@ function drawPattern(
     ctx.globalCompositeOperation = 'destination-out';
   }
 
-  const { naturalWidth, naturalHeight } = pattern.image;
-  const viewHeight = Math.max(MIN_VIEW_HEIGHT, height);
-  const scale = (shouldCover ? Math.max(width / naturalWidth, viewHeight / naturalHeight) : viewHeight / naturalHeight)
-    * dpr;
-  const tile = getPatternTile(pattern, Math.round(naturalWidth * scale), Math.round(naturalHeight * scale));
+  const viewHeight = Math.max(MIN_PATTERN_VIEW_HEIGHT, height);
+  const tile = getPatternTile(pattern, getPatternTileSize(pattern, width, height, dpr, shouldCover));
   const y = Math.round((viewHeight * dpr - tile.height) / 2);
   const startX = Math.round((canvas.width - tile.width) / 2);
 
@@ -300,7 +307,17 @@ function drawPattern(
   }
 }
 
-function getPatternTile(pattern: CachedPattern, width: number, height: number) {
+function getPatternTileSize(
+  pattern: CachedPattern, width: number, height: number, dpr: number, shouldCover?: boolean,
+): CanvasSize {
+  const { naturalWidth, naturalHeight } = pattern.image;
+  const viewHeight = Math.max(MIN_PATTERN_VIEW_HEIGHT, height);
+  const scale = (shouldCover ? Math.max(width / naturalWidth, viewHeight / naturalHeight) : viewHeight / naturalHeight)
+    * dpr;
+  return { width: Math.round(naturalWidth * scale), height: Math.round(naturalHeight * scale) };
+}
+
+function getPatternTile(pattern: CachedPattern, { width, height }: CanvasSize) {
   if (pattern.tile?.width === width && pattern.tile.height === height) return pattern.tile;
 
   const tile = document.createElement('canvas');

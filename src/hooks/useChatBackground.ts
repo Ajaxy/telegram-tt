@@ -1,18 +1,22 @@
-import { useRef } from '../lib/teact/teact';
+import { onFullyIdle } from '../lib/teact/heavyAnimation';
+import { useEffect, useRef } from '../lib/teact/teact';
 
 import type { ApiWallpaper } from '../api/types';
 import type { IThemeSettings, ThemeKey } from '../types';
-import type { WallpaperStorageSource } from '../util/wallpaperStorage';
+import type { WallpaperStorageSource } from '../util/wallpaper/storage';
 
 import { mixColors } from '../lib/color';
 import buildClassName from '../util/buildClassName';
 import buildStyle from '../util/buildStyle';
 import { buildColorFromHex, buildHexFromColor } from '../util/colors';
-import { buildGradientEdgeColors } from '../util/gradientBackground';
 import { buildWallpaperRenderModel, type WallpaperRenderModel } from '../util/wallpaper';
-import { getResolvedWallpaperEdgeColors, getResolvedWallpaperUrl } from '../util/wallpaperStorage';
+import { buildGradientEdgeColors } from '../util/wallpaper/gradient';
+import { clearWallpaperSnapshot, saveWallpaperSnapshot } from '../util/wallpaper/snapshot';
+import { getResolvedWallpaperEdgeColors, getResolvedWallpaperUrl } from '../util/wallpaper/storage';
 import useCustomBackground from './useCustomBackground';
-import useGradientBackground from './useGradientBackground';
+import useEffectWithPrevDeps from './useEffectWithPrevDeps';
+import useFlag from './useFlag';
+import useGradientBackground, { WALLPAPER_TRANSITION_MS } from './useGradientBackground';
 import usePatternCanvas, { getIsPatternSettled, usePatternLoader } from './usePatternCanvas';
 
 import backgroundStyles from '../styles/_patternBackground.module.scss';
@@ -29,7 +33,15 @@ type ChatBackgroundParams = {
   isStatic?: boolean;
   canAnimatePatternSwap?: boolean;
   source?: WallpaperStorageSource;
+  // Covers the layers with the snapshot saved by the previous page until they are drawn, and saves it for the next one
+  withSnapshot?: boolean;
+  // Only the global wallpaper is saved: a new page, tab or account usually opens without the chat
+  isGlobalWallpaper?: boolean;
+  globalWallpaper?: IThemeSettings;
+  shouldUseSystemTheme?: boolean;
 };
+
+const SNAPSHOT_SAVE_DELAY_MS = 1000;
 
 // Shared chat-background rendering: resolves the active wallpaper (custom image, color, gradient or
 // pattern — falling back to the built-in default) into the class names, CSS variables and gradient
@@ -43,6 +55,10 @@ export default function useChatBackground({
   isStatic,
   canAnimatePatternSwap,
   source,
+  withSnapshot,
+  isGlobalWallpaper,
+  globalWallpaper,
+  shouldUseSystemTheme,
 }: ChatBackgroundParams) {
   const selectedModel = buildWallpaperRenderModel(theme, wallpaper);
   const customBackgroundValue = useCustomBackground(
@@ -109,7 +125,7 @@ export default function useChatBackground({
   );
 
   const {
-    patternLayerRef, isPatternFillReady,
+    patternLayerRef, isPatternFillReady, isPatternDrawn, layerSize, getDrawnTile,
   } = usePatternCanvas(getPatternKey(model), {
     fillColor: model.isMaskedPattern ? model.baseColor : undefined,
     shouldCover: model.colors.length === 1,
@@ -119,6 +135,47 @@ export default function useChatBackground({
   // The gradient is marked ready as soon as it draws, but the layer covering all except the doodles
   // needs the pattern. Keep the gradient hidden until then, so it doesn't flash over the whole background.
   const isMaskedPatternPending = model.isMaskedPattern && !isPatternFillReady;
+
+  const isDrawn = model === targetModel && isPatternDrawn;
+  const [isSnapshotHidden, hideSnapshot] = useFlag(!withSnapshot);
+  // A fallback stands in only while the selected wallpaper's media loads
+  const modelKey = withSnapshot && isGlobalWallpaper && !fallbackModel ? JSON.stringify(model) : undefined;
+
+  // Compared by value: syncing unrelated theme fields, such as chat themes, replaces the settings object
+  const globalModelKey = withSnapshot && globalWallpaper
+    ? JSON.stringify(buildWallpaperRenderModel(theme, globalWallpaper)) : undefined;
+
+  useEffectWithPrevDeps(([prevGlobalModelKey]) => {
+    // A chat wallpaper may be shown instead, so the outdated snapshot can't wait to be replaced
+    if (prevGlobalModelKey && prevGlobalModelKey !== globalModelKey) {
+      void clearWallpaperSnapshot()?.catch(() => undefined);
+    }
+  }, [globalModelKey]);
+
+  useEffect(() => {
+    if (!isDrawn || isSnapshotHidden) return undefined;
+
+    // The drawn layers may still be fading in
+    const timeout = window.setTimeout(hideSnapshot, WALLPAPER_TRANSITION_MS);
+    return () => window.clearTimeout(timeout);
+  }, [isDrawn, isSnapshotHidden, hideSnapshot]);
+
+  useEffect(() => {
+    if (!modelKey || !isDrawn || !layerSize) return undefined;
+
+    // Waits out pattern redraws after resizing and crossfades
+    const timeout = window.setTimeout(() => onFullyIdle(() => {
+      void saveWallpaperSnapshot(model, {
+        aspectRatio: layerSize.width / layerSize.height,
+        patternTile: getDrawnTile(),
+        systemTheme: shouldUseSystemTheme ? theme : undefined,
+      }).catch(() => undefined);
+    }), SNAPSHOT_SAVE_DELAY_MS);
+
+    return () => window.clearTimeout(timeout);
+    // The model is rebuilt on every render, while its key changes only with its values
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [modelKey, isDrawn, layerSize, getDrawnTile, shouldUseSystemTheme]);
 
   const backgroundClassNames = buildClassName(
     backgroundStyles.background,
@@ -164,6 +221,8 @@ export default function useChatBackground({
     hasGradient,
     isImage: model.isImage,
     edgeColors,
+    // The snapshot is of the global wallpaper, so it would only hide a chat's own one
+    isSnapshotShown: !isSnapshotHidden && isGlobalWallpaper,
     shouldSnap: !canAnimatePattern,
   };
 }

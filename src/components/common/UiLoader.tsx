@@ -175,6 +175,7 @@ const UiLoader = ({
       {children}
       {shouldRenderMask && (isReloading || !shouldSkipHistoryAnimations) && Boolean(page) && (
         <div className={buildClassName(styles.mask, isReloading && styles.outgoing, transitionClassNames)}>
+          {page === 'main' && <div className={buildClassName('wallpaper-snapshot', styles.wallpaper)} aria-hidden />}
           {page === 'main' ? (
             <div className={buildClassName(styles.main, isFoldersSidebarShown && styles.foldersSidebarVisible)}>
               {isFoldersSidebarShown && <div className={styles.foldersSidebar} />}

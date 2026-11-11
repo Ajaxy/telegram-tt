@@ -3,10 +3,10 @@ import { getActions } from '../global';
 
 import type { ApiWallpaper } from '../api/types';
 import type { ThemeKey } from '../types';
-import type { WallpaperStorageSource } from '../util/wallpaperStorage';
+import type { WallpaperStorageSource } from '../util/wallpaper/storage';
 
 import { buildDefaultWallpaperSettings } from '../util/wallpaper';
-import { acquireWallpaperUrl, cacheThemeWallpaper, getResolvedWallpaperUrl } from '../util/wallpaperStorage';
+import { acquireWallpaperUrl, cacheThemeWallpaper, getResolvedWallpaperUrl } from '../util/wallpaper/storage';
 
 type ResolvedBackground = {
   slug: string;
