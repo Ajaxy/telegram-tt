@@ -23,15 +23,15 @@ export type ResizeHandle = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
 
 interface AspectRatioOption {
   value: AspectRatio;
-  labelKey?: 'Free' | 'Original' | 'Square';
+  labelKey?: 'AspectRatioFree' | 'AspectRatioOriginal' | 'AspectRatioSquare';
   label?: string;
   ratio?: number;
 }
 
 export const ASPECT_RATIOS: AspectRatioOption[] = [
-  { value: 'free', labelKey: 'Free' },
-  { value: 'original', labelKey: 'Original' },
-  { value: 'square', labelKey: 'Square', ratio: 1 },
+  { value: 'free', labelKey: 'AspectRatioFree' },
+  { value: 'original', labelKey: 'AspectRatioOriginal' },
+  { value: 'square', labelKey: 'AspectRatioSquare', ratio: 1 },
   { value: '3:2', label: '3:2', ratio: 3 / 2 },
   { value: '2:3', label: '2:3', ratio: 2 / 3 },
   { value: '4:3', label: '4:3', ratio: 4 / 3 },

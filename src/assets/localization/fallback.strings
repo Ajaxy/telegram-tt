@@ -1219,6 +1219,7 @@
 "QrCodeGiftsEmptyAbout" = "Use any collectible gift you own to style your QR code.";
 "QrCodeGiftsEmptyAboutChat" = "There are no collectible gifts here yet.";
 "QrCodeGiftsBrowse" = "Browse Gifts";
+"QrFree" = "Free";
 "QrFreeRemoveFee" = "Remove {amount} fee";
 "QrFreeExpiresIn" = "Expires in {time}";
 "QrFreeNoTimeLimit" = "No time limit";
@@ -2815,9 +2816,9 @@
 "Neon" = "Neon";
 "Eraser" = "Eraser";
 "AspectRatio" = "Aspect ratio";
-"Free" = "Free";
-"Original" = "Original";
-"Square" = "Square";
+"AspectRatioFree" = "Free";
+"AspectRatioOriginal" = "Original";
+"AspectRatioSquare" = "Square";
 "HEX" = "HEX";
 "RGB" = "RGB";
 "Text" = "Text";

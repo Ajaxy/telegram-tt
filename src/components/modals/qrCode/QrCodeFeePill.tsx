@@ -66,7 +66,7 @@ const QrCodeFeePill = ({
     timerEndsAt,
     feeBefore: feeBefore.trimEnd(),
     feeAfter: `${lang.number(price)}${feeSuffix}`.trimStart(),
-    free: lang('Free'),
+    free: lang('QrFree'),
     noTimeLimit: lang('QrFreeNoTimeLimit'),
     formatExpiresIn: (time) => lang('QrFreeExpiresIn', { time }),
     canAnimate: Boolean(canAnimate),
@@ -135,7 +135,7 @@ const QrCodeFeePill = ({
   const isTemporary = mode === 'temporary';
   const isMenuTemporary = menuMode === 'temporary';
   const ariaLabel = isFree
-    ? `${lang('Free')}, ${lang(isTemporary ? 'QrFreeMenuEnableTimerAbout' : 'QrFreeNoTimeLimit')}`
+    ? `${lang('QrFree')}, ${lang(isTemporary ? 'QrFreeMenuEnableTimerAbout' : 'QrFreeNoTimeLimit')}`
     : lang('QrFreeRemoveFee', { amount: lang.number(price) });
 
   return (

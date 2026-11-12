@@ -996,6 +996,7 @@ export interface LangPair {
   'QrCodeGiftsEmptyAbout': undefined;
   'QrCodeGiftsEmptyAboutChat': undefined;
   'QrCodeGiftsBrowse': undefined;
+  'QrFree': undefined;
   'QrFreeNoTimeLimit': undefined;
   'QrFreeMenuReset': undefined;
   'QrFreeMenuDisableTimer': undefined;
@@ -2071,9 +2072,9 @@ export interface LangPair {
   'Neon': undefined;
   'Eraser': undefined;
   'AspectRatio': undefined;
-  'Free': undefined;
-  'Original': undefined;
-  'Square': undefined;
+  'AspectRatioFree': undefined;
+  'AspectRatioOriginal': undefined;
+  'AspectRatioSquare': undefined;
   'HEX': undefined;
   'RGB': undefined;
   'Text': undefined;
