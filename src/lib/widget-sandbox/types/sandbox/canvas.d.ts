@@ -5,12 +5,19 @@ export declare function enableCanvasWords(on: boolean): void;
 export declare function flushCanvases(push: (op: any) => void): void;
 declare class CanvasGradient {
     _id: number;
-    _canvas: any;
+    /** The command that makes it and its color stops, and the canvases it is made on (local patch, NOTICE.md). */
+    _create: any[];
+    _stops: any[][];
+    _canvases: any[];
     constructor(canvas: any);
     addColorStop(offset: number, color: string): void;
 }
 declare class CanvasPattern {
     _id: number;
+    _create: any[];
+    _stops: any[][];
+    _canvases: any[];
+    constructor(canvas: any);
     setTransform(): void;
 }
 export declare class Path2D {
@@ -44,6 +51,7 @@ export declare class Context2D {
     createLinearGradient(...a: number[]): CanvasGradient;
     createRadialGradient(...a: number[]): CanvasGradient;
     createConicGradient(...a: number[]): CanvasGradient;
+    _gradient(type: string, a: number[]): CanvasGradient;
     createPattern(image: any, repetition: string): CanvasPattern;
     measureText(text: string): any;
     /** Pixel read-back is outside the widget profile: transparent pixels. */

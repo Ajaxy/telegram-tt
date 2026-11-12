@@ -185,17 +185,34 @@ function register(id: number, node: Node) {
   ids.set(node, id);
 }
 
-function forget(node: Node) {
-  const id = ids.get(node);
-  if (id !== undefined) {
+/**
+ * `visit` on `root` and every node under it, in document order; `visit` returning false skips that node's subtree. A walk
+ * by the sibling and parent links, not a recursion: a widget may nest its 2000 nodes, deeper than a WebView's stack
+ * should be trusted with. The subtree must not change during the walk.
+ */
+function walkSubtree(root: Node, visit: (n: Node) => boolean | void) {
+  let n: Node | null = root;
+  while (n) {
+    if (visit(n) !== false) {
+      const c = firstChildOf(n);
+      if (c) { n = c; continue; }
+    }
+    while (n && n !== root && !nextSiblingOf(n)) n = parentNodeOf(n);
+    n = n && n !== root ? nextSiblingOf(n) : null;
+  }
+}
+
+function forget(root: Node) {
+  walkSubtree(root, (node) => {
+    const id = ids.get(node);
+    if (id === undefined) return;
     nodes.delete(id);
     ids.delete(node);
     canvases.delete(id);
     if (node instanceof Element) resizeObserver.unobserve(node);
     if (node instanceof HTMLCanvasElement) { canvasPixelsTotal -= canvasPixels.get(node) ?? 0; canvasPixels.delete(node); }
     if (node instanceof HTMLStyleElement) widgetStyles.delete(node);
-  }
-  for (let c = firstChildOf(node); c; c = nextSiblingOf(c)) forget(c);
+  });
 }
 
 // ───────────────────────── emoji images (local patch, NOTICE.md) ─────────────────────────
@@ -1205,9 +1222,11 @@ function refreshSheets() {
 
 /** The boxes of `el` and of everything under it are gone (display: none, removed, moved away). */
 function clearBoxes(el: Element) {
-  const id = ids.get(el);
-  if (id !== undefined) { paint.removeBox(id * 4); paint.removeBox(id * 4 + BEFORE); paint.removeBox(id * 4 + AFTER); }
-  for (let c = firstChildOf(el); c; c = nextSiblingOf(c)) if (c instanceof Element) clearBoxes(c);
+  walkSubtree(el, (n) => {
+    if (!(n instanceof Element)) return false;
+    const id = ids.get(n);
+    if (id !== undefined) { paint.removeBox(id * 4); paint.removeBox(id * 4 + BEFORE); paint.removeBox(id * 4 + AFTER); }
+  });
 }
 
 /** A `<button>` that is disabled or held down: its opacity is the button's own dimming, not a heavy effect (paint-policy.ts). */
@@ -1228,33 +1247,45 @@ function pseudoPaint(el: Element, key: number, which: '::before' | '::after') {
 }
 
 /** Recomputes the boxes of `el` and of its subtree (`hidden`: an ancestor is display: none). */
-function scanBoxes(el: Element, hidden: boolean) {
-  const id = ids.get(el);
+function scanBoxes(root: Element, hidden: boolean) {
   // the renderer's own elements (the stopped badge) are no boxes of the widget's
-  if (id === undefined) return;
-  if (hidden) return clearBoxes(el);
-  const cs = getComputedStyle(el);
-  const display = cs.display;
-  if (hidesSubtree(display)) return clearBoxes(el);
-  const key = id * 4;
-  paint.setBox(key, stylePaint(cs, display, false, el));
-  if (pseudoSelector && matches(el, pseudoSelector)) {
-    pseudoPaint(el, key + BEFORE, '::before');
-    pseudoPaint(el, key + AFTER, '::after');
-  } else {
-    paint.setBox(key + BEFORE, null);
-    paint.setBox(key + AFTER, null);
-  }
-  for (let c = firstChildOf(el); c; c = nextSiblingOf(c)) if (c instanceof Element) scanBoxes(c, false);
+  if (ids.get(root) === undefined) return;
+  if (hidden) return clearBoxes(root);
+  walkSubtree(root, (el) => {
+    if (!(el instanceof Element)) return false;
+    const id = ids.get(el);
+    if (id === undefined) return false;
+    const cs = getComputedStyle(el);
+    const display = cs.display;
+    if (hidesSubtree(display)) {
+      clearBoxes(el);
+      return false;
+    }
+    const key = id * 4;
+    paint.setBox(key, stylePaint(cs, display, false, el));
+    if (pseudoSelector && matches(el, pseudoSelector)) {
+      pseudoPaint(el, key + BEFORE, '::before');
+      pseudoPaint(el, key + AFTER, '::after');
+    } else {
+      paint.setBox(key + BEFORE, null);
+      paint.setBox(key + AFTER, null);
+    }
+  });
 }
 
 /** Whether `n` or an element above it (up to the widget's root) is display: none; remembered for one count. */
 function hiddenAt(n: Node | null, memo: Map<Node, boolean>): boolean {
-  if (!(n instanceof Element)) return false;
-  let v = memo.get(n);
-  if (v !== undefined) return v;
-  v = hidesSubtree(getComputedStyle(n).display) || (n !== HTML && hiddenAt(parentNodeOf(n), memo));
-  memo.set(n, v);
+  // Up the ancestors until an answer (a loop, not a recursion: see walkSubtree); every element passed on the way gets it.
+  const passed: Element[] = [];
+  let v = false;
+  for (let p = n; p instanceof Element; p = parentNodeOf(p)) {
+    const known = memo.get(p);
+    if (known !== undefined) { v = known; break; }
+    passed.push(p);
+    if (hidesSubtree(getComputedStyle(p).display)) { v = true; break; }
+    if (p === HTML) break;
+  }
+  for (const p of passed) memo.set(p, v);
   return v;
 }
 
@@ -1444,10 +1475,10 @@ function drawWithoutEffects() {
   } catch {}
   // Read before the layer goes in: a box that was fully transparent stays invisible (hidden) rather than turning opaque.
   const fixes: [CSSStyleDeclaration, string, string][] = [];
-  const visit = (el: Element) => {
-    if (!ids.has(el)) return;
+  walkSubtree(HTML, (el) => {
+    if (!(el instanceof Element) || !ids.has(el)) return false;
     const cs = getComputedStyle(el);
-    if (hidesSubtree(cs.display)) return;
+    if (hidesSubtree(cs.display)) return false;
     const style = styleOf(el);
     if (parseFloat(cs.opacity) === 0) fixes.push([style, 'visibility', 'hidden']);
     if (boxShadowBlurred(cs.boxShadow)) fixes.push([style, 'box-shadow', boxShadowWithoutBlur(cs.boxShadow)]);
@@ -1455,9 +1486,7 @@ function drawWithoutEffects() {
     for (const prop of ['filter', 'backdrop-filter', '-webkit-backdrop-filter', 'opacity']) {
       if (style.getPropertyValue(prop) && !(prop === 'opacity' && buttonState(el) === 'disabled')) fixes.push([style, prop, '']);
     }
-    for (let c = firstChildOf(el); c; c = nextSiblingOf(c)) if (c instanceof Element) visit(c);
-  };
-  visit(HTML);
+  });
   const sheet = createElement(doc, 'style');
   setTextContent(sheet, NO_EFFECTS_CSS);
   insertBefore(HEAD, sheet, firstChildOf(HEAD));

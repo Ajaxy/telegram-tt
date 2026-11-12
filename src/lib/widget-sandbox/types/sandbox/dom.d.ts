@@ -21,7 +21,11 @@ export declare function exposeNode<T>(n: T): T;
 /** A Range, TreeWalker, NodeIterator or Selection can reach any node: stop updating text nodes in place for good. */
 export declare function exposeAll(): void;
 export declare function setInPlaceText(enabled: boolean): void;
-/** Append linkedom nodes for the children of a parse5 node. */
+/**
+ * Append linkedom nodes for the children of a parse5 node, in document order. A loop over the open levels, not a
+ * recursion: markup nested 2000 deep is a legal widget, and each level of a recursion was a QuickJS call on the glue's
+ * native stack.
+ */
 export declare function build(p5: any, parent: any, inertScripts?: boolean): void;
 /** Parse a full document or a bare fragment into the (single) widget document. */
 export declare function loadDocument(html: string): void;

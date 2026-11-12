@@ -197,14 +197,14 @@ export function deliverMutationRecords(report: (e: unknown) => void): boolean {
 
 // ───────────────────────── reconciliation ─────────────────────────
 
-function createNode(node: any): number {
+/** One node into the mirror and its `el` / `text` / `comment` op; its children are the caller's (createNode). */
+function createOne(node: any): number {
   const id = idOf(node);
   byId.set(id, node);
   if (node.nodeType === 1) {
     forgetSentStyle(node);
     const attrs = readAttrs(node);
-    const m: Mirror = { parent: 0, kids: [], attrs, data: null };
-    mirror.set(id, m);
+    mirror.set(id, { parent: 0, kids: [], attrs, data: null });
     const op: any = { op: 'el', id, tag: node.localName };
     if (node.namespaceURI === SVG_NS) op.ns = 'svg';
     if (attrs.size) op.attrs = Object.fromEntries(attrs);
@@ -212,21 +212,49 @@ function createNode(node: any): number {
     hooks.elementCreated(node, id);
     for (const [name, value] of attrs) hooks.attributeChanged(node, name, value);
     hooks.elementSynced(node, id, (o) => postOps.push(o), true);
-    for (const c of childrenOf(node)) {
-      const known = c[ID];
-      const cid = known !== undefined && mirror.has(known) ? known : createNode(c);
-      mirror.get(cid)!.parent = id;
-      strays.delete(cid);
-      m.kids.push(cid);
-      ops.push({ op: 'ins', parent: id, id: cid, before: null });
-      sendIfLarge();
-    }
   } else {
     const data = String(node.data ?? '');
     mirror.set(id, { parent: 0, kids: [], attrs: null, data });
     ops.push({ op: node.nodeType === 3 ? 'text' : 'comment', id, data });
   }
   return id;
+}
+
+/**
+ * A node and everything under it that the mirror does not know yet, in document order (each child's subtree, then its
+ * `ins`). A loop over an explicit stack, not a recursion: a widget may nest its 2000 nodes, and every level of a
+ * recursion here was a QuickJS call on the glue's native stack (the web worker's ran out near 1,000).
+ */
+function createNode(node: any): number {
+  const rootId = createOne(node);
+  if (node.nodeType !== 1) return rootId;
+  const stack: { id: number; m: Mirror; kids: Generator<any> }[] = [{ id: rootId, m: mirror.get(rootId)!, kids: childrenOf(node) }];
+  const attach = (frame: { id: number; m: Mirror }, cid: number) => {
+    mirror.get(cid)!.parent = frame.id;
+    strays.delete(cid);
+    frame.m.kids.push(cid);
+    ops.push({ op: 'ins', parent: frame.id, id: cid, before: null });
+    sendIfLarge();
+  };
+  while (stack.length) {
+    const top = stack[stack.length - 1];
+    const next = top.kids.next();
+    if (next.done) {
+      stack.pop();
+      if (stack.length) attach(stack[stack.length - 1], top.id);
+      continue;
+    }
+    const c = next.value;
+    const known = c[ID];
+    if (known !== undefined && mirror.has(known)) {
+      attach(top, known);
+      continue;
+    }
+    const cid = createOne(c);
+    if (c.nodeType === 1) stack.push({ id: cid, m: mirror.get(cid)!, kids: childrenOf(c) });
+    else attach(top, cid);
+  }
+  return rootId;
 }
 
 /** Make sure the host knows a (possibly detached) element, e.g. an offscreen canvas. */
@@ -236,10 +264,17 @@ export function ensureCreated(node: any): number {
 
 /** Has a node under `id` in the mirror moved to another parent since the last sync (into the document or a new subtree)? */
 function holdsMoved(id: number): boolean {
-  const node = byId.get(id);
-  for (const k of mirror.get(id)?.kids ?? []) {
-    if (mirror.get(k)?.parent !== id) continue;
-    if (byId.get(k)?.parentNode !== node || holdsMoved(k)) return true;
+  const stack = [id];
+  // Bounded as strayUnder: a loop in the mirror's parents counts as moved (the removal keeps its place in the order).
+  for (let n = 0; stack.length; n++) {
+    if (n > mirror.size) return true;
+    const p = stack.pop()!;
+    const node = byId.get(p);
+    for (const k of mirror.get(p)?.kids ?? []) {
+      if (mirror.get(k)?.parent !== p) continue;
+      if (byId.get(k)?.parentNode !== node) return true;
+      stack.push(k);
+    }
   }
   return false;
 }
@@ -254,12 +289,16 @@ function strayUnder(id: number): boolean {
 }
 
 function purge(id: number) {
-  const m = mirror.get(id);
-  if (!m) return;
-  strays.delete(id);
-  mirror.delete(id);
-  byId.delete(id);
-  for (const k of m.kids) if (mirror.get(k)?.parent === id) purge(k);
+  const stack = [id];
+  while (stack.length) {
+    const p = stack.pop()!;
+    const m = mirror.get(p);
+    if (!m) continue;
+    strays.delete(p);
+    mirror.delete(p);
+    byId.delete(p);
+    for (const k of m.kids) if (mirror.get(k)?.parent === p) stack.push(k);
+  }
 }
 
 function syncAttrs(el: any, id: number, m: Mirror) {
@@ -514,10 +553,21 @@ function syncNode(node: any) {
   }
 }
 
+/** Every node, in document order, each synced before its children are read (a loop over the open levels: see createNode). */
 function walkAll(node: any) {
   syncNode(node);
   sendIfLarge();
-  for (const c of childrenOf(node)) walkAll(c);
+  const stack = [childrenOf(node)];
+  while (stack.length) {
+    const next = stack[stack.length - 1].next();
+    if (next.done) {
+      stack.pop();
+      continue;
+    }
+    syncNode(next.value);
+    sendIfLarge();
+    stack.push(childrenOf(next.value));
+  }
 }
 
 /**

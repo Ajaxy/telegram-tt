@@ -390,11 +390,17 @@ function queueScript(el: any) {
   scriptQueue.push(q);
 }
 
-function collectScripts(node: any) {
-  for (let c = node.firstChild; c; c = c.nextSibling) {
-    if (c.nodeType !== 1) continue;
-    if (c.localName === 'script') queueScript(c);
-    else collectScripts(c);
+/** The scripts under `root` in document order (a walk by sibling and parent links, no recursion: see capture.ts createNode). */
+function collectScripts(root: any) {
+  let c = root.firstChild;
+  while (c) {
+    if (c.nodeType === 1 && c.localName === 'script') queueScript(c);
+    else if (c.nodeType === 1 && c.firstChild) {
+      c = c.firstChild;
+      continue;
+    }
+    while (c && c !== root && !c.nextSibling) c = c.parentNode;
+    c = c && c !== root ? c.nextSibling : null;
   }
 }
 

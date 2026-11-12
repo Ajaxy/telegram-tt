@@ -83,6 +83,17 @@ const MAX_OPS_PER_BATCH = 10_000;
  */
 const MAX_DOCUMENT_NODES = 2000;
 /**
+ * The deepest chain of nested elements the renderer lays out. The web renders a widget through a shadow root in the
+ * host chat page (no per-widget iframe, release plan D2), so the widget has no process of its own: Chromium kills the
+ * page's renderer process at about 1,650–1,700 nested elements (a plain page, no widget code, under the 2000-node cap),
+ * and with nothing to contain it the whole chat page goes down, not one frame. 1024 is well below that and ~79× the
+ * deepest widget in the corpora (13 nested); past it the validator stops the widget with the fatal `limit` diagnostic
+ * before any renderer sees the document, so one cap shields every client's renderer (the native renderers have their own
+ * thresholds). Counted after each batch, like the node cap. The shim's deep-document loop fix is a separate concern (the
+ * native QuickJS-glue stack, every platform); this cap is the renderer's.
+ */
+const MAX_NESTING_DEPTH = 1024;
+/**
  * Canvas commands in one `canvas` op (one canvas, one task): outside the projected 3D showcase no widget draws more than
  * 237, and the main-thread window (2 µs a command) already holds 4000 a frame to ~13 fps on every client the stress kit
  * measured (9 510 to ~5 fps); the 3D showcase's meshes stay under 2000 a frame.
@@ -150,12 +161,12 @@ export function policyLimits(policy: ValidatorPolicy) {
   return policy === 'strict'
     ? {
       maxText: MAX_TEXT, maxCanvasString: MAX_TEXT, maxAttr: MAX_ATTR, maxOps: MAX_OPS_PER_BATCH, maxCanvasCmds: MAX_CANVAS_CMDS,
-      maxNodes: MAX_DOCUMENT_NODES, maxCssRules: MAX_CSS_RULES, maxKeyframes: MAX_KEYFRAMES, maxLiveAnims: MAX_LIVE_ANIMS, maxCanvasPixels: MAX_CANVAS_PIXELS,
+      maxNodes: MAX_DOCUMENT_NODES, maxDepth: MAX_NESTING_DEPTH, maxCssRules: MAX_CSS_RULES, maxKeyframes: MAX_KEYFRAMES, maxLiveAnims: MAX_LIVE_ANIMS, maxCanvasPixels: MAX_CANVAS_PIXELS,
       complexTextBudget: COMPLEX_TEXT_BUDGET, textBudget: TEXT_BUDGET, stop: true,
     }
     : {
       maxText: COMPAT_MAX_TEXT, maxCanvasString: COMPAT_MAX_ATTR, maxAttr: COMPAT_MAX_ATTR, maxOps: COMPAT_MAX_OPS_PER_BATCH,
-      maxCanvasCmds: COMPAT_MAX_CANVAS_CMDS, maxNodes: 0, maxCssRules: 0, maxKeyframes: 0, maxLiveAnims: COMPAT_MAX_LIVE_ANIMS, maxCanvasPixels: 0,
+      maxCanvasCmds: COMPAT_MAX_CANVAS_CMDS, maxNodes: 0, maxDepth: 0, maxCssRules: 0, maxKeyframes: 0, maxLiveAnims: COMPAT_MAX_LIVE_ANIMS, maxCanvasPixels: 0,
       complexTextBudget: 0, textBudget: 0, stop: false,
     };
 }
@@ -210,7 +221,7 @@ export function validatorTables(policy: ValidatorPolicy = 'compat'): unknown {
     limits: [MAX_NODES, limits.maxText, limits.maxAttr, limits.maxOps, limits.maxCanvasCmds, LIMBO],
     complexTextBudget: limits.complexTextBudget,
     textBudget: limits.textBudget,
-    documentNodes: limits.maxNodes, cssRules: limits.maxCssRules, keyframes: limits.maxKeyframes, liveAnims: limits.maxLiveAnims, canvasPixels: limits.maxCanvasPixels, stop: limits.stop,
+    documentNodes: limits.maxNodes, nestingDepth: limits.maxDepth, cssRules: limits.maxCssRules, keyframes: limits.maxKeyframes, liveAnims: limits.maxLiveAnims, canvasPixels: limits.maxCanvasPixels, stop: limits.stop,
     textAttrs: TEXT_ATTRS, textAttrPrefixes: TEXT_ATTR_PREFIXES,
   };
 }
@@ -307,6 +318,25 @@ export class Validator {
   }
 
   /**
+   * The deepest chain of nodes below the document root (`MAX_NESTING_DEPTH`): `<html>` is 1, `<body>` 2, a node nested N
+   * deep is N. An explicit stack, not recursion, so a deep document never overflows the validator's own stack either.
+   * Walks only the attached tree reachable from the root; a detached subtree in limbo is not laid out and does not count.
+   */
+  private deepestNode(): number {
+    const root = this.nodes.get(DOCUMENT_ID);
+    if (!root) return 0;
+    let max = 0;
+    const stack: [NodeId, number][] = root.children.map((id) => [id, 1]);
+    while (stack.length) {
+      const [id, depth] = stack.pop()!;
+      if (depth > max) max = depth;
+      const n = this.nodes.get(id);
+      if (n) for (const c of n.children) stack.push([c, depth + 1]);
+    }
+    return max;
+  }
+
+  /**
    * The document's counted totals (its text, CSS rules, `@keyframes`) after a whole batch, not op by op: a subtree
    * replaced in one task (`innerHTML`, `replaceChildren`) or two sheets rewritten in one task pass through a sum of the
    * old and the new that the document never holds. False when a total is over its cap (the widget stops).
@@ -314,6 +344,12 @@ export class Validator {
   private checkTotals(): boolean {
     if (this.limits.maxNodes && this.nodes.size - 1 > this.limits.maxNodes) {
       return this.stop(`Node limit exceeded: ${this.nodes.size - 1} nodes in the document (max ${this.limits.maxNodes})`);
+    }
+    if (this.limits.maxDepth) {
+      const depth = this.deepestNode();
+      if (depth > this.limits.maxDepth) {
+        return this.stop(`Nesting depth limit exceeded: ${depth} levels (max ${this.limits.maxDepth})`);
+      }
     }
     if (this.limits.textBudget && this.totalText > this.limits.textBudget) {
       return this.stop(`Text limit exceeded: the document's text is over ${this.limits.textBudget} characters`);

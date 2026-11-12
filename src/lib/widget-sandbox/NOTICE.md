@@ -1,15 +1,15 @@
 # Widget sandbox provenance and notices
 
 This directory vendors the web runtime from `telegram-air/widget-sandbox`,
-version `0.6.3`, commit `7a2ec35e3e7698377626e982e98e5a1161b1aac8`. The original third-party
+version `0.6.5`, commit `1cde0068daba8437f53eac0b61c395d29b8f89e3`. The original third-party
 inventory is retained in `UPSTREAM_THIRD_PARTY_NOTICES.md`; its native packages,
 demo libraries and alternative renderers are not part of this integration.
 
 The prebuilt QuickJS engine is the TelegramMessenger/quickjs fork, revision
-`b02310a11877829888888d67003a0de2eb927989` (`b02310a` in
+`b526a817f188ef861eea7666d68361c7851673a0` (`b526a81` in
 `quickjs/prebuilt/QUICKJS_VERSION`), not the vanilla npm QuickJS binary.
 The vendored WASM SHA-256 is
-`ded681862de45025ab778fec2bfd63b9eaae0e019d79b56b4dcb1a1ef3949a02`.
+`8045387ba4c7fc3f51da8292e86129ad958bf6802d8dadbd11b3878bd451aaab`.
 Its MIT license and the quickjs-emscripten MIT license are retained in
 `quickjs/`. The build uses quickjs-emscripten FFI/core `0.32.0`. Rebuilding that
 binary requires an explicit checkout of the same fork revision, Emscripten,

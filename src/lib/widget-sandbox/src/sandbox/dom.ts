@@ -183,11 +183,22 @@ function setAttrs(el: any, attrs: { name: string; value: string; prefix?: string
   }
 }
 
-/** Append linkedom nodes for the children of a parse5 node. */
+/**
+ * Append linkedom nodes for the children of a parse5 node, in document order. A loop over the open levels, not a
+ * recursion: markup nested 2000 deep is a legal widget, and each level of a recursion was a QuickJS call on the glue's
+ * native stack.
+ */
 export function build(p5: any, parent: any, inertScripts = false): void {
-  for (const c of p5.childNodes ?? []) {
-    if (c.nodeName === '#text') parent.appendChild(document.createTextNode(c.value));
-    else if (c.nodeName === '#comment') parent.appendChild(document.createComment(c.data));
+  const stack: { kids: any[]; i: number; parent: any }[] = [{ kids: p5.childNodes ?? [], i: 0, parent }];
+  while (stack.length) {
+    const top = stack[stack.length - 1];
+    if (top.i >= top.kids.length) {
+      stack.pop();
+      continue;
+    }
+    const c = top.kids[top.i++];
+    if (c.nodeName === '#text') top.parent.appendChild(document.createTextNode(c.value));
+    else if (c.nodeName === '#comment') top.parent.appendChild(document.createComment(c.data));
     else if (c.tagName) {
       let el: any;
       try {
@@ -197,9 +208,9 @@ export function build(p5: any, parent: any, inertScripts = false): void {
       }
       setAttrs(el, c.attrs);
       if (inertScripts && c.tagName === 'script') el[SCRIPT_INERT] = true;
-      parent.appendChild(el);
-      if (c.tagName === 'template' && c.content && el.content) build(c.content, el.content, inertScripts);
-      else build(c, el, inertScripts);
+      top.parent.appendChild(el);
+      if (c.tagName === 'template' && c.content && el.content) stack.push({ kids: c.content.childNodes ?? [], i: 0, parent: el.content });
+      else stack.push({ kids: c.childNodes ?? [], i: 0, parent: el });
     }
   }
 }

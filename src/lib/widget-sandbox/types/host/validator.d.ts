@@ -19,6 +19,7 @@ export declare function policyLimits(policy: ValidatorPolicy): {
     maxOps: number;
     maxCanvasCmds: number;
     maxNodes: number;
+    maxDepth: number;
     maxCssRules: number;
     maxKeyframes: number;
     maxLiveAnims: number;
@@ -74,6 +75,12 @@ export declare class Validator {
     private stop;
     private tooLongText;
     private tooLongAttr;
+    /**
+     * The deepest chain of nodes below the document root (`MAX_NESTING_DEPTH`): `<html>` is 1, `<body>` 2, a node nested N
+     * deep is N. An explicit stack, not recursion, so a deep document never overflows the validator's own stack either.
+     * Walks only the attached tree reachable from the root; a detached subtree in limbo is not laid out and does not count.
+     */
+    private deepestNode;
     /**
      * The document's counted totals (its text, CSS rules, `@keyframes`) after a whole batch, not op by op: a subtree
      * replaced in one task (`innerHTML`, `replaceChildren`) or two sheets rewritten in one task pass through a sum of the
