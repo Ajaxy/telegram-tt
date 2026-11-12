@@ -1,22 +1,31 @@
 const IS_DEBUG = import.meta.env?.TG_APP_ENV !== 'production';
 
-export default function readStrings(data: string): Record<string, string> {
-  const lines = data.split(/;\r?\n?/);
+export default function readStrings(data: string, isStrict?: boolean): Record<string, string> {
+  const report = (message: string) => {
+    if (isStrict) throw new Error(message);
+    // eslint-disable-next-line no-console
+    console.warn(message);
+  };
+
+  const lines = data.split(/\r?\n/);
   const result: Record<string, string> = {};
-  for (const line of lines) {
-    if (!line.startsWith('"')) continue;
-    const [key, value] = parseLine(line) || [];
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.trimEnd();
+    if (!line.startsWith('"')) return;
+    if (!line.endsWith(';')) {
+      report(`Missing semicolon in line ${index + 1}: ${line}`);
+      return;
+    }
+    const [key, value] = parseLine(line.slice(0, -1)) || [];
     if (!key || !value) {
-      // eslint-disable-next-line no-console
-      console.warn('Bad formatting in line:', line);
-      continue;
+      report(`Bad formatting in line ${index + 1}: ${line}`);
+      return;
     }
     if (result[key]) {
-      // eslint-disable-next-line no-console
-      console.warn('Duplicate key:', key);
+      report(`Duplicate key in line ${index + 1}: ${key}`);
     }
     result[key] = value;
-  }
+  });
   return result;
 }
 

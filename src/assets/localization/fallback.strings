@@ -504,7 +504,7 @@
 "SettingsAboutBio" = "Any details such as age, occupation or city.\nExample: 23 y.o. designer from San Francisco";
 "UsernameHelp" = "You can choose a username on **Telegram**. If you do, people will be able to find you by this username and contact you without knowing your phone number.\n\nYou can use **a–z**, **0–9** and underscores.\nMinimum length is **5** characters.";
 "UsernameLink" = "This link opens a chat with you:";
-"SettingsExperimentalAbout" = "Warning! Those are experimental settings. Some may not work. Others may break the app. Any of them may disappear in the next version without a trace. Use at your own risk.";
+"SettingsExperimentalAbout" = "Warning! These are experimental settings. Some may not work. Others may break the app. Any of them may disappear in the next version without a trace. Use at your own risk.";
 "EmptyChatAppearanceLight" = "Light";
 "EmptyChatAppearanceDark" = "Dark";
 "EmptyChatAppearanceSystem" = "System";
@@ -3313,7 +3313,7 @@
 "WalletReceiveAddressCopied" = "Address copied";
 "WalletReceiveShowQr" = "Show my QR";
 "WalletReceivePeerShowQr" = "Show QR";
-"WalletReceivePeerNote" = "Send GRAM to this address or scan this QR code.";
+"WalletReceivePeerNote" = "Send Grams to this address or scan this QR code.";
 "WalletBuyCurrency" = "Currency";
 "WalletBuyError" = "Could not start the purchase. Please try again.";
 "WalletSendTitle" = "Send Grams";
@@ -3383,7 +3383,7 @@
 "WalletCollectibleUsername" = "Collectible Username";
 "WalletCollectibleNumber" = "Collectible Number";
 "WalletCollectibleItemIn" = "+1 item";
-"WalletCollectibleItemOut" = "−1 item";
+"WalletCollectibleItemOut" = "-1 item";
 "WalletCollectibleShowInGifts" = "also show in my gifts";
 "WalletMoveToGifts" = "Move to My Gifts";
 "WalletMoveToGiftsText" = "Transfer this collectible off-chain to your Telegram account?";
