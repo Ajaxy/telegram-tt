@@ -569,6 +569,11 @@
   &.audio {
     min-width: 20rem;
 
+    // The standalone meta raised above the button keeps the same gap under the performer line as without comments
+    > .MessageMeta ~ .CommentButton {
+      margin-top: 1rem;
+    }
+
     @media (max-width: 600px) {
       min-width: 17rem;
     }
