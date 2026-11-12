@@ -1,0 +1,2 @@
+import{M as e}from"./Transition-DdJXGcSw.js";var t;function n(e=`*`,n,r=!1){t||(t=document.createElement(`input`),t.setAttribute(`type`,`file`)),t.setAttribute(`accept`,e),r?t.removeAttribute(`multiple`):t.setAttribute(`multiple`,`multiple`),t.onchange=null,t.value=``,t.onchange=n,t.click()}function r(t,n=document){return e({onEsc:t},n)}export{n,r as t};
+//# sourceMappingURL=captureEscKeyListener-DwGiPGpb.js.map
