@@ -15,6 +15,7 @@ import type {
 import type { ThemePalette } from '../../../util/theme';
 
 import { TME_LINK_PREFIX, VERIFY_AGE_MIN_DEFAULT } from '../../../config';
+import { getLuminance, mixColors } from '../../../lib/color';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { convertToApiChatType, getUserFullName } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
@@ -30,6 +31,7 @@ import { WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle.ts';
+import { buildColorFromHex, buildHexFromColor } from '../../../util/colors';
 import download from '../../../util/download';
 import { isLiteralObject } from '../../../util/iteratees';
 import { extractCurrentThemeParams, FALLBACK_THEME_PARAMS, validateHexColor } from '../../../util/themeStyle';
@@ -110,6 +112,8 @@ const POPUP_BUTTON_TEXT_MAX_LENGTH = 64;
 const POPUP_MAX_BUTTONS = 3;
 const POPUP_BUTTON_TYPES = ['ok', 'close', 'cancel', 'default', 'destructive'];
 const APP_NAME_DISPLAY_DURATION = 3800;
+const PLACEHOLDER_LUMINANCE_THRESHOLD = 0.705;
+const PLACEHOLDER_TINT_WEIGHT = 0.05;
 const DEFAULT_BUTTON_TEXT: Record<string, RegularLangKey> = {
   ok: 'OK',
   cancel: 'Cancel',
@@ -1207,29 +1211,43 @@ const WebAppTab = ({
     );
   }
 
-  function renderDefaultPlaceholder() {
-    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
-    return (
-      <div className={className}>
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-      </div>
-    );
-  }
-
   function renderPlaceholder() {
+    const placeholderBackgroundColor = backgroundColorFromEvent || backgroundColorFromSettings;
+    let color = 'var(--color-web-app-placeholder)';
+    if (placeholderBackgroundColor) {
+      const background = buildColorFromHex(placeholderBackgroundColor);
+      const isLight = getLuminance(background) > PLACEHOLDER_LUMINANCE_THRESHOLD;
+      color = buildHexFromColor(mixColors(
+        background,
+        buildColorFromHex(isLight ? '#000000' : '#ffffff'),
+        PLACEHOLDER_TINT_WEIGHT,
+        { space: 'srgb' },
+      ));
+    }
+
     if (!placeholderPath) {
-      return renderDefaultPlaceholder();
+      return renderDefaultPlaceholder(color);
     }
     return (
       <svg
         className={buildClassName(styles.loadingPlaceholder, isLoaded && styles.hide)}
         viewBox="0 0 512 512"
+        style={`color: ${color}`}
       >
         <path className={styles.placeholderPath} d={placeholderPath} />
       </svg>
+    );
+  }
+
+  function renderDefaultPlaceholder(color: string) {
+    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
+    return (
+      <div className={className} style={`color: ${color}`}>
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+      </div>
     );
   }
 

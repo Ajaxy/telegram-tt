@@ -25,6 +25,7 @@ The reference column describes the initialized defaults. In particular, matching
 | <a id="color-background-compact-menu-reactions"></a>`--color-background-compact-menu-reactions` | Background compact menu reactions | `#FFFFFFEB` | `#212121DD` | No; literal or Sass-computed value |
 | <a id="color-background-compact-menu-hover"></a>`--color-background-compact-menu-hover` | Background compact menu hover | `#00000011` | `#00000066` | No; literal or Sass-computed value |
 | <a id="color-background-menu-separator"></a>`--color-background-menu-separator` | Background menu separator | `#0000001a` | `#ffffff1a` | No; literal or Sass-computed value |
+| <a id="color-web-app-placeholder"></a>`--color-web-app-placeholder` | Mini app splash logo when no custom background is set | `#EFEFF4` | `#333334` | No; literal or Sass-computed value |
 | <a id="color-background-selected"></a>`--color-background-selected` | Selected app surface | `#F4F4F5` | `#2C2C2C` | No; generated palette value |
 | <a id="color-background-secondary"></a>`--color-background-secondary` | Secondary app surface | `#F4F4F5` | `#0F0F0F` | No; generated palette value |
 | <a id="color-background-secondary-accent"></a>`--color-background-secondary-accent` | Accented secondary surface | `#E4E4E5` | `#191919` | No; generated palette value |
