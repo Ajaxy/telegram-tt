@@ -47,7 +47,7 @@ export function buildMentionSuggestion(
     dismissOnOutsideClick: false,
     findSuggestionMatch: findMentionMatch,
     allow: () => config.mention!.isEnabled(),
-    items: ({ query }) => filterMentionUsers(config, query),
+    items: ({ editor: currentEditor, query }) => filterMentionUsers(config, query, isAtInputStart(currentEditor)),
     command: ({ editor: currentEditor, range, props }) => {
       const user = props as ApiUser;
       const content = buildMentionContent(user);
@@ -130,7 +130,12 @@ function findMentionMatch({ $position }: { $position: ResolvedPos }): Suggestion
   return buildBlockMatch($position, text, text.slice(1));
 }
 
-function filterMentionUsers(config: RichEditorTooltipsConfig, query: string) {
+function isAtInputStart(editor: Editor) {
+  const { doc, selection } = editor.state;
+  return /^@[^\s@]*$/u.test(doc.textBetween(0, selection.from, '\n', '\n'));
+}
+
+function filterMentionUsers(config: RichEditorTooltipsConfig, query: string, withInlineBots: boolean) {
   const context = config.getContext();
   const usersById = getGlobal().users.byId;
   const memberIds = context.groupChatMembers?.reduce((result: string[], member) => {
@@ -140,7 +145,7 @@ function filterMentionUsers(config: RichEditorTooltipsConfig, query: string) {
     return result;
   }, []);
   const ids = unique([
-    ...(context.topInlineBotIds || []),
+    ...((withInlineBots && context.topInlineBotIds) || []),
     ...(memberIds || []),
     ...(context.topGuestBotIds || []),
   ]);

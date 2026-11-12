@@ -32,7 +32,7 @@ export function buildInlineBotSuggestion(
     offset: { mainAxis: TOOLTIP_GAP_PX },
     dismissOnOutsideClick: false,
     allowSpaces: true,
-    findSuggestionMatch: findInlineBotMatch,
+    findSuggestionMatch: ({ $position }) => findInlineBotMatch($position, config),
     allow: () => config.inlineBot!.isEnabled(),
     debounce: SEARCH_DEBOUNCE_MS,
     items: ({ editor: currentEditor }) => {
@@ -120,9 +120,14 @@ function buildHelpElement(help: string) {
   return element;
 }
 
-function findInlineBotMatch({ $position }: { $position: ResolvedPos }): SuggestionMatch {
+function findInlineBotMatch($position: ResolvedPos, config: RichEditorTooltipsConfig): SuggestionMatch {
   const text = getSolePlainTextAtCaret($position, true);
   const query = parseInlineBotQuery(text);
+  // A leading mention of a non-bot user must not block the mention tooltip for the next `@`
+  if (query && config.getContext().inlineBots?.[query.username.toLowerCase()] === false) {
+    return null;
+  }
+
   // Text length is not the doc range when a mention node adds its open/close tokens
   return query ? { range: { from: $position.start(), to: $position.pos }, query: query.query, text: text! } : null;
 }
