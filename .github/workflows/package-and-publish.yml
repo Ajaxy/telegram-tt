@@ -313,6 +313,7 @@ jobs:
           curl -X PATCH -H "Authorization: Bearer $GH_TOKEN" -d '{"draft": false}' "https://api.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID"
 
       - name: Update Gist with JSON
+        if: env.UPDATER_GIST_ID != ''
         run: |
           ASSET_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets" | jq -r '.[] | select(.name == "latest.json") | .id')
           JSON_CONTENT=$(curl -sSL -H "Accept: application/octet-stream" -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/assets/$ASSET_ID")
