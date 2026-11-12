@@ -73,7 +73,10 @@ export interface WidgetHostOptions {
     isProtected?: boolean;
     /** The client's answer to `prefers-reduced-motion`, for the widget's CSS and matchMedia (local patch, NOTICE.md) */
     reducedMotion?: boolean;
-    /** A press keeps the client's composer focused, including over selectable widget text */
+    /**
+     * A finger's tap keeps the client's composer focused, also over selectable widget text; a mouse press on that text
+     * still takes the focus, which selecting needs
+     */
     shouldKeepFocus?: boolean;
     onLog?: (level: string, text: string) => void;
     onDiag?: (kind: string, detail: string) => void;

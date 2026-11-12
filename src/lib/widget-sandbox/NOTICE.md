@@ -49,7 +49,8 @@ Paths are relative to this directory; `host/`, `renderer/`, `sandbox/` and `shar
 
 ### Host (`host/widget-host.ts`)
 
-- The client's gesture, focus and protected-copy bridge.
+- The client's gesture, focus and protected-copy bridge. `shouldKeepFocus` keeps the composer focused on a finger's
+  tap only: a mouse press on selectable text needs its default to select.
 - `WidgetHostOptions.reducedMotion` answers `prefers-reduced-motion`.
 - `WidgetHost.suspend()` ends the runtime (the worker is freed and `onDead` is not called) and keeps its last render
   as a still picture, `frozen` with no reason and so no badge: widgets that leave the viewport keep their picture

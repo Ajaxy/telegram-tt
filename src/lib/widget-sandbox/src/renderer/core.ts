@@ -1677,8 +1677,11 @@ function swallow(e: Event) {
   }
   if (e.type === 'mousedown' || e.type === 'selectstart') {
     // No focus move and no selection from a press, unless it lands on text the widget made selectable (user-select: text,
-    // D18); the press itself still reaches the widget (pointerdown, mousedown, :active).
-    if (e.cancelable && (isProtected || (e.type === 'mousedown' && shouldKeepFocus) || !selectable(e.target))) e.preventDefault();
+    // D18); the press itself still reaches the widget (pointerdown, mousedown, :active). A finger's tap keeps the
+    // client's composer focused there too: a finger selects with a hold, which needs no mousedown, while a mouse needs
+    // the mousedown's default to select at all (local patch, NOTICE.md).
+    const keepsFocus = e.type === 'mousedown' && shouldKeepFocus && pressedByFinger;
+    if (e.cancelable && (isProtected || keepsFocus || !selectable(e.target))) e.preventDefault();
     return;
   }
   if (e.type === 'focusin') {
@@ -1702,11 +1705,14 @@ let changedOwn = false;
 const fingersDown = new Set<number>();
 let changedFingerDown = false;
 const isFingerOrPen = (e: PointerEvent) => e.pointerType === 'touch' || e.pointerType === 'pen';
+/** The last press on the widget was a finger's or a pen's: its compatibility mousedown comes after it is let go. */
+let pressedByFinger = false;
 function pressedHere(e: Event) {
   if (!e.isTrusted) return;
   const id = (e as PointerEvent).pointerId;
   ownPointers.add(id);
-  if (isFingerOrPen(e as PointerEvent)) fingersDown.add(id);
+  pressedByFinger = isFingerOrPen(e as PointerEvent);
+  if (pressedByFinger) fingersDown.add(id);
   changedOwn = true;
   changedFingerDown = fingersDown.has(id);
 }
