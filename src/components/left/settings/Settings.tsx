@@ -188,9 +188,7 @@ const Settings = ({
   const {
     closeShareChatFolderModal,
     openSettingsScreen,
-    addRecentlyFoundSettingId,
     loadNestedSettingsData,
-    clearSettingsHighlight,
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
@@ -256,9 +254,6 @@ const Settings = ({
   });
 
   const handleSearchResultSelect = useLastCallback((item: SettingsSearchItem) => {
-    if (currentScreen !== SettingsScreens.Search) return;
-
-    addRecentlyFoundSettingId({ id: item.id });
     openSettingsScreen({ screen: item.screen, highlight: item.highlight });
   });
 
@@ -582,12 +577,10 @@ const Settings = ({
           onReset={handleReset}
           editedFolderId={foldersState.folderId}
           hasProfileBackground={hasProfileBackground}
-          isMenuForcedOpen={highlight?.isInHeaderMenu}
           searchSessionId={searchSessionId}
           getSearchQuery={getSearchQuery}
           onSearchOpen={handleSearchOpen}
           onSearchQueryChange={setSearchQuery}
-          onMenuClose={clearSettingsHighlight}
         />
         {renderCurrentSectionContent(isScreenActive, activeKey)}
       </>

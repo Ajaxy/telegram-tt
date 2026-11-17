@@ -1,2 +1,0 @@
-import e from"./ceylon-dTiwAriW.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/ceylon" instead of "highlight.js/lib/languages/ceylon.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=ceylon.js-H0rg5DuW.js.map

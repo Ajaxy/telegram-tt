@@ -4,6 +4,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { ApiAvatarUpload } from '../../../api/types';
 import type { RegularLangKey } from '../../../types/language';
 import { ChatCreationProgress } from '../../../types';
 
@@ -62,7 +63,7 @@ const NewChatStep2 = ({
 
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');
-  const [photo, setPhoto] = useState<File | undefined>();
+  const [photo, setPhoto] = useState<ApiAvatarUpload | undefined>();
   const [error, setError] = useState<RegularLangKey | undefined>();
 
   const isLoading = creationProgress === ChatCreationProgress.InProgress;
@@ -161,6 +162,7 @@ const NewChatStep2 = ({
         <AvatarEditable
           onChange={setPhoto}
           title={lang('AddPhoto')}
+          isLoading={isLoading}
         />
         <InputText
           value={title}

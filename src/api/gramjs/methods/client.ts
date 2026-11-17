@@ -11,6 +11,8 @@ import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
 import type { ThreadId } from '../../../types';
 import type {
+  ApiAccountConnection,
+  ApiAvatarUpload,
   ApiInitialArgs,
   ApiMediaFormat,
   ApiOnProgress,
@@ -30,6 +32,7 @@ import {
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
+import { resetGiftTmpPassword } from '../giftTmpPassword';
 import {
   buildInputChannelFromLocalDb,
   buildInputPeerFromLocalDb,
@@ -78,6 +81,8 @@ import { ChatAbortController } from '../ChatAbortController';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
+const ACCOUNT_REQUEST_TIMEOUT_MS = 10000;
+const TERMINATED_SESSION_ERRORS = new Set(['AUTH_KEY_UNREGISTERED', 'SESSION_REVOKED', 'USER_DEACTIVATED']);
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
@@ -112,26 +117,21 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
 
   (self as any).maxBufferSize = maxBufferSize;
 
-  client = new TelegramClient(
-    session,
-    TELEGRAM_API_ID,
-    TELEGRAM_API_HASH,
-    {
-      deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
-      systemVersion: platform || DEFAULT_PLATFORM,
-      appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
-      useWSS: true,
-      additionalDcsDisabled: IS_TEST,
-      shouldDebugExportedSenders,
-      shouldForceHttpTransport,
-      shouldAllowHttpTransport,
-      dcId,
-      langPack: LANG_PACK,
-      langCode,
-      systemLangCode: navigator.language,
-      isTestServerRequested,
-    },
-  );
+  client = new TelegramClient(session, TELEGRAM_API_ID, TELEGRAM_API_HASH, {
+    deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
+    systemVersion: platform || DEFAULT_PLATFORM,
+    appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
+    useWSS: true,
+    additionalDcsDisabled: IS_TEST,
+    shouldDebugExportedSenders,
+    shouldForceHttpTransport,
+    shouldAllowHttpTransport,
+    dcId,
+    langPack: LANG_PACK,
+    langCode,
+    systemLangCode: navigator.language,
+    isTestServerRequested,
+  });
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
 
@@ -216,7 +216,62 @@ export async function destroy(noLogOut = false, noClearLocalDb = false) {
     resetUpdatesManager();
   }
 
+  resetGiftTmpPassword();
   client.destroy();
+}
+
+// Requests run without merging another account's entities or updates into the current account
+export async function invokeWithAccount<T extends GramJs.AnyRequest>(
+  request: T,
+  connection?: ApiAccountConnection,
+): Promise<T['__response'] | false | undefined> {
+  const accountClient = connection ? new TelegramClient(
+    new sessions.CallbackSession(connection.sessionData, () => undefined), TELEGRAM_API_ID, TELEGRAM_API_HASH,
+    {
+      deviceModel: navigator.userAgent || DEFAULT_USER_AGENT,
+      systemVersion: connection.platform || DEFAULT_PLATFORM,
+      appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
+      useWSS: true,
+      langPack: LANG_PACK,
+      langCode: connection.langCode,
+      systemLangCode: navigator.language,
+      shouldAllowHttpTransport: connection.shouldAllowHttpTransport,
+      shouldForceHttpTransport: connection.shouldForceHttpTransport,
+      isTestServerRequested: connection.sessionData.isTest,
+      additionalDcsDisabled: true,
+      autoReconnect: false,
+      connectionRetries: 1,
+      requestRetries: 1,
+    },
+  ) : client;
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      (async () => {
+        try {
+          if (connection) await accountClient.connect();
+          if (controller.signal.aborted) return undefined;
+          return await accountClient.invoke(request, undefined, controller.signal);
+        } finally {
+          // A connection can finish after the timeout has already destroyed its client
+          if (connection) accountClient.destroy();
+        }
+      })(),
+      new Promise<undefined>((resolve) => {
+        timeout = setTimeout(() => {
+          controller.abort();
+          resolve(undefined);
+        }, ACCOUNT_REQUEST_TIMEOUT_MS);
+      }),
+    ]);
+  } catch (err) {
+    // Requests can contain credentials that must not enter diagnostic logs, so only a terminated session is reported
+    return err instanceof RPCError && TERMINATED_SESSION_ERRORS.has(err.errorMessage) ? false : undefined;
+  } finally {
+    clearTimeout(timeout);
+    if (connection) accountClient.destroy();
+  }
 }
 
 export function disconnect() {
@@ -409,6 +464,12 @@ export async function downloadMedia(
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {
   return client.uploadFile({ file, onProgress, workers: UPLOAD_WORKERS });
+}
+
+export async function uploadAvatar({ file, video, videoStartTs }: ApiAvatarUpload) {
+  const [inputFile, inputVideo] = await Promise.all([uploadFile(file), video ? uploadFile(video) : undefined]);
+
+  return { file: inputFile, video: inputVideo, videoStartTs: inputVideo ? videoStartTs : undefined };
 }
 
 export function updateTwoFaSettings(params: TwoFaParams) {

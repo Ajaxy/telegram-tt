@@ -6,6 +6,7 @@ import type {
   ApiPeerColorOption,
   ApiPeerPhotos,
   ApiPeerProfileColorSet,
+  ApiPhoto,
   ApiSavedGifts,
   ApiSticker,
   ApiTopic,
@@ -17,7 +18,7 @@ import type { IconName } from '../../../types/icons/index';
 import type { AnimationLevel, ThemeKey } from '../../../types/index';
 import { MediaViewerOrigin } from '../../../types/index';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
+import { MIN_SHOWN_WALLET_NANOS, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
 import {
   getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
 } from '../../../global/helpers/index';
@@ -27,6 +28,7 @@ import {
   selectCurrentMessageList,
   selectCustomEmoji,
   selectPeer,
+  selectPeerAvatarPhoto,
   selectPeerHasProfileBackground,
   selectPeerPhotos,
   selectPeerProfileColor,
@@ -44,7 +46,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
-import { formatTonShortParts } from '../../../util/localization/format';
+import { formatTonParts } from '../../../util/localization/format';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { REM } from '../helpers/mediaDimensions.ts';
@@ -97,6 +99,7 @@ type StateProps = {
   emojiStatusSticker?: ApiSticker;
   emojiStatusSlug?: string;
   profilePhotos?: ApiPeerPhotos;
+  avatarPhoto?: ApiPhoto;
   profileColorOption?: ApiPeerColorOption<ApiPeerProfileColorSet>;
   theme: ThemeKey;
   isPlain?: boolean;
@@ -114,9 +117,6 @@ const MAX_PHOTO_DASH_COUNT = 30;
 const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
 
 const PATTERN_Y_SHIFT = 8 * REM;
-
-// 0.01 Gram
-const MIN_SHOWN_WALLET_NANOS = 10_000_000n;
 
 const ProfileInfo = ({
   isExpanded,
@@ -137,6 +137,7 @@ const ProfileInfo = ({
   emojiStatusSticker,
   emojiStatusSlug,
   profilePhotos,
+  avatarPhoto,
   peerId,
   isForMonoforum,
   profileColorOption,
@@ -448,7 +449,7 @@ const ProfileInfo = ({
   }
 
   function renderWalletBalance() {
-    const [whole, fraction] = formatTonShortParts(lang, walletBalance!);
+    const [whole, fraction] = formatTonParts(lang, walletBalance!, true);
 
     return (
       <button
@@ -644,6 +645,9 @@ const ProfileInfo = ({
           key={peer?.id}
           size="jumbo"
           peer={peer}
+          photo={avatarPhoto}
+          withVideo={canPlayVideo}
+          loopIndefinitely
           style={createVtnStyle('avatar', true)}
           storyCircleStyle={createVtnStyle('avatarStoryCircle', true)}
           onClick={hasAvatar ? handleMinimizedAvatarClick : undefined}
@@ -694,6 +698,7 @@ export default memo(withGlobal<OwnProps>(
     const userStatus = selectUserStatus(global, peerId);
     const chat = selectChat(global, peerId);
     const profilePhotos = selectPeerPhotos(global, peerId);
+    const avatarPhoto = selectPeerAvatarPhoto(global, peerId);
     const { mediaIndex, chatId: avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
@@ -726,6 +731,7 @@ export default memo(withGlobal<OwnProps>(
       emojiStatusSlug,
       emojiStatus,
       profilePhotos,
+      avatarPhoto,
       topic,
       messagesCount: topic ? selectThreadMessagesCount(global, peerId, topic.id) : undefined,
       profileColorOption: profileColor,

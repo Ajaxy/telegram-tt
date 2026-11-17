@@ -1,5 +1,5 @@
 import type { ElementRef } from '../../../lib/teact/teact';
-import { useRef, useState } from '../../../lib/teact/teact';
+import { useRef, useSignal, useState } from '../../../lib/teact/teact';
 
 import animateScroll, { isAnimatingScroll } from '../../../util/animateScroll';
 import { REM } from '../helpers/mediaDimensions';
@@ -23,9 +23,10 @@ export function useStickerPickerObservers(
   idPrefix: string,
   isHidden?: boolean,
 ) {
-  const stickerSetIntersectionsRef = useRef<boolean[]>([]);
+  const intersectingSetsRef = useRef(new Set<Element>());
 
   const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
+  const [getLastVisibleSetIndex, setLastVisibleSetIndex] = useSignal(0);
 
   const {
     observe: observeIntersectionForSet,
@@ -35,26 +36,39 @@ export function useStickerPickerObservers(
     rootRef: containerRef,
     throttleMs: STICKER_INTERSECTION_THROTTLE,
   }, (entries) => {
-    const stickerSetIntersections = stickerSetIntersectionsRef.current;
+    const intersectingSets = intersectingSetsRef.current;
 
-    entries.forEach((entry) => {
-      const index = Number(entry.target.id.replace(`${idPrefix}-`, ''));
-      stickerSetIntersections[index] = entry.isIntersecting;
+    entries.forEach(({ target, isIntersecting }) => {
+      if (isIntersecting) {
+        intersectingSets.add(target);
+      } else {
+        intersectingSets.delete(target);
+      }
     });
 
     if (isAnimatingScroll(containerRef.current)) {
       return;
     }
 
-    const minIntersectingIndex = stickerSetIntersections.reduce((lowestIndex, isIntersecting, index) => {
-      return isIntersecting && index < lowestIndex ? index : lowestIndex;
-    }, Infinity);
+    let minIntersectingIndex = Infinity;
+    let maxIntersectingIndex = -Infinity;
+    intersectingSets.forEach((element) => {
+      if (!element.isConnected) {
+        intersectingSets.delete(element);
+        return;
+      }
+
+      const index = Number(element.id.replace(`${idPrefix}-`, ''));
+      minIntersectingIndex = Math.min(minIntersectingIndex, index);
+      maxIntersectingIndex = Math.max(maxIntersectingIndex, index);
+    });
 
     if (minIntersectingIndex === Infinity) {
       return;
     }
 
     setActiveSetIndex(minIntersectingIndex);
+    setLastVisibleSetIndex(maxIntersectingIndex);
   });
 
   const {
@@ -83,12 +97,18 @@ export function useStickerPickerObservers(
     margin: COVERS_INTERSECTION_MARGIN,
   });
 
+  const isFrozenWhileHiddenRef = useRef(false);
+
   useSyncEffect(() => {
     if (isHidden) {
-      freezeForSet();
-      freezeForShowingItems();
+      if (!isFrozenWhileHiddenRef.current) {
+        isFrozenWhileHiddenRef.current = true;
+        freezeForSet();
+        freezeForShowingItems();
+      }
     } else {
       const timeout = window.setTimeout(() => {
+        isFrozenWhileHiddenRef.current = false;
         unfreezeForShowingItems();
         unfreezeForSet();
       }, UNFREEZE_DELAY);
@@ -101,6 +121,7 @@ export function useStickerPickerObservers(
   }, [freezeForSet, freezeForShowingItems, isHidden, unfreezeForSet, unfreezeForShowingItems]);
 
   const selectStickerSet = useLastCallback((index: number) => {
+    setLastVisibleSetIndex(index);
     setActiveSetIndex((currentIndex) => {
       const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
       const isClose = Math.abs(currentIndex - index) === 1;
@@ -120,6 +141,7 @@ export function useStickerPickerObservers(
 
   return {
     activeSetIndex,
+    getLastVisibleSetIndex,
     observeIntersectionForSet,
     observeIntersectionForShowingItems,
     observeIntersectionForPlayingItems,

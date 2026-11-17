@@ -44,6 +44,14 @@ const SEND_ALL_MODE = 130;
 const TEXT_COMMENT_OPCODE = 0;
 // TEP-62 `transfer`
 const NFT_TRANSFER_OPCODE = 0x5fcc3d14;
+const QUERY_ID_BITS = 64;
+// `addr_std$10`
+const ADDRESS_STD_TAG = 2;
+const ADDRESS_TAG_BITS = 2;
+const ADDRESS_HASH_BITS = 256;
+const HEX_DIGIT_BITS = 4;
+// `VarUInteger 16` keeps its byte length in 4 bits
+const COINS_LENGTH_BITS = 4;
 // A cell fits 1023 bits; the first comment cell also carries the 32-bit opcode
 const COMMENT_FIRST_CHUNK_BYTES = 123;
 const COMMENT_CHUNK_BYTES = 127;
@@ -191,9 +199,37 @@ export function buildSignedInternalBatchTransfer({ secretSeed, ...params }: Wall
   return buildBatchTransfer({ ...params, isInternal: true }, secretSeed);
 }
 
+// The signed external message and its normalised hash (TEP-467), by which explorers find the transaction
+export async function buildSignedBatchTransferWithHash({
+  secretSeed, ownAddress, anchorPublicKey, shouldDeploy, ...bodyParams
+}: WalletBatchTransferParams): Promise<{ boc: Uint8Array<ArrayBuffer>; msgHash: string }> {
+  const unsignedBody = await buildUnsignedBatchTransferBody(bodyParams);
+  const body = await attachSignature(unsignedBody, await signEd25519(unsignedBody.hash, secretSeed));
+  const stateInit = shouldDeploy ? await buildWalletStateInit(anchorPublicKey) : undefined;
+  const normalized = await new Builder()
+    .storeUint(2, 2) // `ext_in_msg_info$10`
+    .storeUint(0, 2) // Source: `addr_none`
+    .storeAddress(ownAddress.workchain, ownAddress.hash)
+    .storeCoins(0n) // Import fee
+    .storeBit(0) // No state init
+    .storeBit(1)
+    .storeRef(body)
+    .build();
+
+  return {
+    boc: serializeBoc(await buildExternalMessage(ownAddress, body, stateInit)),
+    msgHash: Array.from(normalized.hash, (byte) => byte.toString(16).padStart(2, '0')).join(''),
+  };
+}
+
 // A blank signature takes the same 64 bytes, so the size is known before the key is unlocked
 export async function getBatchTransferSize(params: WalletBatchMessageParams): Promise<number> {
   return (await buildBatchTransfer(params)).length;
+}
+
+// The external message with a blank signature, for an emulation that ignores the signature
+export async function buildUnsignedBatchTransferBoc(params: WalletBatchMessageParams): Promise<string> {
+  return bufferToBase64(await buildBatchTransfer(params));
 }
 
 async function buildBatchTransfer(
@@ -303,6 +339,56 @@ export async function buildNftTransferPayload({
   const notification = await buildSnakeCell(TEXT_COMMENT_OPCODE, new TextEncoder().encode(comment));
 
   return builder.storeBit(1).storeRef(notification).build();
+}
+
+// Reads a TEP-62 `transfer` up to `forward_amount`; addresses are returned in the raw form
+export function parseNftTransferPayload(cell: Cell) {
+  const { bits } = cell;
+  let offset = 0;
+
+  function readUint(bitCount: number) {
+    if (offset + bitCount > bits.length) {
+      throw new Error('Cell bits underflow');
+    }
+
+    let value = 0n;
+
+    for (let i = 0; i < bitCount; i++) {
+      value = (value << 1n) | BigInt(bits[offset++]);
+    }
+
+    return value;
+  }
+
+  // `addr_std$10` without anycast
+  function readAddress() {
+    if (readUint(ADDRESS_TAG_BITS) !== BigInt(ADDRESS_STD_TAG) || readUint(1) !== 0n) {
+      throw new Error('Unsupported address');
+    }
+
+    const workchain = BigInt.asIntN(UINT8_BITS, readUint(UINT8_BITS));
+    const hash = readUint(ADDRESS_HASH_BITS).toString(16).padStart(ADDRESS_HASH_BITS / HEX_DIGIT_BITS, '0');
+
+    return `${workchain}:${hash}`;
+  }
+
+  try {
+    if (readUint(UINT32_BITS) !== BigInt(NFT_TRANSFER_OPCODE)) return undefined;
+
+    readUint(QUERY_ID_BITS);
+
+    const newOwner = readAddress();
+    const responseDestination = readAddress();
+
+    // `custom_payload:(Maybe ^Cell)` takes one bit here, the cell itself is a ref
+    readUint(1);
+
+    const forwardAmount = readUint(Number(readUint(COINS_LENGTH_BITS)) * UINT8_BITS);
+
+    return { newOwner, responseDestination, forwardAmount };
+  } catch {
+    return undefined;
+  }
 }
 
 export async function buildSignedKeyRotation({

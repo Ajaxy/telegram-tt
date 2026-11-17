@@ -1,2 +1,0 @@
-import e from"./bnf-CWGByNpv.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/bnf" instead of "highlight.js/lib/languages/bnf.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=bnf.js-CZCf2cRy.js.map

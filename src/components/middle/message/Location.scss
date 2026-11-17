@@ -206,7 +206,7 @@
     font-size: 0.875rem;
     font-weight: var(--font-weight-medium);
     line-height: 1;
-    color: var(--accent-color);
+    color: var(--message-accent, var(--accent-color));
     text-align: center;
   }
 
@@ -216,6 +216,6 @@
     stroke-linecap: round;
     stroke-width: 2;
 
-    transition: stroke-dashoffset 2s, stroke 0.2s;
+    transition: stroke-dashoffset 2s, stroke var(--message-color-transition-duration, 0.2s);
   }
 }

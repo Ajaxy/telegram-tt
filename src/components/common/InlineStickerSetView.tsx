@@ -4,6 +4,7 @@ import { getActions } from '../../global';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
+import { getIsStickerSetInstalled } from '../../global/helpers';
 import { selectStickerSet } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
@@ -88,7 +89,7 @@ export function StickerSetToggleButton({ stickerSet }: { stickerSet: ApiStickerS
     [stickerSet.id],
   ));
 
-  const isAdded = Boolean(!stickerSet.isArchived && stickerSet.installedDate);
+  const isAdded = !stickerSet.isArchived && getIsStickerSetInstalled(stickerSet);
   const suffix = stickerSet.isEmoji ? 'Emoji' : 'Sticker';
   const label = lang(
     isAdded ? `StickerPackRemove${suffix}Count` : `StickerPackAdd${suffix}Count`,

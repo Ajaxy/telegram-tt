@@ -2,13 +2,14 @@ import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiInputDraftReplyInfo, ApiInputSuggestedPostInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiChatInviteImporter, ApiRestrictionReason } from './misc';
+import type { ApiChatInviteImporter, ApiPeerTheme, ApiRestrictionReason, ApiWallpaper } from './misc';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
   ApiFakeType,
   ApiProfileTab,
   ApiSendAsPeerId,
+  ApiShareTheme,
   ApiTypePeerColor,
 } from './peers';
 import type { ApiInputRichMessage } from './richMessage';
@@ -62,6 +63,7 @@ export interface ApiChat {
   isMonoforum?: boolean;
   isBotForum?: boolean;
   withForumTabs?: boolean;
+  withForumSidebar?: boolean;
   linkedMonoforumId?: string;
   linkedCommunityId?: string;
   isCollapsedInDialogs?: boolean;
@@ -138,6 +140,8 @@ export interface ApiCommunityLinkedPeer {
 }
 
 export interface ApiChatFullInfo {
+  peerTheme?: ApiPeerTheme;
+  wallpaper?: ApiWallpaper;
   isCache?: boolean;
   about?: string;
   ttlPeriod?: number;
@@ -189,6 +193,7 @@ export interface ApiChatFullInfo {
   botVerification?: ApiBotVerification;
   mainTab?: ApiProfileTab;
   guardBotId?: string;
+  shareTheme?: ApiShareTheme;
 
   // Community
   linkedPeers?: ApiCommunityLinkedPeer[];

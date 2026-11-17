@@ -7,6 +7,8 @@ type SendFlight = {
   // Viewport CSS pixels of the diamond center when the flight starts
   x: number;
   y: number;
+  // The diamond leaves swollen by the launch hit
+  scale: number;
   startedAt: number;
 };
 
@@ -43,7 +45,11 @@ export function startSendFlight() {
   launch = undefined;
   diamond.isStoneHidden = true;
   setSendFlight({
-    diamond, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, startedAt: performance.now(),
+    diamond,
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    scale: diamond.scale,
+    startedAt: performance.now(),
   });
 
   return true;

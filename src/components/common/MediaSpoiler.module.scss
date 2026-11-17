@@ -61,7 +61,12 @@
 .dots {
   --x-direction: var(--background-size);
   --y-direction: 0;
-  --background-url: url("../../assets/spoilers/turbulence_1x.png");
+  --background-url:
+    image-set(
+      url("../../assets/spoilers/turbulence_1x.avif") 1x,
+      url("../../assets/spoilers/turbulence_2x.avif") 2x,
+      url("../../assets/spoilers/turbulence_3x.avif") 3x
+    );
   --background-size: 256px;
 
   position: absolute;
@@ -115,14 +120,6 @@
     background-size: var(--background-size) var(--background-size);
 
     animation: 2s linear -1.5s infinite opacity-breath;
-  }
-
-  @media (-webkit-min-device-pixel-ratio: 2) {
-    --background-url: url("../../assets/spoilers/turbulence_2x.png");
-  }
-
-  @media (-webkit-min-device-pixel-ratio: 3) {
-    --background-url: url("../../assets/spoilers/turbulence_3x.png");
   }
 }
 

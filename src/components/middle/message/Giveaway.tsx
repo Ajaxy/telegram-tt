@@ -19,6 +19,7 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { getDays, MONTH } from '../../../util/dates/units';
 import { isoToEmoji } from '../../../util/emoji/emoji';
 import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
@@ -405,7 +406,9 @@ export default memo(withGlobal<OwnProps>(
     const sender = (giveaway?.channelIds[0] ? selectChat(global, giveaway.channelIds[0]) : undefined)
       || selectForwardedSender(global, message) || chat;
 
-    const sticker = giveaway && selectGiftStickerForDuration(global, giveaway.months);
+    const sticker = giveaway && selectGiftStickerForDuration(
+      global, giveaway.months !== undefined ? getDays(giveaway.months * MONTH) : undefined,
+    );
 
     return {
       chat,

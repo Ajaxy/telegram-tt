@@ -57,8 +57,8 @@
     outline: none !important;
 
     transition:
-      background-color 0.2s,
-      color 0.2s,
+      background-color var(--message-color-transition-duration, 0.2s),
+      color var(--message-color-transition-duration, 0.2s),
       opacity 0.2s;
 
     white-space-collapse: preserve;
@@ -124,10 +124,10 @@
 
     &.primary {
       --ripple-color: rgba(0, 0, 0, 0.08);
-      --button-text-color: var(--color-white);
+      --button-text-color: var(--color-primary-foreground);
       --button-background-color: var(--color-primary);
-      --button-active-text-color: var(--color-white);
-      --button-active-background-color: rgba(var(--color-primary-shade-rgb), 0.9);
+      --button-active-text-color: var(--color-primary-foreground);
+      --button-active-background-color: var(--color-primary-shade);
       --button-no-ripple-background-color: var(--color-primary-shade-darker);
     }
 
@@ -135,7 +135,7 @@
       --ripple-color: rgba(0, 0, 0, 0.08);
       --button-text-color: var(--color-text);
       --button-background-color: var(--color-background);
-      --button-active-text-color: white;
+      --button-active-text-color: var(--color-primary-foreground);
       --button-active-background-color: var(--color-primary);
       --button-no-ripple-background-color: var(--color-primary-shade);
     }
@@ -152,8 +152,8 @@
       --ripple-color: rgba(var(--color-error-rgb), 0.16);
       --button-text-color: var(--color-error);
       --button-background-color: var(--color-background);
-      --button-active-text-color: var(--color-white);
-      --button-active-background-color: var(--color-error);
+      --button-active-text-color: var(--color-error-foreground);
+      --button-active-background-color: var(--color-error-background);
       --button-no-ripple-background-color: var(--color-error-shade);
     }
 
@@ -209,7 +209,7 @@
       --ripple-color: rgba(0, 0, 0, 0.08);
       --button-text-color: var(--accent-color);
       --button-background-color: transparent;
-      --button-active-text-color: var(--color-white);
+      --button-active-text-color: var(--color-primary-foreground);
       --button-active-background-color: var(--accent-color);
       --button-no-ripple-background-color: var(--active-color);
 
@@ -218,10 +218,10 @@
 
     &.adaptive {
       --ripple-color: var(--accent-background-active-color);
-      --button-text-color: var(--accent-color);
-      --button-background-color: var(--accent-background-color);
-      --button-active-background-color: var(--accent-background-active-color);
-      --button-no-ripple-background-color: var(--accent-background-active-color);
+      --button-text-color: var(--message-accent, var(--accent-color));
+      --button-background-color: var(--message-tint, var(--accent-background-color));
+      --button-active-background-color: var(--message-tint-hover, var(--accent-background-active-color));
+      --button-no-ripple-background-color: var(--message-tint-hover, var(--accent-background-active-color));
     }
 
     &.dark {

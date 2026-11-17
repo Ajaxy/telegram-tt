@@ -1,26 +1,90 @@
+// Prints the open chat as a light transcript: no wallpaper or fills, thin outlines tell messages apart
 @media print {
-  body,
+  // Theme and chat palettes are inline styles, so `!important` is needed to print dark-on-white in any theme
   html,
-  .messages-layout {
-    background: #fff;
+  #MiddleColumn,
+  .MessageList {
+    --color-background: #fff !important;
+    --color-text: #000 !important;
+    --color-text-secondary: #555 !important;
+    --color-text-meta: #555 !important;
+    --color-links: #000 !important;
+    --action-message-bg: transparent !important;
+    --message-service-background: transparent !important;
+    --message-service-text: #000 !important;
+
+    color-scheme: light !important;
+  }
+
+  .MessageList {
+    @each $direction in incoming, outgoing {
+      --message-#{$direction}-background: transparent !important;
+      --message-#{$direction}-text: #000 !important;
+      --message-#{$direction}-text-rgb: 0, 0, 0 !important;
+      --message-#{$direction}-secondary: #555 !important;
+      --message-#{$direction}-secondary-rgb: 85, 85, 85 !important;
+      --message-#{$direction}-meta: #555 !important;
+      --message-#{$direction}-meta-rgb: 85, 85, 85 !important;
+      --message-#{$direction}-accent: #000 !important;
+      --message-#{$direction}-accent-rgb: 0, 0, 0 !important;
+      --message-#{$direction}-links: #000 !important;
+      --message-#{$direction}-links-decoration: underline !important;
+      --message-#{$direction}-control: transparent !important;
+      --message-#{$direction}-control-foreground: #000 !important;
+      --message-#{$direction}-file-title: #000 !important;
+      --message-#{$direction}-file-description: #555 !important;
+      --message-#{$direction}-tint: transparent !important;
+      --message-#{$direction}-tint-hover: transparent !important;
+      --message-#{$direction}-table-background: transparent !important;
+      --message-#{$direction}-table-border: #999 !important;
+      --message-#{$direction}-code-dark: 0 !important;
+    }
+
+    // Size containment makes the list unbreakable, so pages would cut through messages
+    container-type: normal !important;
+
+    .live-tail {
+      min-height: 0 !important;
+    }
+
+    // Peer colors keep their text color but lose their fills
+    [class*="peer-color-"] {
+      --accent-background-color: transparent !important;
+    }
+
+    .Message {
+      --color-reaction-chosen: transparent;
+      --text-color-reaction-chosen: #000;
+    }
+  }
+
+  html,
+  body {
+    background: #fff !important;
   }
 
   #LeftColumn,
   #RightColumn-wrapper,
+  #FoldersSidebar,
   .ChatOrUserPicker,
   #Notifications,
   .Modal,
   .ActiveCallHeader,
   .unread-count,
   #middle-column-portals,
+  .MiddleHeader .back-button,
   .header-tools,
+  .MiddleHeaderPanesIsland,
   .ScrollDownButton,
-  .middle-column-footer {
+  .middle-column-footer,
+  .bubble-canvas,
+  .message-select-control,
+  .message-action-buttons,
+  .svg-appendix,
+  .EmbeddedMessage--background-icons,
+  .WebPage--background-icons,
+  .tauri-drag-region {
     display: none !important;
-  }
-
-  #MiddleColumn {
-    border-left: none !important;
   }
 
   html,
@@ -28,6 +92,7 @@
   #root,
   #Main,
   #MiddleColumn,
+  .MiddleHeader,
   .MessageList,
   .messages-layout,
   .Transition,
@@ -41,21 +106,142 @@
     width: 100% !important;
     max-width: 100% !important;
     height: auto !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+
+    background: none !important;
+    box-shadow: none !important;
+
+    mask-image: none !important;
+  }
+
+  .MiddleHeader {
+    margin-bottom: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid #000 !important;
+    color: #000 !important;
   }
 
   .messages-container {
     width: 100% !important;
-    max-width: 100rem !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    padding: 0 !important;
   }
 
-  .MessageList .sticky-date > span,
-  .MessageList .local-action-message > span,
-  .MessageList .ActionMessage > span,
-  .MessageList .empty > span {
-    color: var(--color-text) !important;
-    background: var(--color-background-own) !important;
+  .message-date-group {
+    padding-top: 0 !important;
+  }
+
+  .sticky-date {
+    position: static !important;
+
+    break-after: avoid;
+
+    margin: 1rem 0 0.5rem !important;
+    border-bottom: 1px solid #999;
+
+    opacity: 1 !important;
+
+    > span {
+      padding: 0 !important;
+      font-weight: var(--font-weight-semibold);
+      color: #000 !important;
+      background: none !important;
+    }
+  }
+
+  .ActionMessage,
+  .local-action-message,
+  .empty {
+    color: #555 !important;
+
+    > span {
+      color: inherit !important;
+      background: none !important;
+    }
+  }
+
+  .Message {
+    opacity: 1 !important;
+
+    &::before {
+      display: none !important;
+    }
+  }
+
+  // Set on the flex item, since avoiding breaks deeper inside leaves an empty fragment at the page bottom
+  .message-content-wrapper,
+  .ActionMessage {
+    break-inside: avoid;
+  }
+
+  // Long text flows across pages instead of leaving a blank page before it
+  .message-content-wrapper:has(> .message-content.text:not(.media)) {
+    break-inside: auto;
+  }
+
+  // The icon is recolored by an inline SVG filter with its on-screen color, which can be white over a cover
+  // image that buttons lose in print
+  .Message .toggle-play .AnimatedSticker {
+    filter: brightness(0) !important;
+  }
+
+  .Message .download-button {
+    display: none !important;
+  }
+
+  // The control color is cleared to drop fills, so text drawn with it gets its own color
+  .text-entity-diff-insert,
+  .text-entity-diff-replace-new,
+  .Audio .voice-duration > * {
+    color: #000 !important;
+  }
+
+  // Own messages keep their right alignment and get a darker outline
+  .message-content {
+    border: 1px solid #bbb !important;
+    box-shadow: none !important;
+
+    .Message.own & {
+      border-color: #555 !important;
+    }
+
+    // Stickers and round videos have no frame on screen either
+    &.custom-shape {
+      border: none !important;
+    }
+  }
+
+  // Overlays on photos and videos keep their backdrop for contrast, even when the browser skips backgrounds
+  .MessageMeta,
+  .message-media-duration {
+    print-color-adjust: exact;
+  }
+
+  // Sticker and round video badges sit on the cleared service background
+  .message-content.custom-shape {
+    --message-media-text: #555;
+  }
+
+  // File type tiles lose their fill like other controls, so the label turns dark inside an outline
+  .File .file-icon {
+    color: #000 !important;
+    background: none !important;
+    box-shadow: inset 0 0 0 1px #bbb;
+
+    .file-ext {
+      color: inherit !important;
+    }
+  }
+
+  .Message .Button {
+    border: 1px solid #bbb !important;
+    color: #000 !important;
+    background: none !important;
   }
 
   .hide-on-print {

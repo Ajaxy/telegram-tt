@@ -1,21 +1,13 @@
-import type { QrCodeGradient } from 'qr-code-styling';
-
 import blankUrl from '../../assets/blank.png';
 
 const QR_MARGIN = 10;
 const QR_IMAGE_SIZE_RATIO = 0.3;
 const QR_IMAGE_MARGIN = 8;
-const QR_GRADIENT_ROTATION = Math.PI / 4; // 45deg diagonal, matches the Telegram brand gradient direction
-
-export type QrGradientStops = {
-  from: string;
-  to: string;
-};
 
 type CreateStyledQrCodeOptions = {
   size: number;
   margin?: number;
-  gradient?: QrGradientStops;
+  color?: string;
   image?: string;
   imageSize?: number;
 };
@@ -33,24 +25,18 @@ function ensureQrCodeStyling() {
 }
 
 // Builds a Telegram-styled QR instance shared by the auth flow and the share-QR modal.
-// When `gradient` is passed, the dots and corners are tinted with a diagonal linear gradient.
+// When `color` is passed, the dots and corners are tinted with it.
 export async function createStyledQrCode({
   size,
   margin = QR_MARGIN,
-  gradient,
+  color,
   image = blankUrl,
   imageSize = QR_IMAGE_SIZE_RATIO,
 }: CreateStyledQrCodeOptions) {
   const QrCodeStyling = (await ensureQrCodeStyling()).default;
 
-  const dotsGradient: QrCodeGradient | undefined = gradient ? {
-    type: 'linear',
-    rotation: QR_GRADIENT_ROTATION,
-    colorStops: [
-      { offset: 0, color: gradient.from },
-      { offset: 1, color: gradient.to },
-    ],
-  } : undefined;
+  // An undefined color would override the library default
+  const colorOptions = color ? { color } : undefined;
 
   return new QrCodeStyling({
     width: size,
@@ -60,11 +46,11 @@ export async function createStyledQrCode({
     type: 'svg',
     dotsOptions: {
       type: 'rounded',
-      gradient: dotsGradient,
+      ...colorOptions,
     },
     cornersSquareOptions: {
       type: 'extra-rounded',
-      gradient: dotsGradient,
+      ...colorOptions,
     },
     imageOptions: {
       imageSize,

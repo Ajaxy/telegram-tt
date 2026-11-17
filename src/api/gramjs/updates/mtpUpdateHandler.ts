@@ -37,6 +37,7 @@ import {
   buildApiMessageEntity,
   buildApiPhoto, buildApiUsernames, buildPrivacyRules,
 } from '../apiBuilders/common';
+import { buildApiTopicEdit } from '../apiBuilders/forums';
 import { buildApiStarGiftAuctionUserState, buildApiTypeStarGiftAuctionState } from '../apiBuilders/gifts';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
@@ -60,6 +61,8 @@ import {
   buildMessageDraft,
 } from '../apiBuilders/messages';
 import {
+  buildApiPeerTheme,
+  buildApiWallpaper,
   buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
@@ -240,7 +243,17 @@ export function updater(update: Update) {
     if (update.message instanceof GramJs.MessageService) {
       const { action } = update.message;
 
-      if (action instanceof GramJs.MessageActionChatEditTitle) {
+      if (action instanceof GramJs.MessageActionSetChatTheme && !(update instanceof GramJs.UpdateNewScheduledMessage)) {
+        // Difference messages use zero `pts` and `ptsCount` and can contain historical theme actions
+        const shouldReload = update instanceof GramJs.UpdateNewMessage && !update.pts && !update.ptsCount;
+        const peerTheme = shouldReload ? undefined : buildApiPeerTheme(action.theme);
+        sendApiUpdate({
+          '@type': 'updatePeerTheme',
+          id: message.chatId,
+          peerTheme,
+          shouldReload: shouldReload || undefined,
+        });
+      } else if (action instanceof GramJs.MessageActionChatEditTitle) {
         sendApiUpdate({
           '@type': 'updateChat',
           id: message.chatId,
@@ -521,6 +534,15 @@ export function updater(update: Update) {
         hasUnreadMention: false,
         isMediaUnread: false,
       },
+    });
+  } else if (update instanceof GramJs.UpdateMessageWidgetData) {
+    sendApiUpdate({
+      '@type': 'updateMessageWidgetData',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      messageId: update.msgId,
+      chatData: update.chatData,
+      publicData: update.publicData,
+      publicDataHash: update.publicDataHash?.toString(),
     });
   } else if (update instanceof GramJs.UpdateMessagePoll) {
     const {
@@ -910,6 +932,14 @@ export function updater(update: Update) {
       id: buildApiPeerId(userId, 'user'),
       user: { phoneNumber: phone },
     });
+  } else if (update instanceof GramJs.UpdatePeerWallpaper) {
+    const id = getApiChatIdFromMtpPeer(update.peer);
+    const wallpaper = update.wallpaper && buildApiWallpaper(update.wallpaper);
+    sendApiUpdate({
+      '@type': 'updatePeerWallpaper',
+      id,
+      wallpaper,
+    });
   } else if (update instanceof GramJs.UpdatePeerSettings) {
     const { peer, settings } = update;
     const peerId = getApiChatIdFromMtpPeer(peer);
@@ -1157,6 +1187,13 @@ export function updater(update: Update) {
       '@type': 'updatePinnedTopicsOrder',
       chatId: getApiChatIdFromMtpPeer(update.peer),
       order: update.order || [],
+    });
+  } else if (update instanceof GramJs.UpdateEditForumTopic) {
+    sendApiUpdate({
+      '@type': 'updateTopicEdit',
+      chatId: getApiChatIdFromMtpPeer(update.peer),
+      topicId: update.topicId,
+      topicEdit: buildApiTopicEdit(update),
     });
   } else if (update instanceof GramJs.UpdateRecentEmojiStatuses) {
     sendApiUpdate({ '@type': 'updateRecentEmojiStatuses' });

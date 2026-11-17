@@ -2,6 +2,7 @@ import type { ElementRef } from '../lib/teact/teact';
 import { useEffect } from '../lib/teact/teact';
 
 import { hasActiveViewTransition } from './animations/useViewTransition';
+import useWindow from './useWindow';
 
 const BACKDROP_CLASSNAME = 'backdrop';
 
@@ -14,15 +15,21 @@ export default function useVirtualBackdrop(
   ignoreRightClick?: boolean,
   excludedClosestSelector?: string,
 ) {
+  const renderingWindow = useWindow();
+
   useEffect(() => {
     if (!isOpen || !onClose) {
       return undefined;
     }
 
+    const ownerDocument = containerRef.current?.ownerDocument || renderingWindow.document;
     const handleEvent = (e: MouseEvent) => {
       const container = containerRef.current;
       const target = e.target as HTMLElement | null;
-      if (!container || !target || (ignoreRightClick && e.button === 2) || hasActiveViewTransition()) {
+      if (
+        !container || !target || (ignoreRightClick && e.button === 2)
+        || (ownerDocument === document && hasActiveViewTransition())
+      ) {
         return;
       }
 
@@ -38,10 +45,10 @@ export default function useVirtualBackdrop(
       }
     };
 
-    document.addEventListener('mousedown', handleEvent);
+    ownerDocument.addEventListener('mousedown', handleEvent);
 
     return () => {
-      document.removeEventListener('mousedown', handleEvent);
+      ownerDocument.removeEventListener('mousedown', handleEvent);
     };
-  }, [excludedClosestSelector, ignoreRightClick, isOpen, containerRef, onClose]);
+  }, [excludedClosestSelector, ignoreRightClick, isOpen, containerRef, onClose, renderingWindow]);
 }

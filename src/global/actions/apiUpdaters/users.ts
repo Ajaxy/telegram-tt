@@ -173,6 +173,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       return updatePeerFullInfo(global, id, { ttlPeriod });
     }
+
+    case 'updatePeerTheme':
+      if (update.shouldReload) {
+        if (isUserId(update.id)) actions.loadFullUser({ userId: update.id });
+        else actions.loadFullChat({ chatId: update.id, force: true });
+        return undefined;
+      }
+      if (!selectPeerFullInfo(global, update.id)) return undefined;
+      return updatePeerFullInfo(global, update.id, { peerTheme: update.peerTheme });
+
+    case 'updatePeerWallpaper':
+      if (!selectPeerFullInfo(global, update.id)) return undefined;
+      return updatePeerFullInfo(global, update.id, { wallpaper: update.wallpaper });
   }
 
   return undefined;

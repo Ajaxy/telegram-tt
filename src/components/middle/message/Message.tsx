@@ -71,6 +71,7 @@ import {
   isMessageLocal,
   isMessageLocalOnly,
   isMessageTranslatable,
+  isMessageUnsupported,
   isOwnMessage,
   isReplyToMessage,
   isSystemBot,
@@ -140,6 +141,7 @@ import { getMessageKey } from '../../../util/keys/messageKey';
 import { parseTranslationCacheKey } from '../../../util/keys/translationKey';
 import { getServerTime } from '../../../util/serverTime';
 import stopEvent from '../../../util/stopEvent';
+import { getRichQuoteTexts } from '../../../util/text/richQuote';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -159,6 +161,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import usePeerColor from '../../../hooks/usePeerColor';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useTextHighlight from '../../../hooks/useTextHighlight';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
 import useFocusMessageListElement from './hooks/useFocusMessageListElement';
@@ -184,7 +187,7 @@ import PeerColorWrapper from '../../common/PeerColorWrapper';
 import RankBadge from '../../common/RankBadge';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import Sparkles from '../../common/Sparkles';
-import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
+import UnsupportedPlate from '../../common/UnsupportedPlate';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import InputText from '../../ui/InputText';
@@ -217,6 +220,7 @@ import StoryMention from './StoryMention';
 import TodoList from './TodoList';
 import Video from './Video';
 import WebPage from './WebPage';
+import Widget from './Widget';
 
 import './Message.scss';
 
@@ -244,6 +248,8 @@ type OwnProps = {
   isThreadTop?: boolean;
   shouldIgnoreSendFocus?: boolean;
   isQuickPreview?: boolean;
+  // A message not sent yet (a bot's prepared message): its widget runs as a preview
+  isPreview?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
   getIsMessageListReady?: Signal<boolean>;
   containerRef?: ElementRef<HTMLDivElement>;
@@ -279,6 +285,8 @@ type StateProps = {
   focusDirection?: FocusDirection;
   focusedQuote?: string;
   focusedQuoteOffset?: number;
+  focusedTodoItemId?: number;
+  focusedPollOption?: string;
   noFocusHighlight?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
   isResizingContainer?: boolean;
@@ -376,6 +384,7 @@ const Message = ({
   withSenderName,
   noComments,
   noReplies,
+  isPreview,
   appearanceOrder,
   isJustAdded,
   isFirstInGroup,
@@ -412,6 +421,8 @@ const Message = ({
   focusDirection,
   focusedQuote,
   focusedQuoteOffset,
+  focusedTodoItemId,
+  focusedPollOption,
   noFocusHighlight,
   scrollTargetPosition,
   isResizingContainer,
@@ -519,7 +530,6 @@ const Message = ({
   const isLocalOnly = isMessageLocalOnly(message);
 
   const [isTranscriptionHidden, setIsTranscriptionHidden] = useState(false);
-  const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
   const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const [shouldPlayDiceEffect, requestDiceEffect, hideDiceEffect] = useFlag();
@@ -534,7 +544,6 @@ const Message = ({
     isContextMenuOpen,
     contextMenuAnchor,
     contextMenuTarget,
-    isContextMenuAltKeyPressed,
     handleBeforeContextMenu,
     handleContextMenu: onContextMenu,
     handleContextMenuClose,
@@ -591,7 +600,8 @@ const Message = ({
     && !isLocalOnly
     && readMetricsMessage.viewsCount !== undefined;
   const hasMessageReply = isReplyToMessage(message) && !shouldHideReply
-    && (!isEphemeralReply || Boolean(replyMessage));
+    && (!isEphemeralReply || Boolean(replyMessage))
+    && (!isInDocumentGroup || isFirstInDocumentGroup);
 
   useMessageReadMetrics({
     messageRef: ref,
@@ -610,13 +620,14 @@ const Message = ({
     voice, document, sticker, contact,
     invoice, location,
     action, game, storyData, giveaway,
-    giveawayResults, todo, dice,
+    giveawayResults, todo, dice, widget,
   } = getMessageContent(message);
 
   const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
 
   const hasStoryReply = Boolean(storyReplyInfo);
   const hasThread = Boolean(repliesThreadInfo) && messageListType === 'thread';
+  const isUnsupported = isMessageUnsupported(message);
   const isCustomShape = !withVoiceTranscription && getMessageCustomShape(message);
   const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
@@ -792,21 +803,15 @@ const Message = ({
   }, [isLastInList, transcribedText, withVoiceTranscription]);
 
   useEffect(() => {
-    const element = ref.current;
     const isPartialAlbumDelete = message.isInAlbum && album?.messages.some((msg) => !msg.isDeleting);
-    if (!element || isPartialAlbumDelete) return;
+    if (isPartialAlbumDelete) return;
 
     if (!message.isDeleting) {
-      setIsPlayingSnapAnimation(false);
       setIsPlayingDeleteAnimation(false);
       return;
     }
 
-    if (animateSnap(element)) {
-      setIsPlayingSnapAnimation(true);
-    } else {
-      setIsPlayingDeleteAnimation(true);
-    }
+    setIsPlayingDeleteAnimation(true);
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- Synchronize animation on `isDeleting` changes
   }, [message.isDeleting]);
 
@@ -831,7 +836,6 @@ const Message = ({
     isFocused && !noFocusHighlight && 'focused',
     isForwarding && 'is-forwarding',
     isPlayingDeleteAnimation && 'is-deleting',
-    isPlayingSnapAnimation && 'is-dissolving',
     isInDocumentGroup && 'is-in-document-group',
     isAlbum && 'is-album',
     message.hasUnreadMention && 'has-unread-mention',
@@ -847,7 +851,8 @@ const Message = ({
   );
 
   const text = textMessage && getMessageContent(textMessage).text;
-  const isInvertedMedia = Boolean(message.isInvertedMedia);
+  // Unsupported media can keep the flag, but its plate has no caption to put above it
+  const isInvertedMedia = Boolean(message.isInvertedMedia) && !isUnsupported;
 
   const replyToMsgId = messageReplyInfo?.replyToMsgId;
   const replyToPeerId = messageReplyInfo?.type === 'message' ? messageReplyInfo.replyToPeerId : undefined;
@@ -903,6 +908,31 @@ const Message = ({
   const currentTranslatedText = shouldTranslate ? translatedText || previousTranslatedText : undefined;
   const currentTranslatedRichMessage = shouldTranslate
     ? translatedRichMessage || (isTranslationPending !== false ? previousTranslatedRichMessage : undefined) : undefined;
+  const forcedText = (isShowingSummary && summary?.text)
+    || (requestedTranslationLanguage ? currentTranslatedText : undefined);
+  const forcedRichMessage = requestedTranslationLanguage ? currentTranslatedRichMessage : undefined;
+  // Quote offsets refer to the original text, not a summary or translation
+  const quoteToHighlight = forcedText || forcedRichMessage ? undefined : focusedQuote;
+  const textRef = useRef<HTMLDivElement>();
+  const richMessage = forcedRichMessage || textMessage?.content.richMessage;
+  const shouldHighlight = Boolean(highlight || quoteToHighlight);
+  const richQuoteTexts = useMemo(
+    () => shouldHighlight && richMessage ? getRichQuoteTexts(richMessage.blocks) : undefined,
+    [richMessage, shouldHighlight],
+  );
+  const quoteSelector = focusedTodoItemId !== undefined
+    ? `.todo-list .Checkbox:has(input[value="${focusedTodoItemId}"]) .label, `
+    + `.todo-list [data-todo-item-id="${focusedTodoItemId}"]`
+    : focusedPollOption !== undefined ? `[data-poll-option="${btoa(focusedPollOption)}"]` : undefined;
+  const highlightedText = forcedText?.text ?? textForLanguageDetection;
+  useTextHighlight(textRef, { text: highlightedText, richTexts: richQuoteTexts, search: highlight });
+  const getQuoteRange = useTextHighlight(quoteSelector ? ref : textRef, {
+    text: highlightedText,
+    richTexts: richQuoteTexts,
+    quote: quoteToHighlight,
+    quoteOffset: focusedQuoteOffset,
+    quoteSelector,
+  });
 
   const phoneCall = action?.type === 'phoneCall' ? action : undefined;
 
@@ -936,6 +966,7 @@ const Message = ({
     (photo || video || isAlbum || invoice?.extendedMedia || invoice?.photo)
     && ((text?.text.length || 0) > MIN_MESSAGE_LENGTH_FOR_WIDE_MEDIA || isMediaWithCommentButton),
   );
+  const hasWidgetTimeOverlay = Boolean(widget && (!hasText || isInvertedMedia) && !hasReactions);
   const contentClassName = buildClassName(buildContentClassName(message, album, {
     poll,
     webPage,
@@ -954,7 +985,9 @@ const Message = ({
     withVoiceTranscription,
     peerColorClass,
     hasOutsideReactions,
-  }), hasWideMedia && 'with-wide-media');
+  }), hasWideMedia && 'with-wide-media', hasWidgetTimeOverlay && 'widget-time-overlay',
+  // The time takes the widget's corner on the interface's side, whatever the direction of the message's content
+  hasWidgetTimeOverlay && lang.isRtl && 'widget-time-overlay-rtl');
 
   const withAppendix = contentClassName.includes('has-appendix');
   const emojiSize = getCustomEmojiSize(text?.emojiOnlyCount);
@@ -968,6 +1001,9 @@ const Message = ({
     metaPosition = 'none';
   } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
+  } else if (isUnsupported) {
+    // The plate replaces the text, so the meta stands over its corner, as on a sticker
+    metaPosition = 'standalone';
   } else if (hasText && !webPage && !emojiSize && !isInvertedMedia) {
     metaPosition = 'in-text';
   } else if (isInvertedMedia && !emojiSize && (hasFactCheck || webPage)) {
@@ -1013,7 +1049,8 @@ const Message = ({
     noFocusHighlight,
     isResizingContainer,
     isJustAdded,
-    isQuote: Boolean(focusedQuote),
+    isQuotePending: Boolean(quoteToHighlight && richMessage?.isPart),
+    getQuoteRange,
     scrollTargetPosition,
   });
 
@@ -1112,7 +1149,9 @@ const Message = ({
       return (
         <MessageRichText
           message={textMessage}
-          forcedRichMessage={requestedTranslationLanguage ? currentTranslatedRichMessage : undefined}
+          forcedRichMessage={forcedRichMessage}
+          focusedQuote={quoteToHighlight}
+          focusedQuoteOffset={focusedQuoteOffset}
           isOwn={isOwn}
           noAvatars={noAvatars}
           canAutoLoadMedia={canAutoLoadMedia}
@@ -1126,17 +1165,12 @@ const Message = ({
       );
     }
 
-    const forcedText = (isShowingSummary && summary?.text)
-      || (requestedTranslationLanguage ? currentTranslatedText : undefined);
     return (
       <MessageText
         messageOrStory={textMessage}
         forcedText={forcedText}
         isForAnimation={isForAnimation}
-        focusedQuote={focusedQuote}
-        focusedQuoteOffset={focusedQuoteOffset}
         emojiSize={emojiSize}
-        highlight={highlight}
         isProtected={isProtected}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1386,9 +1420,10 @@ const Message = ({
             chatId={chatId}
           />
         )}
-        {!isAlbum && isRoundVideo && !withVoiceTranscription && (
+        {!isAlbum && isRoundVideo && (
           <RoundVideo
             message={message}
+            className={withVoiceTranscription ? 'under-transcription' : undefined}
             threadId={threadId}
             isInScheduled={isScheduled}
             observeIntersection={observeIntersectionForLoading}
@@ -1516,8 +1551,15 @@ const Message = ({
         {!isInvertedMedia && (
           <>
             {renderInvertibleMediaContent(hasCustomAppendix)}
-            {hasText && !hasAnimatedEmoji && (
-              <div className={textContentClass} dir="auto">
+            {isUnsupported && (
+              <UnsupportedPlate
+                className="unsupported-plate"
+                title={lang('UnsupportedMessageTitle')}
+                text={lang('MessageUnsupported')}
+              />
+            )}
+            {hasText && !hasAnimatedEmoji && !isUnsupported && (
+              <div className={textContentClass} dir="auto" ref={textRef}>
                 {renderMessageText()}
                 {isNewTextPending && renderMessageTextAnimation()}
                 {hasFactCheck && (
@@ -1564,7 +1606,7 @@ const Message = ({
       outgoingStatus && 'with-outgoing-icon',
     );
 
-    const hasMediaAfterText = isAlbum || (!isAlbum && photo) || (!isAlbum && video && !isRoundVideo);
+    const hasMediaAfterText = isAlbum || widget || (!isAlbum && photo) || (!isAlbum && video && !isRoundVideo);
     const hasContentAfterText = hasMediaAfterText || (!hasAnimatedEmoji && hasFactCheck);
     const isMetaInText = metaPosition === 'in-text';
 
@@ -1572,7 +1614,7 @@ const Message = ({
       <>
         {renderWebPage()}
         {hasText && !hasAnimatedEmoji && (
-          <div className={textContentClass} dir="auto">
+          <div className={textContentClass} dir="auto" ref={textRef}>
             {renderMessageText()}
             {isNewTextPending && renderMessageTextAnimation()}
             {!hasContentAfterText && isMetaInText && renderReactionsAndMeta()}
@@ -1630,6 +1672,21 @@ const Message = ({
   function renderInvertibleMediaContent(hasCustomAppendix: boolean) {
     const content = (
       <>
+        {widget && (
+          <Widget
+            message={message}
+            theme={theme}
+            isInSelectMode={isInSelectMode}
+            isProtected={isProtected}
+            isActive={isMessageListActive}
+            canReply={canReply}
+            hasHeader={Boolean(asForwarded || hasSubheader || shouldRenderSenderName() || (isInvertedMedia && hasText))}
+            hasTimeOverlay={hasWidgetTimeOverlay}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+            isPreview={isPreview}
+          />
+        )}
         {isAlbum && observeIntersectionForLoading && (
           <Album
             album={album}
@@ -2081,7 +2138,6 @@ const Message = ({
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
           targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
-          isAltKeyPressed={isContextMenuAltKeyPressed}
           message={message}
           album={album}
           messageListType={messageListType}
@@ -2205,6 +2261,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
       quote: focusedQuote, quoteOffset: focusedQuoteOffset, scrollTargetPosition,
+      todoItemId: focusedTodoItemId, pollOption: focusedPollOption,
     } = (isFocused && focusedMessage) || {};
 
     const middleSearch = selectCurrentMiddleSearch(global);
@@ -2377,6 +2434,8 @@ export default memo(withGlobal<OwnProps>(
       isResizingContainer: isFocused ? isResizingContainer : undefined,
       focusedQuote: isFocused ? focusedQuote : undefined,
       focusedQuoteOffset: isFocused ? focusedQuoteOffset : undefined,
+      focusedTodoItemId: isFocused ? focusedTodoItemId : undefined,
+      focusedPollOption: isFocused ? focusedPollOption : undefined,
       scrollTargetPosition: isFocused ? scrollTargetPosition : undefined,
       senderBoosts,
       tags: global.savedReactionTags?.byKey,

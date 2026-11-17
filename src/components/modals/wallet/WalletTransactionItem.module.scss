@@ -7,9 +7,11 @@
   gap: 0.75rem;
 
   padding: 0.5rem 0.75rem 0.4375rem 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius-list-item);
 
   transition: background-color 0.25s ease-out, box-shadow 0.35s ease-out;
+
+  corner-shape: squircle;
 
   &:hover {
     background-color: var(--color-chat-hover);
@@ -39,6 +41,8 @@ $sheen-lead: -0.2s;
 
   animation: sheen-fade $sheen-cycle linear $sheen-lead infinite;
 
+  corner-shape: inherit;
+
   &::before {
     background-image:
       linear-gradient(
@@ -62,6 +66,8 @@ $sheen-lead: -0.2s;
   mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
   mask-clip: content-box, border-box;
   mask-composite: exclude;
+
+  corner-shape: inherit;
 
   &::before {
     background-image: linear-gradient(105deg, transparent 42%, rgba(var(--sheen-deep), 0.85) 50%, transparent 58%);

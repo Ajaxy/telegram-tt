@@ -2,7 +2,7 @@ import { memo, useEffect } from '../../lib/teact/teact';
 
 import { ALL_FOLDER_ID } from '../../config';
 import { updateAppBadge } from '../../util/appBadge';
-import { formatIntegerCompact } from '../../util/textFormat';
+import { formatIntegerCompact } from '../../util/text/textFormat';
 
 import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';
 import useLang from '../../hooks/useLang';

@@ -1,0 +1,35 @@
+@layer ui.templates {
+  .root {
+    padding: 0.75rem;
+  }
+
+  .header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 0.75rem;
+
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.25rem;
+  }
+
+  .label {
+    overflow: hidden;
+    color: var(--color-text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .value {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+    transition: color 0.2s ease;
+  }
+
+  .accented {
+    color: var(--ui-accent-color, var(--color-primary));
+  }
+}

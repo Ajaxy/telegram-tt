@@ -1,4 +1,6 @@
 #MiddleColumn {
+  --app-slide-transition: var(--slide-transition);
+
   position: relative;
   z-index: 1;
 
@@ -7,6 +9,8 @@
 
   min-width: 0;
   height: 100%;
+
+  color: var(--color-text);
 
   opacity: 0;
 
@@ -75,8 +79,8 @@
         border-radius 0.15s,
         opacity var(--select-transition),
         transform var(--select-transition),
-        background-color 0.15s,
-        color 0.15s;
+        background-color var(--message-color-transition-duration, 0.15s),
+        color var(--message-color-transition-duration, 0.15s);
 
       transform: scale(1);
       opacity: 1;
@@ -191,6 +195,7 @@
     transform: translate3d(0, 0, 0);
 
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-end;
 
     width: 100%;
@@ -233,7 +238,7 @@
     @media (max-width: 600px) {
       --footer-side-inset: 0.5rem;
 
-      body.is-symbol-menu-open & {
+      body.has-symbol-menu-shift & {
         transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
       }
     }

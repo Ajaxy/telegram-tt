@@ -7,7 +7,7 @@ import type {
 import type { GlobalState } from '../global/types';
 import { ApiMediaFormat } from '../api/types';
 
-import { APP_NAME, DEBUG, IS_TEST } from '../config';
+import { APP_NAME, DEBUG, IS_TEST, NOTIFICATION_MAX_VOLUME, VAPID_SERVER_KEY } from '../config';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -40,21 +40,21 @@ import jsxToHtml from './element/jsxToHtml';
 import { buildCollectionByKey } from './iteratees';
 import { getTranslationFn } from './localization';
 import * as mediaLoader from './mediaLoader';
+import { checkIfPushSubscriptionFailed, getPushIdentity, reconcilePushNotifications } from './pushNotifications';
 import { debounce } from './schedulers';
 import { getServerTime } from './serverTime';
+import { hasStoredSession } from './sessions';
 
 import MessageSummary from '../components/common/MessageSummary';
 
-function getDeviceToken(subscription: PushSubscription) {
-  const data = subscription.toJSON();
-  return JSON.stringify({
-    endpoint: data.endpoint,
-    keys: data.keys,
-  });
+export function checkIfPushSupported() {
+  // Offline push needs a stored session to register the account, and it stops once the push service rejects us
+  return checkIfServiceWorkerNotificationsSupported() && Boolean(VAPID_SERVER_KEY) && 'PushManager' in window
+    && !checkIfPushSubscriptionFailed() && hasStoredSession();
 }
 
-function checkIfPushSupported() {
-  if (!IS_SERVICE_WORKER_SUPPORTED || IS_TAURI) return false;
+function checkIfServiceWorkerNotificationsSupported() {
+  if (!IS_SERVICE_WORKER_SUPPORTED || IS_TAURI || !('Notification' in window)) return false;
 
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
@@ -69,15 +69,6 @@ function checkIfPushSupported() {
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.warn('[PUSH] The user has blocked push notifications.');
-    }
-    return false;
-  }
-
-  // Check if push messaging is supported
-  if (!('PushManager' in window)) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('[PUSH] Push messaging isn\'t supported.');
     }
     return false;
   }
@@ -105,7 +96,6 @@ export function checkIfNotificationsSupported() {
   return true;
 }
 
-const expirationTime = 12 * 60 * 60 * 1000; // 12 hours
 // Notification id is removed from soundPlayed cache after 3 seconds
 const soundPlayedDelay = 3 * 1000;
 const soundPlayedIds = new Set<string>();
@@ -115,7 +105,8 @@ notificationSound.setAttribute('mozaudiochannel', 'notification');
 export async function playNotifySound(id?: string, volume?: number) {
   if (id !== undefined && soundPlayedIds.has(id)) return;
   const { notificationSoundVolume } = selectSettingsKeys(getGlobal());
-  const currentVolume = volume ? volume / 10 : notificationSoundVolume / 10;
+  const currentVolume = volume !== undefined ? volume / NOTIFICATION_MAX_VOLUME
+    : notificationSoundVolume / NOTIFICATION_MAX_VOLUME;
   if (currentVolume === 0) return;
   notificationSound.volume = currentVolume;
   if (id !== undefined) {
@@ -139,13 +130,6 @@ export async function playNotifySound(id?: string, volume?: number) {
 }
 
 export const playNotifySoundDebounced = debounce(playNotifySound, 1000, true, false);
-
-function checkIfShouldResubscribe(subscription: PushSubscription | null) {
-  const global = getGlobal();
-  if (!global.push || !subscription) return true;
-  if (getDeviceToken(subscription) !== global.push.deviceToken) return true;
-  return Date.now() - global.push.subscribedAt > expirationTime;
-}
 
 export async function requestPermission() {
   if (IS_TAURI) {
@@ -171,44 +155,6 @@ export async function requestPermission() {
   return permission === 'granted';
 }
 
-async function unsubscribeFromPush(subscription: PushSubscription | null) {
-  const { deleteDeviceToken } = getActions();
-  if (subscription) {
-    try {
-      const deviceToken = getDeviceToken(subscription);
-      await callApi('unregisterDevice', deviceToken);
-      await subscription.unsubscribe();
-      deleteDeviceToken();
-      return;
-    } catch (error) {
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('[PUSH] Unable to unsubscribe from push.', error);
-      }
-    }
-  }
-  const global = getGlobal();
-  if (global.push) {
-    await callApi('unregisterDevice', global.push.deviceToken);
-    deleteDeviceToken();
-  }
-}
-
-export async function unsubscribe() {
-  if (!checkIfPushSupported()) return;
-  const serviceWorkerRegistration = await navigator.serviceWorker.ready;
-  const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
-  await unsubscribeFromPush(subscription);
-}
-
-export async function unsubscribeLocally() {
-  if (!checkIfPushSupported()) return;
-  const serviceWorkerRegistration = await navigator.serviceWorker.getRegistration();
-  if (!serviceWorkerRegistration) return;
-  const subscription = await serviceWorkerRegistration.pushManager.getSubscription();
-  await subscription?.unsubscribe();
-}
-
 // Load custom emoji from the api if it's not cached already
 async function loadCustomEmoji(id: string) {
   let global = getGlobal();
@@ -231,72 +177,18 @@ async function loadCustomEmoji(id: string) {
   setGlobal(global);
 }
 
-let isSubscriptionFailed = false;
-export function checkIfOfflinePushFailed() {
-  return isSubscriptionFailed;
-}
-
 export async function subscribe() {
-  const { setDeviceToken, updateWebNotificationSettings } = getActions();
-  let hasWebNotifications = false;
-  let hasPushNotifications = false;
-  if (!checkIfPushSupported()) {
-    // Ask for notification permissions only if service worker notifications are not supported
-    // As pushManager.subscribe automatically triggers permission popup
-    hasWebNotifications = await requestPermission();
-    updateWebNotificationSettings({
-      hasWebNotifications,
-      hasPushNotifications,
-    });
+  const { updateWebNotificationSettings } = getActions();
+  const hasWebNotifications = await requestPermission();
+  if (!hasWebNotifications) {
+    updateWebNotificationSettings({ hasWebNotifications: false, hasPushNotifications: false });
     return;
   }
-  const serviceWorkerRegistration = await navigator.serviceWorker.ready;
-  let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
-  if (!checkIfShouldResubscribe(subscription)) return;
-  await unsubscribeFromPush(subscription);
-  try {
-    subscription = await serviceWorkerRegistration.pushManager.subscribe({
-      userVisibleOnly: true,
-    });
-    const deviceToken = getDeviceToken(subscription);
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log('[PUSH] Received push subscription: ', deviceToken);
-    }
-    await callApi('registerDevice', deviceToken);
-    setDeviceToken({ token: deviceToken });
-    hasPushNotifications = true;
-    hasWebNotifications = true;
-  } catch (error: any) {
-    if (Notification.permission === 'denied') {
-      // The user denied the notification permission which
-      // means we failed to subscribe and the user will need
-      // to manually change the notification permission to
-      // subscribe to push messages
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.warn('[PUSH] The user has blocked push notifications.');
-      }
-    } else {
-      // A problem occurred with the subscription, this can
-      // often be down to an issue or lack of the gcm_sender_id
-      // and / or gcm_user_visible_only
-      if (DEBUG) {
-        // eslint-disable-next-line no-console
-        console.log('[PUSH] Unable to subscribe to push.', error);
-      }
-      // Request permissions and fall back to local notifications
-      // if pushManager.subscribe was aborted due to invalid VAPID key.
-      if ([DOMException.ABORT_ERR, DOMException.NOT_SUPPORTED_ERR].includes(error.code)) {
-        isSubscriptionFailed = true;
-        hasWebNotifications = await requestPermission();
-      }
-    }
+  if (!checkIfPushSupported()) {
+    updateWebNotificationSettings({ hasWebNotifications: true, hasPushNotifications: false });
+    return;
   }
-  updateWebNotificationSettings({
-    hasWebNotifications,
-    hasPushNotifications,
-  });
+  await reconcilePushNotifications();
 }
 
 function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
@@ -459,6 +351,9 @@ export async function notifyAboutMessage({
 
   if (!message.id) return;
 
+  const canUseServiceWorker = checkIfServiceWorkerNotificationsSupported();
+  if (canUseServiceWorker && !navigator.serviceWorker?.controller) return;
+
   const activeReaction = getMessageRecentReaction(message);
   // Do not notify about reactions on messages that are not outgoing
   if (isReaction && !activeReaction) return;
@@ -468,30 +363,37 @@ export async function notifyAboutMessage({
     await loadCustomEmoji(activeReaction.reaction.documentId);
   }
 
-  const icon = await getAvatar(chat);
+  const icon = getGlobal().passcode.isScreenLocked ? undefined : await getAvatar(chat);
 
   const {
     title,
     body,
   } = getNotificationContent(chat, message as ApiMessage, activeReaction);
 
-  if (checkIfPushSupported()) {
-    if (navigator.serviceWorker?.controller) {
-      // notify service worker about new message notification
-      navigator.serviceWorker.controller.postMessage({
-        type: 'showMessageNotification',
-        payload: {
-          title,
-          body,
-          icon,
-          chatId: chat.id,
-          messageId: message.id,
-          shouldReplaceHistory: true,
-          isSilent: isSilent || message.isSilent,
-          reaction: activeReaction?.reaction,
-        },
-      });
-    }
+  // Without push state for this account the worker drops the notification, so the page shows it instead
+  const identity = canUseServiceWorker ? await getPushIdentity().catch(() => undefined) : undefined;
+
+  // A hidden touch page doesn't claim pushes, and encrypted ones can't be matched to a local notification
+  if (identity?.isPushEncrypted && IS_TOUCH_ENV && document.hidden) return;
+
+  if (identity) {
+    // notify service worker about new message notification
+    navigator.serviceWorker.controller?.postMessage({
+      type: 'showMessageNotification',
+      payload: {
+        ...identity,
+        kind: isReaction ? 'reaction' : 'message',
+        title,
+        body,
+        icon,
+        chatId: chat.id,
+        messageId: message.id,
+        shouldReplaceHistory: true,
+        isSilent: isSilent || message.isSilent,
+        // Page audio is unreliable in background mobile tabs, and the system sound also vibrates
+        shouldUseSystemSound: IS_TOUCH_ENV,
+      },
+    });
   } else {
     const dispatch = getActions();
     const options: NotificationOptions = {
@@ -506,7 +408,16 @@ export async function notifyAboutMessage({
       options.vibrate = [200, 100, 200];
     }
 
-    const notification = new Notification(title, options);
+    let notification: Notification;
+    try {
+      notification = new Notification(title, options);
+    } catch {
+      // Some mobile browsers only allow notifications from the service worker
+      void navigator.serviceWorker?.ready
+        .then((registration) => registration.showNotification(title, options))
+        .catch(() => undefined);
+      return;
+    }
 
     notification.onclick = () => {
       notification.close();
@@ -531,10 +442,13 @@ export async function notifyAboutMessage({
 
 export function closeMessageNotifications(payload: { chatId: string; lastReadInboxMessageId?: number }) {
   if (IS_TEST || !navigator.serviceWorker?.controller) return;
-  navigator.serviceWorker.controller.postMessage({
-    type: 'closeMessageNotifications',
-    payload,
-  });
+  void getPushIdentity().then((identity) => {
+    if (!identity) return;
+    navigator.serviceWorker.controller?.postMessage({
+      type: 'closeMessageNotifications',
+      payload: { ...payload, ...identity },
+    });
+  }).catch(() => undefined);
 }
 
 function getChatNotifyException(global: GlobalState, chat: ApiChat) {

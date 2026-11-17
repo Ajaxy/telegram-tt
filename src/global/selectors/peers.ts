@@ -19,6 +19,20 @@ export function selectPeerPhotos<T extends GlobalState>(global: T, peerId: strin
   return global.peers.profilePhotosById[peerId];
 }
 
+export function selectPeerAvatarPhoto<T extends GlobalState>(global: T, peerId: string) {
+  const avatarPhotoId = selectPeer(global, peerId)?.avatarPhotoId;
+  if (!avatarPhotoId) return undefined;
+
+  const userFullInfo = selectUserFullInfo(global, peerId);
+  const profilePhoto = userFullInfo ? userFullInfo.profilePhoto : selectChatFullInfo(global, peerId)?.profilePhoto;
+  if (profilePhoto?.id === avatarPhotoId) return profilePhoto;
+  if (userFullInfo?.personalPhoto?.id === avatarPhotoId) return userFullInfo.personalPhoto;
+  if (userFullInfo?.fallbackPhoto?.id === avatarPhotoId) return userFullInfo.fallbackPhoto;
+
+  const galleryPhoto = selectPeerPhotos(global, peerId)?.photos[0];
+  return galleryPhoto?.id === avatarPhotoId ? galleryPhoto : undefined;
+}
+
 export function selectCanGift<T extends GlobalState>(global: T, peerId: string) {
   const bot = selectBot(global, peerId);
   const user = selectUser(global, peerId);

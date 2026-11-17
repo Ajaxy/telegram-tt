@@ -1,2 +1,0 @@
-import e from"./php-template-8u8Pml-P.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/php-template" instead of "highlight.js/lib/languages/php-template.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=php-template.js-Cr9Csa_d.js.map

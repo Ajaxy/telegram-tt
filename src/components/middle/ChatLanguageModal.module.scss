@@ -5,7 +5,7 @@
     min-height: min(75vh, 32rem);
   }
 
-  :global(.matching-text-highlight) {
+  ::highlight(text-search) {
     color: var(--color-primary);
   }
 }

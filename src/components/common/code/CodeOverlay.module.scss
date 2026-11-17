@@ -23,10 +23,10 @@
 
   font-size: 1.25rem;
 
-  transition: background-color 0.15s ease-in-out;
+  transition: background-color var(--message-color-transition-duration, 0.15s) ease-in-out;
 
   &:hover, &.wrapOn {
-    background-color: var(--color-background-compact-menu-hover);
+    background-color: var(--code-background);
   }
 }
 
@@ -43,8 +43,10 @@
   padding: 0.125rem;
   border-bottom-left-radius: 0.25rem;
 
-  background-color: var(--color-background-compact-menu);
-  backdrop-filter: blur(1px);
+  // Opaque copy of the code surface, so scrolled code does not show through
+  background:
+    linear-gradient(var(--code-background), var(--code-background)),
+    var(--color-background);
 
   &.hidden {
     display: none;

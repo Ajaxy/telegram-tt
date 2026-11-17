@@ -16,7 +16,7 @@
   text-wrap: balance;
   white-space: pre-wrap;
 
-  background-color: var(--accent-background-color);
+  background-color: var(--message-tint, var(--accent-background-color));
 }
 
 .content {
@@ -27,7 +27,7 @@
   pointer-events: none;
   position: absolute;
   font-size: 0.8125rem;
-  color: var(--accent-color);
+  color: var(--message-accent, var(--accent-color));
 }
 
 .quoteOpen {

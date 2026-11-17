@@ -13,5 +13,33 @@
 // Safari extends the `body` background into its top and bottom browser chrome. Keep those areas
 // aligned with the client UI while `Main` renders the wallpaper with `--theme-background-color`.
 :global(body.is-ios).bg {
-  background-color: var(--color-background);
+  background-color: var(--browser-bottom-color, var(--color-background));
+}
+
+:global(html.has-browser-colors) {
+  background-color: var(--browser-top-color);
+}
+
+// Safari needs a fixed solid-color candidate for both wallpaper colors and panel resets
+.browserColorTop,
+.browserColorBottom {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: var(--z-local-search);
+  right: 0;
+  left: 0;
+
+  height: 0.75rem;
+}
+
+// Five visible pixels let Safari extend each solid color behind its browser controls
+.browserColorTop {
+  top: -0.4375rem;
+  background-color: var(--browser-top-color, var(--color-background));
+}
+
+.browserColorBottom {
+  bottom: -0.4375rem;
+  background-color: var(--browser-bottom-color, var(--color-background));
 }

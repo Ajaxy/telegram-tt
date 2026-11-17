@@ -25,7 +25,7 @@
     &.open:not(.in-attachment-modal) {
       transform: translate3d(0, 0, 0);
 
-      body.is-media-viewer-open & {
+      body.is-media-viewer-open &:not(.in-keyboard-slot) {
         transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
       }
     }
@@ -41,6 +41,19 @@
 
     &.left-column-open.in-middle-column {
       transform: translate3d(100vw, 0, 0) !important;
+    }
+
+    &.in-keyboard-slot {
+      position: absolute;
+      top: calc(var(--composer-bottom-gap-mobile) + env(safe-area-inset-bottom));
+      bottom: auto;
+      transform: translate3d(0, 0, 0);
+
+      transition: none;
+
+      body.keyboard-visible & {
+        top: var(--composer-bottom-gap-mobile);
+      }
     }
   }
 

@@ -7,6 +7,12 @@ export const lerp = (start: number, end: number, interpolationRatio: number) => 
   return (1 - interpolationRatio) * start + interpolationRatio * end;
 };
 
+export function getSmoothStep(value: number) {
+  const t = clamp(value, 0, 1);
+
+  return t * t * (3 - 2 * t);
+}
+
 // Fractional values cause blurry text & canvas. Round to even to keep whole numbers while centering
 export function roundToNearestEven(value: number) {
   return Math.round(value / 2) * 2;

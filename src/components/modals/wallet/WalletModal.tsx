@@ -3,10 +3,13 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiTonConnectSession, ApiWalletCollectible, ApiWalletTransaction } from '../../../api/types';
+import type {
+  ApiTonConnectSession, ApiUser, ApiWalletCollectible, ApiWalletTransaction,
+} from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { AnimationLevel } from '../../../types';
 import type { RegularLangKey } from '../../../types/language';
+import type { CardEditorRef } from './helpers/cardEditing';
 import { SettingsScreens } from '../../../types';
 import { WalletScreen } from './types';
 
@@ -14,13 +17,13 @@ import { TON_CURRENCY_CODE, WALLET_FIRST_TRANSFER_SUGGESTION } from '../../../co
 import { getIsWalletTransferSubmitted, WALLET_ERROR_LANG_KEYS } from '../../../global/helpers';
 import {
   selectCanExportWalletPhrase, selectIsWalletKeyMissing, selectShouldLoopStickers, selectTabState,
-  selectTonExplorerUrl, selectWalletAddress, selectWalletPublicKey, selectWalletTransactions,
+  selectTonExplorerUrl, selectUser, selectWalletAddress, selectWalletPublicKey, selectWalletTransactions,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
-import { formatTonShortFromNanos } from '../../../util/formatCurrency';
+import { formatTonNumber } from '../../../util/localization/format';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
-import { getAddressGroupSeparator, splitAddressIntoGroups } from '../../../util/tonAddress';
+import { settleWidgetWalletCall } from '../../../util/widgetWalletCalls';
 import useWalletCredentials from './useWalletCredentials';
 import useWalletKeyFlows from './useWalletKeyFlows';
 import useWalletNavigation from './useWalletNavigation';
@@ -43,8 +46,7 @@ import Link from '../../ui/Link';
 import MenuItem from '../../ui/MenuItem';
 import Spinner from '../../ui/Spinner';
 import Transition from '../../ui/Transition';
-import WalletBuyAmountScreen from './WalletBuyAmountScreen';
-import WalletBuyScreen from './WalletBuyScreen';
+import WalletAddressGroups from './WalletAddressGroups';
 import WalletCollectibleScreen from './WalletCollectibleScreen';
 import WalletConnectedAppScreen from './WalletConnectedAppScreen';
 import WalletConnectedAppsScreen from './WalletConnectedAppsScreen';
@@ -54,7 +56,8 @@ import WalletDisableBackupScreen from './WalletDisableBackupScreen';
 import WalletEnterPhraseScreen from './WalletEnterPhraseScreen';
 import WalletHowItWorksModal from './WalletHowItWorksModal';
 import WalletIntroScreen from './WalletIntroScreen';
-import WalletMainScreen, { TRANSACTIONS_TAB_INDEX } from './WalletMainScreen';
+import WalletMainScreen, { COLLECTIBLES_TAB_INDEX, TRANSACTIONS_TAB_INDEX } from './WalletMainScreen';
+import WalletMoveToGiftsDialog from './WalletMoveToGiftsDialog';
 import WalletPasscodeRequiredScreen from './WalletPasscodeRequiredScreen';
 import WalletPasswordScreen from './WalletPasswordScreen';
 import WalletPhraseInfoScreen from './WalletPhraseInfoScreen';
@@ -100,6 +103,7 @@ type StateProps = {
   walletCommentDecryption?: TabState['walletCommentDecryption'];
   walletTonConnect?: TabState['walletTonConnect'];
   tonConnectSessions?: ApiTonConnectSession[];
+  widgetBot?: ApiUser;
   decryptedComments?: Record<string, string>;
   animationLevel: AnimationLevel;
 };
@@ -109,8 +113,6 @@ const ACCENT_SCREENS = new Set([WalletScreen.Receive]);
 const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
   [WalletScreen.Main]: 'WalletTitle',
   [WalletScreen.Receive]: 'WalletReceiveTitle',
-  [WalletScreen.Buy]: 'WalletBuyTitle',
-  [WalletScreen.BuyAmount]: 'WalletBuyTitle',
   [WalletScreen.Currency]: 'WalletBuyCurrency',
   [WalletScreen.Send]: 'WalletSendTitle',
   [WalletScreen.SendAmount]: 'WalletSendTitle',
@@ -125,20 +127,23 @@ const SCREEN_TITLE_KEYS: Partial<Record<WalletScreen, RegularLangKey>> = {
 
 // The server caches the balance for about this long
 const POLL_INTERVAL = 30000;
+// The second tap of a double tap over the widget must not land in the window
+const WIDGET_SHIELD_DELAY = 700;
 
 const WalletModal = ({
   modal, canExportPhrase, isKeyMissing, hasLocalSecret, hasAppPasscode, address, publicKey, balance, tonExplorerUrl,
   transactions, loadedTransactions, collectibles, walletTransfer, walletMnemonic, walletBackup, walletReplace,
-  walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel,
+  walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel, widgetBot,
 }: OwnProps & StateProps) => {
   const {
     openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions,
-    loadWalletBuyContext, clearWalletBuy, decryptWalletComment,
+    openOnrampSession, decryptWalletComment,
     clearWalletCommentDecryption, dropWalletVaultSecrets, openSettingsScreen, openUrl,
     watchWalletActivity, unwatchWalletActivity, openStarsBalanceModal, loadWalletCollectibles,
     unlockWalletTonConnectRequest, respondWalletTonConnect, connectWalletTonConnectOauth, disconnectWalletTonConnect,
-    clearWalletTonConnect, closeUrlAuthModal,
-    disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion,
+    clearWalletTonConnect, closeUrlAuthModal, respondWidgetWalletCall, declineWidgetWalletCall,
+    disconnectAllWalletTonConnect, dismissWalletIntro, dismissSuggestion, saveWalletCardDraft,
+    loadWalletCollectibleGift,
   } = getActions();
 
   const lang = useLang();
@@ -255,6 +260,13 @@ const WalletModal = ({
     return unwatchWalletActivity;
   }, [isOpen, address]);
 
+  // As in the iOS app, card edits wait for a pause, but leaving the wallet saves them at once
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    return saveWalletCardDraft;
+  }, [isOpen]);
+
   // Screens like Receive have nothing to show without an address, so the modal falls back to the main screen
   useEffect(() => {
     if (isOpen && !address) reset();
@@ -263,6 +275,15 @@ const WalletModal = ({
   // Keyed on the values, so a new `modal` object with the same ones does not run the effect again
   const shouldReleaseKey = modal?.shouldReleaseKey;
   const initialTransactionId = modal?.initialTransactionId;
+  const shouldOpenCollectibles = modal?.shouldOpenCollectibles;
+  const shouldOpenReceive = modal?.shouldOpenReceive;
+  const hasCollectibles = Boolean(collectibles?.length);
+
+  // The main screen falls back to the transactions tab while there are no collectibles, and they load with the screen,
+  // so the collectibles tab is chosen once they arrive
+  useEffect(() => {
+    if (shouldOpenCollectibles && hasCollectibles) setActiveTab(COLLECTIBLES_TAB_INDEX);
+  }, [shouldOpenCollectibles, hasCollectibles]);
 
   // The record's own id can differ from the one the chat names when the transfer came from the chain
   const initialTransactionRecordId = useMemo(() => {
@@ -279,8 +300,14 @@ const WalletModal = ({
       return;
     }
 
+    // The top-up a widget's wallet call offered, once the address it shows is known
+    if (shouldOpenReceive && address) {
+      push(WalletScreen.Receive);
+      return;
+    }
+
     if (initialTransactionId) setSelectedTransactionId(initialTransactionRecordId);
-  }, [shouldReleaseKey, initialTransactionId, initialTransactionRecordId, push]);
+  }, [shouldReleaseKey, shouldOpenReceive, address, initialTransactionId, initialTransactionRecordId, push]);
 
   const handleCloseAnimationEnd = useLastCallback(() => {
     reset();
@@ -292,11 +319,18 @@ const WalletModal = ({
     setSelectedSessionId(undefined);
     sendFlow.reset();
     setActiveTab(0);
-    clearWalletBuy();
 
     // An abandoned login sends nothing: the site's session expires on the server
     if (walletTonConnect?.oauth && walletTonConnect.status !== 'done') {
       closeUrlAuthModal();
+    }
+
+    // A widget's call that the window closed on is declined, or failed if it closed on an error; an answered one is
+    // settled already
+    if (walletTonConnect?.widget) {
+      settleWidgetWalletCall(walletTonConnect.widget.callId, {
+        error: walletTonConnect.status === 'error' ? 'FAILED' : 'REJECTED',
+      });
     }
 
     clearWalletTonConnect();
@@ -307,6 +341,19 @@ const WalletModal = ({
   const isReading = credentials.intent === 'phrase' || credentials.intent === 'decrypt';
   const isRequestPending = (credentials.flow?.status === 'pending' && !isReading)
     || walletTonConnect?.status === 'pending';
+
+  // A widget's call opens the window under the finger that tapped it: the second tap of a double tap must land on
+  // nothing in it, the backdrop included (iOS and tdesktop shield the whole window as well)
+  const tonConnectWidget = walletTonConnect?.widget;
+  const [armedWidget, setArmedWidget] = useState<typeof tonConnectWidget>();
+  const isWidgetShielded = Boolean(tonConnectWidget) && armedWidget !== tonConnectWidget;
+
+  useEffect(() => {
+    if (!tonConnectWidget) return undefined;
+
+    const timeout = setTimeout(() => setArmedWidget(tonConnectWidget), WIDGET_SHIELD_DELAY);
+    return () => clearTimeout(timeout);
+  }, [tonConnectWidget]);
 
   const handleClose = useLastCallback(() => {
     if (isRequestPending) return;
@@ -334,10 +381,6 @@ const WalletModal = ({
       credentials.drop();
     }
 
-    if (screen === WalletScreen.BuyAmount) {
-      clearWalletBuy();
-    }
-
     sendFlow.handleBack();
     back();
   });
@@ -362,7 +405,16 @@ const WalletModal = ({
   });
 
   const handleTonConnectConfirm = useLastCallback(() => {
-    const { session, request, oauth } = walletTonConnect!;
+    const { session, request, oauth, widget } = walletTonConnect!;
+
+    if (widget) {
+      credentials.ask({ intent: 'tonConnect', run: (entered) => {
+        hasSubmittedTonConnectRef.current = true;
+        respondWidgetWalletCall(entered);
+      } });
+      return;
+    }
+
     if (!session && !oauth) return;
 
     credentials.ask({ intent: 'tonConnect', run: (entered) => {
@@ -377,7 +429,12 @@ const WalletModal = ({
   });
 
   const handleTonConnectDecline = useLastCallback(() => {
-    const { session, request, connectRequest, oauth } = walletTonConnect!;
+    const { session, request, connectRequest, oauth, widget } = walletTonConnect!;
+
+    if (widget) {
+      declineWidgetWalletCall();
+      return;
+    }
 
     if (oauth) {
       closeWalletModal();
@@ -508,6 +565,8 @@ const WalletModal = ({
   }, [decryptedComment, screen, credentialIntent, dropCredentials, back]);
 
   const headerBalanceRef = useRef<HTMLButtonElement>();
+  // The card editor of the wallet screen, which the gift screen asks to make and animate its changes
+  const cardEditorRef: CardEditorRef = useRef();
   const [headerBalanceWidth, setHeaderBalanceWidth] = useState(0);
 
   const handleOpenInExplorer = useLastCallback(() => {
@@ -524,15 +583,22 @@ const WalletModal = ({
   });
 
   const isTransactionRoot = stack.length === 1;
-  const handleTransactionDone = useLastCallback(() => {
-    if (isTransactionRoot) {
-      openWalletModal();
-    } else {
-      handleBack();
-    }
+  // A request opened on its own has no screens to move between, so the dialog takes the height of its content
+  const isAutoHeight = screen === WalletScreen.TonConnect && stack.length === 1;
+  const handleOpenWallet = useLastCallback(() => {
+    openWalletModal();
   });
 
   const handleOpenTransaction = useLastCallback((transaction: ApiWalletTransaction) => {
+    // Like Android, a gift moved through Telegram opens as the gift itself while the wallet holds it
+    const ownedGift = transaction.peer.type === 'telegramGift' && transaction.collectible
+      ? collectibles?.find(({ address: itemAddress }) => itemAddress === transaction.collectible!.address)
+      : undefined;
+    if (ownedGift) {
+      handleOpenCollectible(ownedGift);
+      return;
+    }
+
     setSelectedTransactionId(transaction.localId ?? transaction.id);
     push(WalletScreen.Transaction);
   });
@@ -543,6 +609,10 @@ const WalletModal = ({
   );
 
   const handleOpenCollectible = useLastCallback((collectible: ApiWalletCollectible) => {
+    if (collectible.type === 'gift' && collectible.gift) {
+      loadWalletCollectibleGift({ collectibleAddress: collectible.address });
+    }
+
     setSelectedCollectibleAddress(collectible.address);
     push(WalletScreen.Collectible);
   });
@@ -552,19 +622,12 @@ const WalletModal = ({
   });
 
   const handleOpenBuy = useLastCallback(() => {
-    push(WalletScreen.Buy);
+    openOnrampSession();
   });
 
   const handleOpenCurrency = useLastCallback(() => {
     push(WalletScreen.Currency);
   });
-
-  const handleProviderSelect = useLastCallback((provider: string) => {
-    loadWalletBuyContext({ provider });
-    push(WalletScreen.BuyAmount);
-  });
-
-  const wrongPhraseGroups = wrongPhrase?.address ? splitAddressIntoGroups(wrongPhrase.address) : undefined;
 
   // Memoized: the phrase screen is a memo component, and a new node each render would re-render it while the user types
   const isOwnPhraseExpected = Boolean(pendingReplace?.isOwnExpected);
@@ -645,7 +708,7 @@ const WalletModal = ({
             <span className={styles.headerBalanceLabel}>{lang('StarsBalance')}</span>
             <span className={styles.headerBalanceAmount}>
               <GramIcon />
-              {formatTonShortFromNanos(balance)}
+              {formatTonNumber(lang, balance, true)}
             </span>
           </button>
         </ModalHeaderAction>
@@ -686,13 +749,7 @@ const WalletModal = ({
   function renderScreenContent(key: WalletScreen, isActive: boolean) {
     switch (key) {
       case WalletScreen.Receive:
-        return <WalletReceiveScreen address={address!} onBuyClick={handleOpenBuy} />;
-      case WalletScreen.Buy:
-        return (
-          <WalletBuyScreen onCurrencyClick={handleOpenCurrency} onProviderSelect={handleProviderSelect} />
-        );
-      case WalletScreen.BuyAmount:
-        return <WalletBuyAmountScreen />;
+        return <WalletReceiveScreen address={address!} isBuyPending={modal?.isBuyPending} onBuyClick={handleOpenBuy} />;
       case WalletScreen.Currency:
         return <WalletCurrencyScreen onSelect={handleBack} />;
       case WalletScreen.Send:
@@ -702,6 +759,7 @@ const WalletModal = ({
             draft={sendDraft}
             onDraftChange={sendFlow.setDraft}
             onContinue={sendFlow.handleRecipientContinue}
+            onMoveToGifts={sendFlow.canMoveToGifts ? sendFlow.handleMoveToGiftsOpen : undefined}
           />
         );
       case WalletScreen.SendAmount:
@@ -712,7 +770,7 @@ const WalletModal = ({
             collectible={sendFlow.collectible}
             onSubmit={sendFlow.handleSubmit}
             onDraftChange={sendFlow.setDraft}
-            onBuy={handleOpenBuy}
+            onDeposit={handleOpenReceive}
           />
         );
       case WalletScreen.Transaction:
@@ -722,7 +780,7 @@ const WalletModal = ({
             isRoot={isTransactionRoot}
             onDecryptComment={handleDecryptComment}
             onSend={address ? sendFlow.handleSendTo : undefined}
-            onDone={handleTransactionDone}
+            onOpenWallet={handleOpenWallet}
           />
         ) : (
           <div className={styles.loading}>
@@ -734,6 +792,8 @@ const WalletModal = ({
         return selectedCollectible ? (
           <WalletCollectibleScreen
             collectible={selectedCollectible}
+            isActive={isActive}
+            cardEditorRef={cardEditorRef}
             onTransfer={sendFlow.handleOpenCollectibleTransfer}
             onDone={handleBack}
           />
@@ -821,6 +881,8 @@ const WalletModal = ({
         ) : (
           <WalletTonConnectScreen
             flow={walletTonConnect}
+            bot={widgetBot}
+            isArmed={!isWidgetShielded}
             onUnlock={handleTonConnectUnlock}
             onConfirm={handleTonConnectConfirm}
             onDecline={handleTonConnectDecline}
@@ -879,6 +941,7 @@ const WalletModal = ({
           <WalletMainScreen
             activeTab={activeTab}
             scrollContainerClosest={`.${styles.slide}`}
+            cardEditorRef={cardEditorRef}
             onProtect={keysFlows.handleEnableBackup}
             onProtectAccount={handleProtectAccount}
             onOpenSettings={handleOpenSettings}
@@ -899,9 +962,10 @@ const WalletModal = ({
       header={header}
       width="slim"
       height="auto"
-      dialogClassName={styles.dialog}
+      dialogClassName={buildClassName(styles.dialog, isWidgetShielded && styles.shielded)}
       noContentInlinePadding
       noScrollable
+      noLightDismiss={isWidgetShielded}
       ariaLabel={lang(screenTitleKey || 'WalletTitle')}
       onClose={handleClose}
       onCloseAnimationEnd={handleCloseAnimationEnd}
@@ -911,12 +975,17 @@ const WalletModal = ({
         name={transitionName}
         activeKey={screen}
         direction={direction}
-        className={styles.transition}
+        className={buildClassName(styles.transition, isAutoHeight && styles.autoHeight)}
       >
         {renderScreen}
       </Transition>
       <WalletSendFlight canLaunch={screen === WalletScreen.SendAmount} onReadyChange={setIsSendFlightReady} />
       <WalletHowItWorksModal isOpen={isHowItWorksOpen} onClose={closeHowItWorks} />
+      <WalletMoveToGiftsDialog
+        isOpen={sendFlow.isMoveToGiftsOpen}
+        onConfirm={sendFlow.handleMoveToGiftsConfirm}
+        onClose={sendFlow.handleMoveToGiftsClose}
+      />
       <ConfirmDialog
         isOpen={isPhraseWhyOpen}
         text={lang('WalletSecretPhraseWhyText')}
@@ -935,15 +1004,8 @@ const WalletModal = ({
         isOnlyConfirm
         onClose={keysFlows.handleWrongPhraseClose}
       >
-        {wrongPhraseGroups && (
-          <div className={styles.wrongPhraseAddress}>
-            {wrongPhraseGroups.map((group, index) => (
-              <span key={index} className={index % 2 ? styles.wrongPhraseGroupMuted : undefined}>
-                {group}
-                {getAddressGroupSeparator(index, wrongPhraseGroups.length)}
-              </span>
-            ))}
-          </div>
+        {wrongPhrase?.address && (
+          <WalletAddressGroups address={wrongPhrase.address} className={styles.wrongPhraseAddress} />
         )}
       </ConfirmDialog>
     </Modal>
@@ -992,6 +1054,7 @@ export default memo(withGlobal<OwnProps>(
       tonConnectSessions: global.wallet?.tonConnectSessions,
       decryptedComments: global.wallet?.decryptedComments,
       animationLevel: selectSharedSettings(global).animationLevel,
+      widgetBot: tabState.walletTonConnect?.widget && selectUser(global, tabState.walletTonConnect.widget.botId),
     };
   },
 )(WalletModal));

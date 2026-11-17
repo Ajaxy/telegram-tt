@@ -61,6 +61,8 @@ export interface ApiStarGiftUnique {
   valueAmount?: number;
   valueUsdAmount?: number;
   offerMinStars?: number;
+  // The profile that shows the gift while its NFT is held in a wallet
+  hostPeerId?: string;
   isBurned?: true;
   isCrafted?: true;
   craftChancePermille?: number;

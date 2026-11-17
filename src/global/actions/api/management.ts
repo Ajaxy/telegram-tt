@@ -423,7 +423,7 @@ addActionHandler('hidePeerSettingsBar', async (global, actions, payload): Promis
 
 addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
-    userId, file, isSuggest, tabId = getCurrentTabId(),
+    userId, photo, isSuggest, tabId = getCurrentTabId(),
   } = payload;
 
   const user = selectUser(global, userId);
@@ -434,7 +434,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
 
   const result = await callApi('uploadContactProfilePhoto', {
     user,
-    file,
+    photo,
     isSuggest,
   });
 
@@ -464,7 +464,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
 
-  if (file && !isSuggest) {
+  if (photo && !isSuggest) {
     actions.showNotification({
       message: {
         key: 'UserInfoSetCustomPhotoSuccessPhotoText',

@@ -1,11 +1,14 @@
+import { beginHeavyAnimation } from '../../../lib/teact/teact';
+
 import type { ApiDimensions, ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
-import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getMessageHtmlId } from '../../../global/helpers';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { getMessageHtmlId, getRichMessageMediaBlocks, isRichMediaMessage } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
+import { lerp } from '../../../util/math';
 import stopEvent from '../../../util/stopEvent';
 import getOffsetToContainer from '../../../util/visibility/getOffsetToContainer';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
@@ -16,12 +19,45 @@ import {
   MEDIA_VIEWER_MEDIA_QUERY,
   REM,
 } from '../../common/helpers/mediaDimensions';
+import { getPageMediaBlockId, isPageMediaBlock } from '../../iv/helpers/pageMedia';
+
+type Rect = Pick<DOMRectReadOnly, 'left' | 'top' | 'width' | 'height'>;
+
+type EditorGhostGeometry = {
+  box: Rect;
+  media: Rect;
+  radii: number[];
+};
+
+type EditorGhost = {
+  host: HTMLDivElement;
+  ghost: HTMLDivElement;
+  media: HTMLImageElement | HTMLCanvasElement;
+  mediaSize: ApiDimensions;
+  isAboveMediaViewer?: boolean;
+  from: EditorGhostGeometry;
+  to?: EditorGhostGeometry;
+  animations: Animation[];
+  fallbackTimeout?: number;
+  isFadingOut?: boolean;
+};
 
 const ANIMATION_DURATION = 200;
 const MIDDLE_HEADER_PANES_HEIGHT_PROPERTY = '--middle-header-panes-height';
 const EDITOR_LANDING_TIMEOUT = 1500;
+const EDITOR_GHOST_FLIGHT_STEPS = 16;
+const CORNER_RADIUS_PROPERTIES = [
+  'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomRightRadius', 'borderBottomLeftRadius',
+] as const;
+const CORNER_ALIGNMENT_TOLERANCE = 1;
+const MEDIA_VIEWER_SLIDE_SELECTOR = '.MediaViewerSlide--active img, .MediaViewerSlide--active video';
 
-let pendingEditorGhost: { ghost: HTMLDivElement; host: HTMLElement; fallbackTimeout: number } | undefined;
+let editorGhost: EditorGhost | undefined;
+
+export function getMediaViewerMedia() {
+  return document.getElementById('MediaViewer')
+    ?.querySelector<HTMLImageElement | HTMLVideoElement>(MEDIA_VIEWER_SLIDE_SELECTOR) || undefined;
+}
 
 export function animateOpening(
   hasFooter: boolean,
@@ -216,123 +252,323 @@ export function animateClosing(
   });
 }
 
-// Builds the flying ghost from the Media Viewer's current media while the viewer is still open, so
-// the viewer can stay visible as an opaque backdrop until the editor is ready. Returns `false` when
-// no source media is on screen, so the caller can close the viewer itself.
-export function prepareMediaEditorGhost(bestImageData?: string) {
-  const mediaViewer = document.getElementById('MediaViewer');
-  const fromImage = mediaViewer?.querySelector<HTMLImageElement>(
-    '.MediaViewerSlide--active img, .MediaViewerSlide--active video',
-  );
-  if (!fromImage) {
-    return false;
-  }
+// Puts a copy of the on-screen media exactly over it and keeps it there until it lands in the Media Editor.
+// Measures, so it has to run in the measure phase. Returns `false` when the media can not be copied yet.
+export function prepareMediaEditorGhost(
+  fromEl: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement, isAboveMediaViewer?: boolean,
+) {
+  const mediaSize = getNaturalSize(fromEl);
+  if (!mediaSize) return false;
 
-  const {
-    top, left, width, height,
-  } = fromImage.getBoundingClientRect();
+  const elementRect = fromEl.getBoundingClientRect();
+  const media = getFittedRect(mediaSize, elementRect, getComputedStyle(fromEl).objectFit);
+  const { box, radii } = getClippedBox(intersectRects(elementRect, media), fromEl);
+  if (!box.width || !box.height) return false;
+
+  const host = document.createElement('div');
+  host.className = 'ghost-host';
+  const ghostEl = document.createElement('div');
+  ghostEl.className = 'ghost for-media-editor';
+  ghostEl.style.borderRadius = radii.map((radius) => `${radius}px`).join(' ');
+  applyRect(ghostEl, box);
+  const mediaEl = createEditorGhostMedia(fromEl, mediaSize);
+  applyRect(mediaEl, getRelativeRect(media, box));
+  ghostEl.appendChild(mediaEl);
+  host.appendChild(ghostEl);
+
+  const prevGhost = editorGhost;
+  const ghost: EditorGhost = {
+    host,
+    ghost: ghostEl,
+    media: mediaEl,
+    mediaSize,
+    isAboveMediaViewer,
+    from: { box, media, radii },
+    animations: [],
+  };
+  ghost.fallbackTimeout = window.setTimeout(() => {
+    requestMutation(() => fadeOutEditorGhost(ghost));
+  }, EDITOR_LANDING_TIMEOUT);
+  editorGhost = ghost;
 
   requestMutation(() => {
-    discardPendingEditorGhost();
+    if (prevGhost) removeEditorGhost(prevGhost);
+    if (editorGhost !== ghost) return;
 
-    // The closing Media Viewer is a modal `<dialog>` in the top layer, so a plain ghost on `body`
-    // would be dimmed by its backdrop. A `manual` popover puts the ghost in the top layer too.
-    const host = document.createElement('div');
-    host.className = 'ghost-host';
-    host.popover = 'manual';
-
-    const ghost = createGhost(bestImageData || fromImage);
-    ghost.classList.add('for-media-editor');
-    applyStyles(ghost, {
-      top: `${top}px`,
-      left: `${left}px`,
-      width: `${width}px`,
-      height: `${height}px`,
-    });
-
-    host.appendChild(ghost);
     document.body.appendChild(host);
-    host.showPopover();
-    document.body.classList.add('ghost-animating');
-
-    const fallbackTimeout = window.setTimeout(fadeOutPendingEditorGhost, EDITOR_LANDING_TIMEOUT);
-    pendingEditorGhost = { ghost, host, fallbackTimeout };
+    if (isAboveMediaViewer) {
+      // The Media Viewer is a modal `<dialog>` in the top layer, so a ghost on `body` would be under it
+      host.popover = 'manual';
+      host.showPopover();
+      document.body.classList.add('ghost-animating');
+    }
   });
 
   return true;
 }
 
+// Flies the ghost from wherever it is into the target and keeps it there. Measures, so it has to run in the
+// measure phase.
 export function landGhostInMediaEditor(target: HTMLElement, onLand: NoneToVoidFunction) {
-  if (!pendingEditorGhost) {
+  const ghost = editorGhost;
+  if (!ghost || ghost.isFadingOut) {
     onLand();
     return;
   }
 
-  const { ghost, host, fallbackTimeout } = pendingEditorGhost;
-  clearTimeout(fallbackTimeout);
-  pendingEditorGhost = undefined;
-
-  requestMeasure(() => {
-    const {
-      top: toTop, left: toLeft, width: toWidth, height: toHeight,
-    } = target.getBoundingClientRect();
-    const {
-      top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,
-    } = ghost.getBoundingClientRect();
-
-    const scaleX = fromWidth / toWidth;
-    const scaleY = fromHeight / toHeight;
-
-    requestMutation(() => {
-      // Move the ghost box to the target, but keep it visually at the source via a transform, so
-      // the transition lands on the exact target box (no residual transform / sub-pixel drift)
-      applyStyles(ghost, {
-        transition: 'none',
-        top: `${toTop}px`,
-        left: `${toLeft}px`,
-        width: `${toWidth}px`,
-        height: `${toHeight}px`,
-        transformOrigin: 'top left',
-        transform: `translate3d(${fromLeft - toLeft}px, ${fromTop - toTop}px, 0) scale(${scaleX}, ${scaleY})`,
-      });
-
-      requestMutation(() => {
-        ghost.style.transition = '';
-        ghost.style.transform = '';
-
-        setTimeout(() => {
-          onLand();
-
-          setTimeout(() => {
-            requestMutation(() => removeGhostHost(ghost, host));
-          }, ANIMATION_END_DELAY);
-        }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-      });
-    });
-  });
-}
-
-function fadeOutPendingEditorGhost() {
-  if (!pendingEditorGhost) return;
-
-  const { ghost, host } = pendingEditorGhost;
-  pendingEditorGhost = undefined;
+  clearTimeout(ghost.fallbackTimeout);
+  const targetRect = target.getBoundingClientRect();
+  const radius = parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0;
+  const to: EditorGhostGeometry = {
+    box: targetRect,
+    media: getFittedRect(ghost.mediaSize, targetRect, 'cover'),
+    radii: CORNER_RADIUS_PROPERTIES.map(() => radius),
+  };
 
   requestMutation(() => {
-    ghost.style.opacity = '0';
+    if (editorGhost !== ghost) return;
+    if (ghost.isFadingOut) {
+      onLand();
+      return;
+    }
 
-    setTimeout(() => {
-      requestMutation(() => removeGhostHost(ghost, host));
-    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
+    const from = getCurrentGeometry(ghost);
+    ghost.animations.forEach((animation) => animation.cancel());
+    ghost.from = from;
+    ghost.to = to;
+    ghost.ghost.style.borderRadius = `${radius}px`;
+    applyRect(ghost.ghost, to.box);
+    applyRect(ghost.media, getRelativeRect(to.media, to.box));
+
+    // Only `transform` runs on the compositor, so the non-composited radius has an animation of its own
+    const keyframes = buildFlightKeyframes(from, to);
+    const timing: KeyframeAnimationOptions = { duration: ANIMATION_DURATION, easing: 'ease' };
+    const flight = ghost.ghost.animate(keyframes.ghost, timing);
+    flight.onfinish = onLand;
+    ghost.animations = [
+      flight,
+      ghost.media.animate(keyframes.media, timing),
+      ghost.ghost.animate(keyframes.radius, timing),
+    ];
+    beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
   });
 }
 
-function discardPendingEditorGhost() {
-  if (!pendingEditorGhost) return;
+// Has to run in the mutation phase
+export function fadeOutMediaEditorGhost(onEnd: NoneToVoidFunction) {
+  if (!editorGhost || editorGhost.isFadingOut) {
+    onEnd();
+    return;
+  }
 
-  clearTimeout(pendingEditorGhost.fallbackTimeout);
-  removeGhostHost(pendingEditorGhost.ghost, pendingEditorGhost.host);
-  pendingEditorGhost = undefined;
+  fadeOutEditorGhost(editorGhost, onEnd);
+}
+
+// Has to run in the mutation phase
+export function discardMediaEditorGhost() {
+  if (!editorGhost) return;
+
+  removeEditorGhost(editorGhost);
+  editorGhost = undefined;
+}
+
+function fadeOutEditorGhost(ghost: EditorGhost, onEnd?: NoneToVoidFunction) {
+  if (editorGhost !== ghost) return;
+
+  clearTimeout(ghost.fallbackTimeout);
+  ghost.isFadingOut = true;
+  const fade = ghost.ghost.animate(
+    { opacity: [1, 0] }, { duration: ANIMATION_DURATION, easing: 'ease', fill: 'forwards' },
+  );
+  ghost.animations.push(fade);
+  fade.onfinish = () => {
+    onEnd?.();
+
+    requestMutation(() => {
+      if (editorGhost !== ghost) return;
+
+      removeEditorGhost(ghost);
+      editorGhost = undefined;
+    });
+  };
+}
+
+function removeEditorGhost({
+  host, animations, fallbackTimeout, isAboveMediaViewer,
+}: EditorGhost) {
+  clearTimeout(fallbackTimeout);
+  animations.forEach((animation) => animation.cancel());
+  host.remove();
+  if (isAboveMediaViewer) {
+    document.body.classList.remove('ghost-animating');
+  }
+}
+
+function createEditorGhostMedia(
+  fromEl: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement, { width, height }: ApiDimensions,
+) {
+  if (fromEl instanceof HTMLImageElement) {
+    const img = new Image();
+    img.className = 'ghost-media';
+    img.draggable = false;
+    img.decoding = 'sync';
+    img.src = fromEl.currentSrc || fromEl.src;
+    return img;
+  }
+
+  const { width: windowWidth, height: windowHeight } = windowSize.get();
+  const { devicePixelRatio } = window;
+  const scale = Math.min(1, (windowWidth * devicePixelRatio) / width, (windowHeight * devicePixelRatio) / height);
+  const canvas = document.createElement('canvas');
+  canvas.className = 'ghost-media';
+  canvas.width = Math.round(width * scale);
+  canvas.height = Math.round(height * scale);
+  canvas.getContext('2d')!.drawImage(fromEl, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+function getNaturalSize(el: HTMLImageElement | HTMLVideoElement | HTMLCanvasElement): ApiDimensions | undefined {
+  if (el instanceof HTMLImageElement) {
+    return el.complete && el.naturalWidth ? { width: el.naturalWidth, height: el.naturalHeight } : undefined;
+  }
+
+  if (el instanceof HTMLCanvasElement) {
+    return el.width && el.height ? { width: el.width, height: el.height } : undefined;
+  }
+
+  return el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && el.videoWidth
+    ? { width: el.videoWidth, height: el.videoHeight } : undefined;
+}
+
+function getCurrentGeometry({ from, to, animations }: EditorGhost) {
+  if (!to) return from;
+
+  const progress = animations[0]?.effect?.getComputedTiming().progress;
+  return interpolateGeometry(from, to, progress ?? 1);
+}
+
+// The ghost box moves from `from.box` to the target with a plain transform, while a counter-transform keeps
+// its media at the interpolated media rect, so a cropped preview uncrops without distortion
+function buildFlightKeyframes(from: EditorGhostGeometry, to: EditorGhostGeometry) {
+  const mediaOffset = getRelativeRect(to.media, to.box);
+  const ghost: Keyframe[] = [];
+  const media: Keyframe[] = [];
+  const radius: Keyframe[] = [];
+
+  for (let step = 0; step <= EDITOR_GHOST_FLIGHT_STEPS; step++) {
+    const { box, media: mediaRect, radii } = interpolateGeometry(from, to, step / EDITOR_GHOST_FLIGHT_STEPS);
+    const scaleX = box.width / to.box.width;
+    const scaleY = box.height / to.box.height;
+    const mediaX = (mediaRect.left - box.left) / scaleX - mediaOffset.left;
+    const mediaY = (mediaRect.top - box.top) / scaleY - mediaOffset.top;
+    const mediaScaleX = mediaRect.width / (scaleX * to.media.width);
+    const mediaScaleY = mediaRect.height / (scaleY * to.media.height);
+    const radiiX = radii.map((r) => `${r / scaleX}px`).join(' ');
+    const radiiY = radii.map((r) => `${r / scaleY}px`).join(' ');
+
+    ghost.push({
+      transform: `translate(${box.left - to.box.left}px, ${box.top - to.box.top}px) scale(${scaleX}, ${scaleY})`,
+    });
+    media.push({ transform: `translate(${mediaX}px, ${mediaY}px) scale(${mediaScaleX}, ${mediaScaleY})` });
+    radius.push({ borderRadius: `${radiiX} / ${radiiY}` });
+  }
+
+  return { ghost, media, radius };
+}
+
+function interpolateGeometry(from: EditorGhostGeometry, to: EditorGhostGeometry, progress: number) {
+  return {
+    box: interpolateRect(from.box, to.box, progress),
+    media: interpolateRect(from.media, to.media, progress),
+    radii: from.radii.map((radius, i) => lerp(radius, to.radii[i], progress)),
+  };
+}
+
+function interpolateRect(from: Rect, to: Rect, progress: number): Rect {
+  return {
+    left: lerp(from.left, to.left, progress),
+    top: lerp(from.top, to.top, progress),
+    width: lerp(from.width, to.width, progress),
+    height: lerp(from.height, to.height, progress),
+  };
+}
+
+function getFittedRect({ width, height }: ApiDimensions, rect: Rect, objectFit: string): Rect {
+  if (objectFit !== 'cover' && objectFit !== 'contain') return rect;
+
+  const scale = objectFit === 'cover'
+    ? Math.max(rect.width / width, rect.height / height)
+    : Math.min(rect.width / width, rect.height / height);
+  const fittedWidth = width * scale;
+  const fittedHeight = height * scale;
+
+  return {
+    left: rect.left + (rect.width - fittedWidth) / 2,
+    top: rect.top + (rect.height - fittedHeight) / 2,
+    width: fittedWidth,
+    height: fittedHeight,
+  };
+}
+
+// Clips the box by every scrolling or clipping ancestor and takes over their rounding at the shared corners
+function getClippedBox(rect: Rect, el: HTMLElement) {
+  const clips: { rect: Rect; style: CSSStyleDeclaration }[] = [];
+  let box = rect;
+  for (let parent = el.parentElement; parent; parent = parent.parentElement) {
+    const style = getComputedStyle(parent);
+    if (style.overflow === 'visible') continue;
+
+    const clipRect = parent.getBoundingClientRect();
+    box = intersectRects(box, clipRect);
+    clips.push({ rect: clipRect, style });
+  }
+
+  const radii = CORNER_RADIUS_PROPERTIES.map((property, corner) => clips.reduce((radius, clip) => (
+    isCornerAligned(box, clip.rect, corner) ? Math.max(radius, parseFloat(clip.style[property]) || 0) : radius
+  ), 0));
+
+  return { box, radii };
+}
+
+function isCornerAligned(box: Rect, clip: Rect, corner: number) {
+  const isRight = corner === 1 || corner === 2;
+  const isBottom = corner === 2 || corner === 3;
+  const deltaX = isRight ? box.left + box.width - clip.left - clip.width : box.left - clip.left;
+  const deltaY = isBottom ? box.top + box.height - clip.top - clip.height : box.top - clip.top;
+
+  return Math.abs(deltaX) <= CORNER_ALIGNMENT_TOLERANCE && Math.abs(deltaY) <= CORNER_ALIGNMENT_TOLERANCE;
+}
+
+function intersectRects(a: Rect, b: Rect): Rect {
+  const left = Math.max(a.left, b.left);
+  const top = Math.max(a.top, b.top);
+
+  return {
+    left,
+    top,
+    width: Math.max(0, Math.min(a.left + a.width, b.left + b.width) - left),
+    height: Math.max(0, Math.min(a.top + a.height, b.top + b.height) - top),
+  };
+}
+
+function getRelativeRect(rect: Rect, origin: Rect): Rect {
+  return {
+    left: rect.left - origin.left,
+    top: rect.top - origin.top,
+    width: rect.width,
+    height: rect.height,
+  };
+}
+
+function applyRect(element: HTMLElement, {
+  left, top, width, height,
+}: Rect) {
+  applyStyles(element, {
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${width}px`,
+    height: `${height}px`,
+  });
 }
 
 function createGhost(
@@ -384,12 +620,6 @@ function removeGhost(ghost: HTMLDivElement) {
   ghost.parentElement?.removeChild(ghost);
 }
 
-function removeGhostHost(ghost: HTMLDivElement, host: HTMLElement) {
-  removeGhost(ghost);
-  host.remove();
-  document.body.classList.remove('ghost-animating');
-}
-
 function uncover(realWidth: number, realHeight: number, top: number, left: number, width: number, height: number) {
   if (realWidth === realHeight) {
     const size = Math.max(width, height) * (realWidth / realHeight);
@@ -414,34 +644,7 @@ function uncover(realWidth: number, realHeight: number, top: number, left: numbe
 
 function getRenderedMediaRect(mediaEl: HTMLElement, dimensions: ApiDimensions) {
   const rect = mediaEl.getBoundingClientRect();
-  if (getComputedStyle(mediaEl).objectFit !== 'contain') {
-    return rect;
-  }
-
-  const { width, height } = calculateContainedDimensions(
-    rect.width, rect.height, dimensions.width, dimensions.height,
-  );
-
-  return {
-    top: rect.top + (rect.height - height) / 2,
-    left: rect.left + (rect.width - width) / 2,
-    width,
-    height,
-  };
-}
-
-function calculateContainedDimensions(
-  availableWidth: number,
-  availableHeight: number,
-  mediaWidth: number,
-  mediaHeight: number,
-): ApiDimensions {
-  const scale = Math.min(availableWidth / mediaWidth, availableHeight / mediaHeight);
-
-  return {
-    width: mediaWidth * scale,
-    height: mediaHeight * scale,
-  };
+  return getComputedStyle(mediaEl).objectFit === 'contain' ? getFittedRect(dimensions, rect, 'contain') : rect;
 }
 
 function isMessageImageFullyVisible(imageEl: HTMLElement) {
@@ -471,21 +674,19 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   let containerSelector;
   let mediaSelector;
 
+  if ((origin === MediaViewerOrigin.Inline || origin === MediaViewerOrigin.Album)
+    && message && isRichMediaMessage(message)) {
+    const block = getRichMessageMediaBlocks(message.content.richMessage!)[index || 0];
+    return getPageBlockNodes(block && isPageMediaBlock(block)
+      // eslint-disable-next-line @stylistic/max-len
+      ? document.querySelector<HTMLElement>(`.Transition_slide-active > .MessageList #${getMessageHtmlId(message.id)} [id*="-page-media-"][id$="-${getPageMediaBlockId(block)}"]`) || undefined
+      : undefined);
+  }
+
   switch (origin) {
     case MediaViewerOrigin.RichPageBlock:
-    case MediaViewerOrigin.IVPageBlock: {
-      const container = sourceId ? document.getElementById(sourceId) : undefined;
-      const pageBlockMediaSelector = 'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), '
-        + 'canvas.thumbnail:not(.blurred-bg), img, video';
-      const mediaEls = container?.querySelectorAll<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement>(
-        pageBlockMediaSelector,
-      );
-
-      return {
-        container,
-        mediaEl: mediaEls?.[0],
-      };
-    }
+    case MediaViewerOrigin.IVPageBlock:
+      return getPageBlockNodes(sourceId ? document.getElementById(sourceId) || undefined : undefined);
 
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
@@ -559,6 +760,17 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
   const container = document.querySelector<HTMLElement>(containerSelector)!;
   const mediaEls = mediaSelector
     ? container?.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector) : undefined;
+
+  return {
+    container,
+    mediaEl: mediaEls?.[0],
+  };
+}
+
+function getPageBlockNodes(container?: HTMLElement) {
+  const mediaEls = container?.querySelectorAll<HTMLImageElement | HTMLVideoElement | HTMLCanvasElement>(
+    'img.full-media, video.full-media, img.thumbnail:not(.blurred-bg), canvas.thumbnail:not(.blurred-bg), img, video',
+  );
 
   return {
     container,

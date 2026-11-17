@@ -26,7 +26,7 @@
 
   color: var(--color-text);
 
-  transition: background-color 0.2s;
+  transition: background-color var(--message-color-transition-duration, 0.2s);
   &:hover {
     background-color: var(--color-background-selected);
   }

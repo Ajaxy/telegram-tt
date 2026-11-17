@@ -12,8 +12,7 @@
 }
 
 .background {
-  &::before,
-  &::after {
+  &::before {
     inset: calc(var(--preview-background-overscan) * -1);
   }
 }
@@ -127,6 +126,6 @@
 
   font-size: 0.75rem;
   line-height: 1;
-  color: rgba(var(--color-text-meta-rgb), 0.75);
+  color: var(--color-text-meta);
   white-space: nowrap;
 }

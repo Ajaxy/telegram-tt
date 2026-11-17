@@ -1,2 +1,0 @@
-import e from"./processing-BD9AMQkN.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/processing" instead of "highlight.js/lib/languages/processing.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=processing.js-Cp69Hukx.js.map

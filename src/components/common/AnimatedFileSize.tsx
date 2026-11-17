@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState, useUnmountCleanup } from '@teact';
 
-import { formatFileSize } from '../../util/textFormat';
+import { formatFileSize } from '../../util/text/textFormat';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';

@@ -58,6 +58,8 @@ export type ApiTonConnectError = ExportSecretPhraseError | 'TONCONNECT_FAILED' |
   | 'LOOKUP_INVALID' | 'TONCONNECT_CLIENT_ID_INVALID' | 'TONCONNECT_CLIENT_ID_OCCUPIED' | 'CHALLENGE_INVALID'
   | 'BODY_INVALID' | 'WALLET_UNAVAILABLE' | 'UNSUPPORTED_WALLET' | 'INVALID_REQUEST' | 'INSUFFICIENT_FUNDS'
   | 'INACTIVE_ADDRESS' | 'TRANSFER_PENDING' | 'SEND_FAILED' | 'WALLET_CHANGED'
+  // Past the broadcast: the transfer may have been sent
+  | 'SEND_UNCERTAIN'
   // A login through Telegram got a session other than the one it named
   | 'SESSION_CHANGED'
   // The same session or request is being answered already
@@ -65,14 +67,46 @@ export type ApiTonConnectError = ExportSecretPhraseError | 'TONCONNECT_FAILED' |
 
 export type ApiTonConnectResult<T> = T | { error: ApiTonConnectError };
 
+// What an emulated action did to the wallet; anything else the emulator reports is `unknown`, as in the native apps
+export type ApiTonConnectEmulatedActionType = 'withdraw' | 'deposit' | 'transfer' | 'excess' | 'callContract'
+  | 'deployContract' | 'unknown';
+
+export interface ApiTonConnectEmulatedAction {
+  type: ApiTonConnectEmulatedActionType;
+  // Nanotons
+  amount?: string;
+  // The other side of the action
+  address?: string;
+}
+
+export interface ApiTonConnectEmulation {
+  actions: ApiTonConnectEmulatedAction[];
+  // The emulated trace failed, or did not run to its end
+  isFailed?: boolean;
+  isIncomplete?: boolean;
+}
+
 export interface ApiTonConnectRequestPreview {
   request: ApiTonConnectAppRequest;
   transaction?: ApiTonConnectTransaction;
   signData?: ApiTonConnectSignData;
   fee?: bigint;
-  expires: number;
+  // Absent when the emulation could not run
+  emulation?: ApiTonConnectEmulation;
+  // Absent for a widget's transaction without `valid_until`
+  expires?: number;
   isInvalid?: boolean;
 }
+
+// A widget's wallet call (widget-sandbox sdk-v1 §2.18): TON Connect's `sendTransaction` request or `signData` payload, as the
+// framework checked it, and the label the bot gets with the outcome
+export type ApiWidgetWalletCall = {
+  method: 'sendTransaction' | 'signData';
+  params: object;
+  data: string;
+};
+
+export type ApiWidgetWalletAnswer = { result?: string; error?: 'TIMEOUT' | 'RATE_LIMITED' | 'FAILED' };
 
 export interface ApiWalletUserAddress {
   // Named only to a user who has a contact or a chat with the owner
@@ -194,11 +228,14 @@ export type ApiWalletCollectible = {
   // The item's Fragment page, or the Fragment home page when the metadata names none
   fragmentUrl: string;
 } & (
-  | { type: 'gift'; model?: string; backdrop?: string }
+  // `gift` is set for a Telegram gift, which can move to the account, show on a profile or go on the card
+  | { type: 'gift'; gift?: ApiStarGiftUnique }
   | { type: 'username' | 'number' | 'other' }
 );
 
 export interface ApiWalletCardSticker {
+  // The NFT address
+  address: string;
   coordinates: ApiMediaAreaCoordinates;
   gift: ApiStarGiftUnique;
 }
@@ -208,55 +245,18 @@ export interface ApiWalletCard {
   // Nanotons
   balance: bigint;
   stickers?: ApiWalletCardSticker[];
-  backgroundGift?: ApiStarGiftUnique;
+  // One of the stickers, whose gift colors the card
+  backgroundAddress?: string;
 }
 
-export interface ApiOnrampProvider {
-  id: string;
-  name: string;
-  cryptoCurrencies: string[];
-  hasBaseCurrencies?: boolean;
-  hasLimits?: boolean;
-  hasQuote?: boolean;
-}
-
-interface ApiOnrampMethod {
-  paymentMethod: string;
-  isAvailable?: boolean;
-}
-
-export interface ApiOnrampAvailability {
-  isAllowed?: boolean;
-  isBuyAllowed?: boolean;
-  // ISO alpha-2, e.g. `DE`
-  countryCode: string;
-  state?: string;
-  methods: ApiOnrampMethod[];
-}
-
-// Amounts are kept as the provider's decimal strings, so no precision is lost
-export interface ApiOnrampLimits {
-  baseCurrency: string;
-  baseMinAmount: string;
-  baseMaxAmount: string;
-  cryptoMinAmount: string;
-  cryptoMaxAmount: string;
-  paymentMethod: string;
-}
-
-export interface ApiOnrampQuote {
-  baseCurrency: string;
-  baseAmount: string;
-  cryptoCurrency: string;
-  cryptoAmount: string;
-  cryptoPrice: string;
-  feeAmount: string;
-  extraFeeAmount: string;
-  networkFeeAmount: string;
-  totalAmount: string;
-  paymentMethod: string;
-  // Unix seconds
-  expiresDate: number;
+// The server's transfer of a gift NFT to its escrow, which puts the gift on the account. Amounts are in nanotons.
+export interface ApiWalletGiftDeposit {
+  escrowAddress: string;
+  // Base64 BOC of the transfer body
+  payload: string;
+  amount: bigint;
+  forwardAmount: bigint;
+  fee?: bigint;
 }
 
 export interface ApiOnrampSession {
@@ -290,6 +290,11 @@ export type RotateWalletKeyResult = { state: ApiWalletStateResult } | { error: W
 export type ReplaceWalletError = 'PROOF_INVALID' | 'REPLACE_FAILED' | 'KEEP_FAILED' | 'WALLET_CHANGED'
   | WalletBackupError;
 export type ReplaceWalletResult = { state: ApiWalletStateResult } | { error: ReplaceWalletError };
+
+// `CARD_STICKER_INVALID` covers every reason a sticker NFT is rejected, as the iOS app shows them alike
+export type SetWalletCardStickersError = 'CARD_STICKER_LIMIT' | 'CARD_SAVED_PROFILE' | 'CARD_BACKGROUND_NOT_ALLOWED'
+  | 'CARD_STICKER_INVALID' | 'FLOOD' | 'CARD_SAVE_FAILED';
+export type SetWalletCardStickersResult = { card: ApiWalletCard } | { error: SetWalletCardStickersError };
 
 export interface ApiWalletTransferFee {
   // Nanotons

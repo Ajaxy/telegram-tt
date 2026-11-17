@@ -1739,6 +1739,12 @@ addActionHandler('toggleUserLocationPermission', (global, actions, payload): Act
   setGlobal(global);
 });
 
+addActionHandler('toggleUserMediaPermission', (global, actions, payload): ActionReturnType => {
+  const { botId, kind, isAccessGranted } = payload;
+
+  return updateBotAppPermissions(global, botId, { [kind]: isAccessGranted });
+});
+
 addActionHandler('startBotFatherConversation', async (global, actions, payload): Promise<void> => {
   const {
     param,

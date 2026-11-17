@@ -30,14 +30,14 @@ export type GpuDiamondScene = {
   draw: (
     pass: GPURenderPassEncoder, target: GpuDiamondTarget, state: DiamondDrawState, viewport: DiamondViewport,
     time: number, frameTime: number, yaw: number, pitch: number,
-  ) => void;
+  ) => DiamondPose;
 };
 
 export type GpuStarRenderer = {
   createTarget: () => GpuDiamondTarget;
   draw: (
     pass: GPURenderPassEncoder, target: GpuDiamondTarget, viewport: DiamondViewport, bursts: StarBurst[],
-    time: number, opacity: number, burstSize: number,
+    time: number, opacity: number, burstSize: number, areLight?: boolean,
   ) => void;
 };
 
@@ -49,7 +49,7 @@ type Mesh = {
 export const SAMPLE_COUNT = 4;
 export const DEPTH_FORMAT: GPUTextureFormat = 'depth24plus';
 
-const BLEND: GPUBlendState = {
+export const BLEND: GPUBlendState = {
   color: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' },
   alpha: { srcFactor: 'one', dstFactor: 'one-minus-src-alpha' },
 };
@@ -162,8 +162,11 @@ export async function createGpuDiamondScene(device: GPUDevice, format: GPUTextur
     pass: GPURenderPassEncoder, target: GpuDiamondTarget, state: DiamondDrawState, viewport: DiamondViewport,
     time: number, frameTime: number, yaw: number, pitch: number,
   ) {
-    writeTarget(target, solvePose(state, time, frameTime, yaw, pitch), viewport, time);
+    const pose = solvePose(state, time, frameTime, yaw, pitch);
+    writeTarget(target, pose, viewport, time);
     encode(pass, target, viewport);
+
+    return pose;
   }
 
   return {
@@ -187,7 +190,8 @@ export async function createGpuStarRenderer(device: GPUDevice, format: GPUTextur
   });
 
   function createTarget(): GpuDiamondTarget {
-    const data = new Float32Array(MAX_BURSTS * VEC4_SIZE);
+    // The salutes, then the style of their stars
+    const data = new Float32Array((MAX_BURSTS + 1) * VEC4_SIZE);
     const buffer = device.createBuffer({
       size: data.byteLength,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -202,7 +206,7 @@ export async function createGpuStarRenderer(device: GPUDevice, format: GPUTextur
 
   function draw(
     pass: GPURenderPassEncoder, target: GpuDiamondTarget, { x, y, size }: DiamondViewport, bursts: StarBurst[],
-    time: number, opacity: number, burstSize: number,
+    time: number, opacity: number, burstSize: number, areLight?: boolean,
   ) {
     const count = getStarCount(burstSize);
     const { data } = target;
@@ -210,6 +214,7 @@ export async function createGpuStarRenderer(device: GPUDevice, format: GPUTextur
     bursts.forEach(({ startTime, seed }, i) => {
       setVector(data, i * VEC4_SIZE, time - startTime, opacity, seed, count);
     });
+    setVector(data, MAX_BURSTS * VEC4_SIZE, areLight ? 1 : 0, 0, 0, 0);
     device.queue.writeBuffer(target.buffer, 0, data);
 
     pass.setViewport(x, y, size, size, 0, 1);
@@ -254,7 +259,7 @@ function createBuffer(device: GPUDevice, usage: GPUBufferUsageFlags, parts: Floa
   return buffer;
 }
 
-function setVector(data: Float32Array, offset: number, x: number, y: number, z: number, w: number) {
+export function setVector(data: Float32Array, offset: number, x: number, y: number, z: number, w: number) {
   data[offset] = x;
   data[offset + 1] = y;
   data[offset + 2] = z;

@@ -1,2 +1,0 @@
-function e(e){return{name:`Clojure REPL`,contains:[{className:`meta.prompt`,begin:/^([\w.-]+|\s*#_)?=>/,starts:{end:/$/,subLanguage:`clojure`}}]}}export{e as default};
-//# sourceMappingURL=clojure-repl-aHBM9jLK.js.map

@@ -5,20 +5,21 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiWallpaper } from '../../../api/types';
 import type { IThemeSettings, ThemeKey } from '../../../types';
-import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
+import { SettingsScreens } from '../../../types';
 
-import { selectTheme, selectThemeValues } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import {
+  selectChatWallpaperSettings, selectIsWallpaperUploading, selectReferencedWallpaperBackgrounds, selectTheme,
+  selectThemeValues,
+} from '../../../global/selectors';
 import { buildHexFromColor, getAverageColor, getPatternColor } from '../../../util/colors';
-import { validateFiles } from '../../../util/files';
 import { throttle } from '../../../util/schedulers';
-import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import { openWallpaperFileDialog, resetWallpaper } from '../../../util/settingsActions';
 import {
   buildThemeSettingsFromWallpaper, buildWallpaperRenderModel, DEFAULT_PATTERN_INTENSITY_FACTOR,
   getDefaultPatternColor, getWallpaperColors, getWallpaperKey,
   isRenderableWallpaper, isWallpaperSelected, RESET_WALLPAPER_SETTINGS,
 } from '../../../util/wallpaper';
-import { removeWallpaperBlobIfUnused } from '../../../util/wallpaperStorage';
+import { removeWallpaperBlobIfUnused } from '../../../util/wallpaper/storage';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -42,10 +43,10 @@ type StateProps = {
   themeSettings?: IThemeSettings;
   isBlurred?: boolean;
   loadedWallpapers?: ApiWallpaper[];
+  isUploading?: boolean;
   theme: ThemeKey;
 };
 
-const SUPPORTED_TYPES = 'image/jpeg';
 const MIN_CATALOGUE_PATTERN_COLORS = 3;
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
@@ -56,11 +57,11 @@ const SettingsGeneralBackground = ({
   themeSettings,
   isBlurred,
   loadedWallpapers,
+  isUploading,
   theme,
 }: OwnProps & StateProps) => {
   const {
     loadWallpapers,
-    uploadWallpaper,
     setThemeSettings,
     openSettingsScreen,
   } = getActions();
@@ -75,18 +76,9 @@ const SettingsGeneralBackground = ({
     });
   }, [loadWallpapers]);
 
-  const handleFileSelect = useLastCallback((e: Event) => {
-    const { files } = e.target as HTMLInputElement;
-
-    const validatedFiles = validateFiles(files);
-    if (validatedFiles?.length) {
-      uploadWallpaper(validatedFiles[0]);
-    }
-  });
-
   const handleUploadWallpaper = useLastCallback(() => {
     requestedWallpaperRef.current = undefined;
-    openSystemFilesDialog(SUPPORTED_TYPES, handleFileSelect, true);
+    openWallpaperFileDialog();
   });
 
   const handleSetColor = useLastCallback(() => {
@@ -96,19 +88,12 @@ const SettingsGeneralBackground = ({
 
   const handleResetToDefault = useLastCallback(() => {
     requestedWallpaperRef.current = undefined;
-    setThemeSettings({
-      theme,
-      ...RESET_WALLPAPER_SETTINGS,
-      isBlurred: true,
-      patternColor: getDefaultPatternColor(theme),
-    });
+    resetWallpaper();
   });
 
   const getActiveWallpaperBackgrounds = useLastCallback(() => {
     const global = getGlobal();
-    const selectedBackgrounds = Object.values(selectSharedSettings(global).themes)
-      .map((settings) => settings?.background)
-      .filter((background): background is string => Boolean(background));
+    const selectedBackgrounds = selectReferencedWallpaperBackgrounds(global);
     const requestedBackground = requestedWallpaperRef.current?.slug;
 
     return requestedBackground
@@ -181,7 +166,6 @@ const SettingsGeneralBackground = ({
     onBack: onReset,
   });
 
-  const isUploading = loadedWallpapers?.[0] && loadedWallpapers[0].slug === UPLOADING_WALLPAPER_SLUG;
   // Blur only applies to a file-backed image (uploaded or server photo), so disable it for colors,
   // gradients and patterns — matching WebK
   const isImageBackground = Boolean(themeSettings?.background) && !themeSettings?.isPattern;
@@ -262,6 +246,7 @@ const SettingsGeneralBackground = ({
             <WallpaperTile
               key={getWallpaperKey(wallpaper)}
               wallpaper={wallpaper}
+              theme={theme}
               isSelected={isWallpaperSelected(wallpaper, themeSettings)}
               onRequest={handleWallpaperRequest}
               onClick={handleWallPaperSelect}
@@ -278,13 +263,14 @@ const SettingsGeneralBackground = ({
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const theme = selectTheme(global);
-    const themeSettings = selectThemeValues(global, theme);
+    const themeSettings = selectChatWallpaperSettings(global);
     const { loadedWallpapers } = global.settings;
 
     return {
       themeSettings,
       isBlurred: themeSettings?.isBlurred,
       loadedWallpapers,
+      isUploading: selectIsWallpaperUploading(global),
       theme,
     };
   },

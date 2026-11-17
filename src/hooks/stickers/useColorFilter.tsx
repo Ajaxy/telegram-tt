@@ -1,28 +1,29 @@
-import { useEffect } from '../../lib/teact/teact';
+import { useEffect, useMemo } from '../../lib/teact/teact';
 
 import { SVG_NAMESPACE } from '../../config';
 import { buildColor, convertColor } from '../../lib/color';
 import { addSvgDefinition, removeSvgDefinition } from '../../util/svgController';
+import useWindow from '../useWindow';
 
-const SVG_MAP = new Map<string, SvgColorFilter>();
+const SVG_MAP = new WeakMap<Document, Map<string, SvgColorFilter>>();
 
 class SvgColorFilter {
   public filterId: string;
 
   private referenceCount = 0;
 
-  constructor(public color: string) {
-    this.filterId = `color-filter-${color.slice(1)}`;
-
+  constructor(public color: string, private targetDocument: Document) {
     const [r, g, b] = convertColor(buildColor(color), 'srgb').coords;
-    addSvgDefinition(
+    // Distinct references make adopted elements resolve the filter in their owning document
+    this.filterId = addSvgDefinition(
       <filter color-interpolation-filters="sRGB" xmlns={SVG_NAMESPACE}>
         <feColorMatrix
           type="matrix"
           values={`0 0 0 0 ${r || 0} 0 0 0 0 ${g || 0} 0 0 0 0 ${b || 0} 0 0 0 1 0`}
         />
       </filter>,
-      this.filterId,
+      undefined,
+      targetDocument,
     );
   }
 
@@ -34,7 +35,7 @@ class SvgColorFilter {
   public removeReference() {
     this.referenceCount -= 1;
     if (this.referenceCount === 0) {
-      removeSvgDefinition(this.filterId);
+      removeSvgDefinition(this.filterId, this.targetDocument);
     }
   }
 
@@ -44,31 +45,34 @@ class SvgColorFilter {
 }
 
 export default function useColorFilter(color?: string, asValue?: boolean) {
+  const targetDocument = useWindow().document;
+
+  const filterId = useMemo(() => {
+    if (!color) return undefined;
+
+    const filters = SVG_MAP.get(targetDocument) || new Map<string, SvgColorFilter>();
+    SVG_MAP.set(targetDocument, filters);
+    const svg = filters.get(color) || new SvgColorFilter(color, targetDocument);
+    filters.set(color, svg);
+    return svg.getFilterId();
+  }, [color, targetDocument]);
+
   useEffect(() => {
     if (!color) return undefined;
 
     return () => {
-      const colorFilter = SVG_MAP.get(color);
+      const filters = SVG_MAP.get(targetDocument)!;
+      const colorFilter = filters.get(color);
       if (colorFilter) {
         colorFilter.removeReference();
         if (!colorFilter.isUsed()) {
-          SVG_MAP.delete(colorFilter.color);
+          filters.delete(colorFilter.color);
         }
       }
     };
-  }, [color]);
+  }, [color, targetDocument]);
 
-  if (!color) return undefined;
-
-  if (SVG_MAP.has(color)) {
-    const svg = SVG_MAP.get(color)!;
-    return prepareStyle(svg.getFilterId(), asValue);
-  }
-
-  const svg = new SvgColorFilter(color);
-  SVG_MAP.set(color, svg);
-
-  return prepareStyle(svg.getFilterId(), asValue);
+  return filterId ? prepareStyle(filterId, asValue) : undefined;
 }
 
 function prepareStyle(filterId: string, asValue?: boolean) {

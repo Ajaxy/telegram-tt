@@ -22,6 +22,7 @@ import {
   getEntityTypeById,
 } from '../gramjsBuilders';
 import { addDocumentToLocalDb, addPhotoToLocalDb, addSavedMusicRepairInfo, addUserToLocalDb } from '../helpers/localDb';
+import { checkErrorType, wrapError } from '../helpers/misc';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
@@ -291,6 +292,61 @@ export async function toggleNoPaidMessagesException({ user, shouldRefundCharged 
     userId: buildInputUser(user.id, user.accessHash),
   }));
   return result;
+}
+
+export async function exportNoPaidMessagesToken({ isTemporary, shouldRevoke }: {
+  isTemporary?: true;
+  shouldRevoke?: true;
+}) {
+  const result = await invokeRequest(new GramJs.contacts.ExportNoPaidMessagesToken({
+    temporary: isTemporary,
+    revoke: shouldRevoke,
+  }), {
+    shouldIgnoreErrors: true,
+  });
+  if (!result) return undefined;
+
+  return {
+    url: result.url,
+    expires: result.expires,
+  };
+}
+
+export async function importNoPaidMessagesToken({ user, token }: {
+  user: ApiUser;
+  token: string;
+}) {
+  try {
+    const result = await invokeRequest(new GramJs.contacts.ImportNoPaidMessagesToken({
+      userId: buildInputUser(user.id, user.accessHash),
+      token,
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!(result instanceof GramJs.User)) return undefined;
+
+    addUserToLocalDb(result);
+
+    return buildApiUser(result);
+  } catch (err) {
+    if (!checkErrorType(err)) return undefined;
+    return wrapError(err);
+  }
+}
+
+export async function importContactToken({ token }: { token: string }) {
+  try {
+    const result = await invokeRequest(new GramJs.contacts.ImportContactToken({ token }), { shouldThrow: true });
+    if (!(result instanceof GramJs.User)) return undefined;
+
+    addUserToLocalDb(result);
+
+    return buildApiUser(result);
+  } catch (err) {
+    if (!checkErrorType(err)) return undefined;
+    return wrapError(err);
+  }
 }
 
 export async function fetchPaidMessagesRevenue({ user }: {

@@ -12,23 +12,6 @@
 
   outline: none;
 
-  :global {
-    .matching-text-highlight {
-      display: inline-block;
-
-      padding: 0 0.125rem;
-      border-radius: 0.25rem;
-
-      color: var(--color-text);
-
-      background: #cae3f7;
-
-      :global(.theme-dark) & {
-        --color-text: #000;
-      }
-    }
-  }
-
   @media (hover: hover) {
     &:hover,
     &:focus-visible,
@@ -63,4 +46,9 @@
   color: var(--color-text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &::highlight(text-search),
+  & ::highlight(text-search) {
+    color: var(--color-primary);
+  }
 }

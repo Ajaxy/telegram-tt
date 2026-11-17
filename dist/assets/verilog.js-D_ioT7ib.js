@@ -1,2 +1,0 @@
-import e from"./verilog-Ke-GOEW9.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/verilog" instead of "highlight.js/lib/languages/verilog.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=verilog.js-D_ioT7ib.js.map

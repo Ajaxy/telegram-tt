@@ -11,8 +11,6 @@ export const DIGIT_REGEX = /^\d$/;
 export const POINT_KEYS = new Set(['.', ',']);
 const SPACE_REGEX = /^\s$/;
 
-const DECIMAL_COMMA_REGEX = /,/g;
-const INVALID_AMOUNT_CHARS_REGEX = /[^0-9.]/g;
 const NON_AMOUNT_CHARS_REGEX = /[^0-9.,]/g;
 // One mark between a group of one to three digits and three more digits, as in `1,000`
 const AMBIGUOUS_AMOUNT_REGEX = /^[1-9]\d{0,2}[.,]\d{3}$/;
@@ -21,16 +19,6 @@ const GROUPED_NUMBER = 1000000;
 const MAX_INTEGER_DIGITS = 9;
 const SHORT_FRACTION_DIGITS = 2;
 const TRAILING_FRACTION_ZEROS_REGEX = /\.?0+$/;
-
-// A decimal comma counts as a decimal point; digits past `maxDecimals` are dropped as typed
-export function normalizeAmountInput(value: string, maxDecimals?: number): string {
-  const normalized = value.replace(DECIMAL_COMMA_REGEX, '.').replace(INVALID_AMOUNT_CHARS_REGEX, '');
-  if (maxDecimals === undefined) return normalized;
-
-  const [whole, ...fraction] = normalized.split('.');
-
-  return fraction.length ? `${whole}.${fraction.join('').slice(0, maxDecimals)}` : whole;
-}
 
 // The typing steps keep the amount as a string, so `10.` stays until the next digit. Each step returns `undefined`
 // when it refuses the key.

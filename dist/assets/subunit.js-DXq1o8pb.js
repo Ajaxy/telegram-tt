@@ -1,2 +1,0 @@
-import e from"./subunit-DV7smCjo.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/subunit" instead of "highlight.js/lib/languages/subunit.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=subunit.js-DXq1o8pb.js.map

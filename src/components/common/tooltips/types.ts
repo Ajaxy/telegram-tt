@@ -100,7 +100,6 @@ type RichEditorInlineBotTooltipConfig = RichEditorTooltipSurfaceConfig & {
     isSilent?: boolean,
     shouldSchedule?: boolean,
   ) => void;
-  onHelpChange: (help?: string) => void;
 };
 
 export type RichEditorTooltipsConfig = {

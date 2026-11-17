@@ -1,2 +1,0 @@
-import e from"./sml-Bqj0DVIt.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/sml" instead of "highlight.js/lib/languages/sml.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=sml.js-U_arQ4D9.js.map

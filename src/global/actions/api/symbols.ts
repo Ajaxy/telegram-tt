@@ -9,6 +9,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { pause, throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
+import { getIsStickerSetInstalled } from '../../helpers';
 import {
   addActionHandler,
   getGlobal, setGlobal,
@@ -613,10 +614,10 @@ addActionHandler('toggleStickerSet', (global, actions, payload): ActionReturnTyp
     return;
   }
 
-  const { accessHash, installedDate, isArchived } = stickerSet;
-  const isInstalled = !isArchived && Boolean(installedDate);
+  const { accessHash, isArchived } = stickerSet;
+  const isAdded = !isArchived && getIsStickerSetInstalled(stickerSet);
 
-  void callApi(!isInstalled ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
+  void callApi(!isAdded ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
 });
 
 addActionHandler('loadEmojiKeywords', async (global, actions, payload): Promise<void> => {

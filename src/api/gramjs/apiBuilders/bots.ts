@@ -34,6 +34,7 @@ import {
   buildApiDocument,
   buildApiRichMessage,
   buildApiWebDocument,
+  buildApiWidget,
   buildAudioFromDocument,
   buildGeoPoint,
   buildVideoFromDocument,
@@ -60,6 +61,7 @@ export function buildReplyButtons(
     keyboardPlaceholder: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.placeholder : undefined,
     isKeyboardSingleUse: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.singleUse : undefined,
     isKeyboardSelective: replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? replyMarkup.selective : undefined,
+    isKeyboardFullHeight: replyMarkup instanceof GramJs.ReplyKeyboardMarkup && !replyMarkup.resize ? true : undefined,
   };
 }
 
@@ -149,6 +151,14 @@ export function buildBotInlineMessage(
     };
   } else if (sendMessage instanceof GramJs.BotInlineMessageRichMessage) {
     content.richMessage = buildApiRichMessage(sendMessage.richMessage);
+  } else if (sendMessage instanceof GramJs.BotInlineMessageWidget) {
+    content.widget = buildApiWidget(sendMessage);
+    if (sendMessage.message) {
+      content.text = {
+        text: sendMessage.message,
+        entities: sendMessage.entities?.map(buildApiMessageEntity),
+      };
+    }
   }
 
   return {

@@ -1,2 +1,0 @@
-import e from"./apache-Dh9PJFmJ.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/apache" instead of "highlight.js/lib/languages/apache.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=apache.js-DFU_NRon.js.map

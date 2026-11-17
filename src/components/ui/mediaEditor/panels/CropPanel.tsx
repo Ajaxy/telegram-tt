@@ -1,0 +1,126 @@
+import { memo } from '@teact';
+
+import type { IconName } from '../../../../types/icons';
+import type { MediaEditorAspectRatio as AspectRatio } from '../../../../types/mediaEditor';
+import type { EditorPanelProps } from '../types';
+
+import { ASPECT_RATIOS, getCropWithAspectRatio } from '../crop';
+import { applyCrop } from '../editDocument';
+
+import useLang from '../../../../hooks/useLang';
+import useLastCallback from '../../../../hooks/useLastCallback';
+
+import Icon from '../../../common/icons/Icon';
+import ListItem from '../../ListItem';
+
+import styles from '../MediaEditor.module.scss';
+
+const RATIO_ICONS: Partial<Record<AspectRatio, IconName>> = {
+  square: 'aspect-1-1',
+  '3:2': 'aspect-3-2',
+  '2:3': 'aspect-2-3',
+  '4:3': 'aspect-4-3',
+  '3:4': 'aspect-3-4',
+  '5:4': 'aspect-5-4',
+  '4:5': 'aspect-4-5',
+  '7:5': 'aspect-7-5',
+  '5:7': 'aspect-5-7',
+  '16:9': 'aspect-16-9',
+  '9:16': 'aspect-9-16',
+};
+
+// First 3 ratios are displayed as full-width items
+const FULL_WIDTH_RATIOS = ASPECT_RATIOS.slice(0, 3);
+
+// Remaining ratios are displayed in pairs
+const PAIRED_RATIOS = ASPECT_RATIOS.slice(3);
+
+function CropPanel({
+  doc, sourceSize, isAspectRatioLocked, isAvatar, getDoc, onCommit,
+}: EditorPanelProps) {
+  const lang = useLang();
+  const currentRatio = doc.crop.aspectRatio;
+
+  const handleRatioChange = useLastCallback((ratio: AspectRatio) => {
+    if (!sourceSize) return;
+
+    const currentDoc = getDoc();
+    onCommit(applyCrop(currentDoc, getCropWithAspectRatio(currentDoc.crop, ratio, sourceSize), sourceSize));
+  });
+
+  const renderRatioIcon = (value: AspectRatio) => {
+    if (value === 'free') {
+      return <Icon name="fullscreen" className="ListItem-main-icon" />;
+    }
+    if (value === 'original') {
+      return <Icon name="media" className="ListItem-main-icon" />;
+    }
+    return <Icon name={RATIO_ICONS[value]!} className="ListItem-main-icon" />;
+  };
+
+  const renderRatioLabel = (option: typeof ASPECT_RATIOS[number]) => {
+    if (option.labelKey) {
+      return lang(option.labelKey);
+    }
+    return option.label;
+  };
+
+  const renderPairedRows = () => {
+    // Generate row indices for paired ratios (0, 2, 4, ...)
+    const rowIndices = Array.from({ length: Math.ceil(PAIRED_RATIOS.length / 2) }, (_, i) => i * 2);
+
+    return rowIndices.map((i) => {
+      const leftRatio = PAIRED_RATIOS[i];
+      const rightRatio = PAIRED_RATIOS[i + 1];
+
+      return (
+        <div key={i} className={styles.aspectRatioRow}>
+          <ListItem
+            buttonClassName={styles.aspectRatioButton}
+            focus={currentRatio === leftRatio.value}
+            onClick={() => handleRatioChange(leftRatio.value)}
+          >
+            {renderRatioIcon(leftRatio.value)}
+            {leftRatio.label}
+          </ListItem>
+          {rightRatio && (
+            <ListItem
+              buttonClassName={styles.aspectRatioButton}
+              focus={currentRatio === rightRatio.value}
+              onClick={() => handleRatioChange(rightRatio.value)}
+            >
+              {renderRatioIcon(rightRatio.value)}
+              {rightRatio.label}
+            </ListItem>
+          )}
+        </div>
+      );
+    });
+  };
+
+  if (isAspectRatioLocked) {
+    return <div className={styles.panelNote}>{lang(isAvatar ? 'CropperTitle' : 'EditorCoverAspectHint')}</div>;
+  }
+
+  return (
+    <>
+      <div className={styles.sectionLabel}>{lang('AspectRatio')}</div>
+      <div className={styles.aspectRatioList}>
+        {FULL_WIDTH_RATIOS.map((option) => (
+          <ListItem
+            key={option.value}
+            buttonClassName={styles.aspectRatioButton}
+            focus={currentRatio === option.value}
+            onClick={() => handleRatioChange(option.value)}
+          >
+            {renderRatioIcon(option.value)}
+            {renderRatioLabel(option)}
+          </ListItem>
+        ))}
+        {renderPairedRows()}
+      </div>
+    </>
+  );
+}
+
+export default memo(CropPanel);

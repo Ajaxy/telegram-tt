@@ -152,6 +152,7 @@ export default function useOuterHandlers(
       replyToMsgId: messageId,
       replyToPeerId: undefined,
       quoteText: undefined,
+      quoteRich: undefined,
       quoteOffset: undefined,
     });
   }
@@ -193,7 +194,10 @@ export default function useOuterHandlers(
             replyToMsgId: messageId,
           });
         } else {
-          updateDraftReplyInfo({ replyToMsgId: messageId });
+          updateDraftReplyInfo({
+            replyToMsgId: messageId, replyToPeerId: undefined,
+            quoteText: undefined, quoteRich: undefined, quoteOffset: undefined,
+          });
         }
 
         setTimeout(unmarkSwiped, Math.max(0, SWIPE_ANIMATION_DURATION - (Date.now() - startedAt)));

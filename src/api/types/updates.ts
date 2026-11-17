@@ -32,6 +32,7 @@ import type {
   ApiReactions,
   ApiStickerSet,
   ApiThreadInfo,
+  ApiTopic,
   ApiWebPage,
   BoughtPaidMedia,
 } from './messages';
@@ -41,7 +42,9 @@ import type {
   ApiNotifyPeerType,
   ApiPasskeyOption,
   ApiPeerNotifySettings,
+  ApiPeerTheme,
   ApiSessionData,
+  ApiWallpaper,
 } from './misc';
 import type { ApiEmojiStatusType, ApiPeerSettings } from './peers';
 import type { ApiRichMessage } from './richMessage';
@@ -425,6 +428,15 @@ export type ApiUpdateMessagePoll = {
   webPages?: ApiWebPage[];
 };
 
+export type ApiUpdateMessageWidgetData = {
+  '@type': 'updateMessageWidgetData';
+  chatId: string;
+  messageId: number;
+  chatData?: string;
+  publicData?: string;
+  publicDataHash?: string;
+};
+
 export type ApiUpdateMessagePollUnread = {
   '@type': 'updateMessagePollUnread';
   chatId: string;
@@ -521,6 +533,19 @@ export type ApiUpdatePeerHistoryTtl = {
   '@type': 'updatePeerHistoryTtl';
   id: string;
   ttlPeriod?: number;
+};
+
+export type ApiUpdatePeerTheme = {
+  '@type': 'updatePeerTheme';
+  id: string;
+  peerTheme?: ApiPeerTheme;
+  shouldReload?: boolean;
+};
+
+export type ApiUpdatePeerWallpaper = {
+  '@type': 'updatePeerWallpaper';
+  id: string;
+  wallpaper?: ApiWallpaper;
 };
 
 export type ApiUpdateUser = {
@@ -818,6 +843,13 @@ export type ApiUpdateTopic = {
   topicId: number;
 };
 
+export type ApiUpdateTopicEdit = {
+  '@type': 'updateTopicEdit';
+  chatId: string;
+  topicId: number;
+  topicEdit: Partial<ApiTopic>;
+};
+
 export type ApiUpdateTopics = {
   '@type': 'updateTopics';
   chatId: string;
@@ -1042,11 +1074,13 @@ export type ApiUpdate = (
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateNewEphemeralMessage | ApiUpdateEphemeralMessage
   | ApiUpdateDeleteEphemeralMessages | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdatePasskeyOption |
-  ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollUnread | ApiUpdateMessagePollVote |
+  ApiUpdateDeleteMessages | ApiUpdateMessageWidgetData |
+  ApiUpdateMessagePoll | ApiUpdateMessagePollUnread | ApiUpdateMessagePollVote |
   ApiUpdateDeleteHistory |
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
   ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings | ApiUpdatePeerHistoryTtl
+  | ApiUpdatePeerTheme | ApiUpdatePeerWallpaper
   | ApiUpdateUserAlreadyAuthorized |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage | ApiUpdateScheduledMessageSendFailed |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction | ApiUpdateThreadReadState |
@@ -1066,7 +1100,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifySettings | ApiUpdatePinnedTopic |
-  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
+  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopicEdit | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |

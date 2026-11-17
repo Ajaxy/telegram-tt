@@ -1,5 +1,6 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
 import type { ApiBotApp, ApiFormattedText, ApiPhoto, ApiPollAnswer, ApiTodoItem } from './messages';
+import type { ApiWallpaper } from './misc';
 import type { ApiStarGiftRegular, ApiStarGiftUnique, ApiTypeCurrencyAmount } from './stars';
 import type { ApiBirthday } from './users';
 
@@ -80,6 +81,19 @@ export interface ApiMessageActionSetMessagesTtl extends ActionMediaType {
   type: 'setMessagesTtl';
   period: number;
   autoSettingFromId?: string;
+}
+
+export interface ApiMessageActionSetChatTheme extends ActionMediaType {
+  type: 'setChatTheme';
+  emoticon?: string;
+  gift?: Pick<ApiStarGiftUnique, 'title' | 'number'>;
+}
+
+export interface ApiMessageActionSetChatWallpaper extends ActionMediaType {
+  type: 'setChatWallpaper';
+  isSame?: true;
+  isForBoth?: true;
+  wallpaper?: ApiWallpaper;
 }
 
 export interface ApiMessageActionGameScore extends ActionMediaType {
@@ -351,6 +365,10 @@ export interface ApiMessageActionPaidMessagesRefunded extends ActionMediaType {
   stars: number;
 }
 
+export interface ApiMessageActionNoPaidMessagesTokenUsed extends ActionMediaType {
+  type: 'noPaidMessagesTokenUsed';
+}
+
 export interface ApiMessageActionPaidMessagesPrice extends ActionMediaType {
   type: 'paidMessagesPrice';
   stars: number;
@@ -445,6 +463,7 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChatDeleteUser | ApiMessageActionChatJoinedByLink | ApiMessageActionChannelCreate
   | ApiMessageActionChatMigrateTo | ApiMessageActionChannelMigrateFrom | ApiMessageActionPinMessage
   | ApiMessageActionHistoryClear | ApiMessageActionSetMessagesTtl
+  | ApiMessageActionSetChatTheme | ApiMessageActionSetChatWallpaper
   | ApiMessageActionGameScore | ApiMessageActionPaymentSent | ApiMessageActionPhoneCall
   | ApiMessageActionScreenshotTaken | ApiMessageActionCustomAction | ApiMessageActionBotAllowed
   | ApiMessageActionBoostApply | ApiMessageActionContactSignUp | ApiMessageActionExpiredContent
@@ -457,7 +476,8 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
   | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch
   | ApiMessageActionGiveawayResults | ApiMessageActionPaymentRefunded | ApiMessageActionGiftStars
   | ApiMessageActionGiftTon | ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
-  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice | ApiMessageActionSuggestedPostApproval
+  | ApiMessageActionPaidMessagesRefunded | ApiMessageActionNoPaidMessagesTokenUsed | ApiMessageActionPaidMessagesPrice
+  | ApiMessageActionSuggestedPostApproval
   | ApiMessageActionSuggestedPostSuccess | ApiMessageActionSuggestedPostRefund | ApiMessageActionTodoCompletions
   | ApiMessageActionTodoAppendTasks | ApiMessageActionPollAppendAnswer | ApiMessageActionPollDeleteAnswer
   | ApiMessageActionStarGiftPurchaseOffer

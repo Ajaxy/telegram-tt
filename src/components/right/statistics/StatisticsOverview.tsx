@@ -10,7 +10,7 @@ import { TON_CURRENCY_CODE } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos } from '../../../util/formatCurrency';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
-import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
+import { formatInteger, formatIntegerCompact } from '../../../util/text/textFormat';
 
 import useLang from '../../../hooks/useLang';
 

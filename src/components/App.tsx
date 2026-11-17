@@ -10,17 +10,17 @@ import {
 } from '../config';
 import { forceMutation } from '../lib/fasterdom/stricterdom.ts';
 import {
-  selectActionMessageBg, selectTabState, selectTheme, selectThemeValues,
+  selectActionMessageBg, selectChatWallpaperSettings, selectTabState, selectTheme,
 } from '../global/selectors';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
-import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
+import { IS_INSTALL_PROMPT_SUPPORTED, IS_IOS, PLATFORM_ENV } from '../util/browser/windowEnvironment';
 import buildClassName from '../util/buildClassName';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
 import { ACCOUNT_SLOT, getAccountSlotUrl, getFirstLoggedInAccountSlot } from '../util/multiaccount';
 import { hasLegacyEncryptedSession } from '../util/passcode';
 import { getInitialLocationHash, getPendingWebLogin } from '../util/routing';
 import { checkSessionLocked, hasStoredSession } from '../util/sessions';
-import { getActionMessageBg, getWallpaperBaseColor } from '../util/wallpaper';
+import { getWallpaperBaseColor } from '../util/wallpaper';
 import { handoffWebLogin } from '../util/webLoginHandoff';
 import { updateSizes } from '../util/windowSize';
 
@@ -241,13 +241,11 @@ const App = ({
   }, [theme, customBackgroundColor]);
 
   useLayoutEffect(() => {
-    // Fall back to the theme default when the tint is unset (e.g. a photo wallpaper without a
-    // thumbnail), so service chips don't keep the previous wallpaper's tint.
-    document.body.style.setProperty(
+    document.documentElement.style.setProperty(
       '--action-message-bg',
-      actionMessageBg || getActionMessageBg(theme)!,
+      actionMessageBg!,
     );
-  }, [actionMessageBg, theme]);
+  }, [actionMessageBg]);
 
   const getIsInBackgroundLocal = getIsInBackground;
   useSignalEffect(() => {
@@ -259,6 +257,12 @@ const App = ({
 
   return (
     <UiLoader page={page} isMobile={isMobile}>
+      {IS_IOS && isMobile && (
+        <>
+          <div className={styles.browserColorTop} aria-hidden />
+          <div className={styles.browserColorBottom} aria-hidden />
+        </>
+      )}
       <Transition
         name="fade"
         activeKey={activeKey}
@@ -281,7 +285,7 @@ export default withGlobal(
   (global): Complete<StateProps> => {
     const { state: authState, hasWebAuthTokenFailed, hasWebAuthTokenPasswordRequired } = global.auth;
     const theme = selectTheme(global);
-    const themeValues = selectThemeValues(global, theme);
+    const themeValues = selectChatWallpaperSettings(global);
 
     return {
       authState,

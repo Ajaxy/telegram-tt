@@ -30,9 +30,6 @@ import type {
   ApiNewMediaTodo,
   ApiNewPoll,
   ApiNotification,
-  ApiOnrampAvailability,
-  ApiOnrampLimits,
-  ApiOnrampQuote,
   ApiPaymentFormRegular,
   ApiPaymentFormStars,
   ApiPaymentStatus,
@@ -45,6 +42,7 @@ import type {
   ApiReactionWithPaid,
   ApiReceiptRegular,
   ApiRequestPeerType,
+  ApiRichText,
   ApiSavedGifts,
   ApiSavedStarGift,
   ApiSearchPostsFlood,
@@ -74,6 +72,8 @@ import type {
   ApiUrlAuthResultRequest,
   ApiUser,
   ApiVideo,
+  ApiWalletGiftDeposit,
+  ApiWidgetWalletCall,
   DecryptWalletCommentError,
   ExportSecretPhraseError,
   ReplaceWalletError,
@@ -111,7 +111,9 @@ import type {
   ProfileEditProgress,
   ProfileTabType,
   ResaleGiftsFilterOptions,
+  RoundVideoMode,
   ScrollTargetPosition,
+  SettingsConfirmation,
   SettingsHighlight,
   SettingsScreens,
   SharedMediaType,
@@ -124,6 +126,7 @@ import type {
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
 import type { RegularLangKey } from '../../types/language';
+import type { WebAppMediaKind } from '../../types/webapp';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -248,6 +251,7 @@ export type TabState = {
   ratingPhoneCall?: ApiPhoneCall;
 
   messageLists: MessageList[];
+  globalThemePreviewChatId?: string;
 
   contentToBeScheduled?: {
     gif?: ApiVideo;
@@ -274,6 +278,8 @@ export type TabState = {
     isResizingContainer?: boolean;
     quote?: string;
     quoteOffset?: number;
+    todoItemId?: number;
+    pollOption?: string;
     scrollTargetPosition?: ScrollTargetPosition;
   };
 
@@ -484,6 +490,8 @@ export type TabState = {
       direction: 'next' | 'prev';
       isAuto?: boolean;
     };
+    // Round video leaves its message for the floating player even while the message is visible
+    roundVideoMode?: RoundVideoMode;
   };
 
   isAudioPlaylistModalOpen?: boolean;
@@ -501,6 +509,7 @@ export type TabState = {
     fromChatId?: string;
     messageId?: number;
     quoteText?: ApiFormattedText;
+    quoteRich?: ApiRichText[];
     quoteOffset?: number;
     toChatId?: string;
     toThreadId?: ThreadId;
@@ -591,6 +600,7 @@ export type TabState = {
   dialogs: ApiDialog[];
 
   safeLinkModalUrl?: string;
+  safeLinkModalIsWidget?: boolean;
   mapModal?: {
     point: ApiGeoPoint;
     zoom?: number;
@@ -744,6 +754,12 @@ export type TabState = {
   locationAccessModal?: {
     bot: ApiUser;
     webAppKey: string;
+  };
+
+  mediaAccessModal?: {
+    bot: ApiUser;
+    webAppKey: string;
+    kinds: WebAppMediaKind[];
   };
 
   confetti?: {
@@ -1017,6 +1033,8 @@ export type TabState = {
 
   qrCodeModal?: {
     peerId: string;
+    uniqueGifts?: ApiSavedStarGift[];
+    uniqueGiftsNextOffset?: string;
   };
 
   loadingWalletTransactionId?: string;
@@ -1032,8 +1050,11 @@ export type TabState = {
     shouldCloseOnBack?: boolean;
     initialTransactionId?: string;
     shouldShowIntro?: boolean;
+    isBuyPending?: boolean;
     // Moves the phrase out of the app passcode's keeping before that passcode goes
     shouldReleaseKey?: boolean;
+    shouldOpenCollectibles?: boolean;
+    shouldOpenReceive?: boolean;
   };
 
   walletCardModal?: {
@@ -1065,6 +1086,14 @@ export type TabState = {
     request?: ApiTonConnectRequest;
     preview?: ApiTonConnectRequestPreview;
     error?: ApiTonConnectError;
+    // A widget's call to pay or sign: the window names its bot, and the outcome goes to the bot, see `widgetWalletCalls`
+    widget?: {
+      callId: string;
+      botId: string;
+      chatId: string;
+      messageId: number;
+      call: ApiWidgetWalletCall;
+    };
   };
 
   walletTransferFee?: {
@@ -1076,6 +1105,15 @@ export type TabState = {
     canUseRelayer?: boolean;
     isLoading?: boolean;
     isFailed?: boolean;
+  };
+
+  // The transfer prepared to move a gift NFT from the wallet to the account
+  walletGiftDeposit?: {
+    collectibleAddress: string;
+    deposit?: ApiWalletGiftDeposit;
+    error?: SendTonTransferError;
+    errorKey?: RegularLangFnParameters;
+    isLoading?: boolean;
   };
 
   // The `.ton` domain typed as the recipient in this tab. `false` records a domain with no wallet.
@@ -1112,21 +1150,6 @@ export type TabState = {
     transactionId: string;
     status: 'pending' | 'error';
     error?: DecryptWalletCommentError;
-  };
-
-  // `unavailable` when the region cannot buy
-  walletBuy?: {
-    provider: string;
-    status: 'loading' | 'ready' | 'unavailable';
-    baseCurrency: string;
-    availability?: ApiOnrampAvailability;
-    baseCurrencies?: string[];
-    limits?: ApiOnrampLimits;
-    quote?: ApiOnrampQuote;
-    quoteBaseAmount?: string;
-    quotePaymentMethod?: string;
-    isQuoteLoading?: boolean;
-    hasQuoteError?: boolean;
   };
 
   starsBalanceModal?: {
@@ -1245,6 +1268,14 @@ export type TabState = {
     errorKey?: RegularLangFnParameters;
   };
 
+  giftMoveToWalletModal?: {
+    gift: ApiSavedStarGift;
+    isPasswordStep?: boolean;
+    isLoading?: boolean;
+    errorKey?: RegularLangFnParameters;
+    passwordErrorKey?: RegularLangFnParameters;
+  };
+
   giftStatusInfoModal?: {
     emojiStatus: ApiEmojiStatusCollectible;
   };
@@ -1325,6 +1356,8 @@ export type TabState = {
 
   isPasskeyModalOpen?: boolean;
 
+  settingsConfirmation?: SettingsConfirmation;
+
   leaveGroupModal?: {
     chatId: string;
     nextOwnerId?: string;
@@ -1360,5 +1393,6 @@ export type TabState = {
   messageMediaEditorRequest?: {
     chatId: string;
     messageId: number;
+    videoTime?: number;
   };
 };

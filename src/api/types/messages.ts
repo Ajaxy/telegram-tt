@@ -1,11 +1,12 @@
 import type { ThreadId, ThreadReadState, WebPageMediaSize } from '../../types';
+import type { MediaEditDocument } from '../../types/mediaEditor';
 import type {
   ApiBotInlineMediaResult,
   ApiBotInlineResult,
   ApiWebDocument,
 } from './bots';
 import type { ApiChatAdminRights } from './chats';
-import type { ApiInstantViewPage } from './instantView';
+import type { ApiInstantViewPage, ApiRichText } from './instantView';
 import type { ApiMessageAction } from './messageActions';
 import type { ApiAttachment, ApiPeerNotifySettings, ApiRestrictionReason } from './misc';
 import type {
@@ -134,12 +135,18 @@ export interface ApiVideo {
   previewPhotoSizes?: ApiPhotoSize[];
   blobUrl?: string;
   previewBlobUrl?: string;
+  editPreview?: {
+    blobUrl: string;
+    mimeType: string;
+    document: MediaEditDocument;
+  };
   size: number;
   noSound?: boolean;
   waveform?: number[];
   timestamp?: number;
   altVideos?: ApiVideo[];
   storyboardInfo?: StoryboardInfo;
+  cover?: ApiPhoto;
 }
 
 export interface ApiAudio {
@@ -403,6 +410,20 @@ export interface ApiMediaTodo {
   completions?: ApiTodoCompletion[];
 }
 
+export interface ApiWidget {
+  mediaType: 'widget';
+  width: number;
+  height: number;
+  html?: string;
+  isCopy?: true;
+  canQuery?: true;
+  canBackgroundQuery?: true;
+  chatData?: string;
+  publicData?: string;
+  publicDataHash?: string;
+  widgetId?: string;
+}
+
 export type ApiNewMediaTodo = {
   todo: ApiTodoList;
 };
@@ -476,7 +497,11 @@ export interface ApiMessageReplyInfo {
   replyToTopId?: number;
   isForumTopic?: true;
   isQuote?: true;
+  todoItemId?: number;
+  pollOption?: string;
+  replyOptionText?: ApiFormattedText;
   quoteText?: ApiFormattedText;
+  quoteRich?: ApiRichText[];
   quoteOffset?: number;
 }
 
@@ -498,7 +523,10 @@ export interface ApiInputMessageReplyInfo {
   replyToPeerId?: string;
   monoforumPeerId?: string;
   quoteText?: ApiFormattedText;
+  quoteRich?: ApiRichText[];
   quoteOffset?: number;
+  todoItemId?: number;
+  pollOption?: string;
 }
 
 export interface ApiInputEphemeralReplyInfo {
@@ -663,7 +691,6 @@ export enum ApiMessageEntityTypes {
   Spoiler = 'MessageEntitySpoiler',
   CustomEmoji = 'MessageEntityCustomEmoji',
   Timestamp = 'MessageEntityTimestamp',
-  QuoteFocus = 'MessageEntityQuoteFocus',
   FormattedDate = 'MessageEntityFormattedDate',
   Unknown = 'MessageEntityUnknown',
   DiffInsert = 'MessageEntityDiffInsert',
@@ -737,6 +764,7 @@ export type MediaContent = {
   contact?: ApiContact;
   pollId?: string;
   todo?: ApiMediaTodo;
+  widget?: ApiWidget;
   action?: ApiMessageAction;
   webPage?: ApiMessageWebPage;
   audio?: ApiAudio;
@@ -806,6 +834,7 @@ export interface ApiMessage {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
+  isKeyboardFullHeight?: boolean;
   viaBotId?: string;
   viaBusinessBotId?: string;
   guestChatViaId?: string;
@@ -1092,6 +1121,7 @@ export type ApiReplyKeyboard = {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
+  isKeyboardFullHeight?: boolean;
 } & Partial<Record<'inlineButtons' | 'keyboardButtons', ApiKeyboardButtons>>;
 
 export type ApiTranscription = {

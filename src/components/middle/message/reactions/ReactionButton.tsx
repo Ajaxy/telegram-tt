@@ -9,7 +9,7 @@ import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import { isReactionChosen } from '../../../../global/helpers';
 import buildClassName from '../../../../util/buildClassName';
-import { formatIntegerCompact } from '../../../../util/textFormat';
+import { formatIntegerCompact } from '../../../../util/text/textFormat';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useSelector from '../../../../hooks/data/useSelector';

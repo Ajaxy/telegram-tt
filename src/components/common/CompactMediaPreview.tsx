@@ -54,7 +54,7 @@ export function canRenderCompactMediaPreview(
   media?: MediaContent,
   attachment?: ApiAttachment,
 ) {
-  const photo = media?.photo;
+  const photo = media?.photo || media?.video?.cover;
   const document = media?.document;
   const previewUrl = getPreviewUrl(photo, document, media?.video, attachment);
   const video = media?.video || attachment?.gif;
@@ -91,7 +91,8 @@ const CompactMediaPreview = ({
   const { isMobile } = useAppLayout();
 
   const previewSize = size || (isPictogram ? PICTOGRAM_SIZE : undefined);
-  const photo = media?.photo;
+  // A custom video cover is a static picture, so it replaces the video thumbnail here
+  const photo = media?.photo || media?.video?.cover;
   const document = media?.document;
   const video = media?.video || attachment?.gif;
   const previewUrl = getPreviewUrl(photo, document, media?.video, attachment);
@@ -117,7 +118,8 @@ const CompactMediaPreview = ({
 
   const resolvedPreviewUrl = previewUrl || (!shouldRenderPreviewAsVideo ? fetchedPreviewUrl : undefined);
   const resolvedPreviewVideoUrl = previewVideoUrl || (shouldRenderPreviewAsVideo ? fetchedPreviewUrl : undefined);
-  const shouldShowSpoiler = isSpoiler ?? photo?.isSpoiler ?? media?.video?.isSpoiler ?? attachment?.shouldSendAsSpoiler;
+  const shouldShowSpoiler = isSpoiler ?? media?.photo?.isSpoiler ?? media?.video?.isSpoiler
+    ?? attachment?.shouldSendAsSpoiler;
 
   const hasResolvedMedia = Boolean(resolvedPreviewUrl || resolvedPreviewVideoUrl);
   const shouldShowCanvasThumb = Boolean(thumbDataUri && (shouldShowSpoiler || !hasResolvedMedia));

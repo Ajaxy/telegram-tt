@@ -3,6 +3,7 @@ import {
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
+  WALLPAPER_SNAPSHOT_CACHE_NAME,
 } from '../config';
 import { yieldToMain } from './browser/scheduler';
 import { loadPasscodeMeta, requestPasscodeStateLock } from './passcode/meta';
@@ -294,6 +295,7 @@ function isPasscodeProtectedCache(cacheName: string) {
   return [
     ...CLEARABLE_CACHE_NAMES,
     CUSTOM_BG_CACHE_NAME,
+    WALLPAPER_SNAPSHOT_CACHE_NAME,
   ].some((name) => cacheName === name || cacheName.startsWith(`${name}_`));
 }
 

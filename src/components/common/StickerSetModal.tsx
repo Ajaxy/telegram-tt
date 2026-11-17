@@ -7,7 +7,7 @@ import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { MessageList } from '../../types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
-import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
+import { getAllowedAttachmentOptions, getCanPostInChat, getIsStickerSetInstalled } from '../../global/helpers';
 import {
   selectBot,
   selectCanScheduleUntilOnline,
@@ -93,7 +93,9 @@ const StickerSetModal = ({
   const prevStickerSet = usePreviousDeprecated(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
-  const isAdded = Boolean(!renderingStickerSet?.isArchived && renderingStickerSet?.installedDate);
+  const isAdded = Boolean(
+    renderingStickerSet && !renderingStickerSet.isArchived && getIsStickerSetInstalled(renderingStickerSet),
+  );
   const isEmoji = renderingStickerSet?.isEmoji;
 
   const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);

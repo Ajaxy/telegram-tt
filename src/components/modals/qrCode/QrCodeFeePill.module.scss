@@ -1,0 +1,49 @@
+.root {
+  pointer-events: auto;
+
+  position: relative;
+  z-index: 1;
+
+  width: fit-content;
+  margin: 1rem auto 0;
+}
+
+.pill {
+  cursor: var(--custom-cursor, pointer);
+
+  display: block;
+
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.75rem;
+
+  font-size: 0.8125rem;
+
+  background-color: var(--qr-control-color);
+  backdrop-filter: blur(1rem);
+  outline: none;
+  box-shadow: inset 0 0 0 10rem transparent;
+
+  transition: box-shadow 0.15s ease;
+
+  &:hover,
+  &:focus-visible,
+  &.active {
+    box-shadow: inset 0 0 0 10rem var(--qr-control-color);
+  }
+}
+
+.canvas {
+  pointer-events: none;
+
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  transition: opacity 0.15s ease;
+
+  .free:has(.pill:hover, .pill:focus-visible, .pill.active) & {
+    opacity: 0.94;
+  }
+}

@@ -1,11 +1,18 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
+import { useLayoutEffect } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
+import type { ApiWallpaper } from '../../api/types';
 import type { IThemeSettings, ThemeKey } from '../../types';
 
-import { selectPerformanceSettingsValue, selectTheme, selectThemeValues } from '../../global/selectors';
+import {
+  selectCanAnimateInterface, selectChatWallpaper, selectChatWallpaperSettings,
+  selectPeerWallpaper, selectPerformanceSettingsValue, selectTheme, selectThemeValues,
+} from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import { updateBrowserThemeColors } from '../../util/switchTheme';
 
 import useChatBackground from '../../hooks/useChatBackground';
 
@@ -24,20 +31,29 @@ type OwnProps = {
   // Previews don't animate: draw the same gradient once on a 2D canvas instead of a live WebGL renderer.
   isStatic?: boolean;
   backgroundMode?: 'default' | 'lockScreen';
+  browserColorMode?: 'wallpaper' | 'surface';
+  shouldExtendChatWallpaper?: boolean;
+  withSnapshot?: boolean;
+  chatId?: string;
   onClick?: NoneToVoidFunction;
 };
 
 type StateProps = {
   theme: ThemeKey;
   canAnimateGradient?: boolean;
+  canAnimateInterface?: boolean;
   themeSettings?: IThemeSettings;
+  serverWallpaper?: ApiWallpaper;
+  fallbackThemeSettings?: IThemeSettings;
+  hasChatWallpaper: boolean;
+  isGlobalWallpaper: boolean;
+  globalWallpaper?: IThemeSettings;
+  shouldUseSystemTheme?: boolean;
 };
 
 const EMPTY_THEME_SETTINGS: IThemeSettings = {};
 
-// Wraps the chat content and renders the wallpaper behind it: the animated gradient + doodle pattern
-// (or a custom image / solid color), plus the CSS variables message bubbles read. Pulls the active
-// active theme's wallpaper from global.
+// Renders the resolved global or peer wallpaper behind the wrapped content
 const Wallpaper = ({
   children,
   containerRef,
@@ -48,10 +64,21 @@ const Wallpaper = ({
   inert,
   isStatic,
   backgroundMode,
+  browserColorMode,
+  shouldExtendChatWallpaper,
+  withSnapshot,
+  chatId,
   onClick,
   theme,
   canAnimateGradient,
+  canAnimateInterface,
   themeSettings,
+  serverWallpaper,
+  fallbackThemeSettings,
+  hasChatWallpaper,
+  isGlobalWallpaper,
+  globalWallpaper,
+  shouldUseSystemTheme,
 }: OwnProps & StateProps) => {
   // With the send animation disabled the gradient never moves, so the 2D render is identical
   // and no WebGL context is spent
@@ -59,10 +86,28 @@ const Wallpaper = ({
 
   const background = useChatBackground({
     theme,
+    chatId,
     wallpaper: themeSettings || EMPTY_THEME_SETTINGS,
+    serverWallpaper,
+    fallbackWallpaper: fallbackThemeSettings,
     isStatic: isStaticGradient,
+    canAnimatePatternSwap: !isStatic && canAnimateInterface,
     source: backgroundMode === 'lockScreen' ? 'lockScreen' : undefined,
+    withSnapshot,
+    isGlobalWallpaper,
+    globalWallpaper,
+    shouldUseSystemTheme,
   });
+  const shouldExtendWallpaper = shouldExtendChatWallpaper && hasChatWallpaper && background.isImage;
+
+  const browserTopColor = browserColorMode === 'wallpaper' ? background.edgeColors?.top : undefined;
+  const browserBottomColor = browserColorMode === 'wallpaper' ? background.edgeColors?.bottom : undefined;
+  useLayoutEffect(() => {
+    if (!browserColorMode) return undefined;
+
+    updateBrowserThemeColors(browserTopColor ? { top: browserTopColor, bottom: browserBottomColor! } : undefined);
+    return () => updateBrowserThemeColors();
+  }, [browserColorMode, browserTopColor, browserBottomColor]);
 
   return (
     <div
@@ -73,16 +118,30 @@ const Wallpaper = ({
       inert={inert}
       onClick={onClick}
     >
-      <div className={buildClassName(background.backgroundClassNames, bgClassName)} style={background.backgroundStyle}>
-        {background.hasGradient && (
-          <canvas
-            // A canvas can hold only one context type, so switching between the animated (WebGL)
-            // and static (2D) renderers must recreate the element
-            key={isStaticGradient ? 'static' : 'animated'}
-            ref={background.gradientCanvasRef}
-            className={backgroundStyles.gradientCanvas}
-          />
-        )}
+      <div
+        className={buildClassName(backgroundStyles.frame, shouldExtendWallpaper && backgroundStyles.chatWallpaperFrame)}
+        style={background.backgroundStyle}
+      >
+        <div
+          className={buildClassName(background.backgroundClassNames,
+            background.shouldSnap && backgroundStyles.noAnimation, bgClassName)}
+        >
+          {background.hasGradient && (
+            <canvas
+              // A canvas can hold only one context type, so switching between the animated (WebGL)
+              // and static (2D) renderers must recreate the element
+              key={isStaticGradient ? 'static' : 'animated'}
+              ref={background.gradientCanvasRef}
+              className={backgroundStyles.gradientCanvas}
+            />
+          )}
+          <div ref={background.patternLayerRef} className={backgroundStyles.patternLayer} />
+          {background.isSnapshotShown && (
+            <div className={buildClassName('wallpaper-snapshot', backgroundStyles.snapshot)} aria-hidden />
+          )}
+        </div>
+        <div className={backgroundStyles.leftExtension} aria-hidden />
+        <div className={backgroundStyles.rightExtension} aria-hidden />
       </div>
       {children}
     </div>
@@ -91,13 +150,25 @@ const Wallpaper = ({
 
 // No `memo`: `children` change on nearly every parent render, so memoization would never apply
 export default withGlobal<OwnProps>(
-  (global, { backgroundMode }): Complete<StateProps> => {
+  (global, { backgroundMode, chatId }): Complete<StateProps> => {
     const theme = selectTheme(global);
+    const globalSettings = selectChatWallpaperSettings(global);
+    const themeSettings = backgroundMode === 'default' ? EMPTY_THEME_SETTINGS
+      : backgroundMode === 'lockScreen' ? globalSettings
+        : selectChatWallpaperSettings(global, chatId);
 
     return {
       theme,
       canAnimateGradient: selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
-      themeSettings: backgroundMode === 'default' ? EMPTY_THEME_SETTINGS : selectThemeValues(global, theme),
+      canAnimateInterface: selectCanAnimateInterface(global),
+      themeSettings,
+      serverWallpaper: backgroundMode ? undefined : selectChatWallpaper(global, chatId),
+      fallbackThemeSettings: selectThemeValues(global, theme),
+      hasChatWallpaper: Boolean(selectPeerWallpaper(global, chatId)),
+      // Chat wallpapers and chat themes resolve to other settings objects
+      isGlobalWallpaper: themeSettings === globalSettings,
+      globalWallpaper: globalSettings,
+      shouldUseSystemTheme: selectSharedSettings(global).shouldUseSystemTheme,
     };
   },
 )(Wallpaper);

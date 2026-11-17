@@ -3,16 +3,17 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiBirthday, ApiMessage, ApiUsername } from '../../../api/types';
+import type {
+  ApiAvatarUpload, ApiBirthday, ApiMessage, ApiPhoto, ApiUsername,
+} from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress, SettingsScreens } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
 import { getChatAvatarHash } from '../../../global/helpers';
 import { filterPeersByQuery } from '../../../global/helpers/peers';
 import {
-  selectChat, selectChatMessage, selectTabState, selectUser, selectUserFullInfo,
+  selectChat, selectChatMessage, selectPeerAvatarPhoto, selectTabState, selectUser, selectUserFullInfo,
 } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { formatDateTime } from '../../../util/localization/dateFormat';
@@ -27,7 +28,6 @@ import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import ManageUsernames from '../../common/ManageUsernames';
@@ -54,6 +54,7 @@ type OwnProps = {
 
 type StateProps = {
   currentAvatarHash?: string;
+  currentAvatarPhoto?: ApiPhoto;
   currentFirstName?: string;
   currentLastName?: string;
   currentBirthday?: ApiBirthday;
@@ -77,6 +78,7 @@ const ERROR_FIRST_NAME_MISSING = 'EditProfileNoFirstName';
 const SettingsEditProfile = ({
   isActive,
   currentAvatarHash,
+  currentAvatarPhoto,
   currentFirstName,
   currentLastName,
   currentBirthday,
@@ -111,7 +113,7 @@ const SettingsEditProfile = ({
   const [isPersonalChannelTouched, setIsPersonalChannelTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  const [photo, setPhoto] = useState<File | undefined>();
+  const [photo, setPhoto] = useState<ApiAvatarUpload | undefined>();
   const [firstName, setFirstName] = useState(currentFirstName || '');
   const [lastName, setLastName] = useState(currentLastName || '');
   const [bio, setBio] = useState(currentBio || '');
@@ -132,8 +134,6 @@ const SettingsEditProfile = ({
     undefined,
     !currentPersonalChannelId,
   );
-
-  const currentAvatarBlobUrl = useMedia(currentAvatarHash, false, ApiMediaFormat.BlobUrl);
 
   const isLoading = progress === ProfileEditProgress.InProgress;
   const isUsernameError = editableUsername === false;
@@ -183,7 +183,7 @@ const SettingsEditProfile = ({
 
   useEffect(() => {
     setPhoto(undefined);
-  }, [currentAvatarBlobUrl]);
+  }, [currentAvatarHash]);
 
   useEffect(() => {
     setFirstName(currentFirstName || '');
@@ -203,6 +203,7 @@ const SettingsEditProfile = ({
 
   useEffect(() => {
     if (progress === ProfileEditProgress.Complete) {
+      setPhoto(undefined);
       setIsProfileFieldsTouched(false);
       setIsPersonalChannelTouched(false);
       setIsUsernameTouched(false);
@@ -222,7 +223,7 @@ const SettingsEditProfile = ({
     return formatDateTime(lang, date, { date: 'long', includeYear: false });
   }, [currentBirthday, lang]);
 
-  const handlePhotoChange = useLastCallback((newPhoto: File) => {
+  const handlePhotoChange = useLastCallback((newPhoto: ApiAvatarUpload) => {
     setPhoto(newPhoto);
   });
 
@@ -336,10 +337,12 @@ const SettingsEditProfile = ({
       <Surface scrollable className="settings-content no-border">
         <IslandOutside className="settings-content-header">
           <AvatarEditable
-            currentAvatarBlobUrl={currentAvatarBlobUrl}
+            isOwn
+            currentAvatarHash={currentAvatarHash}
+            currentAvatarPhoto={currentAvatarPhoto}
             onChange={handlePhotoChange}
             title={lang('AriaSettingsEditProfilePhoto')}
-            disabled={isLoading}
+            isLoading={isLoading}
           />
         </IslandOutside>
         <Island>
@@ -514,6 +517,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       currentAvatarHash,
+      currentAvatarPhoto: currentUserId ? selectPeerAvatarPhoto(global, currentUserId) : undefined,
       currentFirstName,
       currentLastName,
       currentBirthday: currentUserFullInfo?.birthday,

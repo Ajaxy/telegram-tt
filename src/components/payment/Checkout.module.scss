@@ -117,11 +117,12 @@
 }
 
 .provider.stripe {
-  background-image: url("../../assets/stripe-logo.png");
+  background-image: url("../../assets/stripe-logo.svg");
+  background-size: 1.75rem; // Mark corners touch the circular crop at the default size
 }
 
 .provider.smartglocal {
-  background-image: url("../../assets/smartglocal-logo.png");
+  background-image: url("../../assets/smartglocal-logo.svg");
 }
 
 .checkout-info-item-info {

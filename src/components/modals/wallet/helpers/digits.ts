@@ -5,7 +5,7 @@ import buildClassName from '../../../../util/buildClassName';
 import { clamp } from '../../../../util/math';
 import { matchAmountTokens } from './amount';
 import {
-  coast, ease, EASE_EASING, pulse, sampleFrames, settle, SETTLE_EASING,
+  coast, ease, EASE_EASING, getDampedWave, pulse, sampleFrames, settle, SETTLE_EASING,
 } from './motion';
 import { createSvgFilter, startRoll } from './roll';
 
@@ -54,6 +54,15 @@ const HIT_STAGGER = 55;
 const HIT_SIZE = 0.1;
 const HIT_FRAMES = sampleFrames(HIT_DURATION, (_, progress) => ({ scale: String(1 + HIT_SIZE * pulse(progress)) }));
 
+const PUSH_DURATION = 700;
+const PUSH_STAGGER = 35;
+const PUSH_SIZE = 0.06;
+const PUSH_FREQUENCY = 1.6;
+const PUSH_DECAY = 180;
+const PUSH_FRAMES = sampleFrames(PUSH_DURATION, (time) => ({
+  scale: String(1 + PUSH_SIZE * getDampedWave(time, PUSH_FREQUENCY, PUSH_DECAY)),
+}));
+
 const HIDDEN_GLYPH = { transform: 'scale(0.86)', opacity: 0, filter: 'blur(3px)' };
 const SHOWN_GLYPH = { transform: 'none', opacity: 1, filter: 'none' };
 const GHOST_FRAMES = buildGhostFrames();
@@ -87,6 +96,16 @@ export function startDigitsRoll(
 export function hitDigits(cells: DigitCell[]) {
   cells.forEach(({ element }, i) => {
     element.animate(HIT_FRAMES, { duration: HIT_DURATION, delay: i * HIT_STAGGER });
+  });
+}
+
+export function getDigitGlyphs(container: Element) {
+  return Array.from(container.querySelectorAll<HTMLElement>(`.${styles.glyph}`));
+}
+
+export function pushDigits(container: Element) {
+  getDigitGlyphs(container).forEach((glyph, i) => {
+    glyph.parentElement!.animate(PUSH_FRAMES, { duration: PUSH_DURATION, delay: i * PUSH_STAGGER });
   });
 }
 

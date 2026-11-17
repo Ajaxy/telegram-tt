@@ -25,12 +25,12 @@
     height: 100%;
     border-radius: 0;
 
-    :global(.Avatar__media) {
+    :global(.avatar-media) {
       border-radius: 0;
       object-fit: cover;
     }
 
-    &.blurred :global(.Avatar__media) {
+    &.blurred :global(.avatar-media) {
       filter: blur(10px);
     }
   }

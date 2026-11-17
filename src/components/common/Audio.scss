@@ -22,6 +22,8 @@
   }
 
   .media-loading {
+    --media-control-foreground: var(--color-primary-foreground);
+
     pointer-events: none;
     position: absolute;
     inset-block-start: 0;
@@ -47,7 +49,7 @@
       border-radius: 50%;
 
       font-size: 1rem;
-      color: var(--color-white);
+      color: var(--color-primary-foreground);
 
       opacity: 1;
       background-color: var(--color-primary);
@@ -62,7 +64,13 @@
       margin-inline-end: 0.5rem;
 
       &.translucent-white {
-        color: rgba(255, 255, 255, 0.8);
+        --button-text-color: var(--message-media-text);
+        --button-active-text-color: var(--message-media-text);
+        --button-background-color: #4d4d4d80;
+        --button-active-background-color: #4d4d4d80;
+        --button-no-ripple-background-color: #4d4d4d80;
+
+        background-blend-mode: multiply;
       }
 
       &.smaller {
@@ -90,35 +98,10 @@
   }
 
   &.own {
-    --color-text-secondary: var(--accent-color);
-    --color-interactive-active: var(--color-text-green);
-    --color-interactive-inactive: rgba(var(--color-text-green-rgb), 0.4);
-    --color-interactive-buffered: rgba(var(--color-text-green-rgb), 0.4); // Overlays underlying inactive color
-
-    .theme-dark & {
-      --color-text-green-rgb: 255, 255, 255;
-      --color-text-green: var(--color-white);
-    }
-
-    .Button,
-    .icon-view-once,
-    .media-loading {
-      --color-primary: var(--color-text-green);
-      --color-primary-shade: var(--color-active);
-      --color-primary-shade-darker: var(--color-active-darker);
-      --color-white: var(--color-background-own);
-
-      .theme-dark & {
-        --color-primary-shade: #fff;
-        --color-primary-shade-darker: #fff;
-      }
-    }
-
-    .Button {
-      &:hover, &:active, &:focus {
-        opacity: 0.8;
-        background-color: var(--color-primary) !important;
-      }
+    .toggle-play.primary,
+    .download-button.primary {
+      --button-text-color: var(--message-background);
+      --button-active-text-color: var(--message-background);
     }
 
     .voice-duration.unread::after {
@@ -173,8 +156,9 @@
     white-space: nowrap;
   }
 
-  canvas {
+  .waveform-canvas {
     height: 23px;
+    color: var(--color-primary);
   }
 
   .voice-duration {
@@ -244,13 +228,12 @@
       border-radius: var(--border-radius-default-tiny);
 
       font-size: 1.25rem;
-      color: var(--color-primary-shade);
+      color: var(--accent-color);
 
       background: var(--color-voice-transcribe);
 
       &:hover {
-        opacity: 0.8;
-        background: var(--color-voice-transcribe) !important;
+        background: var(--accent-background-active-color) !important;
       }
     }
   }

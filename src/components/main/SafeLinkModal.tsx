@@ -1,7 +1,8 @@
 import { memo, useMemo } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import convertPunycode from '../../lib/punycode';
+import { selectTabState } from '../../global/selectors';
 import {
   ensureProtocol, getSuspiciousDomainCharacters, hasSuspiciousUrlCredentials, isSuspiciousUrl,
 } from '../../util/browser/url';
@@ -26,14 +27,18 @@ export type OwnProps = {
   isOpen: boolean;
 };
 
+type StateProps = {
+  isWidget?: boolean;
+};
+
 const URL_PARTS_PATTERN = /^([a-z][a-z\d+.-]*:\/\/)([^/?#]*@)?(\[[^\]]+\]|[^:/?#]+)(.*)$/i;
 const INVISIBLE_CHARACTER_PATTERN = /[\p{Default_Ignorable_Code_Point}\p{Cc}]/gu;
 
-const SafeLinkModal = ({ modal, isOpen }: OwnProps) => {
+const SafeLinkModal = ({ modal, isOpen, isWidget }: OwnProps & StateProps) => {
   const { toggleSafeLinkModal } = getActions();
 
   const lang = useLang();
-  const renderedUrl = useMemo(() => renderUrl(modal), [modal]);
+  const renderedUrl = useMemo(() => (isWidget ? modal : renderUrl(modal)), [isWidget, modal]);
   const isSuspicious = useMemo(() => isSuspiciousUrl(modal), [modal]);
 
   const handleOpen = useLastCallback(() => {
@@ -81,7 +86,9 @@ const SafeLinkModal = ({ modal, isOpen }: OwnProps) => {
   );
 };
 
-export default memo(SafeLinkModal);
+export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => ({
+  isWidget: selectTabState(global).safeLinkModalIsWidget,
+}))(SafeLinkModal));
 
 function renderUrl(url: string) {
   try {

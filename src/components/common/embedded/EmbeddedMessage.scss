@@ -2,9 +2,6 @@
 @use "../../../styles/icons";
 
 .EmbeddedMessage {
-  --hover-opacity: 0;
-  --hover-background-color: white;
-
   --ripple-color: rgba(0, 0, 0, 0.08);
 
   cursor: var(--custom-cursor, pointer);
@@ -25,35 +22,14 @@
 
   background-color: var(--accent-background-color);
 
+  transition: background-color var(--message-color-transition-duration, 0.15s);
+
   html.theme-dark & {
     --ripple-color: rgba(255, 255, 255, 0.08);
-    --hover-background-color: black;
   }
 
   &:hover {
-    --hover-opacity: 0.15;
-
-    html.theme-dark & {
-      --hover-opacity: 0.08;
-    }
-  }
-
-  .hover-effect {
-    pointer-events: none;
-    content: '';
-
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    left: 0;
-
-    width: 100%;
-    height: 100%;
-
-    opacity: var(--hover-opacity);
-    background-color: var(--hover-background-color);
-
-    transition: opacity 0.15s;
+    background-color: var(--accent-background-active-color);
   }
 
   body.no-page-transitions & {
@@ -78,14 +54,18 @@
 
   .custom-shape & {
     --peer-color-wrapper-bar-color: var(--accent-color);
-    --accent-color: white;
+    --accent-color: var(--message-service-text);
+    --message-accent: var(--message-service-text);
+    --color-text: var(--message-service-text);
+    --color-text-secondary: var(--message-service-text);
+    --secondary-color: var(--message-service-text);
 
     max-width: 15rem;
     margin: 0;
 
-    color: white !important;
+    color: var(--message-service-text) !important;
 
-    background-color: var(--action-message-bg);
+    background-color: var(--message-service-background);
     box-shadow: 0 1px 2px var(--color-default-shadow);
 
     &:dir(rtl) {
@@ -129,6 +109,7 @@
 
   .message-title {
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+    color: var(--accent-color);
   }
 
   .embedded-origin-icon {
@@ -141,6 +122,23 @@
     margin-inline-end: 0.25rem;
     font-size: 0.75rem;
     vertical-align: middle;
+  }
+
+  .embedded-option-icon {
+    margin-inline-end: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--accent-color);
+
+    &.is-incomplete::before {
+      content: '';
+
+      display: inline-block;
+
+      width: 0.75rem;
+      height: 0.75rem;
+      border: 0.0625rem solid currentColor;
+      border-radius: 50%;
+    }
   }
 
   .message-text {
@@ -194,9 +192,18 @@
       }
     }
 
+    .multiline.has-rich-quote {
+      white-space: pre-wrap;
+    }
+
     .multiline {
+      display: -webkit-box;
       flex: 1;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 5;
+
       padding-bottom: 0.0625rem;
+
       line-height: 1.0625rem;
     }
 
@@ -223,8 +230,7 @@
   }
 
   .embedded-action-message {
-    color: var(---secondary-color);
-    opacity: 0.75;
+    color: var(--secondary-color);
   }
 
   .embedded-thumb {

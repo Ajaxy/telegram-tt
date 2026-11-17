@@ -1,2 +1,0 @@
-import e from"./wren-B1F_0bnw.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/wren" instead of "highlight.js/lib/languages/wren.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=wren.js-BasgxpvO.js.map

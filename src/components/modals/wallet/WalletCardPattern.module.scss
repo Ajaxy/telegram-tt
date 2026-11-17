@@ -1,0 +1,12 @@
+.root {
+  pointer-events: none;
+
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  // Each symbol of the iOS pattern is 18% opaque
+  opacity: 0.18;
+}

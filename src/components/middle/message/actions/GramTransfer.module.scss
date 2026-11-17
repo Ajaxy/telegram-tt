@@ -24,6 +24,13 @@
   padding-bottom: 0.5rem;
 }
 
+// A request in the wallet: the card on the modal's own background, with nothing to open
+.request {
+  cursor: default;
+  padding: 0;
+  background-color: transparent;
+}
+
 // The wrapper fades the ribbon in and out. It covers the whole card, so the ribbon keeps its usual place.
 .ribbon {
   pointer-events: none;

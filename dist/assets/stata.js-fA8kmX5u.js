@@ -1,2 +1,0 @@
-import e from"./stata-BakFZ2ml.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/stata" instead of "highlight.js/lib/languages/stata.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=stata.js-fA8kmX5u.js.map

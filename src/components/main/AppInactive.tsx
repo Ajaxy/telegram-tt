@@ -8,7 +8,7 @@ import Button from '../ui/Button';
 
 import './AppInactive.scss';
 
-import appInactivePath from '../../assets/app-inactive.png';
+import appInactivePath from '../../assets/app-inactive.avif';
 
 type OwnProps = {
   inactiveReason: 'auth' | 'otherClient';

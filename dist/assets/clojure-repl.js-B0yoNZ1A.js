@@ -1,2 +1,0 @@
-import e from"./clojure-repl-aHBM9jLK.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/clojure-repl" instead of "highlight.js/lib/languages/clojure-repl.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=clojure-repl.js-B0yoNZ1A.js.map

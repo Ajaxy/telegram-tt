@@ -4,12 +4,13 @@ import {
 } from '../../../lib/teact/teact';
 
 import type { ApiWallpaper } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { getIsMaskedPattern, getWallpaperColors } from '../../../util/wallpaper';
-import { cacheWallpaperMedia } from '../../../util/wallpaperStorage';
+import { buildThemeSettingsFromWallpaper, buildWallpaperRenderModel } from '../../../util/wallpaper';
+import { cacheWallpaperMedia } from '../../../util/wallpaper/storage';
 
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useGradientBackground from '../../../hooks/useGradientBackground';
@@ -25,6 +26,7 @@ import './WallpaperTile.scss';
 
 type OwnProps = {
   wallpaper: ApiWallpaper;
+  theme: ThemeKey;
   isSelected: boolean;
   onRequest: (wallpaper: ApiWallpaper) => void;
   onClick: (wallpaper: ApiWallpaper) => void;
@@ -32,6 +34,7 @@ type OwnProps = {
 
 const WallpaperTile = ({
   wallpaper,
+  theme,
   isSelected,
   onRequest,
   onClick,
@@ -42,14 +45,12 @@ const WallpaperTile = ({
   const isColorOnly = !document;
   const isImage = Boolean(document) && !isPattern;
 
-  const colors = getWallpaperColors(settings);
-  const intensity = settings?.intensity;
-  const isMaskedPattern = getIsMaskedPattern(isPattern, intensity);
-  const gradientColors = isMaskedPattern && colors.length === 1 ? [colors[0], colors[0]] : colors;
-  const hasGradient = gradientColors.length >= 2;
+  const model = buildWallpaperRenderModel(theme, buildThemeSettingsFromWallpaper(wallpaper));
+  const { colors, isMaskedPattern, patternIntensity: intensity, patternDimming } = model;
+  const hasGradient = colors.length >= 2;
 
   const gradientCanvasRef = useGradientBackground(
-    hasGradient ? gradientColors : undefined, undefined, true, settings?.rotation,
+    hasGradient ? colors : undefined, undefined, true, settings?.rotation,
   );
 
   const localMediaHash = document ? `wallpaper${document.id!}` : undefined;
@@ -122,12 +123,14 @@ const WallpaperTile = ({
         className={buildClassName(
           'media-inner',
           isMaskedPattern && 'masked',
+          colors.length === 1 && 'plainPattern',
           isMaskedPattern && patternMaskUrl && 'maskReady',
         )}
         style={buildStyle(
           !isMaskedPattern && colors.length === 1 && `background: ${colors[0]}`,
           isMaskedPattern && patternMaskUrl && `--pattern-mask: url(${patternMaskUrl})`,
           isPattern && intensity !== undefined && `--pattern-intensity: ${Math.abs(intensity) / 100}`,
+          patternDimming !== undefined && `--pattern-dimming: ${patternDimming}`,
         )}
       >
         {hasGradient && <canvas ref={gradientCanvasRef} className="gradient" />}
@@ -153,6 +156,7 @@ const WallpaperTile = ({
             style={`--pattern-mask: url(${patternMaskUrl})`}
           />
         )}
+        {patternDimming !== undefined && <div className="pattern-dimming" />}
         {shouldRenderSpinner && (
           <div className={buildClassName('spinner-container', spinnerClassNames)}>
             <ProgressSpinner progress={loadProgress} onClick={handleClick} />

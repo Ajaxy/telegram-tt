@@ -2,6 +2,7 @@ import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import {
   createContext,
   memo,
+  requestAfterRender,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -10,18 +11,23 @@ import {
 } from '../../../lib/teact/teact';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { IS_DOCUMENT_PICTURE_IN_PICTURE_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { waitForAnimationEnd } from '../../../util/cssAnimationEndListeners';
+import Deferred from '../../../util/Deferred';
 import { disableDirectTextInput, enableDirectTextInput } from '../../../util/directInputManager';
 import { countOpenModal } from '../../../util/openModals';
+import animateToPictureInPicture from './animateToPictureInPicture';
 
 import useContext from '../../../hooks/data/useContext';
+import useDocumentPictureInPicture from '../../../hooks/useDocumentPictureInPicture';
 import useFrozenProps from '../../../hooks/useFrozenProps';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useUniqueId from '../../../hooks/useUniqueId';
+import useWindow from '../../../hooks/useWindow';
 
 import Button from '../../ui/Button';
 import Portal from '../../ui/Portal';
@@ -52,15 +58,22 @@ export type ModalProps = {
   stickyFooter?: TeactNode;
   ariaLabel?: string;
   noContainment?: boolean;
+  pictureInPictureId?: string;
+  pictureInPictureOptions?: DocumentPictureInPictureOptions;
+  noHeaderInPictureInPicture?: boolean;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
   onEsc?: NoneToVoidFunction;
+  // Runs once the content is shown in its current document
+  onAdopt?: NoneToVoidFunction;
 };
 
 type ModalContextType = {
   titleId: string;
   subtitleId: string;
   hasSubtitle: boolean;
+  isPictureInPicture: boolean;
+  requestPictureInPicture: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
   registerTitle: (isPresent: boolean) => void;
   registerSubtitle: (isPresent: boolean) => void;
@@ -107,7 +120,7 @@ const HEIGHT_CLASS_NAME: Record<ModalHeight, string> = {
   fullscreen: styles.heightFullscreen,
 };
 
-function useModalContext() {
+export function useModalContext() {
   return useContext(ModalContext);
 }
 
@@ -148,10 +161,15 @@ const Modal = ({
   stickyFooter,
   ariaLabel,
   noContainment,
+  pictureInPictureId,
+  pictureInPictureOptions,
+  noHeaderInPictureInPicture,
   onClose,
   onCloseAnimationEnd,
   onEsc,
+  onAdopt,
 }: ModalProps) => {
+  const lang = useLang();
   const [hasEverOpened, setHasEverOpened] = useState(Boolean(isOpen));
   const [shouldRender, setShouldRender] = useState(Boolean(isOpen));
   const [isClosing, setIsClosing] = useState(false);
@@ -161,8 +179,25 @@ const Modal = ({
   const dialogRef = useRef<HTMLDialogElement>();
   const panelRef = useRef<HTMLDivElement>();
   const closeAnimationCleanupRef = useRef<NoneToVoidFunction>();
+  // A press that starts or ends on the panel, such as a drag, gets its click on the dialog itself, as the closest element
+  // common to both ends, so the click alone looks like one on the backdrop. Both ends are caught in the capture phase,
+  // before the panel content can stop them.
+  const isPressOutsideRef = useRef(false);
+  const hasFinishedCloseRef = useRef(!isOpen);
+  const pictureInPictureAdoptionRef = useRef<Deferred<void>>();
 
   const uniqueId = useUniqueId();
+  const renderingWindow = useWindow();
+  const { pictureInPictureWindow, requestPictureInPicture, closePictureInPicture } = useDocumentPictureInPicture(
+    pictureInPictureId || uniqueId, pictureInPictureOptions,
+  );
+  const [readyPictureInPictureWindow, setReadyPictureInPictureWindow] = useState<Window>();
+  const renderingPictureInPictureWindow = pictureInPictureWindow === readyPictureInPictureWindow
+    ? pictureInPictureWindow : undefined;
+  const isPictureInPicture = Boolean(renderingPictureInPictureWindow);
+  const wasPictureInPictureRef = useRef(false);
+  const targetDocument = (renderingPictureInPictureWindow || renderingWindow).document;
+  const isInMainDocument = targetDocument === document;
   const titleId = `modal-title-${uniqueId}`;
   const subtitleId = `modal-subtitle-${uniqueId}`;
 
@@ -181,7 +216,7 @@ const Modal = ({
     noContainment,
   }, !isOpen);
 
-  const shouldShowHeader = Boolean(frozenProps.header);
+  const shouldShowHeader = Boolean(frozenProps.header) && !(isPictureInPicture && noHeaderInPictureInPicture);
 
   const cleanupCloseAnimation = useLastCallback(() => {
     closeAnimationCleanupRef.current?.();
@@ -189,6 +224,8 @@ const Modal = ({
   });
 
   const finishClose = useLastCallback(() => {
+    if (hasFinishedCloseRef.current) return;
+    hasFinishedCloseRef.current = true;
     cleanupCloseAnimation();
     setIsClosing(false);
     setShouldRender(false);
@@ -198,20 +235,34 @@ const Modal = ({
   const handleRequestClose = useLastCallback(() => {
     if (isClosing) return;
 
+    if (isPictureInPicture) {
+      closePictureInPicture();
+    }
     onClose();
   });
 
-  const handleEsc = useLastCallback((event: KeyboardEvent) => {
-    if (noLightDismiss || !isOpen || isClosing) return;
+  const handleEsc = useLastCallback((event: Event, isCloseRequest?: boolean) => {
+    if (dialogRef.current?.querySelector('.Menu .backdrop')) {
+      event.preventDefault();
+      return false;
+    }
+    if (isPictureInPicture) {
+      event.preventDefault();
+      closePictureInPicture();
+      return undefined;
+    }
+    if (noLightDismiss || !isOpen || isClosing) return undefined;
 
     event.preventDefault();
 
-    if (onEsc) {
+    // Native close requests (e.g. Android back) close the modal like history back does
+    if (onEsc && !isCloseRequest) {
       onEsc();
-      return;
+      return undefined;
     }
 
     handleRequestClose();
+    return undefined;
   });
 
   const registerTitle = useLastCallback((isPresent: boolean) => {
@@ -222,16 +273,44 @@ const Modal = ({
     setHasSubtitle(isPresent);
   });
 
+  const showDialog = useLastCallback(() => {
+    const dialogElement = dialogRef.current;
+    if (!isOpen || !dialogElement?.isConnected || dialogElement.ownerDocument !== targetDocument) return;
+    if (isPictureInPicture ? dialogElement.open : dialogElement.matches(':modal')) return;
+    if (dialogElement.open) dialogElement.close();
+    if (isPictureInPicture) {
+      dialogElement.show();
+    } else {
+      dialogElement.showModal();
+    }
+  });
+
+  const handleAdopt = useLastCallback(() => {
+    // Context consumers render their autofocus attributes before the native dialog opens
+    requestAfterRender(() => {
+      showDialog();
+      if (dialogRef.current?.ownerDocument === pictureInPictureWindow?.document) {
+        pictureInPictureAdoptionRef.current?.resolve();
+        pictureInPictureAdoptionRef.current = undefined;
+      }
+      onAdopt?.();
+    });
+  });
+
   const contextValue = useMemo<ModalContextType>(() => ({
     onClose: handleRequestClose,
     titleId,
     subtitleId,
     hasSubtitle,
+    isPictureInPicture,
+    requestPictureInPicture,
     registerTitle,
     registerSubtitle,
   }), [
     handleRequestClose,
     hasSubtitle,
+    isPictureInPicture,
+    requestPictureInPicture,
     registerSubtitle,
     registerTitle,
     subtitleId,
@@ -243,6 +322,33 @@ const Modal = ({
       setHasEverOpened(true);
     }
   }, [hasEverOpened, isOpen]);
+
+  useLayoutEffect(() => {
+    if (isOpen) hasFinishedCloseRef.current = false;
+    if (!pictureInPictureWindow) setReadyPictureInPictureWindow(undefined);
+    if (!isOpen) {
+      closePictureInPicture();
+      if (wasPictureInPictureRef.current) finishClose();
+    }
+    wasPictureInPictureRef.current = isOpen && isPictureInPicture;
+  }, [isOpen, isPictureInPicture, pictureInPictureWindow, closePictureInPicture]);
+
+  useEffect(() => {
+    if (!isOpen || !pictureInPictureWindow) return undefined;
+
+    const cancelAnimation = animateToPictureInPicture(panelRef.current!, pictureInPictureWindow, () => {
+      const adopted = new Deferred<void>();
+      pictureInPictureAdoptionRef.current = adopted;
+      setReadyPictureInPictureWindow(pictureInPictureWindow);
+      return adopted.promise;
+    });
+
+    return () => {
+      cancelAnimation();
+      pictureInPictureAdoptionRef.current?.resolve();
+      pictureInPictureAdoptionRef.current = undefined;
+    };
+  }, [isOpen, pictureInPictureWindow]);
 
   useEffect(() => {
     if (isOpen) {
@@ -260,7 +366,7 @@ const Modal = ({
       return;
     }
 
-    if (!shouldRender || isClosing) {
+    if (!shouldRender || isClosing || hasFinishedCloseRef.current) {
       return;
     }
 
@@ -285,12 +391,19 @@ const Modal = ({
       return undefined;
     }
 
-    closeAnimationCleanupRef.current = waitForAnimationEnd(
+    let isCanceled = false;
+    const releaseAnimation = waitForAnimationEnd(
       panelElement,
-      finishClose,
+      () => {
+        if (!isCanceled) finishClose();
+      },
       undefined,
       CLOSE_ANIMATION_DURATION + 100,
     );
+    closeAnimationCleanupRef.current = () => {
+      isCanceled = true;
+      releaseAnimation();
+    };
 
     return cleanupCloseAnimation;
   }, [isClosing]);
@@ -306,9 +419,7 @@ const Modal = ({
       return undefined;
     }
 
-    if (!dialogElement.open) {
-      dialogElement.showModal();
-    }
+    handleAdopt();
 
     return () => {
       cleanupCloseAnimation();
@@ -317,33 +428,33 @@ const Modal = ({
         dialogElement.close();
       }
     };
-  }, [shouldRender]);
+  }, [shouldRender, targetDocument, handleAdopt]);
 
   useEffect(() => {
     if (!shouldRender) {
       return undefined;
     }
 
-    return captureKeyboardListeners({ onEsc: handleEsc });
-  }, [handleEsc, shouldRender]);
+    return captureKeyboardListeners({ onEsc: handleEsc }, targetDocument);
+  }, [handleEsc, shouldRender, targetDocument]);
 
   useEffect(() => {
-    if (!shouldRender) {
+    if (!shouldRender || !isInMainDocument) {
       return undefined;
     }
 
     return addBodyDialogClass();
-  }, [shouldRender]);
+  }, [shouldRender, isInMainDocument]);
 
   useEffect(() => {
-    if (!shouldRender) {
+    if (!shouldRender || !isInMainDocument) {
       return undefined;
     }
 
     disableDirectTextInput();
 
     return enableDirectTextInput;
-  }, [shouldRender]);
+  }, [shouldRender, isInMainDocument]);
 
   useEffect(() => {
     if (!shouldRender) {
@@ -359,11 +470,7 @@ const Modal = ({
     const handleCancel = (event: Event) => {
       event.preventDefault();
 
-      if (noLightDismiss || !isOpen || isClosing) {
-        return;
-      }
-
-      handleRequestClose();
+      handleEsc(event, true);
     };
 
     dialogElement.addEventListener('cancel', handleCancel);
@@ -371,22 +478,35 @@ const Modal = ({
     return () => {
       dialogElement.removeEventListener('cancel', handleCancel);
     };
-  }, [isClosing, isOpen, noLightDismiss, shouldRender]);
+  }, [handleEsc, shouldRender]);
 
   useHistoryBack({
-    isActive: Boolean(isOpen && !noLightDismiss),
+    isActive: Boolean(isOpen && !noLightDismiss && isInMainDocument),
     onBack: handleRequestClose,
+  });
+
+  const handleDialogPointerDown = useLastCallback((event: React.PointerEvent<HTMLDialogElement>) => {
+    isPressOutsideRef.current = event.target === event.currentTarget;
+  });
+
+  const handleDialogPointerUp = useLastCallback((event: React.PointerEvent<HTMLDialogElement>) => {
+    if (event.target !== event.currentTarget) isPressOutsideRef.current = false;
   });
 
   const handleDialogClick = useLastCallback((event: React.MouseEvent<HTMLDialogElement>) => {
     if (
       event.target !== event.currentTarget
+      || !isPressOutsideRef.current
       || noLightDismiss
       || !isOpen
       || isClosing
     ) {
       return;
     }
+
+    // Opening a portalled menu on mouse-down can retarget the trigger's click to the dialog
+    const { left, right, top, bottom } = panelRef.current!.getBoundingClientRect();
+    if (event.clientX >= left && event.clientX <= right && event.clientY >= top && event.clientY <= bottom) return;
 
     handleRequestClose();
   });
@@ -396,7 +516,11 @@ const Modal = ({
   }
 
   return (
-    <Portal>
+    <Portal
+      pictureInPictureWindow={renderingPictureInPictureWindow}
+      nestedContainerRef={dialogRef}
+      onAdopt={handleAdopt}
+    >
       <ModalContext.Provider value={contextValue}>
         <dialog
           ref={dialogRef}
@@ -409,16 +533,19 @@ const Modal = ({
             isClosing ? styles.closing : styles.open,
             frozenProps.dialogClassName,
             !frozenProps.noContainment && styles.contained,
+            isPictureInPicture && styles.pictureInPicture,
           )}
-          aria-modal="true"
+          aria-modal={isPictureInPicture ? undefined : 'true'}
           aria-label={!hasTitle ? frozenProps.ariaLabel : undefined}
           aria-labelledby={hasTitle ? titleId : undefined}
           aria-describedby={hasSubtitle ? subtitleId : undefined}
+          onPointerDownCapture={handleDialogPointerDown}
+          onPointerUpCapture={handleDialogPointerUp}
           onClick={handleDialogClick}
         >
           <div ref={panelRef} className={styles.panel}>
-            {shouldShowHeader && (
-              <div className={styles.headerSlot}>
+            {Boolean(frozenProps.header) && (
+              <div className={styles.headerSlot} hidden={!shouldShowHeader}>
                 {frozenProps.header}
               </div>
             )}
@@ -442,6 +569,11 @@ const Modal = ({
               </div>
             )}
           </div>
+          {isPictureInPicture && (
+            <div className={styles.resizeHint} role="status">
+              {lang('PictureInPictureResizeHint')}
+            </div>
+          )}
         </dialog>
       </ModalContext.Provider>
     </Portal>
@@ -507,7 +639,7 @@ const ModalTitle = ({ noAutoFocus, className, children }: ModalTitleProps) => {
       className={buildClassName(styles.title, className)}
       dir="auto"
       tabIndex={-1}
-      autoFocus={!noAutoFocus}
+      autoFocus={!noAutoFocus && !modalContext?.isPictureInPicture}
     >
       {children}
     </div>
@@ -567,6 +699,26 @@ const ModalCloseButton = ({ asAbsolute, className, onBack }: ModalCloseButtonPro
   );
 };
 
+const ModalPictureInPictureButton = () => {
+  const lang = useLang();
+  const modalContext = useModalContext();
+
+  if (!IS_DOCUMENT_PICTURE_IN_PICTURE_SUPPORTED || !modalContext || modalContext.isPictureInPicture) {
+    return undefined;
+  }
+
+  return (
+    <Button
+      round
+      color="translucent"
+      size="tiny"
+      iconName="pip"
+      ariaLabel={lang('VideoPlayerPictureInPicture')}
+      onClick={modalContext.requestPictureInPicture}
+    />
+  );
+};
+
 export default memo(Modal);
 export {
   ModalHeader,
@@ -575,4 +727,5 @@ export {
   ModalTitle,
   ModalSubtitle,
   ModalCloseButton,
+  ModalPictureInPictureButton,
 };

@@ -4,12 +4,15 @@ import { addExtraClass, removeExtraClass, setExtraStyles } from '../lib/teact/te
 
 import type { IAnchorPosition } from '../types';
 
-import { requestForcedReflow } from '../lib/fasterdom/fasterdom';
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { useStateRef } from './useStateRef';
+import useWindow from './useWindow';
+
+type PositionX = 'left' | 'right' | 'center';
 
 interface StaticPositionOptions {
   anchor?: IAnchorPosition;
-  positionX?: 'left' | 'right';
+  positionX?: PositionX;
   positionY?: 'top' | 'bottom';
   transformOriginX?: number;
   transformOriginY?: number;
@@ -18,7 +21,7 @@ interface StaticPositionOptions {
 }
 
 interface DynamicPositionOptions {
-  anchor: IAnchorPosition;
+  anchor: IAnchorPosition | (() => IAnchorPosition);
   positionY?: 'top' | 'bottom';
   getTriggerElement: () => HTMLElement | undefined | null;
   getRootElement: () => HTMLElement | undefined | null;
@@ -42,6 +45,7 @@ export interface Layout {
   isDense?: boolean; //  Allows you to place the menu as close to the edges of the area as possible
 }
 
+const POSITIONS_X: PositionX[] = ['left', 'right', 'center'];
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
 const MENU_POSITION_BOTTOM_MARGIN = 12;
 const EMPTY_RECT = {
@@ -54,25 +58,43 @@ export default function useMenuPosition(
   bubbleRef: ElementRef<HTMLDivElement>,
   options: MenuPositionOptions,
 ) {
+  const targetWindow = useWindow();
   const optionsRef = useStateRef(options);
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return undefined;
 
     const options2 = optionsRef.current;
 
     if (!('getTriggerElement' in options2)) {
       applyStaticOptions(containerRef, bubbleRef, options2);
-    } else {
-      requestForcedReflow(() => {
-        const staticOptions = processDynamically(containerRef, bubbleRef, options2);
+      return undefined;
+    }
 
-        return () => {
+    let isCanceled = false;
+    function updatePosition() {
+      requestMeasure(() => {
+        if (isCanceled || !containerRef.current || !bubbleRef.current) return;
+        const currentOptions = optionsRef.current;
+        const staticOptions = 'getTriggerElement' in currentOptions
+          ? processDynamically(containerRef, bubbleRef, currentOptions)
+          : currentOptions;
+
+        requestMutation(() => {
+          if (isCanceled) return;
           applyStaticOptions(containerRef, bubbleRef, staticOptions);
-        };
+        });
       });
     }
-  }, [isOpen, containerRef, bubbleRef, optionsRef]);
+
+    updatePosition();
+    targetWindow.addEventListener('resize', updatePosition);
+
+    return () => {
+      isCanceled = true;
+      targetWindow.removeEventListener('resize', updatePosition);
+    };
+  }, [isOpen, containerRef, bubbleRef, optionsRef, targetWindow]);
 }
 
 function applyStaticOptions(
@@ -99,7 +121,9 @@ function applyStaticOptions(
   }
 
   if (positionX) {
-    removeExtraClass(bubbleEl, positionX === 'left' ? 'right' : 'left');
+    POSITIONS_X.forEach((position) => {
+      if (position !== positionX) removeExtraClass(bubbleEl, position);
+    });
     addExtraClass(bubbleEl, positionX);
   }
 
@@ -131,14 +155,16 @@ function processDynamically(
 ) {
   const triggerEl = getTriggerElement()!;
 
-  let { x, y } = anchor;
+  const resolvedAnchor = typeof anchor === 'function' ? anchor() : anchor;
+  let { x, y } = resolvedAnchor;
   const anchorX = x;
   const anchorY = y;
-  const anchorWidth = anchor.width || 0;
-  const anchorHeight = anchor.height || 0;
+  const anchorWidth = resolvedAnchor.width || 0;
+  const anchorHeight = resolvedAnchor.height || 0;
 
   const menuEl = getMenuElement();
   const rootEl = getRootElement();
+  const targetDocument = triggerEl.ownerDocument;
 
   const {
     extraPaddingX = 0,
@@ -151,7 +177,7 @@ function processDynamically(
     isDense = false,
   } = getLayout?.() || {};
 
-  const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) : undefined;
+  const marginTop = menuEl ? parseInt(targetDocument.defaultView!.getComputedStyle(menuEl).marginTop, 10) : undefined;
   const { offsetWidth: menuElWidth, offsetHeight: menuElHeight } = menuEl || { offsetWidth: 0, offsetHeight: 0 };
   const menuRect = menuEl ? {
     width: Math.max(menuElWidth, menuElMinWidth),
@@ -214,8 +240,8 @@ function processDynamically(
   // is the bubble's left edge for `positionX='left'` and right edge for `positionX='right'`
   // (same for `top`/`bottom`). Clamp the anchor so the bubble fits the viewport on either side.
   if (withPortal) {
-    const viewportWidth = document.documentElement.clientWidth;
-    const viewportHeight = document.documentElement.clientHeight;
+    const viewportWidth = targetDocument.documentElement.clientWidth;
+    const viewportHeight = targetDocument.documentElement.clientHeight;
     const margin = MENU_POSITION_VISUAL_COMFORT_SPACE_PX;
     if (positionX === 'left') {
       left = Math.max(margin, Math.min(left, viewportWidth - menuRect.width - margin));

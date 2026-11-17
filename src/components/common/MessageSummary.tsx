@@ -19,7 +19,7 @@ import {
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../global/helpers/messageSummary';
 import { selectPeerStory, selectPollFromMessage, selectWebPageFromMessage } from '../../global/selectors';
-import trimText from '../../util/trimText';
+import trimText from '../../util/text/trimText';
 import renderText from './helpers/renderText';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 
@@ -32,7 +32,6 @@ type OwnProps = {
   message: ApiMessage;
   forcedText?: ApiFormattedText;
   noEmoji?: boolean;
-  highlight?: string;
   truncateLength?: number;
   withTranslucentThumbs?: boolean;
   inChatList?: boolean;
@@ -51,7 +50,6 @@ function MessageSummary({
   message,
   forcedText,
   noEmoji,
-  highlight,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
   withTranslucentThumbs,
   inChatList,
@@ -76,11 +74,7 @@ function MessageSummary({
 
       return (
         <span>
-          {highlight ? (
-            renderText(trimmedText, ['emoji', 'highlight'], { highlight })
-          ) : (
-            renderText(trimmedText)
-          )}
+          {renderText(trimmedText)}
         </span>
       );
     }
@@ -93,7 +87,6 @@ function MessageSummary({
       const renderedDescription = formattedSummaryText
         ? renderFormattedSummaryText({
           formattedText: formattedSummaryText,
-          highlight,
           truncateLength,
           emojiSize,
           observeIntersectionForLoading,
@@ -118,11 +111,7 @@ function MessageSummary({
 
     return (
       <span>
-        {highlight ? (
-          renderText(trimmedText, ['emoji', 'highlight'], { highlight })
-        ) : (
-          renderText(trimmedText)
-        )}
+        {renderText(trimmedText)}
       </span>
     );
   }
@@ -136,7 +125,6 @@ function MessageSummary({
       <MessageText
         messageOrStory={message}
         forcedText={forcedText}
-        highlight={highlight}
         asPreview
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -175,7 +163,6 @@ export default memo(withGlobal<OwnProps>(
 
 function renderFormattedSummaryText({
   formattedText,
-  highlight,
   truncateLength,
   emojiSize,
   observeIntersectionForLoading,
@@ -183,7 +170,6 @@ function renderFormattedSummaryText({
   withTranslucentThumbs,
 }: {
   formattedText: ApiFormattedText;
-  highlight?: string;
   truncateLength?: number;
   emojiSize?: number;
   observeIntersectionForLoading?: ObserveFn;
@@ -193,7 +179,6 @@ function renderFormattedSummaryText({
   return renderTextWithEntities({
     text: trimText(formattedText.text, truncateLength),
     entities: formattedText.entities,
-    highlight,
     emojiSize,
     asPreview: true,
     observeIntersectionForLoading,

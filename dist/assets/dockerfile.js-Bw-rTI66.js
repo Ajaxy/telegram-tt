@@ -1,2 +1,0 @@
-import e from"./dockerfile-C0zufGsU.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/dockerfile" instead of "highlight.js/lib/languages/dockerfile.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=dockerfile.js-Bw-rTI66.js.map

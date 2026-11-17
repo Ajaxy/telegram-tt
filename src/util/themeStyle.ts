@@ -21,8 +21,9 @@ export const FALLBACK_THEME_PARAMS: ApiThemeParameters = {
   section_separator_color: '#c8c6cc',
 };
 
-export function extractCurrentThemeParams(): ApiThemeParameters {
-  const style = getComputedStyle(document.documentElement);
+// An element inside a message bubble reads the bubble's own palette, which overrides these variables
+export function extractCurrentThemeParams(element = document.documentElement): ApiThemeParameters {
+  const style = getComputedStyle(element);
 
   const backgroundColor = getPropertyHexColor(style, '--color-background') || FALLBACK_THEME_PARAMS.bg_color;
   const secondaryTextColor = getPropertyHexColor(style, '--color-text-secondary') || FALLBACK_THEME_PARAMS.hint_color;
@@ -30,7 +31,8 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
   const bgColor = backgroundColor;
   const textColor = getPropertyHexColor(style, '--color-text') || FALLBACK_THEME_PARAMS.text_color;
   const buttonColor = getPropertyHexColor(style, '--color-primary') || FALLBACK_THEME_PARAMS.button_color;
-  const buttonTextColor = getPropertyHexColor(style, '--color-white') || FALLBACK_THEME_PARAMS.button_text_color;
+  const buttonTextColor = getPropertyHexColor(style, '--color-primary-foreground')
+    || FALLBACK_THEME_PARAMS.button_text_color;
   const linkColor = getPropertyHexColor(style, '--color-links') || FALLBACK_THEME_PARAMS.link_color;
   const hintColor = secondaryTextColor;
   const secondaryBgColor = getPropertyHexColor(style, '--color-background-secondary')
@@ -74,10 +76,11 @@ export function getPropertyHexColor(style: CSSStyleDeclaration, property: string
   return prepareHexColor(value.trim())?.slice(0, HEX_COLOR_LENGTH);
 }
 
-export function prepareHexColor(color: string) {
+export function prepareHexColor(color: string, shouldKeepAlpha?: boolean) {
   try {
+    // Without `alpha` a translucent colour keeps its alpha as #rrggbbaa
     return serializeColor(mapColorToGamut(buildColor(color), { space: 'srgb', method: 'clip' }), {
-      format: 'hex', collapse: false, alpha: false,
+      format: 'hex', collapse: false, alpha: shouldKeepAlpha ? undefined : false,
     });
   } catch {
     return undefined;

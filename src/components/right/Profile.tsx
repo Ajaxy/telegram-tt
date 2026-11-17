@@ -34,10 +34,14 @@ import {
   getIsSavedDialog,
   getMessageDocument,
   getMessageHtmlId,
+  getRichMediaMessage,
+  isChatBasicGroup,
   isChatChannel,
   isChatGroup,
   isUserBot,
   isUserRightBanned,
+  parseSharedMediaKey,
+  type SharedMediaKey,
 } from '../../global/helpers';
 import { getSavedGiftKey } from '../../global/helpers/stars';
 import {
@@ -50,6 +54,7 @@ import {
   selectChatMessages,
   selectCurrentSharedMediaSearch,
   selectIsChatRestricted,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
   selectMonoforumChannel,
@@ -94,6 +99,7 @@ import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useSyncEffectWithPrevDeps from '../../hooks/useSyncEffectWithPrevDeps.ts';
 import useAsyncRendering from './hooks/useAsyncRendering';
@@ -158,6 +164,7 @@ type StateProps = {
   hasMembersTab?: boolean;
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
+  areProfileTabsKnown?: boolean;
   gifts?: ApiSavedStarGift[];
   storyAlbums?: ApiStoryAlbum[];
   giftCollections?: ApiStarGiftCollection[];
@@ -289,6 +296,7 @@ const Profile = ({
   hasMembersTab,
   hasPreviewMediaTab,
   hasGiftsTab,
+  areProfileTabsKnown,
   gifts,
   storyAlbums,
   giftCollections,
@@ -473,6 +481,10 @@ const Profile = ({
     setSharedMediaSearchType({ mediaType: SHARED_MEDIA_TYPES.has(type) ? type as SharedMediaType : undefined });
   });
 
+  const isSharedMediaReady = Boolean(profileTab || areProfileTabsKnown);
+  const { ref: sharedMediaTabsRef } = useMediaTransition({ hasMediaData: isSharedMediaReady });
+  const { ref: sharedMediaRef } = useMediaTransition({ hasMediaData: isSharedMediaReady });
+
   useEffect(() => {
     if (isClosed) return;
     if (profileTab) {
@@ -482,13 +494,10 @@ const Profile = ({
       return;
     }
 
-    setActiveTab(tabs[0].type); // Set default tab
-  }, [isClosed, profileTab, tabs, forceScrollProfileTab]);
+    if (!areProfileTabsKnown) return;
 
-  useEffectWithPrevDeps(([prevPeerFullInfo]) => {
-    if (prevPeerFullInfo || !peerFullInfo?.mainTab) return;
-    setActiveTab(peerFullInfo.mainTab); // Only focus when loading full info
-  }, [peerFullInfo]);
+    setActiveTab(tabs[0].type); // Set default tab
+  }, [isClosed, profileTab, tabs, forceScrollProfileTab, areProfileTabsKnown]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
     startAutoScrollToTabsIfNeeded();
@@ -649,7 +658,7 @@ const Profile = ({
     if (getMore && !viewportIds && isSynced) {
       getMore({ direction: LoadMoreDirection.Backwards });
     }
-  }, [getMore, viewportIds, resultType, isSynced]);
+  }, [getMore, viewportIds, resultType, mediaSearchType, isSynced]);
 
   const shouldRenderProfileInfo = !noProfileInfo && !isSavedMessages;
 
@@ -725,11 +734,12 @@ const Profile = ({
     setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.InProgress });
   });
 
-  const handleSelectMedia = useLastCallback((messageId: number) => {
+  const handleSelectMedia = useLastCallback((messageId: number, messageChatId: string, mediaIndex?: number) => {
     openMediaViewer({
       chatId: profileId,
       threadId: MAIN_THREAD_ID,
       messageId,
+      mediaIndex,
       origin: MediaViewerOrigin.SharedMedia,
     });
   });
@@ -743,10 +753,10 @@ const Profile = ({
     });
   });
 
-  const handlePlayAudio = useLastCallback((messageId: number, messageChatId: string) => {
+  const handlePlayAudio = useLastCallback((messageId: number, messageChatId: string, documentId?: string) => {
     openAudioPlayer({
       item: {
-        type: 'message', chatId: messageChatId, threadId: threadId ?? MAIN_THREAD_ID, messageId,
+        type: 'message', chatId: messageChatId, threadId: threadId ?? MAIN_THREAD_ID, messageId, documentId,
       },
     });
   });
@@ -988,6 +998,18 @@ const Profile = ({
     return undefined;
   }
 
+  function getViewportMediaItems() {
+    return (viewportIds as SharedMediaKey[]).flatMap((key) => {
+      const { messageId, mediaIndex } = parseSharedMediaKey(key);
+      const sourceMessage = messagesById?.[messageId];
+      const message = sourceMessage && mediaIndex !== undefined
+        ? getRichMediaMessage(sourceMessage, mediaIndex)
+        : sourceMessage;
+
+      return message ? [{ key, message, mediaIndex }] : [];
+    });
+  }
+
   function renderSpinnerOrContentBase(noContent: boolean, noSpinner: boolean) {
     if (noContent) {
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
@@ -1072,16 +1094,17 @@ const Profile = ({
         teactFastList
       >
         {resultType === 'media' || resultType === 'gif' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id, i, ids) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }, i, items) => (
             <Media
-              key={id}
-              message={messagesById[id]}
-              className={getGridCornerClassName(i, ids.length)}
-              isProtected={isChatProtected || messagesById[id].isProtected}
+              key={key}
+              message={message}
+              mediaIndex={mediaIndex}
+              className={getGridCornerClassName(i, items.length)}
+              isProtected={isChatProtected || message.isProtected}
               canAutoPlay={canAutoPlayGifs}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
-              contextActions={getMessageContextActions(messagesById[id])}
+              contextActions={getMessageContextActions(message)}
             />
           ))
         ) : (resultType === 'stories' || resultType === 'storiesArchive') ? (
@@ -1095,21 +1118,23 @@ const Profile = ({
             />
           ))
         ) : resultType === 'documents' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }) => (
             <Document
-              key={id}
-              id={`shared-media${getMessageHtmlId(id)}`}
-              document={getMessageDocument(messagesById[id])!}
-              datetime={messagesById[id].date}
+              key={key}
+              id={`shared-media${getMessageHtmlId(message.id, mediaIndex)}`}
+              document={getMessageDocument(message)!}
+              datetime={message.date}
               fileSize="small"
               className="scroll-item"
-              isDownloading={getIsDownloading(activeDownloads, getMessageDocument(messagesById[id])!)}
+              noDownload={isChatProtected || message.isProtected}
+              isDownloading={getIsDownloading(activeDownloads, getMessageDocument(message)!)}
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
-              message={messagesById[id]}
+              message={message}
               shouldWarnAboutFiles={shouldWarnAboutFiles}
+              mediaIndex={mediaIndex}
               onMediaClick={handleSelectMedia}
-              contextActions={getMessageContextActions(messagesById[id])}
+              contextActions={getMessageContextActions(message)}
             />
           ))
         ) : resultType === 'links' ? (
@@ -1124,20 +1149,21 @@ const Profile = ({
             />
           ))
         ) : resultType === 'audio' ? (
-          (viewportIds as number[]).filter((id) => Boolean(messagesById[id])).map((id) => (
+          getViewportMediaItems().map(({ key, message, mediaIndex }) => (
             <Audio
-              key={id}
+              key={key}
               theme={theme}
-              message={messagesById[id]}
+              message={message}
+              mediaIndex={mediaIndex}
               variant="sharedMedia"
               threadId={threadId}
-              date={messagesById[id].date}
+              date={message.date}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
-              contextActions={getMessageContextActions(messagesById[id])}
-              canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.audio!)}
+              contextActions={getMessageContextActions(message)}
+              canDownload={!isChatProtected && !message.isProtected}
+              isDownloading={getIsDownloading(activeDownloads, message.content.audio!)}
             />
           ))
         ) : resultType === 'voice' ? (
@@ -1417,6 +1443,7 @@ const Profile = ({
       {!isRestricted && (
         <>
           <div
+            ref={sharedMediaTabsRef}
             className={buildClassName(styles.sharedMediaTabs, 'shared-media-tabs')}
           >
             <TabList
@@ -1426,6 +1453,7 @@ const Profile = ({
             />
           </div>
           <div
+            ref={sharedMediaRef}
             className={styles.sharedMedia}
           >
             <Transition
@@ -1510,6 +1538,7 @@ export default memo(withGlobal<OwnProps>(
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const { similarBotsIds } = selectSimilarBotsIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    const isCurrentUserFrozen = selectIsCurrentUserFrozen(global);
 
     const peer = user || chat;
     const peerFullInfo = userFullInfo || chatFullInfo;
@@ -1525,14 +1554,19 @@ export default memo(withGlobal<OwnProps>(
       && !isSavedMessages;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
     const selectedStoryAlbumId = selectActiveStoriesCollectionId(global);
+    const profileStoryIds = peerStories?.profileIds.length || peerStories?.isFullyLoaded || isCurrentUserFrozen
+      ? peerStories?.profileIds
+      : undefined;
     const storyIds = selectedStoryAlbumId !== 'all'
       ? peerStories?.idsByAlbumId?.[selectedStoryAlbumId]?.ids
-      : peerStories?.profileIds;
+      : profileStoryIds;
     const pinnedStoryIds = peerStories?.pinnedIds;
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedMessages;
+    const areProfileTabsKnown = isCurrentUserFrozen || (chat && isChatBasicGroup(chat))
+      || peerFullInfo?.hasPinnedStories !== undefined;
 
     const activeCollectionId = selectActiveGiftsCollectionId(global, chatId);
     const peerGifts = savedGifts.collectionsByPeerId[chatId]?.[activeCollectionId];
@@ -1574,6 +1608,7 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       storyIds,
       hasGiftsTab,
+      areProfileTabsKnown,
       gifts: peerGifts?.gifts,
       storyAlbums,
       giftCollections,

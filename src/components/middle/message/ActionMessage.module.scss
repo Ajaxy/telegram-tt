@@ -21,9 +21,9 @@
   padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-messages);
 
-  color: white;
+  color: var(--message-service-text);
 
-  background-color: var(--action-message-bg);
+  background-color: var(--message-service-background);
 }
 
 .textContent {
@@ -36,9 +36,9 @@
   padding: 0.1875rem 0.5rem;
   border-radius: var(--border-radius-messages);
 
-  color: white;
+  color: var(--message-service-text);
 
-  background-color: var(--action-message-bg);
+  background-color: var(--message-service-background);
 }
 
 .hasFullContent {
@@ -119,6 +119,10 @@
     color: black;
     // Solid color for filter
     background-color: black;
+
+    @media print {
+      display: none;
+    }
   }
 
   .textContent {
@@ -153,6 +157,17 @@
 
 .channelPhoto {
   --radius: var(--border-radius-messages);
+}
+
+.wallpaperPreview {
+  position: relative;
+  z-index: 0;
+
+  overflow: hidden;
+
+  width: 6.25rem;
+  height: 6.25rem;
+  border-radius: 50%;
 }
 
 .suggestedAvatar {
@@ -193,14 +208,15 @@
   border-radius: 1.25rem;
 
   font-weight: var(--font-weight-semibold);
+  color: var(--message-service-text);
 
-  background-color: var(--action-message-bg);
+  background-color: var(--message-service-background);
 
   transition: opacity 0.15s;
 
   &:hover,
   &:focus {
-    opacity: 0.8;
+    background-color: #000000cc;
   }
 }
 
@@ -231,7 +247,12 @@
 
     border-radius: calc(var(--border-radius-messages) + 0.25rem);
 
-    background-color: var(--action-message-bg);
+    background-color: var(--message-service-background);
+  }
+
+  // The card keeps its backdrop in print, so its text must stay light
+  @media print {
+    --message-service-text: #fff;
   }
 }
 
@@ -275,7 +296,7 @@
   transition: opacity 0.15s;
 
   &:hover {
-    opacity: 0.8;
+    background-color: #000000cc;
   }
 }
 
@@ -335,8 +356,11 @@
 .botForumTopicIcon {
   padding: 1.25rem;
   border-radius: 50%;
+
   font-size: 2.5rem;
-  background-color: var(--action-message-bg);
+  color: var(--message-service-text);
+
+  background-color: var(--message-service-background);
 }
 
 .botForumTopicTitle {

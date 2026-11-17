@@ -1,12 +1,13 @@
 import { getActions } from '../global';
 
-import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
+import { DEBUG, IS_TEST } from '../config';
 // eslint-disable-next-line import-x/default
 import serviceWorkerUrl from '../serviceWorker/service.worker.ts?worker&url';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './browser/windowEnvironment';
 import { formatShareText } from './deeplink';
 import { validateFiles } from './files';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
+import { handlePushWorkerMessage, initPushNotifications, notifyPushClientReady } from './pushNotifications';
 
 type WorkerAction = {
   type: string;
@@ -14,23 +15,18 @@ type WorkerAction = {
 };
 
 const IGNORE_WORKER_PATH = '/k/';
+const CONTROLLER_TIMEOUT_MS = 3000;
 const SERVICE_WORKER_OPTIONS: RegistrationOptions = import.meta.env.DEV
   ? { scope: './', type: 'module' }
   : { type: 'module' };
 
 function handleWorkerMessage(e: MessageEvent) {
   const action: WorkerAction = e.data;
-  if (DEBUG_MORE) {
-    // eslint-disable-next-line no-console
-    console.log('[SW] Message from worker', action);
-  }
+  void handlePushWorkerMessage(e).catch(() => undefined);
   if (!action.type) return;
   const dispatch = getActions();
   const payload = action.payload;
   switch (action.type) {
-    case 'focusMessage':
-      dispatch.focusMessage?.(payload as any);
-      break;
     case 'playNotificationSound':
       playNotifySoundDebounced(action.payload.id);
       break;
@@ -43,18 +39,30 @@ function handleWorkerMessage(e: MessageEvent) {
   }
 }
 
+let subscribedController: ServiceWorker | undefined;
+
 function subscribeToWorker() {
+  // Both `controllerchange` and the load handler can report the same controller
+  if (subscribedController === navigator.serviceWorker.controller) return;
+  subscribedController = navigator.serviceWorker.controller || undefined;
+
   navigator.serviceWorker.removeEventListener('message', handleWorkerMessage);
   navigator.serviceWorker.addEventListener('message', handleWorkerMessage);
   // Notify web worker that client is ready to receive messages
   notifyClientReady();
+  initPushNotifications();
+  notifyPushClientReady();
 }
 
 if (IS_SERVICE_WORKER_SUPPORTED) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (navigator.serviceWorker.controller) subscribeToWorker();
+  });
+
   window.addEventListener('load', async () => {
     try {
       const controller = navigator.serviceWorker.controller;
-      if (!controller || controller.scriptURL.includes(IGNORE_WORKER_PATH)) {
+      if (controller?.scriptURL.includes(IGNORE_WORKER_PATH)) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         const ourRegistrations = registrations.filter((r) => !r.scope.includes(IGNORE_WORKER_PATH));
         if (ourRegistrations.length) {
@@ -73,10 +81,23 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         console.log('[SW] ServiceWorker registered');
       }
 
-      await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready;
 
-      // Wait for registration to be available
-      await navigator.serviceWorker.getRegistration();
+      if (!navigator.serviceWorker.controller && registration.active) {
+        const worker = registration.active;
+        await new Promise<void>((resolve) => {
+          const timeout = setTimeout(finish, CONTROLLER_TIMEOUT_MS);
+
+          function finish() {
+            clearTimeout(timeout);
+            navigator.serviceWorker.removeEventListener('controllerchange', finish);
+            resolve();
+          }
+
+          navigator.serviceWorker.addEventListener('controllerchange', finish);
+          worker.postMessage({ type: 'claimClient' });
+        });
+      }
 
       if (navigator.serviceWorker.controller) {
         if (DEBUG) {

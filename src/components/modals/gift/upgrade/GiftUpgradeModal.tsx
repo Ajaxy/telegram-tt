@@ -144,7 +144,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const formattedPriceElement = useMemo(() => (upgradeStars ? (
     <span>
-      <Icon name="star" />
+      <Icon name="star" className="in-text-icon" />
       <AnimatedCounter text={lang.number(upgradeStars)} />
     </span>
   ) : undefined), [lang, upgradeStars]);

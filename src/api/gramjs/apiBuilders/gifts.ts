@@ -5,6 +5,8 @@ import type {
   ApiDisallowedGiftsSettings,
   ApiInputSavedStarGift,
   ApiSavedStarGift,
+  ApiShareTheme,
+  ApiShareThemeBackdrop,
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiftAttributeCounter,
@@ -26,6 +28,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiFormattedText } from './common';
 import { buildApiCurrencyAmount } from './payments';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiReaction } from './reactions';
 import { buildStickerFromDocument } from './symbols';
 import { buildApiUser } from './users';
 
@@ -34,7 +37,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
       giftAddress, resellAmount, releasedBy, resaleTonOnly, requirePremium, valueCurrency, valueAmount, giftId,
-      valueUsdAmount, burned, crafted, craftChancePermille,
+      valueUsdAmount, burned, crafted, craftChancePermille, hostId,
     } = starGift;
 
     return {
@@ -59,6 +62,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       valueUsdAmount: toJSNumber(valueUsdAmount),
       regularGiftId: giftId.toString(),
       offerMinStars: starGift.offerMinStars,
+      hostPeerId: hostId && getApiChatIdFromMtpPeer(hostId),
       isBurned: burned,
       isCrafted: crafted,
       craftChancePermille,
@@ -466,5 +470,37 @@ export function buildApiStarGiftAuctionAcquiredGift(
     message: result.message ? buildApiFormattedText(result.message) : undefined,
     giftNumber: result.giftNum,
     isNameHidden: result.nameHidden || undefined,
+  };
+}
+
+export function buildApiShareTheme(shareTheme: GramJs.TypeShareTheme): ApiShareTheme | undefined {
+  if (shareTheme instanceof GramJs.ShareThemeEmojiBackdrop) {
+    return {
+      type: 'emojiBackdrop',
+      backdropId: shareTheme.backdropId,
+      emojis: shareTheme.emojis?.map((reaction) => buildApiReaction(reaction)).filter(Boolean) || [],
+    };
+  }
+
+  if (shareTheme instanceof GramJs.ShareThemeGift) {
+    const gift = buildApiStarGift(shareTheme.stargift);
+    return gift.type === 'starGiftUnique' ? { type: 'gift', gift } : undefined;
+  }
+
+  return undefined;
+}
+
+export function buildApiShareThemeBackdrop(backdrop: GramJs.ShareThemeBackdropOption): ApiShareThemeBackdrop {
+  const {
+    backdropId, name, centerColor, edgeColor, patternColor, textColor,
+  } = backdrop;
+
+  return {
+    backdropId,
+    name,
+    centerColor: int2hex(centerColor),
+    edgeColor: int2hex(edgeColor),
+    patternColor: int2hex(patternColor),
+    textColor: int2hex(textColor),
   };
 }

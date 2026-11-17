@@ -9,11 +9,11 @@
   background-color: var(--accent-background-active-color);
   filter: brightness(1);
 
-  transition: 150ms filter ease-in;
+  transition: background-color var(--message-color-transition-duration, 150ms) ease-in, filter 150ms ease-in;
 }
 
 .plain {
-  color: rgba(var(--color-text-meta-rgb), 0.75);
+  color: var(--color-text-meta);
   background-color: transparent;
 }
 

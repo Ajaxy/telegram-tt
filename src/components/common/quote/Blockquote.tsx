@@ -17,9 +17,11 @@ import styles from './Blockquote.module.scss';
 type OwnProps = {
   className?: string;
   contentClassName?: string;
+  richQuoteIndex?: number;
   canBeCollapsible?: boolean;
   isToggleDisabled?: boolean;
   noInitialCollapse?: boolean;
+  shouldExpand?: boolean;
   recalculationKey?: unknown;
   ignoredLines?: number;
   isCollapsed?: boolean;
@@ -32,9 +34,11 @@ const MAX_LINES = 4;
 const Blockquote = ({
   className,
   contentClassName,
+  richQuoteIndex,
   canBeCollapsible,
   isToggleDisabled,
   noInitialCollapse,
+  shouldExpand,
   recalculationKey,
   ignoredLines,
   isCollapsed: isCollapsedControlled,
@@ -49,7 +53,7 @@ const Blockquote = ({
     noInitialCollapse,
     recalculationKey,
     ignoredLines,
-    isCollapsed: isCollapsedControlled,
+    isCollapsed: shouldExpand ? false : isCollapsedControlled,
     onCollapseChange,
   });
 
@@ -71,6 +75,7 @@ const Blockquote = ({
       onClick={canExpand ? handleExpand : undefined}
     >
       <blockquote
+        data-rich-quote-index={richQuoteIndex}
         className={buildClassName(styles.blockquote, contentClassName, hasCollapseIcon && styles.withCollapseIcon)}
         ref={ref}
         data-entity-type={ApiMessageEntityTypes.Blockquote}

@@ -17,7 +17,7 @@
   stroke-linecap: round;
   stroke-width: 2;
 
-  transition: stroke-dashoffset 1s linear, stroke 0.2s;
+  transition: stroke-dashoffset 1s linear, stroke var(--message-color-transition-duration, 0.2s);
 
   @starting-style {
     stroke-dashoffset: 0;

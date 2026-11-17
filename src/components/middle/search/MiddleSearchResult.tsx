@@ -1,4 +1,4 @@
-import { memo } from '../../../lib/teact/teact';
+import { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
 
@@ -9,6 +9,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useTextHighlight from '../../../hooks/useTextHighlight';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -41,6 +42,8 @@ const MiddleSearchResult = ({
   onClick,
 }: OwnProps) => {
   const lang = useLang();
+  const textRef = useRef<HTMLDivElement>();
+  useTextHighlight(textRef, { search: message ? query : undefined });
 
   const handleClick = useLastCallback(() => {
     onClick(message);
@@ -105,14 +108,14 @@ const MiddleSearchResult = ({
           {(senderPeer && <FullNameTitle peer={senderPeer} withEmojiStatus />) || hiddenForwardTitle}
           <LastMessageMeta className={styles.meta} message={message} />
         </div>
-        <div className={styles.subtitle} dir="auto">
+        <div className={styles.subtitle} dir="auto" ref={textRef}>
           {senderName && (
             <>
-              <span className="sender-name">{renderText(senderName)}</span>
-              <span className="colon">:</span>
+              <span className="sender-name" data-text-content="">{renderText(senderName)}</span>
+              <span className="colon" data-text-content="">:</span>
             </>
           )}
-          <MessageSummary message={message} highlight={query} truncateLength={TRUNCATE_LENGTH} />
+          <MessageSummary message={message} truncateLength={TRUNCATE_LENGTH} />
         </div>
       </div>
     </div>

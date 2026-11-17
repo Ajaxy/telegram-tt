@@ -3,6 +3,7 @@ import { useEffect, useRef } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getCurrentTrackAnalyser } from '../../util/audioPlayback/audioAnalyser';
 import buildClassName from '../../util/buildClassName';
+import { fastRaf } from '../../util/schedulers';
 
 import useLang from '../../hooks/useLang';
 
@@ -75,7 +76,6 @@ const PlayingRing = ({ withCutout, isPaused, className }: OwnProps) => {
     const target = new Float32Array(TICK_COUNT);
     let data: Uint8Array<ArrayBuffer> | undefined;
     let bands: { bin: number; gain: number }[] | undefined;
-    let rafId: number;
     let isUnmounted = false;
 
     const applyLoudness = () => {
@@ -113,6 +113,7 @@ const PlayingRing = ({ withCutout, isPaused, className }: OwnProps) => {
     };
 
     const renderFrame = () => {
+      if (isUnmounted) return;
       fillTarget();
 
       let isSettled = true;
@@ -128,14 +129,13 @@ const PlayingRing = ({ withCutout, isPaused, className }: OwnProps) => {
       }
 
       requestMutation(applyLoudness);
-      rafId = requestAnimationFrame(renderFrame);
+      fastRaf(renderFrame);
     };
 
-    rafId = requestAnimationFrame(renderFrame);
+    fastRaf(renderFrame);
 
     return () => {
       isUnmounted = true;
-      cancelAnimationFrame(rafId);
     };
   }, [isPaused]);
 

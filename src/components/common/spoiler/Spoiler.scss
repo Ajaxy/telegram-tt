@@ -2,7 +2,7 @@
   &--concealed {
     cursor: var(--custom-cursor, pointer);
     border-radius: 0.5rem;
-    background-image: url('../../../assets/spoiler-dots-black.png');
+    background-image: url('../../../assets/spoiler-dots-black.webp');
     background-size: auto min(100%, 1.125rem);
 
     html.theme-dark &,
@@ -10,7 +10,7 @@
     .ActionMessage &,
     .MediaViewerFooter &,
     #StoryViewer & {
-      background-image: url('../../../assets/spoiler-dots-white.png');
+      background-image: url('../../../assets/spoiler-dots-white.webp');
     }
 
     .emoji-only & {

@@ -14,7 +14,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { compact } from '../../../util/iteratees';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 import { ChatAnimationTypes } from './hooks';
 

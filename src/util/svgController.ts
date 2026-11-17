@@ -3,47 +3,51 @@ import { requestMutation } from '../lib/fasterdom/fasterdom';
 import jsxToHtml from './element/jsxToHtml';
 import generateUniqueId from './generateUniqueId';
 
-const DEFINITION_MAP = new Map<string, Element>();
+const DEFINITION_MAP = new WeakMap<Document, Map<string, Element>>();
+const DEFS_BY_DOCUMENT = new WeakMap<Document, SVGElement>();
 
-let defs: SVGElement | undefined;
+function init(targetDocument: Document) {
+  const existingDefs = DEFS_BY_DOCUMENT.get(targetDocument);
+  if (existingDefs) return existingDefs;
 
-function init() {
-  if (defs) return;
-
-  const container = document.createElementNS(SVG_NAMESPACE, 'svg');
+  const container = targetDocument.createElementNS(SVG_NAMESPACE, 'svg');
   container.setAttribute('width', '0');
   container.setAttribute('height', '0');
   container.setAttribute('viewBox', '0 0 1 1');
   container.classList.add('svg-definitions');
-  document.body.appendChild(container);
+  targetDocument.body.appendChild(container);
 
-  defs = document.createElementNS(SVG_NAMESPACE, 'defs');
+  const defs = targetDocument.createElementNS(SVG_NAMESPACE, 'defs');
   container.appendChild(defs);
+  DEFS_BY_DOCUMENT.set(targetDocument, defs);
+  return defs;
 }
 
-function appendElement(element: Element) {
+function appendElement(element: Element, targetDocument: Document) {
   requestMutation(() => {
-    if (!defs) init();
-    defs!.appendChild(element);
+    init(targetDocument).appendChild(element);
   });
 }
 
-export function addSvgDefinition(element: React.JSX.Element, id?: string) {
+export function addSvgDefinition(element: React.JSX.Element, id?: string, targetDocument = document) {
   id ??= generateUniqueId();
   element.props.id = id;
 
   const htmlElement = jsxToHtml(element)[0];
-  DEFINITION_MAP.set(element.props.id, htmlElement);
-  appendElement(htmlElement);
+  const definitions = DEFINITION_MAP.get(targetDocument) || new Map<string, Element>();
+  DEFINITION_MAP.set(targetDocument, definitions);
+  definitions.set(element.props.id, htmlElement);
+  appendElement(htmlElement, targetDocument);
   return id;
 }
 
-export function removeSvgDefinition(id: string) {
-  const element = DEFINITION_MAP.get(id);
+export function removeSvgDefinition(id: string, targetDocument = document) {
+  const definitions = DEFINITION_MAP.get(targetDocument);
+  const element = definitions?.get(id);
   if (element) {
     requestMutation(() => {
       element.remove();
     });
-    DEFINITION_MAP.delete(id);
+    definitions!.delete(id);
   }
 }

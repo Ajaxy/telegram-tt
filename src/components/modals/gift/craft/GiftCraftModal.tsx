@@ -17,7 +17,7 @@ import { requestMeasure, requestMutation } from '../../../../lib/fasterdom/faste
 import { VTT_CRAFT_ATTRIBUTES } from '../../../../util/animations/viewTransitionTypes';
 import buildClassName from '../../../../util/buildClassName';
 import { NEXT_ARROW_REPLACEMENT } from '../../../../util/localization/format';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
 import { REM } from '../../../common/helpers/mediaDimensions';

@@ -1,5 +1,6 @@
 import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
+import type { MediaEditState, VideoProcessingParams, VideoQualityLevel } from '../../types/mediaEditor';
 import type { AdvancedLangFnParameters, RegularLangFnParameters } from '../../util/localization';
 import type {
   ApiContact,
@@ -8,6 +9,7 @@ import type {
   ApiMessageEntity,
   ApiPhoto,
   ApiReaction,
+  ApiSticker,
   ApiVideo,
 } from './messages';
 import type { ApiPremiumSection } from './payments';
@@ -33,6 +35,12 @@ export interface ApiInitialArgs {
   accountIds?: string[];
   hasPasskeySupport?: boolean;
 }
+
+export type ApiAccountConnection = Pick<ApiInitialArgs,
+  'platform' | 'langCode' | 'shouldAllowHttpTransport' | 'shouldForceHttpTransport'
+> & {
+  sessionData: ApiSessionData;
+};
 
 export type ApiPasskeyOption = {
   publicKey: PublicKeyCredentialRequestOptionsJSON;
@@ -87,8 +95,26 @@ export interface ApiAttachment {
   ttlSeconds?: number;
   isRoundVideo?: boolean;
   shouldSendInHighQuality?: boolean;
+  editState?: MediaEditState;
+  videoProcessing?: VideoProcessingParams;
+  videoQualityLevel?: VideoQualityLevel;
+  shouldSendAsGif?: true;
+  attachedStickers?: ApiSticker[];
+  isFromMessageMedia?: true;
+  sourceBlobUrl?: string;
+  videoCover?: {
+    blobUrl: string;
+    width: number;
+    height: number;
+  };
 
   gif?: ApiVideo;
+}
+
+export interface ApiAvatarUpload {
+  file: File;
+  video?: File;
+  videoStartTs?: number;
 }
 
 export interface ApiWallpaperSettings {
@@ -113,6 +139,31 @@ export interface ApiWallpaper {
   isDefault?: boolean;
   settings?: ApiWallpaperSettings;
 }
+
+export type ApiBaseTheme = 'classic' | 'day' | 'night' | 'tinted';
+
+export interface ApiThemeSettings {
+  baseTheme: ApiBaseTheme;
+  accentColor: string;
+  outgoingColors?: string[];
+  areOutgoingColorsAnimated?: boolean;
+  outboxAccentColor?: string;
+  wallpaper?: ApiWallpaper;
+}
+
+export interface ApiChatTheme {
+  emoticon: string;
+  isDefault?: boolean;
+  settings: ApiThemeSettings[];
+}
+
+export type ApiPeerTheme = {
+  type: 'emoticon';
+  emoticon: string;
+} | {
+  type: 'gift';
+  settings: ApiThemeSettings[];
+};
 
 export interface ApiSession {
   hash: string;
@@ -197,6 +248,7 @@ export type ApiDialogContact = {
 
 export type ApiDialogLocalizedMessage = {
   type: 'localized';
+  title?: RegularLangFnParameters;
   text: AdvancedLangFnParameters;
 };
 
@@ -283,6 +335,7 @@ export interface ApiAppConfig {
   urlAuthDomains: string[];
   whitelistedDomains: string[];
   webAppAllowedProtocols: string[];
+  areWidgetsDisabled?: boolean;
   premiumInvoiceSlug?: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
@@ -353,6 +406,8 @@ export interface ApiAppConfig {
   // Transfers below this are hidden from the wallet history
   walletTransferMinNanos?: bigint;
   walletGaslessDailyTransfers?: number;
+  // Collection slugs, such as `PlushPepe`, whose gifts can color the wallet card
+  walletCardBackgroundCollections?: string[];
   oldWalletBotUsername?: string;
   pollMaxAnswers: number;
   pollClosePeriodMax: number;
@@ -361,6 +416,7 @@ export interface ApiAppConfig {
   todoItemsMax: number;
   todoTitleLengthMax: number;
   todoItemLengthMax: number;
+  quoteLengthMax: number;
   ignoreRestrictionReasons?: string[];
   needAgeVideoVerification?: boolean;
   verifyAgeBotUsername?: string;

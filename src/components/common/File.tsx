@@ -151,6 +151,7 @@ const File = ({
         {shouldSpinnerRender && (
           <div className={buildClassName('file-progress', color, spinnerClassNames)}>
             <ProgressSpinner
+              withColor
               progress={transferProgress}
               size={previewSize === 'small' ? 's' : 'm'}
               onClick={isUploading ? onClick : undefined}
@@ -160,7 +161,7 @@ const File = ({
         {onClick && (
           <Icon
             name={actionIcon || 'download'}
-            className={buildClassName('action-icon', shouldSpinnerRender && 'hidden')}
+            className={buildClassName('action-icon', color, shouldSpinnerRender && 'hidden')}
           />
         )}
       </div>

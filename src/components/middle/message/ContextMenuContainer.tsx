@@ -1,5 +1,5 @@
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -10,11 +10,11 @@ import type { ApiAvailableReaction,
   ApiMessagePoll,
   ApiReaction,
   ApiStickerSet,
-  ApiStickerSetInfo,
   ApiThreadInfo,
   ApiTypeStory,
   ApiUser,
   ApiWebPage } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type {
   ActiveDownloads,
   IAlbum,
@@ -33,7 +33,9 @@ import {
   getCanReplyToEphemeralMessage,
   getIsDownloading,
   getMessageAudio,
+  getMessageCustomEmojis,
   getMessageVideo,
+  getUniqueStickerSetsInfo,
   getUserFullName,
   hasMessageTtl,
   isActionMessage,
@@ -46,6 +48,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectActiveDownloads,
+  selectAlbumMessageIdToEdit,
   selectAllowedMessageActionsSlow,
   selectBot,
   selectCanForwardMessage,
@@ -56,13 +59,13 @@ import {
   selectCanTranslateMessage,
   selectChat,
   selectChatFullInfo,
+  selectCustomEmoji,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
-  selectMessageCustomEmojiSets,
   selectMessageTranslations,
   selectPeerStory,
   selectPollFromMessage,
@@ -82,9 +85,12 @@ import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { isUserId } from '../../../util/entities/ids';
 import { getTranslationCacheKey, parseTranslationCacheKey } from '../../../util/keys/translationKey';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
+import { getSelectionAsRichQuote } from './helpers/getSelectionAsRichQuote';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
+import { useShallowSelector } from '../../../hooks/data/useSelector';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -101,7 +107,6 @@ export type OwnProps = {
   album?: IAlbum;
   anchor: IAnchorPosition;
   targetHref?: string;
-  isAltKeyPressed?: boolean;
   messageListType: MessageListType;
   threadId: ThreadId;
   noReplies?: boolean;
@@ -128,8 +133,6 @@ type StateProps = {
   canShowReactionsCount?: boolean;
   canBuyPremium?: boolean;
   canShowReactionList?: boolean;
-  customEmojiSetsInfo?: ApiStickerSetInfo[];
-  customEmojiSets?: ApiStickerSet[];
   canUnpin?: boolean;
   canDelete?: boolean;
   canReport?: boolean;
@@ -164,6 +167,7 @@ type StateProps = {
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
   isInSavedMessages?: boolean;
+  quoteLengthMax: number;
   isChannel?: boolean;
   canReplyInChat?: boolean;
   isWithPaidReaction?: boolean;
@@ -189,15 +193,12 @@ const ContextMenuContainer = ({
   isOpen,
   messageListType,
   message,
-  customEmojiSetsInfo,
-  customEmojiSets,
   album,
   poll,
   webPage,
   story,
   anchor,
   targetHref,
-  isAltKeyPressed,
   noOptions,
   canSendNow,
   hasFullInfo,
@@ -243,6 +244,7 @@ const ContextMenuContainer = ({
   translationRequestLanguage,
   isReactionPickerOpen,
   isInSavedMessages,
+  quoteLengthMax,
   canReplyInChat,
   isWithPaidReaction,
   user,
@@ -319,12 +321,33 @@ const ContextMenuContainer = ({
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
   const [selectionQuoteOffset, setSelectionQuoteOffset] = useState(UNQUOTABLE_OFFSET);
+  const [selectedRichQuote, setSelectedRichQuote] = useState<ReturnType<typeof getSelectionAsRichQuote>>();
   const [requestCalendar, calendar] = useSchedule(
     canScheduleUntilOnline,
     onClose,
     message.date,
     message.scheduleRepeatPeriod,
   );
+
+  const customEmojis = useMemo(() => (
+    message.isEphemeral ? MEMO_EMPTY_ARRAY : getMessageCustomEmojis(message)
+  ), [message]);
+  const customEmojiDocumentsSelector = useCallback((global: GlobalState) => customEmojis.map((emoji) => (
+    ('document' in emoji && emoji.document) || selectCustomEmoji(global, emoji.documentId)
+  )), [customEmojis]);
+  const customEmojiDocuments = useShallowSelector(customEmojiDocumentsSelector);
+  const customEmojiSetsInfo = useMemo(() => (
+    // If some emoji are still loading, do not return an empty array
+    customEmojiDocuments.every(Boolean)
+      ? getUniqueStickerSetsInfo(customEmojiDocuments.map((document) => document.stickerSetInfo))
+      : undefined
+  ), [customEmojiDocuments]);
+  const customEmojiSetsSelector = useCallback((global: GlobalState) => (
+    customEmojiSetsInfo?.map((set) => selectStickerSet(global, set))
+  ), [customEmojiSetsInfo]);
+  const customEmojiSetsNotFiltered = useShallowSelector(customEmojiSetsSelector);
+  const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
+    ? customEmojiSetsNotFiltered : undefined;
 
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = !message.isEphemeral
@@ -424,8 +447,17 @@ const ContextMenuContainer = ({
   const selectionRange = canReply && selection?.rangeCount ? selection.getRangeAt(0) : undefined;
 
   useEffect(() => {
+    setSelectedRichQuote(undefined);
     if (isMessageTranslated) {
       setSelectionQuoteOffset(UNQUOTABLE_OFFSET);
+      return;
+    }
+
+    if (message.content.richMessage) {
+      const richQuote = selectionRange && !message.isEphemeral
+        ? getSelectionAsRichQuote(selectionRange, message.content.richMessage, message.id, quoteLengthMax) : undefined;
+      setSelectedRichQuote(richQuote);
+      setSelectionQuoteOffset(richQuote?.quoteOffset ?? UNQUOTABLE_OFFSET);
       return;
     }
 
@@ -453,7 +485,8 @@ const ContextMenuContainer = ({
     setSelectionQuoteOffset(selectionRange.startOffset);
   }, [
     selectionRange, selectionRange?.collapsed, selectionRange?.startOffset, selectionRange?.endOffset,
-    isMessageTranslated, message.content.text,
+    isMessageTranslated, message.content.text, message.content.richMessage, message.id, message.isEphemeral,
+    quoteLengthMax,
   ]);
 
   const closeMenu = useLastCallback(() => {
@@ -488,8 +521,11 @@ const ContextMenuContainer = ({
   });
 
   const handleReply = useLastCallback(() => {
-    const quoteText = !message.isEphemeral && selectionQuoteOffset !== UNQUOTABLE_OFFSET && selectionRange
+    const quoteText = !message.isEphemeral && !message.content.richMessage
+      && selectionQuoteOffset !== UNQUOTABLE_OFFSET && selectionRange
       ? getSelectionAsFormattedText(selectionRange) : undefined;
+    const quoteRich = selectedRichQuote?.quoteRich;
+    const quoteOffset = selectionQuoteOffset !== UNQUOTABLE_OFFSET ? selectionQuoteOffset : undefined;
     if (message.isEphemeral) {
       updateDraftReplyInfo({
         type: 'ephemeral',
@@ -501,13 +537,14 @@ const ContextMenuContainer = ({
 
     if (!canReplyInChat) {
       openReplyMenu({
-        fromChatId: message.chatId, messageId: message.id, quoteText, quoteOffset: selectionQuoteOffset,
+        fromChatId: message.chatId, messageId: message.id, quoteText, quoteRich, quoteOffset,
       });
     } else {
       updateDraftReplyInfo({
         replyToMsgId: message.id,
         quoteText,
-        quoteOffset: selectionQuoteOffset,
+        quoteRich,
+        quoteOffset,
         monoforumPeerId: savedDialogId,
         replyToPeerId: undefined,
       });
@@ -530,7 +567,8 @@ const ContextMenuContainer = ({
         messageId: message.id,
       });
     } else {
-      startEditingMessage({ messageId: message.id });
+      const messageId = message.isInAlbum ? selectAlbumMessageIdToEdit(getGlobal(), message) : message.id;
+      startEditingMessage({ messageId });
     }
     closeMenu();
   });
@@ -794,7 +832,6 @@ const ContextMenuContainer = ({
         reactionsLimit={reactionsLimit}
         anchor={anchor}
         targetHref={targetHref}
-        isAltKeyPressed={isAltKeyPressed}
         chat={chat}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
@@ -987,11 +1024,6 @@ export default memo(withGlobal<OwnProps>(
     const canCopyNumber = Boolean(message.content.contact);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
-    const customEmojiSetsInfo = selectMessageCustomEmojiSets(global, message);
-    const customEmojiSetsNotFiltered = customEmojiSetsInfo?.map((set) => selectStickerSet(global, set));
-    const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
-      ? customEmojiSetsNotFiltered : undefined;
-
     const translationRequestLanguage = selectRequestedMessageTranslationLanguage(global, message.chatId, message.id);
     const chatTranslationLanguage = selectRequestedChatTranslationLanguage(global, message.chatId);
     const chatTranslationTone = selectRequestedChatTranslationTone(global, message.chatId);
@@ -1071,8 +1103,6 @@ export default memo(withGlobal<OwnProps>(
       canShowReactionList: !message.isEphemeral && !isLocal && !isAction && !isScheduled && !hasTtl
         && !(chat && !isPrivate && !isChatAdmin(chat) && isUserRightBanned(chat, 'sendReactions', chatFullInfo)),
       canBuyPremium: !message.isEphemeral && !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
-      customEmojiSetsInfo: message.isEphemeral ? undefined : customEmojiSetsInfo,
-      customEmojiSets: message.isEphemeral ? undefined : customEmojiSets,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
       canTranslate: !message.isEphemeral && canTranslate,
       canShowOriginal: !message.isEphemeral && hasTranslation && !isChatTranslated,
@@ -1083,6 +1113,7 @@ export default memo(withGlobal<OwnProps>(
       canPlayAnimatedEmojis: !message.isEphemeral && selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: !message.isEphemeral && selectIsReactionPickerOpen(global),
       isInSavedMessages,
+      quoteLengthMax: global.appConfig.quoteLengthMax,
       isChannel,
       canReplyInChat,
       isWithPaidReaction: !message.isEphemeral && chatFullInfo?.isPaidReactionAvailable,

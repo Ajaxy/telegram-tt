@@ -9,6 +9,7 @@ import type {
   ApiOnProgress,
 } from '../../../../api/types';
 import type { ThreadId } from '../../../../types';
+import type { MediaEditState } from '../../../../types/mediaEditor';
 import type { RichEditorMediaItem } from '../../../../util/tiptap/richMedia';
 import type { RichEditor, RichEditorMediaFilesHandler } from '../richEditorTypes';
 
@@ -322,7 +323,7 @@ export default function useRichMedia({
     setEditingUploadId(undefined);
   });
 
-  const handleSaveMediaEdit = useLastCallback(async (file: File) => {
+  const handleSaveMediaEdit = useLastCallback(async (file: File, editState: MediaEditState) => {
     const uploadId = editingUploadId;
     const currentUpload = getRichMediaUpload(uploadId);
     const initiatingContext = editorContextRef.current;
@@ -364,6 +365,8 @@ export default function useRichMedia({
     try {
       attachment = await buildAttachment(file.name, file, {
         shouldSendInHighQuality: currentUpload.attachment.shouldSendInHighQuality,
+        sourceBlobUrl: currentUpload.attachment.sourceBlobUrl ?? currentUpload.attachment.blobUrl,
+        editState,
       });
       const uploadingMedia = buildUploadingMedia(attachment);
       const preview = uploadingMedia.photo;

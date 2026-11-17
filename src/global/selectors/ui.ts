@@ -1,14 +1,17 @@
-import type { ApiMessage, ApiPeer, ApiSponsoredMessage } from '../../api/types';
-import type { CustomPeer, PerformanceTypeKey, ThemeKey } from '../../types';
+import type { ApiMessage, ApiPeer, ApiSponsoredMessage, ApiWallpaper } from '../../api/types';
+import type { CustomPeer, IThemeSettings, PerformanceTypeKey, ThemeKey } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
-import { IS_SNAP_EFFECT_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import memoized from '../../util/memoized';
-import { getActionMessageBg } from '../../util/wallpaper';
+import { buildThemePalette } from '../../util/theme';
+import {
+  buildThemeSettingsFromWallpaper, getActionMessageBg, getChatThemeEntry, getThemeWallpaper,
+} from '../../util/wallpaper';
 import { selectTabBrowserState } from '../helpers/browser';
 import { getMessageVideo, getWebPageVideo } from '../helpers/messageMedia';
+import { selectPeerFullInfo } from './chats';
 import { selectCurrentManagement } from './management';
 import { selectWebPageFromMessage } from './messages';
 import { selectSharedSettings } from './sharedState';
@@ -16,6 +19,8 @@ import { selectIsStatisticsShown } from './statistics';
 import { selectTabState } from './tabs';
 
 const getActionMessageBgMemo = memoized(getActionMessageBg);
+const WALLPAPER_SETTINGS = new WeakMap<ApiWallpaper, IThemeSettings>();
+const GLOBAL_WALLPAPER_SETTINGS = new WeakMap<IThemeSettings, IThemeSettings>();
 
 export function selectIsMediaViewerOpen<T extends GlobalState>(
   global: T,
@@ -82,9 +87,95 @@ export function selectThemeValues<T extends GlobalState>(global: T, themeKey: Th
   return selectSharedSettings(global).themes[themeKey];
 }
 
-export function selectActionMessageBg<T extends GlobalState>(global: T) {
+export function selectActionMessageBg<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return getActionMessageBgMemo(
+    selectTheme(global),
+    selectChatThemePalette(global, chatId, tabId),
+    selectChatWallpaperSettings(global, chatId, tabId),
+  );
+}
+
+export function selectChatThemeSettings<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
   const theme = selectTheme(global);
-  return getActionMessageBgMemo(theme, selectThemeValues(global, theme));
+  if (chatId && chatId !== global.currentUserId && chatId !== selectTabState(global, tabId).globalThemePreviewChatId) {
+    const peerTheme = selectPeerFullInfo(global, chatId)?.peerTheme;
+    const settings = peerTheme?.type === 'gift' ? peerTheme.settings
+      : peerTheme && global.settings.chatThemes?.find((entry) => entry.emoticon === peerTheme.emoticon)?.settings;
+    const peerSettings = settings && getChatThemeEntry(settings, theme === 'dark');
+    if (peerSettings) return peerSettings;
+  }
+  return selectThemeValues(global, theme)?.serverThemeSettings;
+}
+
+export function selectChatThemePalette<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return buildThemePalette(selectTheme(global), selectChatThemeSettings(global, chatId, tabId));
+}
+
+export function selectPeerWallpaper<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (!chatId || chatId === global.currentUserId || chatId === selectTabState(global, tabId).globalThemePreviewChatId) {
+    return undefined;
+  }
+  return selectPeerFullInfo(global, chatId)?.wallpaper;
+}
+
+export function selectChatWallpaper<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (chatId && chatId !== global.currentUserId && chatId !== selectTabState(global, tabId).globalThemePreviewChatId) {
+    const fullInfo = selectPeerFullInfo(global, chatId);
+    const peerWallpaper = selectPeerWallpaper(global, chatId, tabId);
+    if (peerWallpaper) return peerWallpaper;
+    const peerTheme = fullInfo?.peerTheme;
+    const settings = peerTheme?.type === 'gift' ? peerTheme.settings
+      : peerTheme && global.settings.chatThemes?.find((entry) => entry.emoticon === peerTheme.emoticon)?.settings;
+    const wallpaper = settings && getChatThemeEntry(settings, selectTheme(global) === 'dark')?.wallpaper;
+    if (wallpaper) return wallpaper;
+  }
+  return getThemeWallpaper(selectThemeValues(global, selectTheme(global)));
+}
+
+export function selectChatWallpaperSettings<T extends GlobalState>(
+  global: T,
+  chatId?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const globalSettings = selectThemeValues(global, selectTheme(global));
+  const wallpaper = selectChatWallpaper(global, chatId, tabId);
+  if (!wallpaper) return globalSettings;
+  if (globalSettings && wallpaper === selectChatWallpaper(global, undefined, tabId)) {
+    const cached = GLOBAL_WALLPAPER_SETTINGS.get(globalSettings);
+    if (cached) return cached;
+    const settings = {
+      ...buildThemeSettingsFromWallpaper(wallpaper),
+      patternIntensityFactor: globalSettings.patternIntensityFactor,
+      isBlurred: globalSettings.isBlurred ?? wallpaper.settings?.isBlurred,
+    };
+    GLOBAL_WALLPAPER_SETTINGS.set(globalSettings, settings);
+    return settings;
+  }
+  const cached = WALLPAPER_SETTINGS.get(wallpaper);
+  if (cached) return cached;
+  const settings = buildThemeSettingsFromWallpaper(wallpaper);
+  WALLPAPER_SETTINGS.set(wallpaper, settings);
+  return settings;
 }
 
 export function selectIsForumPanelOpen<T extends GlobalState>(
@@ -167,10 +258,6 @@ export function selectCanAnimateInterface<T extends GlobalState>(global: T) {
 
 export function selectCanAnimateRightColumn<T extends GlobalState>(global: T) {
   return selectPerformanceSettingsValue(global, 'rightColumnAnimations');
-}
-
-export function selectCanAnimateSnapEffect<T extends GlobalState>(global: T) {
-  return IS_SNAP_EFFECT_SUPPORTED && selectPerformanceSettingsValue(global, 'snapEffect');
 }
 
 export function selectIsContextMenuTranslucent<T extends GlobalState>(global: T) {

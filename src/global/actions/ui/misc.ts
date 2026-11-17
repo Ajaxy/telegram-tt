@@ -430,10 +430,13 @@ addActionHandler('dismissDialog', (global, actions, payload): ActionReturnType =
 });
 
 addActionHandler('toggleSafeLinkModal', (global, actions, payload): ActionReturnType => {
-  const { url: safeLinkModalUrl, tabId = getCurrentTabId() } = payload;
+  const { url: safeLinkModalUrl, isWidget, tabId = getCurrentTabId() } = payload;
+
+  if (isWidget && selectTabState(global, tabId).safeLinkModalUrl) return undefined;
 
   return updateTabState(global, {
     safeLinkModalUrl,
+    safeLinkModalIsWidget: safeLinkModalUrl ? isWidget : undefined,
   }, tabId);
 });
 
@@ -1039,7 +1042,9 @@ addActionHandler('openCocoonModal', (global, actions, payload): ActionReturnType
 addTabStateResetterAction('closeCocoonModal', 'isCocoonModalOpen');
 
 addActionHandler('requestMessageMediaEditor', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  const {
+    chatId, messageId, videoTime, tabId = getCurrentTabId(),
+  } = payload;
 
   const message = selectChatMessage(global, chatId, messageId);
   if (!message || !canEditMediaInEditor(message)) return;
@@ -1048,6 +1053,7 @@ addActionHandler('requestMessageMediaEditor', (global, actions, payload): Action
     messageMediaEditorRequest: {
       chatId: message.chatId,
       messageId: message.id,
+      videoTime,
     },
   }, tabId);
 });

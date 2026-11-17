@@ -31,23 +31,23 @@ type SettingsSearchEntry = {
   icon?: IconName;
   iconBg?: IconBackdropColor;
   requires?: SettingsSearchFlag;
-  isInHeaderMenu?: boolean;
+  isSectionHeader?: boolean;
 };
 
 type EntryOptions = Omit<SettingsSearchEntry, 'screen' | 'titleKey'>;
 
-const PRIVACY_VISIBILITY_SCREENS = [
-  SettingsScreens.PrivacyPhoneNumber,
-  SettingsScreens.PrivacyLastSeen,
-  SettingsScreens.PrivacyProfilePhoto,
-  SettingsScreens.PrivacyBio,
-  SettingsScreens.PrivacyBirthday,
-  SettingsScreens.PrivacyGifts,
-  SettingsScreens.PrivacySavedMusic,
-  SettingsScreens.PrivacyForwarding,
-  SettingsScreens.PrivacyPhoneCall,
-  SettingsScreens.PrivacyVoiceMessages,
-  SettingsScreens.PrivacyGroupChats,
+const PRIVACY_VISIBILITY_SCREENS: [SettingsScreens, RegularLangKey][] = [
+  [SettingsScreens.PrivacyPhoneNumber, 'PrivacyPhoneTitle'],
+  [SettingsScreens.PrivacyLastSeen, 'LastSeenTitle'],
+  [SettingsScreens.PrivacyProfilePhoto, 'PrivacyProfilePhotoTitle'],
+  [SettingsScreens.PrivacyBio, 'PrivacyBioTitle'],
+  [SettingsScreens.PrivacyBirthday, 'PrivacyBirthdayTitle'],
+  [SettingsScreens.PrivacyGifts, 'PrivacyGiftsTitle'],
+  [SettingsScreens.PrivacySavedMusic, 'PrivacyMusicTitle'],
+  [SettingsScreens.PrivacyForwarding, 'PrivacyForwardsTitle'],
+  [SettingsScreens.PrivacyPhoneCall, 'WhoCanCallMe'],
+  [SettingsScreens.PrivacyVoiceMessages, 'PrivacyVoiceMessagesTitle'],
+  [SettingsScreens.PrivacyGroupChats, 'WhoCanAddMe'],
 ];
 
 export const SETTINGS_SEARCH_SECTIONS: SettingsSearchSection[] = [
@@ -209,83 +209,74 @@ export const SETTINGS_SEARCH_SECTIONS: SettingsSearchSection[] = [
     screen: SettingsScreens.PrivacyPhoneNumber,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyPhone',
-    aliasKey: 'PrivacyPhoneTitle',
   },
   {
     screen: SettingsScreens.PrivacyLastSeen,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyLastSeen',
-    aliasKey: 'LastSeenTitle',
     keywordsKey: 'SettingsKeywordsLastSeen',
   },
   {
     screen: SettingsScreens.PrivacyProfilePhoto,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyProfilePhoto',
-    aliasKey: 'PrivacyProfilePhotoTitle',
   },
   {
     screen: SettingsScreens.PrivacyBio,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyBio',
-    aliasKey: 'PrivacyBioTitle',
   },
   {
     screen: SettingsScreens.PrivacyBirthday,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyBirthday',
-    aliasKey: 'PrivacyBirthdayTitle',
   },
   {
     screen: SettingsScreens.PrivacyGifts,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyGifts',
-    aliasKey: 'PrivacyGiftsTitle',
   },
   {
     screen: SettingsScreens.PrivacySavedMusic,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyMusic',
-    aliasKey: 'PrivacyMusicTitle',
   },
   {
     screen: SettingsScreens.PrivacyForwarding,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyForwards',
-    aliasKey: 'PrivacyForwardsTitle',
   },
   {
     screen: SettingsScreens.PrivacyPhoneCall,
     parent: SettingsScreens.Privacy,
     titleKey: 'Calls',
-    aliasKey: 'WhoCanCallMe',
   },
   {
     screen: SettingsScreens.PrivacyVoiceMessages,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyVoiceMessages',
-    aliasKey: 'PrivacyVoiceMessagesTitle',
   },
   {
     screen: SettingsScreens.PrivacyMessages,
     parent: SettingsScreens.Privacy,
     titleKey: 'PrivacyMessages',
-    aliasKey: 'PrivacyMessagesTitle',
   },
   {
     screen: SettingsScreens.PrivacyGroupChats,
     parent: SettingsScreens.Privacy,
     titleKey: 'AutodownloadGroupChats',
-    aliasKey: 'WhoCanAddMe',
   },
 ];
 
 export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
+  ...buildEntries(SettingsScreens.Main, ['WalletMenuItem'], {
+    requires: 'isWalletAvailable', icon: 'gram-filled', iconBg: 'blue',
+  }),
   ...buildEntries(SettingsScreens.Main, ['TelegramPremium'], {
     requires: 'canBuyPremium', icon: 'star', iconBg: 'premium',
   }),
   ...buildEntries(SettingsScreens.Main, ['MenuStars'], { icon: 'stars-filled', iconBg: 'orange' }),
-  ...buildEntries(SettingsScreens.Main, ['GramEarnings'], { icon: 'gram-filled', iconBg: 'blue' }),
+  ...buildEntries(SettingsScreens.Main, ['GramEarnings'], { icon: 'earnings', iconBg: 'blue' }),
   ...buildEntries(SettingsScreens.Main, ['MenuSendGift'], {
     requires: 'isGiveawayAvailable', icon: 'gift-filled', iconBg: 'orange',
   }),
@@ -293,7 +284,7 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   ...buildEntries(SettingsScreens.Main, ['MenuTelegramFaq'], { icon: 'help-filled', iconBg: 'blue' }),
   ...buildEntries(SettingsScreens.Main, ['MenuPrivacyPolicy'], { icon: 'privacy-policy-filled', iconBg: 'green' }),
   ...buildEntries(SettingsScreens.Main, ['LogOutTitle'], {
-    keywordsKey: 'SettingsKeywordsLogOut', icon: 'logout', iconBg: 'gray', isInHeaderMenu: true,
+    keywordsKey: 'SettingsKeywordsLogOut', icon: 'logout', iconBg: 'gray',
   }),
 
   ...buildEntries(SettingsScreens.EditProfile, [
@@ -301,7 +292,7 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   ]),
 
   ...buildEntries(SettingsScreens.General, ['TextSize'], { keywordsKey: 'SettingsKeywordsTextSize' }),
-  ...buildEntries(SettingsScreens.General, ['Theme'], { keywordsKey: 'SettingsKeywordsTheme' }),
+  ...buildEntries(SettingsScreens.General, ['ColorTheme'], { keywordsKey: 'SettingsKeywordsTheme' }),
   ...buildEntries(SettingsScreens.General, ['SettingsTimeFormat'], { keywordsKey: 'SettingsKeywordsTimeFormat' }),
   ...buildEntries(SettingsScreens.General, [
     'EmptyChatAppearanceLight', 'EmptyChatAppearanceDark', 'EmptyChatAppearanceSystem', 'SettingsTimeFormat12',
@@ -317,9 +308,11 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
   ]),
 
   ...buildEntries(SettingsScreens.Notifications, [
-    'NotificationsWeb', 'NotificationsOffline', 'NotificationsSound', 'NotificationsForPrivateChats', 'MessagePreview',
+    'NotificationsWeb', 'NotificationsOffline', 'NotificationsForPrivateChats', 'MessagePreview',
     'NotificationsForGroups', 'NotificationsForChannels', 'ContactJoined', 'PinnedMessagesNotifications',
   ]),
+  ...buildEntries(SettingsScreens.Notifications, IS_IOS ? [] : ['NotificationsSound']),
+  ...buildEntries(SettingsScreens.Notifications, ['PushPreviewsWhenLocked'], { requires: 'hasPasscode' }),
   ...buildEntries(SettingsScreens.Notifications, ['AutodownloadPrivateChats'], {
     keywordsKey: 'SettingsKeywordsPrivateChats',
   }),
@@ -341,7 +334,6 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
     'SettingsPerformanceReactionEffects', 'SettingsPerformanceStickerEffects', 'SettingsPerformanceAutoplayGif',
     'SettingsPerformanceAutoplayVideo',
   ]),
-  ...buildEntries(SettingsScreens.Performance, ['SettingsPerformanceThanos'], { requires: 'isSnapEffectSupported' }),
 
   ...buildEntries(SettingsScreens.Stickers, ['SuggestStickers', 'InstalledStickersDynamicPackOrder']),
   ...buildEntries(SettingsScreens.Stickers, ['ChooseStickerMyStickerSets'], { requires: 'areStickerSetsLoaded' }),
@@ -377,15 +369,17 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
     requires: 'arePasskeysAvailable', keywordsKey: 'SettingsKeywordsPasskeys',
   }),
 
-  ...PRIVACY_VISIBILITY_SCREENS.flatMap((screen) => (
-    buildEntries(screen, ['P2PEverybody', 'P2PContacts', 'P2PNobody'])
-  )),
+  ...PRIVACY_VISIBILITY_SCREENS.flatMap(([screen, titleKey]) => [
+    ...buildEntries(screen, [titleKey], { isSectionHeader: true }),
+    ...buildEntries(screen, ['P2PEverybody', 'P2PContacts', 'P2PNobody']),
+  ]),
   ...buildEntries(SettingsScreens.PrivacyLastSeen, ['HideReadTime'], { requires: 'canHideReadTime' }),
   ...buildEntries(SettingsScreens.PrivacyGifts, [
     'PrivacyDisplayGiftsButton', 'PrivacyAcceptedGiftTitle', 'PrivacyGiftLimitedEdition', 'PrivacyGiftUnlimited',
     'PrivacyGiftUnique', 'PrivacyGiftPremiumSubscription',
   ]),
   ...buildEntries(SettingsScreens.PrivacyPhoneCall, ['PrivacyP2P']),
+  ...buildEntries(SettingsScreens.PrivacyMessages, ['PrivacyMessagesTitle'], { isSectionHeader: true }),
   ...buildEntries(SettingsScreens.PrivacyMessages, [
     'P2PEverybody', 'PrivacyMessagesContactsAndPremium', 'PrivacyChargeForMessages',
   ]),

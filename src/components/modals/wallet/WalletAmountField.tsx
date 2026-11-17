@@ -8,9 +8,8 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import {
-  formatTonInFiat, formatTonShortFromNanos, getCurrencyExp, parseTonToNanos,
-} from '../../../util/formatCurrency';
+import { formatTonInFiat, getCurrencyExp, parseTonToNanos } from '../../../util/formatCurrency';
+import { formatTonNumber } from '../../../util/localization/format';
 import {
   convertFiatEntryToTon, convertTonToFiatEntry, DIGIT_REGEX, eraseAmountChar, getAmountGroupSeparator,
   getCurrencySymbol, POINT_KEYS, roundTonEntry, stripAmountGroupSeparators, TON_DECIMALS, typeAmountText,
@@ -19,9 +18,11 @@ import {
   ARROW_DOWN_FRAMES, ARROW_UP_FRAMES, FLIP_DURATION, FLIP_FRAMES_TO_FIAT, FLIP_FRAMES_TO_GEM, POP_DURATION, POP_FRAMES,
   REFUSAL_DURATION_MS, REFUSAL_FRAMES, REFUSAL_VIBRATION,
 } from './helpers/amountFrames';
+import { getDigitGlyphs, pushDigits } from './helpers/digits';
 import { SPIN_DURATION, splitNumberSegments } from './helpers/roll';
 import { AMOUNT_DIAMOND_SIZE, AMOUNT_DIAMOND_SPIN } from './helpers/sendFlight';
 import useAmountLaunch from './useAmountLaunch';
+import useDiamondLens from './useDiamondLens';
 import useDiamondThrow from './useDiamondThrow';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
@@ -75,6 +76,7 @@ const SUBMIT_AFTER_SWAP_DELAY = SPIN_DURATION + 80;
 // The salute spreads over the whole canvas, so its size sets how far the stars fly
 const GEM_CANVAS_SIZE = 220;
 const AMOUNT_BURST_SIZE = 0.25;
+const GEM_GROWTH = 2.75;
 const DIGIT_KICK = -5.5;
 const DIGIT_KICK_STEP = -0.25;
 const POINT_KICK = -3.5;
@@ -129,7 +131,33 @@ const WalletAmountField = ({
   const amountNanos = parseTonToNanos(amount);
 
   const { glowRef, ringRef, hitKey } = useAmountLaunch(diamondRef, isLaunching, isActive);
-  const gemThrow = useDiamondThrow(diamondRef);
+
+  const getLensText = useLastCallback(() => {
+    const line = lineRef.current!;
+
+    return [...getDigitGlyphs(line), line.querySelector<HTMLElement>(`.${styles.code}`)!];
+  });
+
+  const pushLineDigits = useLastCallback(() => {
+    pushDigits(lineRef.current!);
+  });
+
+  const holdDiamond = useDiamondLens(
+    diamondRef,
+    {
+      blockRef: amountBlockRef,
+      slotRef: amountSymbolRef,
+      gemFaceRef,
+      fitRef: lineRef,
+      size: AMOUNT_DIAMOND_SIZE,
+      growth: GEM_GROWTH,
+    },
+    // As long as the handle that holds the diamond is there, so a hold always gets its release
+    isGemReady && !isFiatEntry && !isSubmitted && !noAnimation,
+    getLensText,
+    pushLineDigits,
+  );
+  const gemThrow = useDiamondThrow(diamondRef, holdDiamond);
 
   useShrinkToFit(amountBlockRef, lineRef);
 
@@ -398,7 +426,7 @@ const WalletAmountField = ({
   });
 
   const fiatHint = formatTonInFiat(amountNanos, usdRate, currency, currencyRate, lang.code);
-  const pillText = isFiatEntry ? `${formatTonShortFromNanos(amountNanos)} ${lang('WalletCurrencyTicker')}`
+  const pillText = isFiatEntry ? `${formatTonNumber(lang, amountNanos, true)} ${lang('WalletCurrencyTicker')}`
     : fiatHint && `~${fiatHint}`;
   const pillSegments = useMemo(() => (pillText ? splitNumberSegments(pillText) : undefined), [pillText]);
   const currencyCode = isFiatEntry ? currency : lang('WalletCurrencyTicker');

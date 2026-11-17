@@ -24,6 +24,7 @@ import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import Icon from './icons/Icon';
+import SelectionOrderBadge from './SelectionOrderBadge';
 import StickerView from './StickerView';
 
 import './StickerButton.scss';
@@ -39,10 +40,12 @@ type OwnProps<T> = {
   isStatusPicker?: boolean;
   canViewSet?: boolean;
   isSelected?: boolean;
+  selectionOrder?: number;
   isCurrentUserPremium?: boolean;
   shouldIgnorePremium?: boolean;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
+  withInstantThumb?: boolean;
   forcePlayback?: boolean;
   isEffectEmoji?: boolean;
   noShowPremium?: boolean;
@@ -76,11 +79,13 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   isStatusPicker,
   canViewSet,
   isSelected,
+  selectionOrder,
   isCurrentUserPremium,
   shouldIgnorePremium,
   noShowPremium,
   sharedCanvasRef,
   withTranslucentThumb,
+  withInstantThumb,
   forcePlayback,
   isEffectEmoji,
   noIcons,
@@ -302,7 +307,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           customColor={customColor}
           forceAlways={forcePlayback}
         />
-      ) : (isIntersecting && sticker.thumbnail?.dataUri && (
+      ) : ((withInstantThumb || isIntersecting) && sticker.thumbnail?.dataUri && (
         <img
           src={sticker.thumbnail.dataUri}
           className="sticker-media"
@@ -322,6 +327,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           <Icon name="star" />
         </div>
       )}
+      {selectionOrder !== undefined && <SelectionOrderBadge order={selectionOrder} />}
       {shouldShowCloseButton && (
         <Button
           className="sticker-remove-button"

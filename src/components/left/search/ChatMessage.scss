@@ -19,21 +19,6 @@
 
     .subtitle {
       color: var(--color-text-secondary);
-
-      .matching-text-highlight {
-        display: inline-block;
-
-        padding: 0 0.125rem;
-        border-radius: 0.25rem;
-
-        color: var(--color-text);
-
-        background: #cae3f7;
-
-        .theme-dark & {
-          --color-text: #000;
-        }
-      }
     }
 
     .message {
@@ -41,6 +26,11 @@
       flex-grow: 1;
       color: var(--color-text-secondary);
       text-overflow: ellipsis;
+
+      &::highlight(text-search),
+      & ::highlight(text-search) {
+        color: var(--color-primary);
+      }
 
       .sender-name {
         color: var(--color-text);

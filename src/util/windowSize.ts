@@ -26,6 +26,22 @@ if (IS_IOS) {
   window.addEventListener('resize', handleResize);
 }
 
+// Measured outside render, so reading sizes of a PiP window does not force layout during mutations
+const pictureInPictureSizes = new WeakMap<Window, IDimensions>();
+
+window.documentPictureInPicture?.addEventListener('enter', (e) => {
+  const pictureInPictureWindow = (e as Event & { window: Window }).window;
+  const measure = () => {
+    pictureInPictureSizes.set(pictureInPictureWindow, {
+      width: pictureInPictureWindow.innerWidth,
+      height: pictureInPictureWindow.innerHeight,
+    });
+  };
+
+  measure();
+  pictureInPictureWindow.addEventListener('resize', throttle(measure, WINDOW_RESIZE_THROTTLE_MS, true));
+});
+
 export function updateSizes(): IDimensions {
   let height: number;
   if (IS_IOS) {
@@ -46,7 +62,7 @@ export function updateSizes(): IDimensions {
 }
 
 const windowSize = {
-  get: () => currentWindowSize,
+  get: (targetWindow?: Window) => (targetWindow && pictureInPictureSizes.get(targetWindow)) || currentWindowSize,
   getIsKeyboardVisible: () => initialHeight > currentWindowSize.height,
 };
 

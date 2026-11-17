@@ -1,6 +1,6 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 import {
-  memo, useCallback, useMemo, useRef,
+  memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -35,12 +35,14 @@ import {
 } from '../../types';
 
 import { DEBUG, TME_LINK_PREFIX } from '../../config';
-import { getPageBlocksAudios } from '../../global/helpers/buildPageAudioById';
+import { getPageBlocksAudios, getPageBlocksWithMedia } from '../../global/helpers/buildPageAudioById';
 import { getRichTextPlainText, hasRichText } from '../../global/helpers/richMessage';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import { IS_MAC_OS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
+import { isLocalMessageId } from '../../util/keys/messageKey';
 import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
+import { getRichQuoteText, getRichQuoteTexts, type RichQuoteRange } from '../../util/text/richQuote';
 import {
   EMPTY_RICH_MEDIA_CAPTION,
   getRichMediaRef,
@@ -69,6 +71,7 @@ import PlayableAudio from '../common/PlayableAudio';
 import Blockquote from '../common/quote/Blockquote';
 import Pullquote from '../common/quote/Pullquote';
 import SafeLink from '../common/SafeLink';
+import UnsupportedPlate from '../common/UnsupportedPlate';
 import { Breakout } from '../gili/layout/Surface';
 import Photo from '../middle/message/Photo';
 import Video from '../middle/message/Video';
@@ -88,12 +91,15 @@ const SHOULD_HIDE_SCROLLBARS = IS_MAC_OS || IS_TOUCH_ENV;
 
 type OwnProps = {
   blocks: ApiPageBlock[];
+  focusedQuoteRange?: RichQuoteRange;
+  noQuoting?: boolean;
   isRtl?: boolean;
   isOwn?: boolean;
   noAvatars?: boolean;
   canAutoLoadMedia?: boolean;
   isProtected?: boolean;
   noPlaylist?: boolean;
+  withMediaNavigation?: boolean;
   theme: ThemeKey;
   fontSizeAdjust?: number;
   pageUrl?: string;
@@ -129,12 +135,15 @@ const MAP_FALLBACK_HEIGHT = 360;
 
 const RichContent = ({
   blocks,
+  focusedQuoteRange,
+  noQuoting,
   isRtl,
   isOwn,
   noAvatars,
   canAutoLoadMedia,
   isProtected,
   noPlaylist,
+  withMediaNavigation,
   theme,
   fontSizeAdjust,
   pageUrl,
@@ -149,24 +158,44 @@ const RichContent = ({
   onTelegramChannelClick,
 }: OwnProps) => {
   const {
-    openMapModal, openMediaViewer, openUrl,
+    openMapModal, openMediaViewer, openUrl, searchChatMediaMessages,
   } = getActions();
 
   const lang = useLang();
+  const ref = useRef<HTMLDivElement>();
   const { shouldWarnAboutFiles } = useSelector(selectSharedSettings);
   const containerId = useUniqueId();
   const unsupportedText = lang('PageContentUnsupported');
   const embedTitle = lang('PageContentEmbed');
   const style = fontSizeAdjust !== undefined ? `--iv-font-size-scale: ${fontSizeAdjust}` : undefined;
   const isMessageContent = messageId !== undefined;
+  const quoteTexts = useMemo(
+    () => isMessageContent ? getRichQuoteTexts(blocks) : undefined, [blocks, isMessageContent],
+  );
+  const quoteIndexes = useMemo(() => quoteTexts
+    ? new Map(quoteTexts.map((text, index) => [text, index])) : undefined, [quoteTexts]);
 
-  const richMessageSource = useMemo<PlaybackSource | undefined>(() => (
-    chatId !== undefined && messageId !== undefined && !noPlaylist
-      ? {
-        type: 'richMessage', chatId, threadId: threadId ?? MAIN_THREAD_ID, messageId,
+  useLayoutEffect(() => {
+    if (!focusedQuoteRange) return;
+    ref.current?.querySelectorAll<HTMLElement>('[data-rich-quote-index]').forEach((element) => {
+      if (!isInQuoteRange(focusedQuoteRange, Number(element.dataset.richQuoteIndex))) return;
+      let details = element.closest('details') || undefined;
+      while (details) {
+        details.open = true;
+        details = details.parentElement?.closest('details') || undefined;
       }
-      : undefined
-  ), [chatId, messageId, threadId, noPlaylist]);
+    });
+  }, [blocks, focusedQuoteRange]);
+
+  // Tracks of a sent message play through the chat playlist, like regular audio messages
+  const audioSource = useMemo<PlaybackSource>(() => (
+    withMediaNavigation && !noPlaylist && chatId !== undefined && messageId !== undefined
+    && !isLocalMessageId(messageId)
+      ? {
+        type: 'chat', chatId, threadId: threadId ?? MAIN_THREAD_ID, mediaType: 'audio',
+      }
+      : SINGLE_SOURCE
+  ), [withMediaNavigation, chatId, messageId, threadId, noPlaylist]);
 
   const audioItemsById = useMemo(() => {
     const itemsById = new Map<string, PlaybackItemRef>();
@@ -221,6 +250,26 @@ const RichContent = ({
   });
 
   const handleOpenMedia = useLastCallback((mediaBlocks: PageMediaBlock[], sourceIds: string[], mediaIndex: number) => {
+    const block = mediaBlocks[mediaIndex];
+    const messageMediaIndex = withMediaNavigation ? getPageBlocksWithMedia(blocks).indexOf(block) : -1;
+    if (chatId && messageId && messageMediaIndex !== -1) {
+      searchChatMediaMessages({
+        chatId,
+        threadId,
+        currentMediaMessageId: messageId,
+        mediaType: block.type === 'video' && block.video.isGif ? 'gif' : 'media',
+      });
+      openMediaViewer({
+        chatId,
+        threadId,
+        messageId,
+        mediaIndex: messageMediaIndex,
+        origin: MediaViewerOrigin.Inline,
+        withDynamicLoading: true,
+      });
+      return;
+    }
+
     openMediaViewer({
       origin: messageId ? MediaViewerOrigin.RichPageBlock : MediaViewerOrigin.IVPageBlock,
       mediaIndex,
@@ -237,6 +286,8 @@ const RichContent = ({
   });
 
   const renderContext: RenderBlockContext = {
+    quoteIndexes,
+    focusedQuoteRange,
     richTextContext,
     unsupportedText,
     isOwn,
@@ -250,6 +301,10 @@ const RichContent = ({
     onTelegramChannelClick,
   };
   function renderTopLevelBlock(block: ApiPageBlock, index: number) {
+    if (block.type === 'unsupported') {
+      return renderUnsupportedPlate(true);
+    }
+
     const sourceKey = String(index);
     const content = renderBlock(block, sourceKey, true);
 
@@ -327,9 +382,10 @@ const RichContent = ({
       case 'preformatted':
         return (
           <CodeBlock
-            text={getRichTextPlainText(block.text)}
+            text={isMessageContent ? getRichQuoteText(block.text) : getRichTextPlainText(block.text)}
             language={block.language}
             noCopy={isProtected}
+            richQuoteIndex={quoteIndexes?.get(block.text)}
           />
         );
       case 'divider':
@@ -391,7 +447,7 @@ const RichContent = ({
         return renderVideoBlock(block, renderContext, sourceKey, shouldBreakoutMedia, handleOpenMedia);
       case 'math':
         return (
-          <MathBlock source={block.source} />
+          <MathBlock source={block.source} richQuoteIndex={quoteIndexes?.get(block)} />
         );
       case 'thinking':
         return renderTextBlock(block.text, styles.thinking, renderContext);
@@ -448,7 +504,7 @@ const RichContent = ({
               <PlayableAudio
                 audio={block.audio}
                 item={item}
-                source={richMessageSource || SINGLE_SOURCE}
+                source={audioSource}
                 variant="inline"
                 isOwn={isOwn}
                 canDownload={!isProtected}
@@ -459,22 +515,45 @@ const RichContent = ({
         );
       }
       case 'unsupported':
-        return renderUnsupportedBlock(unsupportedText, block.type);
+        return renderUnsupportedPlate();
     }
+  }
+
+  function renderUnsupportedPlate(isTopLevel?: boolean) {
+    return (
+      <div
+        className={styles.unsupportedBlock}
+        data-rich-copy-ignore
+        // The bubble canvas tears a message around its top-level plates
+        data-bubble-tear={(isTopLevel && isMessageContent) || undefined}
+      >
+        <UnsupportedPlate
+          title={lang('UnsupportedBlockTitle')}
+          text={lang('UnsupportedBlockMessage')}
+          className={isMessageContent ? undefined : styles.unsupportedPlateStatic}
+        />
+      </div>
+    );
   }
 
   return (
     <div
       id={containerId}
+      ref={ref}
       className={styles.richContent}
       style={style}
       dir={isRtl ? 'rtl' : 'auto'}
       data-rich-copy-root
+      data-rich-quote-root={(isMessageContent && !noQuoting) || undefined}
     >
       {blocks.map(renderTopLevelBlock)}
     </div>
   );
 };
+
+function isInQuoteRange(range?: RichQuoteRange, index?: number) {
+  return Boolean(range && index !== undefined && index >= range.first && index <= range.last);
+}
 
 function getLinkContext(chatId?: string, messageId?: number, threadId?: ThreadId): LinkContext | undefined {
   if (!chatId || messageId === undefined) {
@@ -490,6 +569,8 @@ function getLinkContext(chatId?: string, messageId?: number, threadId?: ThreadId
 }
 
 type RenderBlockContext = {
+  quoteIndexes?: Map<ApiRichText, number>;
+  focusedQuoteRange?: RichQuoteRange;
   richTextContext: RichTextContext;
   unsupportedText: string;
   isOwn?: boolean;
@@ -573,7 +654,7 @@ function TableBlock({
   );
 }
 
-function MathBlock({ source }: { source: string }) {
+function MathBlock({ source, richQuoteIndex }: { source: string; richQuoteIndex?: number }) {
   const ref = useRef<HTMLDivElement>();
 
   useScrollableHint(ref);
@@ -582,6 +663,7 @@ function MathBlock({ source }: { source: string }) {
     <div
       ref={ref}
       data-rich-block-type="math"
+      data-rich-quote-index={richQuoteIndex}
       data-source={source}
       className={buildClassName(
         styles.block, styles.latexBlockWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar',
@@ -686,7 +768,10 @@ function renderSlideshowBlock(
         observeIntersectionForPlaying={context.observeIntersectionForPlaying}
         className={shouldBreakoutMedia ? styles.noBorderRadius : undefined}
         onMediaClick={(index) => onOpenMedia(items, sourceIds, index)}
-        renderCaption={(caption) => renderCaption(caption, context)}
+        // Print-only copies stay out of quote lookups, which take the first element with a matching index
+        renderCaption={(caption, isPrintOnly) => renderCaption(
+          caption, isPrintOnly ? { ...context, quoteIndexes: undefined } : context,
+        )}
       />
       {renderCaption(block.caption, context, true)}
     </figure>
@@ -799,7 +884,11 @@ function renderTextBlock(
   }
 
   return (
-    <p className={buildClassName(styles.block, className)} data-rich-block-type={blockType}>
+    <p
+      className={buildClassName(styles.block, className)}
+      data-rich-block-type={blockType}
+      data-rich-quote-index={context.quoteIndexes?.get(text)}
+    >
       <RichText text={text} {...context.richTextContext} />
     </p>
   );
@@ -810,10 +899,21 @@ function renderQuoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Blockquote className={styles.block} contentClassName={styles.blockquote} canBeCollapsible={block.canCollapse}>
+    <Blockquote
+      className={styles.block}
+      contentClassName={styles.blockquote}
+      canBeCollapsible={block.canCollapse}
+      shouldExpand={isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.text))
+        || isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.caption))}
+      richQuoteIndex={context.quoteIndexes?.get(block.text)}
+    >
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
+        <footer
+          className={styles.quoteCaption}
+          data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
+        >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -826,12 +926,16 @@ function renderPullquoteBlock(
   context: RenderBlockContext,
 ) {
   return (
-    <Pullquote className={buildClassName(styles.block, styles.pullquote)}>
+    <Pullquote
+      className={buildClassName(styles.block, styles.pullquote)}
+      richQuoteIndex={context.quoteIndexes?.get(block.text)}
+    >
       <RichText text={block.text} {...context.richTextContext} />
       {hasRichText(block.caption) && (
         <footer
           className={buildClassName(styles.quoteCaption, styles.pullquoteCaption)}
           data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
         >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
@@ -847,10 +951,14 @@ function renderBlockquoteBlocks(
   renderBlock: RenderBlockFn,
 ) {
   return (
-    <Blockquote className={styles.block} contentClassName={styles.blockquote}>
+    <Blockquote className={styles.block} contentClassName={buildClassName(styles.blockquote, styles.blockquoteBlocks)}>
       {block.blocks.map((nestedBlock, index) => renderBlock(nestedBlock, `${sourceKey}-quote-${index}`))}
       {hasRichText(block.caption) && (
-        <footer className={styles.quoteCaption} data-rich-block-type="quoteCaption">
+        <footer
+          className={styles.quoteCaption}
+          data-rich-block-type="quoteCaption"
+          data-rich-quote-index={context.quoteIndexes?.get(block.caption)}
+        >
           <RichText text={block.caption} {...context.richTextContext} />
         </footer>
       )}
@@ -866,7 +974,7 @@ function renderDetailsBlock(
 ) {
   return (
     <details className={styles.details} open={block.isOpen}>
-      <summary className={styles.detailsSummary}>
+      <summary className={styles.detailsSummary} data-rich-quote-index={context.quoteIndexes?.get(block.title)}>
         <RichText text={block.title} {...context.richTextContext} />
       </summary>
       <div className={styles.detailsContent} data-rich-block-type="detailsContent">
@@ -931,6 +1039,7 @@ function renderListItem(
   return (
     <li
       className={styles.listItem}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
     >
@@ -950,6 +1059,7 @@ function renderNativeOrderedListItem(
   return (
     <li
       className={styles.listItem}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
       value={item.value}
@@ -969,6 +1079,7 @@ function renderOrderedListItem(
   return (
     <li
       className={buildClassName(styles.listItem, styles.orderedListItem)}
+      data-rich-quote-index={item.type === 'text' ? context.quoteIndexes?.get(item.text) : undefined}
       data-checkbox={item.isCheckbox ? 'true' : undefined}
       data-checked={item.isChecked ? 'true' : undefined}
     >
@@ -1049,6 +1160,7 @@ function renderTableCell(
   return (
     <CellTag
       className={className}
+      data-rich-quote-index={cell.text && context.quoteIndexes?.get(cell.text)}
       colSpan={cell.colspan}
       rowSpan={cell.rowspan}
     >
@@ -1068,11 +1180,16 @@ function renderCaption(caption: ApiPageCaption, context: RenderBlockContext, isS
     <figcaption
       className={styles.caption}
       data-rich-block-type="mediaCaption"
+      data-rich-quote-index={context.quoteIndexes?.get(caption.text)}
       data-rich-media-block-caption={isSharedCaption}
     >
       {hasText && <RichText text={caption.text} {...context.richTextContext} />}
       {hasCredit && (
-        <span className={styles.credit} data-rich-block-type="mediaCredit">
+        <span
+          className={styles.credit}
+          data-rich-block-type="mediaCredit"
+          data-rich-quote-index={context.quoteIndexes?.get(caption.credit)}
+        >
           <RichText text={caption.credit} {...context.richTextContext} />
         </span>
       )}

@@ -1,4 +1,5 @@
 import type { ApiError, ApiPrivacySettings, ApiUsername } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 import type { ActionReturnType } from '../../types';
 import {
   LeftColumnContent,
@@ -18,21 +19,26 @@ import { signalUnknownPasskey, toCredentialCreationOptions } from '../../../util
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { changeLanguage, getTranslationFn } from '../../../util/localization';
-import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
+import { requestPermission, subscribe } from '../../../util/notifications';
+import {
+  reconcilePushNotifications, suspendPushForPasscode, unregisterPushAccount,
+} from '../../../util/pushNotifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
+import { runSettingsAction } from '../../../util/settingsActions';
 import { resolveSettingsLink } from '../../../util/settingsLinks';
+import { getChatThemeEntry, RESET_WALLPAPER_SETTINGS } from '../../../util/wallpaper';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, getPromiseActions, setGlobal } from '../../index';
 import {
   addBlockedUser, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replacePersonalChannelIds, replaceSettings, updateChat,
-  updateNotifyDefaults, updateSharedSettings, updateUser, updateUserFullInfo,
+  updateNotifyDefaults, updateSharedSettings, updateThemeSettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat, selectIsCurrentUserFrozen,
+  selectChat, selectCurrentMessageList, selectIsCurrentUserFrozen,
   selectLanguageCode,
   selectTabState, selectUser,
 } from '../../selectors';
@@ -60,7 +66,7 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   if (photo) {
-    await callApi('uploadProfilePhoto', photo);
+    await callApi('uploadProfilePhoto', { photo });
   }
 
   if (firstName || lastName || about) {
@@ -231,6 +237,49 @@ addActionHandler('loadWallpapers', async (global): Promise<void> => {
     },
   };
   setGlobal(global);
+});
+
+addActionHandler('loadChatThemes', async (global): Promise<void> => {
+  const result = await callApi('fetchChatThemes');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      chatThemes: result.chatThemes,
+    },
+  };
+  CHAT_THEME_KEYS.forEach((theme) => {
+    const emoticon = selectSharedSettings(global).themes[theme]?.chatThemeEmoticon;
+    const chatTheme = result.chatThemes.find((entry) => entry.emoticon === emoticon);
+    global = updateThemeSettings(global, theme, {
+      chatThemeEmoticon: chatTheme?.emoticon,
+      serverThemeSettings: chatTheme && getChatThemeEntry(chatTheme.settings, theme === 'dark'),
+    });
+  });
+  setGlobal(global);
+});
+
+const CHAT_THEME_KEYS: ThemeKey[] = ['light', 'dark'];
+
+addActionHandler('applyChatTheme', (global, actions, { emoticon, tabId = getCurrentTabId() }): ActionReturnType => {
+  const chatTheme = global.settings.chatThemes?.find((theme) => theme.emoticon === emoticon);
+  if (emoticon && !chatTheme) return global;
+
+  CHAT_THEME_KEYS.forEach((theme) => {
+    global = updateThemeSettings(global, theme, {
+      ...RESET_WALLPAPER_SETTINGS,
+      chatThemeEmoticon: emoticon,
+      serverThemeSettings: chatTheme && getChatThemeEntry(chatTheme.settings, theme === 'dark'),
+    });
+  });
+  return updateTabState(global, {
+    globalThemePreviewChatId: selectCurrentMessageList(global, tabId)?.chatId,
+  }, tabId);
 });
 
 addActionHandler('uploadWallpaper', async (global, actions, payload): Promise<void> => {
@@ -405,7 +454,13 @@ addActionHandler('updateWebNotificationSettings', async (global, actions, payloa
     await subscribe();
   }
   if (oldSettings.hasPushNotifications && !hasPushNotifications) {
-    await unsubscribe();
+    await unregisterPushAccount();
+  }
+  if (oldSettings.shouldShowPushPreviewsWhenLocked !== global.settings.byKey.shouldShowPushPreviewsWhenLocked) {
+    if (global.passcode.hasPasscode && !global.settings.byKey.shouldShowPushPreviewsWhenLocked) {
+      await suspendPushForPasscode(true);
+    }
+    await reconcilePushNotifications();
   }
   if (!oldSettings.hasWebNotifications && hasWebNotifications) {
     const isGranted = await requestPermission();
@@ -857,6 +912,21 @@ addActionHandler('loadTimezones', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadShareThemeBackdrops', async (global): Promise<void> => {
+  const result = await callApi('fetchShareThemeBackdrops', global.shareThemeBackdrops?.hash);
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    shareThemeBackdrops: {
+      list: result.backdrops,
+      hash: result.hash,
+    },
+  };
+  setGlobal(global);
+});
+
 addActionHandler('loadGlobalPrivacySettings', async (global): Promise<void> => {
   const globalSettings = await callApi('fetchGlobalPrivacySettings');
   if (!globalSettings) {
@@ -1140,11 +1210,11 @@ addActionHandler('deletePasskey', async (global, actions, payload): Promise<void
 
 addActionHandler('loadNestedSettingsData', async (global): Promise<void> => {
   const {
-    loadPasswordInfo, loadBlockedUsers, loadWebAuthorizations, loadPasskeys, loadDefaultHistoryTtl,
+    loadPasswordInfo, loadAuthorizations, loadBlockedUsers, loadWebAuthorizations, loadPasskeys, loadDefaultHistoryTtl,
     loadGlobalPrivacySettings,
   } = getPromiseActions();
 
-  const requests = [loadPasswordInfo()];
+  const requests = [loadPasswordInfo(), loadAuthorizations()];
   if (!selectIsCurrentUserFrozen(global)) {
     requests.push(
       loadBlockedUsers(), loadWebAuthorizations(), loadPasskeys(), loadDefaultHistoryTtl(),
@@ -1159,9 +1229,14 @@ addActionHandler('openSettingsLink', async (global, actions, payload): Promise<v
   const { path, tabId = getCurrentTabId() } = payload;
 
   const target = resolveSettingsLink(global, path);
+  if (target?.action) {
+    runSettingsAction(target.action, tabId);
+    return;
+  }
+
   const openedScreen = target ? target.screen : selectTabState(global, tabId).leftColumn.settingsScreen;
   if (target) {
-    actions.openSettingsScreen({ ...target, tabId });
+    actions.openSettingsScreen({ screen: target.screen, highlight: target.highlight, tabId });
   } else {
     actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings, tabId });
   }
@@ -1173,7 +1248,12 @@ addActionHandler('openSettingsLink', async (global, actions, payload): Promise<v
   if (contentKey !== LeftColumnContent.Settings || settingsScreen !== openedScreen) return;
 
   const loadedTarget = resolveSettingsLink(global, path);
+  if (loadedTarget?.action) {
+    runSettingsAction(loadedTarget.action, tabId);
+    return;
+  }
+
   if (!loadedTarget || loadedTarget.screen === openedScreen) return;
 
-  actions.openSettingsScreen({ ...loadedTarget, tabId });
+  actions.openSettingsScreen({ screen: loadedTarget.screen, highlight: loadedTarget.highlight, tabId });
 });

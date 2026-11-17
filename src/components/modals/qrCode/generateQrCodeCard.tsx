@@ -1,11 +1,12 @@
-import type { QrGradientStops } from '../../../util/qrCode/buildStyledQrCode';
-import type { WallpaperRenderModel } from '../../../util/wallpaper';
+import type { LayerItem, LayerRect } from './helpers/floatingLayer';
 
+import cycleRestrict from '../../../util/cycleRestrict';
 import jsxToHtml from '../../../util/element/jsxToHtml';
-import { renderStaticGradient } from '../../../util/gradientBackground';
+import { MAX_WORKERS, requestMediaWorker } from '../../../util/launchMediaWorkers';
 import { createStyledQrCode } from '../../../util/qrCode/buildStyledQrCode';
-
-import defaultPatternUrl from '../../../assets/pattern.svg';
+import {
+  enumerateEmojiItems, enumerateGiftModels, enumerateGiftSymbols, getIsCoveredByCard,
+} from './helpers/floatingLayer';
 
 export const QR_CODE_CARD_MIME_TYPE = 'image/png';
 
@@ -14,28 +15,34 @@ const QR_LOGO_SIZE = 160;
 const EXPORT_SCALE = 3;
 const EXPORT_WIDTH = 390;
 const EXPORT_HEIGHT = 844;
-const EXPORT_CARD_WIDTH = 300;
-const EXPORT_CARD_HEIGHT = 330;
+const EXPORT_CARD_PADDING = 20;
+const EXPORT_QR_SIZE = 208;
+const EXPORT_USERNAME_GAP = 8;
+const EXPORT_USERNAME_HEIGHT = 30;
+const EXPORT_CARD_WIDTH = EXPORT_QR_SIZE + 2 * EXPORT_CARD_PADDING;
+const EXPORT_CARD_BOTTOM_PADDING = 16;
+const EXPORT_CARD_HEIGHT = EXPORT_CARD_PADDING + EXPORT_QR_SIZE + EXPORT_USERNAME_GAP + EXPORT_USERNAME_HEIGHT
+  + EXPORT_CARD_BOTTOM_PADDING;
 const EXPORT_CARD_RADIUS = 42;
-const EXPORT_AVATAR_SIZE = 100;
-const EXPORT_AVATAR_RADIUS = EXPORT_AVATAR_SIZE / 2;
-const EXPORT_AVATAR_OVERHANG = Math.floor(EXPORT_AVATAR_SIZE * 0.7);
 const EXPORT_CARD_X = (EXPORT_WIDTH - EXPORT_CARD_WIDTH) / 2;
 const EXPORT_CARD_Y = Math.floor((EXPORT_HEIGHT - EXPORT_CARD_HEIGHT) / 2);
-const EXPORT_AVATAR_X = EXPORT_WIDTH / 2;
-const EXPORT_AVATAR_Y = EXPORT_CARD_Y - EXPORT_AVATAR_OVERHANG + EXPORT_AVATAR_RADIUS;
-const EXPORT_QR_SIZE = 220;
 const EXPORT_QR_X = (EXPORT_WIDTH - EXPORT_QR_SIZE) / 2;
-const EXPORT_QR_Y = EXPORT_CARD_Y + 50;
-const EXPORT_USERNAME_Y = EXPORT_QR_Y + EXPORT_QR_SIZE + 20;
-const AVATAR_RING_WIDTH = 4;
-const AVATAR_FONT_SIZE_RATIO_FALLBACK = 2;
-const PATTERN_SIZE = 430;
+const EXPORT_QR_Y = EXPORT_CARD_Y + EXPORT_CARD_PADDING;
+const EXPORT_USERNAME_Y = EXPORT_QR_Y + EXPORT_QR_SIZE + EXPORT_USERNAME_GAP;
 const USERNAME_MIN_FONT_SIZE = 12;
-const FALLBACK_ACCENT_COLOR = '#3390ec';
 const WHITE_COLOR = '#ffffff';
-const WALLPAPER_IMAGE_SCALE = 1.1;
-const WALLPAPER_BLUR_PX = 12;
+const GRADIENT_RADIUS_TO_CARD = 1.6;
+const SYMBOL_OPACITY = 0.37;
+const EXPORT_AREA: LayerRect = {
+  left: 0, top: 0, width: EXPORT_WIDTH, height: EXPORT_HEIGHT,
+};
+const EXPORT_CARD: LayerRect = {
+  left: EXPORT_CARD_X, top: EXPORT_CARD_Y, width: EXPORT_CARD_WIDTH, height: EXPORT_CARD_HEIGHT,
+};
+const EXPORT_ORIGIN = {
+  x: EXPORT_CARD_X + EXPORT_CARD_WIDTH / 2,
+  y: EXPORT_CARD_Y + EXPORT_CARD_HEIGHT / 2,
+};
 const QR_LOGO_PATH = [
   'M80,13c37,0,67,30,67,67s-30,67-67,67s-67-30-67-67S43,13,80,13z',
   'M108.7,51.9h-0.1c-2.5,0-6.4,1.4-24.3,8.8L81.2,62C74,65,61,70.6,42,78.9',
@@ -47,21 +54,34 @@ const QR_LOGO_PATH = [
   'c0.1-1,0-2.2-0.1-2.7l0-0.2c-0.1-0.5-0.3-1.2-0.9-1.6C110.5,52.1,109.3,51.9,108.7,51.9z',
 ].join(' ');
 
+let lastEncodeWorkerIndex = -1;
+
 export type QrPreviewSnapshot = {
-  wallpaper: QrWallpaperSnapshot;
   username?: UsernameSnapshot;
-  avatar?: AvatarSnapshot;
+  layer: QrLayerSnapshot;
 };
 
-export type QrWallpaperSnapshot = {
-  model: WallpaperRenderModel;
-  fallbackColor: string;
-  resourceUrl?: string;
+export type QrLayerSnapshot = {
+  emojiSources: (QrEmojiSource | undefined)[];
+  modelSource?: CanvasImageSource;
+  symbol?: {
+    url: string;
+    color: string;
+  };
+};
+
+export type QrMediaSource = HTMLCanvasElement | HTMLImageElement | HTMLVideoElement;
+
+export type QrEmojiSource = {
+  source: QrMediaSource;
+  // Text-color emoji are tinted by a CSS filter, which canvas drawing skips
+  tintColor?: string;
 };
 
 type QrCodeCardParams = {
   link: string;
-  gradient: QrGradientStops;
+  inkColor: string;
+  gradientStops: string[];
   snapshot: QrPreviewSnapshot;
 };
 
@@ -71,8 +91,6 @@ type UsernameSnapshot = {
 };
 
 type UsernameStyleSnapshot = {
-  backgroundImage: string;
-  color: string;
   fontFamily: string;
   fontSize: string;
   fontWeight: string;
@@ -80,32 +98,19 @@ type UsernameStyleSnapshot = {
   lineHeight: string;
 };
 
-type AvatarSnapshot = {
-  backgroundColor: string;
-  backgroundImage: string;
-  color: string;
-  fontFamily: string;
-  fontSize: string;
-  fontWeight: string;
-  size: number;
-  imageSrc?: string;
-  text?: string;
-};
-
 export function buildQrPreviewSnapshot(
-  wallpaper: QrWallpaperSnapshot, avatar?: HTMLElement, username?: HTMLElement,
+  layer: QrLayerSnapshot, username?: HTMLElement,
 ): QrPreviewSnapshot {
   return {
-    wallpaper,
     username: getUsernameSnapshot(username),
-    avatar: getAvatarSnapshot(avatar),
+    layer,
   };
 }
 
 export async function generateQrCodeCard({
-  snapshot, link, gradient,
+  snapshot, link, inkColor, gradientStops,
 }: QrCodeCardParams) {
-  const blob = await renderQrCodeCard(snapshot, link, gradient);
+  const blob = await renderQrCodeCard(snapshot, link, inkColor, gradientStops);
   if (!blob) {
     throw new Error('QR_PREVIEW_RENDER_FAILED');
   }
@@ -113,13 +118,8 @@ export async function generateQrCodeCard({
   return blob;
 }
 
-export function logQrRenderError(error: unknown) {
-  // eslint-disable-next-line no-console
-  console.error('[QrCodeModal] export render failed', formatQrRenderError(error));
-}
-
 async function renderQrCodeCard(
-  snapshot: QrPreviewSnapshot, url: string, gradient: QrGradientStops,
+  snapshot: QrPreviewSnapshot, url: string, inkColor: string, gradientStops: string[],
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -131,14 +131,12 @@ async function renderQrCodeCard(
   canvas.height = EXPORT_HEIGHT * EXPORT_SCALE;
   ctx.setTransform(EXPORT_SCALE, 0, 0, EXPORT_SCALE, 0, 0);
 
-  await drawWallpaper(ctx, snapshot.wallpaper, EXPORT_WIDTH, EXPORT_HEIGHT);
-  drawCardLayout(ctx, snapshot.username);
-  await drawAvatar(ctx, snapshot.avatar);
-  await drawQr(ctx, url, gradient);
+  drawThemeBackground(ctx, gradientStops);
+  await drawLayer(ctx, snapshot.layer);
+  drawCardLayout(ctx, snapshot.username, inkColor);
+  await drawQr(ctx, url, inkColor);
 
-  const blob = await canvasToBlob(canvas);
-
-  return blob;
+  return encodeCanvas(canvas);
 }
 
 function getUsernameSnapshot(username?: HTMLElement): UsernameSnapshot | undefined {
@@ -149,8 +147,6 @@ function getUsernameSnapshot(username?: HTMLElement): UsernameSnapshot | undefin
   return {
     text,
     style: {
-      backgroundImage: style.backgroundImage,
-      color: style.color,
       fontFamily: style.fontFamily,
       fontSize: style.fontSize,
       fontWeight: style.fontWeight,
@@ -160,191 +156,91 @@ function getUsernameSnapshot(username?: HTMLElement): UsernameSnapshot | undefin
   };
 }
 
-function getAvatarSnapshot(avatar?: HTMLElement): AvatarSnapshot | undefined {
-  if (!avatar) return undefined;
+function drawThemeBackground(ctx: CanvasRenderingContext2D, gradientStops: string[]) {
+  const gradient = ctx.createRadialGradient(
+    EXPORT_ORIGIN.x, EXPORT_ORIGIN.y, 0,
+    EXPORT_ORIGIN.x, EXPORT_ORIGIN.y, EXPORT_CARD_WIDTH * GRADIENT_RADIUS_TO_CARD,
+  );
+  gradientStops.forEach((color, i) => {
+    gradient.addColorStop(i / (gradientStops.length - 1), color);
+  });
 
-  const imageEl = avatar.querySelector<HTMLImageElement>('img');
-  const inner = avatar.firstElementChild as HTMLElement | undefined;
-  const backgroundStyle = inner ? getComputedStyle(inner) : getComputedStyle(avatar);
-  const textStyle = getComputedStyle(avatar);
-  const text = avatar.textContent?.trim();
-
-  return {
-    backgroundColor: backgroundStyle.backgroundColor,
-    backgroundImage: backgroundStyle.backgroundImage,
-    color: textStyle.color,
-    fontFamily: textStyle.fontFamily,
-    fontSize: textStyle.fontSize,
-    fontWeight: textStyle.fontWeight,
-    size: avatar.offsetWidth,
-    imageSrc: imageEl?.src,
-    text,
-  };
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
 }
 
-async function drawWallpaper(
-  ctx: CanvasRenderingContext2D,
-  snapshot: QrWallpaperSnapshot,
-  width: number,
-  height: number,
-) {
-  const { model, resourceUrl, fallbackColor } = snapshot;
-  ctx.fillStyle = model.baseColor || fallbackColor;
-  ctx.fillRect(0, 0, width, height);
+async function drawLayer(ctx: CanvasRenderingContext2D, layer: QrLayerSnapshot) {
+  const { emojiSources, modelSource, symbol } = layer;
 
-  if (model.isImage && resourceUrl) {
-    await drawBackgroundImage(ctx, resourceUrl, model.isBlurred, width, height);
-  }
-
-  const gradientCanvas = !model.isImage && model.colors.length >= 2
-    ? createGradientCanvas(model)
-    : undefined;
-  const patternUrl = model.isDefault ? defaultPatternUrl : resourceUrl;
-  const patternOpacity = Math.abs(model.patternIntensity || 0) / 100;
-
-  if (gradientCanvas && !model.isMaskedPattern) {
-    ctx.drawImage(gradientCanvas, 0, 0, width, height);
-  }
-
-  if (model.isPattern && patternUrl) {
-    if (model.isMaskedPattern && gradientCanvas) {
-      await drawMaskedPattern(ctx, patternUrl, gradientCanvas, patternOpacity, width, height);
-    } else {
-      await drawOverlayPattern(ctx, patternUrl, patternOpacity, width, height);
+  if (symbol) {
+    const symbolSource = await loadTintedImage(symbol.url, symbol.color);
+    if (symbolSource) {
+      ctx.save();
+      ctx.globalAlpha = SYMBOL_OPACITY;
+      drawLayerItems(ctx, enumerateGiftSymbols(EXPORT_AREA, EXPORT_ORIGIN), () => symbolSource);
+      ctx.restore();
     }
   }
+
+  if (modelSource) {
+    drawLayerItems(ctx, enumerateGiftModels(EXPORT_AREA, EXPORT_ORIGIN), () => modelSource);
+  }
+
+  if (emojiSources.length) {
+    const sources = emojiSources.map((emoji) => (
+      emoji?.tintColor ? createTintedCanvas(emoji.source, emoji.tintColor) : emoji?.source
+    ));
+    const items = enumerateEmojiItems(EXPORT_AREA, EXPORT_ORIGIN, emojiSources.length, 0);
+    drawLayerItems(ctx, items, (item) => sources[item.pick]);
+  }
 }
 
-async function drawBackgroundImage(
+function drawLayerItems(
   ctx: CanvasRenderingContext2D,
-  imageUrl: string,
-  isBlurred: boolean,
-  width: number,
-  height: number,
+  items: LayerItem[],
+  getSource: (item: LayerItem) => CanvasImageSource | undefined,
 ) {
-  const image = await loadImage(imageUrl).catch(() => undefined);
-  if (!image) return;
+  items.forEach((item) => {
+    const source = getSource(item);
+    if (!source || getIsCoveredByCard(EXPORT_CARD, item.x, item.y, item.size)) return;
 
-  ctx.save();
-  ctx.translate(width / 2, height / 2);
-  ctx.scale(WALLPAPER_IMAGE_SCALE, WALLPAPER_IMAGE_SCALE);
-  ctx.translate(-width / 2, -height / 2);
-  if (isBlurred) ctx.filter = `blur(${WALLPAPER_BLUR_PX}px)`;
-  drawImageCover(ctx, image, 0, 0, width, height);
-  ctx.restore();
+    ctx.save();
+    ctx.translate(item.x, item.y);
+    ctx.rotate((item.rotation * Math.PI) / 180);
+    ctx.drawImage(source, -item.size / 2, -item.size / 2, item.size, item.size);
+    ctx.restore();
+  });
 }
 
-function createGradientCanvas(model: WallpaperRenderModel) {
+async function loadTintedImage(url: string, color: string) {
+  const image = await loadImage(url).catch(() => undefined);
+  return image && createTintedCanvas(image, color);
+}
+
+function createTintedCanvas(source: QrMediaSource, color: string) {
+  const { width, height } = getMediaSize(source);
   const canvas = document.createElement('canvas');
-  renderStaticGradient(canvas, model.colors, model.backgroundRotation);
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(source, 0, 0, width, height);
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, width, height);
+
   return canvas;
 }
 
-async function drawMaskedPattern(
-  ctx: CanvasRenderingContext2D,
-  patternUrl: string,
-  gradientCanvas: HTMLCanvasElement,
-  opacity: number,
-  width: number,
-  height: number,
-) {
-  const maskImage = await loadImage(patternUrl).catch(() => undefined);
-  if (!maskImage) return;
-  const patternCanvas = createMaskedPatternCanvas(maskImage, gradientCanvas, width, height);
-  if (!patternCanvas) return;
-
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.drawImage(patternCanvas, 0, 0, width, height);
-  ctx.restore();
+function getMediaSize(source: QrMediaSource) {
+  if (source instanceof HTMLImageElement) return { width: source.naturalWidth, height: source.naturalHeight };
+  if (source instanceof HTMLVideoElement) return { width: source.videoWidth, height: source.videoHeight };
+  return { width: source.width, height: source.height };
 }
 
-async function drawOverlayPattern(
-  ctx: CanvasRenderingContext2D,
-  patternUrl: string,
-  opacity: number,
-  width: number,
-  height: number,
-) {
-  const image = await loadImage(patternUrl).catch(() => undefined);
-  if (!image) return;
-
-  const patternCanvas = createPatternCanvas(image, width, height);
-  if (!patternCanvas) return;
-
-  ctx.save();
-  ctx.globalAlpha = opacity;
-  ctx.globalCompositeOperation = 'soft-light';
-  ctx.drawImage(patternCanvas, 0, 0, width, height);
-  ctx.restore();
-}
-
-function createPatternCanvas(image: HTMLImageElement, width: number, height: number) {
-  const patternCanvas = document.createElement('canvas');
-  const patternCtx = patternCanvas.getContext('2d');
-  if (!patternCtx) return undefined;
-
-  const bitmapWidth = width * EXPORT_SCALE;
-  const bitmapHeight = height * EXPORT_SCALE;
-  patternCanvas.width = bitmapWidth;
-  patternCanvas.height = bitmapHeight;
-
-  if (!fillScaledPattern(patternCtx, image, bitmapWidth, bitmapHeight)) return undefined;
-
-  return patternCanvas;
-}
-
-function createMaskedPatternCanvas(
-  image: HTMLImageElement,
-  gradientImage: CanvasImageSource,
-  width: number,
-  height: number,
-) {
-  const patternCanvas = document.createElement('canvas');
-  const patternCtx = patternCanvas.getContext('2d');
-  if (!patternCtx) return undefined;
-
-  const bitmapWidth = width * EXPORT_SCALE;
-  const bitmapHeight = height * EXPORT_SCALE;
-  patternCanvas.width = bitmapWidth;
-  patternCanvas.height = bitmapHeight;
-
-  patternCtx.drawImage(gradientImage, 0, 0, bitmapWidth, bitmapHeight);
-
-  patternCtx.globalCompositeOperation = 'destination-in';
-  if (!fillScaledPattern(patternCtx, image, bitmapWidth, bitmapHeight)) return undefined;
-
-  return patternCanvas;
-}
-
-function fillScaledPattern(ctx: CanvasRenderingContext2D, image: HTMLImageElement, width: number, height: number) {
-  const pattern = createScaledPattern(ctx, image, PATTERN_SIZE * EXPORT_SCALE);
-  if (!pattern) return false;
-
-  ctx.fillStyle = pattern;
-  ctx.fillRect(0, 0, width, height);
-  return true;
-}
-
-function createScaledPattern(ctx: CanvasRenderingContext2D, image: HTMLImageElement, patternSize = PATTERN_SIZE) {
-  const sourceWidth = image.naturalWidth || image.width;
-  const sourceHeight = image.naturalHeight || image.height;
-  const patternHeight = sourceWidth && sourceHeight
-    ? Math.max(1, Math.round(patternSize * (sourceHeight / sourceWidth)))
-    : patternSize;
-  const patternCanvas = document.createElement('canvas');
-  patternCanvas.width = patternSize;
-  patternCanvas.height = patternHeight;
-
-  const patternCtx = patternCanvas.getContext('2d')!;
-  patternCtx.drawImage(image, 0, 0, patternSize, patternHeight);
-
-  return ctx.createPattern(patternCanvas, 'repeat');
-}
-
-function drawCardLayout(ctx: CanvasRenderingContext2D, username: UsernameSnapshot | undefined) {
+function drawCardLayout(ctx: CanvasRenderingContext2D, username: UsernameSnapshot | undefined, inkColor: string) {
   drawCard(ctx);
-  drawUsername(ctx, username);
+  drawUsername(ctx, username, inkColor);
 }
 
 function drawCard(ctx: CanvasRenderingContext2D) {
@@ -355,7 +251,7 @@ function drawCard(ctx: CanvasRenderingContext2D) {
   ctx.restore();
 }
 
-function drawUsername(ctx: CanvasRenderingContext2D, username: UsernameSnapshot | undefined) {
+function drawUsername(ctx: CanvasRenderingContext2D, username: UsernameSnapshot | undefined, inkColor: string) {
   if (!username) return;
 
   const { text, style } = username;
@@ -363,123 +259,33 @@ function drawUsername(ctx: CanvasRenderingContext2D, username: UsernameSnapshot 
   const maxWidth = EXPORT_CARD_WIDTH - Math.floor(qrInsetX * 1.2);
   const fontSize = getFittedFontSize(ctx, text, style, maxWidth);
   const fittedText = getFittedText(ctx, text, maxWidth);
-  const textWidth = Math.min(ctx.measureText(fittedText).width, maxWidth);
 
   ctx.save();
   ctx.font = `${style.fontWeight} ${fontSize}px ${style.fontFamily}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillStyle = getUsernameFillStyle(
-    ctx,
-    style,
-    EXPORT_WIDTH / 2 - textWidth / 2,
-    EXPORT_WIDTH / 2 + textWidth / 2,
-    fontSize,
-  );
+  ctx.fillStyle = inkColor;
   ctx.fillText(fittedText, EXPORT_WIDTH / 2, EXPORT_USERNAME_Y);
   ctx.restore();
-}
-
-function getUsernameFillStyle(
-  ctx: CanvasRenderingContext2D,
-  style: UsernameStyleSnapshot,
-  x1: number,
-  x2: number,
-  fontSize: number,
-) {
-  const colors = getCssColors(style.backgroundImage);
-  const firstColor = colors[0];
-  const lastColor = colors[colors.length - 1];
-  if (firstColor && lastColor) {
-    const gradient = ctx.createLinearGradient(
-      x1,
-      EXPORT_USERNAME_Y,
-      x2,
-      EXPORT_USERNAME_Y + fontSize,
-    );
-    gradient.addColorStop(0, firstColor);
-    gradient.addColorStop(1, lastColor);
-    return gradient;
-  }
-
-  return style.color || FALLBACK_ACCENT_COLOR;
-}
-
-async function drawAvatar(ctx: CanvasRenderingContext2D, avatar: AvatarSnapshot | undefined) {
-  if (!avatar) return;
-  const rect = new DOMRect(
-    EXPORT_AVATAR_X - EXPORT_AVATAR_RADIUS,
-    EXPORT_AVATAR_Y - EXPORT_AVATAR_RADIUS,
-    EXPORT_AVATAR_SIZE,
-    EXPORT_AVATAR_SIZE,
-  );
-
-  ctx.save();
-  ctx.fillStyle = WHITE_COLOR;
-  ctx.beginPath();
-  ctx.arc(EXPORT_AVATAR_X, EXPORT_AVATAR_Y, EXPORT_AVATAR_RADIUS + AVATAR_RING_WIDTH, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(EXPORT_AVATAR_X, EXPORT_AVATAR_Y, EXPORT_AVATAR_RADIUS, 0, Math.PI * 2);
-  ctx.clip();
-
-  if (avatar.imageSrc) {
-    const image = await loadImage(avatar.imageSrc).catch(() => undefined);
-    if (image) {
-      drawImageCover(ctx, image, rect.x, rect.y, rect.width, rect.height);
-    } else {
-      drawAvatarFallback(ctx, avatar, rect);
-    }
-  } else {
-    drawAvatarFallback(ctx, avatar, rect);
-  }
-
-  ctx.restore();
-}
-
-function drawAvatarFallback(ctx: CanvasRenderingContext2D, avatar: AvatarSnapshot, rect: DOMRect) {
-  const colors = getCssColors(avatar.backgroundImage);
-  const firstColor = colors[0];
-  const lastColor = colors[colors.length - 1];
-  if (firstColor && lastColor) {
-    const gradient = ctx.createLinearGradient(rect.x, rect.y, rect.x, rect.y + rect.height);
-    gradient.addColorStop(0, firstColor);
-    gradient.addColorStop(1, lastColor);
-    ctx.fillStyle = gradient;
-  } else {
-    ctx.fillStyle = avatar.backgroundColor || FALLBACK_ACCENT_COLOR;
-  }
-  ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-
-  const text = avatar.text;
-  if (!text) return;
-
-  const fontSize = getScaledAvatarFontSize(avatar, rect.width);
-  ctx.fillStyle = avatar.color || WHITE_COLOR;
-  ctx.font = `${avatar.fontWeight} ${fontSize}px ${avatar.fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, rect.x + rect.width / 2, rect.y + rect.height / 2);
 }
 
 async function drawQr(
   ctx: CanvasRenderingContext2D,
   url: string,
-  gradient: QrGradientStops,
+  inkColor: string,
 ) {
-  const qrLogoUrl = createQrLogoUrl(gradient);
+  const qrLogoUrl = createQrLogoUrl(inkColor);
 
   try {
     const exportQrCode = await createStyledQrCode({
       size: EXPORT_QR_SIZE * EXPORT_SCALE,
-      gradient,
+      margin: 0,
+      color: inkColor,
       image: qrLogoUrl,
     });
     exportQrCode.update({ data: url });
-    const qrBlob = await exportQrCode.getRawData('png');
+    // A vector source avoids an extra PNG encoding and is rasterized at the export scale anyway
+    const qrBlob = await exportQrCode.getRawData('svg');
     if (!qrBlob) {
       throw new Error('QR_RASTERIZATION_FAILED');
     }
@@ -496,23 +302,10 @@ async function drawQr(
   }
 }
 
-function createQrLogoUrl(gradient: QrGradientStops) {
+function createQrLogoUrl(color: string) {
   const logoSvgElement = jsxToHtml(
     <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${QR_LOGO_SIZE} ${QR_LOGO_SIZE}`}>
-      <defs>
-        <linearGradient
-          id="qrLogoGradient"
-          x1="0"
-          y1="0"
-          x2={QR_LOGO_SIZE}
-          y2={QR_LOGO_SIZE}
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop offset="0" style={`stop-color: ${gradient.from}`} />
-          <stop offset="1" style={`stop-color: ${gradient.to}`} />
-        </linearGradient>
-      </defs>
-      <path fillRule="evenodd" clipRule="evenodd" fill="url(#qrLogoGradient)" d={QR_LOGO_PATH} />
+      <path fillRule="evenodd" clipRule="evenodd" fill={color} d={QR_LOGO_PATH} />
     </svg>,
   )[0];
 
@@ -534,19 +327,6 @@ function getFittedFontSize(
   return USERNAME_MIN_FONT_SIZE;
 }
 
-function getScaledAvatarFontSize(avatar: AvatarSnapshot, exportSize: number) {
-  const fontSize = parseFloat(avatar.fontSize || '0');
-  if (!Number.isFinite(fontSize)) {
-    return exportSize / AVATAR_FONT_SIZE_RATIO_FALLBACK;
-  }
-
-  if (!avatar.size) {
-    return fontSize;
-  }
-
-  return fontSize * (exportSize / avatar.size);
-}
-
 function getFittedText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
   if (ctx.measureText(text).width <= maxWidth) {
     return text;
@@ -558,34 +338,6 @@ function getFittedText(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
     result = result.slice(0, -1);
   }
   return `${result}${ellipsis}`;
-}
-
-function drawImageCover(
-  ctx: CanvasRenderingContext2D,
-  image: HTMLImageElement | HTMLCanvasElement,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-) {
-  const sourceWidth = 'naturalWidth' in image ? image.naturalWidth : image.width;
-  const sourceHeight = 'naturalHeight' in image ? image.naturalHeight : image.height;
-  const sourceRatio = sourceWidth / sourceHeight;
-  const targetRatio = width / height;
-  let sourceX = 0;
-  let sourceY = 0;
-  let cropWidth = sourceWidth;
-  let cropHeight = sourceHeight;
-
-  if (sourceRatio > targetRatio) {
-    cropWidth = sourceHeight * targetRatio;
-    sourceX = (sourceWidth - cropWidth) / 2;
-  } else if (sourceRatio < targetRatio) {
-    cropHeight = sourceWidth / targetRatio;
-    sourceY = (sourceHeight - cropHeight) / 2;
-  }
-
-  ctx.drawImage(image, sourceX, sourceY, cropWidth, cropHeight, x, y, width, height);
 }
 
 function addRoundRect(
@@ -605,10 +357,6 @@ function addRoundRect(
   ctx.closePath();
 }
 
-function getCssColors(value: string) {
-  return value.match(/rgba?\([^)]+\)|#[0-9a-fA-F]{3,8}/g) || [];
-}
-
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
@@ -619,6 +367,22 @@ function loadImage(src: string) {
   });
 }
 
+// Encoding on the main thread waits for idle time, which the modal animations rarely leave
+async function encodeCanvas(canvas: HTMLCanvasElement) {
+  try {
+    const imageBitmap = await createImageBitmap(canvas);
+    const { blob } = await requestMediaWorker({
+      name: 'offscreen-canvas:encodeImage',
+      args: [imageBitmap, QR_CODE_CARD_MIME_TYPE],
+      transferables: [imageBitmap],
+    }, cycleRestrict(MAX_WORKERS, ++lastEncodeWorkerIndex));
+
+    return blob;
+  } catch {
+    return canvasToBlob(canvas);
+  }
+}
+
 function canvasToBlob(canvas: HTMLCanvasElement) {
   return new Promise<Blob | undefined>((resolve, reject) => {
     try {
@@ -627,12 +391,4 @@ function canvasToBlob(canvas: HTMLCanvasElement) {
       reject(err);
     }
   });
-}
-
-function formatQrRenderError(error: unknown) {
-  return error instanceof Error ? {
-    name: error.name,
-    message: error.message,
-    stack: error.stack,
-  } : error;
 }

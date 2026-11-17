@@ -8,7 +8,9 @@ const THROW_SAMPLE_MS = 80;
 // A shorter drag gives no speed to throw with
 const THROW_MIN_SPAN_MS = 5;
 
-export default function useDiamondThrow(diamondRef: ElementRef<StandaloneDiamond>) {
+export default function useDiamondThrow(
+  diamondRef: ElementRef<StandaloneDiamond>, onHoldChange: (isHeld: boolean) => void,
+) {
   const dragRef = useRef<{ x: number; y: number; samples: [number, number][] }>();
 
   const handlePointerDown = useLastCallback((e: React.PointerEvent<HTMLElement>) => {
@@ -19,6 +21,7 @@ export default function useDiamondThrow(diamondRef: ElementRef<StandaloneDiamond
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current = { x: e.clientX, y: e.clientY, samples: [[performance.now(), e.clientX]] };
     diamondRef.current.beginDrag();
+    onHoldChange(true);
   });
 
   const handlePointerMove = useLastCallback((e: React.PointerEvent<HTMLElement>) => {
@@ -30,6 +33,7 @@ export default function useDiamondThrow(diamondRef: ElementRef<StandaloneDiamond
     if (!e.buttons) {
       dragRef.current = undefined;
       diamondRef.current?.endDrag(0, true);
+      onHoldChange(false);
       return;
     }
 
@@ -50,6 +54,7 @@ export default function useDiamondThrow(diamondRef: ElementRef<StandaloneDiamond
     const [firstTime, firstX] = drag.samples[0];
     const velocity = now - firstTime > THROW_MIN_SPAN_MS ? ((e.clientX - firstX) / (now - firstTime)) * 1000 : 0;
     diamondRef.current?.endDrag(velocity, e.type === 'pointercancel');
+    onHoldChange(false);
   });
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

@@ -1,0 +1,143 @@
+.root {
+  overflow-x: auto;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem 0.75rem;
+}
+
+.tile {
+  cursor: var(--custom-cursor, pointer);
+
+  flex: 0 0 auto;
+
+  margin: 0;
+  padding: 0.1875rem;
+  border: 2px solid transparent;
+  border-radius: 0.875rem;
+
+  font: inherit;
+  color: inherit;
+
+  background: none;
+
+  transition: border-color 0.15s ease;
+}
+
+.selected {
+  border-color: var(--color-primary);
+}
+
+.preview {
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 5rem;
+  height: 6.5rem;
+  border-radius: 0.75rem;
+
+  background-color: var(--color-background-secondary);
+  background-position: center;
+  background-size: cover;
+}
+
+.wallpaper,
+.pattern {
+  position: absolute;
+  inset: 0;
+}
+
+.pattern {
+  // The wallpaper's own intensity, so the tile previews the same pattern strength as the chat
+  opacity: var(--pattern-intensity, 0.5);
+  background-image: var(--pattern-mask);
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 7.5rem auto;
+  mix-blend-mode: soft-light;
+}
+
+.plainPattern {
+  mix-blend-mode: normal;
+}
+
+.patternDimming {
+  position: absolute;
+  inset: 0;
+  opacity: var(--pattern-dimming);
+  background: #000;
+}
+
+.bubble {
+  position: absolute;
+
+  overflow: hidden;
+
+  width: 2.75rem;
+  height: 1.125rem;
+  border-radius: 0.75rem;
+}
+
+.gradient {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.masked {
+  opacity: var(--pattern-intensity, 1);
+
+  mask-image: var(--pattern-mask);
+  mask-repeat: repeat;
+  mask-position: center;
+  mask-size: 7.5rem auto;
+}
+
+.bubbleOut {
+  top: 0.75rem;
+  right: 0.5rem;
+}
+
+.bubbleIn {
+  top: 2.125rem;
+  left: 0.5rem;
+}
+
+.emoji {
+  pointer-events: none;
+
+  position: absolute;
+  right: 0;
+  bottom: 0.625rem;
+  left: 0;
+  transform-origin: center bottom;
+  transform: scale(0.5);
+
+  width: 4rem;
+  height: 4rem;
+  margin-inline: auto;
+
+  font-size: 4rem;
+  line-height: 1;
+  text-align: center;
+
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  :global(.emoji-small) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.emojiPlaying {
+  transform: scale(1);
+}
+
+.defaultIcon {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+}

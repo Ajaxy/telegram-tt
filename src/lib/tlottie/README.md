@@ -15,7 +15,7 @@ requires Rust with the `wasm32-unknown-unknown` target.
 rustup target add wasm32-unknown-unknown
 
 # Build the no-SIMD fallback.
-RUSTFLAGS="-C target-feature=-simd128" cargo build --profile release-nostd \
+RUSTFLAGS="-C target-feature=-simd128 -C strip=symbols" cargo build --profile release-nostd \
   --target wasm32-unknown-unknown \
   --no-default-features \
   --features wasm,no-std \
@@ -25,7 +25,7 @@ cp target/wasm32-unknown-unknown/release-nostd/tlottie.wasm \
   /path/to/telegram-t/src/lib/tlottie/tlottie-no-simd.wasm
 
 # Build the baseline SIMD version.
-RUSTFLAGS="-C target-feature=+simd128" cargo build --profile release-nostd \
+RUSTFLAGS="-C target-feature=+simd128 -C strip=symbols" cargo build --profile release-nostd \
   --target wasm32-unknown-unknown \
   --no-default-features \
   --features wasm,no-std \

@@ -29,7 +29,7 @@ import StarTopupOptionList from '../StarTopupOptionList';
 import styles from './StarsGiftModal.module.scss';
 
 import StarLogo from '../../../../assets/icons/star/GoldStar.svg';
-import StarsBackground from '../../../../assets/stars-bg.png';
+import StarsBackground from '../../../../assets/stars-bg.svg';
 
 export type OwnProps = {
   modal: TabState['starsGiftModal'];

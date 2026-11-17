@@ -4,7 +4,7 @@ import { IS_IOS, IS_PWA, IS_TOUCH_ENV } from '../util/browser/windowEnvironment'
 
 const metaViewport = document.querySelector('meta[name="viewport"]');
 const defaultViewportContent = metaViewport?.getAttribute('content') || '';
-const allowedZoomViewportContent = 'width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover';
+const allowedZoomViewportContent = 'width=device-width, initial-scale=1, viewport-fit=cover';
 
 export default function usePreventPinchZoomGesture(isDisabled = false) {
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function usePreventPinchZoomGesture(isDisabled = false) {
     }
 
     return () => {
-      metaViewport?.setAttribute('content', 'width=device-width, initial-scale=1, shrink-to-fit=no');
+      metaViewport?.setAttribute('content', allowedZoomViewportContent);
       if (IS_IOS && !IS_PWA) {
         document.removeEventListener('gesturestart', preventEvent);
       }

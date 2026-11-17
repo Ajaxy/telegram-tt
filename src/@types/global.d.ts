@@ -17,6 +17,7 @@ interface ImportMetaEnv {
   readonly TG_TELEGRAM_API_HASH?: string;
   readonly TG_TELEGRAM_API_ID?: string;
   readonly TG_TEST_SESSION?: string;
+  readonly TG_VAPID_KEY?: string;
 }
 
 declare namespace React {
@@ -106,6 +107,11 @@ declare module '*.webp' {
   export default url;
 }
 
+declare module '*.avif' {
+  const url: string;
+  export default url;
+}
+
 declare module '*.svg' {
   const url: string;
   export default url;
@@ -168,6 +174,20 @@ interface Document {
   mozCancelFullScreen?: () => Promise<void>;
   webkitCancelFullScreen?: () => Promise<void>;
   webkitExitFullscreen?: () => Promise<void>;
+}
+
+interface DocumentPictureInPictureOptions {
+  width?: number;
+  height?: number;
+}
+
+interface DocumentPictureInPicture extends EventTarget {
+  readonly window?: Window;
+  requestWindow(options?: DocumentPictureInPictureOptions): Promise<Window>;
+}
+
+interface Window {
+  readonly documentPictureInPicture?: DocumentPictureInPicture;
 }
 
 interface HTMLElement {
@@ -249,5 +269,6 @@ declare const GPUShaderStage: {
 declare const GPUTextureUsage: {
   readonly COPY_SRC: GPUTextureUsageFlags;
   readonly COPY_DST: GPUTextureUsageFlags;
+  readonly TEXTURE_BINDING: GPUTextureUsageFlags;
   readonly RENDER_ATTACHMENT: GPUTextureUsageFlags;
 };

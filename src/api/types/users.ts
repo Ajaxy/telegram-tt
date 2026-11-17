@@ -2,12 +2,14 @@ import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiAudio, ApiDocument, ApiFormattedText, ApiPhoto } from './messages';
+import type { ApiPeerTheme, ApiWallpaper } from './misc';
 import type {
   ApiBotVerification,
   ApiEmojiStatusType,
   ApiFakeType,
   ApiPeerSettings,
   ApiProfileTab,
+  ApiShareTheme,
   ApiTypePeerColor,
 } from './peers';
 import type { ApiSavedStarGift, ApiStarsRating } from './stars';
@@ -56,6 +58,8 @@ export interface ApiUser {
 }
 
 export interface ApiUserFullInfo {
+  peerTheme?: ApiPeerTheme;
+  wallpaper?: ApiWallpaper;
   isBlocked?: boolean;
   ttlPeriod?: number;
   bio?: string;
@@ -97,6 +101,7 @@ export interface ApiUserFullInfo {
   isUnofficialSecurityRisk?: boolean;
   botManagerId?: string;
   walletCard?: ApiWalletCard;
+  shareTheme?: ApiShareTheme;
 }
 
 export type ApiUserType = 'userTypeBot' | 'userTypeRegular' | 'userTypeDeleted' | 'userTypeUnknown';

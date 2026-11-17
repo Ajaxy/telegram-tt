@@ -15,6 +15,7 @@ import {
 } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import * as playbackController from '../../../util/audioPlayback/playbackController';
+import { focusDocumentPictureInPicture } from '../../../util/documentPictureInPicture';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { isSearchResultKey, parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { hasMessageTtl } from '../../helpers/messages';
@@ -31,6 +32,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   makeTrackKeyFromItem,
   selectCanWrapPlaylist,
+  selectChatPlaylistTrack,
   selectCurrentPlaylistKey,
   selectCurrentTrackKey,
   selectIsPlaylistFullyLoaded,
@@ -69,6 +71,17 @@ addActionHandler('setAudioPlaybackSource', (global, actions, payload): ActionRet
   }, tabId);
 
   return global;
+});
+
+addActionHandler('setRoundVideoMode', (global, actions, payload): ActionReturnType => {
+  const { mode, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    audioPlayer: {
+      ...selectTabState(global, tabId).audioPlayer,
+      roundVideoMode: mode,
+    },
+  }, tabId);
 });
 
 addActionHandler('handleAudioPlaybackEnded', (global, actions, payload): ActionReturnType => {
@@ -242,6 +255,10 @@ addActionHandler('settlePendingPlaylistStep', (global, actions, payload): Action
 addActionHandler('openAudioPlaylistModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
+  if (tabId === getCurrentTabId()) {
+    focusDocumentPictureInPicture('audio-playlist');
+  }
+
   return updateTabState(global, { isAudioPlaylistModalOpen: true }, tabId);
 });
 
@@ -262,9 +279,11 @@ function openTrack<T extends GlobalState>(
 
   switch (source?.type) {
     case 'chat':
-      if (typeof key !== 'number') return false;
       item = {
-        type: 'message', chatId: source.chatId, threadId: source.threadId, messageId: key,
+        type: 'message',
+        chatId: source.chatId,
+        threadId: source.threadId,
+        ...selectChatPlaylistTrack(global, source.chatId, key),
       };
       break;
     case 'globalSearch': {
@@ -278,16 +297,6 @@ function openTrack<T extends GlobalState>(
     case 'savedMusic':
       if (typeof key !== 'string') return false;
       item = { type: 'savedMusic', peerId: source.peerId, audioId: key };
-      break;
-    case 'richMessage':
-      if (typeof key !== 'string') return false;
-      item = {
-        type: 'message',
-        chatId: source.chatId,
-        threadId: source.threadId,
-        messageId: source.messageId,
-        documentId: key,
-      };
       break;
     default:
       return false;

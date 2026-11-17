@@ -9,7 +9,7 @@ import {
   selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatIntegerCompact } from '../../../util/textFormat';
+import { formatIntegerCompact } from '../../../util/text/textFormat';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 import useLang from '../../../hooks/useLang';

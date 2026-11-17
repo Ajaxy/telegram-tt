@@ -14,7 +14,7 @@ import { selectWebPageFromMessage } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
-import trimText from '../../util/trimText';
+import trimText from '../../util/text/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';
 
@@ -88,7 +88,7 @@ const WebLink = ({
         siteName: domain.replace(/^www./, ''),
         url: linkUrl.includes('://') ? linkUrl : linkUrl.includes('@') ? `mailto:${linkUrl}` : `http://${linkUrl}`,
         formattedDescription: getMessageTextWithFallback(lang, message)?.text !== linkUrl
-          ? renderMessageSummary(lang, message, undefined, undefined, MAX_TEXT_LENGTH)
+          ? renderMessageSummary(lang, message, undefined, MAX_TEXT_LENGTH)
           : undefined,
       } satisfies ApiWebPageWithFormatted;
     }
@@ -100,7 +100,7 @@ const WebLink = ({
 
   const fallbackDescription = useMemo(() => {
     return getMessageTextWithFallback(lang, message)?.text !== url
-      ? renderMessageSummary(lang, message, undefined, undefined, MAX_TEXT_LENGTH)
+      ? renderMessageSummary(lang, message, undefined, MAX_TEXT_LENGTH)
       : undefined;
   }, [lang, message, url]);
 

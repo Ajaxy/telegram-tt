@@ -1,2 +1,0 @@
-import e from"./asciidoc-Qa3iLJWP.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/asciidoc" instead of "highlight.js/lib/languages/asciidoc.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=asciidoc.js-BTmIADNI.js.map

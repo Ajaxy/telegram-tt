@@ -5,16 +5,15 @@
     max-width: 90vw;
   }
 
-  // A dark scrim keeps the white icon readable over arbitrary wallpapers: 50% black over pure
-  // white still gives the icon ~3.9:1 — above the 3:1 UI-component threshold
   :global(.modal-absolute-close-button) {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--qr-control-color);
+    backdrop-filter: blur(1rem);
   }
 
   :global(.modal-absolute-close-button .animated-close-icon),
   :global(.modal-absolute-close-button .animated-close-icon::before),
   :global(.modal-absolute-close-button .animated-close-icon::after) {
-    background-color: white;
+    background-color: var(--qr-foreground-color);
   }
 }
 
@@ -23,39 +22,65 @@
   padding: 0 !important;
 }
 
-.wallpaper {
+.surface {
   position: relative;
   z-index: 0;
 
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  padding: 5rem 1.5rem 1.5rem;
+  aspect-ratio: 9 / 16;
+  width: 100%;
+  min-height: min-content;
+  max-height: 92vh;
+  padding: 4rem 1.5rem 1.5rem;
+}
+
+.background {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+}
+
+.backgroundSlide {
+  position: absolute;
+  inset: 0;
+}
+
+.cardWrapper {
+  pointer-events: none;
+
+  position: relative;
+  z-index: 1;
+  transform-origin: 50% 0;
+
+  width: 100%;
+  margin-block: auto;
+
+  transition: transform 0.25s ease;
+
+  :global(body.no-page-transitions) & {
+    transition: none;
+  }
 }
 
 .card {
+  pointer-events: auto;
+
   position: relative;
-  z-index: 1;
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  width: 100%;
-  padding: 4.75rem 1.25rem 1.5rem;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 1rem;
   border-radius: 1.5rem;
 
   background-color: white;
-}
-
-.avatar {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  box-shadow: 0 0 0 0.25rem white;
 }
 
 .qrOuter {
@@ -65,7 +90,7 @@
   align-items: center;
   justify-content: center;
 
-  width: 100%;
+  width: 13rem;
 }
 
 .qrContainer {
@@ -76,7 +101,7 @@
   justify-content: center;
 
   aspect-ratio: 1;
-  width: min(16.25rem, 100%);
+  width: 100%;
 
   opacity: 0;
 
@@ -88,6 +113,15 @@
 .qrSvg {
   width: 100%;
   height: 100%;
+}
+
+.swapCanvas {
+  pointer-events: none;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .qrContainerReady {
@@ -104,7 +138,7 @@
 
   border-radius: 50%;
 
-  background: linear-gradient(135deg, var(--qr-gradient-from), var(--qr-gradient-to));
+  background: var(--qr-ink-color);
 
   transition: opacity 0.15s ease-in;
 }
@@ -133,22 +167,46 @@
 }
 
 .username {
-  margin-top: 0.75rem;
+  position: relative;
+  z-index: 1;
+
+  max-width: 13rem;
+  margin-top: 0.5rem;
 
   font-size: 1.5rem;
   font-weight: var(--font-weight-semibold);
-  color: transparent;
+  color: var(--qr-ink-color);
   word-break: break-all;
-
-  background: linear-gradient(135deg, var(--qr-gradient-from), var(--qr-gradient-to));
-  background-clip: text;
-
-  -webkit-text-fill-color: transparent;
 }
 
 .copyButton {
+  cursor: var(--custom-cursor, pointer);
+
   position: relative;
   z-index: 1;
+
   width: 100%;
-  margin-top: 1.5rem;
+  height: 3rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 1.5rem;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--qr-foreground-color);
+
+  background-color: var(--qr-control-color);
+  backdrop-filter: blur(1rem);
+  outline: none;
+  box-shadow: inset 0 0 0 10rem transparent;
+
+  transition:
+    box-shadow 0.15s ease,
+    background-color 0.3s ease,
+    color 0.3s ease;
+
+  &:hover,
+  &:focus-visible {
+    box-shadow: inset 0 0 0 10rem var(--qr-control-color);
+  }
 }

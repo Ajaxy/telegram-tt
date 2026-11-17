@@ -152,6 +152,10 @@
   border-top: 0.0625rem solid var(--color-borders);
 }
 
+.unsupportedNode {
+  margin-block: 0.375rem;
+}
+
 .mathNode:global(.ProseMirror-selectednode) {
   outline: none;
 }
@@ -219,25 +223,6 @@
 
 .highlightedTableCell {
   background-color: var(--color-code-bg);
-}
-
-.unsupported {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin: 0.375rem 0.5rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 0.0625rem solid var(--color-error);
-  border-radius: 0.5rem;
-
-  color: var(--color-error);
-
-  background: var(--color-background-secondary);
-}
-
-.unsupportedDelete {
-  flex-shrink: 0;
 }
 
 .emoji {
@@ -327,11 +312,11 @@
     -0.125rem 0.125rem 0 var(--color-background),
     0.125rem 0.125rem 0 var(--color-background);
 
-  background-image: url("../../assets/spoiler-dots-black.png");
+  background-image: url("../../assets/spoiler-dots-black.webp");
   background-size: auto min(100%, 1.125rem);
 
   :global(html.theme-dark) & {
-    background-image: url("../../assets/spoiler-dots-white.png");
+    background-image: url("../../assets/spoiler-dots-white.webp");
   }
 }
 
@@ -363,9 +348,18 @@
   border-radius: 0.25rem;
 
   font-family: var(--font-family-monospace);
-  font-size: 0.875em;
+  // Keep monospace font metrics from growing the line
+  line-height: 0;
 
   background-color: var(--color-code-bg);
+
+  // Size the background from cap height and baseline, as monospace ascent/descent differ from the text font
+  @supports (text-box: trim-both cap alphabetic) {
+    padding-top: 0.1875em;
+    padding-bottom: 0.25em;
+
+    text-box: trim-both cap alphabetic;
+  }
 }
 
 .clone .customEmoji {

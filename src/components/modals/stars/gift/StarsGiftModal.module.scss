@@ -36,11 +36,15 @@
 
 .logoBackground {
   position: absolute;
-  top: 0.75rem;
+  top: 4.125rem; // Center of `.logo`
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 
-  height: 8rem;
+  height: 6.875rem;
+}
+
+.avatar + .logoBackground {
+  top: 5.125rem; // Center of `.avatar`
 }
 
 .description {

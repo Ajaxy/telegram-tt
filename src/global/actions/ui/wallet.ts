@@ -9,7 +9,7 @@ addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType
   const {
     initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
     shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
-    tabId = getCurrentTabId(),
+    shouldOpenCollectibles, shouldOpenReceive, tabId = getCurrentTabId(),
   } = payload || {};
 
   // The wallet state is not fetched here: the modal's poll makes its first call on open
@@ -23,6 +23,7 @@ addActionHandler('openWalletModal', (global, actions, payload): ActionReturnType
     walletModal: {
       initialRecipient, initialAmount, initialComment, isInitialCommentEncrypted, shouldCloseAfterSend,
       shouldCloseOnBack, initialTransactionId, shouldShowIntro, shouldReleaseKey, shouldOpenTonConnect,
+      shouldOpenCollectibles, shouldOpenReceive,
     },
   }, tabId);
 });
@@ -60,13 +61,13 @@ addTabStateResetterAction('clearWalletTransfer', 'walletTransfer');
 
 addTabStateResetterAction('clearWalletTransferFee', 'walletTransferFee');
 
+addTabStateResetterAction('clearWalletGiftDeposit', 'walletGiftDeposit');
+
 addTabStateResetterAction('clearWalletMnemonic', 'walletMnemonic');
 
 addTabStateResetterAction('clearWalletBackup', 'walletBackup');
 
 addTabStateResetterAction('clearWalletReplace', 'walletReplace');
-
-addTabStateResetterAction('clearWalletBuy', 'walletBuy');
 
 addTabStateResetterAction('clearWalletCommentDecryption', 'walletCommentDecryption');
 

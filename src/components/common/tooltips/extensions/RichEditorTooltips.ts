@@ -7,7 +7,7 @@ import { buildCommandSuggestion } from './richEditorTooltips/command';
 import { RichEditorTooltipsController } from './richEditorTooltips/controller';
 import { buildEmojiSuggestion } from './richEditorTooltips/emoji';
 import { buildFormatterPlugin, refreshFormatter } from './richEditorTooltips/formatter';
-import { buildInlineBotSuggestion } from './richEditorTooltips/inlineBot';
+import { buildInlineBotHelpPlugin, buildInlineBotSuggestion } from './richEditorTooltips/inlineBot';
 import { buildMentionSuggestion } from './richEditorTooltips/mention';
 import { buildNativeEmojiSuggestion } from './richEditorTooltips/nativeEmoji';
 
@@ -40,7 +40,7 @@ export const RichEditorTooltips = Extension.create<RichEditorTooltipsConfig, Ric
     const getController = () => this.storage.controller;
 
     if (this.options.inlineBot) {
-      plugins.push(buildInlineBotSuggestion(this.editor, this.options, getController));
+      plugins.push(buildInlineBotSuggestion(this.editor, this.options, getController), buildInlineBotHelpPlugin());
     }
     if (this.options.command) {
       plugins.push(buildCommandSuggestion(this.editor, this.options, getController));

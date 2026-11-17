@@ -42,6 +42,7 @@ import type {
   ApiStickerSet,
   ApiStory,
   ApiStorySkipped,
+  ApiThemeSettings,
   ApiThreadInfo,
   ApiTopic,
   ApiTypingStatus,
@@ -71,6 +72,7 @@ export type SessionUserInfo = {
 };
 
 export type SharedSessionData = {
+  pushKey?: string;
   date?: number;
   dcId: number;
   authKeyCreatedAt?: ApiSessionData['authKeyCreatedAt'];
@@ -127,11 +129,12 @@ export type PerformanceTypeKey = (
   'pageTransitions' | 'messageSendingAnimations' | 'mediaViewerAnimations'
   | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur'
   | 'rightColumnAnimations' | 'animatedEmoji' | 'loopAnimatedStickers' | 'reactionEffects' | 'stickerEffects'
-  | 'autoplayGifs' | 'autoplayVideos' | 'storyRibbonAnimations' | 'snapEffect' | 'textStreaming'
+  | 'autoplayGifs' | 'autoplayVideos' | 'storyRibbonAnimations' | 'textStreaming'
 );
 export type PerformanceType = Record<PerformanceTypeKey, boolean>;
 
 export interface IThemeSettings {
+  // An empty string selects the built-in wallpaper; `undefined` allows the color theme's wallpaper
   background?: string;
   backgroundColor?: string;
   secondBackgroundColor?: string;
@@ -144,6 +147,8 @@ export interface IThemeSettings {
   patternIntensityFactor?: number;
   isPattern?: boolean;
   isBlurred?: boolean;
+  serverThemeSettings?: ApiThemeSettings;
+  chatThemeEmoticon?: string;
 }
 
 export type LangCode = (
@@ -156,6 +161,7 @@ export type TimeFormat = '24h' | '12h';
 export interface AccountSettings {
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
+  shouldShowPushPreviewsWhenLocked: boolean;
   hasContactJoinedNotifications?: boolean;
   shouldNotifyAboutPinnedMessages: boolean;
   notificationSoundVolume: number;
@@ -183,6 +189,7 @@ export interface AccountSettings {
   shouldNewNonContactPeersRequirePremium?: boolean;
   defaultHistoryTtl?: number;
   nonContactPeersPaidStars?: number;
+  permanentFreeMessagesLink?: string;
   shouldDisplayGiftsButton?: boolean;
   disallowedGifts?: ApiDisallowedGiftsSettings;
   shouldHideReadMarks?: boolean;
@@ -210,8 +217,13 @@ export interface ShippingOption {
 
 export type SettingsHighlight = {
   langKey: RegularLangKey;
-  isInHeaderMenu?: boolean;
 };
+
+export type SettingsConfirmation = 'askQuestion' | 'logOut' | 'terminateAllSessions' | 'terminateAllWebSessions';
+
+export type SettingsAction = SettingsConfirmation | 'openPremium' | 'openStars' | 'openTon' | 'sendGift' | 'openFaq'
+  | 'openPrivacyPolicy' | 'uploadWallpaper' | 'resetWallpaper' | 'clearMediaCache' | 'openPasskeys' | 'setBirthday'
+  | 'setAccountTtl' | 'openWallet';
 
 export enum SettingsScreens {
   Main,
@@ -405,7 +417,6 @@ export type PlaybackSource =
   | { type: 'chat'; chatId: string; threadId: ThreadId; mediaType: PlaybackMediaType }
   | { type: 'globalSearch'; mediaType: PlaybackMediaType }
   | { type: 'savedMusic'; peerId: string }
-  | { type: 'richMessage'; chatId: string; threadId: ThreadId; messageId: number }
   | { type: 'single' };
 
 export type PlaybackContextType = 'message' | 'savedMusic' | 'instantView' | 'musicSearch';
@@ -427,6 +438,8 @@ export type PlaybackCapabilities = {
   mediaSession: 'own' | 'keep' | 'clear';
   withAutoAdvance: boolean;
 };
+
+export type RoundVideoMode = 'mini' | 'large';
 
 export type RepeatMode = 'none' | 'one' | 'all';
 export type OrderMode = 'default' | 'reverse' | 'shuffle';
@@ -705,6 +718,7 @@ export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
   viewportIds?: number[];
+  hiddenBotKeyboardId?: number;
 }
 
 export interface ThreadReadState {
@@ -839,6 +853,8 @@ export type CallSound = (
 
 export type BotAppPermissions = {
   geolocation?: boolean;
+  camera?: boolean;
+  microphone?: boolean;
 };
 
 export type GiftProfileFilterOptions = {

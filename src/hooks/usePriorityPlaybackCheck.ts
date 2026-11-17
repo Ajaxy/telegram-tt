@@ -6,8 +6,7 @@ import useLastCallback from './useLastCallback';
 const startCallbacks = createCallbackManager();
 const endCallbacks = createCallbackManager();
 
-let timeout: number | undefined;
-let isActive = false;
+let activeCount = 0;
 
 const usePriorityPlaybackCheck = (
   onStart?: AnyToVoidFunction,
@@ -22,7 +21,7 @@ const usePriorityPlaybackCheck = (
       return undefined;
     }
 
-    if (isActive) {
+    if (activeCount) {
       lastOnStart();
     }
 
@@ -37,29 +36,25 @@ const usePriorityPlaybackCheck = (
 };
 
 export function isPriorityPlaybackActive() {
-  return isActive;
+  return activeCount > 0;
 }
 
+// Overlapping dispatchers, e.g. the Media Viewer handing over to the Media Editor, keep the playback paused
 export function dispatchPriorityPlaybackEvent() {
-  if (!isActive) {
-    isActive = true;
+  activeCount++;
+  if (activeCount === 1) {
     startCallbacks.runCallbacks();
   }
 
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = undefined;
-  }
-
-  // Race condition may happen if another `dispatchPriorityPlaybackEvent` is called before `onEnd`
+  let isEnded = false;
   function onEnd() {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = undefined;
-    }
+    if (isEnded) return;
 
-    isActive = false;
-    endCallbacks.runCallbacks();
+    isEnded = true;
+    activeCount--;
+    if (!activeCount) {
+      endCallbacks.runCallbacks();
+    }
   }
 
   return onEnd;

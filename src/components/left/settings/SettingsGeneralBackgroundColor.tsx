@@ -7,7 +7,7 @@ import type { ThemeKey } from '../../../types';
 import type { RealTouchEvent } from '../../../util/captureEvents';
 
 import { buildColor, type Color, convertColor } from '../../../lib/color';
-import { selectTheme, selectThemeValues } from '../../../global/selectors';
+import { selectChatWallpaperSettings, selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { captureEvents } from '../../../util/captureEvents';
 import {
@@ -402,7 +402,7 @@ function drawHue(canvas: HTMLCanvasElement) {
 export default memo(withGlobal<OwnProps>(
   (global): Complete<StateProps> => {
     const theme = selectTheme(global);
-    const { backgroundColor } = selectThemeValues(global, theme) || {};
+    const { backgroundColor } = selectChatWallpaperSettings(global) || {};
     return {
       backgroundColor,
       theme,

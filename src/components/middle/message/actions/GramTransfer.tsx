@@ -1,19 +1,23 @@
-import { memo, useEffect, useMemo, useRef } from '../../../../lib/teact/teact';
+import {
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../../../lib/teact/teact';
 
 import type { ApiMessageActionGramTransfer } from '../../../../api/types/messageActions';
 
-import { getHasPendingWalletTransfer } from '../../../../global/helpers/wallet';
+import { getIsWalletTransferConfirmed, getPendingWalletTransfer } from '../../../../global/helpers/wallet';
 import { selectWalletTransactions } from '../../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
-import { formatTonShortFromNanos } from '../../../../util/formatCurrency';
+import { formatTonParts } from '../../../../util/localization/format';
 import { splitAddressInHalves } from '../../../../util/tonAddress';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useTimeout from '../../../../hooks/schedulers/useTimeout';
 import useClickable from '../../../../hooks/useClickable';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useShowTransition from '../../../../hooks/useShowTransition';
 import useShrinkToFit from '../../../../hooks/useShrinkToFit';
 
@@ -35,12 +39,16 @@ type OwnProps = {
   isFailed?: boolean;
   isLoading?: boolean;
   shouldLoopStickers?: boolean;
+  // A transfer the wallet is asked to make: the card alone, with no status and nothing to open
+  isRequest?: boolean;
   onClick?: NoneToVoidFunction;
 };
 
 // The sender key, the message key and a random prefix ahead of the text
 const ENCRYPTED_COMMENT_OVERHEAD = 64;
 const EN_DASH = '\u2013';
+// The rounded font's dash has almost no side bearing, so it would touch the digits
+const THIN_SPACE = '\u2009';
 // The Android app's ribbon colors; a failed transfer takes the red of the theme there as well
 const RIBBON_COLOR_IN = '#4bb9fe';
 const RIBBON_COLOR_OUT = '#15be00';
@@ -50,13 +58,15 @@ const SHINE_MIN_DURATION = 600;
 const SHINE_HIDE_DURATION = 320;
 
 const GramTransfer = ({
-  action, localMessageId, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, onClick,
+  action, localMessageId, peerName, isOutgoing, isSending, isFailed, isLoading, shouldLoopStickers, isRequest, onClick,
 }: OwnProps) => {
   const lang = useLang();
   const [isHover, markHover, unmarkHover] = useFlag();
 
   const amountRef = useRef<HTMLDivElement>();
   const amountContentRef = useRef<HTMLDivElement>();
+  const peerRef = useRef<HTMLDivElement>();
+  const addressRef = useRef<HTMLDivElement>();
 
   useShrinkToFit(amountRef, amountContentRef);
 
@@ -86,21 +96,37 @@ const GramTransfer = ({
 
   const walletTransactions = useSelector(selectWalletTransactions);
   // As in the native apps, a clock replaces the ribbon until the chain confirms the transfer
-  const isAwaitingChain = useMemo(
-    () => localMessageId !== undefined && !isFailed && getHasPendingWalletTransfer(walletTransactions, localMessageId),
+  const pendingTransfer = useMemo(
+    () => (localMessageId !== undefined && !isFailed
+      ? getPendingWalletTransfer(walletTransactions, localMessageId)
+      : undefined),
     [isFailed, walletTransactions, localMessageId],
   );
-  const isInProgress = isSending || isAwaitingChain;
+  const isInProgress = isSending || Boolean(pendingTransfer);
+
+  const [burstKey, setBurstKey] = useState(0);
+
+  useEffectWithPrevDeps(([prevPendingTransfer]) => {
+    if (!prevPendingTransfer?.localId || pendingTransfer) return;
+
+    if (getIsWalletTransferConfirmed(walletTransactions, prevPendingTransfer.localId)) {
+      setBurstKey((key) => key + 1);
+    }
+  }, [pendingTransfer, walletTransactions]);
+
+  const getLensText = useLastCallback(() => (
+    [amountContentRef.current, peerRef.current, addressRef.current].filter(Boolean)
+  ));
 
   const { ref: clockRef, shouldRender: shouldRenderClock } = useShowTransition({
-    isOpen: isInProgress, withShouldRender: true, noMountTransition: true,
+    isOpen: isInProgress && !isRequest, withShouldRender: true, noMountTransition: true,
   });
   const { ref: ribbonRef, shouldRender: shouldRenderRibbon } = useShowTransition({
-    isOpen: !isInProgress, withShouldRender: true, noMountTransition: true,
+    isOpen: !isInProgress && !isRequest, withShouldRender: true, noMountTransition: true,
   });
 
-  const [whole, fraction] = formatTonShortFromNanos(amount).split('.');
-  const groupedWhole = lang.number(Number(whole));
+  // A request shows every nanoton the wallet is asked for; a chat card keeps the short form
+  const [whole, fraction] = formatTonParts(lang, amount, !isRequest);
   const [addressStart, addressEnd] = splitAddressInHalves(peerAddress);
 
   // The server cannot read an encrypted comment, so the spoiler length is estimated from the payload size
@@ -114,7 +140,7 @@ const GramTransfer = ({
 
   return (
     <div
-      className={buildClassName(styles.root, hasComment && styles.withComment)}
+      className={buildClassName(styles.root, hasComment && styles.withComment, isRequest && styles.request)}
       {...clickableProps}
       onMouseEnter={!IS_TOUCH_ENV ? markHover : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? unmarkHover : undefined}
@@ -126,22 +152,27 @@ const GramTransfer = ({
           className={styles.icon}
           isHovered={isHover}
           shouldLoopStickers={shouldLoopStickers}
+          burstKey={burstKey}
+          getLensText={getLensText}
         />
         <div ref={amountRef} className={styles.amount}>
           <div ref={amountContentRef} className={styles.amountContent}>
             <span>
               {isOutgoing ? EN_DASH : '+'}
-              {groupedWhole}
-              {fraction && <span className={styles.amountFraction}>{`.${fraction}`}</span>}
+              {THIN_SPACE}
+              {whole}
+              {fraction && <span className={styles.amountFraction}>{fraction}</span>}
             </span>
             <span className={styles.ticker}>{lang('ActionGramTransferTicker')}</span>
           </div>
         </div>
-        {peerName && <div className={styles.peer}>{peerName}</div>}
-        <div className={styles.address} aria-hidden>
+        {peerName && <div ref={peerRef} className={styles.peer}>{peerName}</div>}
+        <div ref={addressRef} className={styles.address} aria-hidden>
           <span className={styles.addressLine}>{addressStart}</span>
           <span className={styles.addressLine}>{addressEnd}</span>
         </div>
+        {/* The halves read as two words, so a screen reader gets the address whole */}
+        {peerAddress && <span className="visually-hidden">{peerAddress}</span>}
         {shouldRenderShine && (
           <div ref={shineRef} className={styles.shine} aria-hidden>
             <div className={styles.shineStroke} />

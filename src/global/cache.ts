@@ -36,6 +36,7 @@ import {
   SHARED_STATE_CACHE_KEY,
   TON_CURRENCY_CODE,
 } from '../config';
+import { toRawAddress } from '../lib/ton/address';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { isUserId } from '../util/entities/ids';
 import { getOrderedIds } from '../util/folderManager';
@@ -49,15 +50,13 @@ import { onBeforeUnload, throttle } from '../util/schedulers';
 import { getServerTime } from '../util/serverTime';
 import { hasStoredSession } from '../util/sessions';
 import { getSystemTheme } from '../util/systemTheme';
-import { getDefaultPatternColor } from '../util/wallpaper';
-import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaperStorage';
+import { getDefaultPatternColor, getThemeWallpaper } from '../util/wallpaper';
+import { migrateLegacyWallpaperBlobs, prefetchWallpaperUrl } from '../util/wallpaper/storage';
 import { buildPageAudioById } from './helpers/buildPageAudioById';
 import { selectSharedSettings } from './selectors/sharedState';
 import { selectThreadInfo } from './selectors/threads';
 import { addActionHandler, getGlobal } from './index';
-import {
-  INITIAL_GLOBAL_STATE, SHARED_STATE_CACHE_VERSION,
-} from './initialState';
+import { INITIAL_GLOBAL_STATE, SHARED_STATE_CACHE_VERSION } from './initialState';
 import { clearGlobalForLockScreen, updatePasscodeSettings } from './reducers';
 import {
   selectChatLastMessageId,
@@ -85,6 +84,11 @@ const APP_CONFIG_NANOTON_KEYS = [
 // wallpaper-derived ones
 const LEGACY_DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
 const LEGACY_DARK_THEME_PATTERN_COLOR = '#48576166';
+
+// Bump `SHARED_STATE_CACHE_VERSION` in `initialState.ts` alongside the newest step here
+const SHARED_STATE_PATTERN_COLORS_CACHE_VERSION = 3;
+const SHARED_STATE_V1_LIGHT_PATTERN_COLOR = '#77854b66';
+const SHARED_STATE_V1_DARK_PATTERN_COLOR = '#27308a66';
 const updateCacheThrottled = throttle(() => onFullyIdle(() => updateCache()), UPDATE_THROTTLE, false);
 const updateCacheForced = () => updateCache(true);
 
@@ -110,11 +114,26 @@ export function loadCachedGlobal() {
 }
 
 export function loadCachedGlobalForSlot(slot: number | undefined) {
-  return MAIN_IDB_STORE.get<GlobalState>(getGlobalStateCacheKey(slot));
+  return readCachedState<GlobalState>(getGlobalStateCacheKey(slot));
 }
 
 export function loadCachedSharedState() {
-  return MAIN_IDB_STORE.get<SharedState>(SHARED_STATE_CACHE_KEY);
+  return readCachedState<SharedState>(SHARED_STATE_CACHE_KEY);
+}
+
+async function readCachedState<T>(key: string): Promise<T | undefined> {
+  try {
+    return await MAIN_IDB_STORE.get<T>(key);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'NotReadableError') {
+      // A missing backing file invalidates only this disposable cache record.
+      // Cleanup failure must not prevent startup from using fresh state.
+      await MAIN_IDB_STORE.del(key).catch(() => undefined);
+      return undefined;
+    }
+
+    throw err;
+  }
 }
 
 export function removeGlobalFromCache() {
@@ -276,7 +295,10 @@ export function migrateSharedCache(
   let migrated = cached || initialState;
 
   if (cacheVersion < SHARED_STATE_CACHE_VERSION) {
-    const { messageBlur, ...performance } = settings.performance as PerformanceType & { messageBlur?: boolean };
+    const { messageBlur, snapEffect, ...performance } = settings.performance as PerformanceType & {
+      messageBlur?: boolean;
+      snapEffect?: boolean;
+    };
 
     migrated = {
       ...migrated,
@@ -290,13 +312,34 @@ export function migrateSharedCache(
     };
   }
 
+  if (cacheVersion < SHARED_STATE_PATTERN_COLORS_CACHE_VERSION) {
+    const themes = cloneThemeSettings(migrated.settings.themes);
+    if (themes.light?.patternColor === SHARED_STATE_V1_LIGHT_PATTERN_COLOR) {
+      themes.light.patternColor = getDefaultPatternColor('light');
+    }
+
+    if (themes.dark?.patternColor === SHARED_STATE_V1_DARK_PATTERN_COLOR) {
+      themes.dark.patternColor = getDefaultPatternColor('dark');
+    }
+
+    migrated = {
+      ...migrated,
+      settings: {
+        ...migrated.settings,
+        themes,
+      },
+    };
+  }
+
   return migrated;
 }
 
 function prefetchCurrentWallpaperUrl(global: GlobalState) {
   const { theme, themes, shouldUseSystemTheme } = selectSharedSettings(global);
   const currentTheme = shouldUseSystemTheme ? getSystemTheme() : theme;
-  return prefetchWallpaperUrl(themes[currentTheme]?.background);
+  const settings = themes[currentTheme];
+  const wallpaper = getThemeWallpaper(settings);
+  return prefetchWallpaperUrl(settings?.background ?? (wallpaper?.document ? wallpaper.slug : undefined));
 }
 
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
@@ -323,6 +366,10 @@ function pruneExpiredEphemeralMessages(cached: GlobalState) {
 
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   const untypedCached = cached as any;
+  // Push registrations are reconciled against the shared subscription registry
+  delete untypedCached.push;
+
+  cached.messageWidgetStorage ||= {};
   Object.values(cached.chats.fullInfoById).forEach((fullInfo) => {
     fullInfo.isCache = true;
   });
@@ -443,6 +490,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.cacheVersion = 8;
   }
 
+  if (cached.cacheVersion < 9) {
+    migrateWalletNftAddresses(cached);
+    cached.cacheVersion = 9;
+  }
+
   if (!cached.auth) {
     cached.auth = initialState.auth;
     cached.auth.rememberMe = untypedCached.authRememberMe;
@@ -543,9 +595,9 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'recentEmojis',
       'recentCustomEmojis',
       'emojiGroups',
-      'push',
       'serviceNotifications',
       'attachmentSettings',
+      'mediaEditorSettings',
       'leftColumnWidth',
       'archiveSettings',
       'mediaViewer',
@@ -557,6 +609,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'peerColors',
       'savedReactionTags',
       'timezones',
+      'shareThemeBackdrops',
       'availableEffectById',
       'walletCurrency',
       'currencyRates',
@@ -567,6 +620,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
     users: reduceUsers(global),
     chats: reduceChats(global),
     messages: reduceMessages(global),
+    messageWidgetStorage: reduceMessageWidgetStorage(global),
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
@@ -603,6 +657,25 @@ function reduceSharedState(sharedState: SharedState): SharedState {
     },
     isInitial: undefined,
   };
+}
+
+function reduceMessageWidgetStorage(global: GlobalState): GlobalState['messageWidgetStorage'] {
+  const result: GlobalState['messageWidgetStorage'] = {};
+  Object.entries(global.messageWidgetStorage).forEach(([chatId, byId]) => {
+    Object.entries(byId).forEach(([messageId, {
+      senderId, threadId, storage: { local }, lastSeenAt, height, resizeAnchor,
+    }]) => {
+      const hasLocal = Boolean(local && Object.keys(local).length);
+      const isLoaded = Boolean(global.messages.byChatId[chatId]?.byId[Number(messageId)]);
+      if (!hasLocal && (!height || !isLoaded)) return;
+      result[chatId] ||= {};
+      result[chatId][Number(messageId)] = {
+        senderId, threadId, storage: hasLocal ? { local } : {}, lastSeenAt: hasLocal ? lastSeenAt : undefined,
+        height, resizeAnchor,
+      };
+    });
+  });
+  return result;
 }
 
 export function serializeGlobal<T extends GlobalState>(global: T) {
@@ -971,6 +1044,7 @@ function omitLocalVideo(video: ApiVideo): ApiVideo {
     ...video,
     blobUrl: undefined,
     previewBlobUrl: undefined,
+    editPreview: undefined,
   };
 }
 
@@ -983,9 +1057,10 @@ function omitLocalDocument(document: ApiDocument): ApiDocument {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, accountDaysTtl,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, accountDaysTtl, chatThemes,
   } = global.settings;
 
+  // Cached palettes remain usable offline; the catalog refresh restores wallpaper documents in the worker
   return {
     byKey,
     privacy: {},
@@ -993,6 +1068,7 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     lastPremiumBandwithNotificationDate,
     notifyDefaults,
     accountDaysTtl,
+    chatThemes,
   };
 }
 
@@ -1023,6 +1099,8 @@ function reduceWallet<T extends GlobalState>(global: T): GlobalState['wallet'] {
     state: wallet.state,
     // The logout warning counts their last known balances while the network has not answered
     savedWallets: wallet.savedWallets,
+    // Kept to be saved after a reload
+    cardDraft: wallet.cardDraft,
     // Sent transfers are kept with their hash and seqno, and transfers without an answer with their body hashes. A
     // transfer that did not reach the server is not kept. The history cursor is reset to the stale marker.
     // The chat card of a pending transfer is not cached, and after a reload its local id can go to another message
@@ -1066,6 +1144,18 @@ function migrateButtonActions(cached: GlobalState) {
 
 // A cache saved by an earlier app version holds TON amounts as plain numbers, and the wallet balance is an
 // `ApiTonAmount` object
+// Collectibles compare by the raw NFT address. A cached card has its stickers without one and comes again with the
+// profile.
+function migrateWalletNftAddresses(cached: GlobalState) {
+  Object.values(cached.users.fullInfoById).forEach((fullInfo) => {
+    delete fullInfo.walletCard;
+  });
+
+  cached.wallet?.transactions?.forEach(({ collectible }) => {
+    if (collectible) collectible.address = toRawAddress(collectible.address) ?? collectible.address;
+  });
+}
+
 function migrateNanotonsToBigInt(cached: GlobalState) {
   const { wallet, appConfig } = cached;
 

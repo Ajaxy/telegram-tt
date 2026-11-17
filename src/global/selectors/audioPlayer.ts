@@ -14,10 +14,14 @@ import {
 } from '../../util/audioPlayback/mediaPool';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { buildSearchResultKey, isSearchResultKey, parseSearchResultKey } from '../../util/keys/searchResultKey';
-import { getRichMessageAudios, getWebPageAudio } from '../helpers/messageMedia';
+import {
+  getRichMessageAudios, getRichMessageMediaBlocks, getSharedMediaKey, getSharedMediaKeys, getWebPageAudio,
+  isRichMediaMessage, parseSharedMediaKey,
+} from '../helpers/messageMedia';
 import { hasMessageTtl } from '../helpers/messages';
 import {
-  selectChatMessageOrEphemeral, selectFullWebPage, selectScheduledMessage, selectWebPageFromMessage,
+  selectChatMessageOrEphemeral, selectChatMessages, selectFullWebPage, selectScheduledMessage,
+  selectWebPageFromMessage,
 } from './messages';
 import { selectChatMediaSearch } from './middleSearch';
 import { selectMusicSearchAudio } from './musicPicker';
@@ -28,7 +32,6 @@ const NEXT_DELTA_BY_SOURCE_TYPE: Record<PlaybackSource['type'], number> = {
   chat: -1,
   globalSearch: 1,
   savedMusic: 1,
-  richMessage: 1,
   single: 0,
 };
 
@@ -50,6 +53,14 @@ export function selectPlaybackMessage<T extends GlobalState>(global: T, itemRef?
   return itemRef.isScheduled
     ? selectScheduledMessage(global, itemRef.chatId, itemRef.messageId)
     : selectChatMessageOrEphemeral(global, itemRef.chatId, itemRef.messageId);
+}
+
+// Round videos without TTL are the ones that can leave their message for the floating player
+export function selectPlaybackRoundVideo<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
+  if (itemRef?.type !== 'message' || itemRef.documentId) return undefined;
+
+  const message = selectPlaybackMessage(global, itemRef);
+  return message?.content.video?.isRound && !hasMessageTtl(message) ? message : undefined;
 }
 
 export function selectPlaybackMedia<T extends GlobalState>(global: T, itemRef?: PlaybackItemRef) {
@@ -93,19 +104,16 @@ function selectMessagePlaybackMedia<T extends GlobalState>(
   return audio || voice || video || getWebPageAudio(selectWebPageFromMessage(global, message));
 }
 
-export function selectRichMessageAudios<T extends GlobalState>(global: T, chatId: string, messageId: number) {
-  const richMessage = selectChatMessageOrEphemeral(global, chatId, messageId)?.content.richMessage;
-  return richMessage && getRichMessageAudios(richMessage);
-}
-
 function selectInstantViewAudio<T extends GlobalState>(global: T, webPageId: string, documentId: string) {
   return selectFullWebPage(global, webPageId)?.cachedPageAudioById?.[documentId];
 }
 
-export function makeMessageTrackKeyFrom(message: ApiMessage, isScheduled = message.isScheduled) {
+export function makeMessageTrackKeyFrom(
+  message: ApiMessage, isScheduled = message.isScheduled, documentId?: string,
+) {
   return isScheduled
-    ? makeScheduledMessageTrackKey(message.chatId, message.id)
-    : makeMessageTrackKey(message.chatId, message.id);
+    ? makeScheduledMessageTrackKey(message.chatId, message.id, documentId)
+    : makeMessageTrackKey(message.chatId, message.id, documentId);
 }
 
 export function makeTrackKeyFromItem(itemRef: PlaybackItemRef): TrackKey {
@@ -141,6 +149,52 @@ const SEGMENT_BY_SEARCH_PARAMS = new WeakMap<ChatMediaSearchParams, {
   segment: ChatMediaSearchSegment | undefined;
 }>();
 const INDEX_BY_KEYS = new WeakMap<readonly PlaylistKey[], { currentKey: PlaylistKey; index: number }>();
+const KEYS_BY_FOUND_IDS = new WeakMap<readonly number[], {
+  messagesById?: Record<number, ApiMessage>;
+  keys: PlaylistKey[];
+}>();
+
+// Chat playlists use shared media keys, so tracks from rich messages play between the regular ones
+function selectChatPlaylistKeys<T extends GlobalState>(
+  global: T, chatId: string, foundIds: readonly number[], mediaType: PlaybackMediaType,
+) {
+  const messagesById = selectChatMessages(global, chatId);
+  const memoized = KEYS_BY_FOUND_IDS.get(foundIds);
+  if (memoized?.messagesById === messagesById) return memoized.keys;
+
+  const keys = foundIds.flatMap((messageId): PlaylistKey[] => {
+    const message = messagesById?.[messageId];
+    // Chat playlists step towards older messages, so a message's tracks are reversed to play in reading order
+    return message && isRichMediaMessage(message)
+      ? getSharedMediaKeys(messagesById, [messageId], mediaType).reverse()
+      : [messageId];
+  });
+  KEYS_BY_FOUND_IDS.set(foundIds, { messagesById, keys });
+
+  return keys;
+}
+
+export function selectChatPlaylistTrack<T extends GlobalState>(global: T, chatId: string, key: PlaylistKey) {
+  const { messageId, mediaIndex } = parseSharedMediaKey(key);
+  const richMessage = mediaIndex !== undefined
+    ? selectChatMessageOrEphemeral(global, chatId, messageId)?.content.richMessage : undefined;
+  const block = richMessage && getRichMessageMediaBlocks(richMessage)[mediaIndex!];
+
+  return { messageId, documentId: block?.type === 'audio' ? block.audio.id : undefined };
+}
+
+function selectChatPlaylistKey<T extends GlobalState>(
+  global: T, chatId: string, messageId: number, documentId?: string,
+): PlaylistKey | undefined {
+  if (!documentId) return messageId;
+
+  const message = selectChatMessageOrEphemeral(global, chatId, messageId);
+  const richMessage = message?.content.richMessage;
+  const mediaIndex = richMessage ? getRichMessageMediaBlocks(richMessage)
+    .findIndex((block) => block.type === 'audio' && block.audio.id === documentId) : -1;
+
+  return mediaIndex !== -1 ? getSharedMediaKey(message, mediaIndex) : undefined;
+}
 
 export function selectPlaylistSegment<T extends GlobalState>(
   global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -169,14 +223,14 @@ export function selectPlaylistKeys<T extends GlobalState>(
   const source = selectPlaybackSource(global, tabId);
 
   switch (source?.type) {
-    case 'chat':
-      return selectPlaylistSegment(global, tabId)?.foundIds;
+    case 'chat': {
+      const foundIds = selectPlaylistSegment(global, tabId)?.foundIds;
+      return foundIds && selectChatPlaylistKeys(global, source.chatId, foundIds, source.mediaType);
+    }
     case 'globalSearch':
       return selectTabState(global, tabId).globalSearch.resultsByType?.[source.mediaType]?.foundIds;
     case 'savedMusic':
       return selectUserSavedMusic(global, source.peerId)?.ids;
-    case 'richMessage':
-      return selectRichMessageAudios(global, source.chatId, source.messageId)?.ids;
     default:
       return undefined;
   }
@@ -189,13 +243,13 @@ export function selectCurrentPlaylistKey<T extends GlobalState>(
 
   switch (source?.type) {
     case 'chat':
-      return activeItem?.type === 'message' ? activeItem.messageId : undefined;
+      return activeItem?.type === 'message'
+        ? selectChatPlaylistKey(global, activeItem.chatId, activeItem.messageId, activeItem.documentId)
+        : undefined;
     case 'globalSearch':
       return activeItem?.type === 'message' ? buildSearchResultKey(activeItem.chatId, activeItem.messageId) : undefined;
     case 'savedMusic':
       return activeItem?.type === 'savedMusic' ? activeItem.audioId : undefined;
-    case 'richMessage':
-      return activeItem?.type === 'message' ? activeItem.documentId : undefined;
     default:
       return undefined;
   }
@@ -288,10 +342,6 @@ export function selectIsPlaylistOrphan<T extends GlobalState>(
       const savedMusic = selectUserSavedMusic(global, source.peerId);
       return Boolean(savedMusic) && !savedMusic.ids.includes(currentKey as string);
     }
-    case 'richMessage': {
-      const ids = selectRichMessageAudios(global, source.chatId, source.messageId)?.ids;
-      return Boolean(ids) && !ids.includes(currentKey as string);
-    }
     default:
       return false;
   }
@@ -325,12 +375,11 @@ export function selectPlaylistWrapKey<T extends GlobalState>(
         : searchParams.segments.find(isEndLoaded);
       if (!segment) return undefined;
 
-      const { foundIds } = segment;
-      return selectPlayablePlaylistEdgeKey(global, foundIds, isPastStart, tabId);
+      const segmentKeys = selectChatPlaylistKeys(global, source.chatId, segment.foundIds, source.mediaType);
+      return selectPlayablePlaylistEdgeKey(global, segmentKeys, isPastStart, tabId);
     }
     case 'savedMusic':
     case 'globalSearch':
-    case 'richMessage':
       if (!isPastStart) return selectPlayablePlaylistEdgeKey(global, keys, false, tabId);
 
       return selectIsPlaylistEdgeLoaded(global, false, tabId)
@@ -354,8 +403,8 @@ function selectPlayablePlaylistEdgeKey<T extends GlobalState>(
 function selectIsSkippedInPlaylist<T extends GlobalState>(global: T, key: PlaylistKey, tabId: number) {
   const source = selectPlaybackSource(global, tabId);
   let message: ApiMessage | undefined;
-  if (source?.type === 'chat' && typeof key === 'number') {
-    message = selectChatMessageOrEphemeral(global, source.chatId, key);
+  if (source?.type === 'chat') {
+    message = selectChatMessageOrEphemeral(global, source.chatId, parseSharedMediaKey(key).messageId);
   } else if (source?.type === 'globalSearch' && isSearchResultKey(key)) {
     const [chatId, messageId] = parseSearchResultKey(key);
     message = selectChatMessageOrEphemeral(global, chatId, messageId);
@@ -517,6 +566,15 @@ export function selectCanGoPrev<T extends GlobalState>(
     || selectIsWrapTargetMissing(global, false, tabId);
 }
 
+export function selectUpcomingTrackKey<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (!selectCanGoNext(global, tabId)) return undefined;
+
+  return selectIsShuffling(global, tabId)
+    ? selectShuffleForwardKey(global, tabId) : selectNextTrackKey(global, tabId);
+}
+
 export function selectHasPlaylistWindow<T extends GlobalState>(
   global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -531,10 +589,10 @@ export function selectNextTrackMedia<T extends GlobalState>(
   if (!source || nextKey === undefined) return undefined;
 
   switch (source.type) {
-    case 'chat':
-      return typeof nextKey === 'number'
-        ? selectMessagePlaybackMedia(global, source.chatId, nextKey)
-        : undefined;
+    case 'chat': {
+      const { messageId, documentId } = selectChatPlaylistTrack(global, source.chatId, nextKey);
+      return selectMessagePlaybackMedia(global, source.chatId, messageId, documentId);
+    }
     case 'globalSearch': {
       if (!isSearchResultKey(nextKey)) return undefined;
 
@@ -543,10 +601,6 @@ export function selectNextTrackMedia<T extends GlobalState>(
     }
     case 'savedMusic':
       return typeof nextKey === 'string' ? selectSavedMusicAudio(global, source.peerId, nextKey) : undefined;
-    case 'richMessage':
-      return typeof nextKey === 'string'
-        ? selectMessagePlaybackMedia(global, source.chatId, source.messageId, nextKey)
-        : undefined;
     default:
       return undefined;
   }
@@ -560,8 +614,10 @@ export function selectNextMediaTrackKey<T extends GlobalState>(
   if (!source || nextKey === undefined) return undefined;
 
   switch (source.type) {
-    case 'chat':
-      return typeof nextKey === 'number' ? makeMessageTrackKey(source.chatId, nextKey) : undefined;
+    case 'chat': {
+      const { messageId, documentId } = selectChatPlaylistTrack(global, source.chatId, nextKey);
+      return makeMessageTrackKey(source.chatId, messageId, documentId);
+    }
     case 'globalSearch': {
       if (!isSearchResultKey(nextKey)) return undefined;
 
@@ -570,8 +626,6 @@ export function selectNextMediaTrackKey<T extends GlobalState>(
     }
     case 'savedMusic':
       return typeof nextKey === 'string' ? makeSavedMusicTrackKey(source.peerId, nextKey) : undefined;
-    case 'richMessage':
-      return typeof nextKey === 'string' ? makeMessageTrackKey(source.chatId, source.messageId, nextKey) : undefined;
     default:
       return undefined;
   }
@@ -582,9 +636,6 @@ export function selectHasPlaybackModes<T extends GlobalState>(
 ) {
   const source = selectPlaybackSource(global, tabId);
   if (!source || source.type === 'single') return false;
-  if (source.type === 'richMessage') {
-    return (selectRichMessageAudios(global, source.chatId, source.messageId)?.ids.length ?? 0) > 1;
-  }
 
   return source.type === 'savedMusic' || source.mediaType === 'audio';
 }
@@ -607,6 +658,7 @@ export function selectPlaylistLoadDirection<T extends GlobalState>(
     return LoadMoreDirection.Backwards;
   }
 
-  if (areAllItemsLoadedForwards || index < segment.foundIds.length - 1 - MEDIA_PRELOAD_OFFSET) return undefined;
+  const keyCount = selectPlaylistKeys(global, tabId)!.length;
+  if (areAllItemsLoadedForwards || index < keyCount - 1 - MEDIA_PRELOAD_OFFSET) return undefined;
   return LoadMoreDirection.Forwards;
 }

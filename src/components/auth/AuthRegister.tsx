@@ -1,6 +1,7 @@
 import { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ApiAvatarUpload } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
@@ -23,7 +24,7 @@ const AuthRegister = ({
 
   const lang = useLang();
   const [isButtonShown, setIsButtonShown] = useState(false);
-  const [croppedFile, setCroppedFile] = useState<File | undefined>();
+  const [avatar, setAvatar] = useState<ApiAvatarUpload | undefined>();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
 
@@ -49,8 +50,8 @@ const AuthRegister = ({
 
     signUp({ firstName, lastName });
 
-    if (croppedFile) {
-      uploadProfilePhoto({ file: croppedFile });
+    if (avatar) {
+      uploadProfilePhoto({ photo: avatar });
     }
   }
 
@@ -58,7 +59,7 @@ const AuthRegister = ({
     <div id="auth-registration-form" className="custom-scroll">
       <div className="auth-form">
         <form action="" method="post" onSubmit={handleSubmit}>
-          <AvatarEditable onChange={setCroppedFile} />
+          <AvatarEditable isOwn onChange={setAvatar} />
           <h2>{lang('YourName')}</h2>
           <p className="note">{lang('LoginRegisterDesc')}</p>
           <InputText

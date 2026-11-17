@@ -2,22 +2,56 @@
 
 // General styles
 .Message {
+  @each $role in background, text, secondary, links, links-decoration, links-decoration-hover, meta,
+    accent, accent-foreground, control, control-foreground, file-title, file-description,
+    checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
+    selected, selected-text,
+    text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
+    --message-#{$role}: var(--message-incoming-#{$role});
+  }
 
-  --background-color: var(--color-background);
-  --hover-color: var(--color-reply-hover);
-  --color-reaction: var(--color-message-reaction);
-  --hover-color-reaction: var(--color-message-reaction-hover);
+  --color-background: var(--message-background);
+  --color-background-selected: var(--message-selected);
+  --color-background-own-selected: var(--message-selected);
+  --color-text: var(--message-text);
+  --color-text-rgb: var(--message-text-rgb);
+  --color-text-secondary: var(--message-secondary);
+  --color-text-secondary-rgb: var(--message-secondary-rgb);
+  --color-text-meta: var(--message-meta);
+  --color-text-meta-rgb: var(--message-meta-rgb);
+  --color-message-meta-own: var(--message-meta);
+  --color-links: var(--message-links);
+  --color-primary: var(--message-control);
+  --color-primary-shade: color-mix(in srgb, var(--message-control) 90%, black);
+  --color-primary-shade-darker: color-mix(in srgb, var(--message-control) 85%, black);
+  --color-active: var(--message-control);
+  --color-active-darker: var(--message-control);
+  --color-primary-foreground: var(--message-control-foreground);
+  --color-accent-own: var(--message-accent);
+  --color-accent-own-rgb: var(--message-accent-rgb);
+  --color-text-green: var(--message-accent);
+  --color-text-green-rgb: var(--message-accent-rgb);
+  --color-interactive-active: var(--message-accent);
+  --color-interactive-inactive: var(--message-tint);
+  --color-interactive-buffered: var(--message-tint);
+  --color-interactive-element-hover: var(--message-tint);
+  --background-color: var(--message-background);
+  --hover-color: var(--message-tint);
+  --color-reaction: color-mix(in srgb, var(--message-accent) 10%, transparent);
+  --color-reaction-hover: color-mix(in srgb, var(--message-accent) 30%, transparent);
   --text-color-reaction: var(--accent-color);
   --color-reaction-chosen: var(--accent-color);
-  --text-color-reaction-chosen: #FFFFFF;
-  --hover-color-reaction-chosen: var(--color-message-reaction-chosen-hover);
-  --active-color: var(--color-reply-active);
+  --text-color-reaction-chosen: var(--message-accent-foreground);
+  --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 90%, black);
+  --active-color: var(--message-tint-hover);
   --max-width: 29rem;
-  --accent-color: var(--color-primary);
-  --accent-shade-color: var(--color-primary-shade);
-  --secondary-color: var(--color-text-secondary);
-  --color-voice-transcribe: var(--color-voice-transcribe-button);
-  --thumbs-background: var(--color-background);
+  --accent-color: var(--message-accent);
+  --accent-shade-color: var(--message-accent);
+  --accent-background-color: var(--message-tint);
+  --accent-background-active-color: var(--message-tint-hover);
+  --secondary-color: var(--message-secondary);
+  --color-voice-transcribe: var(--message-tint);
+  --thumbs-background: var(--message-background);
   --deleting-translate-x: -50%;
   --select-message-scale: 0.9;
 
@@ -33,11 +67,9 @@
 
   .theme-dark & {
     --color-reaction: rgb(255, 255, 255, 0.1);
-    --hover-color-reaction: rgb(255, 255, 255, 0.2);
-    --text-color-reaction: var(--color-text);
-
-    --color-reaction-chosen: #3390ec;
-    --hover-color-reaction-chosen: #4096ec;
+    --color-reaction-hover: rgb(255, 255, 255, 0.2);
+    --text-color-reaction: var(--message-text);
+    --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 90%, white);
   }
 
   &.is-swiped {
@@ -197,44 +229,28 @@
   }
 
   &.own {
-    --background-color: var(--color-background-own);
-    --hover-color: var(--color-reply-own-hover);
-    --color-reaction: var(--color-message-reaction-own);
-    --hover-color-reaction: var(--color-message-reaction-hover-own);
-    --text-color-reaction: var(--accent-color);
-    --color-reaction-chosen: var(--accent-color);
-    --text-color-reaction-chosen: var(--color-background);
-    --hover-color-reaction-chosen: var(--color-message-reaction-chosen-hover-own);
-    --active-color: var(--color-reply-own-active);
+    @each $role in background, text, secondary, links, links-decoration, links-decoration-hover, meta,
+      accent, accent-foreground, control, control-foreground, file-title, file-description,
+      checkbox-fill, checkbox-foreground, table-background, table-border, tint, tint-hover,
+      selected, selected-text,
+      text-rgb, secondary-rgb, meta-rgb, accent-rgb, ripple, code-dark {
+      --message-#{$role}: var(--message-outgoing-#{$role});
+    }
+
+    --color-text-selection: var(--message-outgoing-text-selection);
+    --color-selection-highlight-emoji: var(--message-outgoing-text-selection-emoji);
+
     --max-width: 30rem;
-    --accent-color: var(--color-accent-own);
-    --accent-shade-color: var(--color-active);
-    --secondary-color: var(--color-accent-own);
-    --color-code: var(--color-code-own);
-    --color-code-bg: var(--color-code-own-bg);
-    --color-links: var(--color-own-links);
     --deleting-translate-x: 50%;
-    --color-text-green: var(--color-accent-own);
-    --color-voice-transcribe: var(--color-voice-transcribe-button-own);
-    --thumbs-background: var(--color-background-own);
+    --text-color-reaction-chosen: var(--message-background);
 
     flex-direction: row-reverse;
 
     .theme-dark & {
-      --color-reaction: rgb(255, 255, 255, 0.1);
-      --hover-color-reaction: rgb(255, 255, 255, 0.2);
-      --text-color-reaction: var(--color-text);
-
-      --color-reaction-chosen: rgb(255, 255, 255, 0.75);
-      --hover-color-reaction-chosen: rgb(255, 255, 255, 0.85);
-      --text-color-reaction-chosen: rgb(62, 62, 62);
-    }
-
-    body.is-ios &,
-    body.is-macos & {
-      --color-background-own: var(--color-background-own-apple);
-      --color-reply-own-hover: var(--color-reply-own-hover-apple);
-      --color-reply-own-active: var(--color-reply-own-active-apple);
+      --color-reaction-chosen: color-mix(in srgb, var(--message-accent) 75%, transparent);
+      --color-reaction-chosen-hover: color-mix(in srgb, var(--message-accent) 85%, transparent);
+      // Resolves to the old rgb(62, 62, 62) over the default white accent
+      --text-color-reaction-chosen: color-mix(in srgb, var(--message-accent-foreground) 75%, var(--message-accent));
     }
 
     &.first-in-group:not(.last-in-group) {
@@ -279,12 +295,8 @@
     }
   }
 
-  &.is-dissolving {
-    visibility: hidden;
-  }
-
   &.is-story-mention {
-    --background-color: var(--pattern-color);
+    --background-color: var(--message-service-background);
 
     .message-content-wrapper {
       margin-right: auto;
@@ -306,7 +318,7 @@
       border-radius: var(--border-radius-messages);
 
       font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
-      color: white;
+      color: var(--message-service-text);
       text-align: center;
       overflow-wrap: anywhere;
 
@@ -618,7 +630,7 @@
         .message-content {
           --background-color: var(--color-background-own-selected);
 
-          background: var(--color-background-own-selected);
+          background-color: var(--color-background-own-selected);
         }
       }
     }
@@ -628,7 +640,7 @@
     }
 
     .message-content {
-      transition: background-color var(--select-transition);
+      transition: background-color var(--message-color-transition-duration, 200ms) ease-out;
     }
 
     &.own {
@@ -661,14 +673,14 @@
     border-radius: 50%;
 
     font-size: 1rem;
-    color: white;
+    color: var(--color-primary-foreground);
 
     opacity: 0;
 
     transition: opacity var(--select-transition);
 
     &-icon {
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
     }
 
     .theme-dark & {
@@ -723,6 +735,19 @@
     }
   }
 
+  // The shared layer lets the focus outline override `Button`'s reset
+  @layer ui.button {
+    .Button:focus-visible {
+      outline: 0.125rem solid currentColor !important;
+      outline-offset: -0.125rem;
+    }
+  }
+
+  .Button,
+  .EmbeddedMessage {
+    --ripple-color: var(--message-ripple);
+  }
+
   .message-summary {
     cursor: var(--custom-cursor, pointer);
 
@@ -767,7 +792,7 @@
     border-radius: 1.125rem;
 
     opacity: 0;
-    background-color: var(--action-message-bg);
+    background-color: var(--message-service-background);
 
     transition: opacity 150ms;
 
@@ -780,7 +805,7 @@
     overflow: visible;
     width: 2.25rem;
     height: 2.25rem;
-    color: white;
+    color: var(--message-service-text);
 
     &.action-summary .icon {
       font-size: 1.25rem;

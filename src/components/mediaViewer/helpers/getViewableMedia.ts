@@ -2,9 +2,16 @@ import type {
   ApiMessage, ApiPageCaption, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { MediaViewerMedia, MediaViewerOrigin, MediaViewerPageMedia } from '../../../types';
+import type { MediaViewerMedia, MediaViewerPageMedia } from '../../../types';
 
-import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
+import {
+  getMessageContent,
+  getRichMediaMessage,
+  getRichMessageMediaBlocks,
+  isDocumentPhoto,
+  isDocumentVideo,
+  isRichMediaMessage,
+} from '../../../global/helpers';
 import { selectWebPageFromMessage } from '../../../global/selectors';
 import { getPageMediaBlockMedia } from '../../iv/helpers/pageMedia';
 
@@ -93,7 +100,7 @@ export function getMediaViewerItem({
 }
 
 export default function selectViewableMedia(
-  global: GlobalState, origin?: MediaViewerOrigin, params?: MediaViewerItem,
+  global: GlobalState, params?: MediaViewerItem,
 ): ViewableMedia | undefined {
   if (!params) return undefined;
 
@@ -126,6 +133,22 @@ export default function selectViewableMedia(
       };
     }
     return undefined;
+  }
+
+  if (params.type === 'message' && isRichMediaMessage(params.message)) {
+    const mediaIndex = params.mediaIndex || 0;
+    const mediaMessage = getRichMediaMessage(params.message, mediaIndex);
+    if (!mediaMessage) return undefined;
+
+    const { document, photo, video } = getMessageContent(mediaMessage);
+    const media = video || photo || (document && (isDocumentPhoto(document) || isDocumentVideo(document))
+      ? document : undefined);
+    if (!media) return undefined;
+
+    return {
+      media,
+      caption: getRichMessageMediaBlocks(params.message.content.richMessage!)[mediaIndex].caption,
+    };
   }
 
   const {

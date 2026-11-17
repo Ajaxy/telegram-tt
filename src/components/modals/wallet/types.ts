@@ -1,8 +1,8 @@
+import type { ApiWalletGiftDeposit } from '../../../api/types';
+
 export enum WalletScreen {
   Main,
   Receive,
-  Buy,
-  BuyAmount,
   Currency,
   Send,
   SendAmount,
@@ -37,6 +37,7 @@ export type WalletTransferPayload = {
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
   collectibleAddress?: string;
+  giftDeposit?: ApiWalletGiftDeposit;
   // The relayer was to pay the fee
   isGasless?: boolean;
   isAnimated?: boolean;

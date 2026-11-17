@@ -11,7 +11,7 @@ import { getSavedGiftKey } from '../../../../global/helpers/stars';
 import { selectTabState } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { throttle } from '../../../../util/schedulers';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';

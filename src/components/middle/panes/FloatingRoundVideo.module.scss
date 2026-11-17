@@ -1,4 +1,28 @@
+.backdrop {
+  pointer-events: none;
+
+  position: fixed;
+  z-index: var(--z-modal-low-priority);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  transition: opacity 200ms;
+
+  &.backdropShown {
+    pointer-events: auto;
+    opacity: 1;
+  }
+}
+
 .floating {
+  --round-video-size: 10rem;
+  --round-video-button-size: 1.5rem;
+
   touch-action: none;
 
   position: fixed;
@@ -7,12 +31,13 @@
   left: 0;
   transform: translate(var(--round-video-x, calc(100vw - 100% - 1rem)), var(--round-video-y, 5.5rem));
 
-  width: 10rem;
-  height: 10rem;
+  width: var(--round-video-size);
+  height: var(--round-video-size);
   border-radius: 50%;
 
   visibility: hidden;
   opacity: 0;
+  outline: none;
   box-shadow: 0 0.125rem 0.75rem #0006;
 
   transition: opacity 150ms;
@@ -20,6 +45,55 @@
   &.shown {
     visibility: visible;
     opacity: 1;
+  }
+
+  &.snapping {
+    transition: opacity 150ms, transform 250ms cubic-bezier(0.33, 1, 0.68, 1);
+
+    :global(body.no-page-transitions) & {
+      transition: opacity 150ms;
+    }
+  }
+
+  &.large {
+    --round-video-size: min(30rem, 75vmin);
+    --round-video-button-size: 2rem;
+
+    cursor: var(--custom-cursor, pointer);
+    z-index: calc(var(--z-modal-low-priority) + 1);
+    transform: translate(calc(50vw - 50%), calc(var(--vh, 1vh) * 50 - 50%));
+  }
+
+  // Message circle the player zooms out of or back into
+  &.zoomFrom,
+  &.zoomBack {
+    --round-video-size: var(--round-video-origin-size);
+
+    z-index: calc(var(--z-modal-low-priority) + 1);
+    transform: translate(var(--round-video-origin-x), var(--round-video-origin-y));
+  }
+
+  &.zoomFrom {
+    transition: none;
+  }
+
+  &.zoomBack {
+    pointer-events: none;
+  }
+
+  &.zooming {
+    z-index: calc(var(--z-modal-low-priority) + 1);
+    // The fixed player is out of flow, so resizing relayouts only its own content
+    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+    transition: opacity 150ms, transform 200ms ease, width 200ms ease, height 200ms ease;
+  }
+
+  // Separate from `transform`, so the shift does not disturb the player position
+  &.closing {
+    pointer-events: none;
+    translate: 0 -1rem;
+    opacity: 0;
+    transition: opacity 200ms, translate 200ms ease-out;
   }
 }
 
@@ -51,11 +125,24 @@
 
 .progress {
   pointer-events: none;
+  touch-action: none;
 
   position: absolute;
   top: 0;
   left: 0;
 
+  width: 100%;
+  height: 100%;
+
+  &:focus-visible {
+    border-radius: 50%;
+    outline: 0.125rem solid var(--color-primary);
+    outline-offset: -0.125rem;
+  }
+}
+
+.ring {
+  display: block;
   width: 100%;
   height: 100%;
 }
@@ -66,6 +153,17 @@
   stroke-linecap: round;
   stroke-opacity: 0.5;
   stroke-width: 1.5;
+}
+
+.hitArea {
+  pointer-events: stroke;
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+}
+
+.thumb {
+  fill: #fff;
 }
 
 .playbackButton {
@@ -90,8 +188,32 @@
   }
 }
 
-.closeButton {
+// Corner buttons keep the same spot relative to the circle in both sizes
+.cornerButton {
+  --button-background-color: var(--action-message-bg);
+  --button-active-background-color: var(--action-message-bg);
+  --button-no-ripple-background-color: var(--action-message-bg);
+
   position: absolute;
-  top: 0;
-  right: 0;
+  top: calc(7.5% - var(--round-video-button-size) / 2);
+
+  width: var(--round-video-button-size);
+  height: var(--round-video-button-size);
+  padding: 0;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.resizeButton {
+  left: calc(7.5% - var(--round-video-button-size) / 2);
+}
+
+.closeButton {
+  right: calc(7.5% - var(--round-video-button-size) / 2);
+}
+
+.cornerIcon {
+  font-size: calc(var(--round-video-button-size) * 2 / 3);
 }

@@ -1,10 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiOnrampAvailability,
-  ApiOnrampLimits,
-  ApiOnrampProvider,
-  ApiOnrampQuote,
+  ApiMediaAreaCoordinates,
   ApiOnrampSession,
   ApiTonConnectRequest,
   ApiTonConnectSession,
@@ -18,7 +15,7 @@ import type {
   ApiWalletTransactionPeer,
 } from '../../types';
 
-import { toNonBounceableAddress } from '../../../lib/ton/address';
+import { toNonBounceableAddress, toRawAddress } from '../../../lib/ton/address';
 import { getBigIntAbs } from '../../../util/numbers';
 import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
@@ -27,11 +24,10 @@ import { buildApiWebDocument } from './messageContent';
 import { buildApiPeerId } from './peers';
 import { buildApiMediaAreaCoordinates } from './stories';
 
-const MODEL_TRAIT = 'Model';
 const FRAGMENT_NFT_HOST = 'nft.fragment.com';
+const MAX_PERCENT = 100;
 const FRAGMENT_URL = 'https://fragment.com';
 const FRAGMENT_METADATA_EXTENSION = '.json';
-const BACKDROP_TRAIT = 'Backdrop';
 // Fragment puts the item type in the first segment of its metadata and image paths
 const FRAGMENT_TYPES = ['gift', 'username', 'number'] as const;
 
@@ -198,7 +194,7 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
   if (imageSmall) addWebDocumentToLocalDb(imageSmall);
 
   const base = {
-    address,
+    address: buildNftAddressKey(address),
     name,
     description,
     attributes: attributes?.map(({ traitType, value }) => ({ traitType, value })),
@@ -207,42 +203,60 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
     // An item without a page of its own is sold from the Fragment home page
     fragmentUrl: buildFragmentUrl(contentUrl?.url) || FRAGMENT_URL,
   };
-  const type = getCollectibleType(contentUrl?.url, item.image?.url);
+  const gift = buildUniqueGiftFromNft(item);
+  const type = gift ? 'gift' : getCollectibleType(contentUrl?.url, item.image?.url);
 
-  if (type !== 'gift') {
-    return { ...base, type };
-  }
-
-  return {
-    ...base,
-    type,
-    model: attributes?.find(({ traitType }) => traitType === MODEL_TRAIT)?.value,
-    backdrop: attributes?.find(({ traitType }) => traitType === BACKDROP_TRAIT)?.value,
-  };
+  return type === 'gift' ? { ...base, type, gift } : { ...base, type };
 }
 
+// As in the iOS app, a malformed card is cleaned up: a repeated NFT keeps only its last sticker, and the background must
+// be one of the stickers
 export function buildApiWalletCard(card: GramJs.wallet.Card): ApiWalletCard {
   const {
     address, balance, stickers, bgNftItem,
   } = card;
 
+  const builtStickers = stickers?.map(buildApiWalletCardSticker).filter(Boolean);
+  const uniqueStickers = builtStickers?.filter((sticker, i) => (
+    !builtStickers.slice(i + 1).some(({ address: nftAddress }) => nftAddress === sticker.address)
+  ));
+  const backgroundAddress = bgNftItem && buildNftAddressKey(bgNftItem.address);
+
   return {
     address: toNonBounceableAddress(address),
     balance,
-    stickers: stickers?.map(buildApiWalletCardSticker).filter(Boolean),
-    backgroundGift: bgNftItem && buildUniqueGiftFromNft(bgNftItem),
+    stickers: uniqueStickers,
+    backgroundAddress: uniqueStickers?.some(({ address: nftAddress }) => nftAddress === backgroundAddress)
+      ? backgroundAddress
+      : undefined,
   };
 }
 
 // A sticker shows the model of a collectible gift, so an NFT of another kind has nothing to draw
 function buildApiWalletCardSticker({ coordinates, nft }: GramJs.wallet.CardSticker): ApiWalletCardSticker | undefined {
   const gift = buildUniqueGiftFromNft(nft);
-  if (!gift) return undefined;
+  const area = buildApiMediaAreaCoordinates(coordinates);
+  if (!gift || !getIsValidStickerArea(area)) return undefined;
 
   return {
-    coordinates: buildApiMediaAreaCoordinates(coordinates),
+    address: buildNftAddressKey(nft.address),
+    coordinates: area,
     gift,
   };
+}
+
+function getIsValidStickerArea({
+  x, y, width, height, rotation, radius,
+}: ApiMediaAreaCoordinates) {
+  return [x, y, width, height, rotation].every(Number.isFinite)
+    && x >= 0 && x <= MAX_PERCENT && y >= 0 && y <= MAX_PERCENT
+    && width > 0 && width <= MAX_PERCENT && height > 0 && height <= MAX_PERCENT
+    && (radius === undefined || (Number.isFinite(radius) && radius >= 0));
+}
+
+// One NFT comes in different address forms from different lists, so every list keeps the raw form, as in the iOS app
+function buildNftAddressKey(address: string) {
+  return toRawAddress(address) ?? address;
 }
 
 function buildUniqueGiftFromNft(nft: GramJs.wallet.NftItem) {
@@ -278,62 +292,11 @@ function buildFragmentUrl(metadataUrl?: string): string | undefined {
   }
 }
 
-export function buildApiOnrampProvider(provider: GramJs.OnrampProviderInfo): ApiOnrampProvider {
-  return {
-    id: provider.id,
-    name: provider.name,
-    cryptoCurrencies: provider.cryptoCurrencies,
-    hasBaseCurrencies: provider.supportsBaseCurrencies,
-    hasLimits: provider.supportsLimits,
-    hasQuote: provider.supportsQuote,
-  };
-}
-
 export function buildApiOnrampSession(session: GramJs.OnrampSession): ApiOnrampSession {
   return {
     provider: session.provider,
     sessionId: session.sessionId,
     url: session.url,
     expiresDate: session.expiresDate,
-  };
-}
-
-export function buildApiOnrampAvailability(availability: GramJs.OnrampAvailability): ApiOnrampAvailability {
-  return {
-    isAllowed: availability.allowed,
-    isBuyAllowed: availability.buyAllowed,
-    countryCode: availability.countryCode,
-    state: availability.state,
-    methods: availability.methods.map((method) => ({
-      paymentMethod: method.paymentMethod,
-      isAvailable: method.available,
-    })),
-  };
-}
-
-export function buildApiOnrampLimits(limits: GramJs.OnrampLimits): ApiOnrampLimits {
-  return {
-    baseCurrency: limits.baseCurrency,
-    baseMinAmount: limits.baseMinAmount,
-    baseMaxAmount: limits.baseMaxAmount,
-    cryptoMinAmount: limits.cryptoMinAmount,
-    cryptoMaxAmount: limits.cryptoMaxAmount,
-    paymentMethod: limits.paymentMethod,
-  };
-}
-
-export function buildApiOnrampQuote(quote: GramJs.OnrampQuote): ApiOnrampQuote {
-  return {
-    baseCurrency: quote.baseCurrency,
-    baseAmount: quote.baseAmount,
-    cryptoCurrency: quote.cryptoCurrency,
-    cryptoAmount: quote.cryptoAmount,
-    cryptoPrice: quote.cryptoPrice,
-    feeAmount: quote.feeAmount,
-    extraFeeAmount: quote.extraFeeAmount,
-    networkFeeAmount: quote.networkFeeAmount,
-    totalAmount: quote.totalAmount,
-    paymentMethod: quote.paymentMethod,
-    expiresDate: quote.expiresDate,
   };
 }

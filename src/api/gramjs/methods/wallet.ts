@@ -3,10 +3,16 @@ import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
+import type { Cell } from '../../../lib/ton/cell';
+import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ApiChat,
   ApiMessage,
+  ApiTonConnectEmulatedAction,
+  ApiTonConnectEmulation,
   ApiUser,
+  ApiWalletCardSticker,
+  ApiWalletGiftDeposit,
   ApiWalletStateResult,
   ApiWalletTransferFee,
   ApiWalletUserAddress,
@@ -16,21 +22,25 @@ import type {
   RotateWalletKeyResult,
   SendTonTransferError,
   SendTonTransferResult,
+  SetWalletCardStickersError,
+  SetWalletCardStickersResult,
   WalletBackupError,
   WalletBackupResult,
 } from '../../types';
+import type { ApiMessageActionGramTransfer } from '../../types/messageActions';
 
 import {
-  DEBUG, GRAM_TRANSFER_FEE_RESERVE, NFT_TRANSFER_ATTACHED_NANOS, NFT_TRANSFER_FORWARD_NANOS,
+  DEBUG, GIFT_DEPOSIT_MAX_NANOS, GRAM_TRANSFER_FEE_RESERVE, NFT_TRANSFER_ATTACHED_NANOS, NFT_TRANSFER_FORWARD_NANOS,
 } from '../../../config';
 import { unwatchAddressActivity, watchAddressActivity } from '../../../lib/ton/activityStream';
 import {
-  formatAddress, parseAddress, toNonBounceableAddress, toRawAddress,
+  formatAddress, parseAddress, toBounceableAddress, toNonBounceableAddress, toRawAddress,
 } from '../../../lib/ton/address';
 import {
   COMPOSITE_WORD_COUNT, deriveBip39MnemonicSeeds, deriveImportedWalletSeeds, deriveTonMnemonicSeeds,
   deriveWholeBip39MnemonicSeeds, isBip39Mnemonic,
 } from '../../../lib/ton/bip39';
+import { parseBoc } from '../../../lib/ton/boc';
 import { MAX_COINS } from '../../../lib/ton/cell';
 import { decryptE2eBlob, encryptE2eBlob, generateE2eSeed } from '../../../lib/ton/e2e';
 import { getEd25519PublicKey } from '../../../lib/ton/ed25519';
@@ -48,6 +58,7 @@ import {
   buildWalletInitBocs,
   deriveWalletAddress,
   encryptPreviousSigningSeed,
+  parseNftTransferPayload,
   TRANSFER_TTL_SECONDS,
 } from '../../../lib/ton/wallet';
 import { WALLET_IDB_STORE } from '../../../util/browser/idb';
@@ -62,18 +73,15 @@ import { buildLocalMessage } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildApiOnrampAvailability,
-  buildApiOnrampLimits,
-  buildApiOnrampProvider,
-  buildApiOnrampQuote,
   buildApiOnrampSession,
+  buildApiWalletCard,
   buildApiWalletCollectible,
   buildApiWalletSentTransfer,
   buildApiWalletStateResult,
   buildApiWalletTransaction,
 } from '../apiBuilders/wallet';
-import { buildInputUser, buildInputUserFromLocalDb } from '../gramjsBuilders';
-import { deserializeBytes, serializeBytes } from '../helpers/misc';
+import { buildInputUser, buildInputUserFromLocalDb, buildInputWalletCardSticker } from '../gramjsBuilders';
+import { deserializeBytes, serializeBytes, wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { getClient, invokeRequest } from './client';
 import { handleLocalMessageUpdate } from './messages';
@@ -124,6 +132,19 @@ type WalletKeyChange = {
   encryptedOldSeed?: Uint8Array;
 };
 
+type EmulateTraceResponse = ToncenterError & {
+  trace?: { tx_hash?: string };
+  transactions?: Record<string, {
+    description?: {
+      aborted?: boolean;
+      compute_ph?: { success?: boolean; exit_code?: number };
+      action?: { success?: boolean; result_code?: number };
+    };
+  }>;
+  actions?: { type?: string; success?: boolean; details?: Record<string, unknown> }[];
+  is_incomplete?: boolean;
+};
+
 type EstimateFeeResponse = ToncenterError & {
   source_fees?: {
     in_fwd_fee?: number;
@@ -133,7 +154,8 @@ type EstimateFeeResponse = ToncenterError & {
   };
 };
 
-// MoonPay rejects an uppercase coin code
+// The server id of the @walt bot, also @wallet, which sells Grams for cash and other crypto
+const ONRAMP_PROVIDER = 'wallet';
 const ONRAMP_CRYPTO_CURRENCY = 'gram';
 // Representation hash of the `WalletTg` trampoline code cell, as toncenter reports it
 const WALLET_TG_CODE_HASH = 'kUmuUcHkaJcQzr94MCl7Fqz7rbNjqSClN4k+f/7sp2g=';
@@ -339,6 +361,46 @@ export async function fetchWalletCollectibles({ offset = '', limit }: { offset?:
   };
 }
 
+export async function setWalletCardStickers({ stickers, backgroundAddress }: {
+  stickers: ApiWalletCardSticker[];
+  backgroundAddress?: string;
+}): Promise<SetWalletCardStickersResult> {
+  try {
+    const result = await invokeRequest(new GramJs.wallet.SetCardStickers({
+      stickers: stickers.map(buildInputWalletCardSticker),
+      bgNftAddress: backgroundAddress && toBounceableAddress(backgroundAddress),
+    }), { shouldThrow: true });
+
+    return result ? { card: buildApiWalletCard(result) } : { error: 'CARD_SAVE_FAILED' };
+  } catch (err: unknown) {
+    return { error: mapCardStickersRpcError(err) };
+  }
+}
+
+function mapCardStickersRpcError(err: unknown): SetWalletCardStickersError {
+  if (!(err instanceof RPCError)) return 'CARD_SAVE_FAILED';
+
+  const { errorMessage } = err;
+  if (errorMessage.startsWith('FLOOD_WAIT')) return 'FLOOD';
+
+  switch (errorMessage) {
+    case 'WALLET_STICKER_LIMIT_EXCEEDED':
+      return 'CARD_STICKER_LIMIT';
+    case 'WALLET_STICKER_SAVED_PROFILE':
+      return 'CARD_SAVED_PROFILE';
+    case 'WALLET_CARD_BG_NOT_ALLOWED':
+      return 'CARD_BACKGROUND_NOT_ALLOWED';
+    case 'WALLET_STICKER_INVALID':
+    case 'WALLET_STICKER_DUPLICATE':
+    case 'WALLET_ADDRESS_INVALID':
+    case 'WALLET_NFT_NOT_OWNED':
+    case 'WALLET_NFT_INVALID':
+      return 'CARD_STICKER_INVALID';
+    default:
+      return 'CARD_SAVE_FAILED';
+  }
+}
+
 // `false` for a domain that points to no wallet; an answer with several records or another domain is not trusted
 export async function fetchWalletDomainAddress({ domain }: { domain: string }) {
   const result = await invokeTonApiRequest<DnsRecordsResponse>({
@@ -356,104 +418,18 @@ export async function fetchWalletDomainAddress({ domain }: { domain: string }) {
   return wallet && parseTonTransferAddress(wallet) ? toNonBounceableAddress(wallet) : false;
 }
 
-export async function fetchOnrampProviders() {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampProviders({
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(buildApiOnrampProvider);
-}
-
-export async function fetchOnrampBaseCurrencies({ provider }: { provider: string }) {
-  return invokeRequest(new GramJs.payments.GetOnrampBaseCurrencies({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-  }));
-}
-
-export async function fetchOnrampAvailability({
-  provider, baseCurrency,
-}: {
-  provider: string;
-  baseCurrency?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampAvailability({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-  }));
-
-  return result && buildApiOnrampAvailability(result);
-}
-
-export async function fetchOnrampLimits({
-  provider, baseCurrency, paymentMethod,
-}: {
-  provider: string;
-  baseCurrency: string;
-  paymentMethod?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampLimits({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-    paymentMethod,
-  }));
-
-  return result && buildApiOnrampLimits(result);
-}
-
-// Exactly one of `baseAmount` and `cryptoAmount` must be set
-export async function fetchOnrampQuote({
-  provider, baseCurrency, baseAmount, cryptoAmount, paymentMethod,
-}: {
-  provider: string;
-  baseCurrency: string;
-  baseAmount?: string;
-  cryptoAmount?: string;
-  paymentMethod?: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetOnrampQuote({
-    provider,
-    cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
-    baseCurrency,
-    baseAmount,
-    cryptoAmount,
-    paymentMethod,
-  }));
-
-  return result && buildApiOnrampQuote(result);
-}
-
 export async function createOnrampSession({
-  provider, ownAddress, baseCurrency, baseAmount, paymentMethod, memo, theme, successReturnUrl, failReturnUrl,
+  ownAddress, theme,
 }: {
-  provider: string;
   ownAddress: string;
-  baseCurrency?: string;
-  baseAmount?: string;
-  paymentMethod?: string;
-  memo?: string;
   // `dark` or `light`
   theme?: string;
-  successReturnUrl?: string;
-  failReturnUrl?: string;
 }) {
   const result = await invokeRequest(new GramJs.payments.CreateOnrampSession({
-    provider,
+    provider: ONRAMP_PROVIDER,
     cryptoCurrency: ONRAMP_CRYPTO_CURRENCY,
     address: ownAddress,
-    baseCurrency,
-    baseAmount,
-    paymentMethod,
-    memo,
     theme,
-    successReturnUrl,
-    failReturnUrl,
   }));
 
   return result && buildApiOnrampSession(result);
@@ -540,6 +516,87 @@ export async function estimateFee(
   }
 
   return BigInt((fees.in_fwd_fee || 0) + (fees.storage_fee || 0) + (fees.gas_fee || 0) + (fees.fwd_fee || 0));
+}
+
+const EXCESS_OPCODE = 0xd53276db;
+const EMULATED_TRANSFER_TYPES = new Set(['ton_transfer', 'extra_currency_transfer']);
+
+// What the transaction would do, by the same rules as Telegram Desktop: the wallet's own transfers, contract calls and
+// deployments, and everything else as an unknown action
+export async function emulateTransfer(
+  ownAddress: string, boc: string,
+): Promise<ApiTonConnectEmulation | undefined> {
+  const result = await invokeTonApiRequest<EmulateTraceResponse>({
+    endpoint: '/api/emulate/v1/emulateTrace',
+    payload: JSON.stringify({
+      boc,
+      ignore_chksig: true,
+      include_code_data: false,
+      include_address_book: false,
+      include_metadata: false,
+      with_actions: true,
+    }),
+    isPost: true,
+  });
+
+  if (!result || result.error || !Array.isArray(result.actions)) return undefined;
+
+  const own = toRawAddress(ownAddress);
+  const rootHash = result.trace?.tx_hash;
+  const root = rootHash ? result.transactions?.[rootHash]?.description : undefined;
+  const isRootDone = Boolean(root && !root.aborted
+    && root.compute_ph?.success && (root.compute_ph.exit_code === 0 || root.compute_ph.exit_code === 1)
+    && root.action?.success && root.action.result_code === 0);
+
+  const actions: ApiTonConnectEmulatedAction[] = [];
+  let hasFailedAction = false;
+
+  for (const { type, success, details = {} } of result.actions) {
+    if (type === 'unknown') continue;
+    if (success === false) hasFailedAction = true;
+
+    const source = readEmulatedAddress(details.source);
+    const destination = readEmulatedAddress(details.destination);
+    const amount = typeof details.value === 'string' && /^\d+$/.test(details.value) ? details.value : undefined;
+
+    if (type === 'contract_deploy') {
+      actions.push({ type: 'deployContract', address: destination && toBounceableAddress(destination) });
+      continue;
+    }
+
+    const isOutgoing = Boolean(source && source === own);
+    const isIncoming = !isOutgoing && Boolean(destination && destination === own);
+    const raw = isIncoming ? source : destination;
+    const counterparty = raw && toBounceableAddress(raw);
+
+    if (type && EMULATED_TRANSFER_TYPES.has(type)) {
+      actions.push({
+        type: isOutgoing ? 'withdraw' : isIncoming ? 'deposit' : 'transfer', amount, address: counterparty,
+      });
+    } else if (type === 'call_contract') {
+      const opcode = readEmulatedOpcode(details.opcode);
+      actions.push({ type: opcode === EXCESS_OPCODE ? 'excess' : 'callContract', amount, address: counterparty });
+    } else {
+      actions.push({ type: 'unknown', address: counterparty });
+    }
+  }
+
+  return {
+    actions,
+    isFailed: !isRootDone || hasFailedAction,
+    isIncomplete: Boolean(result.is_incomplete),
+  };
+}
+
+function readEmulatedAddress(value: unknown) {
+  return typeof value === 'string' ? toRawAddress(value) : undefined;
+}
+
+function readEmulatedOpcode(value: unknown) {
+  if (typeof value === 'number') return value >>> 0;
+  if (typeof value !== 'string' || !/^0x[\da-f]{1,8}$/i.test(value)) return undefined;
+
+  return Number.parseInt(value.slice(2), 16);
 }
 
 // Each holder DC keeps one XOR share and re-encrypts it to a key that lives only for this call
@@ -1183,20 +1240,23 @@ async function fetchWalletKeyChanges(ownAddress: string): Promise<WalletKeyChang
 
 export async function sendTonTransfer({
   toAddress, toUser, chat, lastMessageId, amount, comment, shouldEncryptComment, shouldSendAll, collectibleAddress,
-  isGasless, ownAddress, ownPublicKey, pendingSeqno, pendingValidUntil, words, password,
+  collectiblePayload, isGasless, ownAddress, ownPublicKey, pendingSeqno, pendingValidUntil, words, password,
+  hasPassword,
 }: {
   toAddress: string;
   // Once the chain shows the transfer reached them, the server names each side to the other
   toUser?: ApiUser;
   chat?: ApiChat;
   lastMessageId?: number;
-  // Nanotons; ignored for a collectible, which always carries `NFT_TRANSFER_ATTACHED_NANOS`
+  // Nanotons; ignored for a collectible without `collectiblePayload`, which carries `NFT_TRANSFER_ATTACHED_NANOS`
   amount: bigint;
   comment?: string;
   shouldEncryptComment?: boolean;
   shouldSendAll?: boolean;
   // A collectible's comment cannot be encrypted and goes as plain text
   collectibleAddress?: string;
+  // Base64 BOC of a transfer body the server built for the collectible, see `fetchWalletGiftDeposit`
+  collectiblePayload?: string;
   // A transfer the relayer turns down is not sent at the user's expense instead
   isGasless?: boolean;
   ownAddress: string;
@@ -1206,10 +1266,12 @@ export async function sendTonTransfer({
   pendingValidUntil?: number;
   words?: string[];
   password?: string;
+  // As last loaded, so it may be out of date
+  hasPassword?: boolean;
 }, onQueued?: (localMessageId?: number) => void): Promise<SendTonTransferResult | undefined> {
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
-  if (collectible) {
+  if (collectible && !collectiblePayload) {
     amount = NFT_TRANSFER_ATTACHED_NANOS;
   }
 
@@ -1224,54 +1286,39 @@ export async function sendTonTransfer({
     return { error: 'INVALID_ADDRESS' };
   }
 
-  const exported = await exportWalletSecretPhrase({
-    ownAddress, ownPublicKey, words, password,
-  });
+  const collectibleBody = collectiblePayload ? await parseBoc(collectiblePayload).catch(() => undefined) : undefined;
 
-  if ('error' in exported) {
-    return exported;
+  // The history records `toAddress`, so it must name the new owner from the body. The wallet trusts the server with
+  // the escrow address itself.
+  if (collectiblePayload && (!collectible || !collectibleBody
+    || parseGiftDepositBody(collectibleBody, amount, ownAddress)?.newOwner !== toRawAddress(toAddress))) {
+    return { error: 'NFT_UNAVAILABLE' };
   }
 
-  const seeds = await deriveWalletSeeds(exported.words, ownAddress, ownPublicKey);
+  // The server asks for the 2FA password only on the export, and only an answer to the form opens the password screen.
+  // So with 2FA, or when it is unknown, the export goes before the transfer is queued.
+  const exportedFirst = !words && (Boolean(password) || hasPassword !== false) ? await exportWalletSecretPhrase({
+    ownAddress, ownPublicKey, password,
+  }) : undefined;
 
-  if (!seeds) {
-    return { error: 'UNSUPPORTED_WALLET' };
+  if (exportedFirst && 'error' in exportedFirst) {
+    return exportedFirst;
   }
 
-  const keys = { seed: seeds.signing, publicKey: await getEd25519PublicKey(seeds.signing) };
-
-  // The address, and so the state init of a wallet not deployed yet, comes from the anchor key
-  const anchorPublicKey = await getEd25519PublicKey(seeds.anchor);
-
-  let encryptedComment: Uint8Array<ArrayBuffer> | undefined;
-
-  if (comment && shouldEncryptComment && !collectible) {
-    const theirPublicKey = await fetchRecipientPublicKey(toAddress);
-
-    if (!theirPublicKey) {
-      return { error: 'COMMENT_ENCRYPTION_UNAVAILABLE' };
-    }
-
-    // The receiver checks the salt as the bounceable address, see `decryptWalletComment`
-    const salt = new TextEncoder().encode(formatAddress(own.workchain, own.hash, true));
-    encryptedComment = await encryptMessageComment(comment, keys.publicKey, keys.seed, theirPublicKey, salt);
-  }
-
-  const encryptedCommentBase64 = encryptedComment && bufferToBase64(encryptedComment);
+  const isCommentEncrypted = Boolean(comment && shouldEncryptComment && !collectible);
   const randomId = generateRandomBigInt();
-  const localMessage = chat && buildLocalMessage({
-    chat,
-    lastMessageId,
-    action: {
-      mediaType: 'action',
-      type: 'gramTransfer',
-      amount,
-      peerAddress: toAddress,
-      transactionId: '',
-      comment: encryptedComment ? undefined : comment,
-      encryptedComment: encryptedCommentBase64,
-    },
-    isPending: true,
+
+  // An encrypted comment joins the message once it is encrypted
+  const transferAction: ApiMessageActionGramTransfer = {
+    mediaType: 'action',
+    type: 'gramTransfer',
+    amount,
+    peerAddress: toAddress,
+    transactionId: '',
+    comment: isCommentEncrypted ? undefined : comment,
+  };
+  let localMessage = chat && buildLocalMessage({
+    chat, lastMessageId, action: transferAction, isPending: true,
   }).message;
 
   if (localMessage) {
@@ -1280,6 +1327,7 @@ export async function sendTonTransfer({
     });
   }
 
+  // As in the iOS app, the transfer is queued before the keys and the comment are prepared, so the form closes at once
   onQueued?.(localMessage?.id);
 
   // The wait is counted from the moment the transfer is queued. Otherwise a transfer that waits for the lock could wait
@@ -1288,6 +1336,49 @@ export async function sendTonTransfer({
   const sending = runWalletSend<SendTonTransferResult | undefined>(ownAddress, async () => {
     if (Date.now() >= waitUntil) {
       return { error: 'TRANSFER_PENDING' };
+    }
+
+    const exported = exportedFirst ?? await exportWalletSecretPhrase({ ownAddress, ownPublicKey, words });
+
+    if ('error' in exported) {
+      return exported;
+    }
+
+    const seeds = await deriveWalletSeeds(exported.words, ownAddress, ownPublicKey);
+
+    if (!seeds) {
+      return { error: 'UNSUPPORTED_WALLET' };
+    }
+
+    const keys = { seed: seeds.signing, publicKey: await getEd25519PublicKey(seeds.signing) };
+
+    // The address, and so the state init of a wallet not deployed yet, comes from the anchor key
+    const anchorPublicKey = await getEd25519PublicKey(seeds.anchor);
+
+    let encryptedComment: Uint8Array<ArrayBuffer> | undefined;
+
+    if (isCommentEncrypted) {
+      const theirPublicKey = await fetchRecipientPublicKey(toAddress);
+
+      if (!theirPublicKey) {
+        return { error: 'COMMENT_ENCRYPTION_UNAVAILABLE' };
+      }
+
+      // The receiver checks the salt as the bounceable address, see `decryptWalletComment`
+      const salt = new TextEncoder().encode(formatAddress(own.workchain, own.hash, true));
+      encryptedComment = await encryptMessageComment(comment!, keys.publicKey, keys.seed, theirPublicKey, salt);
+    }
+
+    const encryptedCommentBase64 = encryptedComment && bufferToBase64(encryptedComment);
+
+    if (localMessage && encryptedCommentBase64) {
+      const action = { ...transferAction, encryptedComment: encryptedCommentBase64 };
+      const content = { ...localMessage.content, action };
+      localMessage = { ...localMessage, content };
+
+      sendApiUpdate({
+        '@type': 'updateMessage', chatId: localMessage.chatId, id: localMessage.id, message: { content },
+      });
     }
 
     let state = await fetchToncenterWalletState(ownAddress);
@@ -1355,7 +1446,7 @@ export async function sendTonTransfer({
       seqno: state.seqno,
       now: getServerTime(),
       secretSeed: keys.seed,
-      payload: await buildNftTransferPayload({
+      payload: collectibleBody ?? await buildNftTransferPayload({
         newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
       }),
     } : {
@@ -1446,6 +1537,80 @@ export async function sendTonTransfer({
   }
 
   return outcome;
+}
+
+// The server prepares the transfer of the item to its escrow, and the gift then lands on the account
+export async function fetchWalletGiftDeposit({
+  slug, collectibleAddress, ownAddress, ownPublicKey,
+}: {
+  slug: string;
+  collectibleAddress: string;
+  ownAddress: string;
+  ownPublicKey: string;
+}): Promise<ApiWalletGiftDeposit | { error: SendTonTransferError } | { errorKey: RegularLangFnParameters }> {
+  const collectible = parseTonTransferAddress(collectibleAddress);
+
+  if (!collectible || !parseTonTransferAddress(ownAddress)) {
+    return { error: 'INVALID_ADDRESS' };
+  }
+
+  try {
+    const answer = await invokeRequest(new GramJs.payments.DepositStarGift({
+      peer: new GramJs.InputPeerSelf(),
+      slug,
+    }), { shouldThrow: true });
+
+    if (!answer || toRawAddress(answer.nftAddress) !== toRawAddress(collectibleAddress)) {
+      return { error: 'NFT_UNAVAILABLE' };
+    }
+
+    const payload = bufferToBase64(answer.payload);
+    const body = await parseBoc(payload);
+    const transfer = parseGiftDepositBody(body, answer.amount, ownAddress);
+
+    if (!transfer) {
+      return { error: 'NFT_UNAVAILABLE' };
+    }
+
+    const state = await fetchToncenterWalletState(ownAddress);
+    const fee = state?.isSupportedContract ? await estimateFee(
+      ownAddress,
+      await buildUnsignedTransferBodyBoc({
+        to: { ...collectible, isBounceable: true },
+        amount: answer.amount,
+        seqno: state.seqno,
+        now: getServerTime(),
+        payload: body,
+      }),
+      state.isDeployed ? undefined : await buildWalletInitBocs(deserializeBytes(ownPublicKey)),
+    ) : undefined;
+
+    return {
+      escrowAddress: toNonBounceableAddress(transfer.newOwner),
+      payload,
+      amount: answer.amount,
+      forwardAmount: transfer.forwardAmount,
+      fee,
+    };
+  } catch (err: unknown) {
+    // A server refusal with wording of its own, such as a flood wait, is shown as the native apps show it
+    const messageKey = err instanceof RPCError ? wrapError(err).messageKey : undefined;
+
+    return messageKey && messageKey.key !== 'ErrorUnexpectedMessage'
+      ? { errorKey: messageKey }
+      : { error: 'NFT_UNAVAILABLE' };
+  }
+}
+
+// The server builds the body the wallet signs. It must be an NFT transfer that returns the excess to the wallet, and
+// the attached value must stay small. The item pays `forward_amount` out of the attached value, so when the value
+// does not exceed it, the item fails the transfer and the gift stays in the wallet. The rest of the body,
+// `custom_payload` and `forward_payload`, is signed as the server sent it, like the native apps do.
+export function parseGiftDepositBody(body: Cell, amount: bigint, ownAddress: string) {
+  const transfer = parseNftTransferPayload(body);
+  if (!transfer || transfer.responseDestination !== toRawAddress(ownAddress)) return undefined;
+
+  return transfer.forwardAmount < amount && amount <= GIFT_DEPOSIT_MAX_NANOS ? transfer : undefined;
 }
 
 async function checkCollectibleTransferable(

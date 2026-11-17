@@ -47,7 +47,7 @@
 .expired {
   height: auto;
   padding-bottom: 0;
-  color: var(--accent-color);
+  color: var(--message-accent, var(--accent-color));
 }
 
 .expiredIcon {

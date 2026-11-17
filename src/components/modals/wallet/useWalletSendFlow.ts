@@ -3,7 +3,7 @@ import {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { ApiWalletCollectible } from '../../../api/types';
+import type { ApiWalletCollectible, ApiWalletGiftDeposit } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { WalletTransferPayload } from './types';
 import type useWalletCredentials from './useWalletCredentials';
@@ -17,6 +17,7 @@ import { parseTonTransferAddress } from '../../../util/tonAddress';
 import { loadCurrentUserAddress } from './helpers/loadCurrentUserAddress';
 import { startSendFlight } from './helpers/sendFlight';
 
+import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import { useStateRef } from '../../../hooks/useStateRef';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -36,6 +37,8 @@ type Options = {
 };
 
 const SEND_SCREENS = new Set([WalletScreen.Send, WalletScreen.SendAmount]);
+// As `closeAfterTransferRegistration` of the iOS app
+const LAUNCH_SPIN_DURATION = 180;
 
 export default function useWalletSendFlow({
   modal, navigation, credentials, isKeyMissing, address, balance, collectibles, walletTransfer, isFlightReady,
@@ -43,7 +46,7 @@ export default function useWalletSendFlow({
 }: Options) {
   const {
     sendWalletTransfer, clearWalletTransfer, clearWalletTransferFee, loadWalletGaslessInfo, closeWalletModal,
-    showNotification,
+    showNotification, loadWalletGiftDeposit, clearWalletGiftDeposit,
   } = getActions();
 
   const {
@@ -58,12 +61,14 @@ export default function useWalletSendFlow({
 
   // The send screen unmounts when another slides over it, so its draft lives here
   const [draft, setDraft] = useState(EMPTY_SEND_DRAFT);
+  const [isMoveToGiftsOpen, openMoveToGifts, closeMoveToGifts] = useFlag();
 
   // A link fills the form once, so a wallet swapped in from another tab does not become the sender
   const appliedLinkRef = useRef<string>();
   // Whether the queued transfer closes the wallet: only the form a chat opened does, until the user leaves it for the
   // main screen, as in the iOS app
   const shouldCloseAfterSendRef = useRef(false);
+  const launchedAtRef = useRef<number>();
   const isOpenRef = useStateRef(Boolean(modal));
   const stackRef = useStateRef(stack);
 
@@ -124,26 +129,44 @@ export default function useWalletSendFlow({
     if (screen === WalletScreen.Main) shouldCloseAfterSendRef.current = false;
   }, [screen]);
 
+  // Closes the dialog once the send screen is left: a credentials screen covers it, or a queued transfer returns to
+  // the main screen
+  useEffect(() => {
+    if (screen !== WalletScreen.Send) closeMoveToGifts();
+  }, [screen, closeMoveToGifts]);
+
   // A transfer started from a chat closes the wallet, leaving the chat where the message appears
   useEffect(() => {
-    if (walletTransfer?.status !== 'queued') return;
+    if (walletTransfer?.status !== 'queued') return undefined;
 
-    clearWalletTransfer();
-    setDraft(EMPTY_SEND_DRAFT);
-    dropCredentials();
+    // The transfer is queued at once, so the diamond spins up for a moment before it leaves
+    const launchedAt = launchedAtRef.current;
+    const wait = launchedAt === undefined ? 0 : Math.max(0, launchedAt + LAUNCH_SPIN_DURATION - performance.now());
 
-    if (shouldCloseAfterSendRef.current) {
-      closeWalletModal();
-    } else {
-      if (canFlightLand && startSendFlight()) onFlightStart();
-      resetNavigation();
-    }
-  }, [walletTransfer?.status, canFlightLand, dropCredentials, resetNavigation, onFlightStart]);
+    const timeout = window.setTimeout(() => {
+      clearWalletTransfer();
+      setDraft(EMPTY_SEND_DRAFT);
+      dropCredentials();
+
+      // The wallet may have been closed while the diamond spun up
+      if (!isOpenRef.current) return;
+
+      if (shouldCloseAfterSendRef.current) {
+        closeWalletModal();
+      } else {
+        if (canFlightLand && startSendFlight()) onFlightStart();
+        resetNavigation();
+      }
+    }, wait);
+
+    return () => window.clearTimeout(timeout);
+  }, [walletTransfer?.status, canFlightLand, dropCredentials, resetNavigation, onFlightStart, isOpenRef]);
 
   const handleBack = useLastCallback(() => {
     if (!isSendScreen) return;
 
     clearWalletTransferFee();
+    clearWalletGiftDeposit();
 
     // Back to the recipient screen keeps the draft, so the field and the list stay as the user left them
     if (stack[stack.length - 2] !== WalletScreen.Send) setDraft(EMPTY_SEND_DRAFT);
@@ -152,6 +175,7 @@ export default function useWalletSendFlow({
   const reset = useLastCallback(() => {
     setDraft(EMPTY_SEND_DRAFT);
     clearWalletTransferFee();
+    clearWalletGiftDeposit();
   });
 
   const handleOpenSend = useLastCallback(() => {
@@ -225,13 +249,15 @@ export default function useWalletSendFlow({
     // that closes after the transfer has no history for it to land in
     credentials.ask({
       intent: 'send',
-      run: (entered) => sendWalletTransfer({
-        ...payload,
-        ...entered,
-        isAnimated: payload.isAnimated && canFlightLand && !entered.passcode && !entered.password
-          && !shouldCloseAfterSendRef.current,
-        fromAddress: draft.fromAddress!,
-      }),
+      run: (entered) => {
+        const isAnimated = payload.isAnimated && canFlightLand && !entered.passcode && !entered.password
+          && !shouldCloseAfterSendRef.current;
+        launchedAtRef.current = isAnimated ? performance.now() : undefined;
+
+        sendWalletTransfer({
+          ...payload, ...entered, isAnimated, fromAddress: draft.fromAddress!,
+        });
+      },
     });
   });
 
@@ -239,12 +265,35 @@ export default function useWalletSendFlow({
     () => collectibles?.find(({ address: itemAddress }) => itemAddress === draft.collectibleAddress),
     [collectibles, draft.collectibleAddress],
   );
+  const canMoveToGifts = collectible?.type === 'gift' && Boolean(collectible.gift);
+
+  const handleMoveToGiftsOpen = useLastCallback(() => {
+    loadWalletGiftDeposit({ collectibleAddress: draft.collectibleAddress! });
+    openMoveToGifts();
+  });
+
+  const handleMoveToGiftsClose = useLastCallback(() => {
+    if (walletTransfer?.status === 'pending') return;
+
+    closeMoveToGifts();
+  });
+
+  const handleMoveToGiftsConfirm = useLastCallback((giftDeposit: ApiWalletGiftDeposit) => {
+    handleSubmit({
+      toAddress: giftDeposit.escrowAddress,
+      amount: giftDeposit.amount,
+      collectibleAddress: draft.collectibleAddress,
+      giftDeposit,
+    });
+  });
 
   return {
     draft,
     setDraft,
     collectible,
     isSendScreen,
+    canMoveToGifts,
+    isMoveToGiftsOpen,
     handleBack,
     reset,
     handleOpenSend,
@@ -253,5 +302,8 @@ export default function useWalletSendFlow({
     handleRecipientContinue,
     handleSendMax,
     handleSubmit,
+    handleMoveToGiftsOpen,
+    handleMoveToGiftsClose,
+    handleMoveToGiftsConfirm,
   };
 }

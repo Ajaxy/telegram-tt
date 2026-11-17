@@ -12,7 +12,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon } from '../../../util/localization/format';
-import { formatInteger } from '../../../util/textFormat';
+import { formatInteger } from '../../../util/text/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -32,7 +32,7 @@ import PaidMediaThumb from './transaction/PaidMediaThumb';
 
 import styles from './StarsBalanceModal.module.scss';
 
-import StarsBackground from '../../../assets/stars-bg.png';
+import StarsBackground from '../../../assets/stars-bg.svg';
 
 export type OwnProps = {
   modal: TabState['starsPayment'];

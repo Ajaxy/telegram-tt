@@ -8,6 +8,7 @@ import { MediaViewerOrigin } from '../../../../types';
 import { getMainUsername, getMessagePhoto, getWebPagePhoto, getWebPageVideo } from '../../../../global/helpers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import { tryParseDeepLink } from '../../../../util/deepLinkParser';
+import { getRichQuoteText } from '../../../../util/text/richQuote';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -62,7 +63,7 @@ export default function useInnerHandlers({
   } = message;
 
   const {
-    replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText, quoteOffset,
+    replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText, quoteRich, quoteOffset, todoItemId, pollOption,
   } = getMessageReplyInfo(message) || {};
 
   const handleSenderClick = useLastCallback(() => {
@@ -124,6 +125,8 @@ export default function useInnerHandlers({
         originChannelId: replyToPeerId,
         originMessageId: replyToTopId,
         focusMessageId: replyToMsgId,
+        todoItemId,
+        pollOption,
       });
       return;
     }
@@ -134,7 +137,10 @@ export default function useInnerHandlers({
       messageId: replyToMsgId,
       replyMessageId: replyToPeerId ? undefined : messageId,
       noForumTopicPanel: !replyToPeerId, // Open topic panel for cross-chat replies
-      ...(isQuote && { quote: quoteText?.text, quoteOffset }),
+      quote: isQuote ? quoteRich?.map(getRichQuoteText).join('\n') || quoteText?.text : undefined,
+      quoteOffset: isQuote ? quoteOffset : undefined,
+      todoItemId,
+      pollOption,
     });
   });
 
@@ -152,7 +158,9 @@ export default function useInnerHandlers({
   const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
     if (paidMedia && !paidMedia.isBought) return;
     if (withDynamicLoading && !message.isEphemeral) {
-      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
+      searchChatMediaMessages({
+        chatId, threadId, currentMediaMessageId: messageId, mediaType: video?.isGif ? 'gif' : 'media',
+      });
     }
 
     const parsedLink = webPage?.url && tryParseDeepLink(webPage.url);
@@ -176,8 +184,7 @@ export default function useInnerHandlers({
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
   const handleVideoMediaClick = useLastCallback(() => {
-    const isGif = message.content?.video?.isGif;
-    const withDynamicLoading = !message.isEphemeral && !isGif && !isScheduled && !paidMedia;
+    const withDynamicLoading = !message.isEphemeral && !isScheduled && !paidMedia;
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
 

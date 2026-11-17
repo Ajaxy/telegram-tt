@@ -29,6 +29,7 @@ import useMedia from '../../../hooks/useMedia';
 import Icon from '../../common/icons/Icon';
 import PlayPauseIcon from '../../common/PlayPauseIcon';
 import Island from '../../gili/layout/Island';
+import { useModalContext } from '../../gili/modal/Modal';
 import PlayerSeekLine from '../../middle/panes/PlayerSeekLine';
 import PlayerTime from '../../middle/panes/PlayerTime';
 import Button from '../../ui/Button';
@@ -99,6 +100,7 @@ const PlaylistControls = ({
   } = getActions();
 
   const lang = useLang();
+  const isPictureInPicture = useModalContext()?.isPictureInPicture;
 
   const { voice, video } = message ? getMessageContent(message) : {};
   const coverBlobUrl = useMedia(audio && getMediaHash(audio, 'pictogram'), false, ApiMediaFormat.BlobUrl);
@@ -236,6 +238,7 @@ const PlaylistControls = ({
         <div className={styles.buttonsRow}>
           <DropdownMenu
             className={buildClassName(styles.orderMenu, 'with-menu-transitions')}
+            withPortal
             positionX="left"
             positionY="bottom"
             trigger={OrderButton}
@@ -284,6 +287,7 @@ const PlaylistControls = ({
             round
             color="translucent"
             className={buildClassName(styles.transportButton, styles.playButton)}
+            autoFocus={isPictureInPicture}
             onClick={onPlayPause}
             ariaLabel={lang(isPlaying ? 'AudioPause' : 'AudioPlay')}
           >
@@ -301,6 +305,7 @@ const PlaylistControls = ({
 
           <DropdownMenu
             className={buildClassName(styles.orderMenu, 'with-menu-transitions')}
+            withPortal
             positionX="right"
             positionY="bottom"
             trigger={MoreButton}
@@ -324,7 +329,7 @@ const PlaylistControls = ({
         </div>
 
       </Island>
-      {canSaveToProfile && (
+      {canSaveToProfile && !isPictureInPicture && (
         <Button
           className={styles.profileButton}
           disabled={isSavedMusicLoading}
@@ -368,7 +373,7 @@ export default memo(withGlobal<OwnProps>(
       isMessageProtected: selectIsMessageProtected(global, message),
       playbackItem: activeItem,
       savedMusicPeerId: source?.type === 'savedMusic' ? source.peerId : undefined,
-      threadId: source?.type === 'chat' || source?.type === 'richMessage' ? source.threadId : undefined,
+      threadId: source?.type === 'chat' ? source.threadId : undefined,
     };
   },
 )(PlaylistControls));

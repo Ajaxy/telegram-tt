@@ -5,14 +5,16 @@ import type { ApiMediaExtendedPreview, ApiVideo } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
-  getMediaDimensions, getMediaFormat, getMediaThumbUri, getMediaTransferState, getVideoMediaHash,
+  getMediaDimensions, getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash, getVideoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { formatMediaDuration } from '../../../util/dates/duration';
 import * as mediaLoader from '../../../util/mediaLoader';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -26,6 +28,7 @@ import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import SensitiveContentConfirmModal from '../../common/SensitiveContentConfirmModal';
+import EditedVideoPreview from '../../ui/mediaEditor/EditedVideoPreview.async';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import MediaBadge from './MediaBadge';
@@ -57,6 +60,8 @@ type StateProps = {
   needsAgeVerification?: boolean;
 };
 
+const EDITED_PREVIEW_MAX_SIDE = 30 * REM;
+
 const Video = <T,>({
   id,
   video,
@@ -87,6 +92,7 @@ const Video = <T,>({
   const { width, height } = getMediaDimensions(video);
 
   const localBlobUrl = !isPaidPreview ? video.blobUrl : undefined;
+  const editPreview = useCurrentOrPrev(video.mediaType === 'video' ? video.editPreview : undefined, true);
 
   const shouldShowSpoiler = isPaidPreview || video.isSpoiler || isMediaNsfw;
   const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(shouldShowSpoiler);
@@ -120,7 +126,13 @@ const Video = <T,>({
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && !isPaidPreview);
+  const cover = video.mediaType === 'video' ? video.cover : undefined;
+  const hasCover = Boolean(cover);
   const [isPlayAllowed, setIsPlayAllowed] = useState(Boolean(canAutoPlay && !isSpoilerShown));
+  const [isHovered, markHovered, unmarkHovered] = useFlag();
+  const canPlay = hasCover
+    ? Boolean(canAutoPlay ? isHovered && !isSpoilerShown : isPlayAllowed)
+    : isPlayAllowed;
 
   const fullMediaHash = !isPaidPreview ? getVideoMediaHash(video, 'inline') : undefined;
   const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));
@@ -131,8 +143,10 @@ const Video = <T,>({
   );
   const fullMediaData = localBlobUrl || mediaData;
   const [isPlayerReady, markPlayerReady] = useFlag();
+  const [isEditPreviewReady, markEditPreviewReady] = useFlag();
+  const isMediaReady = isPlayerReady || Boolean(editPreview && isEditPreviewReady);
 
-  const thumbDataUri = getMediaThumbUri(video);
+  const thumbDataUri = getMediaThumbUri(cover ?? video);
   const hasThumb = Boolean(thumbDataUri);
   const withBlurredBackground = layout !== 'fill';
 
@@ -140,17 +154,19 @@ const Video = <T,>({
 
   const isUnsupported = useUnsupportedMedia(videoRef, true, !isInline);
 
-  const previewMediaHash = !isPaidPreview ? getVideoMediaHash(video, 'preview') : undefined;
+  const previewMediaHash = isPaidPreview ? undefined
+    : cover ? getPhotoMediaHash(cover, 'preview') : getVideoMediaHash(video, 'preview');
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
   const canLoadPreview = isIntersectingForLoading;
-  const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
-  const shouldHidePreview = isPlayerReady && !isUnsupported;
+  const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview)
+    || cover?.blobUrl || (video.mediaType === 'video' ? video.previewBlobUrl : undefined);
+  const shouldHidePreview = isMediaReady && !isUnsupported && (!hasCover || canPlay);
   const { ref: previewRef } = useMediaTransition<HTMLImageElement>({
     hasMediaData: Boolean((hasThumb || previewBlobUrl) && !shouldHidePreview),
   });
 
-  const noThumb = Boolean(!hasThumb || previewBlobUrl || isPlayerReady);
-  const thumbRef = useBlurredMediaThumbRef(video, noThumb);
+  const noThumb = Boolean(!hasThumb || previewBlobUrl || shouldHidePreview);
+  const thumbRef = useBlurredMediaThumbRef(cover ?? video, noThumb);
   useMediaTransition({ ref: thumbRef, hasMediaData: !noThumb });
   const blurredBackgroundRef = useBlurredMediaThumbRef(video, !withBlurredBackground);
 
@@ -162,7 +178,7 @@ const Video = <T,>({
 
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
-    (shouldLoad && !isPlayerReady && !isFullMediaPreloaded) || isDownloading,
+    (shouldLoad && !editPreview && !isPlayerReady && !isFullMediaPreloaded) || isDownloading,
     uploadProgress !== undefined,
   );
 
@@ -171,14 +187,14 @@ const Video = <T,>({
     ref: spinnerRef,
     shouldRender: shouldRenderSpinner,
   } = useShowTransition({
-    isOpen: isTransferring && !isUnsupported,
+    isOpen: isTransferring && !isUnsupported && (isUploading || !isSpoilerShown),
     noMountTransition: wasLoadDisabled,
     withShouldRender: true,
   });
   const {
     ref: playButtonRef,
   } = useShowTransition({
-    isOpen: Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner),
+    isOpen: Boolean((isLoadAllowed || fullMediaData) && !canPlay && !shouldRenderSpinner),
   });
   const {
     ref: transferProgressRef,
@@ -270,6 +286,8 @@ const Video = <T,>({
       className={componentClassName}
       style={style}
       onClick={isUploading ? undefined : (e) => handleClick(e)}
+      onMouseEnter={hasCover ? markHovered : undefined}
+      onMouseLeave={hasCover ? unmarkHovered : undefined}
     >
       {withBlurredBackground && (
         <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
@@ -279,7 +297,7 @@ const Video = <T,>({
           ref={videoRef}
           src={fullMediaData}
           className="full-media"
-          canPlay={isPlayAllowed && isIntersectingForPlaying && !isUnsupported}
+          canPlay={canPlay && isIntersectingForPlaying && !isUnsupported}
           defaultMuted
           muted
           loop
@@ -288,6 +306,17 @@ const Video = <T,>({
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
           onReady={markPlayerReady}
+        />
+      )}
+      {editPreview && wasIntersectedRef.current && !isPlayerReady && (
+        <EditedVideoPreview
+          className="full-media"
+          blobUrl={editPreview.blobUrl}
+          mimeType={editPreview.mimeType}
+          editDocument={editPreview.document}
+          maxSide={Math.min(Math.max(width, height), EDITED_PREVIEW_MAX_SIDE)}
+          canPlay={canPlay && isIntersectingForPlaying}
+          onReady={markEditPreviewReady}
         />
       )}
       {previewBlobUrl && (

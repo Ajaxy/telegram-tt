@@ -112,8 +112,8 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
     return renderTextDialog(renderedText, title);
   };
 
-  const renderLocalizedDialog = (dialog: ApiDialogLocalizedMessage, title?: string) => {
-    return renderTextDialog(lang.with(dialog.text), title);
+  const renderLocalizedDialog = (dialog: ApiDialogLocalizedMessage) => {
+    return renderTextDialog(lang.with(dialog.text), dialog.title && lang.withRegular(dialog.title));
   };
 
   const renderError = (error: ApiDialogError) => {

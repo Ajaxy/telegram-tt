@@ -6,7 +6,7 @@ import type { MenuPositionOptions } from '../../hooks/useMenuPosition';
 
 import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -17,6 +17,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
+import useWindow from '../../hooks/useWindow';
 
 import Portal from './Portal';
 
@@ -78,6 +79,7 @@ const Menu = ({
   ...positionOptions
 }: OwnProps) => {
   const { isTouchScreen } = useAppLayout();
+  const targetDocument = useWindow().document;
 
   const containerRef = useRef<HTMLDivElement>();
 
@@ -89,13 +91,18 @@ const Menu = ({
 
   useMenuPosition(isOpen, containerRef, bubbleRef, positionOptions);
 
+  const handleEsc = useLastCallback((event: KeyboardEvent) => {
+    event.preventDefault();
+    onClose();
+  });
+
   useEffect(
-    () => (isOpen ? captureEscKeyListener(onClose) : undefined),
-    [isOpen, onClose],
+    () => (isOpen ? captureKeyboardListeners({ onEsc: handleEsc }, targetDocument) : undefined),
+    [isOpen, handleEsc, targetDocument],
   );
 
   useHistoryBack({
-    isActive: isOpen,
+    isActive: isOpen && targetDocument === document,
     onBack: onClose,
     shouldBeReplaced: true,
   });
@@ -116,7 +123,7 @@ const Menu = ({
       return;
     }
 
-    const menuItem = e.target instanceof HTMLElement ? e.target.closest('.MenuItem') : undefined;
+    const menuItem = (e.target as HTMLElement).closest('.MenuItem');
     if (menuItem && !menuItem.classList.contains('submenu')) {
       onClose();
     }
@@ -187,7 +194,7 @@ const Menu = ({
   );
 
   if (withPortal) {
-    return <Portal>{menu}</Portal>;
+    return <Portal className="MenuPortal">{menu}</Portal>;
   }
 
   return menu;

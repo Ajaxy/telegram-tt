@@ -1,2 +1,0 @@
-import e from"./gradle-DeCngaqu.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/gradle" instead of "highlight.js/lib/languages/gradle.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=gradle.js-CHslC6wl.js.map

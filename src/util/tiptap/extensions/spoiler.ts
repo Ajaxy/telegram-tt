@@ -4,6 +4,7 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import styles from '../styling.module.scss';
 
+// Also replayed for opener-last typing by `RichEditorReverseMarkdown`; keep it `$`-anchored with content captured last
 const INPUT_REGEX = /(?:^|\s)(\|\|(?=\S)(.*?\S)\|\|)$/;
 const TOKEN_REGEX = /^\|\|(?=\S)(.*?\S)\|\|/;
 

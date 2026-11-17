@@ -133,8 +133,49 @@ export function hasUnsupportedRichBlocks(value: ApiInputRichMessage) {
 export function removeUnsupportedRichBlocks(value: ApiInputRichMessage): ApiInputRichMessage {
   return {
     ...value,
-    blocks: value.blocks.filter((block) => !hasUnsupportedRichBlock(block)),
+    blocks: removeUnsupportedBlocks(value.blocks),
   };
+}
+
+// Drops unsupported blocks at any depth. A container that held one goes only once it has nothing left to show.
+function removeUnsupportedBlocks(blocks: ApiPageBlock[]): ApiPageBlock[] {
+  return blocks.flatMap((block): ApiPageBlock[] => {
+    if (!hasUnsupportedRichBlock(block)) return [block];
+
+    switch (block.type) {
+      case 'blockquoteBlocks': {
+        // The editor trims the same paragraphs, and a quote without a body is dropped
+        const nestedBlocks = trimEdgeEmptyParagraphs(removeUnsupportedBlocks(block.blocks));
+        if (nestedBlocks.length) return [{ ...block, blocks: nestedBlocks }];
+
+        // A quote cannot be sent without a body, so its caption stays as a paragraph
+        return hasRichText(block.caption) ? [{ type: 'paragraph', text: block.caption }] : [];
+      }
+      case 'details': {
+        const nestedBlocks = removeUnsupportedBlocks(block.blocks);
+        return nestedBlocks.length || hasRichText(block.title) ? [{ ...block, blocks: nestedBlocks }] : [];
+      }
+      case 'list': {
+        const items = removeUnsupportedListItems(block.items);
+        return items.length ? [{ ...block, items }] : [];
+      }
+      case 'orderedList': {
+        const items = removeUnsupportedListItems(block.items);
+        return items.length ? [{ ...block, items }] : [];
+      }
+      default:
+        return [];
+    }
+  });
+}
+
+function removeUnsupportedListItems<T extends ApiPageListItem | ApiPageListOrderedItem>(items: T[]): T[] {
+  return items.flatMap((item) => {
+    if (item.type !== 'blocks' || !item.blocks.some(hasUnsupportedRichBlock)) return [item];
+
+    const blocks = removeUnsupportedBlocks(item.blocks);
+    return blocks.length ? [{ ...item, blocks }] : [];
+  });
 }
 
 export function getRichInputAsFormatted(
@@ -1227,15 +1268,9 @@ function buildRichTextFromTiptapNode(node: TiptapJsonContent): ApiRichText {
 
   if (node.type === 'mention') {
     const userId = getTiptapStringAttr(node, 'userId');
-    const username = getTiptapStringAttr(node, 'username');
     const text = buildRichTextFromTiptapContent(node.content);
-    const plainText = getRichTextPlainText(text);
-    if (!plainText) {
+    if (!getRichTextPlainText(text)) {
       return EMPTY_RICH_TEXT;
-    }
-
-    if (username && plainText.toLowerCase() === `@${username.toLowerCase()}`) {
-      return { type: 'mention', text };
     }
 
     return userId
@@ -1278,8 +1313,6 @@ function applyTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
       return buildDateRichTextFromTiptapMark(text, mark);
     case 'link':
       return buildLinkRichTextFromTiptapMark(text, mark);
-    case 'mention':
-      return buildMentionRichTextFromTiptapMark(text, mark);
     default:
       return text;
   }
@@ -1288,16 +1321,6 @@ function applyTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
 function buildLinkRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
   const url = getTiptapMarkStringAttr(mark, 'href');
   return url ? { type: 'url', text, url } : text;
-}
-
-function buildMentionRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {
-  const username = getTiptapMarkStringAttr(mark, 'username');
-  const plainText = getRichTextPlainText(text);
-  if (!username || plainText.toLowerCase() !== `@${username.toLowerCase()}`) {
-    return text;
-  }
-
-  return { type: 'mention', text };
 }
 
 function buildDateRichTextFromTiptapMark(text: ApiRichText, mark: TiptapMark): ApiRichText {

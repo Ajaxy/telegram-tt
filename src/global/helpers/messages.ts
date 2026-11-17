@@ -22,6 +22,7 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 import {
   LOCAL_MESSAGES_LIMIT,
   LOTTIE_STICKER_MIME_TYPE,
+  NSFW_RESTRICTION_REASON,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -75,6 +76,14 @@ export function getApplicableRestrictionReasons(
   });
 }
 
+// Sensitive content is blurred per media and does not block access, same as in other clients
+export function getBlockingRestrictionReasons(
+  restrictionReasons?: ApiRestrictionReason[], ignoreRestrictionReasons?: string[],
+): ApiRestrictionReason[] {
+  return getApplicableRestrictionReasons(restrictionReasons, ignoreRestrictionReasons)
+    .filter((reason) => reason.reason !== NSFW_RESTRICTION_REASON);
+}
+
 export function getMessageOriginalId(message: ApiMessage) {
   return message.previousLocalId || message.id;
 }
@@ -89,7 +98,7 @@ export function getMessageTranscription(message: ApiMessage) {
 export function hasMessageText(message: MediaContainer) {
   const {
     action, text, sticker, photo, video, audio, voice, document, pollId, todo, dice,
-    webPage, contact, invoice, location, game, storyData, giveaway, giveawayResults, paidMedia,
+    webPage, contact, invoice, location, game, storyData, giveaway, giveawayResults, paidMedia, widget,
   } = message.content;
 
   if (pollId) return false;
@@ -97,7 +106,7 @@ export function hasMessageText(message: MediaContainer) {
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || pollId || todo || webPage
     || invoice || location || game || storyData || giveaway || giveawayResults || dice
-    || paidMedia || action?.type === 'phoneCall'
+    || paidMedia || widget || action?.type === 'phoneCall'
   );
 }
 
@@ -196,11 +205,18 @@ export function getMessageTextWithFallback(lang: LangFn, message: MediaContainer
   return { text: richMessageText || lang('MessageUnsupported') };
 }
 
+export function isMessageUnsupported(message: MediaContainer) {
+  return !Object.keys(message.content).length;
+}
+
 export function getMessageCustomShape(message: ApiMessage): boolean {
+  // An unsupported message is a standalone plate, with no bubble of its own
+  if (isMessageUnsupported(message)) return true;
+
   const {
     text, sticker, photo, video, audio, voice,
     document, pollId, webPage, contact, action,
-    game, invoice, location, storyData, dice,
+    game, invoice, location, storyData, dice, widget,
   } = message.content;
 
   if (sticker || (video?.isRound) || dice) {
@@ -208,7 +224,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
   }
 
   if (!text || photo || video || audio || voice || document || pollId || webPage || contact || action || game
-    || invoice || location || storyData) {
+    || invoice || location || storyData || widget) {
     return false;
   }
 

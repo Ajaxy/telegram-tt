@@ -1,2 +1,0 @@
-import e from"./thrift-DO8eeo3I.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/thrift" instead of "highlight.js/lib/languages/thrift.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=thrift.js-BNMndpWV.js.map

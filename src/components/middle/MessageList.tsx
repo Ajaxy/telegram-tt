@@ -4,10 +4,12 @@ import {
 import { addExtraClass, removeExtraClass } from '@teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic } from '../../api/types';
+import type { ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiThemeSettings, ApiTopic } from '../../api/types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { LoadMoreDirection, type MessageListType, type ThreadId } from '../../types';
+import {
+  LoadMoreDirection, type MessageListType, type ThemeKey, type ThreadId,
+} from '../../types';
 
 import {
   ANIMATION_END_DELAY,
@@ -19,7 +21,7 @@ import {
 } from '../../config';
 import { forceMeasure, forceMutation, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  getApplicableRestrictionReasons,
+  getBlockingRestrictionReasons,
   getIsSavedDialog,
   getMessageHtmlId,
   getMessageOriginalId,
@@ -30,7 +32,9 @@ import {
   isSystemBot,
 } from '../../global/helpers';
 import {
+  selectActionMessageBg,
   selectBot,
+  selectCanAnimateInterface,
   selectCanTranslateChat,
   selectChat,
   selectChatAnchoredMessages,
@@ -39,6 +43,7 @@ import {
   selectChatLastMessage,
   selectChatMessages,
   selectChatScheduledMessages,
+  selectChatThemeSettings,
   selectCurrentMessageIds,
   selectFirstUnreadId,
   selectFocusedMessageId,
@@ -51,6 +56,7 @@ import {
   selectMonoforumChannel,
   selectPerformanceSettingsValue,
   selectTabState,
+  selectTheme,
   selectTopic,
   selectTranslationLanguage,
   selectUser,
@@ -67,7 +73,7 @@ import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from 
 import { IS_FIREFOX } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isUserId } from '../../util/entities/ids';
-import { buildCollectionByKey } from '../../util/iteratees';
+import { areSortedArraysEqual, buildCollectionByKey } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
@@ -88,6 +94,7 @@ import {
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useInterval from '../../hooks/schedulers/useInterval';
+import useChatTheme from '../../hooks/useChatTheme';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -97,6 +104,7 @@ import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
+import useBubbleCanvas from './hooks/useBubbleCanvas';
 import useContainerHeight from './hooks/useContainerHeight';
 import useStickyDates from './hooks/useStickyDates';
 
@@ -176,6 +184,17 @@ type StateProps = {
   canManageBotForumTopics?: boolean;
   shouldScrollToBottom?: boolean;
   reactionPollingPause?: { until: number; chatId: string };
+  serverThemeSettings?: ApiThemeSettings;
+  actionMessageBg: string;
+  canAnimateTheme?: boolean;
+  areOwnGradientColorsAnimated?: boolean;
+  theme: ThemeKey;
+};
+
+type RenderData = {
+  renderMessageIds?: number[];
+  renderMessagesById?: Record<number, ApiMessage>;
+  addedMessageInfo?: ReturnType<typeof getAddedMessageInfo>;
 };
 
 enum Content {
@@ -289,6 +308,11 @@ const MessageList = ({
   translationLanguage,
   shouldAutoTranslate,
   reactionPollingPause,
+  serverThemeSettings,
+  actionMessageBg,
+  canAnimateTheme,
+  areOwnGradientColorsAnimated,
+  theme,
   isQuickPreview,
   onIntersectPinnedMessage,
   onScrollDownToggle,
@@ -299,12 +323,17 @@ const MessageList = ({
   } = getActions();
   const lang = useLang();
 
-  const restrictionReasons = useMemo(() => getApplicableRestrictionReasons(
+  const restrictionReasons = useMemo(() => getBlockingRestrictionReasons(
     rawRestrictionReasons, ignoreRestrictionReasons,
   ), [ignoreRestrictionReasons, rawRestrictionReasons]);
   const isRestricted = restrictionReasons.length > 0;
 
   const containerRef = useRef<HTMLDivElement>();
+  const bubbleCanvasRef = useRef<HTMLCanvasElement>();
+  const { palette, shouldSnapColors } = useChatTheme(
+    containerRef, chatId, theme, serverThemeSettings, canAnimateTheme, actionMessageBg,
+  );
+  const hasOwnGradient = Boolean(palette.outgoingColors);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
@@ -348,7 +377,7 @@ const MessageList = ({
 
   const areMessagesLoaded = Boolean(messageIds);
 
-  const renderData = useMemo(() => {
+  const latestRenderData = useMemo(() => {
     if (type !== 'thread' || !messageIds || !messagesById) {
       return {
         renderMessageIds: messageIds,
@@ -378,13 +407,27 @@ const MessageList = ({
       renderMessagesById: buildCollectionByKey(renderMessages, 'id'),
     };
   }, [anchoredById, ephemeralById, isViewportNewest, messageIds, messagesById, threadId, type]);
-  const { renderMessageIds, renderMessagesById } = renderData;
-  const previousRenderMessageIds = usePrevious(renderMessageIds);
-  const addedMessageInfo = useMemo(() => (isViewportNewest ? getAddedMessageInfo(
-    renderMessageIds,
-    renderMessagesById,
-    previousRenderMessageIds,
-  ) : undefined), [isViewportNewest, previousRenderMessageIds, renderMessageIds, renderMessagesById]);
+  const renderDataRef = useRef<RenderData>();
+  const renderData = useMemo((): RenderData => {
+    const { renderMessageIds, renderMessagesById } = latestRenderData;
+    const prevRenderData = renderDataRef.current;
+    if (
+      renderMessageIds && prevRenderData?.renderMessageIds
+      && areSortedArraysEqual(renderMessageIds, prevRenderData.renderMessageIds)
+    ) {
+      return { ...prevRenderData, renderMessagesById };
+    }
+
+    return {
+      renderMessageIds,
+      renderMessagesById,
+      addedMessageInfo: isViewportNewest
+        ? getAddedMessageInfo(renderMessageIds, renderMessagesById, prevRenderData?.renderMessageIds)
+        : undefined,
+    };
+  }, [isViewportNewest, latestRenderData]);
+  renderDataRef.current = renderData;
+  const { renderMessageIds, renderMessagesById, addedMessageInfo } = renderData;
   const { addedMessageIds, areAddedMessagesOutgoing, previousLastCurrentMessageId } = addedMessageInfo || {};
 
   const isPrivate = isUserId(chatId);
@@ -668,6 +711,19 @@ const MessageList = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
+  // Only the bubble canvas can tear a bubble around a top-level unsupported block
+  const hasTornBubbles = useMemo(() => Boolean(messageIds?.some((id) => (
+    messagesById?.[id]?.content.richMessage?.blocks.some((block) => block.type === 'unsupported')
+  ))), [messageIds, messagesById]);
+
+  const {
+    scheduleMeasure: scheduleBubbleCanvasMeasure,
+    updateOnScroll: updateBubbleCanvasScroll,
+  } = useBubbleCanvas(
+    containerRef, bubbleCanvasRef, palette, hasTornBubbles, messageIds, theme, areOwnGradientColorsAnimated,
+    shouldSnapColors,
+  );
+
   const updateBottomSnapClass = useLastCallback(() => {
     const container = containerRef.current;
     const bottomTrigger = container?.querySelector<HTMLDivElement>('.fab-trigger');
@@ -715,13 +771,16 @@ const MessageList = ({
   });
 
   const handleScroll = useLastCallback(() => {
-    if (isScrollTopJustUpdatedRef.current) {
-      isScrollTopJustUpdatedRef.current = false;
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
 
-    const container = containerRef.current;
-    if (!container) {
+    // Programmatic scrolls are skipped below, but the gradient must follow them too
+    updateBubbleCanvasScroll(container);
+
+    if (isScrollTopJustUpdatedRef.current) {
+      isScrollTopJustUpdatedRef.current = false;
       return;
     }
 
@@ -767,6 +826,8 @@ const MessageList = ({
   const isMessageSendPendingRef = useRef(false);
 
   const handleContentResize = useLastCallback((growth: number) => {
+    scheduleBubbleCanvasMeasure();
+
     const container = containerRef.current;
     if (!container || growth <= 0) return;
 
@@ -785,18 +846,14 @@ const MessageList = ({
       return;
     }
 
-    // Retarget active glides before ignoring send-pending resizes
     if (isAnimatingScroll(container)) {
       restartCurrentScrollAnimation();
       return;
     }
 
-    if (isMessageSendPendingRef.current) {
-      return;
-    }
-
     const { scrollTop, scrollHeight, offsetHeight } = container;
-    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - effectiveGrowth <= BOTTOM_THRESHOLD;
+    const bottomThreshold = isMessageSendPendingRef.current ? BOTTOM_SNAP_THRESHOLD : BOTTOM_THRESHOLD;
+    const wasAtBottom = (scrollHeight - scrollTop - offsetHeight) - effectiveGrowth <= bottomThreshold;
     if (!wasAtBottom || !isViewportNewest) return;
 
     forceMutation(() => {
@@ -880,7 +937,22 @@ const MessageList = ({
       });
     },
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
-    [renderMessageIds, isViewportNewest, effectiveLiveTailStartOriginalId, rememberScrollPositionRef],
+    [
+      messageIds,
+      renderMessageIds,
+      isViewportNewest,
+      effectiveLiveTailStartOriginalId,
+      currentLastMessageOriginalId,
+      currentLastMessageId,
+      addedMessageIds,
+      areAddedMessagesOutgoing,
+      previousLastCurrentMessageId,
+      isCurrentLastMessageTypingDraft,
+      isCurrentLastMessageIncomingTypingDraft,
+      isCurrentLastMessageOwnSent,
+      noMessageSendingAnimation,
+      rememberScrollPositionRef,
+    ],
   );
   useEffect(
     () => rememberScrollPositionRef.current(),
@@ -932,6 +1004,7 @@ const MessageList = ({
     );
 
     const wasMessageAdded = hasLoadedMessageIds
+      && renderMessageIds !== prevRenderMessageIds
       && Boolean(addedMessageIds?.length)
       && !hasViewportShifted;
     const wasLiveTailCreated = Boolean(
@@ -1115,6 +1188,7 @@ const MessageList = ({
           maxDistance: Number.MAX_SAFE_INTEGER,
           forceDuration: noMessageSendingAnimation ? 0 : undefined,
           shouldReturnMutationFn: true,
+          noEndShift: true,
         })
         : undefined;
       const typingDraftTop = shouldRevealTypingDraft && lastItemElement
@@ -1193,7 +1267,7 @@ const MessageList = ({
       } else if (unreadDivider) {
         newScrollTop = Math.min(
           getOffsetToContainer(unreadDivider, container).top - UNREAD_DIVIDER_TOP,
-          scrollHeight - scrollOffset,
+          effectiveScrollHeight - scrollOffset,
         );
       } else {
         newScrollTop = scrollHeight - scrollOffset;
@@ -1387,6 +1461,8 @@ const MessageList = ({
         withUsers={withUsers}
         noAvatars={noAvatars}
         containerRef={containerRef}
+        bubbleCanvasRef={hasOwnGradient || hasTornBubbles ? bubbleCanvasRef : undefined}
+        hasOwnGradient={hasOwnGradient}
         anchorIdRef={anchorIdRef}
         memoUnreadDividerBeforeIdRef={memoUnreadDividerBeforeIdRef}
         memoFirstUnreadIdRef={memoFirstUnreadIdRef}
@@ -1553,6 +1629,11 @@ export default memo(withGlobal<OwnProps>(
       canManageBotForumTopics: chat.isBotForum && user?.canManageBotForumTopics,
       shouldScrollToBottom,
       reactionPollingPause: global.reactionPollingPause,
+      serverThemeSettings: selectChatThemeSettings(global, chatId),
+      actionMessageBg: selectActionMessageBg(global, chatId),
+      canAnimateTheme: selectCanAnimateInterface(global),
+      areOwnGradientColorsAnimated: selectChatThemeSettings(global, chatId)?.areOutgoingColorsAnimated,
+      theme: selectTheme(global),
     };
   },
 )(MessageList));

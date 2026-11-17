@@ -18,6 +18,7 @@ import {
 import {
   selectActiveDownloads,
   selectAllowedMessageActionsSlow, selectCanForwardMessage,
+  selectCanPostInMessageList,
   selectChatFullInfo, selectCurrentChat,
   selectCurrentMessageList,
   selectIsChatProtected,
@@ -27,6 +28,7 @@ import {
 } from '../../global/selectors';
 import { isUserId } from '../../util/entities/ids';
 import selectViewableMedia from './helpers/getViewableMedia';
+import { getMediaViewerMedia } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
@@ -67,6 +69,7 @@ type StateProps = {
   canDelete?: boolean;
   canForward?: boolean;
   canReportMessage?: boolean;
+  canPost?: boolean;
   chat?: ApiChat;
   chatFullInfo?: ApiChatFullInfo;
   canUpdate?: boolean;
@@ -88,6 +91,7 @@ const MediaViewerActions = ({
   canReportMessage,
   canDelete,
   canForward,
+  canPost,
   canUpdate,
   withAnimation,
   messageListType,
@@ -120,11 +124,11 @@ const MediaViewerActions = ({
   const isMessage = item?.type === 'message';
   const message = item?.type === 'message' ? item.message : undefined;
 
-  const { canSendPhotos } = getAllowedAttachmentOptions(chat, chatFullInfo);
+  const { canSendPhotos, canSendVideos } = getAllowedAttachmentOptions(chat, chatFullInfo);
   const canEditViewedMedia = Boolean(
-    message && !message.isEphemeral && !isMobile && !isProtected && !isChatProtected
-    && message.chatId === chat?.id
-    && canSendPhotos
+    message && !message.isEphemeral && !message.isScheduled && !isMobile && !isProtected && !isChatProtected
+    && message.chatId === chat?.id && canPost
+    && (message.content.video ? canSendVideos : canSendPhotos)
     && canEditMediaInEditor(message),
   );
 
@@ -162,7 +166,12 @@ const MediaViewerActions = ({
 
   const handleEditClick = useLastCallback(() => {
     if (!message) return;
-    requestMessageMediaEditor({ chatId: message.chatId, messageId: message.id });
+    const mediaEl = getMediaViewerMedia();
+    requestMessageMediaEditor({
+      chatId: message.chatId,
+      messageId: message.id,
+      videoTime: mediaEl instanceof HTMLVideoElement ? mediaEl.currentTime : undefined,
+    });
     if (!withAnimation) {
       closeMediaViewer();
       return;
@@ -497,7 +506,10 @@ export default memo(withGlobal<OwnProps>(
     const canForward = message && selectCanForwardMessage(global, message);
     const canUpdate = canUpdateMedia && Boolean(avatarPhoto) && !isCurrentAvatar;
     const messageListType = currentMessageList?.type;
-    const viewableMedia = selectViewableMedia(global, origin, item);
+    const canPost = Boolean(currentMessageList && selectCanPostInMessageList(
+      global, currentMessageList.chatId, currentMessageList.threadId, currentMessageList.type,
+    ));
+    const viewableMedia = selectViewableMedia(global, item);
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
     return {
@@ -509,6 +521,7 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canForward,
       canReportMessage: Boolean(message?.isEphemeral && !message.isOutgoing),
+      canPost,
       canUpdate,
       withAnimation,
       messageListType,

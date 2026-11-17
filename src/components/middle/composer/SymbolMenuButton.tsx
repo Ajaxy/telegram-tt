@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -48,14 +47,16 @@ type OwnProps = {
   onEmojiSelect: (emoji: string) => void;
   closeBotCommandMenu?: VoidFunction;
   closeSendAsMenu?: VoidFunction;
+  onLoad?: NoneToVoidFunction;
   isSymbolMenuForced?: boolean;
+  keyboardSlotElement?: HTMLElement;
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
   className?: string;
   inputCssSelector?: string;
 };
 
-const SymbolMenuButton: FC<OwnProps> = ({
+const SymbolMenuButton = ({
   chatId,
   threadId,
   isMobile,
@@ -68,6 +69,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   isAttachmentModal,
   canSendPlainText,
   isSymbolMenuForced,
+  keyboardSlotElement,
   className,
   forceDarkTheme,
   inputCssSelector = EDITABLE_INPUT_CSS_SELECTOR,
@@ -81,7 +83,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
   onEmojiSelect,
   closeBotCommandMenu,
   closeSendAsMenu,
-}) => {
+  onLoad,
+}: OwnProps) => {
   const {
     addRecentEmoji,
     addRecentCustomEmoji,
@@ -93,6 +96,11 @@ const SymbolMenuButton: FC<OwnProps> = ({
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
   const lang = useLang();
+
+  const handleSymbolMenuLoad = useLastCallback(() => {
+    onSymbolMenuLoadingComplete();
+    onLoad?.();
+  });
 
   const isMenuOpen = isSymbolMenuOpen || Boolean(isSymbolMenuForced);
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(
@@ -155,7 +163,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         canSendStickers={canSendStickers}
         isMessageComposer={isMessageComposer}
         idPrefix={idPrefix}
-        onLoad={onSymbolMenuLoadingComplete}
+        onLoad={handleSymbolMenuLoad}
         onClose={closeSymbolMenu}
         onEmojiSelect={onEmojiSelect}
         onStickerSelect={onStickerSelect}
@@ -166,6 +174,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         addRecentEmoji={addRecentEmoji}
         addRecentCustomEmoji={addRecentCustomEmoji}
         isAttachmentModal={isAttachmentModal}
+        keyboardSlotElement={keyboardSlotElement}
         canSendPlainText={canSendPlainText}
         className={buildClassName(className, forceDarkTheme && 'component-theme-dark')}
         anchor={isAttachmentModal ? contextMenuAnchor : undefined}

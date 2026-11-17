@@ -58,6 +58,14 @@ export async function resizeImage(blob: Blob, width: number, height: number, out
   return { blob: await canvas.convertToBlob({ type: outputType }) };
 }
 
+export async function encodeImage(imageBitmap: ImageBitmap, outputType: string) {
+  const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+  canvas.getContext('2d')!.drawImage(imageBitmap, 0, 0);
+  imageBitmap.close();
+
+  return { blob: await canvas.convertToBlob({ type: outputType }) };
+}
+
 function dataUriToImageBitmap(dataUri: string) {
   const byteString = atob(dataUri.split(',')[1]);
   const mimeString = dataUri.split(',')[0].split(':')[1].split(';')[0];
@@ -83,6 +91,7 @@ const api = {
   'offscreen-canvas:blurThumb': blurThumb,
   'offscreen-canvas:getAppendixColorFromImage': getAppendixColorFromImage,
   'offscreen-canvas:resizeImage': resizeImage,
+  'offscreen-canvas:encodeImage': encodeImage,
 };
 
 createWorkerInterface(api, 'media');

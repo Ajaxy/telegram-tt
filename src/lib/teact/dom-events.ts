@@ -6,8 +6,41 @@ type DelegationRegistry = Map<Element, Handler>;
 const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load', 'error']);
 
 const documentEventCounters: Record<string, number> = {};
+const delegatedDocuments = new Map<Document, number>([[document, 1]]);
 const delegationRegistryByEventType: Record<string, DelegationRegistry> = {};
 const delegatedEventTypesByElement = new Map<Element, Set<string>>();
+
+export function registerDelegatedDocument(targetDocument: Document) {
+  const count = delegatedDocuments.get(targetDocument) || 0;
+  delegatedDocuments.set(targetDocument, count + 1);
+  let isRegistered = true;
+
+  if (!count) {
+    Object.keys(documentEventCounters).forEach((eventType) => {
+      if (documentEventCounters[eventType]) {
+        targetDocument.addEventListener(eventType, handleEvent);
+      }
+    });
+  }
+
+  return () => {
+    if (!isRegistered) {
+      return;
+    }
+
+    isRegistered = false;
+    const remainingCount = delegatedDocuments.get(targetDocument)! - 1;
+    if (remainingCount) {
+      delegatedDocuments.set(targetDocument, remainingCount);
+      return;
+    }
+
+    delegatedDocuments.delete(targetDocument);
+    Object.keys(documentEventCounters).forEach((eventType) => {
+      targetDocument.removeEventListener(eventType, handleEvent);
+    });
+  };
+}
 
 export function addEventListener(element: Element, propName: string, handler: Handler, asCapture = false) {
   const eventType = resolveEventType(propName, element);
@@ -66,7 +99,7 @@ function canUseEventDelegation(realEventType: string, element: Element, asCaptur
 function addDelegatedListener(eventType: string, element: Element, handler: Handler) {
   if (!documentEventCounters[eventType]) {
     documentEventCounters[eventType] = 0;
-    document.addEventListener(eventType, handleEvent);
+    delegatedDocuments.forEach((_, targetDocument) => targetDocument.addEventListener(eventType, handleEvent));
   }
 
   resolveDelegationRegistry(eventType).set(element, handler);
@@ -79,7 +112,7 @@ function removeDelegatedListener(eventType: string, element: Element) {
   if (!documentEventCounters[eventType]) {
     // Synchronous deletion on 0 will cause perf degradation in the case of 1 element
     // which is not a real case, so it's ok to do it this way
-    document.removeEventListener(eventType, handleEvent);
+    delegatedDocuments.forEach((_, targetDocument) => targetDocument.removeEventListener(eventType, handleEvent));
   }
 
   delegationRegistryByEventType[eventType].delete(element);
@@ -102,6 +135,7 @@ function handleEvent(realEvent: Event) {
   if (events) {
     let furtherCallsPrevented = false;
     let current: Element = realEvent.target as Element;
+    const { body } = realEvent.currentTarget as Document;
 
     const stopPropagation = () => {
       furtherCallsPrevented = true;
@@ -129,7 +163,7 @@ function handleEvent(realEvent: Event) {
     });
 
     // This can also be limited by teact root
-    while (current && current !== document.body) {
+    while (current && current !== body) {
       const handler = events.get(current);
       if (handler) {
         handler(event);

@@ -13,7 +13,7 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import { getStickerMediaHash } from '../../../global/helpers';
 import { fetch } from '../../../util/mediaLoader';
-import { formatPercent } from '../../../util/textFormat';
+import { formatPercent } from '../../../util/text/textFormat';
 
 export type GiftAttributes = {
   model?: ApiStarGiftAttributeModel;

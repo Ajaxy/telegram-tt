@@ -10,7 +10,7 @@ type TonTransferLink = {
 };
 
 const ADDRESS_GROUP_REGEX = /.{1,4}/g;
-const ADDRESS_GROUPS_PER_LINE = 4;
+export const ADDRESS_GROUPS_PER_LINE = 4;
 const ADDRESS_EDGE_LENGTH = 4;
 // `ton://transfer/<address>?amount=<nanotons>&text=<comment>`, as a wallet QR code carries it
 const TON_TRANSFER_LINK_REGEX = /^ton:\/\/transfer(?:\/([^/?#]*))?(?:\?(.*))?$/i;

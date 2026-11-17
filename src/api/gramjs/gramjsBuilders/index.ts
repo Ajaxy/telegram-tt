@@ -32,6 +32,7 @@ import type {
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiRequestInputSavedStarGift,
+  ApiRequestInputShareTheme,
   ApiSendMessageAction,
   ApiSticker,
   ApiStory,
@@ -39,6 +40,7 @@ import type {
   ApiThemeParameters,
   ApiTypeCurrencyAmount,
   ApiVideo,
+  ApiWalletCardSticker,
   MediaContent,
 } from '../../types';
 import {
@@ -46,11 +48,13 @@ import {
 } from '../../types';
 
 import { CHANNEL_ID_BASE, DEFAULT_STATUS_ICON_ID, STARS_CURRENCY_CODE } from '../../../config';
+import { toBounceableAddress } from '../../../lib/ton/address';
 import { writeUint32LE } from '../../../util/encoding/buffer';
 import { getMtpEphemeralMessageId } from '../../../util/keys/messageKey';
 import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 import { buildInputDocument, buildInputPhoto } from './media';
+import { buildMtpRichText } from './richContent';
 
 export { buildInputRichMessage } from './richContent';
 export { buildInputDocument, buildInputPhoto } from './media';
@@ -1039,16 +1043,23 @@ export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
 
   if (replyInfo.type === 'message') {
     const {
-      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteOffset, monoforumPeerId,
+      replyToMsgId, replyToTopId, replyToPeerId, quoteText, quoteRich, quoteOffset, monoforumPeerId, todoItemId,
+      pollOption,
     } = replyInfo;
+    const mtpQuoteRich = quoteRich?.map(buildMtpRichText);
+    const validQuoteRich = mtpQuoteRich?.length && mtpQuoteRich.every((text) => text !== undefined)
+      ? mtpQuoteRich : undefined;
     return new GramJs.InputReplyToMessage({
       replyToMsgId,
       topMsgId: replyToTopId,
       replyToPeerId: replyToPeerId ? buildInputPeerFromLocalDb(replyToPeerId)! : undefined,
       monoforumPeerId: monoforumPeerId ? buildInputPeerFromLocalDb(monoforumPeerId)! : undefined,
-      quoteText: quoteText?.text,
-      quoteEntities: quoteText?.entities?.map(buildMtpMessageEntity),
-      quoteOffset,
+      quoteText: validQuoteRich ? undefined : quoteText?.text,
+      quoteEntities: validQuoteRich ? undefined : quoteText?.entities?.map(buildMtpMessageEntity),
+      quoteRich: validQuoteRich,
+      quoteOffset: validQuoteRich || quoteText ? quoteOffset : undefined,
+      todoItemId,
+      pollOption: pollOption !== undefined ? deserializeBytes(pollOption) : undefined,
     });
   }
 
@@ -1152,6 +1163,22 @@ export function buildInputSavedStarGift(inputGift: ApiRequestInputSavedStarGift)
   });
 }
 
+export function buildInputShareTheme(theme?: ApiRequestInputShareTheme) {
+  switch (theme?.type) {
+    case 'emojiBackdrop':
+      return new GramJs.ShareThemeEmojiBackdrop({
+        backdropId: theme.backdropId,
+        emojis: theme.emojis.length ? theme.emojis.map(buildInputReaction) : undefined,
+      });
+    case 'gift':
+      return new GramJs.InputShareThemeGift({
+        stargift: buildInputSavedStarGift(theme.inputGift),
+      });
+    default:
+      return new GramJs.ShareThemeDefault();
+  }
+}
+
 export function buildInputProfileTab(profileTab: ApiProfileTab) {
   switch (profileTab) {
     case 'stories':
@@ -1175,4 +1202,17 @@ export function buildInputProfileTab(profileTab: ApiProfileTab) {
       return _exhaustiveCheck;
     }
   }
+}
+
+export function buildInputWalletCardSticker({ address, coordinates }: ApiWalletCardSticker) {
+  const {
+    x, y, width, height, rotation, radius,
+  } = coordinates;
+
+  return new GramJs.InputWalletCardSticker({
+    coordinates: new GramJs.MediaAreaCoordinates({
+      x, y, w: width, h: height, rotation, radius,
+    }),
+    nftAddress: toBounceableAddress(address),
+  });
 }

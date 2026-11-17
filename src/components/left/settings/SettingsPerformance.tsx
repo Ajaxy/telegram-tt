@@ -18,7 +18,7 @@ import {
 } from '../../../global/initialState';
 import { selectPerformanceSettings, selectTabState } from '../../../global/selectors';
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import { IS_BACKDROP_BLUR_SUPPORTED, IS_SNAP_EFFECT_SUPPORTED } from '../../../util/browser/windowEnvironment';
+import { IS_BACKDROP_BLUR_SUPPORTED } from '../../../util/browser/windowEnvironment';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -65,7 +65,6 @@ const PERFORMANCE_OPTIONS: PerformanceSection[] = [
     { key: 'contextMenuAnimations', label: 'SettingsPerformanceContextAnimation' },
     { key: 'contextMenuBlur', label: 'SettingsPerformanceContextBlur', disabled: !IS_BACKDROP_BLUR_SUPPORTED },
     { key: 'rightColumnAnimations', label: 'SettingsPerformanceRightColumn' },
-    { key: 'snapEffect', label: 'SettingsPerformanceThanos' },
     { key: 'textStreaming', label: 'SettingsPerformanceTextStreaming' },
   ]],
   ['SettingsPerformanceStickers', [
@@ -216,7 +215,6 @@ function SettingsPerformance({
               {Boolean(sectionExpandedStates[index]) && (
                 <div className="DropdownList DropdownList--open">
                   {options.map(({ key, label, disabled }) => {
-                    if (key === 'snapEffect' && !IS_SNAP_EFFECT_SUPPORTED) return undefined;
                     return (
                       <Checkbox
                         key={key}

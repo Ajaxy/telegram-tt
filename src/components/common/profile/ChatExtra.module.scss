@@ -36,7 +36,7 @@
 }
 
 .phone, .description, .link, .miniapp, .notifications, .location, .note, .savedMessages, .botEmojiStatus,
-.botLocation, .subscribers {
+.botLocation, .botCamera, .botMicrophone, .subscribers {
   @include mixins.with-vt-type('chatExtra');
 }
 

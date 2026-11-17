@@ -1,5 +1,11 @@
+@use '../../../styles/mixins';
+
 .dialog {
   --modal-content-block-padding: 0;
+}
+
+.shielded {
+  pointer-events: none;
 }
 
 // The screens scroll on under the header, so it keeps no background of its own until they do. The fading strip
@@ -161,6 +167,15 @@
   margin-top: calc(-1 * var(--modal-header-height));
 }
 
+// The active slide stays in the flow, so the dialog follows its content up to the usual height, then scrolls
+.autoHeight {
+  height: auto;
+
+  .slide {
+    max-height: var(--slide-height);
+  }
+}
+
 // The gutter is held with or without the bar, so a longer screen does not nudge the content sideways.
 // The tilted wallet card reaches into it, which must not scroll the screen sideways.
 .slide {
@@ -207,16 +222,8 @@
 
 .wrongPhraseAddress {
   margin-top: 1rem;
-
-  font-family: var(--font-family-monospace);
   font-size: 0.8125rem;
   line-height: 1.45;
-  text-align: center;
-  white-space: pre-line;
-}
-
-.wrongPhraseGroupMuted {
-  color: var(--color-text-secondary);
 }
 
 .headerBalance {
@@ -241,6 +248,8 @@
   &:hover {
     background-color: var(--color-interactive-element-hover);
   }
+
+  @include mixins.no-pointer-focus-ring;
 }
 
 .headerBalanceLabel {

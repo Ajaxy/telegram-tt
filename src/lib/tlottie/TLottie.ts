@@ -56,6 +56,7 @@ class TLottie {
     coords?: Params['coords'];
     onLoad?: NoneToVoidFunction;
     onFrame?: FrameCallback;
+    handleContextChange: NoneToVoidFunction;
   }>();
 
   private imgSize!: number;
@@ -142,8 +143,11 @@ class TLottie {
 
   public removeView(viewId: string) {
     const {
-      canvas, ctx, isSharedCanvas, coords,
+      canvas, ctx, isSharedCanvas, coords, handleContextChange,
     } = this.views.get(viewId)!;
+
+    canvas.removeEventListener('contextlost', handleContextChange);
+    canvas.removeEventListener('contextrestored', handleContextChange);
 
     if (isSharedCanvas) {
       ctx.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
@@ -156,6 +160,33 @@ class TLottie {
     if (!this.views.size) {
       this.destroy();
     }
+  }
+
+  redrawView(viewId: string) {
+    requestMutation(() => {
+      const view = this.views.get(viewId);
+      if (!view) return;
+
+      if (!view.isSharedCanvas && view.ctx.isContextLost?.()) {
+        const { canvas, handleContextChange } = view;
+        // Document adoption can permanently lose the canvas context
+        const replacement = canvas.cloneNode() as HTMLCanvasElement;
+        canvas.removeEventListener('contextlost', handleContextChange);
+        canvas.removeEventListener('contextrestored', handleContextChange);
+        replacement.addEventListener('contextlost', handleContextChange);
+        replacement.addEventListener('contextrestored', handleContextChange);
+        canvas.replaceWith(replacement);
+        view.canvas = replacement;
+        view.ctx = replacement.getContext('2d')!;
+      }
+
+      const frame = this.getFrame(this.prevFrameIndex);
+      if (!frame || frame === WAITING) return;
+
+      const { ctx, coords: { x = 0, y = 0 } = {} } = view;
+      ctx.clearRect(x, y, this.imgSize, this.imgSize);
+      ctx.drawImage(frame, x, y);
+    });
   }
 
   isPlaying() {
@@ -281,6 +312,7 @@ class TLottie {
     coords?: Params['coords'],
   ) {
     const sizeFactor = this.calcSizeFactor();
+    const handleContextChange = () => this.redrawView(viewId);
 
     let imgSize: number;
 
@@ -309,7 +341,7 @@ class TLottie {
       canvas.height = imgSize;
 
       this.views.set(viewId, {
-        canvas, ctx, onLoad, onFrame,
+        canvas, ctx, onLoad, onFrame, handleContextChange,
       });
 
       requestMutation(() => {
@@ -343,8 +375,13 @@ class TLottie {
         },
         onLoad,
         onFrame,
+        handleContextChange,
       });
     }
+
+    const { canvas } = this.views.get(viewId)!;
+    canvas.addEventListener('contextlost', handleContextChange);
+    canvas.addEventListener('contextrestored', handleContextChange);
 
     if (this.isRendererInited) {
       this.doPlay();

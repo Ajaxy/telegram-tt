@@ -34,6 +34,7 @@ export { default as AboutMonetizationModal } from '../components/common/AboutMon
 export { default as VerificationMonetizationModal } from '../components/common/VerificationMonetizationModal';
 export { default as EmojiStatusAccessModal } from '../components/modals/emojiStatusAccess/EmojiStatusAccessModal';
 export { default as LocationAccessModal } from '../components/modals/locationAccess/LocationAccessModal';
+export { default as MediaAccessModal } from '../components/modals/mediaAccess/MediaAccessModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
 export { default as ReportModal } from '../components/modals/reportModal/ReportModal';
 export { default as PreparedMessageModal } from '../components/modals/preparedMessage/PreparedMessageModal';
@@ -82,6 +83,7 @@ export { default as LanguageModal } from '../components/modals/language/Language
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as MediaEditor } from '../components/ui/mediaEditor/MediaEditor';
+export { default as EditedVideoPreview } from '../components/ui/mediaEditor/EditedVideoPreview';
 export { default as PollModal } from '../components/modals/poll/PollModal';
 export { default as MusicPickerModal } from '../components/modals/musicPicker/MusicPickerModal';
 export { default as ToDoListModal } from '../components/middle/composer/ToDoListModal';
@@ -116,6 +118,8 @@ export { default as FrozenAccountModal } from '../components/modals/frozenAccoun
 export { default as ProfileRatingModal } from '../components/modals/profileRating/ProfileRatingModal';
 export { default as DisableSharingAboutModal } from '../components/modals/disableSharing/DisableSharingAboutModal';
 export { default as AutoDeleteTimerModal } from '../components/modals/autoDeleteTimer/AutoDeleteTimerModal';
+export { default as SettingsConfirmationModal }
+  from '../components/modals/settingsConfirmation/SettingsConfirmationModal';
 export { default as EditRankModal } from '../components/modals/rank/EditRankModal';
 export { default as RankModal } from '../components/modals/rank/RankModal';
 export { default as QuickPreviewModal } from '../components/modals/quickPreview/QuickPreviewModal';

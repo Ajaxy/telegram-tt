@@ -174,6 +174,7 @@ const ReportModal = ({
       onClose={closeReportMessageModalHandler}
       contentClassName={styles.content}
       className={buildClassName(styles.root, modal?.subject === 'story' && 'component-theme-dark')}
+      isNativeDialog
     >
       <Transition
         name="slide"

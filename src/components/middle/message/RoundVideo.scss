@@ -8,6 +8,11 @@
     pointer-events: none;
   }
 
+  // Stays mounted under the transcription, so collapsing it shows the loaded video without a reload
+  &.under-transcription {
+    display: none;
+  }
+
   .video-wrapper {
     position: absolute;
     top: 0;
@@ -133,7 +138,8 @@
     animation: 1s linear loader-rectangle infinite;
   }
 
-  .transcribe-button {
+  .transcribe-button,
+  .upscale-button {
     position: absolute;
     top: 1.6875rem;
     left: 0.1875rem;
@@ -142,11 +148,24 @@
     height: 1.3125rem;
     border-radius: 0.5rem;
 
-    background: var(--action-message-bg);
+    color: var(--message-service-text);
+
+    background: var(--message-service-background);
     &:hover {
-      opacity: 0.8;
-      background: var(--action-message-bg) !important;
+      background: var(--message-service-background) !important;
     }
+  }
+
+  // Mirrors the duration badge and touches the circle edge at its height
+  .upscale-button {
+    top: 0.1875rem;
+    right: 1.8125rem;
+    left: auto;
+
+    width: 1.75rem;
+    height: 1.125rem;
+    padding: 0;
+    border-radius: 0.75rem;
   }
 
   .unread::after {

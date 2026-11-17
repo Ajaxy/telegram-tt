@@ -14,7 +14,6 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
 import Island, { IslandTitle } from '../../gili/layout/Island';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import SettingsActiveSession from './SettingsActiveSession';
@@ -37,12 +36,11 @@ const SettingsActiveSessions = ({
 }: OwnProps & StateProps) => {
   const {
     terminateAuthorization,
-    terminateAllAuthorizations,
     changeSessionTtl,
+    openSettingsConfirmation,
   } = getActions();
 
   const lang = useLang();
-  const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
@@ -101,11 +99,6 @@ const SettingsActiveSessions = ({
   const handleTerminateSessionClick = useCallback((hash: string) => {
     terminateAuthorization({ hash });
   }, [terminateAuthorization]);
-
-  const handleTerminateAllSessions = useCallback(() => {
-    closeConfirmTerminateAllDialog();
-    terminateAllAuthorizations();
-  }, [closeConfirmTerminateAllDialog, terminateAllAuthorizations]);
 
   const handleOpenSessionModal = useCallback((hash: string) => {
     setOpenedSessionHash(hash);
@@ -180,7 +173,7 @@ const SettingsActiveSessions = ({
               icon="stop"
               ripple
               narrow
-              onClick={openConfirmTerminateAllDialog}
+              onClick={() => openSettingsConfirmation({ confirmation: 'terminateAllSessions' })}
             >
               {lang('TerminateAllSessions')}
             </ListItem>
@@ -273,17 +266,6 @@ const SettingsActiveSessions = ({
       {currentSession && renderCurrentSession(currentSession)}
       {hasOtherSessions && renderOtherSessions(otherSessionHashes)}
       {renderAutoTerminate()}
-      {hasOtherSessions && (
-        <ConfirmDialog
-          isOpen={isConfirmTerminateAllDialogOpen}
-          onClose={closeConfirmTerminateAllDialog}
-          text={lang('AreYouSureSessions')}
-          confirmLabel={lang('TerminateAllSessions')}
-          confirmHandler={handleTerminateAllSessions}
-          confirmIsDestructive
-          areButtonsInColumn
-        />
-      )}
       <SettingsActiveSession isOpen={isModalOpen} hash={openedSessionHash} onClose={handleCloseSessionModal} />
     </div>
   );

@@ -1,4 +1,5 @@
-import type { ApiPhoto } from './messages';
+import type { ApiPhoto, ApiReaction } from './messages';
+import type { ApiRequestInputSavedStarGift, ApiStarGiftUnique } from './stars';
 
 export interface ApiPeerPhotos {
   fallbackPhoto?: ApiPhoto;
@@ -96,3 +97,30 @@ export interface ApiPeerColors {
 }
 
 export type ApiProfileTab = 'stories' | 'gifts' | 'media' | 'documents' | 'audio' | 'voice' | 'links' | 'gif';
+
+export interface ApiShareThemeEmojiBackdrop {
+  type: 'emojiBackdrop';
+  backdropId?: number;
+  emojis: ApiReaction[];
+}
+
+export interface ApiShareThemeGift {
+  type: 'gift';
+  gift: ApiStarGiftUnique;
+}
+
+export type ApiShareTheme = ApiShareThemeEmojiBackdrop | ApiShareThemeGift;
+
+export type ApiRequestInputShareTheme = ApiShareThemeEmojiBackdrop | {
+  type: 'gift';
+  inputGift: ApiRequestInputSavedStarGift;
+};
+
+export interface ApiShareThemeBackdrop {
+  backdropId: number;
+  name: string;
+  centerColor: string;
+  edgeColor: string;
+  patternColor: string;
+  textColor: string;
+}

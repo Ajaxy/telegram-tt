@@ -19,6 +19,7 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectIsMessageProtected,
   selectSender,
   selectTabState,
   selectTheme,
@@ -58,6 +59,7 @@ type StateProps = {
   noAuthors?: boolean;
   noCaptions?: boolean;
   forwardsHaveCaptions?: boolean;
+  forwardsHaveWidgets?: boolean;
   isCurrentUserPremium?: boolean;
   isContextMenuDisabled?: boolean;
   isReplyToDiscussion?: boolean;
@@ -69,6 +71,7 @@ type StateProps = {
   forwardMessageIds?: number[];
   fromChatId?: string;
   isMediaNsfw?: boolean;
+  isMessageProtected?: boolean;
   theme: ThemeKey;
 };
 
@@ -87,6 +90,7 @@ const CLOSE_DURATION = 350;
 const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const {
     shouldAnimate,
+    isMessageProtected,
     isReplyToDiscussion,
     isInChangingRecipientMode,
     forwardMessageIds,
@@ -184,6 +188,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
     noAuthors,
     noCaptions,
     forwardsHaveCaptions,
+    forwardsHaveWidgets,
     forwardedMessagesCount: frozenForwardedMessagesCount,
     message: frozenMessage,
     shouldForceShowEditing: frozenShouldForceShowEditing,
@@ -195,11 +200,11 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
 
   const isForwardingRendering = Boolean(frozenForwardedMessagesCount);
   const isShowingReplyRendering = Boolean(frozenReplyInfo) && !frozenShouldForceShowEditing;
-  const frozenReplyQuoteText = frozenReplyInfo?.type === 'message' ? frozenReplyInfo.quoteText : undefined;
-  const isReplyWithQuoteRendering = Boolean(frozenReplyQuoteText);
+  const isReplyWithQuoteRendering = frozenReplyInfo?.type === 'message'
+    && Boolean(frozenReplyInfo.quoteText || frozenReplyInfo.quoteRich?.length);
   const isShowingSuggestedPostRendering = Boolean(frozenSuggestedPostInfo) && !frozenShouldForceShowEditing;
 
-  const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile;
+  const canMediaBeEdited = frozenMessage && canEditMediaInEditor(frozenMessage) && !isMobile && !isMessageProtected;
 
   useEffect(() => {
     if (shouldPreventComposerAnimation) {
@@ -263,7 +268,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
   const handleForwardToAnotherChatClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
   const handleShowMessageClick = useLastCallback(buildAutoCloseMenuItemHandler(focusMessageFromDraft));
   const handleRemoveQuoteClick = useLastCallback(buildAutoCloseMenuItemHandler(
-    () => updateDraftReplyInfo({ quoteText: undefined }),
+    () => updateDraftReplyInfo({ quoteText: undefined, quoteRich: undefined, quoteOffset: undefined }),
   ));
   const handleChangeReplyRecipientClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
   const handleReplyInSenderChat = useLastCallback(() => {
@@ -358,7 +363,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           onKeyDown={handleIconKeyDown}
         >
           {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
-          {Boolean(frozenReplyQuoteText) && (
+          {isReplyWithQuoteRendering && (
             <Icon name="quote" className="quote-reply" />
           )}
         </div>
@@ -403,29 +408,33 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
           >
             {isForwardingRendering && (
               <>
-                <MenuItem
-                  icon={!noAuthors ? 'check' : undefined}
-                  customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
+                {!forwardsHaveWidgets && (
+                  <>
+                    <MenuItem
+                      icon={!noAuthors ? 'check' : undefined}
+                      customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
 
-                  onClick={() => setForwardNoAuthors({
-                    noAuthors: false,
-                  })}
-                >
-                  {lang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
-                </MenuItem>
-                <MenuItem
-                  icon={noAuthors ? 'check' : undefined}
-                  customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
+                      onClick={() => setForwardNoAuthors({
+                        noAuthors: false,
+                      })}
+                    >
+                      {lang(frozenForwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={noAuthors ? 'check' : undefined}
+                      customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
 
-                  onClick={() => setForwardNoAuthors({
-                    noAuthors: true,
-                  })}
-                >
-                  {lang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
-                </MenuItem>
+                      onClick={() => setForwardNoAuthors({
+                        noAuthors: true,
+                      })}
+                    >
+                      {lang(frozenForwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
+                    </MenuItem>
+                  </>
+                )}
                 {forwardsHaveCaptions && (
                   <>
-                    <MenuSeparator />
+                    {!forwardsHaveWidgets && <MenuSeparator />}
                     <MenuItem
                       icon={!noCaptions ? 'check' : undefined}
                       customIcon={noCaptions ? <Icon name="placeholder" /> : undefined}
@@ -448,7 +457,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
                     </MenuItem>
                   </>
                 )}
-                <MenuSeparator />
+                {(!forwardsHaveWidgets || forwardsHaveCaptions) && <MenuSeparator />}
                 <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick}>
                   {lang('ForwardToAnotherChat')}
                 </MenuItem>
@@ -551,8 +560,8 @@ export default memo(withGlobal<OwnProps>(
         sender = selectForwardedSender(global, message);
       }
 
-      const quoteText = replyInfo.type === 'message' ? replyInfo.quoteText : undefined;
-      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(quoteText))) {
+      const hasQuote = replyInfo.type === 'message' && Boolean(replyInfo.quoteText || replyInfo.quoteRich?.length);
+      if (!sender && (!forwardInfo?.hiddenUserName || hasQuote)) {
         sender = selectSender(global, message);
       }
     }
@@ -563,6 +572,8 @@ export default memo(withGlobal<OwnProps>(
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (
       forward?.content.text && Object.keys(forward.content).length > 1
     ));
+    // A widget is never forwarded without its author, so hiding the sender is not offered
+    const forwardsHaveWidgets = forwardedMessages?.some((forward) => forward?.content.widget);
 
     const isContextMenuDisabled = replyInfo?.type === 'ephemeral'
       || (isForwarding && forwardMessageIds!.length === 1 && Boolean(message?.content.storyData));
@@ -583,6 +594,7 @@ export default memo(withGlobal<OwnProps>(
       noAuthors,
       noCaptions,
       forwardsHaveCaptions,
+      forwardsHaveWidgets,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isContextMenuDisabled,
       isReplyToDiscussion,
@@ -594,6 +606,7 @@ export default memo(withGlobal<OwnProps>(
       forwardMessageIds,
       fromChatId,
       isMediaNsfw,
+      isMessageProtected: !editingId && selectIsMessageProtected(global, message),
       theme: selectTheme(global),
     };
   },

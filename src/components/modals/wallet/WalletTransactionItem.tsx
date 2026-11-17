@@ -28,7 +28,6 @@ import Avatar from '../../common/Avatar';
 import GramIcon from '../../common/icons/GramIcon';
 import Icon from '../../common/icons/Icon';
 import ExpandableTonAmount from './ExpandableTonAmount';
-import { getOnrampProviderIcon } from './WalletBuyScreen';
 import WalletCollectibleImage from './WalletCollectibleImage';
 import WalletPendingClock from './WalletPendingClock';
 import WalletRowOverlay from './WalletRowOverlay';
@@ -44,6 +43,8 @@ type OwnProps = {
 };
 
 const AVATAR_SIZE = 42;
+// The @walt bot reports itself as `wallet` or `walt`
+const WALT_PROVIDER_NAMES = new Set(['walt', 'wallet']);
 const EXPAND_DURATION = 520;
 const APPEAR_DURATION = 560;
 const IMPACT_DURATION = 1200;
@@ -115,7 +116,7 @@ const WalletTransactionItem = ({
     });
   });
 
-  const onrampIcon = peer.type === 'onramp' ? getOnrampProviderIcon(peer.providerName).icon : undefined;
+  const onrampIcon = peer.type !== 'onramp' ? undefined : isWaltProvider(peer.providerName) ? 'walt' : 'card-alt';
   const title = getTitle(lang, peer, counterparty);
   const description = comment
     || (peer.type === 'onramp' ? capitalizeName(peer.providerName) : lang(getDescriptionKey(transaction)));
@@ -232,9 +233,7 @@ function getTitle(lang: LangFn, peer: ApiWalletTransactionPeer, counterparty?: A
 
   switch (peer.type) {
     case 'onramp':
-      return lang(getOnrampProviderIcon(peer.providerName).icon === 'walt'
-        ? 'WalletTransactionTopUpCrypto'
-        : 'WalletTransactionTopUp');
+      return lang(isWaltProvider(peer.providerName) ? 'WalletTransactionTopUpCrypto' : 'WalletTransactionTopUp');
     case 'telegramGift':
       return lang('Telegram');
     case 'unsupported':
@@ -255,6 +254,10 @@ function getCollectibleTypeKey(type: ApiWalletCollectible['type']): RegularLangK
     default:
       return 'WalletCollectibleTitle';
   }
+}
+
+function isWaltProvider(providerName: string) {
+  return WALT_PROVIDER_NAMES.has(providerName.toLowerCase());
 }
 
 // The provider arrives in lower case

@@ -56,6 +56,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   autologin_token: string;
   url_auth_domains: string[];
   web_app_allowed_protocols?: string[];
+  web_widgets_disabled?: boolean;
   whitelisted_domains: string[];
   premium_purchase_blocked: boolean;
   giveaway_gifts_purchase_available: boolean;
@@ -123,6 +124,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   wallet_available?: boolean;
   wallet_transfer_min_nanos?: number;
   wallet_gasless_daily_transfers?: number;
+  wallet_card_bg_gifts?: string[];
   old_wallet_bot_username?: string;
   poll_answers_max?: number;
   poll_close_period_max?: number;
@@ -131,6 +133,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   todo_items_max?: number;
   todo_title_length_max?: number;
   todo_item_length_max?: number;
+  quote_length_max?: number;
   ignore_restriction_reasons?: string[];
   need_age_video_verification?: boolean;
   verify_age_bot_username?: string;
@@ -206,6 +209,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     urlAuthDomains: appConfig.url_auth_domains || [],
     whitelistedDomains: appConfig.whitelisted_domains || [],
     webAppAllowedProtocols: appConfig.web_app_allowed_protocols,
+    areWidgetsDisabled: appConfig.web_widgets_disabled,
     maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
@@ -297,6 +301,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     isWalletAvailable: appConfig.wallet_available,
     walletTransferMinNanos: buildNanotons(appConfig.wallet_transfer_min_nanos),
     walletGaslessDailyTransfers: appConfig.wallet_gasless_daily_transfers,
+    walletCardBackgroundCollections: appConfig.wallet_card_bg_gifts,
     oldWalletBotUsername: appConfig.old_wallet_bot_username,
     pollMaxAnswers: appConfig.poll_answers_max,
     pollClosePeriodMax: appConfig.poll_close_period_max,
@@ -305,6 +310,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     todoItemsMax: appConfig.todo_items_max,
     todoTitleLengthMax: appConfig.todo_title_length_max,
     todoItemLengthMax: appConfig.todo_item_length_max,
+    quoteLengthMax: appConfig.quote_length_max,
     ignoreRestrictionReasons: appConfig.ignore_restriction_reasons,
     needAgeVideoVerification: appConfig.need_age_video_verification,
     verifyAgeBotUsername: appConfig.verify_age_bot_username,

@@ -1,14 +1,9 @@
-import {
-  memo, useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
+import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { DEBUG_LOG_FILENAME } from '../../../config';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import {
-  IS_SNAP_EFFECT_SUPPORTED,
-  IS_WAVE_TRANSFORM_SUPPORTED,
-} from '../../../util/browser/windowEnvironment';
+import { IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
 import { getAccountSlotUrl } from '../../../util/multiaccount';
@@ -21,7 +16,6 @@ import useMultiaccountInfo from '../../../hooks/useMultiaccountInfo';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Island from '../../gili/layout/Island';
-import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -47,9 +41,6 @@ const SettingsExperimental = ({
 }: OwnProps & StateProps) => {
   const { requestConfetti, setSharedSettingOption, requestWave } = getActions();
 
-  const snapButtonRef = useRef<HTMLDivElement>();
-  const [isSnapButtonAnimating, setIsSnapButtonAnimating] = useState(false);
-
   const lang = useLang();
 
   const accounts = useMultiaccountInfo();
@@ -71,19 +62,6 @@ const SettingsExperimental = ({
 
   const handleRequestConfetti = useLastCallback(() => {
     requestConfetti({ withStars: true });
-  });
-
-  const handleSnap = useLastCallback(() => {
-    const button = snapButtonRef.current;
-    if (!button) return;
-
-    if (animateSnap(button)) {
-      setIsSnapButtonAnimating(true);
-      // Manual reset for debug
-      setTimeout(() => {
-        setIsSnapButtonAnimating(false);
-      }, 1500);
-    }
   });
 
   const newAccountUrl = useMemo(() => {
@@ -132,15 +110,6 @@ const SettingsExperimental = ({
           disabled={!IS_WAVE_TRANSFORM_SUPPORTED}
         >
           <div className="title">{lang('SettingsStartWave')}</div>
-        </ListItem>
-        <ListItem
-          ref={snapButtonRef}
-          onClick={handleSnap}
-          icon="spoiler"
-          disabled={!IS_SNAP_EFFECT_SUPPORTED}
-          style={isSnapButtonAnimating ? 'visibility: hidden' : ''}
-        >
-          <div className="title">{lang('SettingsVaporizeButton')}</div>
         </ListItem>
       </Island>
       <Island>

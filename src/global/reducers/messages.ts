@@ -1,7 +1,7 @@
 import type {
-  ApiMessage, ApiMessagePoll, ApiPollResult, ApiPollResults, ApiQuickReply, ApiSponsoredMessage,
-  ApiWebPage,
+  ApiMessage, ApiMessagePoll, ApiPollResult, ApiPollResults, ApiQuickReply, ApiSponsoredMessage, ApiWebPage,
   ApiWebPageFull,
+  ApiWidget,
 } from '../../api/types';
 import type {
   MessageList,
@@ -54,6 +54,7 @@ import {
 } from '../selectors';
 import { selectThreadIdFromMessage, selectThreadInfo, selectThreadLocalStateParam } from '../selectors/threads';
 import { removeUnreadMentions } from './chats';
+import { deleteMessageWidgetStorage } from './messageWidgetStorage';
 import { removeIdFromSearchResults } from './middleSearch';
 import { removeUnreadPollVotes } from './polls';
 import { removeUnreadReactions } from './reactions';
@@ -77,7 +78,9 @@ export function updateCurrentMessageList<T extends GlobalState>(
   shouldReplaceLast?: boolean,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const { messageLists, aiMessageEditorModal, aiMessageEditorPendingResult } = selectTabState(global, tabId);
+  const {
+    messageLists, globalThemePreviewChatId, aiMessageEditorModal, aiMessageEditorPendingResult,
+  } = selectTabState(global, tabId);
   let newMessageLists: MessageList[];
   if (shouldReplaceHistory || IS_TEST) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
@@ -109,6 +112,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
 
   return updateTabState(global, {
     messageLists: newMessageLists,
+    globalThemePreviewChatId: nextList?.chatId === globalThemePreviewChatId ? globalThemePreviewChatId : undefined,
     aiMessageEditorModal: hasChanged ? undefined : aiMessageEditorModal,
     aiMessageEditorPendingResult: hasChanged ? undefined : aiMessageEditorPendingResult,
   }, tabId);
@@ -376,6 +380,21 @@ export function updateChatMessage<T extends GlobalState>(
   });
 }
 
+export function updateMessageWidgetData<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  messageId: number,
+  data: Partial<Pick<ApiWidget, 'chatData' | 'publicData' | 'publicDataHash'>>,
+): T {
+  const message = selectChatMessage(global, chatId, messageId);
+  const widget = message?.content.widget;
+  if (!widget) return global;
+
+  return updateChatMessage(global, chatId, messageId, {
+    content: { ...message.content, widget: { ...widget, ...omitUndefined(data) } },
+  });
+}
+
 export function updateScheduledMessage<T extends GlobalState>(
   global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): T {
@@ -443,8 +462,10 @@ export function deleteChatMessages<T extends GlobalState>(
   messageIds: number[],
   options?: {
     shouldPreserveMedia?: boolean;
+    shouldPreserveWidgetStorage?: boolean;
   },
 ): T {
+  if (!options?.shouldPreserveWidgetStorage) global = deleteMessageWidgetStorage(global, chatId, messageIds);
   const byId = selectChatMessages(global, chatId);
   if (!byId) {
     return global;

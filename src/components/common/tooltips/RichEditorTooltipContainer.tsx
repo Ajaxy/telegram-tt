@@ -21,6 +21,7 @@ import type {
 
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { setInlineBotHelp } from './extensions/richEditorTooltips/inlineBot';
 import { parseInlineBotQuery } from './extensions/richEditorTooltips/suggestion';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -90,8 +91,6 @@ const RichEditorTooltipContainer = ({
   const inlineBotHelp = canShowInlineBotHelp && inlineBot
     ? inlineBot.help
     : undefined;
-  const inlineBotUsername = inlineBotState?.username;
-  const onInlineBotHelpChange = config.inlineBot?.onHelpChange;
 
   const handleMentionSelect = useLastCallback((user: ApiUser) => suggestion?.command(user));
   const handleEmojiSelect = useLastCallback((emoji: string) => {
@@ -132,11 +131,9 @@ const RichEditorTooltipContainer = ({
   });
 
   useEffect(() => {
-    onInlineBotHelpChange?.(
-      inlineBotHelp && inlineBotUsername ? `@${inlineBotUsername} ${inlineBotHelp}` : undefined,
-    );
-    return () => onInlineBotHelpChange?.();
-  }, [inlineBotHelp, inlineBotUsername, onInlineBotHelpChange]);
+    setInlineBotHelp(editor, inlineBotHelp);
+    return () => setInlineBotHelp(editor);
+  }, [editor, inlineBotHelp]);
 
   if (formatter && !editor.isDestroyed) {
     return (
@@ -198,7 +195,7 @@ const RichEditorTooltipContainer = ({
   if (surface === 'customEmoji' || surface === 'sticker') {
     const customEmojiConfig = config.customEmoji;
     return (
-      <div className={styles.emojiStack}>
+      <div className={buildClassName(styles.emojiStack, stickerSuggestion && styles.raised)}>
         {stickerSuggestion ? (
           <StickerTooltip
             isOpen={isStickerOpen}
@@ -246,7 +243,7 @@ const RichEditorTooltipContainer = ({
 
   if (surface === 'inlineBot' && inlineBot && inlineBotState) {
     return (
-      <div className={styles.root}>
+      <div className={buildClassName(styles.root, styles.raised)}>
         <InlineBotTooltip
           isOpen={isOpen}
           selectedIndex={selectedIndex}

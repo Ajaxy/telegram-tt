@@ -15,7 +15,7 @@ import type {
 } from '../../types';
 
 import { MAX_BUTTONS_PER_ROW, normalizeButtonText } from '../../../global/helpers/buttons';
-import { hasRichText } from '../../../util/richText';
+import { forEachPageBlocksRichText, forEachRichTextNode, hasRichText } from '../../../util/text/richText';
 import { buildInputUserFromLocalDb } from './index';
 import { buildInputDocument, buildInputPhoto } from './media';
 
@@ -45,13 +45,27 @@ export function buildInputRichMessage(value: ApiInputRichMessage): GramJs.InputR
     return undefined;
   }
 
+  const users = buildRichMessageUsers(value.blocks);
+
   return new GramJs.InputRichMessage({
     rtl: value.isRtl,
     noautolink: value.shouldDisableAutoLink,
     blocks: blocks as GramJs.TypePageBlock[],
     photos: media.photos.length ? media.photos : undefined,
     documents: media.documents.length ? media.documents : undefined,
+    users: users.length ? users : undefined,
   });
+}
+
+function buildRichMessageUsers(blocks: ApiPageBlock[]) {
+  const userIds = new Set<string>();
+  forEachPageBlocksRichText(blocks, (text) => forEachRichTextNode(text, (node) => {
+    if (node.type === 'mentionName') {
+      userIds.add(node.userId);
+    }
+  }));
+
+  return Array.from(userIds, (userId) => buildInputUserFromLocalDb(userId)).filter(Boolean);
 }
 
 function buildMtpPageBlocks(blocks: ApiPageBlock[]) {
@@ -336,7 +350,7 @@ function buildDetailsPageBlock(
   });
 }
 
-function buildMtpRichText(text: ApiRichText): GramJs.TypeRichText | undefined {
+export function buildMtpRichText(text: ApiRichText): GramJs.TypeRichText | undefined {
   switch (text.type) {
     case 'button':
       return hasRichText(normalizeButtonText(text.text))
@@ -368,7 +382,31 @@ function buildMtpRichText(text: ApiRichText): GramJs.TypeRichText | undefined {
     case 'email':
       return buildEmailRichText(text);
     case 'mention':
-      return buildNestedRichText(text.text, GramJs.TextMention);
+      return buildMtpRichText(text.text);
+    case 'hashtag':
+      return buildNestedRichText(text.text, GramJs.TextHashtag);
+    case 'botCommand':
+      return buildNestedRichText(text.text, GramJs.TextBotCommand);
+    case 'cashtag':
+      return buildNestedRichText(text.text, GramJs.TextCashtag);
+    case 'autoUrl':
+      return buildNestedRichText(text.text, GramJs.TextAutoUrl);
+    case 'autoEmail':
+      return buildNestedRichText(text.text, GramJs.TextAutoEmail);
+    case 'autoPhone':
+      return buildNestedRichText(text.text, GramJs.TextAutoPhone);
+    case 'bankCard':
+      return buildNestedRichText(text.text, GramJs.TextBankCard);
+    case 'tonAddress':
+      return buildNestedRichText(text.text, GramJs.TextTonAddress);
+    case 'phone': {
+      const mtpText = buildMtpRichText(text.text);
+      return mtpText ? new GramJs.TextPhone({ text: mtpText, phone: text.phone }) : undefined;
+    }
+    case 'anchor': {
+      const mtpText = buildMtpRichText(text.text);
+      return mtpText ? new GramJs.TextAnchor({ text: mtpText, name: text.name }) : undefined;
+    }
     case 'mentionName':
       return buildMentionNameRichText(text);
     case 'concat':

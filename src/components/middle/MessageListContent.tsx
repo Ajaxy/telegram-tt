@@ -31,6 +31,7 @@ import { formatCalendarDate, formatMessageListDate, secondsToDate } from '../../
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
 import { consumePendingTopGrowth } from './helpers/messageListReserves';
+import { consumeMessageWidgetResize } from './helpers/messageWidgetResize';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import { renderPeerLink } from './message/helpers/messageActions';
 
@@ -73,6 +74,8 @@ interface OwnProps {
   isComments?: boolean;
   noAvatars: boolean;
   containerRef: ElementRef<HTMLDivElement>;
+  bubbleCanvasRef?: ElementRef<HTMLCanvasElement>;
+  hasOwnGradient?: boolean;
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
@@ -155,6 +158,8 @@ const MessageListContent = ({
   isBotForum,
   noAvatars,
   containerRef,
+  bubbleCanvasRef,
+  hasOwnGradient,
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
@@ -191,13 +196,14 @@ const MessageListContent = ({
     const newHeight = entry.contentRect.height;
     const prevHeight = prevContentHeightRef.current;
     prevContentHeightRef.current = newHeight;
+    const widgetGrowth = consumeMessageWidgetResize(entry.target);
     if (prevHeight === undefined) {
       consumePendingTopGrowth(entry.target.closest<HTMLElement>('.MessageList')!);
       return;
     }
 
-    const growth = newHeight - prevHeight;
-    if (growth > 0) onContentResize?.(growth);
+    const growth = newHeight - prevHeight - widgetGrowth;
+    onContentResize?.(growth);
   });
 
   useResizeObserver(messagesContainerRef, handleContentResize);
@@ -734,7 +740,16 @@ const MessageListContent = ({
   });
 
   return (
-    <div ref={messagesContainerRef} className="messages-container" teactFastList>
+    <div
+      ref={messagesContainerRef}
+      className={buildClassName(
+        'messages-container', bubbleCanvasRef && 'with-bubble-canvas', hasOwnGradient && 'with-own-gradient',
+      )}
+      teactFastList
+    >
+      {bubbleCanvasRef && (
+        <canvas ref={bubbleCanvasRef} key="bubble-canvas" className="bubble-canvas" />
+      )}
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo
         && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} hasMessages />}

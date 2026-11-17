@@ -1,25 +1,61 @@
 .modal {
-  :global(.modal-dialog) {
-    max-width: 22.5rem;
-    background-color: var(--color-background-secondary);
-  }
+  --modal-max-width: 22.5rem;
 }
 
 .content {
+  --modal-content-block-padding: 0rem;
+
+  overflow: hidden;
+}
+
+.layout {
   display: flex;
   flex-direction: column;
-  padding: 1rem;
-  padding-top: 0;
+  gap: 1rem;
+
+  max-height: calc(var(--modal-max-height) - var(--modal-header-height));
+  padding: 0 1rem 1rem;
+}
+
+.controlsContainer {
+  flex-shrink: 0;
+}
+
+.listContainer {
+  --playlist-preferred-height: min(24rem, calc(var(--playlist-track-count) * 3.75rem + 0.75rem));
+
+  flex: 1 1 var(--playlist-preferred-height);
+  min-height: 0;
+}
+
+.queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.queueTitle {
+  overflow: hidden;
+  display: none;
+  flex-shrink: 0;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .listIsland {
   overflow: hidden;
+  flex: 1 1 0;
+
+  min-height: 0;
+  margin: 0;
   padding: 0;
 }
 
 .list {
   overflow-y: auto;
-  max-height: 24rem;
+  height: 100%;
   padding: 0.75rem;
 
   :global(.Audio .media-loading) {
@@ -32,7 +68,57 @@
   }
 }
 
+@media (display-mode: picture-in-picture) {
+  .modal {
+    --modal-max-width: 100dvw;
+  }
+
+  .content {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layout {
+    justify-content: center;
+    height: 100%;
+    max-height: none;
+    padding-block: 0.5rem;
+  }
+
+  .listContainer {
+    flex: 0 1 calc(var(--playlist-preferred-height) + 1.75rem);
+  }
+
+  .queueTitle {
+    display: block;
+  }
+}
+
+.compactQueue {
+  .listContainer {
+    flex: none;
+  }
+
+  .fullList {
+    display: none;
+  }
+
+  .listIsland {
+    flex: none;
+  }
+
+  .queueTitle {
+    display: block;
+  }
+}
+
+.noQueue .listContainer {
+  display: none;
+}
+
 .trackRow {
+  height: 3rem;
   transition: color 150ms ease-out;
 
   & + & {
@@ -200,6 +286,7 @@
 }
 
 .buttonsRow {
+  container-type: inline-size;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -210,28 +297,28 @@
 }
 
 .transportButton {
-  width: 3.5rem !important;
+  width: min(3.5rem, 20cqi) !important;
   height: 3.5rem !important;
   color: var(--color-text) !important;
 
   :global(.icon) {
-    font-size: 1.75rem;
+    font-size: min(1.75rem, 18cqi);
   }
 }
 
 .playButton {
   :global(.icon) {
-    font-size: 1.875rem;
+    font-size: min(1.875rem, 18cqi);
   }
 }
 
 .sideButton {
-  width: 2.75rem !important;
+  width: min(2.75rem, 20cqi) !important;
   height: 2.75rem !important;
   color: var(--color-text) !important;
 
   :global(.icon) {
-    font-size: 1.5rem;
+    font-size: min(1.5rem, 18cqi);
   }
 }
 

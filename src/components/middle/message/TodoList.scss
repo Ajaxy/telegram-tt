@@ -19,7 +19,7 @@
     margin-inline-end: 0.5rem;
 
     font-weight: var(--font-weight-semibold);
-    color: var(--accent-color);
+    color: var(--message-accent, var(--accent-color));
   }
 
   .readonly-item-label {
@@ -71,12 +71,9 @@
       }
 
       &::after {
-        background-color: var(--accent-color);
+        color: var(--color-primary-foreground);
+        background-color: var(--message-accent, var(--accent-color));
         outline: 1px solid var(--background-color);
-
-        .theme-dark .Message.own & {
-          color: var(--color-primary);
-        }
       }
 
       .user-avatar,
@@ -103,7 +100,7 @@
 
     input:checked ~ .Checkbox-main {
       &::before {
-        border-color: var(--accent-color);
+        border-color: var(--message-accent, var(--accent-color));
       }
     }
 

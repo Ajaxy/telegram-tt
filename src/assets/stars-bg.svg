@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="388" height="220" viewBox="0 0 194 110" fill="none">
+<defs>
+<linearGradient id="a" x1="0" y1="6.703" x2="9.801" y2="-.175" gradientUnits="userSpaceOnUse"><stop stop-color="#fdeb32"/><stop offset=".439" stop-color="#febd04"/><stop offset="1" stop-color="#d75902"/></linearGradient>
+<linearGradient id="b" x1="10.788" y1="3.12" x2="4.956" y2="4.853" gradientUnits="userSpaceOnUse"><stop stop-color="#fff" stop-opacity="0"/><stop offset=".396" stop-color="#fff" stop-opacity=".85"/><stop offset=".521" stop-color="#fff"/><stop offset=".646" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="c" href="#a" gradientTransform="scale(.8)"/>
+<linearGradient id="d" href="#b" gradientTransform="scale(.8)"/>
+<path id="p" d="M3.998 8C4.191 8 4.341 7.862 4.372 7.661C4.727 5.033 5.093 4.662 7.645 4.378C7.846 4.355 8 4.193 8 4C8 3.803 7.85 3.645 7.649 3.622C5.101 3.318 4.75 2.964 4.372 0.339C4.341 0.138 4.187 0 3.998 0C3.809 0 3.655 0.138 3.624 0.339C3.269 2.967 2.903 3.338 0.355 3.622C0.15 3.645 0 3.803 0 4C0 4.193 0.146 4.351 0.351 4.378C2.899 4.721 3.234 5.036 3.624 7.661C3.659 7.862 3.813 8 3.998 8Z"/>
+<mask id="m" fill="#fff"><use href="#p"/></mask>
+<g id="coin"><path d="M10 5C10 7.761 7.761 10 5 10C2.239 10 0 7.761 0 5C0 2.239 2.239 0 5 0C7.761 0 10 2.239 10 5Z" fill="url(#a)"/><path d="M9.5 5C9.5 7.485 7.485 9.5 5 9.5C2.515 9.5 0.5 7.485 0.5 5C0.5 2.515 2.515 0.5 5 0.5C7.485 0.5 9.5 2.515 9.5 5Z" stroke="url(#b)" style="mix-blend-mode:soft-light"/><path d="M4.987 8.439C4.866 8.439 4.776 8.357 4.776 8.224V7.74C3.854 7.685 3.186 7.244 2.999 6.626C2.971 6.548 2.96 6.474 2.96 6.404C2.96 6.158 3.128 5.99 3.401 5.99C3.612 5.99 3.76 6.095 3.854 6.314C3.983 6.654 4.249 6.904 4.776 6.958V5.376L4.561 5.326C3.557 5.095 3.01 4.642 3.01 3.826C3.01 2.923 3.749 2.333 4.776 2.267V1.775C4.776 1.642 4.866 1.56 4.987 1.56C5.108 1.56 5.198 1.642 5.198 1.775V2.267C6.069 2.333 6.706 2.779 6.893 3.404C6.913 3.478 6.925 3.548 6.925 3.623C6.925 3.853 6.753 4.009 6.495 4.009C6.276 4.009 6.132 3.896 6.03 3.689C5.87 3.322 5.604 3.107 5.198 3.052V4.572L5.436 4.626C6.479 4.869 7.038 5.291 7.038 6.134C7.038 7.107 6.245 7.669 5.198 7.74V8.224C5.198 8.357 5.108 8.439 4.987 8.439ZM3.952 3.748C3.952 4.087 4.186 4.322 4.776 4.474V3.048C4.237 3.111 3.952 3.404 3.952 3.748ZM6.1 6.232C6.1 5.853 5.882 5.642 5.198 5.474V6.958C5.819 6.912 6.1 6.623 6.1 6.232Z" fill="#fff" opacity=".8" style="mix-blend-mode:overlay"/></g>
+<g id="spark"><use href="#p" fill="url(#c)"/><use href="#p" stroke="url(#d)" stroke-width="2" mask="url(#m)" style="mix-blend-mode:soft-light"/></g>
+</defs>
+<use href="#coin" transform="translate(34 30)"/>
+<use href="#coin" transform="translate(157 45)"/>
+<use href="#coin" transform="translate(178 83)"/>
+<use href="#coin" transform="translate(62 100)"/>
+<use href="#coin" transform="translate(98 0) scale(0.6)" opacity="0.5"/>
+<use href="#coin" transform="translate(0 21) scale(0.6)" opacity="0.5"/>
+<use href="#coin" transform="translate(188 53) scale(0.6)" opacity="0.5"/>
+<use href="#coin" transform="translate(20 81) scale(0.6)" opacity="0.5"/>
+<use href="#spark" transform="translate(132 6) scale(1.25)"/>
+<use href="#spark" transform="translate(53 12) scale(1.25)"/>
+<use href="#spark" transform="translate(46 71) scale(1.25)" opacity="0.3"/>
+<use href="#spark" transform="translate(147 76) scale(1.25)"/>
+<use href="#spark" transform="translate(41 6)" opacity="0.3"/>
+<use href="#spark" transform="translate(153 14)" opacity="0.3"/>
+<use href="#spark" transform="translate(140 18)" opacity="0.6"/>
+<use href="#spark" transform="translate(12 47)"/>
+<use href="#spark" transform="translate(40 55)"/>
+<use href="#spark" transform="translate(56 60)" opacity="0.6"/>
+<use href="#spark" transform="translate(139 64)" opacity="0.3"/>
+<use href="#spark" transform="translate(129 94)" opacity="0.3"/>
+</svg>

@@ -16,12 +16,14 @@ import type {
   ApiPageListOrderedItem,
   ApiRichMessage,
   ApiRichText,
+  ApiRichTextCustomEmoji,
 } from '../../api/types';
 
 import { getTranslationFn } from '../../util/localization';
-import { getUtf8Length } from '../../util/textFormat';
+import { forEachPageBlocksRichText, forEachRichTextNode } from '../../util/text/richText';
+import { getUtf8Length } from '../../util/text/textFormat';
 
-export { hasRichText } from '../../util/richText';
+export { hasRichText } from '../../util/text/richText';
 
 const PREVIEW_OVERFLOW_LENGTH = 1;
 const BLOCK_TEXT_SEPARATOR = '\n';
@@ -56,6 +58,15 @@ export function getRichMessageUsage(richMessage: ApiInputRichMessage | ApiRichMe
   appendCountedPageBlocksUsage(richMessage.blocks, 0, usage);
 
   return usage;
+}
+
+export function getRichMessageCustomEmojis(richMessage: ApiRichMessage) {
+  const customEmojis: ApiRichTextCustomEmoji[] = [];
+  forEachPageBlocksRichText(richMessage.blocks, (text) => forEachRichTextNode(text, (node) => {
+    if (node.type === 'customEmoji') customEmojis.push(node);
+  }));
+
+  return customEmojis;
 }
 
 export function getRichTextPlainText(text: ApiRichText): string {

@@ -1,6 +1,7 @@
 import type { ElementRef, TeactNode } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
+import type { DiamondPalette } from '../../../lib/diamond/model';
 import type StandaloneDiamond from '../../../lib/diamond/standalone';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -24,6 +25,7 @@ type OwnProps = {
   speed?: number;
   sway?: number;
   burstSize?: number;
+  palette?: DiamondPalette;
   isPaused?: boolean;
   noPreview?: boolean;
   // Shown instead of the diamond when it cannot be drawn in 3D
@@ -33,7 +35,7 @@ type OwnProps = {
 };
 
 const WalletStandaloneDiamond = ({
-  diamondRef, size, canvasSize, speed, sway, burstSize, isPaused, noPreview, fallback, onReadyChange,
+  diamondRef, size, canvasSize, speed, sway, burstSize, palette, isPaused, noPreview, fallback, onReadyChange,
 }: OwnProps) => {
   const shouldLoopStickers = useSelector(selectShouldLoopStickers);
   const canvasRef = useRef<HTMLCanvasElement>();
@@ -42,7 +44,7 @@ const WalletStandaloneDiamond = ({
   const is3d = shouldLoopStickers && !isFailed;
   // The diamond starts with these and then is driven through `diamondRef`
   const optionsRef = useStateRef({
-    speed, sway, burstSize, isPaused,
+    speed, sway, burstSize, palette, isPaused,
   });
 
   useEffect(() => {
@@ -94,7 +96,7 @@ const WalletStandaloneDiamond = ({
     <span className={styles.root} style={`width: ${size}px; height: ${size}px`}>
       {!noPreview && (
         <img
-          src={LOCAL_TGS_PREVIEW_URLS.Gram3d}
+          src={palette === 'regular' ? LOCAL_TGS_PREVIEW_URLS.BlueDiamond3d : LOCAL_TGS_PREVIEW_URLS.Gram3d}
           alt=""
           draggable={false}
           className={buildClassName(styles.preview, isReady && styles.previewHidden)}

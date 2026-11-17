@@ -8,6 +8,7 @@ export const API_GENERAL_ID_LIMIT = 100;
 export const RESALE_GIFTS_LIMIT = 50;
 export const WALLET_TRANSACTIONS_LIMIT = 50;
 export const WALLET_COLLECTIBLES_LIMIT = 20;
+export const WALLET_CARD_STICKERS_LIMIT = 10;
 export const PINNED_MESSAGES_LIMIT = 50;
 export const BLOCKED_LIST_LIMIT = 100;
 export const GLOBAL_SEARCH_CONTACTS_LIMIT = 20;
@@ -150,6 +151,7 @@ export const DEFAULT_APP_CONFIG: ApiAppConfig = {
   noForwardsRequestExpirePeriod: 86400,
   tonSuggestedPostCommissionPermille: 850,
   todoItemLengthMax: 64,
+  quoteLengthMax: 1024,
   todoItemsMax: 30,
   todoTitleLengthMax: 32,
   tonSuggestedPostAmountMax: 10_000_000_000_000n,

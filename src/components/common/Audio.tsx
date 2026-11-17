@@ -11,12 +11,13 @@ import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
 import {
   getMediaFormat,
   getMediaHash,
+  getMediaThumbUri,
   getWebPageAudio,
   hasMessageTtl,
   isMessageLocal,
   isOwnMessage,
 } from '../../global/helpers';
-import { selectWebPageFromMessage } from '../../global/selectors';
+import { selectChatThemePalette, selectWebPageFromMessage } from '../../global/selectors';
 import { getPlaybackCapabilities, makeMessageTrackKeyFrom } from '../../global/selectors/audioPlayer';
 import { selectMessageMediaDuration } from '../../global/selectors/media';
 import { prepareTrackSwitch } from '../../util/audioPlayback/playbackController';
@@ -30,6 +31,8 @@ import TrackRow from './TrackRow';
 type OwnProps = {
   theme: ThemeKey;
   message: ApiMessage;
+  // Set when `message` is a rich message track from `getRichMediaMessage`
+  mediaIndex?: number;
   senderTitle?: string;
   uploadProgress?: number;
   variant: AudioVariant;
@@ -53,7 +56,7 @@ type OwnProps = {
   isTranscriptionError?: boolean;
   autoPlay?: boolean;
   onHideTranscription?: (isHidden: boolean) => void;
-  onPlay?: (messageId: number, chatId: string) => void;
+  onPlay?: (messageId: number, chatId: string, documentId?: string) => void;
   onPause?: NoneToVoidFunction;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
@@ -64,6 +67,7 @@ type OwnProps = {
 type StateProps = {
   mediaDuration?: number;
   webPage?: ApiWebPage;
+  waveformColor: string;
 };
 
 const SINGLE_SOURCE: PlaybackSource = { type: 'single' };
@@ -73,6 +77,7 @@ const PRELOAD = true;
 const Audio = ({
   theme,
   message,
+  mediaIndex,
   senderTitle,
   uploadProgress,
   variant,
@@ -97,6 +102,7 @@ const Audio = ({
   autoPlay,
   webPage,
   mediaDuration,
+  waveformColor,
   onHideTranscription,
   onPlay,
   onPause,
@@ -124,7 +130,8 @@ const Audio = ({
   const mediaType: PlaybackMediaType = isVoice ? 'voice' : 'audio';
   const isOwn = isOwnMessage(message);
   const isScheduled = isInScheduled || message.isScheduled;
-  const trackKey = makeMessageTrackKeyFrom(message, isScheduled);
+  const documentId = mediaIndex !== undefined ? audio?.id : undefined;
+  const trackKey = makeMessageTrackKeyFrom(message, isScheduled, documentId);
 
   const source = useMemo<PlaybackSource>(() => {
     if (playbackSource) return playbackSource;
@@ -148,6 +155,8 @@ const Audio = ({
 
   const coverHash = getMediaHash(media, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
+  // Round video shows its embedded thumbnail until the cover loads
+  const coverUrl = coverBlobUrl || (video ? getMediaThumbUri(video) : undefined);
 
   const mediaData = useMedia(
     getMediaHash(media, 'inline'),
@@ -164,7 +173,7 @@ const Audio = ({
   const handleBeforePlay = useLastCallback(() => {
     if (source.type === 'globalSearch') prepareTrackSwitch(trackKey);
     setAudioPlaybackSource({ source });
-    onPlay?.(message.id, message.chatId);
+    onPlay?.(message.id, message.chatId, documentId);
   });
 
   const handleLockedClick = useLastCallback(() => {
@@ -200,12 +209,13 @@ const Audio = ({
       className={className}
       audio={audio}
       mediaSource={mediaSource}
+      waveformColor={waveformColor}
       trackKey={trackKey}
       mediaType={mediaType}
       capabilities={capabilities}
       src={mediaData}
       originalDuration={mediaDuration!}
-      coverBlobUrl={coverBlobUrl}
+      coverBlobUrl={coverUrl}
       senderTitle={senderTitle}
       date={date}
       isOwn={isOwn}
@@ -247,10 +257,13 @@ export default memo(withGlobal<OwnProps>(
   }): Complete<StateProps> => {
     const webPage = selectWebPageFromMessage(global, message);
     const mediaDuration = selectMessageMediaDuration(global, message);
+    const palette = selectChatThemePalette(global, message.chatId);
+    const direction = isOwnMessage(message) ? 'outgoing' : 'incoming';
 
     return {
       webPage,
       mediaDuration,
+      waveformColor: palette.variables[`--message-${direction}-accent`],
     };
   },
 )(Audio));

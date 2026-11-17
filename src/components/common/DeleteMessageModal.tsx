@@ -516,6 +516,7 @@ const DeleteMessageModal = ({
       onClose={onCloseHandler}
       onEnter={handleDeleteMessageList}
       className={styles.root}
+      isNativeDialog
     >
       <div className={styles.main}>
         {renderHeader()}
@@ -568,7 +569,9 @@ const DeleteMessageModal = ({
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageList}>
             {shouldShowOption ? lang('DeleteProceedBtn') : lang('Delete')}
           </Button>
-          <Button className="confirm-dialog-button" isText onClick={onCloseHandler}>{lang('Cancel')}</Button>
+          <Button className="confirm-dialog-button" isText onClick={onCloseHandler} autoFocus>
+            {lang('Cancel')}
+          </Button>
         </div>
       </div>
     </Modal>

@@ -1,6 +1,8 @@
 import type { ElementRef, TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMessageEntityFormattedDate, ApiRichText, ApiRichTextDate } from '../../api/types';
+import type {
+  ApiMessageEntityFormattedDate, ApiRichText, ApiRichTextCustomEmoji, ApiRichTextDate,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
@@ -9,7 +11,9 @@ import { DEBUG } from '../../config';
 import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getNestedRichText, getRichTextPlainText } from '../../global/helpers/richMessage';
 import buildClassName from '../../util/buildClassName';
+import { getRichQuoteText } from '../../util/text/richQuote';
 import renderText from '../common/helpers/renderText';
+import { handleBotCommandClick, handleHashtagClick } from '../common/helpers/renderTextWithEntities';
 
 import CustomEmoji from '../common/CustomEmoji';
 import FormattedDate from '../common/FormattedDate';
@@ -25,6 +29,7 @@ import styles from './RichContent.module.scss';
 
 export type RichTextProps = {
   text: ApiRichText;
+  asPreview?: boolean;
   isButtonLabel?: boolean;
   unsupportedText: string;
   containerId: string;
@@ -41,6 +46,7 @@ export type RichTextProps = {
 
 const RichText = ({
   text,
+  asPreview,
   isButtonLabel,
   unsupportedText,
   containerId,
@@ -82,6 +88,7 @@ const RichText = ({
           key={index}
           text={part}
           isButtonLabel={isButtonLabel}
+          asPreview={asPreview}
           unsupportedText={unsupportedText}
           containerId={containerId}
           pageUrl={pageUrl}
@@ -224,8 +231,9 @@ const RichText = ({
     case 'date':
       return (
         <FormattedDate
+          sourceText={getRichQuoteText(text)}
           entity={buildDateEntity(text)}
-          asPreview={isButtonLabel}
+          asPreview={isButtonLabel || asPreview}
           chatId={chatId}
           messageId={messageId}
         >
@@ -238,8 +246,20 @@ const RichText = ({
       return <TonAddressLink address={address} noCopy={isProtected}>{renderNestedText()}</TonAddressLink>;
     }
     case 'hashtag':
+    case 'cashtag': {
+      const [tag, username] = getRichTextPlainText(text.text).split('@');
+      return (
+        <a onClick={() => handleHashtagClick(tag, username)} className="text-entity-link" dir="auto">
+          {renderNestedText()}
+        </a>
+      );
+    }
     case 'botCommand':
-    case 'cashtag':
+      return (
+        <a onClick={handleBotCommandClick} className="text-entity-link" dir="auto">
+          {renderNestedText()}
+        </a>
+      );
     case 'bankCard':
       return renderNestedText();
     case 'math':
@@ -261,6 +281,7 @@ const RichText = ({
       <RichText
         text={getNestedRichText(text)}
         isButtonLabel={isButtonLabel}
+        asPreview={asPreview}
         unsupportedText={unsupportedText}
         containerId={containerId}
         pageUrl={pageUrl}
@@ -276,10 +297,11 @@ const RichText = ({
     );
   }
 
-  function renderCustomEmoji(customEmojiText: Extract<ApiRichText, { type: 'customEmoji' }>) {
+  function renderCustomEmoji(customEmojiText: ApiRichTextCustomEmoji) {
     if (customEmojiText.document) {
       return (
         <CustomEmoji
+          alt={customEmojiText.alt}
           sticker={customEmojiText.document}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -293,6 +315,7 @@ const RichText = ({
 
     return (
       <CustomEmoji
+        alt={customEmojiText.alt}
         documentId={customEmojiText.documentId}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}

@@ -620,7 +620,7 @@ function checkCanInsertBlockAtSelection(editor: Editor, nodeTypeName: string) {
 
   const { $from } = editor.state.selection;
   let parentDepth = $from.depth;
-  while (parentDepth > 0 && $from.node(parentDepth).isTextblock) {
+  while (parentDepth > 0 && $from.node(parentDepth).inlineContent) {
     parentDepth -= 1;
   }
 

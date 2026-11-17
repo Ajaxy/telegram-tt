@@ -58,6 +58,7 @@ type OwnProps = {
   className?: string;
   audio?: ApiAudio;
   mediaSource?: ApiVoice | ApiVideo;
+  waveformColor?: string;
   trackKey: TrackKey;
   mediaType: PlaybackMediaType;
   capabilities: PlaybackCapabilities;
@@ -108,6 +109,7 @@ const TrackRow = ({
   className,
   audio,
   mediaSource,
+  waveformColor,
   trackKey,
   mediaType,
   capabilities,
@@ -201,6 +203,7 @@ const TrackRow = ({
     isMobile,
     isReverse,
     generatedWaveform,
+    waveformColor,
   );
 
   const withSeekline = !noProgress && (isPlaying || (playProgress > 0 && playProgress < 1));
@@ -650,7 +653,7 @@ function renderVoice(
           draggable={false}
           ref={seekerRef}
         >
-          <canvas ref={waveformCanvasRef} />
+          <canvas ref={waveformCanvasRef} className="waveform-canvas" />
         </div>
         {onClickTranscribe && (
 
@@ -710,6 +713,7 @@ function useWaveformCanvas(
   isMobile = false,
   isReverse = false,
   generatedWaveform?: number[],
+  color?: string,
 ) {
   const canvasRef = useRef<HTMLCanvasElement>();
   const dpr = useDevicePixelRatio();
@@ -745,23 +749,19 @@ function useWaveformCanvas(
       return;
     }
 
-    const fillColor = theme === 'dark' ? '#494A78' : '#ADD3F7';
-    const fillOwnColor = theme === 'dark' ? '#B7ABED' : '#AEDFA4';
     const progressFillColor = theme === 'dark' ? '#8774E1' : '#3390EC';
     const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#4FAE4E';
-
-    const fillStyle = isOwn ? fillOwnColor : fillColor;
-    const progressFillStyle = isOwn ? progressFillOwnColor : progressFillColor;
+    const progressFillStyle = color || (isOwn ? progressFillOwnColor : progressFillColor);
 
     const progress = isFilled ? 1 : getProgress();
 
     renderWaveform(canvas, spikes, isReverse ? 1 - progress : progress, {
       peak,
-      fillStyle,
+      fillStyle: progressFillStyle,
       progressFillStyle,
       dpr,
     });
-  }, [isOwn, peak, getProgress, isFilled, spikes, theme, isReverse, dpr]);
+  }, [color, isOwn, peak, getProgress, isFilled, spikes, theme, isReverse, dpr]);
 
   return canvasRef;
 }

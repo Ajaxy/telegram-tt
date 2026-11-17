@@ -99,7 +99,10 @@ const ENTRY_ORDER = [
   'gramjs-worker',
   'fasttext-worker',
   'media-worker',
+  'video-processing-worker',
   'shared-state-worker',
+  'latex-worker',
+  'widget-sandbox-worker',
   'service-worker',
 ];
 const MANUAL_BUNDLES: BundleDefinition[] = [
@@ -450,15 +453,28 @@ function getWorkerEntry(name: string, chunkFiles: Set<string>) {
     return { key: 'media-worker', label: '🎞️ Media worker' };
   }
 
+  if (/^videoProcessing\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'video-processing-worker', label: '🎬 Video processing worker' };
+  }
+
   if (/^sharedState\.worker-[\w-]+\.js$/.test(name)) {
     return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
+  }
+
+  if (/^latex\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'latex-worker', label: '🧮 LaTeX worker' };
+  }
+
+  if (/^widgetSandbox\.worker-[\w-]+\.js$/.test(name)) {
+    return { key: 'widget-sandbox-worker', label: '🧩 Widget sandbox worker' };
   }
 
   return undefined;
 }
 
 function isWorkerAssetName(name: string) {
-  return /^(?:worker|fasttext\.worker|index\.worker|sharedState\.worker)-[\w-]+\.js$/.test(name);
+  return /^(?:worker|(?:fasttext|index|videoProcessing|sharedState|latex|widgetSandbox)\.worker)-[\w-]+\.js$/
+    .test(name);
 }
 
 function isIgnoredAsset(name: string) {

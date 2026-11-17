@@ -376,6 +376,7 @@
   // `ComposerEmbeddedMessage` / `WebPagePreview` are full-width flex children that
   // wrap into their own row above the input row
   flex-wrap: wrap;
+  margin-bottom: 0;
   box-shadow: var(--shadow-footer);
 
   .select-mode-active + .middle-column-footer & {
@@ -428,7 +429,7 @@
     .bot-commands {
       width: var(--composer-main-button-height);
       height: var(--composer-main-button-height);
-      color: white !important;
+      color: var(--color-primary-foreground) !important;
       background: var(--color-primary) !important;
 
       &.activated {
@@ -466,8 +467,7 @@
     padding-inline: 0;
   }
 
-  #message-input-text .placeholder-text,
-  #message-input-text .forced-placeholder {
+  #message-input-text .placeholder-text {
     left: 0;
   }
 
@@ -488,7 +488,7 @@
     box-shadow: none;
 
     .icon {
-      color: white;
+      color: var(--color-primary-foreground);
     }
 
     .icon-new-send {
@@ -514,7 +514,7 @@
       font-family: var(--font-family-monospace);
       font-size: 1rem;
       font-weight: var(--font-weight-semibold);
-      color: var(--color-white);
+      color: var(--color-primary-foreground);
 
       .icon {
         font-size: 1.25rem;
@@ -647,7 +647,9 @@
 
     color: var(--color-composer-button);
 
-    transition: opacity 150ms ease-out, background-color 150ms ease-out;
+    transition:
+      opacity 150ms ease-out,
+      background-color var(--message-color-transition-duration, 150ms) ease-out;
   }
 
   .ai-composer-button {
@@ -813,12 +815,12 @@
       padding: 0 var(--padding-sides);
       border-radius: calc(var(--height) / 2);
 
-      color: white !important;
+      color: var(--color-primary-foreground) !important;
       text-transform: none;
 
       background: var(--color-primary) !important;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-      transition: 0.25s ease-out width, 0.15s background-color;
+      transition: width 0.25s ease-out, background-color var(--message-color-transition-duration, 0.15s);
 
       &.open {
         width: calc(var(--icon-width) + var(--icon-gap) + var(--bot-menu-text-width) + var(--padding-sides) * 2);
@@ -855,8 +857,8 @@
       content: "";
 
       position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
+      top: 0.3125rem;
+      right: 0.3125rem;
 
       box-sizing: content-box;
       width: 0.5rem;
@@ -872,6 +874,28 @@
   position: absolute;
   bottom: 0;
   left: -1rem;
+}
+
+.symbol-menu-slot {
+  --slide-transition: var(--app-slide-transition);
+
+  position: relative;
+  z-index: var(--z-symbol-menu-mobile);
+
+  flex-shrink: 0;
+
+  width: calc(100% + 2 * var(--footer-side-inset));
+  margin-inline: calc(-1 * var(--footer-side-inset));
+
+  transition: opacity var(--layer-transition);
+
+  &.keyboard-open {
+    opacity: 0;
+  }
+
+  body.no-message-composer-animations & {
+    transition: none;
+  }
 }
 
 .input-scroller {
@@ -947,7 +971,6 @@
 
     background: transparent !important;
     box-shadow: none !important;
-    caret-color: var(--color-text);
 
     &.touched {
       & ~ .placeholder-text {
@@ -966,7 +989,6 @@
     margin-inline-end: 0.0625rem;
     line-height: 1;
   }
-  .forced-placeholder,
   .placeholder-text {
     pointer-events: none;
 
@@ -1004,12 +1026,15 @@
     }
   }
 
-  .forced-placeholder {
-    z-index: var(--z-below);
-    left: 0;
+  // Zero-size anchor at the caret, the absolute child keeps the editor layout intact and gets clipped by it
+  .inline-bot-help {
+    pointer-events: none;
+    position: relative;
 
-    @media (min-width: 600px) {
-      left: 0.5rem;
+    &-text {
+      position: absolute;
+      color: var(--color-placeholders);
+      white-space: pre;
     }
   }
 

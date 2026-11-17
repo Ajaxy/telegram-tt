@@ -12,7 +12,7 @@ import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import { selectWebPage } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useSelector from '../../../../hooks/data/useSelector';
@@ -384,7 +384,7 @@ const PollOption = ({
       >
         {renderSelector()}
       </Transition>
-      <div className={styles.answer} dir="auto">
+      <div className={styles.answer} dir="auto" data-poll-option={btoa(answer.option)}>
         {answerText}
       </div>
       {renderResultsMeta()}

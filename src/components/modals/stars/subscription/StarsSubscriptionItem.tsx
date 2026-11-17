@@ -11,7 +11,7 @@ import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { getServerTime } from '../../../../util/serverTime';
-import { formatInteger } from '../../../../util/textFormat';
+import { formatInteger } from '../../../../util/text/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useSelector from '../../../../hooks/data/useSelector';

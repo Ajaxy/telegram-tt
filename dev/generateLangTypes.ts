@@ -14,7 +14,7 @@ type LangVariable = string | number | undefined;
 
 const data = readFileSync('./src/assets/localization/fallback.strings', 'utf8');
 
-const parsed = readStrings(data);
+const parsed = readStrings(data, true);
 const regularKeysWithVars: Record<string, string[]> = {};
 const pluralKeysWithVars: Record<string, string[]> = {};
 Object.entries(parsed).forEach(([keyWithSuffix, value]) => {

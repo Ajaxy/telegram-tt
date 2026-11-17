@@ -6,7 +6,7 @@ import type { ThreadId } from '../../types';
 import { GENERAL_TOPIC_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { getTopicDefaultIcon } from '../../util/forumColors';
-import { getFirstLetters } from '../../util/textFormat';
+import { getFirstLetters } from '../../util/text/textFormat';
 import renderText from './helpers/renderText';
 
 import Icon from './icons/Icon';

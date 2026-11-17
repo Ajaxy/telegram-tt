@@ -11,7 +11,7 @@ import { IS_TAURI } from '../../util/browser/globalEnvironment';
 import { IS_EMOJI_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isoToEmoji } from '../../util/emoji/emoji';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { prepareSearchWordsForNeedle } from '../../util/text/searchWords';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';

@@ -27,7 +27,7 @@ import {
 import { IS_TUCK_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
 import { isUserId } from '../../../../util/entities/ids';
-import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
+import parseHtmlAsFormattedText from '../../../../util/text/parseHtmlAsFormattedText';
 import { REM } from '../../../common/helpers/mediaDimensions';
 import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
 

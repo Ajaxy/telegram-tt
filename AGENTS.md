@@ -10,10 +10,11 @@ Telegram web app using TypeScript and Teact, a custom React-like UI library. Fol
 - Only write tests when directly prompted to do so.
 - Review the change for the smallest coherent design that satisfies the requirements. Fix substantive findings and repeat until none remain; avoid speculative abstractions, unused exports, and unrelated cleanup.
 - Keep responses concise: summarize the result, verification, and any unresolved issue. If deeper debugging needs user involvement, provide concrete steps. Remove temporary debug code when resolved.
+- Before adding complexity for a speculative or vanishingly unlikely race or security edge case, explain the concrete failure mode, likelihood, and complexity cost to the user and get their buy-in. Do not silently expand scope for theoretical robustness.
 
 ## Friction log
 
-- Record concrete inefficiencies in code patterns, contributor practices, or tooling in [FRICTION_LOG.md](FRICTION_LOG.md) when resolving them exceeds the current task's scope. Keep the current task focused.
+- Record concrete inefficiencies in code patterns, contributor practices, or tooling in [FRICTION_LOG.md](FRICTION_LOG.md) when resolving them exceeds the current task's scope. Keep the current task focused. Do not report issues with agent-specific setup like sandbox or skills.
 - Read existing entries first and extend a matching entry instead of adding a duplicate.
 - Use a descriptive heading and one or two paragraphs explaining the current behavior, its impact, and representative code paths or reproduction details. Distinguish verified observations from reported symptoms and suspected causes. Resolution preferences or suggestions are optional; estimates and proposed fixes are not required.
 - Keep a flat list of open problems. Contributors with available time can pick an entry, recheck the relevant code, and work on it. Remove resolved entries in the same change, or update an entry to describe what remains.
@@ -82,6 +83,7 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - For a measurement-dependent write, read inside `requestMeasure` and schedule the write with `requestMutation`. Use `requestForcedReflow` only as a last resort for synchronous measure/mutate work. See `src/lib/fasterdom/fasterdom.ts`.
 - Prefer signals for frequent updates that do not need component renders, such as typing, caret position, and animation state. Signal setters notify subscribers without rendering; `useDerivedState` turns signal values into render state. Use `useStateRef` to read current state without adding dependencies.
 - Reuse existing signal and scheduling hooks. `useSyncEffect` runs during render; `useLayoutEffectWithPrevDeps` runs in the layout-effect phase. Respect the corresponding DOM phase rules.
+- Components rendered through `Portal` can move into Document Picture-in-Picture. Use `useWindow()` in portable components for the current rendering window and its `document`, and rebind window and document listeners when it changes. In plain DOM utilities, derive `ownerDocument` and `ownerDocument.defaultView` from the element for queries, focus/`activeElement`, viewport measurements, and drag/menu listeners, or accept an explicit document. Prefer the element's owner when adoption timing matters. Global `document`/`window` remain appropriate for code intentionally managing the main app, its history, or shared playback.
 - Protect animation performance, especially in `Message`, `Chat`, and `Sticker`. Use `beginHeavyAnimation` to pause non-critical updates during heavy animations and `onFullyIdle` for work that can wait until animations and browser activity are idle.
 
 ## Styles
@@ -92,6 +94,12 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - Prefer `rem` measurements (`N px = N / 16 rem`), with exceptions only when needed.
 - Give each styled element a class. Avoid broad, complex, and tag-based selectors; nest only for meaningful relationships such as `.parentModifier .child`.
 - Use existing font-weight variables, such as `var(--font-weight-medium)` and `var(--font-weight-semibold)`; never numeric weights, `bold`, or custom values.
+
+## Design variable documentation
+
+- Update [DESIGN.md](DESIGN.md) in the same change whenever CSS custom properties are added, removed, renamed, or changed, including runtime assignments and component overrides. Only document global and message list specific theming properties.
+- Keep each variable's purpose, light/dark defaults, aliases, derived relationships, inheritance, and scope/overrides accurate. Distinguish live `var(...)` references from copied or computed values.
+- Remove obsolete entries and update affected links and related descriptions when variables are removed or renamed.
 
 ## Localization
 
@@ -111,11 +119,17 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 ## Telegram API
 
 - GramJS runs in a web worker; UI and global state use plain `Api*` objects from `src/api/types`.
-- Read the TL schema in `src/lib/gramjs/tl/static/api.tl`; do not edit it. Add needed method names to `src/lib/gramjs/tl/static/api.json` and run `npm run gramjs:tl` to regenerate `src/lib/gramjs/tl/api.d.ts` and schema modules.
+- Read the TL schema in `src/lib/gramjs/tl/static/api.tl`; do not edit it without receiving updated schema beforehand. Add needed method names to `src/lib/gramjs/tl/static/api.json` and run `npm run gramjs:tl` to regenerate `src/lib/gramjs/tl/api.d.ts` and schema modules.
 - Implement methods under `src/api/gramjs/methods/` using destructured parameter objects and `invokeRequest(new GramJs.namespace.MethodName(...))`. Name TL `get*` fetchers `fetch*`.
 - Convert results using `apiBuilders` (`buildApi*`) and inputs using `gramjsBuilders` (`buildInput*`). Return `undefined` when `invokeRequest` returns `undefined`.
 - Global actions call methods through `callApi` and check for `undefined` before updating state. Pass full `ApiPeer`, `ApiChat`, or `ApiUser` objects across this boundary; do not add separate `id`/`accessHash` method parameters. Extract fields for `buildInput*` inside the GramJS method.
 - Server updates enter through `src/api/gramjs/updates/mtpUpdateHandler.ts` and merge through `src/global/actions/apiUpdaters/`; update types live in `src/api/types/updates.ts`.
+
+## Widget sandbox
+
+- `src/lib/widget-sandbox/` vendors upstream `widget-sandbox` with local changes. Record each local change in its `NOTICE.md`, and keep its third-party license table in sync with what the bundles ship.
+- Its source follows upstream conventions and has its own TypeScript project: regenerate `types/` with `node node_modules/typescript/bin/tsc -p src/lib/widget-sandbox/tsconfig.json`; never edit `types/` by hand.
+- To update, follow the steps under "Updating" in its `NOTICE.md`. The widget worker's CSP is set by the service worker (`src/serviceWorker/service.worker.ts`, see its `DEPLOYMENT.md`); keep it in line with what the worker loads.
 
 ## Commits and PRs
 

@@ -12,11 +12,12 @@ import {
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
 import { setTimeFormat } from '../../../util/localization';
-import { subscribe, unsubscribe } from '../../../util/notifications';
+import { subscribe } from '../../../util/notifications';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import { hasStoredSession } from '../../../util/sessions';
 import switchTheme from '../../../util/switchTheme';
 import { getSystemTheme, setSystemThemeChangeCallback } from '../../../util/systemTheme';
+import { buildThemeColorOverrides } from '../../../util/theme';
 import { startWebsync, stopWebsync } from '../../../util/websync';
 import { callApi } from '../../../api/gramjs';
 import { clearCaching, setupCaching } from '../../cache';
@@ -59,7 +60,6 @@ addActionHandler('switchMultitabRole', (global, actions, payload): ActionReturnT
   setGlobal(global, { forceSyncOnIOs: true });
 
   if (!isMasterTab) {
-    void unsubscribe();
     actions.destroyConnection();
     stopWebsync();
     destroySharedStatePort();
@@ -100,8 +100,8 @@ addActionHandler('initShared', (): ActionReturnType => {
 addActionHandler('initMain', (global, actions): ActionReturnType => {
   actions.cleanupExpiredTtlMessages();
 
-  const { hasWebNotifications, hasPushNotifications } = selectSettingsKeys(global);
-  if (hasWebNotifications && hasPushNotifications) {
+  const { hasWebNotifications } = selectSettingsKeys(global);
+  if (hasWebNotifications) {
     // Most of the browsers only show the notifications permission prompt after the first user gesture.
     const events = ['click', 'keypress'];
     const subscribeAfterUserGesture = () => {
@@ -127,7 +127,7 @@ addCallback((global: GlobalState) => {
   }, tabState.id);
 
   const {
-    messageTextSize, shouldUseSystemTheme, timeFormat,
+    messageTextSize, shouldUseSystemTheme, timeFormat, themes,
   } = selectSharedSettings(global);
 
   const globalTheme = selectTheme(global);
@@ -173,7 +173,7 @@ addCallback((global: GlobalState) => {
 
   const canAnimate = selectCanAnimateInterface(global);
 
-  switchTheme(theme, canAnimate);
+  switchTheme(theme, canAnimate, buildThemeColorOverrides(themes[theme], theme));
   setScrollbarWidthProperty();
 
   // Make sure global has the latest theme. Will cause `switchTheme` on change

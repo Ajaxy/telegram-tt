@@ -17,7 +17,7 @@
 
   font-size: 1rem;
   font-weight: var(--font-weight-medium);
-  color: rgba(var(--color-text-secondary-rgb), 0.75);
+  color: var(--color-text-secondary);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -36,10 +36,10 @@
 }
 
 .toggleButton {
-  --button-background-color: rgb(var(--color-primary-shade-rgb));
-  --button-text-color: var(--color-white);
-  --button-active-background-color: rgba(var(--color-primary-shade-rgb), 0.85);
-  --button-active-text-color: var(--color-white);
+  --button-background-color: var(--color-primary-shade);
+  --button-text-color: var(--color-primary-foreground);
+  --button-active-background-color: var(--color-primary-shade);
+  --button-active-text-color: var(--color-primary-foreground);
 
   position: absolute;
   z-index: 3;
@@ -50,13 +50,13 @@
   width: max-content;
 
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: width 0.25s ease-out, background-color 0.25s ease-out;
+  transition: width 0.25s ease-out, background-color var(--message-color-transition-duration, 0.25s) ease-out;
 
   &:global(.danger) {
-    --button-background-color: var(--color-error);
-    --button-text-color: var(--color-white);
+    --button-background-color: var(--color-error-background);
+    --button-text-color: var(--color-error-foreground);
     --button-active-background-color: var(--color-error-shade);
-    --button-active-text-color: var(--color-white);
+    --button-active-text-color: var(--color-error-foreground);
   }
 }
 

@@ -14,7 +14,7 @@
   background: transparent no-repeat center;
   background-size: contain;
 
-  transition: background-color 0.15s ease, opacity 0.3s ease !important;
+  transition: background-color var(--message-color-transition-duration, 0.15s) ease, opacity 0.3s ease !important;
 
   &.custom-emoji {
     width: var(--custom-emoji-size);
@@ -50,7 +50,7 @@
 
     background-color: var(--color-chat-hover);
 
-    transition: background-color 0.15s ease;
+    transition: background-color var(--message-color-transition-duration, 0.15s) ease;
 
     &:hover {
       background-color: rgba(var(--color-text-secondary-rgb), 0.16);

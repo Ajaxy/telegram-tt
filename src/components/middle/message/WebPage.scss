@@ -15,6 +15,12 @@
 
   background-color: var(--accent-background-color);
 
+  transition: background-color var(--message-color-transition-duration, 0.15s);
+
+  &:has(.WebPage-text_interactive:hover, .WebPage--quick-button:hover) {
+    background-color: var(--accent-background-active-color);
+  }
+
   &.with-video {
     padding-block: 0.375rem;
   }
@@ -66,10 +72,7 @@
 
     color: var(--accent-color) !important;
 
-    transition: opacity 0.2s ease-in;
-
     &:hover, &:active {
-      opacity: 0.85;
       background-color: transparent !important;
     }
 
@@ -95,11 +98,6 @@
 
     &_interactive {
       cursor: var(--custom-cursor, pointer);
-      transition: opacity 0.15s;
-
-      &:hover {
-        opacity: 0.75;
-      }
     }
   }
 

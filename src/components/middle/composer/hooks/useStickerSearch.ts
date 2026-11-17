@@ -5,7 +5,7 @@ import type { ApiSticker, ApiStickerSet } from '../../../../api/types';
 
 import { selectLanguageCode } from '../../../../global/selectors/settings';
 import { throttle } from '../../../../util/schedulers';
-import searchWords from '../../../../util/searchWords';
+import searchWords from '../../../../util/text/searchWords';
 import { callApi } from '../../../../api/gramjs';
 
 import useLastCallback from '../../../../hooks/useLastCallback';

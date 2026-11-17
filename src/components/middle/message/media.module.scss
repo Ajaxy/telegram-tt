@@ -117,9 +117,9 @@
   align-items: center;
   justify-content: center;
 
-  color: #fff;
+  color: var(--message-media-text);
 
-  opacity: 0.7;
+  opacity: 1;
 
   transition: opacity 150ms;
 
@@ -132,11 +132,13 @@
     height: 3.375rem;
     border-radius: 50%;
 
-    background: rgba(black, 0.25);
+    background: #00000073;
   }
 
   &:hover {
-    opacity: 1;
+    &::before {
+      background: #00000099;
+    }
   }
 
   &:global(.opacity-transition) {
@@ -150,8 +152,16 @@
 
 .downloadButton {
   font-size: 1.5rem;
+
+  @media print {
+    display: none;
+  }
 }
 
 .playButton {
   font-size: 2.5rem;
+
+  &::before {
+    padding-left: 0.375rem;
+  }
 }

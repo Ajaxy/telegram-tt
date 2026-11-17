@@ -1,4 +1,5 @@
 import type { GpuCanvas, GpuDrawGroup, GpuRenderer } from './gpu';
+import type { DiamondLens, GpuLensTarget } from './lensGpu';
 import type { DiamondDrawState } from './model';
 import type { GpuDiamondTarget } from './sceneGpu';
 
@@ -36,6 +37,8 @@ type Subscriber = {
   isReady: boolean;
   isInDialog: boolean;
   interaction?: Interaction;
+  lens?: DiamondLens;
+  lensTarget?: GpuLensTarget;
   onReady: NoneToVoidFunction;
   onFallback: NoneToVoidFunction;
 };
@@ -152,6 +155,7 @@ export function subscribeDiamondIcon(
     visibleCanvases.delete(canvas);
     observer?.unobserve(canvas);
     subscriber.gpu.destroy();
+    destroyLensTarget(subscriber);
     if (!subscribers.size) removeGpuDrawGroup(group);
     updateGpuPlayback();
   };
@@ -188,6 +192,11 @@ export function holdDiamondIcon(canvas: HTMLCanvasElement) {
   updateGpuPlayback();
 
   return true;
+}
+
+export function setDiamondIconLens(canvas: HTMLCanvasElement, lens?: DiamondLens) {
+  const subscriber = subscribers.get(canvas);
+  if (subscriber) subscriber.lens = lens;
 }
 
 export function turnDiamondIcon(canvas: HTMLCanvasElement, deltaX: number, deltaY: number) {
@@ -311,11 +320,29 @@ function drawCanvas(
   encoder: GPUCommandEncoder, canvas: HTMLCanvasElement, subscriber: Subscriber, state: DiamondDrawState,
   yaw: number, pitch: number, frameTime: number,
 ) {
+  const { scene, lens } = subscriber.renderer;
+  const viewport = { x: 0, y: 0, size: canvas.width };
   const pass = subscriber.gpu.beginPass(encoder);
-  subscriber.renderer.scene.draw(
-    pass, subscriber.gpu.sceneTarget, state, { x: 0, y: 0, size: canvas.width }, time, frameTime, yaw, pitch,
-  );
+  const pose = scene.draw(pass, subscriber.gpu.sceneTarget, state, viewport, time, frameTime, yaw, pitch);
+
+  if (lens && subscriber.lens) {
+    // A held icon draws a larger frame, and its lens needs a texture of that size
+    if (subscriber.lensTarget?.texture.width !== canvas.width) {
+      destroyLensTarget(subscriber);
+      subscriber.lensTarget = lens.createTarget(canvas.width);
+    }
+
+    lens.draw(
+      pass, subscriber.lensTarget, subscriber.lens, pose, viewport, canvas.width / parseFloat(canvas.style.width), yaw,
+    );
+  }
+
   pass.end();
+}
+
+function destroyLensTarget(subscriber: Subscriber) {
+  subscriber.lensTarget?.destroy();
+  subscriber.lensTarget = undefined;
 }
 
 // A frame outside the loop, with the step of a frame at rest

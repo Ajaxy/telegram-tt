@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
 
 import useLastCallback from '../useLastCallback';
 import useResizeObserver from '../useResizeObserver';
+import useWindow from '../useWindow';
 
 const UPDATE_DEBOUNCE = 50; // ms
 
@@ -15,6 +16,7 @@ export default function useStyleObserver(
   debounce = UPDATE_DEBOUNCE,
   isDisabled?: boolean,
 ) {
+  const targetWindow = useWindow();
   const [value, setValue] = useState<string | undefined>();
 
   const updateValue = useLastCallback(() => {
@@ -23,7 +25,8 @@ export default function useStyleObserver(
       return;
     }
 
-    const computedValue = getComputedStyle(ref.current).getPropertyValue(property).trim();
+    const computedValue = ref.current.ownerDocument.defaultView!
+      .getComputedStyle(ref.current).getPropertyValue(property).trim();
     setValue(computedValue);
   });
 
@@ -66,7 +69,7 @@ export default function useStyleObserver(
     return () => {
       el.removeEventListener('transitionend', handleTransitionEnd);
     };
-  }, [isDisabled, property, ref, updateValue]);
+  }, [isDisabled, property, ref, updateValue, targetWindow]);
 
   return value;
 }

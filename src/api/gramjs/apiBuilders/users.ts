@@ -17,9 +17,10 @@ import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHo
 import {
   buildApiFormattedText, buildApiPhoto, buildApiUsernames,
 } from './common';
-import { buildApiDisallowedGiftsSettings } from './gifts';
+import { buildApiDisallowedGiftsSettings, buildApiShareTheme } from './gifts';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiAudioFromDocument } from './media';
+import { buildApiPeerTheme, buildApiWallpaper } from './misc';
 import {
   buildApiBotVerification,
   buildApiEmojiStatus,
@@ -41,7 +42,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
       starsRating, starsMyPendingRating, starsMyPendingRatingDate, mainTab, savedMusic, note,
       noforwardsMyEnabled, noforwardsPeerEnabled, unofficialSecurityRisk, privateForwardName,
-      ttlPeriod, botManagerId, walletCard,
+      ttlPeriod, theme, wallpaper, botManagerId, walletCard, shareTheme,
     },
     users,
   } = mtpUserFull;
@@ -49,6 +50,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
   const userId = buildApiPeerId(users[0].id, 'user');
 
   return {
+    peerTheme: theme && buildApiPeerTheme(theme),
+    wallpaper: wallpaper && buildApiWallpaper(wallpaper),
     bio: about,
     ttlPeriod,
     commonChatsCount,
@@ -90,6 +93,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     isUnofficialSecurityRisk: unofficialSecurityRisk,
     botManagerId: botManagerId !== undefined ? buildApiPeerId(botManagerId, 'user') : undefined,
     walletCard: walletCard && buildApiWalletCard(walletCard),
+    shareTheme: shareTheme && buildApiShareTheme(shareTheme),
   };
 }
 

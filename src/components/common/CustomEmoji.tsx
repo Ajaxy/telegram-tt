@@ -22,6 +22,7 @@ import blankImg from '../../assets/blank.png';
 type OwnProps = {
   ref?: ElementRef<HTMLDivElement>;
   className?: string;
+  alt?: string;
   style?: string;
   size?: number;
   isBig?: boolean;
@@ -59,6 +60,7 @@ const CustomEmoji = ({
   documentId,
   sticker,
   className,
+  alt,
   style,
   size = STICKER_SIZE,
   isBig,
@@ -136,14 +138,14 @@ const CustomEmoji = ({
       onAnimationEnd={onAnimationEnd}
       data-entity-type={ApiMessageEntityTypes.CustomEmoji}
       data-document-id={documentId}
-      data-alt={customEmoji?.emoji}
+      data-alt={alt ?? customEmoji?.emoji}
       style={style}
     >
       {isSelectable && (
         <img
           className={styles.highlightCatch}
           src={blankImg}
-          alt={customEmoji?.emoji}
+          alt={alt ?? customEmoji?.emoji}
           data-entity-type={ApiMessageEntityTypes.CustomEmoji}
           data-document-id={documentId}
           draggable={false}

@@ -5,7 +5,7 @@ import type { ApiWebDocument } from '../../../../api/types';
 
 import { getWebDocumentHash } from '../../../../global/helpers';
 import buildClassName from '../../../../util/buildClassName.ts';
-import { getFirstLetters } from '../../../../util/textFormat';
+import { getFirstLetters } from '../../../../util/text/textFormat';
 import renderText from '../../../common/helpers/renderText';
 import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
 

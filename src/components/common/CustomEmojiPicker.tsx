@@ -72,11 +72,14 @@ type OwnProps = {
   idPrefix?: string;
   withDefaultTopicIcons?: boolean;
   selectedReactionIds?: string[];
+  withSelectionOrder?: boolean;
   isStatusPicker?: boolean;
   isReactionPicker?: boolean;
   isTuckEnabled?: boolean;
   isTranslucent?: boolean;
   noAddButton?: boolean;
+  // Free custom emoji shown in place of the top reactions
+  topCustomEmojis?: ApiSticker[];
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
   onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
   onReactionContext?: (reaction: ApiReactionWithPaid) => void;
@@ -133,6 +136,7 @@ const CustomEmojiPicker = ({
   customEmojisById,
   recentCustomEmojiIds,
   selectedReactionIds,
+  withSelectionOrder,
   recentStatusEmojis,
   collectibleStatuses,
   stickerSetsById,
@@ -148,6 +152,7 @@ const CustomEmojiPicker = ({
   isTuckEnabled,
   isTranslucent,
   noAddButton,
+  topCustomEmojis,
   isSavedMessages,
   isCurrentUserPremium,
   withDefaultTopicIcons,
@@ -216,11 +221,22 @@ const CustomEmojiPicker = ({
     }
 
     if (isReactionPicker && !isSavedMessages) {
-      const topReactionsSlice: ApiReactionWithPaid[] = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
+      const topReactionsSlice: ApiReactionWithPaid[] = topCustomEmojis
+        ? []
+        : topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
       if (isWithPaidReaction) {
         topReactionsSlice.unshift({ type: 'paid' });
       }
-      if (topReactionsSlice?.length) {
+      if (topCustomEmojis?.length) {
+        defaultSets.push({
+          id: TOP_SYMBOL_SET_ID,
+          accessHash: '',
+          title: lang('Reactions'),
+          stickers: topCustomEmojis,
+          count: topCustomEmojis.length,
+          isEmoji: true,
+        });
+      } else if (topReactionsSlice?.length) {
         defaultSets.push({
           id: TOP_SYMBOL_SET_ID,
           accessHash: '',
@@ -315,7 +331,7 @@ const CustomEmojiPicker = ({
     addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
     customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
     defaultStatusIconsId, defaultTopicIconsId, isSavedMessages, defaultTagReactions, chatEmojiSetId,
-    isWithPaidReaction, collectibleStatusEmojis,
+    isWithPaidReaction, collectibleStatusEmojis, topCustomEmojis,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -571,7 +587,9 @@ const CustomEmojiPicker = ({
                   {allSets.map((stickerSet, i) => {
                     const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
                       || (stickerSet.id === RECENT_SYMBOL_SET_ID && (withDefaultTopicIcons || isStatusPicker));
-                    const isChatEmojiSet = stickerSet.id === chatEmojiSetId;
+                    // Free top emoji are shown in full and unlocked, like the chat's own set
+                    const isChatEmojiSet = stickerSet.id === chatEmojiSetId
+                      || (stickerSet.id === TOP_SYMBOL_SET_ID && Boolean(topCustomEmojis));
 
                     return (
                       <StickerSet
@@ -594,6 +612,7 @@ const CustomEmojiPicker = ({
                         isChatEmojiSet={isChatEmojiSet}
                         isCurrentUserPremium={isCurrentUserPremium}
                         selectedReactionIds={selectedReactionIds}
+                        withSelectionOrder={withSelectionOrder}
                         availableReactions={availableReactions}
                         isTranslucent={isTranslucent}
                         onReactionSelect={onReactionSelect}

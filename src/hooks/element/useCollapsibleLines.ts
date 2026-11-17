@@ -44,6 +44,11 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
   const isCollapsed = isCollapsible && (isCollapsedControlled ?? isCollapsedUncontrolled);
   const shouldKeepExpandedHeightAuto = recalculationKey !== undefined;
 
+  // Preserve the last controlled value when returning to uncontrolled mode
+  useEffect(() => {
+    if (isCollapsedControlled !== undefined) setIsCollapsedUncontrolled(isCollapsedControlled);
+  }, [isCollapsedControlled]);
+
   const setIsCollapsed = useLastCallback<StateHookSetter<boolean>>((newValue) => {
     const isNextCollapsed = typeof newValue === 'function' ? newValue(isCollapsed) : newValue;
     if (isNextCollapsed === isCollapsed) return;

@@ -26,6 +26,12 @@ export type WebApp = {
   reloadFrame?: (url: string) => void;
 };
 
+export type WebAppMediaKind = 'camera' | 'microphone';
+export type WebAppMediaAccessStatus = 'not_requested' | 'granted' | 'denied' | 'unavailable';
+export type WebAppMediaAccessState = Record<WebAppMediaKind, WebAppMediaAccessStatus> & {
+  reload_required: boolean;
+};
+
 export type PopupOptions = {
   title?: string;
   message: string;
@@ -137,6 +143,7 @@ interface WebAppInboundEventMap {
     refresh_rate?: number;
     need_absolute?: boolean;
   };
+  web_app_request_media_access: Partial<Record<WebAppMediaKind, boolean>>;
 
   // No payload
   web_app_request_viewport: null;
@@ -154,6 +161,8 @@ interface WebAppInboundEventMap {
   web_app_check_location: null;
   web_app_request_location: null;
   web_app_open_location_settings: null;
+  web_app_check_media_access: null;
+  web_app_open_media_access_settings: null;
   web_app_request_fullscreen: null;
   web_app_exit_fullscreen: null;
   web_app_request_safe_area: null;
@@ -258,6 +267,9 @@ interface WebAppOutboundEventMap {
       course_accuracy: number | null;
       speed_accuracy: number | null;
     };
+  media_access_checked: WebAppMediaAccessState & { supported: true };
+  media_access_requested: WebAppMediaAccessState;
+  media_access_changed: WebAppMediaAccessState;
   emoji_status_access_requested: {
     status: 'allowed' | 'cancelled';
   };

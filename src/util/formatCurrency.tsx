@@ -132,15 +132,6 @@ export function formatTonInFiat(
   );
 }
 
-export function formatTonAsCurrency(nanos: bigint, locale: string = FALLBACK_LANG_CODE) {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: TON_CURRENCY_CODE,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 10,
-  }).format(convertTonFromNanos(nanos));
-}
-
 export function formatCurrencyAsString(
   totalPrice: number,
   currency: string,

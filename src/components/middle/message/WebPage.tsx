@@ -8,7 +8,7 @@ import type { ThemeKey, WebPageMediaSize } from '../../../types';
 import { getPhotoFullDimensions } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { tryParseDeepLink } from '../../../util/deepLinkParser';
-import trimText from '../../../util/trimText';
+import trimText from '../../../util/text/trimText';
 import renderText from '../../common/helpers/renderText';
 import { getWebpageButtonIcon, getWebpageButtonLangKey } from './helpers/webpageType';
 

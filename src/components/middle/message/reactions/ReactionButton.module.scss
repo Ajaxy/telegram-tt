@@ -2,7 +2,7 @@
 .root.root {
   --custom-emoji-size: 1.25rem;
   --reaction-background: var(--color-reaction);
-  --reaction-background-hover: var(--hover-color-reaction);
+  --reaction-background-hover: var(--color-reaction-hover);
   --reaction-text-color: var(--text-color-reaction);
 
   position: relative;
@@ -27,31 +27,32 @@
 
   background-color: var(--reaction-background) !important;
 
-  transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms !important;
+  transition:
+    background-color var(--message-color-transition-duration, 150ms),
+    color var(--message-color-transition-duration, 150ms),
+    backdrop-filter 150ms,
+    filter 150ms !important;
 
   &.chosen {
     --reaction-background: var(--color-reaction-chosen);
-    --reaction-background-hover: var(--hover-color-reaction-chosen);
+    --reaction-background-hover: var(--color-reaction-chosen-hover);
     --reaction-text-color: var(--text-color-reaction-chosen);
   }
 
   &.paid {
-    --reaction-background: #FFBC2E33 !important;
-    --reaction-background-hover: #FFBC2E55 !important;
-    --reaction-text-color: #E98111 !important;
-
     z-index: 2;
+  }
 
-    &.outside {
-      --reaction-text-color: #FFFFFF !important;
-      --reaction-background: #FFBC2E77 !important;
-      --reaction-background-hover: #FFBC2E99 !important;
-    }
+  // Outside, an unchosen paid reaction keeps the regular chip
+  &.paid:not(.outside) {
+    --reaction-background: #FFB72740 !important;
+    --reaction-background-hover: #FFB72766 !important;
+    --reaction-text-color: #FFB727 !important;
   }
 
   &.paid.chosen {
     --reaction-background: #FFB727 !important;
-    --reaction-background-hover: #FFB727CC !important;
+    --reaction-background-hover: #E6A523 !important;
     --reaction-text-color: #FFFFFF !important;
   }
 
@@ -123,7 +124,7 @@
 
 .tail-fill {
   fill: var(--reaction-background);
-  transition: fill 150ms;
+  transition: fill var(--message-color-transition-duration, 150ms);
 }
 
 .tag-text {

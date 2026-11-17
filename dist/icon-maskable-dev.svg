@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="-29 -29 570 570">
+  <defs>
+    <linearGradient id="background" gradientUnits="userSpaceOnUse" x1="0" y1="-29" x2="0" y2="541">
+      <stop offset="0" stop-color="#36ABE8"/>
+      <stop offset="1" stop-color="#299DD4"/>
+    </linearGradient>
+    <pattern id="grid" patternUnits="userSpaceOnUse" x="46.9" y="46.4" width="14.96" height="14.96">
+      <path d="M7.48 0V14.96M0 7.48H14.96" fill="none" stroke="#fff" stroke-opacity=".21" stroke-width="1.8"/>
+    </pattern>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="12.4" height="12.4" patternTransform="rotate(60.53)">
+      <rect y="4.12" width="12.4" height="4.1" fill="#fff"/>
+    </pattern>
+    <path id="plane" d="M103.75 256L349.25 155.5C363 150 381.8 160.7 379.25 176.5L349.75 361C347 378 330.7 385.6 317.25 377L228.25 320C220 314.7 222.3 308.2 230.5 299.5L300.5 225.5C305 220.8 301.2 211.7 294.5 216L193 281C183 287.4 170 294.2 156.5 290.25L102.5 274.5C93 271.7 94.5 259.8 103.75 256Z"/>
+    <clipPath id="plane-clip">
+      <use href="#plane"/>
+    </clipPath>
+  </defs>
+
+  <rect x="-29" y="-29" width="570" height="570" fill="url(#background)"/>
+  <rect x="-29" y="-29" width="570" height="570" fill="url(#grid)"/>
+
+  <g fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2">
+    <path d="M99.5 98V262M368.5 98V158M308.5 128V221"/>
+    <path d="M100.5 114H367.5M113.5 108L100.5 114L113.5 120M354.5 108L367.5 114L354.5 120"/>
+    <path d="M100.5 144H307.5M113.5 138L100.5 144L113.5 150M294.5 138L307.5 144L294.5 150"/>
+    <path d="M375 158.5H443M306 218.5H416M336.5 383H444"/>
+    <path d="M428 160V381M422 173L428 160L434 173M422 368L428 381L434 368"/>
+    <path d="M398 220V381M392 233L398 220L404 233M392 368L398 381L404 368"/>
+    <circle cx="151.75" cy="367.75" r="32.5"/>
+    <path d="M185 367.75H219L263 319"/>
+  </g>
+
+  <rect x="90" y="148" width="295" height="240" fill="url(#hatch)" clip-path="url(#plane-clip)"/>
+  <use href="#plane" fill="none" stroke="#fff" stroke-width="8" stroke-linejoin="round"/>
+
+  <path d="M143.25 389V359C143.25 352 147 349 150 349C154.5 349 157.5 351.5 157.5 355.5C157.5 360 154.5 363 149.75 363C155.5 363 160.25 365.5 160.25 371C160.25 376.5 155.5 379.5 150.5 379.5C148 379.5 145.5 378.5 143.25 376" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+</svg>

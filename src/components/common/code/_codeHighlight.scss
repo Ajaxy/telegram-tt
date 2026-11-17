@@ -1,63 +1,29 @@
-@mixin code-highlight-dark-theme {
-  --color-type: #56b6c2;
-  --color-keyword: #c678dd;
-  --color-class: #e06c75;
-  --color-string: #98c379;
-  --color-template: #d19a66;
-  --color-selector: #e06c75;
-  --color-function: #61aeee;
-  --color-comment: #5c6370;
-  --color-section: #e06c75;
-  --color-variable: #d19a66;
-  --color-attribute: #d19a66;
-  --color-link: #d19a66;
-  --color-tag: #e06c75;
+// `--message-code-dark` is 1 on dark code backgrounds and 0 on light ones
+@function select-code-color($light, $dark) {
+  @return color-mix(in srgb, #{$dark} calc(var(--message-code-dark) * 100%), #{$light});
 }
 
-@mixin code-highlight-theme($includeOwnTheme: false) {
-  :global(html.theme-light) & {
-    --color-type: #0053d4;
-    --color-keyword: #388e22;
-    --color-class: #3e6c20;
-    --color-string: #9a1111;
-    --color-template: #9a5334;
-    --color-selector: #9a5334;
-    --color-function: #a753b7;
-    --color-comment: #616161;
-    --color-section: #9a1111;
-    --color-variable: #bd63c5;
-    --color-attribute: #276b8f;
-    --color-link: #276b8f;
-    --color-tag: #000000;
-  }
+// Light code shares the quote tint, so it follows the peer color of the bar
+@mixin code-surface {
+  --code-background: #{select-code-color(var(--accent-background-color), #00000080)};
 
-  @if $includeOwnTheme {
-    :global(html.theme-dark) :not(:global(.own)) & {
-      @include code-highlight-dark-theme;
-    }
+  background-color: var(--code-background);
+}
 
-    :global(html.theme-dark) :global(.own) & {
-      --color-type: #9effff;
-      --color-keyword: #ffe900;
-      --color-class: #b2f5ff;
-      --color-string: #fedcad;
-      --color-template: #ffe900;
-      --color-selector: #b2f5ff;
-      --color-function: #87ff91;
-      --color-comment: #cbcbcb;
-      --color-section: #b2f5ff;
-      --color-variable: #ffe900;
-      --color-attribute: #ffe900;
-      --color-link: #ffe900;
-      --color-tag: #b2f5ff;
-    }
-  }
-
-  @else {
-    :global(html.theme-dark) & {
-      @include code-highlight-dark-theme;
-    }
-  }
+@mixin code-highlight-theme {
+  --color-type: #{select-code-color(#0053d4, #56b6c2)};
+  --color-keyword: #{select-code-color(#388e22, #c678dd)};
+  --color-class: #{select-code-color(#3e6c20, #e06c75)};
+  --color-string: #{select-code-color(#9a1111, #98c379)};
+  --color-template: #{select-code-color(#9a5334, #d19a66)};
+  --color-selector: #{select-code-color(#9a5334, #e06c75)};
+  --color-function: #{select-code-color(#a753b7, #61aeee)};
+  --color-comment: #{select-code-color(#616161, #9da5b4)};
+  --color-section: #{select-code-color(#9a1111, #e06c75)};
+  --color-variable: #{select-code-color(#bd63c5, #d19a66)};
+  --color-attribute: #{select-code-color(#276b8f, #d19a66)};
+  --color-link: #{select-code-color(#276b8f, #d19a66)};
+  --color-tag: #{select-code-color(#000000, #e06c75)};
 }
 
 @mixin code-highlight-tokens {

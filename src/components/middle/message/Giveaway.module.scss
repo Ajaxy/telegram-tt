@@ -31,14 +31,9 @@
   border-radius: 1rem;
 
   line-height: 1.25;
-  color: white;
+  color: var(--color-primary-foreground);
 
   background-color: var(--color-primary);
-
-  :global(.theme-dark .own) & {
-    color: var(--background-color);
-    background-color: var(--color-text);
-  }
 }
 
 .section {
@@ -62,11 +57,11 @@
 }
 
 .peer {
-  color: var(--accent-color);
-  background-color: var(--accent-background-color);
+  color: var(--message-accent, var(--accent-color));
+  background-color: var(--message-tint, var(--accent-background-color));
 
   &:hover, &:active, &:focus {
-    background-color: var(--accent-background-active-color);
+    background-color: var(--message-tint-hover, var(--accent-background-active-color));
   }
 }
 

@@ -194,7 +194,7 @@ const FloatingActionButtons = ({
   );
 
   return (
-    <div ref={elementRef} className={fabClassName} inert={isHidden}>
+    <div ref={elementRef} className={fabClassName} inert={isHidden} data-floating-action-buttons>
       {unreadCountButtons.map((button) => (
         <ScrollDownButton
           key={button.icon}

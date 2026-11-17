@@ -78,7 +78,7 @@
 
   background-color: var(--color-background);
 
-  transition: background-color 0.2s;
+  transition: background-color var(--message-color-transition-duration, 0.2s);
 
   &:hover:not(.no-hover) {
     background-color: var(--color-interactive-element-hover);
@@ -95,7 +95,6 @@
   overflow: hidden;
   flex-grow: 1;
 
-  min-width: 15rem;
   max-width: 15rem;
   margin-top: 0.125rem;
   margin-inline-start: 0.375rem;
@@ -104,7 +103,6 @@
 
   &.withMedia {
     transform: translateX(2.625rem);
-    min-width: calc(15rem - 2.625rem);
     max-width: calc(15rem - 2.625rem);
     margin-right: 2.625rem;
 
@@ -161,7 +159,7 @@
 .inlineButton:global(.Button.tiny) {
   overflow: hidden;
   display: block;
-  flex-shrink: 1;
+  flex-shrink: 0;
 
   width: auto;
   max-width: 10rem;

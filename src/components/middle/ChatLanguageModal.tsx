@@ -1,5 +1,5 @@
 import {
-  memo, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -14,10 +14,10 @@ import {
   selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useTextHighlight from '../../hooks/useTextHighlight';
 
 import InputText from '../ui/InputText';
 import ListItem from '../ui/ListItem';
@@ -60,6 +60,8 @@ const ChatLanguageModal = ({
 
   const [search, setSearch] = useState('');
   const lang = useLang();
+  const languagesRef = useRef<HTMLDivElement>();
+  useTextHighlight(languagesRef, { search });
 
   const handleSelect = useLastCallback((langCode: string) => {
     if (!chatId) return;
@@ -124,7 +126,7 @@ const ChatLanguageModal = ({
         placeholder={lang('Search')}
         teactExperimentControlled
       />
-      <div className={buildClassName(styles.languages, 'custom-scroll')}>
+      <div className={buildClassName(styles.languages, 'custom-scroll')} ref={languagesRef}>
         {filteredDisplayedLanguages.map(({ langCode, originalName, translatedName }) => (
           <ListItem
             key={langCode}
@@ -137,10 +139,10 @@ const ChatLanguageModal = ({
             onClick={() => handleSelect(langCode)}
           >
             <span className={buildClassName('title', styles.title)}>
-              {renderText(originalName, ['highlight'], { highlight: search })}
+              {originalName}
             </span>
             <span className={buildClassName('subtitle', styles.subtitle)}>
-              {renderText(translatedName, ['highlight'], { highlight: search })}
+              {translatedName}
             </span>
           </ListItem>
         ))}

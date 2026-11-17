@@ -33,13 +33,11 @@ import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import focusEditableElement from '../../../util/focusEditableElement';
 import { CODE_HIGHLIGHTING_CHANGED_META, subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
 import { debounce, fastRaf, throttleWith } from '../../../util/schedulers';
-import { getUtf8Length } from '../../../util/textFormat';
+import { getUtf8Length } from '../../../util/text/textFormat';
 import tiptapStyles from '../../../util/tiptap/styling.module.scss';
-import renderText from '../../common/helpers/renderText';
 import {
   getRichInputAsFormatted,
   hasUnsupportedRichBlocks,
-  removeUnsupportedRichBlocks,
 } from '../../ui/textInput/richText';
 import { RICH_INPUT_MODE_CHANGED_META } from './helpers/richEditorMode';
 
@@ -77,7 +75,6 @@ export type OwnProps = {
   editableInputId?: string;
   isActive: boolean;
   placeholder: TeactNode | string;
-  forcedPlaceholder?: string;
   noFocusInterception?: boolean;
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
@@ -126,7 +123,6 @@ const MessageInput = ({
   editableInputId,
   isActive,
   placeholder,
-  forcedPlaceholder,
   canSendPlainText,
   isRichInputExpanded,
   canAutoFocus,
@@ -649,16 +645,6 @@ const MessageInput = ({
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
 
-  function handleDeleteUnsupported() {
-    if (!richValue) {
-      return;
-    }
-
-    const nextValue = removeUnsupportedRichBlocks(richValue);
-    richEditor.setValue(nextValue.blocks.length ? nextValue : undefined);
-    syncCloneWithSource(editor?.view.dom);
-  }
-
   useEffect(() => {
     if (IS_TOUCH_ENV) {
       return;
@@ -771,20 +757,6 @@ const MessageInput = ({
       onClick={shouldSuppressFocus ? onSuppressedFocus : undefined}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      {hasUnsupportedRichContent && (
-        <div className={tiptapStyles.unsupported}>
-          <span>{lang('PageContentUnsupported')}</span>
-          <Button
-            isText
-            size="smaller"
-            color="danger"
-            className={tiptapStyles.unsupportedDelete}
-            onClick={handleDeleteUnsupported}
-          >
-            {lang('Delete')}
-          </Button>
-        </div>
-      )}
       <div className="shared-canvas-container">
         {canRenderRichEditor && (
           <>
@@ -828,24 +800,22 @@ const MessageInput = ({
               onFocus={!isNeedPremium ? onFocusRef.current : undefined}
               onBlur={!isNeedPremium ? onBlurRef.current : undefined}
             />
-            {!forcedPlaceholder && (
-              <span
-                className={buildClassName(
-                  'placeholder-text',
-                  isMainInputLocked && 'with-icon',
-                  isNeedPremium && 'is-need-premium',
-                )}
-                dir="auto"
-              >
-                {isMainInputLocked && <Icon name="lock-filled" className="placeholder-icon" />}
-                {placeholder}
-                {isStoryInput && isNeedPremium && (
-                  <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
-                    {lang('StoryRepliesLockedButton')}
-                  </Button>
-                )}
-              </span>
-            )}
+            <span
+              className={buildClassName(
+                'placeholder-text',
+                isMainInputLocked && 'with-icon',
+                isNeedPremium && 'is-need-premium',
+              )}
+              dir="auto"
+            >
+              {isMainInputLocked && <Icon name="lock-filled" className="placeholder-icon" />}
+              {placeholder}
+              {isStoryInput && isNeedPremium && (
+                <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
+                  {lang('StoryRepliesLockedButton')}
+                </Button>
+              )}
+            </span>
           </div>
         </div>
       </div>
@@ -893,7 +863,6 @@ const MessageInput = ({
           onSubmit={handleFormattedDateSubmit}
         />
       )}
-      {forcedPlaceholder && <span className="forced-placeholder">{renderText(forcedPlaceholder)}</span>}
     </div>
   );
 };

@@ -18,13 +18,12 @@ import {
 } from '../../../global/helpers/messageSummary';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getTranslationFn, type LangFn } from '../../../util/localization';
-import trimText from '../../../util/trimText';
+import trimText from '../../../util/text/trimText';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
 
 export function renderMessageText({
   message,
-  highlight,
   emojiSize,
   asPreview,
   truncateLength,
@@ -36,7 +35,6 @@ export function renderMessageText({
   maxTimestamp,
 }: {
   message: ApiMessage | ApiSponsoredMessage;
-  highlight?: string;
   emojiSize?: number;
   asPreview?: boolean;
   truncateLength?: number;
@@ -59,7 +57,6 @@ export function renderMessageText({
   return renderTextWithEntities({
     text: trimText(text, truncateLength),
     entities,
-    highlight,
     emojiSize,
     shouldRenderAsHtml,
     containerId: `${isForMediaViewer ? 'mv-' : ''}${messageKey}`,
@@ -78,7 +75,6 @@ export function renderMessageSummary(
   lang: LangFn,
   message: ApiMessage,
   noEmoji = false,
-  highlight?: string,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
 ): TextPart[] {
   const { entities } = message.content.text || {};
@@ -93,11 +89,7 @@ export function renderMessageSummary(
   if (!hasSpoilers && !hasCustomEmoji && !hasFormattedSummaryEntities) {
     const text = trimText(getMessageSummaryText(lang, message, statefulContent, noEmoji), truncateLength);
 
-    if (highlight) {
-      return renderText(text, ['emoji', 'highlight'], { highlight });
-    } else {
-      return renderText(text);
-    }
+    return renderText(text);
   }
 
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
@@ -106,12 +98,12 @@ export function renderMessageSummary(
   if (formattedSummaryText && hasFormattedSummaryEntities) {
     return [
       ...renderText(emojiWithSpace),
-      ...renderFormattedSummaryText(formattedSummaryText, highlight, truncateLength),
+      ...renderFormattedSummaryText(formattedSummaryText, truncateLength),
     ].filter(Boolean);
   }
 
   const text = renderMessageText({
-    message, highlight, asPreview: true, truncateLength,
+    message, asPreview: true, truncateLength,
   });
   const description = getMessageSummaryDescription(lang, message, statefulContent, text);
 
@@ -141,13 +133,11 @@ function getFormattedSummaryText(
 
 function renderFormattedSummaryText(
   formattedText: ApiFormattedText,
-  highlight?: string,
   truncateLength?: number,
 ): TextPart[] {
   return renderTextWithEntities({
     text: trimText(formattedText.text, truncateLength),
     entities: formattedText.entities,
-    highlight,
     asPreview: true,
   });
 }

@@ -1,113 +1,45 @@
 import { useRef } from '@teact';
 
+import type { CropState } from '../../../../types/mediaEditor';
+import type { ResizeHandle } from '../crop';
+import type { Size } from '../render/transform';
+
 import { clamp } from '../../../../util/math';
-import { getEffectiveDimensions } from '../canvasUtils';
+import { computeCenteredCrop, getAspectRatioValue } from '../crop';
+import { getEffectiveDimensions } from '../render/transform';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
-
-export interface CropState {
-  cropperX: number;
-  cropperY: number;
-  cropperWidth: number;
-  cropperHeight: number;
-  aspectRatio: AspectRatio;
-  rotation: number;
-  quarterTurns: number;
-  flipH: boolean;
-}
-
-export function getTotalRotation(state: CropState): number {
-  return state.rotation - state.quarterTurns * 90;
-}
-
-export type AspectRatio =
-  'free' | 'original' | 'square' | '3:2' | '2:3' | '4:3' | '3:4' | '5:4' | '4:5' | '16:9' | '9:16';
-
-export type ResizeHandle = 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-
-interface AspectRatioOption {
-  value: AspectRatio;
-  labelKey?: 'Free' | 'Original' | 'Square';
-  label?: string;
-  ratio?: number;
-}
-
-export const ASPECT_RATIOS: AspectRatioOption[] = [
-  { value: 'free', labelKey: 'Free' },
-  { value: 'original', labelKey: 'Original' },
-  { value: 'square', labelKey: 'Square', ratio: 1 },
-  { value: '3:2', label: '3:2', ratio: 3 / 2 },
-  { value: '2:3', label: '2:3', ratio: 2 / 3 },
-  { value: '4:3', label: '4:3', ratio: 4 / 3 },
-  { value: '3:4', label: '3:4', ratio: 3 / 4 },
-  { value: '5:4', label: '5:4', ratio: 5 / 4 },
-  { value: '4:5', label: '4:5', ratio: 4 / 5 },
-  { value: '16:9', label: '16:9', ratio: 16 / 9 },
-  { value: '9:16', label: '9:16', ratio: 9 / 16 },
-];
-
-export const DEFAULT_CROP_STATE: CropState = {
-  cropperX: 0,
-  cropperY: 0,
-  cropperWidth: 0,
-  cropperHeight: 0,
-  aspectRatio: 'free',
-  rotation: 0,
-  quarterTurns: 0,
-  flipH: false,
-};
-
-export interface CropAction {
-  type: 'crop';
-  previousState: CropState;
-}
+import useWindow from '../../../../hooks/useWindow';
 
 const MIN_CROP_SIZE = 50;
 const MIN_ROTATION = -90;
 const MAX_ROTATION = 90;
-
-function computeCenteredCrop(effW: number, effH: number, ratioValue: number | undefined) {
-  let width: number;
-  let height: number;
-
-  if (!ratioValue) {
-    width = effW;
-    height = effH;
-  } else if (effW / effH > ratioValue) {
-    height = effH;
-    width = effH * ratioValue;
-  } else {
-    width = effW;
-    height = effW / ratioValue;
-  }
-
-  return {
-    cropperX: (effW - width) / 2,
-    cropperY: (effH - height) / 2,
-    cropperWidth: width,
-    cropperHeight: height,
-  };
-}
+const QUARTER_TURNS_IN_TURN = 4;
 
 interface UseCropperOptions {
-  imageRef: React.RefObject<HTMLImageElement | undefined>;
-  displaySize: { width: number; height: number };
-  getDisplayScale: () => number;
+  sourceSize?: Size;
+  displayScale: number;
   getDisplayCoordinates: (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => { x: number; y: number };
-  onAction: (action: CropAction) => void;
-  cropState: CropState;
-  setCropState: (value: CropState | ((prev: CropState) => CropState)) => void;
+  lockedAspectRatio?: number;
+  getCrop: () => CropState;
+  onPreview: (crop: CropState) => void;
+  onCommit: (crop: CropState) => void;
 }
 
 export default function useCropper({
-  imageRef,
-  displaySize,
-  getDisplayScale,
+  sourceSize,
+  displayScale,
   getDisplayCoordinates,
-  onAction,
-  cropState,
-  setCropState,
+  lockedAspectRatio,
+  getCrop,
+  onPreview,
+  onCommit,
 }: UseCropperOptions) {
+  const renderingWindow = useWindow();
+  const getRatio = (crop: CropState, quarterTurns = crop.quarterTurns) => (
+    lockedAspectRatio ?? getAspectRatioValue(crop.aspectRatio, sourceSize!, quarterTurns)
+  );
+
   const cropperDragStartRef = useRef<{
     startX: number;
     startY: number;
@@ -117,57 +49,62 @@ export default function useCropper({
     cropperHeight: number;
   }>();
 
-  const cropStateRef = useRef<CropState>(DEFAULT_CROP_STATE);
-  cropStateRef.current = cropState;
-
-  const getAspectRatioValue = useLastCallback((ratio: AspectRatio): number | undefined => {
-    if (ratio === 'free') return undefined;
-    if (ratio === 'original' && imageRef.current) {
-      const { width: effW, height: effH } = getEffectiveDimensions(
-        imageRef.current.width, imageRef.current.height, cropStateRef.current.quarterTurns,
-      );
-      return effW / effH;
-    }
-    const option = ASPECT_RATIOS.find((r) => r.value === ratio);
-    return option?.ratio;
-  });
-
   const setupDragListeners = (
     onMove: (ev: MouseEvent | TouchEvent) => void,
     onUp: () => void,
   ) => {
+    const targetDocument = renderingWindow.document;
     const handleUp = () => {
       onUp();
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('mouseup', handleUp);
-      document.removeEventListener('touchend', handleUp);
+      targetDocument.removeEventListener('mousemove', onMove);
+      targetDocument.removeEventListener('touchmove', onMove);
+      targetDocument.removeEventListener('mouseup', handleUp);
+      targetDocument.removeEventListener('touchend', handleUp);
+      targetDocument.removeEventListener('touchcancel', handleUp);
     };
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('touchmove', onMove);
-    document.addEventListener('mouseup', handleUp);
-    document.addEventListener('touchend', handleUp);
+    targetDocument.addEventListener('mousemove', onMove);
+    targetDocument.addEventListener('touchmove', onMove);
+    targetDocument.addEventListener('mouseup', handleUp);
+    targetDocument.addEventListener('touchend', handleUp);
+    targetDocument.addEventListener('touchcancel', handleUp);
   };
 
-  const handleCropperDragStart = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
-    const img = imageRef.current;
-    if (!img || displaySize.width === 0) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
+  const startDrag = (e: React.MouseEvent | React.TouchEvent) => {
     const { x, y } = getDisplayCoordinates(e);
-    const displayScale = getDisplayScale();
+    const crop = getCrop();
 
     cropperDragStartRef.current = {
       startX: x,
       startY: y,
-      cropperX: cropState.cropperX,
-      cropperY: cropState.cropperY,
-      cropperWidth: cropState.cropperWidth,
-      cropperHeight: cropState.cropperHeight,
+      cropperX: crop.cropperX,
+      cropperY: crop.cropperY,
+      cropperWidth: crop.cropperWidth,
+      cropperHeight: crop.cropperHeight,
     };
+  };
+
+  const handleDragEnd = () => {
+    const startState = cropperDragStartRef.current;
+    cropperDragStartRef.current = undefined;
+    if (!startState) return;
+
+    const crop = getCrop();
+    if (startState.cropperX !== crop.cropperX
+      || startState.cropperY !== crop.cropperY
+      || startState.cropperWidth !== crop.cropperWidth
+      || startState.cropperHeight !== crop.cropperHeight) {
+      onCommit(crop);
+    }
+  };
+
+  const handleCropperDragStart = useLastCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!sourceSize || !displayScale) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    startDrag(e);
 
     const handleMove = (ev: MouseEvent | TouchEvent) => {
       if (!cropperDragStartRef.current) return;
@@ -182,58 +119,30 @@ export default function useCropper({
       const newCropperX = cropperDragStartRef.current.cropperX + imageDeltaX;
       const newCropperY = cropperDragStartRef.current.cropperY + imageDeltaY;
 
+      const crop = getCrop();
       const { width: effW, height: effH } = getEffectiveDimensions(
-        img.width, img.height, cropStateRef.current.quarterTurns,
+        sourceSize.width, sourceSize.height, crop.quarterTurns,
       );
       const constrainedX = clamp(newCropperX, 0, effW - cropperDragStartRef.current.cropperWidth);
       const constrainedY = clamp(newCropperY, 0, effH - cropperDragStartRef.current.cropperHeight);
 
-      setCropState((prev) => ({
-        ...prev,
+      onPreview({
+        ...crop,
         cropperX: constrainedX,
         cropperY: constrainedY,
-      }));
+      });
     };
 
-    const handleUp = () => {
-      if (cropperDragStartRef.current) {
-        const startState = cropperDragStartRef.current;
-        if (startState.cropperX !== cropStateRef.current.cropperX
-          || startState.cropperY !== cropStateRef.current.cropperY) {
-          const previousState: CropState = {
-            ...cropStateRef.current,
-            cropperX: startState.cropperX,
-            cropperY: startState.cropperY,
-            cropperWidth: startState.cropperWidth,
-            cropperHeight: startState.cropperHeight,
-          };
-          onAction({ type: 'crop', previousState });
-        }
-      }
-      cropperDragStartRef.current = undefined;
-    };
-
-    setupDragListeners(handleMove, handleUp);
+    setupDragListeners(handleMove, handleDragEnd);
   });
 
   const handleCornerResizeStart = useLastCallback((e: React.MouseEvent | React.TouchEvent, handle: ResizeHandle) => {
-    const img = imageRef.current;
-    if (!img || displaySize.width === 0) return;
+    if (!sourceSize || !displayScale) return;
 
     e.preventDefault();
     e.stopPropagation();
 
-    const { x, y } = getDisplayCoordinates(e);
-    const displayScale = getDisplayScale();
-
-    cropperDragStartRef.current = {
-      startX: x,
-      startY: y,
-      cropperX: cropState.cropperX,
-      cropperY: cropState.cropperY,
-      cropperWidth: cropState.cropperWidth,
-      cropperHeight: cropState.cropperHeight,
-    };
+    startDrag(e);
 
     const handleMove = (ev: MouseEvent | TouchEvent) => {
       if (!cropperDragStartRef.current) return;
@@ -246,226 +155,125 @@ export default function useCropper({
       const imageDeltaY = displayDeltaY / displayScale;
 
       const startState = cropperDragStartRef.current;
+      const crop = getCrop();
       const { width: effW, height: effH } = getEffectiveDimensions(
-        img.width, img.height, cropStateRef.current.quarterTurns,
+        sourceSize.width, sourceSize.height, crop.quarterTurns,
       );
-      let newX = startState.cropperX;
-      let newY = startState.cropperY;
-      let newWidth = startState.cropperWidth;
-      let newHeight = startState.cropperHeight;
+      const isLeftHandle = handle === 'topLeft' || handle === 'bottomLeft';
+      const isTopHandle = handle === 'topLeft' || handle === 'topRight';
+      const ratioValue = getRatio(crop);
 
-      const ratioValue = getAspectRatioValue(cropStateRef.current.aspectRatio);
-
-      if (handle === 'topLeft') {
-        newX = startState.cropperX + imageDeltaX;
-        newY = startState.cropperY + imageDeltaY;
-        newWidth = startState.cropperWidth - imageDeltaX;
-        newHeight = startState.cropperHeight - imageDeltaY;
-      } else if (handle === 'topRight') {
-        newY = startState.cropperY + imageDeltaY;
-        newWidth = startState.cropperWidth + imageDeltaX;
-        newHeight = startState.cropperHeight - imageDeltaY;
-      } else if (handle === 'bottomLeft') {
-        newX = startState.cropperX + imageDeltaX;
-        newWidth = startState.cropperWidth - imageDeltaX;
-        newHeight = startState.cropperHeight + imageDeltaY;
-      } else if (handle === 'bottomRight') {
-        newWidth = startState.cropperWidth + imageDeltaX;
-        newHeight = startState.cropperHeight + imageDeltaY;
-      }
+      let newWidth = startState.cropperWidth + (isLeftHandle ? -imageDeltaX : imageDeltaX);
+      let newHeight = startState.cropperHeight + (isTopHandle ? -imageDeltaY : imageDeltaY);
 
       if (ratioValue) {
-        const currentRatio = newWidth / newHeight;
-        if (currentRatio > ratioValue) {
-          const adjustedWidth = newHeight * ratioValue;
-          if (handle === 'topLeft' || handle === 'bottomLeft') {
-            newX += (newWidth - adjustedWidth);
-          }
-          newWidth = adjustedWidth;
+        if (newWidth / newHeight > ratioValue) {
+          newWidth = newHeight * ratioValue;
         } else {
-          const adjustedHeight = newWidth / ratioValue;
-          if (handle === 'topLeft' || handle === 'topRight') {
-            newY += (newHeight - adjustedHeight);
-          }
-          newHeight = adjustedHeight;
+          newHeight = newWidth / ratioValue;
         }
       }
 
       if (newWidth < MIN_CROP_SIZE) {
-        if (handle === 'topLeft' || handle === 'bottomLeft') {
-          newX -= (MIN_CROP_SIZE - newWidth);
-        }
         newWidth = MIN_CROP_SIZE;
         if (ratioValue) newHeight = MIN_CROP_SIZE / ratioValue;
       }
       if (newHeight < MIN_CROP_SIZE) {
-        if (handle === 'topLeft' || handle === 'topRight') {
-          newY -= (MIN_CROP_SIZE - newHeight);
-        }
         newHeight = MIN_CROP_SIZE;
         if (ratioValue) newWidth = MIN_CROP_SIZE * ratioValue;
       }
 
-      // Clamp to image bounds, keeping the opposite edge fixed
-      const rightEdge = newX + newWidth;
-      const bottomEdge = newY + newHeight;
+      // Clamp to image bounds, keeping the opposite corner fixed
+      const anchorX = isLeftHandle ? startState.cropperX + startState.cropperWidth : startState.cropperX;
+      const anchorY = isTopHandle ? startState.cropperY + startState.cropperHeight : startState.cropperY;
+      const maxWidth = isLeftHandle ? anchorX : effW - anchorX;
+      const maxHeight = isTopHandle ? anchorY : effH - anchorY;
 
-      if (handle === 'topLeft' || handle === 'bottomLeft') {
-        newX = Math.max(0, newX);
-        newWidth = rightEdge - newX;
+      if (ratioValue) {
+        const fitScale = Math.min(1, maxWidth / newWidth, maxHeight / newHeight);
+        newWidth *= fitScale;
+        newHeight *= fitScale;
       } else {
-        newWidth = Math.min(newWidth, effW - newX);
+        newWidth = Math.min(newWidth, maxWidth);
+        newHeight = Math.min(newHeight, maxHeight);
       }
 
-      if (handle === 'topLeft' || handle === 'topRight') {
-        newY = Math.max(0, newY);
-        newHeight = bottomEdge - newY;
-      } else {
-        newHeight = Math.min(newHeight, effH - newY);
-      }
-
-      setCropState((prev) => ({
-        ...prev,
-        cropperX: newX,
-        cropperY: newY,
+      onPreview({
+        ...crop,
+        cropperX: isLeftHandle ? anchorX - newWidth : anchorX,
+        cropperY: isTopHandle ? anchorY - newHeight : anchorY,
         cropperWidth: newWidth,
         cropperHeight: newHeight,
-      }));
+      });
     };
 
-    const handleUp = () => {
-      if (cropperDragStartRef.current) {
-        const startState = cropperDragStartRef.current;
-        if (startState.cropperX !== cropStateRef.current.cropperX
-          || startState.cropperY !== cropStateRef.current.cropperY
-          || startState.cropperWidth !== cropStateRef.current.cropperWidth
-          || startState.cropperHeight !== cropStateRef.current.cropperHeight) {
-          const previousState: CropState = {
-            ...cropStateRef.current,
-            cropperX: startState.cropperX,
-            cropperY: startState.cropperY,
-            cropperWidth: startState.cropperWidth,
-            cropperHeight: startState.cropperHeight,
-          };
-          onAction({ type: 'crop', previousState });
-        }
-      }
-      cropperDragStartRef.current = undefined;
-    };
-
-    setupDragListeners(handleMove, handleUp);
+    setupDragListeners(handleMove, handleDragEnd);
   });
 
-  const handleAspectRatioChange = useLastCallback((newRatio: AspectRatio) => {
-    const img = imageRef.current;
-    if (!img) return;
-
-    const previousState = { ...cropStateRef.current };
-    const { width: effW, height: effH } = getEffectiveDimensions(
-      img.width, img.height, cropStateRef.current.quarterTurns,
-    );
-
-    setCropState({
-      ...cropStateRef.current,
-      aspectRatio: newRatio,
-      ...computeCenteredCrop(effW, effH, getAspectRatioValue(newRatio)),
-    });
-    onAction({ type: 'crop', previousState });
-  });
-
-  const initCropState = useLastCallback((width: number, height: number) => {
-    setCropState({
-      aspectRatio: 'free',
-      cropperX: 0,
-      cropperY: 0,
-      cropperWidth: width,
-      cropperHeight: height,
-      rotation: 0,
-      quarterTurns: 0,
-      flipH: false,
-    });
-  });
-
-  const getCroppedRegion = useLastCallback(() => {
-    const { cropperX, cropperY, cropperWidth, cropperHeight } = cropStateRef.current;
-    return {
-      x: cropperX,
-      y: cropperY,
-      width: cropperWidth,
-      height: cropperHeight,
-    };
-  });
-
-  const rotationStartStateRef = useRef<CropState | undefined>();
+  const isRotatingRef = useRef(false);
 
   const handleRotationChange = useLastCallback((value: number) => {
-    const img = imageRef.current;
-    if (!img) return;
+    if (!sourceSize) return;
 
-    if (!rotationStartStateRef.current) {
-      rotationStartStateRef.current = { ...cropStateRef.current };
-    }
+    isRotatingRef.current = true;
 
+    const crop = getCrop();
     const { width: effW, height: effH } = getEffectiveDimensions(
-      img.width, img.height, cropStateRef.current.quarterTurns,
+      sourceSize.width, sourceSize.height, crop.quarterTurns,
     );
 
-    setCropState({
-      ...cropStateRef.current,
+    onPreview({
+      ...crop,
       rotation: clamp(value, MIN_ROTATION, MAX_ROTATION),
-      ...computeCenteredCrop(effW, effH, getAspectRatioValue(cropStateRef.current.aspectRatio)),
+      ...computeCenteredCrop(effW, effH, getRatio(crop)),
     });
   });
 
   const handleRotationChangeEnd = useLastCallback(() => {
-    if (rotationStartStateRef.current) {
-      onAction({ type: 'crop', previousState: rotationStartStateRef.current });
-      rotationStartStateRef.current = undefined;
+    if (isRotatingRef.current) {
+      isRotatingRef.current = false;
+      onCommit(getCrop());
     }
   });
 
   const handleQuarterRotate = useLastCallback(() => {
-    const img = imageRef.current;
-    if (!img) return;
+    if (!sourceSize) return;
 
-    const previousState = { ...cropStateRef.current };
-    const newQuarterTurns = (cropStateRef.current.quarterTurns + 1) % 4;
+    const crop = getCrop();
+    const newQuarterTurns = (crop.quarterTurns + 1) % QUARTER_TURNS_IN_TURN;
     const { width: newEffW, height: newEffH } = getEffectiveDimensions(
-      img.width, img.height, newQuarterTurns,
+      sourceSize.width, sourceSize.height, newQuarterTurns,
     );
 
-    setCropState({
-      ...cropStateRef.current,
+    onCommit({
+      ...crop,
       quarterTurns: newQuarterTurns,
       rotation: 0,
-      ...computeCenteredCrop(newEffW, newEffH, getAspectRatioValue(cropStateRef.current.aspectRatio)),
+      ...computeCenteredCrop(newEffW, newEffH, getRatio(crop, newQuarterTurns)),
     });
-    onAction({ type: 'crop', previousState });
   });
 
+  // Mirrors the result on screen, which in source space also reverses the rotation
   const handleFlip = useLastCallback(() => {
-    const img = imageRef.current;
-    if (!img) return;
+    if (!sourceSize) return;
 
-    const previousState = { ...cropStateRef.current };
+    const crop = getCrop();
     const { width: effW } = getEffectiveDimensions(
-      img.width, img.height, cropStateRef.current.quarterTurns,
+      sourceSize.width, sourceSize.height, crop.quarterTurns,
     );
 
-    setCropState({
-      ...cropStateRef.current,
-      flipH: !cropStateRef.current.flipH,
-      cropperX: effW - cropStateRef.current.cropperX - cropStateRef.current.cropperWidth,
+    onCommit({
+      ...crop,
+      flipH: !crop.flipH,
+      rotation: -crop.rotation,
+      quarterTurns: (QUARTER_TURNS_IN_TURN - crop.quarterTurns) % QUARTER_TURNS_IN_TURN,
+      cropperX: effW - crop.cropperX - crop.cropperWidth,
     });
-    onAction({ type: 'crop', previousState });
   });
 
   return {
-    getCroppedRegion,
-    initCropState,
     handleCropperDragStart,
     handleCornerResizeStart,
-    handleAspectRatioChange,
     handleRotationChange,
     handleRotationChangeEnd,
     handleQuarterRotate,

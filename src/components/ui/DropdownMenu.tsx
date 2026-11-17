@@ -3,7 +3,7 @@ import {
   useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { IAnchorPosition } from '../../types';
+import type { MenuPositionOptions } from '../../hooks/useMenuPosition';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -19,7 +19,7 @@ type OwnProps = {
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   transformOriginX?: number;
   transformOriginY?: number;
-  positionX?: 'left' | 'right';
+  positionX?: 'left' | 'right' | 'center';
   positionY?: 'top' | 'bottom';
   footer?: string;
   forceOpen?: boolean;
@@ -57,14 +57,8 @@ const DropdownMenu = ({
   const menuRef = useRef<HTMLDivElement>();
   const triggerRef = useRef<HTMLDivElement>();
   const [isOpen, setIsOpen] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>();
 
   const toggleIsOpen = () => {
-    if (!isOpen && withPortal && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setMenuAnchor({ x: rect.left, y: rect.bottom });
-    }
-
     setIsOpen(!isOpen);
 
     if (isOpen) {
@@ -81,7 +75,7 @@ const DropdownMenu = ({
       return;
     }
 
-    const focusedElement = document.activeElement;
+    const focusedElement = menu.ownerDocument.activeElement;
     const elementChildren = Array.from(menu.children);
 
     if (!focusedElement || elementChildren.indexOf(focusedElement) === -1) {
@@ -111,9 +105,26 @@ const DropdownMenu = ({
   }, [trigger, lang]);
 
   const getTriggerElement = useLastCallback(() => triggerRef.current);
-  const getRootElement = useLastCallback(() => document.body);
+  const getAnchor = useLastCallback(() => {
+    const rect = triggerRef.current!.getBoundingClientRect();
+    return { x: rect.left, y: positionY === 'bottom' ? rect.top : rect.bottom };
+  });
+  const getRootElement = useLastCallback(() => triggerRef.current?.ownerDocument.documentElement);
   const getMenuElement = useLastCallback(() => menuRef.current);
   const getLayout = useLastCallback(() => ({ withPortal: true }));
+  const positionOptions: MenuPositionOptions = withPortal ? {
+    anchor: getAnchor,
+    positionY,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  } : {
+    positionX,
+    positionY,
+    transformOriginX,
+    transformOriginY,
+  };
 
   return (
     <div
@@ -129,23 +140,13 @@ const DropdownMenu = ({
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
         bubbleClassName={bubbleClassName || ''}
-        transformOriginX={transformOriginX}
-        transformOriginY={transformOriginY}
-        positionX={positionX}
-        positionY={positionY}
+        {...positionOptions}
         footer={footer}
         autoClose={autoClose}
         withPortal={withPortal}
         onClose={handleClose}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}
-        {...(withPortal && menuAnchor ? {
-          anchor: menuAnchor,
-          getTriggerElement,
-          getRootElement,
-          getMenuElement,
-          getLayout,
-        } : undefined)}
       >
         {children}
       </Menu>

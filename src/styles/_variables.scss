@@ -27,7 +27,7 @@
 
   $color-text-green: #4fae4e;
   $color-green: #00c73e;
-  $color-light-green: #eeffde;
+  $color-light-green: #e1ffc7;
 
   $color-error: #e53935;
 
@@ -52,7 +52,6 @@
   $color-item-active: #ededed;
   $color-chat-hover: #f4f4f5;
   $color-chat-active: #3390ec;
-  $color-selection: #3993fb;
 
   $color-message-reaction: #ebf3fd;
   $color-message-reaction-hover: #c5def9;
@@ -72,6 +71,7 @@
     --color-background-compact-menu-reactions: #FFFFFFEB;
     --color-background-compact-menu-hover: #000000B2;
     --color-background-menu-separator: #0000001a;
+    --color-web-app-placeholder: #EFEFF4;
     --color-background-selected: #f4f4f5;
     --color-background-secondary: #f4f4f5;
     --color-background-secondary-accent: #e4e4e5;
@@ -80,6 +80,11 @@
     --color-background-own-selected: #{color.adjust($color-light-green, $lightness: -10%, $space: hsl)};
     --color-text: #{$color-black};
     --color-text-rgb: #{toRGB($color-black)};
+    --color-text-own: var(--color-text);
+    --color-text-own-rgb: var(--color-text-rgb);
+    --color-text-secondary-own: var(--color-text-secondary);
+    --color-text-secondary-own-rgb: var(--color-text-secondary-rgb);
+    --color-poll-check-own: var(--color-white);
     --color-text-lighter: #{$color-dark-gray};
     --color-text-secondary: #{$color-text-secondary};
     --color-icon-secondary: #{$color-text-secondary};
@@ -109,6 +114,7 @@
     --color-voice-transcribe-button-own: #cceebf;
 
     --color-primary: #{$color-primary};
+    --color-primary-foreground: #{$color-white};
     --color-primary-shade: #{color.mix($color-primary, $color-black, 92%)};
     --color-primary-shade-darker: #{color.mix($color-primary, $color-black, 84%)};
     --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
@@ -128,6 +134,8 @@
     --color-green-rgb: #{toRGB($color-green)};
 
     --color-error: #{$color-error};
+    --color-error-background: #b3261e;
+    --color-error-foreground: #{$color-white};
     --color-error-shade: #{color.mix($color-error, $color-black, 92%)};
     --color-error-rgb: #{toRGB($color-error)};
 
@@ -152,6 +160,50 @@
     --color-code-own: #3c7940;
     --color-code-own-bg: #{rgba($color-text-secondary, 0.08)};
 
+    @each $direction in incoming, outgoing {
+      --message-#{$direction}-text: #000000;
+      --message-#{$direction}-text-rgb: 0, 0, 0;
+      --message-#{$direction}-secondary: #404040;
+      --message-#{$direction}-secondary-rgb: 64, 64, 64;
+      --message-#{$direction}-meta: #404040;
+      --message-#{$direction}-meta-rgb: 64, 64, 64;
+      --message-#{$direction}-links: #000000;
+      --message-#{$direction}-links-decoration: underline;
+      --message-#{$direction}-links-decoration-hover: none;
+      --message-#{$direction}-accent: #000000;
+      --message-#{$direction}-accent-rgb: 0, 0, 0;
+      --message-#{$direction}-accent-foreground: #ffffff;
+      --message-#{$direction}-control: var(--color-primary);
+      --message-#{$direction}-control-foreground: #ffffff;
+      --message-#{$direction}-file-title: var(--color-text);
+      --message-#{$direction}-file-description: var(--color-text-secondary);
+      --message-#{$direction}-checkbox-fill: var(--color-primary);
+      --message-#{$direction}-checkbox-foreground: #ffffff;
+      --message-#{$direction}-table-background: #0000000d;
+      --message-#{$direction}-table-border: #0000001a;
+      --message-#{$direction}-tint: #0000001f;
+      --message-#{$direction}-tint-hover: #0000003d;
+      --message-#{$direction}-ripple: #ffffff14;
+      --message-#{$direction}-selected-text: #000000;
+      --message-#{$direction}-error: #000000;
+      --message-#{$direction}-error-background: #b3261e;
+      --message-#{$direction}-error-foreground: #ffffff;
+      --message-#{$direction}-code-dark: 0;
+    }
+
+    --message-incoming-background: #ffffff;
+    --message-incoming-selected: #e6e6e6;
+    --message-outgoing-background: #{$color-light-green};
+    --message-outgoing-selected: #cbe6b3;
+    --message-outgoing-text-selection: #bbde9f;
+    --message-outgoing-text-selection-emoji: #bbde9fb3;
+    --message-service-background: var(--action-message-bg);
+    --message-service-text: #ffffff;
+    --message-call-success: #63da6e;
+    --message-media-background: #000000b3;
+    --message-media-text: #ffffff;
+    --message-code-dark: 0;
+
     --color-accent-own: #{$color-text-green};
     --color-accent-own-rgb: #{toRGB($color-text-green)};
     --color-message-meta-own: #{$color-text-green};
@@ -173,10 +225,6 @@
     --color-reply-own-hover: #{blend-normal(rgba($color-text-green, 0.12), $color-light-green)};
     --color-reply-own-active: #{blend-normal(rgba($color-text-green, 0.24), $color-light-green)};
 
-    --color-background-own-apple: #dcf8c5;
-    --color-reply-own-hover-apple: #cbefb7;
-    --color-reply-own-active-apple: #bae6a8;
-
     --color-white: #{$color-white};
     --color-gray: #{$color-gray};
 
@@ -186,8 +234,8 @@
     --color-item-hover: #{$color-item-hover};
     --color-item-active: #{$color-item-active};
 
-    --color-selection-highlight: #{$color-selection};
-    --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, 0.7);
+    --color-text-selection: rgba(#{toRGB($color-primary)}, 0.3);
+    --color-selection-highlight-emoji: var(--color-text-selection);
 
     --color-avatar-story-unread-from: #34c578;
     --color-avatar-story-unread-to: #3ca3f3;
@@ -252,7 +300,7 @@
     --right-column-content-width: calc(var(--right-column-width) - var(--right-column-padding));
     --middle-panel-inline-padding: 1rem;
     --chat-list-inline-inset: 0.5rem;
-    --folders-sidebar-width: 5rem;
+    --folders-sidebar-width: 4.5rem;
     --window-controls-width: 0rem;
     --middle-header-height: 3rem;
     --middle-header-gap: 0.5rem;

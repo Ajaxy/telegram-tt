@@ -23,12 +23,12 @@ import appStyles from '../App.module.scss';
 import styles from './UiLoader.module.scss';
 
 import starIconPath from '../../assets/icons/star/star.webp';
-import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 import spoilerMaskPath from '../../assets/spoilers/mask.svg';
 import telegramLogoPath from '../../assets/telegram-logo.svg';
 import pausePreviewPath from '../../assets/tgs-previews/Pause.svg';
 import playPreviewPath from '../../assets/tgs-previews/Play.svg';
+import lockPreviewPath from '../../assets/tgs-previews/settings/Lock.avif';
 
 export type UiLoaderPage =
   'main'
@@ -175,6 +175,7 @@ const UiLoader = ({
       {children}
       {shouldRenderMask && (isReloading || !shouldSkipHistoryAnimations) && Boolean(page) && (
         <div className={buildClassName(styles.mask, isReloading && styles.outgoing, transitionClassNames)}>
+          {page === 'main' && <div className={buildClassName('wallpaper-snapshot', styles.wallpaper)} aria-hidden />}
           {page === 'main' ? (
             <div className={buildClassName(styles.main, isFoldersSidebarShown && styles.foldersSidebarVisible)}>
               {isFoldersSidebarShown && <div className={styles.foldersSidebar} />}

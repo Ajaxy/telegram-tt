@@ -1,4 +1,5 @@
-import type { DiamondDrawState } from './model';
+import type { DiamondLens } from './lensGpu';
+import type { DiamondDrawState, DiamondPalette } from './model';
 import type { StarBurst } from './stars';
 
 import DiamondMotion from './motion';
@@ -17,6 +18,9 @@ type StandaloneDiamondOptions = {
   sway?: number;
   // Share of a full salute, 0..1
   burstSize?: number;
+  // Light stars for a colored backdrop, as the iOS card has
+  areStarsLight?: boolean;
+  palette?: DiamondPalette;
   onReady?: NoneToVoidFunction;
   onFallback?: NoneToVoidFunction;
 };
@@ -38,6 +42,8 @@ export default class StandaloneDiamond {
   // Device pixels
   readonly frameSize: number;
 
+  readonly palette: DiamondPalette;
+
   motion = new DiamondMotion();
 
   drawState: DiamondDrawState = {};
@@ -53,17 +59,21 @@ export default class StandaloneDiamond {
 
   burstSize: number;
 
+  readonly areStarsLight?: boolean;
+
   starOpacity = 1;
 
   isPaused = false;
 
   isStoneHidden = false;
 
+  lens?: DiamondLens;
+
   onReady?: NoneToVoidFunction;
 
   onFallback?: NoneToVoidFunction;
 
-  private readonly canvasSize: number;
+  readonly canvasSize: number;
 
   private targetScale = 1;
 
@@ -80,9 +90,11 @@ export default class StandaloneDiamond {
     this.canvas = canvas;
     this.canvasSize = options.canvasSize;
     this.frameSize = options.size * pixelRatio;
+    this.palette = options.palette ?? 'icon';
     this.speed = options.speed ?? 0;
     this.motion.swayScale = options.sway ?? 1;
     this.burstSize = options.burstSize ?? 1;
+    this.areStarsLight = options.areStarsLight;
     this.onReady = options.onReady;
     this.onFallback = options.onFallback;
 

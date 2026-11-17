@@ -1,0 +1,75 @@
+.address {
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+
+  font-size: 1.125rem;
+  line-height: 1.5;
+
+  background-color: var(--color-background-secondary);
+}
+
+// The loading content of `Button` swaps the label for a longer text and a larger spinner, which resizes the button. A
+// small spinner next to the label keeps its size.
+.moveSpinner {
+  --spinner-size: 1.125rem;
+
+  display: inline-flex;
+  margin-inline-start: 0.5rem;
+  vertical-align: text-bottom;
+}
+
+.error {
+  margin-top: 1rem;
+  margin-bottom: 0;
+
+  font-size: 0.875rem;
+  color: var(--color-error);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+// `Transition` keeps the container at the height of the confirmation. The password slide stretches to that height,
+// so the window does not jump and the button stays at the bottom.
+.slide:has(> .passwordSlide) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.passwordSlide {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+// The form's elements become items of the slide, so the error can go between the description and the pinned button
+.passwordForm {
+  display: contents;
+
+  :global(.Button) {
+    order: 2;
+    margin-top: auto;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// The error takes the free space above itself, so the button must not split it
+.withError .passwordForm :global(.Button) {
+  margin-top: 0;
+}
+
+// The gap to the button repeats the one under it: its own bottom margin plus the modal content padding
+.passwordError {
+  order: 1;
+  margin-top: auto;
+  margin-bottom: 1.6875rem;
+}
+
+.bottomButton {
+  margin-top: auto;
+  margin-bottom: 0.5rem;
+}
+
+.noPassword {
+  font-weight: var(--font-weight-semibold);
+}

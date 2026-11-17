@@ -14,7 +14,6 @@ import { clearMemoryCache } from '../../../util/mediaLoader';
 import {
   ACCOUNT_SLOT, getAccountSlots, getAccountSlotUrl, loadSlotSession,
 } from '../../../util/multiaccount';
-import { unsubscribe } from '../../../util/notifications';
 import { parseJsonWithBigInt } from '../../../util/numbers';
 import {
   abortPasscodeDisable,
@@ -66,8 +65,10 @@ import {
   enableEncryptedSessionStore,
   resetSessionStore,
 } from '../../../util/passcode/sessionStore';
+import {
+  clearPrivatePushNotifications, reconcilePushNotifications, refreshPushNotificationState, suspendPushForPasscode,
+} from '../../../util/pushNotifications';
 import { getPendingWebLogin } from '../../../util/routing';
-import { pause } from '../../../util/schedulers';
 import { clearAllStoredSessions, storeSession, updateSessionUserId } from '../../../util/sessions';
 import {
   clearLockScreenWallpaperBlobs,
@@ -75,9 +76,10 @@ import {
   encryptWallpaperBlobs,
   restoreWallpaperBlobsFromPasscode,
   syncLockScreenWallpaperBlobs,
-} from '../../../util/wallpaperStorage';
+} from '../../../util/wallpaper/storage';
 import { interruptWebLogin } from '../../../util/webLogin';
 import { handoffWebLogin } from '../../../util/webLoginHandoff';
+import { flushWidgetStorage } from '../../../util/widgetStorage';
 import { closeApi } from '../../../api/gramjs';
 import {
   cacheGlobalForSlot,
@@ -94,7 +96,7 @@ import {
 import { INITIAL_GLOBAL_STATE } from '../../initialState';
 import { clearGlobalForLockScreen, clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 import { updateWallet } from '../../reducers/wallet';
-import { selectTabState } from '../../selectors';
+import { selectGlobalWallpaperBackgrounds, selectTabState } from '../../selectors';
 
 const WRONG_PASSCODE_ERROR: RegularLangFnParameters = { key: 'PasscodeWrong' };
 const TOO_MANY_ATTEMPTS_ERROR: RegularLangFnParameters = { key: 'PasscodeTooManyAttempts' };
@@ -104,7 +106,6 @@ const SOMETHING_WENT_WRONG_ERROR: RegularLangFnParameters = { key: 'SomethingWen
 const MAX_INVALID_ATTEMPTS = 5;
 const INVALID_ATTEMPTS_TIMEOUT_BASE_MS = 30 * 1000;
 const INVALID_ATTEMPTS_TIMEOUT_MAX_MS = 5 * 60 * 1000;
-const API_TEARDOWN_TIMEOUT_MS = 3000;
 
 let apiTeardownPromise: Promise<void> | undefined;
 
@@ -116,6 +117,7 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
 
   setPasscodeSettings({ isLoading: true });
   try {
+    if (!global.passcode.hasPasscode) await suspendPushForPasscode();
     await requestPasscodeStateLock(async () => {
       const meta = await loadPasscodeMeta();
       if (meta) {
@@ -138,6 +140,8 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
       await finishPasscodeSetup(context);
     });
 
+    await refreshPushNotificationState().catch(logPasscodeWarning);
+
     setPasscodeSettings({
       hasPasscode: true,
       hasPasskey: false,
@@ -145,6 +149,7 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
       isLoading: false,
     });
     forceUpdateCache();
+    void reconcilePushNotifications();
     if (hadPasskey) {
       actions.showNotification({ message: { key: 'PasscodePasskeyRemovedChange' }, tabId });
     }
@@ -158,7 +163,9 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
       localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
     }
 
+    await refreshPushNotificationState().catch(logPasscodeWarning);
     setPasscodeSettings({ isLoading: false });
+    void reconcilePushNotifications();
 
     actions.showNotification({
       message: { key: 'SomethingWentWrong' },
@@ -259,11 +266,14 @@ addActionHandler('clearPasscode', async (global, actions, payload): Promise<void
   global = clearPasscodeSettings(global);
   setGlobal(global);
   forceUpdateCache();
+  void reconcilePushNotifications();
   actions.openSettingsScreen({ screen: SettingsScreens.Privacy, tabId: getCurrentTabId() });
 });
 
 addActionHandler('lockScreen', async (global): Promise<void> => {
   if (!global.passcode.hasPasscode || global.passcode.isScreenLocked) return;
+  // Widgets' writes still held go to the state, and their actions run before the vault takes it, after the awaits below
+  flushWidgetStorage();
   let shouldLockCurrentTab = false;
   let lockCurrentTabPromise: Promise<void> | undefined;
   try {
@@ -524,6 +534,8 @@ addActionHandler('setPasscodeAutolockDuration', async (global, actions, payload)
 });
 
 addActionHandler('onPasscodeStateChangedRemotely', async (global, actions, payload): Promise<void> => {
+  // A lock from another tab: as in `lockScreen`, this master tab's vault snapshot takes the widgets' writes
+  flushWidgetStorage();
   await requestPasscodeStateLock(async () => {
     const meta = await loadPasscodeMeta();
     global = getGlobal();
@@ -821,10 +833,7 @@ async function updateLockScreenWallpaperCache(global: GlobalState) {
 }
 
 async function syncSelectedLockScreenWallpaperBlobs(global: GlobalState) {
-  const selectedBackgrounds = Object.values(global.sharedState.settings.themes)
-    .map((themeSettings) => themeSettings?.background)
-    .filter((background): background is string => Boolean(background));
-  await syncLockScreenWallpaperBlobs(selectedBackgrounds);
+  await syncLockScreenWallpaperBlobs(selectGlobalWallpaperBackgrounds(global));
 }
 
 function logPasscodeWarning(err: unknown) {
@@ -1030,6 +1039,7 @@ async function lockCurrentTab() {
   });
 
   updateAppBadge(0);
+  await clearPrivatePushNotifications().catch(logPasscodeWarning);
   clearMemoryCache();
 
   setTimeout(() => {
@@ -1058,7 +1068,6 @@ function preparePasscodeForLock(generation?: string) {
 }
 
 async function teardownApi() {
-  await Promise.race([unsubscribe(), pause(API_TEARDOWN_TIMEOUT_MS)]).catch(() => undefined);
   await closeApi(true);
 }
 

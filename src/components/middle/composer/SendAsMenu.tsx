@@ -1,11 +1,15 @@
-import { memo, useEffect, useRef } from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../global';
+import { memo, useEffect, useMemo, useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { ApiSendAsPeerId } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
+import { isApiPeerUser } from '../../../global/helpers/peers';
+import { selectPeer } from '../../../global/selectors';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 
+import { useShallowSelector } from '../../../hooks/data/useSelector';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
@@ -36,11 +40,13 @@ const SendAsMenu = ({
   isCurrentUserPremium,
   onClose,
 }: OwnProps) => {
-  const { saveDefaultSendAs, showNotification } = getActions();
+  const { saveDefaultSendAs, showNotification, loadSendAs } = getActions();
 
-  // No need for expensive global updates on users and chats, so we avoid them
-  const usersById = getGlobal().users.byId;
-  const chatsById = getGlobal().chats.byId;
+  const peersSelector = useMemo(() => (global: GlobalState) => (
+    sendAsPeerIds?.map(({ id }) => selectPeer(global, id))
+  ), [sendAsPeerIds]);
+  const peers = useShallowSelector(peersSelector);
+  const hasMissingPeers = Boolean(peers?.some((peer) => !peer));
 
   const lang = useLang();
   const containerRef = useRef<HTMLDivElement>();
@@ -71,6 +77,13 @@ const SendAsMenu = ({
     containerRef.current?.querySelector<HTMLElement>('.focus')?.scrollIntoView({ block: 'nearest' });
   }, [selectedSendAsIndex]);
 
+  // Cached `sendAsPeerIds` can outlive the cached peers they point to
+  useEffect(() => {
+    if (isOpen && chatId && hasMissingPeers) {
+      loadSendAs({ chatId });
+    }
+  }, [isOpen, chatId, hasMissingPeers]);
+
   useEffect(() => {
     if (sendAsPeerIds && !sendAsPeerIds.length) {
       onClose();
@@ -92,10 +105,9 @@ const SendAsMenu = ({
       noCompact
     >
       <div className="send-as-title" dir="auto">{lang('SendMessageAsTitle')}</div>
-      {usersById && chatsById && sendAsPeerIds?.map(({ id, isPremium }, index) => {
-        const user = usersById[id];
-        const chat = chatsById[id];
-        const peer = user || chat;
+      {sendAsPeerIds?.map(({ id, isPremium }, index) => {
+        const peer = peers?.[index];
+        if (!peer) return undefined;
 
         const handleClick = () => {
           if (!isPremium || isCurrentUserPremium) {
@@ -133,11 +145,11 @@ const SendAsMenu = ({
               className={avatarClassName}
             />
             <div className="info">
-              {peer && <FullNameTitle peer={peer} noFake />}
+              <FullNameTitle peer={peer} noFake />
               <span className="subtitle">
-                {user
+                {isApiPeerUser(peer)
                   ? lang('VoipGroupPersonalAccount')
-                  : lang('Subscribers', { count: chat.membersCount || 0 }, { pluralValue: chat.membersCount || 0 })}
+                  : lang('Subscribers', { count: peer.membersCount || 0 }, { pluralValue: peer.membersCount || 0 })}
               </span>
             </div>
           </ListItem>

@@ -12,7 +12,7 @@
 
   color: var(--color-text);
 
-  background-color: var(--color-code-bg);
+  @include codeHighlight.code-surface;
 
   .code-title {
     overflow: hidden;
@@ -42,7 +42,7 @@
       white-space: pre;
     }
 
-    @include codeHighlight.code-highlight-theme(true);
+    @include codeHighlight.code-highlight-theme;
     @include codeHighlight.code-highlight-tokens;
 
     .hljs {

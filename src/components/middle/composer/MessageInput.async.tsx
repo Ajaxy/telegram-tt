@@ -12,7 +12,6 @@ const MessageInputAsync = (props: OwnProps) => {
     id,
     editableInputId,
     placeholder,
-    forcedPlaceholder,
     isNeedPremium,
   } = props;
   const MessageInput = useModuleLoader(Bundles.Editor, 'MessageInput');
@@ -37,21 +36,16 @@ const MessageInputAsync = (props: OwnProps) => {
               aria-labelledby={placeholderId}
               tabIndex={-1}
             />
-            {!forcedPlaceholder && (
-              <span
-                id={placeholderId}
-                className={buildClassName('placeholder-text', isNeedPremium && 'is-need-premium')}
-                dir="auto"
-              >
-                {placeholder}
-              </span>
-            )}
+            <span
+              id={placeholderId}
+              className={buildClassName('placeholder-text', isNeedPremium && 'is-need-premium')}
+              dir="auto"
+            >
+              {placeholder}
+            </span>
           </div>
         </div>
       </div>
-      {forcedPlaceholder && (
-        <span id={placeholderId} className="forced-placeholder">{forcedPlaceholder}</span>
-      )}
     </div>
   );
 };

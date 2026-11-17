@@ -7,11 +7,12 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { areSortedArraysEqual } from '../../../util/iteratees';
 import { loadAndChangeLanguage, setTimeFormat } from '../../../util/localization';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
-import switchTheme from '../../../util/switchTheme';
-import { updatePeerColors } from '../../../util/theme';
-import { updateSelectedWallpaperBlobs } from '../../../util/wallpaperStorage';
+import switchTheme, { hasActiveThemeTransition } from '../../../util/switchTheme';
+import { buildThemePalette, isThemePaletteTransitionSafe, updatePeerColors } from '../../../util/theme';
+import { removeWallpaperBlobIfUnused, updateSelectedWallpaperBlobs } from '../../../util/wallpaper/storage';
 import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import {
@@ -19,7 +20,10 @@ import {
 } from '../../index';
 import { replaceSettings, updateSharedSettings, updateThemeSettings } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectCanAnimateInterface, selectChatFolder, selectTabState } from '../../selectors';
+import {
+  selectCanAnimateInterface, selectChatFolder, selectGlobalWallpaperBackgrounds,
+  selectReferencedWallpaperBackgrounds, selectTabState,
+} from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 
 const MAX_RECENTLY_FOUND_SETTINGS = 5;
@@ -37,6 +41,18 @@ addCallback((global: GlobalState) => {
   const oldSharedSettings = selectSharedSettings(oldGlobal);
   const sharedSettings = selectSharedSettings(global);
 
+  const selectedBackgrounds = selectGlobalWallpaperBackgrounds(global);
+  const previousBackgrounds = selectGlobalWallpaperBackgrounds(oldGlobal);
+  if (!areSortedArraysEqual(selectedBackgrounds, previousBackgrounds)
+    || sharedSettings.shouldKeepLockScreenBackground !== oldSharedSettings.shouldKeepLockScreenBackground) {
+    updateCustomBackgroundCache(global);
+    previousBackgrounds.forEach((background) => {
+      if (!selectedBackgrounds.includes(background)) {
+        removeWallpaperBlobIfUnused(background, getCurrentSelectedBackgrounds);
+      }
+    });
+  }
+
   const performance = sharedSettings.performance;
   const prevPerformance = oldSharedSettings.performance;
   const peerColors = global.peerColors;
@@ -52,9 +68,18 @@ addCallback((global: GlobalState) => {
     });
   }
 
-  if (sharedSettings.theme !== oldSharedSettings.theme) {
-    const withAnimation = document.hasFocus() ? selectCanAnimateInterface(global) : false;
-    switchTheme(sharedSettings.theme, withAnimation);
+  const themeSettings = sharedSettings.themes[sharedSettings.theme];
+  const oldThemeSettings = oldSharedSettings.themes[oldSharedSettings.theme];
+
+  if (sharedSettings.theme !== oldSharedSettings.theme
+    || themeSettings?.serverThemeSettings !== oldThemeSettings?.serverThemeSettings) {
+    const withThemeAnimation = document.hasFocus() && selectCanAnimateInterface(global);
+    const palette = buildThemePalette(sharedSettings.theme, themeSettings?.serverThemeSettings);
+    const oldPalette = buildThemePalette(oldSharedSettings.theme, oldThemeSettings?.serverThemeSettings);
+    const shouldSnapMessageColors = hasActiveThemeTransition(document.documentElement)
+      || !isThemePaletteTransitionSafe(oldPalette, palette);
+
+    switchTheme(sharedSettings.theme, withThemeAnimation, palette.variables, shouldSnapMessageColors);
   }
 
   if (sharedSettings.language !== oldSharedSettings.language) {
@@ -127,6 +152,16 @@ addActionHandler('updateShouldDebugExportedSenders', (global): ActionReturnType 
   callApi('setShouldDebugExportedSenders', Boolean(settings.shouldDebugExportedSenders));
 });
 
+addActionHandler('updateMediaEditorSettings', (global, actions, payload): ActionReturnType => {
+  return {
+    ...global,
+    mediaEditorSettings: {
+      ...global.mediaEditorSettings,
+      ...payload,
+    },
+  };
+});
+
 addActionHandler('setSettingOption', (global, actions, payload): ActionReturnType => {
   return replaceSettings(global, payload);
 });
@@ -150,18 +185,19 @@ addActionHandler('updatePerformanceSettings', (global, actions, payload): Action
 
 addActionHandler('setThemeSettings', (global, actions, payload): ActionReturnType => {
   const { theme, ...settings } = payload;
-  const previousBackground = selectSharedSettings(global).themes[theme]?.background;
-
-  global = updateThemeSettings(global, theme, settings);
-  if ('background' in settings) updateCustomBackgroundCache(global, previousBackground);
-
-  return global;
+  return updateThemeSettings(global, theme, settings);
 });
 
-function updateCustomBackgroundCache(global: GlobalState, previousBackground: string | undefined) {
+addActionHandler('syncGlobalWallpaperCache', (global, actions, { background }): ActionReturnType => {
+  if (!selectGlobalWallpaperBackgrounds(global).includes(background)) return undefined;
+  updateCustomBackgroundCache(global);
+  return undefined;
+});
+
+function updateCustomBackgroundCache(global: GlobalState) {
   updateSelectedWallpaperBlobs(
-    getSelectedBackgrounds(global),
-    previousBackground,
+    selectGlobalWallpaperBackgrounds(global),
+    undefined,
     getCurrentSelectedBackgrounds,
     selectSharedSettings(global).shouldKeepLockScreenBackground,
   );
@@ -169,13 +205,7 @@ function updateCustomBackgroundCache(global: GlobalState, previousBackground: st
 
 function getCurrentSelectedBackgrounds() {
   const global = getGlobal();
-  return getSelectedBackgrounds(global);
-}
-
-function getSelectedBackgrounds(global: GlobalState) {
-  return Object.values(selectSharedSettings(global).themes)
-    .map((themeSettings) => themeSettings?.background)
-    .filter((background): background is string => Boolean(background));
+  return selectReferencedWallpaperBackgrounds(global);
 }
 
 addActionHandler('requestNextFoldersAction', (global, actions, payload): ActionReturnType => {
@@ -304,6 +334,15 @@ addActionHandler('openPasskeyModal', (global, actions, payload): ActionReturnTyp
 });
 
 addTabStateResetterAction('closePasskeyModal', 'isPasskeyModalOpen');
+
+addActionHandler('openSettingsConfirmation', (global, actions, payload): ActionReturnType => {
+  const { confirmation, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    settingsConfirmation: confirmation,
+  }, tabId);
+});
+
+addTabStateResetterAction('closeSettingsConfirmation', 'settingsConfirmation');
 addTabStateResetterAction('closeLanguageModal', 'languageModal');
 
 addActionHandler('removeCustomLanguage', (global, actions, payload): ActionReturnType => {

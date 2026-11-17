@@ -6,7 +6,8 @@
   align-items: center;
 
   .Message.own & {
-    --secondary-color: var(--color-text-green);
+    --color-primary: var(--message-incoming-control);
+    --color-primary-foreground: var(--message-incoming-control-foreground);
   }
 
   .content-inner & {
@@ -33,10 +34,12 @@
     height: 3.375rem;
     border-radius: var(--border-radius-messages-small);
 
-    background: var(--color-primary);
+    background: #3993fb;
   }
 
   .file-progress {
+    --media-control-foreground: currentColor;
+
     position: absolute;
     top: 0;
     left: 0;
@@ -50,7 +53,7 @@
 
     padding: 1rem 0.75rem 0.5rem;
 
-    color: white;
+    color: var(--color-white);
 
     clip-path: polygon(0 0, calc(100% - 1.125rem) 0, 100% 1.125rem, 100% 100%, 0 100%);
 
@@ -76,6 +79,7 @@
     .file-ext {
       font-size: 1rem;
       font-weight: var(--font-weight-medium);
+      color: var(--color-white);
       transition: opacity 0.15s;
     }
   }
@@ -87,7 +91,8 @@
     & + .action-icon,
     & + .file-progress {
       border-radius: var(--border-radius-messages-small);
-      background: rgba(black, 0.5);
+      color: var(--message-media-text);
+      background: var(--message-media-background);
     }
 
     img {
@@ -107,7 +112,7 @@
     height: 3.375rem;
 
     font-size: 1.5rem;
-    color: #fff;
+    color: var(--color-primary-foreground);
 
     opacity: 0;
 
@@ -170,6 +175,7 @@
     font-size: 1rem;
     font-weight: var(--font-weight-medium);
     line-height: 1.5rem;
+    color: var(--message-file-title, var(--color-text));
     text-overflow: ellipsis;
 
     .emoji {
@@ -184,7 +190,7 @@
 
     font-size: 0.875rem;
     line-height: 0.9375rem;
-    color: var(--secondary-color);
+    color: var(--message-file-description, var(--secondary-color));
     text-overflow: ellipsis;
   }
 
@@ -276,15 +282,36 @@
 // Document extension colors
 .File .file-progress,
 .File .file-icon {
+  color: var(--color-white);
+
   &.red {
-    background-color: var(--color-error);
+    color: var(--color-error-foreground);
+    background-color: var(--color-error-background);
   }
 
   &.orange {
+    color: #202124;
     background-color: var(--color-warning);
   }
 
   &.green {
-    background-color: var(--color-text-green);
+    color: var(--color-primary-foreground);
+    background-color: var(--color-primary);
   }
+}
+
+.File .action-icon {
+  &.red {
+    color: var(--color-error-foreground);
+  }
+
+  &.orange {
+    color: #202124;
+  }
+}
+
+.File .file-preview + .action-icon,
+.File .file-preview + .file-progress {
+  color: var(--message-media-text);
+  background: var(--message-media-background);
 }

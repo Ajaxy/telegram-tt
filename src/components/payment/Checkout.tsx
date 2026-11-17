@@ -142,7 +142,7 @@ const Checkout = ({
       <Checkbox
         label={lang('PaymentCheckoutAcceptTerms', {
           bot: botName,
-          link: <SafeLink url={url} text={lang('StarsTransactionTOSLinkText')} isRtl={lang.isRtl} />,
+          link: <SafeLink url={url} text={lang('PaymentCheckoutAcceptTermsLink')} isRtl={lang.isRtl} />,
         }, { withNodes: true })}
         name="checkout_tos"
         checked={Boolean(isTosAccepted)}

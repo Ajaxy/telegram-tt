@@ -23,7 +23,7 @@
   .icon-close {
     position: absolute;
     font-size: 1.625rem;
-    color: var(--color-white);
+    color: var(--media-control-foreground, var(--color-white));
   }
 
   &.square {
@@ -41,7 +41,7 @@
       height: 0.8125rem;
       border-radius: 0.125rem;
 
-      background-color: #fff;
+      background-color: var(--media-control-foreground, var(--color-white));
     }
   }
 
@@ -72,7 +72,7 @@
 
   &_canvas {
     display: block;
-    color: var(--color-white);
+    color: var(--media-control-foreground, var(--color-white));
     background-color: transparent !important;
   }
 }

@@ -73,6 +73,7 @@ const ReportAvatarModal = ({
       onCloseAnimationEnd={onCloseAnimationEnd}
       className="narrow"
       title={title}
+      isNativeDialog
     >
       <RadioGroup
         className="dialog-checkbox-group"
@@ -90,7 +91,7 @@ const ReportAvatarModal = ({
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
           {lang('ReportButton')}
         </Button>
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose} autoFocus>{lang('Cancel')}</Button>
       </div>
     </Modal>
   );

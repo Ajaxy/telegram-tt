@@ -1,5 +1,3 @@
-import temmlUrl from 'temml/dist/temml.mjs?url';
-
 import type { LatexRequest, LatexResponse } from '../lib/latex/latex.worker';
 
 type RenderJob = {
@@ -98,10 +96,7 @@ function initializeWorker() {
     instance.onerror = handleError;
     instance.onmessageerror = handleError;
     timeoutId = window.setTimeout(handleWorkerFailure, INITIALIZATION_TIMEOUT);
-    instance.postMessage({
-      type: 'init',
-      moduleUrl: new URL(temmlUrl, document.baseURI).href,
-    } satisfies LatexRequest);
+    instance.postMessage({ type: 'init' } satisfies LatexRequest);
   } catch {
     handleWorkerFailure();
   }

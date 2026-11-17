@@ -12,22 +12,26 @@ import type {
   WebAppInboundEvent,
   WebAppOutboundEvent,
 } from '../../../types/webapp';
+import type { ThemePalette } from '../../../util/theme';
 
 import { TME_LINK_PREFIX, VERIFY_AGE_MIN_DEFAULT } from '../../../config';
+import { getLuminance, mixColors } from '../../../lib/color';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { convertToApiChatType, getUserFullName } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
   selectBotAppPermissions,
+  selectChatThemePalette,
   selectTabState,
   selectTheme,
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
-import { IFRAME_ALLOW_ATTRIBUTES, WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
+import { WEB_APP_SANDBOX_ATTRIBUTES } from '../../../util/browser/iframe';
 import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle.ts';
+import { buildColorFromHex, buildHexFromColor } from '../../../util/colors';
 import download from '../../../util/download';
 import { isLiteralObject } from '../../../util/iteratees';
 import { extractCurrentThemeParams, FALLBACK_THEME_PARAMS, validateHexColor } from '../../../util/themeStyle';
@@ -45,6 +49,7 @@ import useSyncEffect from '../../../hooks/useSyncEffect';
 import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFullscreen';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
+import useWebAppMediaAccess from './hooks/useWebAppMediaAccess';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import Icon from '../../common/icons/Icon';
@@ -86,10 +91,12 @@ type StateProps = {
   botAppSettings?: ApiBotAppSettings;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
+  themePalette: ThemePalette;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
   modalState?: BrowserModalStateType;
   botAppPermissions?: BotAppPermissions;
+  isMediaAccessModalOpen?: boolean;
   verifyAgeMin?: number;
   verifyAgeBotUsername?: string;
 };
@@ -105,6 +112,8 @@ const POPUP_BUTTON_TEXT_MAX_LENGTH = 64;
 const POPUP_MAX_BUTTONS = 3;
 const POPUP_BUTTON_TYPES = ['ok', 'close', 'cancel', 'default', 'destructive'];
 const APP_NAME_DISPLAY_DURATION = 3800;
+const PLACEHOLDER_LUMINANCE_THRESHOLD = 0.705;
+const PLACEHOLDER_TINT_WEIGHT = 0.05;
 const DEFAULT_BUTTON_TEXT: Record<string, RegularLangKey> = {
   ok: 'OK',
   cancel: 'Cancel',
@@ -118,6 +127,7 @@ const WebAppTab = ({
   webApp,
   bot,
   theme,
+  themePalette,
   isPaymentModalOpen,
   paymentStatus,
   isActive,
@@ -125,6 +135,7 @@ const WebAppTab = ({
   modalState,
   isMultiTabSupported,
   botAppPermissions,
+  isMediaAccessModalOpen,
   botAppSettings,
   modalHeight,
   verifyAgeMin = VERIFY_AGE_MIN_DEFAULT,
@@ -165,7 +176,7 @@ const WebAppTab = ({
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
   const [clipboardRequestId, setClipboardRequestId] = useState<string>();
   const [requestedFileDownload, setRequestedFileDownload] = useState<{ url: string; fileName: string }>();
-  const [bottomBarColor, setBottomBarColor] = useState<string>();
+  const [bottomBarColorFromEvent, setBottomBarColorFromEvent] = useState<string>();
   const {
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
@@ -228,11 +239,7 @@ const WebAppTab = ({
     requestMeasure(() => {
       setThemeParams(extractCurrentThemeParams());
     });
-  }, [theme]);
-
-  useEffect(() => {
-    setBottomBarColor(themeParams.secondary_bg_color);
-  }, [themeParams]);
+  }, []);
 
   const themeBackgroundColor = themeParams.bg_color;
   const [backgroundColorFromEvent, setBackgroundColorFromEvent] = useState<string>();
@@ -263,16 +270,37 @@ const WebAppTab = ({
   const isSimple = Boolean(buttonText);
 
   const {
-    reloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
+    reloadFrame, forceReloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
   } = useWebAppFrame(frameRef, isOpen, isFullscreen, isSimple, handleEvent, webApp, markLoaded);
+
+  const {
+    allowAttribute, isReloadRequired: isMediaReloadRequired, handleMediaAccessEvent, markPermissionsApplied,
+  } = useWebAppMediaAccess(sendEvent, forceReloadFrame, webApp, bot, botAppPermissions, isMediaAccessModalOpen);
+
+  const handleReloadFrame = useLastCallback((frameUrl: string) => {
+    markPermissionsApplied();
+    reloadFrame(frameUrl);
+  });
+
+  const handleMediaReloadClick = useLastCallback(() => {
+    handleReloadFrame(url!);
+  });
+
+  // Any permission change replaces the object, so the panel shows again
+  const [mediaReloadDismissedFor, setMediaReloadDismissedFor] = useState<BotAppPermissions>();
+  const isMediaReloadPanelVisible = isMediaReloadRequired && mediaReloadDismissedFor !== botAppPermissions;
+
+  const handleMediaReloadDismiss = useLastCallback(() => {
+    setMediaReloadDismissedFor(botAppPermissions);
+  });
 
   useEffect(() => {
     if (isActive) registerSendEventCallback(sendEvent);
   }, [sendEvent, registerSendEventCallback, isActive]);
 
   useEffect(() => {
-    if (isActive) registerReloadFrameCallback(reloadFrame);
-  }, [reloadFrame, registerReloadFrameCallback, isActive]);
+    if (isActive) registerReloadFrameCallback(handleReloadFrame);
+  }, [handleReloadFrame, registerReloadFrameCallback, isActive]);
 
   function hasBottomButtonContent(text: string | undefined, iconCustomEmojiId?: string) {
     return Boolean(text?.trim().length || iconCustomEmojiId);
@@ -362,15 +390,17 @@ const WebAppTab = ({
   });
 
   const sendThemeCallback = useLastCallback(() => {
+    setThemeParams(extractCurrentThemeParams());
     sendTheme();
   });
 
-  // Notify view that theme changed
-  useSyncEffect(() => {
-    setTimeout(() => {
-      sendThemeCallback();
+  // Read the final colors after the theme transition
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      requestMeasure(sendThemeCallback);
     }, ANIMATION_WAIT);
-  }, [theme]);
+    return () => clearTimeout(timeout);
+  }, [themePalette, sendThemeCallback]);
 
   const setFullscreenCallback = useLastCallback(() => {
     if (!checkIfFullscreen() && isActive) {
@@ -657,6 +687,8 @@ const WebAppTab = ({
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
 
+    handleMediaAccessEvent(event);
+
     if (eventType === 'web_app_request_fullscreen') {
       if (!isActive) return;
 
@@ -706,7 +738,7 @@ const WebAppTab = ({
 
     if (eventType === 'web_app_set_bottom_bar_color') {
       const color = getValidHexColor(eventData.color);
-      if (color) setBottomBarColor(color);
+      if (color) setBottomBarColorFromEvent(color);
     }
 
     if (eventType === 'web_app_data_send') {
@@ -912,7 +944,7 @@ const WebAppTab = ({
       handleRequestLocation();
     }
 
-    if (eventType === 'web_app_open_location_settings') {
+    if (eventType === 'web_app_open_location_settings' || eventType === 'web_app_open_media_access_settings') {
       handleOpenChat();
     }
 
@@ -1179,29 +1211,43 @@ const WebAppTab = ({
     );
   }
 
-  function renderDefaultPlaceholder() {
-    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
-    return (
-      <div className={className}>
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-        <div className={styles.placeholderSquare} />
-      </div>
-    );
-  }
-
   function renderPlaceholder() {
+    const placeholderBackgroundColor = backgroundColorFromEvent || backgroundColorFromSettings;
+    let color = 'var(--color-web-app-placeholder)';
+    if (placeholderBackgroundColor) {
+      const background = buildColorFromHex(placeholderBackgroundColor);
+      const isLight = getLuminance(background) > PLACEHOLDER_LUMINANCE_THRESHOLD;
+      color = buildHexFromColor(mixColors(
+        background,
+        buildColorFromHex(isLight ? '#000000' : '#ffffff'),
+        PLACEHOLDER_TINT_WEIGHT,
+        { space: 'srgb' },
+      ));
+    }
+
     if (!placeholderPath) {
-      return renderDefaultPlaceholder();
+      return renderDefaultPlaceholder(color);
     }
     return (
       <svg
         className={buildClassName(styles.loadingPlaceholder, isLoaded && styles.hide)}
         viewBox="0 0 512 512"
+        style={`color: ${color}`}
       >
         <path className={styles.placeholderPath} d={placeholderPath} />
       </svg>
+    );
+  }
+
+  function renderDefaultPlaceholder(color: string) {
+    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
+    return (
+      <div className={className} style={`color: ${color}`}>
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+      </div>
     );
   }
 
@@ -1242,6 +1288,23 @@ const WebAppTab = ({
     >
       {isFullscreen && getIsWebAppsFullscreenSupported() && renderFullscreenHeaderPanel()}
       {!isMinimizedState && renderPlaceholder()}
+      {isMediaReloadPanelVisible && !isMinimizedState && (
+        <div className={buildClassName(styles.mediaReloadPanel, isFullscreen && styles.mediaReloadPanelFullscreen)}>
+          <Button
+            round
+            size="tiny"
+            color="translucent"
+            ariaLabel={lang('Close')}
+            onClick={handleMediaReloadDismiss}
+          >
+            <Icon name="close" />
+          </Button>
+          <span className={styles.mediaReloadText}>{lang('WebAppMediaReloadText')}</span>
+          <Button size="tiny" fluid onClick={handleMediaReloadClick}>
+            {lang('WebAppMediaReloadButton')}
+          </Button>
+        </div>
+      )}
       <iframe
         className={buildClassName(
           styles.frame,
@@ -1252,13 +1315,13 @@ const WebAppTab = ({
         src={url}
         title={lang('AriaMiniApp', { bot: bot?.firstName })}
         sandbox={WEB_APP_SANDBOX_ATTRIBUTES}
-        allow={IFRAME_ALLOW_ATTRIBUTES}
+        allow={allowAttribute}
         allowFullScreen
         ref={frameRef}
       />
       {!isMinimizedState && (
         <div
-          style={`background-color: ${bottomBarColor};`}
+          style={`background-color: ${bottomBarColorFromEvent || themeParams.secondary_bg_color};`}
           className={buildClassName(
             styles.buttonsContainer,
             renderingSecondaryButton?.position === 'left' && styles.leftToRight,
@@ -1442,7 +1505,8 @@ export default memo(withGlobal<OwnProps>(
     const tabState = selectTabState(global);
     const { isPaymentModalOpen, status: regularPaymentStatus } = tabState.payment;
     const { status: starsPaymentStatus, inputInvoice: starsInputInvoice } = tabState.starsPayment;
-    const botAppPermissions = bot ? selectBotAppPermissions(global, bot.id) : undefined;
+    const botAppPermissions = botId ? selectBotAppPermissions(global, botId) : undefined;
+    const isMediaAccessModalOpen = Boolean(webApp) && tabState.mediaAccessModal?.webAppKey === getWebAppKey(webApp);
 
     const paymentStatus = starsPaymentStatus || regularPaymentStatus;
 
@@ -1451,10 +1515,12 @@ export default memo(withGlobal<OwnProps>(
       bot,
       currentUser,
       theme,
+      themePalette: selectChatThemePalette(global),
       isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
       paymentStatus,
       modalState,
       botAppPermissions,
+      isMediaAccessModalOpen,
       botAppSettings,
       verifyAgeMin,
       verifyAgeBotUsername,

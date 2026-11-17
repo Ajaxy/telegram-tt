@@ -3,7 +3,7 @@ import { getActions } from '../../../../global';
 
 import { SettingsScreens } from '../../../../types';
 
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import renderText from '../../../common/helpers/renderText';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
@@ -12,8 +12,6 @@ import useLang from '../../../../hooks/useLang';
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Island from '../../../gili/layout/Island';
 import ListItem from '../../../ui/ListItem';
-
-import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   isActive?: boolean;
@@ -36,7 +34,7 @@ const SettingsTwoFaEnabled = ({
       <div className="settings-content-header no-border">
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={160}
           className="settings-content-icon"
         />

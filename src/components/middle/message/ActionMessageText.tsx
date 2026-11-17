@@ -15,7 +15,9 @@ import {
   getMessageContent,
   getMessageInvoice,
   getMessageTextWithFallback,
+  isChatBasicGroup,
   isChatChannel,
+  isChatSuperGroup,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
@@ -32,10 +34,10 @@ import {
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
 import { formatCountdown, formatShortDuration } from '../../../util/dates/duration';
-import { formatCurrency, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { formatCurrency, formatTonInFiat } from '../../../util/formatCurrency';
 import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import {
-  formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText,
+  formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText, formatTonTextFromNanos,
 } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
@@ -113,6 +115,7 @@ const ActionMessageText = ({
     const isSavedMessages = chatId === currentUserId;
 
     const isChannel = chat && isChatChannel(chat);
+    const isSenderSelf = sender ? sender.id === currentUserId : isOutgoing;
     const senderTitle = sender && getPeerTitle(lang, sender);
     const chatTitle = chat && getPeerTitle(lang, chat);
 
@@ -219,6 +222,35 @@ const ActionMessageText = ({
       case 'chatEditPhoto':
         return isChannel ? lang('ActionChangedPhotoChannel')
           : translateWithYou(lang, 'ActionChangedPhoto', isOutgoing, { from: senderLink });
+
+      case 'setChatTheme': {
+        const themeName = action.gift
+          ? lang('GiftUnique', { title: action.gift.title, number: lang.number(action.gift.number) })
+          : action.emoticon;
+        if (!themeName) {
+          return isChannel ? lang('ActionDisabledThemeChannel')
+            : translateWithYou(lang, 'ActionDisabledTheme', isSenderSelf, { from: senderLink });
+        }
+        const theme = renderStrong(renderText(themeName));
+        return isChannel ? lang('ActionChangedThemeChannel', { theme }, { withNodes: true })
+          : translateWithYou(lang, 'ActionChangedTheme', isSenderSelf, { from: senderLink, theme });
+      }
+
+      case 'setChatWallpaper': {
+        if (action.isSame) {
+          return translateWithYou(lang, 'ActionSetSameWallpaper', isSenderSelf, { from: senderLink });
+        }
+        if (isSenderSelf && action.isForBoth) {
+          return lang('ActionChangedWallpaperBothYou', {
+            peer: renderStrong(chatTitle || userFallbackText),
+          }, { withNodes: true });
+        }
+        if (isChannel) return lang('ActionChangedWallpaperChannel');
+        if (chat && (isChatBasicGroup(chat) || isChatSuperGroup(chat))) {
+          return lang(isSenderSelf ? 'ActionChangedWallpaperGroupYou' : 'ActionChangedWallpaperGroup');
+        }
+        return translateWithYou(lang, 'ActionChangedWallpaper', isSenderSelf, { from: senderLink });
+      }
 
       case 'chatCreate': {
         const { title } = action;
@@ -492,12 +524,7 @@ const ActionMessageText = ({
         return lang('WalletConnectRequest');
 
       case 'gramTransfer': {
-        const formattedAmount = formatTonFromNanos(action.amount);
-        const [whole, fraction] = formattedAmount.split('.');
-        const groupedAmount = fraction ? `${lang.number(Number(whole))}.${fraction}` : lang.number(Number(whole));
-        const amount = renderStrong(
-          lang('GramAmountText', { amount: groupedAmount }, { pluralValue: Number(formattedAmount) }),
-        );
+        const amount = renderStrong(formatTonTextFromNanos(lang, action.amount));
         const fiat = formatTonInFiat(action.amount, tonUsdRate, walletCurrency!, walletCurrencyRate, lang.code);
         const worth = fiat ? `${NBSP}${lang('ActionGramTransferWorth', { fiat })}` : '';
 
@@ -934,6 +961,16 @@ const ActionMessageText = ({
           peer: senderLink,
           amount: formatStarsAsText(lang, stars),
         }, { withMarkdown: true });
+      }
+
+      case 'noPaidMessagesTokenUsed': {
+        if (isOutgoing) {
+          return lang('ActionNoPaidTokenUsedYou', {
+            user: renderPeerLink(chat?.id, chatTitle || userFallbackText, asPreview),
+          }, { withNodes: true });
+        }
+
+        return lang('ActionNoPaidTokenUsed', { user: senderLink }, { withNodes: true });
       }
 
       case 'paidMessagesRefunded': {

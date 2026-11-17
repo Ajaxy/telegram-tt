@@ -1,10 +1,9 @@
 import {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
+import type { ApiAvatarUpload, ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import {
@@ -12,6 +11,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectBot,
+  selectPeerAvatarPhoto,
   selectTabState,
   selectUserFullInfo,
 } from '../../../global/selectors';
@@ -22,14 +22,12 @@ import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 
 import Island, { IslandDescription } from '../../gili/layout/Island';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import SelectAvatar from '../../ui/SelectAvatar';
 import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
@@ -43,6 +41,7 @@ type OwnProps = {
 type StateProps = {
   userId?: string;
   user?: ApiUser;
+  currentAvatarPhoto?: ApiPhoto;
   currentBio?: string;
   progress?: ManagementProgress;
   maxBioLength: number;
@@ -53,6 +52,7 @@ const ERROR_NAME_MISSING = 'BotNameRequired';
 const ManageBot = ({
   userId,
   user,
+  currentAvatarPhoto,
   progress,
   currentBio,
   isActive,
@@ -62,7 +62,6 @@ const ManageBot = ({
   const {
     setBotInfo,
     uploadProfilePhoto,
-    uploadContactProfilePhoto,
     startBotFatherConversation,
   } = getActions();
 
@@ -80,12 +79,11 @@ const ManageBot = ({
 
   const currentName = user ? getUserFirstOrLastName(lang, user) : '';
 
-  const [photo, setPhoto] = useState<File | undefined>();
+  const [photo, setPhoto] = useState<ApiAvatarUpload | undefined>();
   const [name, setName] = useState(currentName || '');
   const [bio, setBio] = useState(currentBio || '');
 
   const currentAvatarHash = user && getChatAvatarHash(user);
-  const currentAvatarBlobUrl = useMedia(currentAvatarHash, false, ApiMediaFormat.BlobUrl);
 
   useEffect(() => {
     unmarkProfileTouched();
@@ -99,7 +97,7 @@ const ManageBot = ({
 
   useEffect(() => {
     setPhoto(undefined);
-  }, [currentAvatarBlobUrl]);
+  }, [currentAvatarHash]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -123,7 +121,7 @@ const ManageBot = ({
     markFieldTouched();
   });
 
-  const handlePhotoChange = useLastCallback((newPhoto: File) => {
+  const handlePhotoChange = useLastCallback((newPhoto: ApiAvatarUpload) => {
     setPhoto(newPhoto);
     markAvatarTouched();
   });
@@ -147,8 +145,8 @@ const ManageBot = ({
 
     if (photo) {
       uploadProfilePhoto({
-        file: photo,
-        ...(isAvatarTouched && { bot: user }),
+        photo,
+        bot: user,
       });
     }
   });
@@ -165,14 +163,6 @@ const ManageBot = ({
     startBotFatherConversation({ param: username! });
   });
 
-  const inputRef = useRef<HTMLInputElement>();
-  const isSuggestRef = useRef(false);
-
-  const handleSelectAvatar = useLastCallback((file: File) => {
-    markAvatarTouched();
-    uploadContactProfilePhoto({ userId, file, isSuggest: isSuggestRef.current });
-  });
-
   if (!user) {
     return undefined;
   }
@@ -184,10 +174,11 @@ const ManageBot = ({
       <div className="custom-scroll">
         <Island>
           <AvatarEditable
-            currentAvatarBlobUrl={currentAvatarBlobUrl}
+            currentAvatarHash={currentAvatarHash}
+            currentAvatarPhoto={currentAvatarPhoto}
             onChange={handlePhotoChange}
             title={lang('ChatSetPhotoOrVideo')}
-            disabled={isLoading}
+            isLoading={isLoading}
           />
           <InputText
             id="user-name"
@@ -231,10 +222,6 @@ const ManageBot = ({
         iconName="check"
         isLoading={isLoading}
       />
-      <SelectAvatar
-        onChange={handleSelectAvatar}
-        inputRef={inputRef}
-      />
     </div>
   );
 };
@@ -249,6 +236,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       userId,
       user,
+      currentAvatarPhoto: selectPeerAvatarPhoto(global, userId),
       progress,
       currentBio: userFullInfo?.bio,
       maxBioLength,

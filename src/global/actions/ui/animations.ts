@@ -1,6 +1,6 @@
 import type { ActionReturnType } from '../../types';
 
-import { scrollGradientBackground } from '../../../util/gradientBackground';
+import { scrollGradientBackground } from '../../../util/wallpaper/gradient';
 import { addActionHandler } from '../../index';
 import { selectCurrentMessageList, selectPerformanceSettingsValue } from '../../selectors';
 

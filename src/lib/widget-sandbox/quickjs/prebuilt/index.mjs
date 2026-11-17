@@ -1,0 +1,1 @@
+var variant={type:"sync",importFFI:()=>import("./ffi.mjs").then(mod=>mod.QuickJSFFI),importModuleLoader:()=>import("./emscripten-module.browser.mjs").then(mod=>mod.default)},src_default=variant;export{src_default as default};

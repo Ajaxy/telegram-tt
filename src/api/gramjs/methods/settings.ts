@@ -2,6 +2,8 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
+  ApiAccountConnection,
+  ApiAvatarUpload,
   ApiBirthday,
   ApiChat,
   ApiDisallowedGiftsSettings,
@@ -9,9 +11,11 @@ import type {
   ApiLanguage,
   ApiNotifyPeerType,
   ApiPasskeyRegistrationOption,
+  ApiPeer,
   ApiPeerNotifySettings,
   ApiPhoto,
   ApiPrivacyKey,
+  ApiRequestInputShareTheme,
   ApiUser,
 } from '../../types';
 
@@ -26,8 +30,9 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { toJSNumber } from '../../../util/numbers';
 import { BLOCKED_LIST_LIMIT } from '../../../limits';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
-import { buildApiDisallowedGiftsSettings } from '../apiBuilders/gifts';
+import { buildApiDisallowedGiftsSettings, buildApiShareThemeBackdrop } from '../apiBuilders/gifts';
 import {
+  buildApiChatTheme,
   buildApiCountryList,
   buildApiLanguage,
   buildApiPasskey,
@@ -52,13 +57,16 @@ import {
   buildInputPhoto,
   buildInputPrivacyKey,
   buildInputPrivacyRules,
+  buildInputShareTheme,
   buildInputUser,
   DEFAULT_PRIMITIVES,
 } from '../gramjsBuilders';
 import { buildInputPasskeyCredential } from '../gramjsBuilders/passkeys';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
-import { getClient, invokeRequest, uploadFile } from './client';
+import {
+  invokeRequest, invokeWithAccount, uploadAvatar, uploadFile,
+} from './client';
 
 export function updateProfile({
   firstName,
@@ -149,14 +157,20 @@ export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean)
   return undefined;
 }
 
-export async function uploadProfilePhoto(
-  file: File, isFallback?: boolean, isVideo = false, videoTs = 0, bot?: ApiUser,
-) {
-  const inputFile = await uploadFile(file);
+export async function uploadProfilePhoto({
+  photo, isFallback, bot,
+}: {
+  photo: ApiAvatarUpload;
+  isFallback?: boolean;
+  bot?: ApiUser;
+}) {
+  const { file, video, videoStartTs } = await uploadAvatar(photo);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    ...(bot ? { bot: buildInputUser(bot.id, bot.accessHash) } : undefined),
-    ...(isVideo ? { video: inputFile, videoStartTs: videoTs } : { file: inputFile }),
-    ...(isFallback ? { fallback: true } : undefined),
+    file,
+    video,
+    videoStartTs,
+    bot: bot ? buildInputUser(bot.id, bot.accessHash) : undefined,
+    fallback: isFallback || undefined,
   }));
 
   if (!result) return undefined;
@@ -171,17 +185,20 @@ export async function uploadProfilePhoto(
 }
 
 export async function uploadContactProfilePhoto({
-  file, isSuggest, user,
+  photo, isSuggest, user,
 }: {
-  file?: File;
+  photo?: ApiAvatarUpload;
   isSuggest?: boolean;
   user: ApiUser;
 }) {
-  const inputFile = file ? await uploadFile(file) : undefined;
+  const inputPhoto = photo && await uploadAvatar(photo);
   const result = await invokeRequest(new GramJs.photos.UploadContactProfilePhoto({
     userId: buildInputUser(user.id, user.accessHash),
-    file: inputFile,
-    ...(isSuggest ? { suggest: true } : { save: true }),
+    file: inputPhoto?.file,
+    video: inputPhoto?.video,
+    videoStartTs: inputPhoto?.videoStartTs,
+    suggest: isSuggest || undefined,
+    save: !isSuggest || undefined,
   }));
 
   if (!result) return undefined;
@@ -226,6 +243,18 @@ export async function fetchWallpapers() {
 
   return {
     wallpapers: result.wallpapers.map(buildApiWallpaper).filter(Boolean),
+  };
+}
+
+export async function fetchChatThemes() {
+  const result = await invokeRequest(new GramJs.account.GetChatThemes({ hash: BigInt('0') }));
+
+  if (!result || result instanceof GramJs.account.ThemesNotModified) {
+    return undefined;
+  }
+
+  return {
+    chatThemes: result.themes.map(buildApiChatTheme).filter(Boolean),
   };
 }
 
@@ -546,24 +575,27 @@ export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
   };
 }
 
-export function registerDevice(token: string) {
-  const client = getClient();
-  const secret = client.session.getAuthKey().getKey()!;
-  return invokeRequest(new GramJs.account.RegisterDevice({
+export function registerDevice({ token, otherIds, secret, connection }: {
+  token: string; otherIds: string[]; secret: Uint8Array<ArrayBuffer>; connection?: ApiAccountConnection;
+}) {
+  return invokeWithAccount(new GramJs.account.RegisterDevice({
     tokenType: 10,
-    secret,
     appSandbox: false,
-    otherUids: [],
+    secret,
+    noMuted: true,
+    otherUids: otherIds.map(BigInt),
     token,
-  }));
+  }), connection);
 }
 
-export function unregisterDevice(token: string) {
-  return invokeRequest(new GramJs.account.UnregisterDevice({
+export function unregisterDevice({ token, otherIds, connection }: {
+  token: string; otherIds: string[]; connection?: ApiAccountConnection;
+}) {
+  return invokeWithAccount(new GramJs.account.UnregisterDevice({
     tokenType: 10,
-    otherUids: [],
+    otherUids: otherIds.map(BigInt),
     token,
-  }));
+  }), connection);
 }
 
 export async function setPrivacySettings(
@@ -638,6 +670,25 @@ export async function fetchPeerProfileColors(hash?: number) {
     colors,
     hash: newHash,
   };
+}
+
+export async function fetchShareThemeBackdrops(hash?: number) {
+  const result = await invokeRequest(new GramJs.messages.GetShareThemeBackdrops({
+    hash: hash ?? DEFAULT_PRIMITIVES.INT,
+  }));
+  if (!result || result instanceof GramJs.ShareThemeBackdropsNotModified) return undefined;
+
+  return {
+    backdrops: result.backdrops.map(buildApiShareThemeBackdrop),
+    hash: result.hash,
+  };
+}
+
+export function setShareTheme({ peer, theme }: { peer: ApiPeer; theme?: ApiRequestInputShareTheme }) {
+  return invokeRequest(new GramJs.messages.SetShareTheme({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    theme: buildInputShareTheme(theme),
+  }));
 }
 
 export async function fetchTimezones(hash?: number) {

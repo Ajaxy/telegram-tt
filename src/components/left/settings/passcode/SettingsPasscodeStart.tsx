@@ -2,7 +2,7 @@ import type { FC } from '../../../../lib/teact/teact';
 import { memo } from '../../../../lib/teact/teact';
 
 import { STICKER_SIZE_PASSCODE } from '../../../../config';
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
@@ -10,8 +10,6 @@ import useLang from '../../../../hooks/useLang';
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Island, { IslandDescription } from '../../../gili/layout/Island';
 import Button from '../../../ui/Button';
-
-import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   isActive?: boolean;
@@ -31,7 +29,7 @@ const SettingsPasscodeStart: FC<OwnProps> = ({
       <div className="settings-content-header no-border">
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={STICKER_SIZE_PASSCODE}
           className="settings-content-icon"
         />

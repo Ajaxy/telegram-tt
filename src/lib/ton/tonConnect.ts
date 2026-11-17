@@ -1,4 +1,5 @@
-import nacl from 'tweetnacl';
+import { hsalsa, xsalsa20poly1305 } from '@noble/ciphers/salsa.js';
+import { clean, u32 } from '@noble/ciphers/utils.js';
 
 import type { BocBudget } from './boc';
 import type { Cell } from './cell';
@@ -10,16 +11,13 @@ import { formatAddress, parseAddress, toRawAddress } from './address';
 import { createBocBudget, parseBoc, serializeBoc } from './boc';
 import { MAX_COINS } from './cell';
 import { isRecord, MAINNET, MAX_BODY_BYTES } from './connectRequest';
-import { getEd25519PublicKey } from './ed25519';
+import { clampX25519Scalar, getEd25519PublicKey, getX25519, getX25519PublicKey } from './ed25519';
 import { hmacSha512 } from './encryption';
 import { signOwnershipProof } from './proof';
 import { buildWalletStateInit, WALLET_MAX_BATCH_MESSAGES } from './wallet';
 
 const SESSION_CONTEXT = 'tonconnect/session/v1';
 const KEY_BYTES = 32;
-const X25519_LOW_BYTE_MASK = 248;
-const X25519_HIGH_BYTE_MASK = 127;
-const X25519_HIGH_BYTE_BIT = 64;
 const NONCE_BYTES = 24;
 const TAG_BYTES = 16;
 const CHALLENGE_BYTES = KEY_BYTES + NONCE_BYTES + TAG_BYTES + KEY_BYTES;
@@ -30,9 +28,10 @@ const IMPORT_PROOF_DOMAIN = 'telegram.org';
 const TEXT_COMMENT_OPCODE_BITS = 32;
 const MAX_COMMENT_BYTES = 1024;
 const textDecoder = new TextDecoder('utf-8', { fatal: true });
+const SALSA_SIGMA = u32(bufferFromUtf8('expand 32-byte k'));
 
 export type TonConnectSessionKey = {
-  secretKey: Uint8Array;
+  secretKey: Uint8Array<ArrayBuffer>;
   clientId: string;
 };
 
@@ -66,12 +65,9 @@ export async function deriveTonConnectSessionKey(
   const publicKey = parseClientId(dappClientId);
   const prk = await hmacSha512(new Uint8Array(seed), bufferFromUtf8(SESSION_CONTEXT));
   const okm = await hmacSha512(prk, concat(publicKey, nonce));
-  const secretKey = okm.slice(0, KEY_BYTES);
-  secretKey[0] &= X25519_LOW_BYTE_MASK;
-  secretKey[KEY_BYTES - 1] &= X25519_HIGH_BYTE_MASK;
-  secretKey[KEY_BYTES - 1] |= X25519_HIGH_BYTE_BIT;
+  const secretKey = clampX25519Scalar(okm.slice(0, KEY_BYTES));
 
-  return { secretKey, clientId: bufferToHex(nacl.box.keyPair.fromSecretKey(secretKey).publicKey) };
+  return { secretKey, clientId: bufferToHex(await getX25519PublicKey(secretKey)) };
 }
 
 // Whether the message, once encrypted, stays within the body size the bridge accepts
@@ -79,42 +75,47 @@ export function canEncryptTonConnectMessage(message: unknown) {
   return bufferFromUtf8(JSON.stringify(message)).length + NONCE_BYTES + TAG_BYTES <= MAX_BODY_BYTES;
 }
 
-export function encryptTonConnectMessage(
-  message: unknown, dappClientId: string, secretKey: Uint8Array,
-): Uint8Array<ArrayBuffer> {
+export async function encryptTonConnectMessage(
+  message: unknown, dappClientId: string, secretKey: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
   if (!canEncryptTonConnectMessage(message)) throw new Error('Message is too large');
 
   const plaintext = bufferFromUtf8(JSON.stringify(message));
   const nonce = crypto.getRandomValues(new Uint8Array(NONCE_BYTES));
 
-  return concat(nonce, nacl.box(plaintext, nonce, parseClientId(dappClientId), secretKey));
+  const sealed = await runBox(parseClientId(dappClientId), secretKey, nonce, (box) => box.encrypt(plaintext));
+
+  return concat(nonce, sealed);
 }
 
-export function decryptTonConnectMessage(
-  body: Uint8Array, dappClientId: string, secretKey: Uint8Array,
-): unknown {
+export async function decryptTonConnectMessage(
+  body: Uint8Array, dappClientId: string, secretKey: Uint8Array<ArrayBuffer>,
+): Promise<unknown> {
   if (body.length < NONCE_BYTES + TAG_BYTES || body.length > MAX_BODY_BYTES) throw new Error('Invalid message size');
 
-  const plaintext = nacl.box.open(
-    body.subarray(NONCE_BYTES), body.subarray(0, NONCE_BYTES), parseClientId(dappClientId), secretKey,
+  // Throws on a forged or corrupted message
+  const plaintext = await runBox(
+    parseClientId(dappClientId), secretKey, body.subarray(0, NONCE_BYTES),
+    (box) => box.decrypt(body.subarray(NONCE_BYTES)),
   );
-  if (!plaintext) throw new Error('Invalid encrypted message');
 
   return JSON.parse(textDecoder.decode(plaintext));
 }
 
-export function answerTonConnectChallenge(challenge: Uint8Array, secretKey: Uint8Array): Uint8Array<ArrayBuffer> {
+export async function answerTonConnectChallenge(
+  challenge: Uint8Array, secretKey: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
   if (challenge.length !== CHALLENGE_BYTES) throw new Error('Invalid challenge size');
 
-  const answer = nacl.box.open(
-    challenge.subarray(KEY_BYTES + NONCE_BYTES),
-    challenge.subarray(KEY_BYTES, KEY_BYTES + NONCE_BYTES),
-    challenge.subarray(0, KEY_BYTES),
-    secretKey,
+  // Throws on a forged or corrupted challenge; the size check above leaves exactly a key-sized answer
+  const answer = await runBox(
+    challenge.slice(0, KEY_BYTES), secretKey, challenge.subarray(KEY_BYTES, KEY_BYTES + NONCE_BYTES),
+    (box) => box.decrypt(challenge.subarray(KEY_BYTES + NONCE_BYTES)),
   );
-  if (!answer || answer.length !== KEY_BYTES) throw new Error('Invalid challenge');
+  const result = answer.slice();
+  clean(answer);
 
-  return new Uint8Array(answer);
+  return result;
 }
 
 export function parseTonConnectRequest(value: unknown): TonConnectRequest {
@@ -349,6 +350,23 @@ export async function readTonConnectComment(payload: string): Promise<string | u
     return textDecoder.decode(new Uint8Array(bytes));
   } catch {
     return undefined;
+  }
+}
+
+// NaCl `crypto_box`: the X25519 secret hashed with HSalsa20 into an XSalsa20-Poly1305 key, wiped after use
+async function runBox<T>(
+  publicKey: Uint8Array<ArrayBuffer>, secretKey: Uint8Array<ArrayBuffer>, nonce: Uint8Array,
+  run: (box: ReturnType<typeof xsalsa20poly1305>) => T,
+): Promise<T> {
+  const shared = await getX25519(secretKey, publicKey);
+  const key = new Uint8Array(KEY_BYTES);
+  hsalsa(SALSA_SIGMA, u32(shared), new Uint32Array(4), u32(key));
+  clean(shared);
+
+  try {
+    return run(xsalsa20poly1305(key, nonce));
+  } finally {
+    clean(key);
   }
 }
 

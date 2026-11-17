@@ -3,6 +3,7 @@ import { PasswordFreshError, RPCError, SessionFreshError } from '../../../lib/gr
 
 import type { ChatListType, ThreadReadState } from '../../../types';
 import {
+  type ApiAvatarUpload,
   type ApiChat,
   type ApiChatAdminRights,
   type ApiChatBannedRights,
@@ -55,7 +56,9 @@ import {
   getPeerKey,
 } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiShareTheme } from '../apiBuilders/gifts';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
+import { buildApiWallpaper } from '../apiBuilders/misc';
 import {
   buildApiBotVerification,
   buildApiPeerId,
@@ -95,7 +98,9 @@ import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {
   applyState, updateChannelState,
 } from '../updates/updateManager';
-import { dispatchErrorUpdate, handleGramJsUpdate, invokeRequest, uploadFile } from './client';
+import {
+  dispatchErrorUpdate, handleGramJsUpdate, invokeRequest, uploadAvatar,
+} from './client';
 import { getPassword } from './twoFaSettings';
 
 type FullChatData = {
@@ -592,15 +597,15 @@ export async function requestChatUpdate({
   const readState = buildThreadReadState(dialog);
   const threadInfo = buildApiThreadInfoFromDialog(chat.id, dialog);
   sendApiUpdate({
+    '@type': 'updateThreadInfo',
+    threadInfo,
+  });
+
+  sendApiUpdate({
     '@type': 'updateThreadReadState',
     chatId: id,
     threadId: MAIN_THREAD_ID,
     readState,
-  });
-
-  sendApiUpdate({
-    '@type': 'updateThreadInfo',
-    threadInfo,
   });
 
   sendApiUpdate({
@@ -671,6 +676,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     reactionsLimit,
     hasScheduled,
     ttlPeriod,
+    themeEmoticon,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -692,6 +698,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       about,
       ttlPeriod,
       members,
+      peerTheme: themeEmoticon ? { type: 'emoticon', emoticon: themeEmoticon } : undefined,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       canViewMembers: true,
       botCommands,
@@ -774,6 +781,9 @@ async function getFullChannelInfo(
     mainTab,
     guardBotId,
     ttlPeriod,
+    themeEmoticon,
+    wallpaper,
+    shareTheme,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -835,6 +845,8 @@ async function getFullChannelInfo(
       about,
       ttlPeriod,
       onlineCount,
+      peerTheme: themeEmoticon ? { type: 'emoticon', emoticon: themeEmoticon } : undefined,
+      wallpaper: wallpaper && buildApiWallpaper(wallpaper),
       inviteLink,
       slowMode: slowmodeSeconds ? {
         seconds: slowmodeSeconds,
@@ -876,6 +888,7 @@ async function getFullChannelInfo(
       arePaidMessagesAvailable: paidMessagesAvailable,
       mainTab: mainTab && buildApiProfileTab(mainTab),
       guardBotId: guardBotId ? buildApiPeerId(guardBotId, 'user') : undefined,
+      shareTheme: shareTheme && buildApiShareTheme(shareTheme),
     },
     chats,
     userStatusesById: statusesById,
@@ -1171,17 +1184,14 @@ export async function createGroupChat({
 }
 
 export async function editChatPhoto({
-  chatId, accessHash, photo,
+  chat, photo,
 }: {
-  chatId: string; accessHash?: string; photo?: File | ApiPhoto;
+  chat: ApiChat; photo?: ApiAvatarUpload | ApiPhoto;
 }) {
-  const chatType = getEntityTypeById(chatId);
+  const chatType = getEntityTypeById(chat.id);
   let inputPhoto: GramJs.TypeInputChatPhoto;
-  if (photo instanceof File) {
-    const uploadedPhoto = await uploadFile(photo);
-    inputPhoto = new GramJs.InputChatUploadedPhoto({
-      file: uploadedPhoto,
-    });
+  if (photo && !('mediaType' in photo)) {
+    inputPhoto = new GramJs.InputChatUploadedPhoto(await uploadAvatar(photo));
   } else if (photo) {
     const photoId = buildInputPhoto(photo);
     if (!photoId) return false;
@@ -1194,11 +1204,11 @@ export async function editChatPhoto({
   return invokeRequest(
     chatType === 'channel'
       ? new GramJs.channels.EditPhoto({
-        channel: buildInputChannel(chatId, accessHash),
+        channel: buildInputChannel(chat.id, chat.accessHash),
         photo: inputPhoto,
       })
       : new GramJs.messages.EditChatPhoto({
-        chatId: buildInputChat(chatId),
+        chatId: buildInputChat(chat.id),
         photo: inputPhoto,
       }),
     {
@@ -1580,18 +1590,21 @@ type ChannelMembersFilter =
   'kicked'
   | 'admin'
   | 'recent'
-  | 'search';
+  | 'search'
+  | 'mentions';
 
 export async function fetchMembers({
   chat,
   memberFilter = 'recent',
   offset,
   query = DEFAULT_PRIMITIVES.STRING,
+  topMsgId,
 }: {
   chat: ApiChat;
   memberFilter?: ChannelMembersFilter;
   offset?: number;
   query?: string;
+  topMsgId?: number;
 }) {
   let filter: GramJs.TypeChannelParticipantsFilter;
 
@@ -1604,6 +1617,9 @@ export async function fetchMembers({
       break;
     case 'search':
       filter = new GramJs.ChannelParticipantsSearch({ q: query });
+      break;
+    case 'mentions':
+      filter = new GramJs.ChannelParticipantsMentions({ q: query, topMsgId });
       break;
     default:
       filter = new GramJs.ChannelParticipantsRecent();
@@ -1994,6 +2010,7 @@ export function toggleForum({
     channel: buildInputChannel(id, accessHash),
     enabled: isEnabled,
     tabs: Boolean(chat.withForumTabs),
+    sidebar: Boolean(chat.withForumSidebar),
   }), {
     shouldReturnTrue: true,
     shouldThrow: true,

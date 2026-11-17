@@ -8,6 +8,7 @@ import type { MediaViewerOrigin, ThreadId } from '../../types';
 import type { MediaViewerItem, ViewableMedia } from './helpers/getViewableMedia';
 
 import { MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION } from '../../config';
+import { isRichMediaMessage } from '../../global/helpers';
 import { hasRichText } from '../../global/helpers/richMessage';
 import {
   selectIsMessageProtected, selectTabState,
@@ -187,9 +188,9 @@ const MediaViewerContent = ({
     lang('PageContentUnsupported'),
     captionContainerId,
     item.type === 'pageBlock' ? item.pageMedia.pageUrl : undefined,
-    item.type === 'pageBlock' ? item.pageMedia.chatId : undefined,
-    item.type === 'pageBlock' ? item.pageMedia.messageId : undefined,
-    item.type === 'pageBlock' ? item.pageMedia.threadId : undefined,
+    item.type === 'pageBlock' ? item.pageMedia.chatId : item.type === 'message' ? item.message.chatId : undefined,
+    item.type === 'pageBlock' ? item.pageMedia.messageId : item.type === 'message' ? item.message.id : undefined,
+    item.type === 'pageBlock' ? item.pageMedia.threadId : item.type === 'message' ? threadId : undefined,
   );
   const buttonText = textMessage && 'buttonText' in textMessage ? textMessage.buttonText : undefined;
   const hasFooter = Boolean(textParts || captionParts);
@@ -265,9 +266,11 @@ export default memo(withGlobal<OwnProps>(
     } = selectTabState(global).mediaViewer;
     const message = item.type === 'message' ? item.message : undefined;
     const sponsoredMessage = item.type === 'sponsoredMessage' ? item.message : undefined;
-    const textMessage = message || sponsoredMessage;
+    // A rich message tile uses its block caption instead of the message text
+    const isRichMediaTile = message && isRichMediaMessage(message);
+    const textMessage = isRichMediaTile ? undefined : message || sponsoredMessage;
     const pageMedia = item.type === 'pageBlock' ? item.pageMedia : undefined;
-    const viewableMedia = selectViewableMedia(global, origin, item);
+    const viewableMedia = selectViewableMedia(global, item);
 
     const maxTimestamp = message && selectMessageTimestampableDuration(global, message, true);
 

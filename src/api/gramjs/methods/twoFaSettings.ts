@@ -19,7 +19,7 @@ export async function getPasswordInfo() {
 
   const { hint, hasPassword } = result;
 
-  return { hint, hasPassword };
+  return { hint, hasPassword: Boolean(hasPassword) };
 }
 
 function onRequestEmailCode(length: number) {

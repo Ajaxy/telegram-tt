@@ -1,14 +1,12 @@
 import { memo } from '../../../../lib/teact/teact';
 
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useLang from '../../../../hooks/useLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Button from '../../../ui/Button';
-
-import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   onStart: NoneToVoidFunction;
@@ -31,7 +29,7 @@ const SettingsTwoFaStart = ({
       <div className="settings-content-header no-border">
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={160}
           className="settings-content-icon"
         />

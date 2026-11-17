@@ -25,7 +25,7 @@ import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTime, secondsToDate } from '../../../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../../../util/localization/format';
-import { formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/text/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { getTransactionTitle, isNegativeAmount } from '../helpers/transaction';
 

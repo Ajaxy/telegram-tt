@@ -1,4 +1,5 @@
 import type { GpuCanvas, GpuDrawGroup, GpuRenderer } from './gpu';
+import type { GpuLensTarget } from './lensGpu';
 import type StandaloneDiamond from './standalone';
 
 import { getOpenModalCount } from '../../util/openModals';
@@ -15,6 +16,7 @@ type Entry = {
   gpu: GpuCanvas;
   isInDialog: boolean;
   isReady: boolean;
+  lensTarget?: GpuLensTarget;
 };
 
 const DIALOG_SELECTOR = 'dialog, [role="dialog"]';
@@ -55,7 +57,7 @@ export function registerStandaloneDiamond(diamond: StandaloneDiamond) {
     // The diamond may be gone already, or have fallen back with the others
     if (!pendingDiamonds.delete(diamond)) return;
 
-    const gpu = renderer && createGpuCanvas(renderer, diamond.canvas, 'icon');
+    const gpu = renderer && createGpuCanvas(renderer, diamond.canvas, diamond.palette);
     if (!renderer || !gpu) {
       diamond.onFallback?.();
       return;
@@ -86,6 +88,7 @@ function removeEntry(diamond: StandaloneDiamond) {
   visibleCanvases.delete(diamond.canvas);
   observer?.unobserve(diamond.canvas);
   entry.gpu.destroy();
+  entry.lensTarget?.destroy();
   if (!entries.size) removeGpuDrawGroup(group);
 }
 
@@ -121,9 +124,9 @@ function drawDiamonds(encoder: GPUCommandEncoder, frameTime: number) {
   });
 }
 
-// The salute goes first and the diamond over it
+// The salute goes first, the diamond over it and the lens over the diamond
 function drawDiamond(encoder: GPUCommandEncoder, diamond: StandaloneDiamond, entry: Entry, frameTime: number) {
-  const { scene, stars } = entry.renderer;
+  const { scene, stars, lens } = entry.renderer;
   const { gpu } = entry;
 
   diamond.advance(frameTime);
@@ -134,7 +137,7 @@ function drawDiamond(encoder: GPUCommandEncoder, diamond: StandaloneDiamond, ent
   if (diamond.bursts.length) {
     stars.draw(
       pass, gpu.starTarget, { x: 0, y: 0, size }, diamond.bursts, diamond.elapsed, diamond.starOpacity,
-      diamond.burstSize,
+      diamond.burstSize, diamond.areStarsLight,
     );
   }
 
@@ -142,11 +145,20 @@ function drawDiamond(encoder: GPUCommandEncoder, diamond: StandaloneDiamond, ent
 
   if (!diamond.isStoneHidden && frameSize > 0) {
     const offset = Math.floor((size - frameSize) / 2);
+    const viewport = { x: offset, y: size - offset - frameSize, size: frameSize };
 
-    scene.draw(
-      pass, gpu.sceneTarget, diamond.drawState, { x: offset, y: size - offset - frameSize, size: frameSize },
-      diamond.elapsed, frameTime, diamond.motion.yaw, diamond.motion.pitch,
+    const pose = scene.draw(
+      pass, gpu.sceneTarget, diamond.drawState, viewport, diamond.elapsed, frameTime, diamond.motion.yaw,
+      diamond.motion.pitch,
     );
+
+    if (lens && diamond.lens) {
+      entry.lensTarget ??= lens.createTarget(size);
+
+      lens.draw(
+        pass, entry.lensTarget, diamond.lens, pose, viewport, size / diamond.canvasSize, diamond.motion.yaw,
+      );
+    }
   }
 
   pass.end();

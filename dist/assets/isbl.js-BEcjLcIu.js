@@ -1,2 +1,0 @@
-import e from"./isbl-D8SR3GGH.js";function t(){t.warned||(t.warned=!0,console.log(`Deprecation (warning): Using file extension in specifier is deprecated, use "highlight.js/lib/languages/isbl" instead of "highlight.js/lib/languages/isbl.js"`))}t();var n=e;export{n as default};
-//# sourceMappingURL=isbl.js-BEcjLcIu.js.map

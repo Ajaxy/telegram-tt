@@ -15,7 +15,6 @@ import useLang from '../../../hooks/useLang';
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
 import Island, { IslandDescription, IslandTitle } from '../../gili/layout/Island';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
 import SettingsActiveWebsite from './SettingsActiveWebsite';
 
@@ -37,24 +36,15 @@ const SettingsActiveWebsites = ({
   orderedHashes,
   onReset,
 }: OwnProps & StateProps) => {
-  const {
-    terminateWebAuthorization,
-    terminateAllWebAuthorizations,
-  } = getActions();
+  const { terminateWebAuthorization, openSettingsConfirmation } = getActions();
 
   const lang = useLang();
-  const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedWebsiteHash, setOpenedWebsiteHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
   const handleTerminateAuthClick = useCallback((hash: string) => {
     terminateWebAuthorization({ hash });
   }, [terminateWebAuthorization]);
-
-  const handleTerminateAllAuth = useCallback(() => {
-    closeConfirmTerminateAllDialog();
-    terminateAllWebAuthorizations();
-  }, [closeConfirmTerminateAllDialog, terminateAllWebAuthorizations]);
 
   const handleOpenSessionModal = useCallback((hash: string) => {
     setOpenedWebsiteHash(hash);
@@ -68,10 +58,10 @@ const SettingsActiveWebsites = ({
 
   // Close when empty
   useEffect(() => {
-    if (!orderedHashes.length) {
+    if (isActive && !orderedHashes.length) {
       onReset();
     }
-  }, [onReset, orderedHashes]);
+  }, [isActive, onReset, orderedHashes]);
 
   useHistoryBack({
     isActive,
@@ -144,7 +134,7 @@ const SettingsActiveWebsites = ({
           icon="stop"
           ripple
           narrow
-          onClick={openConfirmTerminateAllDialog}
+          onClick={() => openSettingsConfirmation({ confirmation: 'terminateAllWebSessions' })}
         >
           {lang('AuthSessionsLogOutApplications')}
         </ListItem>
@@ -153,14 +143,6 @@ const SettingsActiveWebsites = ({
         {lang('ClearOtherWebSessionsHelp')}
       </IslandDescription>
       {renderSessions(orderedHashes)}
-      <ConfirmDialog
-        isOpen={isConfirmTerminateAllDialogOpen}
-        onClose={closeConfirmTerminateAllDialog}
-        title={lang('AuthSessionsLogOutApplications')}
-        text={lang('AreYouSureWebSessions')}
-        confirmHandler={handleTerminateAllAuth}
-        confirmIsDestructive
-      />
       <SettingsActiveWebsite isOpen={isModalOpen} hash={openedWebsiteHash} onClose={handleCloseWebsiteModal} />
     </div>
   );

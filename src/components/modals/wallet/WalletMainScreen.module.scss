@@ -111,3 +111,10 @@
 .historyTabs {
   margin-bottom: 0.5rem;
 }
+
+// Three tiles in a row, 10 points apart, as in the iOS app
+.collectibles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.625rem;
+}

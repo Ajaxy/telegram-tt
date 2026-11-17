@@ -1,6 +1,6 @@
 import { memo } from '../../../lib/teact/teact';
 
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import { LOCAL_TGS_PREVIEW_URLS, LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useLang from '../../../hooks/useLang';
 
@@ -9,8 +9,6 @@ import Button from '../../ui/Button';
 import WalletNoticeScreen, { WalletNoticeActions } from './WalletNoticeScreen';
 
 import styles from './WalletPasscodeRequiredScreen.module.scss';
-
-import lockPreviewUrl from '../../../assets/lock.png';
 
 type OwnProps = {
   onSetUp: NoneToVoidFunction;
@@ -26,7 +24,7 @@ const WalletPasscodeRequiredScreen = ({ onSetUp }: OwnProps) => {
       sticker={(
         <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Lock}
-          previewUrl={lockPreviewUrl}
+          previewUrl={LOCAL_TGS_PREVIEW_URLS.Lock}
           size={STICKER_SIZE}
           className={styles.sticker}
         />

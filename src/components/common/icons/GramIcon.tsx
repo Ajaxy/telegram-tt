@@ -4,7 +4,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import styles from './GramIcon.module.scss';
 
-import GramAppLogo from '../../../assets/icons/gram/gram.png';
+import GramAppLogo from '../../../assets/icons/gram/gram.avif';
 import GramLogo from '../../../assets/icons/gram/gram.svg';
 
 type OwnProps = {

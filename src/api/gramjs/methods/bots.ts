@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { RPCError } from '../../../lib/gramjs/errors';
+import { FloodWaitError, RPCError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type {
@@ -819,4 +819,78 @@ async function invokeUrlAuthRequest(
     }
     throw err;
   }
+}
+
+export type BotWidgetQueryAnswer = { result?: string; error?: 'TIMEOUT' | 'RATE_LIMITED' | 'FAILED' };
+
+export function fetchBotWidgetQueryAnswer({
+  chat, messageId, data, withWallet,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  data: string;
+  // The server attaches the wallet card of the user's profile, creating the wallet if there is none
+  withWallet?: boolean;
+}): Promise<BotWidgetQueryAnswer> {
+  return invokeBotWidgetQuery({
+    chat, messageId, data, queryType: new GramJs.WidgetQueryTypeData({ withWallet: withWallet || undefined }),
+  });
+}
+
+// The client's own deadline, as in tdesktop: a flood wait GramJS sleeps out would otherwise hold the widget for minutes
+const WIDGET_QUERY_TIMEOUT = 30000;
+
+export async function invokeBotWidgetQuery({
+  chat, messageId, data, queryType,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  data: string;
+  queryType: GramJs.TypeWidgetQueryType;
+}): Promise<BotWidgetQueryAnswer> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    const answer = await Promise.race([
+      invokeRequest(new GramJs.messages.GetBotWidgetQueryAnswer({
+        peer: buildInputPeer(chat.id, chat.accessHash),
+        msgId: messageId,
+        queryType,
+        data: new TextEncoder().encode(data),
+      }), {
+        shouldThrow: true,
+      }),
+      new Promise<'timeout'>((resolve) => {
+        timeout = setTimeout(() => resolve('timeout'), WIDGET_QUERY_TIMEOUT);
+      }),
+    ]);
+    if (answer === 'timeout') return { error: 'TIMEOUT' };
+
+    return { result: answer?.result };
+  } catch (err) {
+    if (err instanceof FloodWaitError) return { error: 'RATE_LIMITED' };
+    if (err instanceof RPCError && err.errorMessage === 'WIDGET_RESPONSE_TIMEOUT') return { error: 'TIMEOUT' };
+    return { error: 'FAILED' };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export async function fetchWidgetPublicData({ chat, messageId, hash }: {
+  chat: ApiChat;
+  messageId: number;
+  hash?: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetWidgetPublicData({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    hash: BigInt(hash || 0),
+  }));
+  if (!result) return undefined;
+
+  return {
+    period: result.period,
+    data: result instanceof GramJs.messages.WidgetPublicData ? result.data : undefined,
+    hash: result instanceof GramJs.messages.WidgetPublicData ? result.hash.toString() : undefined,
+  };
 }

@@ -1,0 +1,44 @@
+// The tile of the iOS app: a square with a 16pt radius, the gift on its backdrop and the number on a ribbon
+.root {
+  cursor: var(--custom-cursor, pointer);
+  user-select: none;
+
+  position: relative;
+
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  aspect-ratio: 1;
+  border-radius: 1rem;
+
+  background-color: var(--color-background);
+
+  -webkit-touch-callout: none;
+}
+
+.backdrop,
+.image {
+  position: absolute;
+  inset: 0;
+}
+
+.model {
+  position: relative;
+}
+
+.modelHidden {
+  visibility: hidden;
+}
+
+.silhouette {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}

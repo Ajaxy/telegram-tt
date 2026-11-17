@@ -1,4 +1,4 @@
-import { clamp } from '../../../../util/math';
+import { clamp, getSmoothStep } from '../../../../util/math';
 
 type Rgba = [number, number, number, number];
 
@@ -742,10 +742,4 @@ export function findPassTime(target: number) {
   }
 
   return high;
-}
-
-function getSmoothStep(k: number) {
-  const t = clamp(k, 0, 1);
-
-  return t * t * (3 - 2 * t);
 }

@@ -8,6 +8,7 @@ import {
   DEFAULT_GIF_SEARCH_BOT_USERNAME, GLOBAL_STICKER_SEARCH_LIMIT, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT,
 } from '../../../config';
 import { compact } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
 import { buildVideoFromDocument } from '../apiBuilders/messageContent';
 import { buildApiEmojiStatus } from '../apiBuilders/peers';
 import {
@@ -484,7 +485,7 @@ export async function installStickerSet({ stickerSetId, accessHash }: { stickerS
     sendApiUpdate({
       '@type': 'updateStickerSet',
       id: stickerSetId,
-      stickerSet: { installedDate: Date.now() },
+      stickerSet: { installedDate: getServerTime() },
     });
   }
 }

@@ -33,14 +33,19 @@ import {
   cancelMessageMediaDownload,
   enterMessageSelectMode,
   exitMessageSelectMode,
+  markMessageWidgetSeen,
   toggleMessageSelection,
   updateChatMessage,
   updateFocusedMessage,
+  updateMessageWidgetData,
+  updateMessageWidgetHeight,
+  updateMessageWidgetStorage,
 } from '../../reducers';
 import { pushPlayedTrack } from '../../reducers/audioPlayer';
 import { updateTabState } from '../../reducers/tabs';
 import { replaceTabThreadParam, replaceThreadLocalStateParam, updateThreadReadState } from '../../reducers/threads';
 import {
+  selectAlbumMessageIdToEdit,
   selectAllowedMessageActionsSlow,
   selectCanForwardMessage,
   selectCanForwardMessages,
@@ -59,7 +64,9 @@ import {
   selectTabState,
   selectViewportIds,
 } from '../../selectors';
-import { makeMessageTrackKeyFrom, selectCurrentPlaylistKey } from '../../selectors/audioPlayer';
+import {
+  makeMessageTrackKeyFrom, selectCurrentPlaylistKey, selectPlaybackRoundVideo,
+} from '../../selectors/audioPlayer';
 import { selectMessageDownloadableMedia } from '../../selectors/media';
 import { selectDraft, selectReplyStack, selectThreadInfo } from '../../selectors/threads';
 import { getPeerStarsForMessage } from '../api/messages';
@@ -73,6 +80,49 @@ const SERVICE_NOTIFICATIONS_MAX_AMOUNT = 1e3;
 
 let blurTimeout: number | undefined;
 
+addActionHandler('setMessageWidgetStorage', (global, actions, payload): ActionReturnType => {
+  const {
+    accountId, chatId, messageId, area, values,
+  } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked || global.auth.isLoggingOut
+    || !message?.content.widget || message.isDeleting) return;
+
+  return updateMessageWidgetStorage(global, message, area, values);
+});
+
+addActionHandler('markMessageWidgetSeen', (global, actions, payload): ActionReturnType => {
+  const { accountId, chatId, messageId } = payload;
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked) return undefined;
+
+  return markMessageWidgetSeen(global, chatId, messageId);
+});
+
+addActionHandler('clearMessageWidgetStorage', (global): ActionReturnType => {
+  return { ...global, messageWidgetStorage: {} };
+});
+
+addActionHandler('setMessageWidgetHeight', (global, actions, payload): ActionReturnType => {
+  const {
+    accountId, chatId, messageId, height, resizeAnchor,
+  } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (accountId !== global.currentUserId || global.passcode.isScreenLocked || global.auth.isLoggingOut
+    || !message?.content.widget || message.isDeleting) return;
+
+  return updateMessageWidgetHeight(global, message, height, resizeAnchor);
+});
+
+addActionHandler('setMessagesWidgetPublicData', (global, actions, payload): ActionReturnType => {
+  const { messages, publicData, publicDataHash } = payload;
+
+  messages.forEach(({ chatId, messageId }) => {
+    global = updateMessageWidgetData(global, chatId, messageId, { publicData, publicDataHash });
+  });
+
+  return global;
+});
+
 addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId, scrollOffset, tabId = getCurrentTabId(),
@@ -81,6 +131,14 @@ addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType
   global = replaceThreadLocalStateParam(global, chatId, threadId, 'lastScrollOffset', scrollOffset);
 
   return replaceTabThreadParam(global, chatId, threadId, 'scrollOffset', scrollOffset, tabId);
+});
+
+addActionHandler('setHiddenBotKeyboardId', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, threadId, messageId, tabId = getCurrentTabId(),
+  } = payload;
+
+  return replaceTabThreadParam(global, chatId, threadId, 'hiddenBotKeyboardId', messageId, tabId);
 });
 
 addActionHandler('setEditingId', (global, actions, payload): ActionReturnType => {
@@ -141,7 +199,12 @@ addActionHandler('editLastMessage', (global, actions, payload): ActionReturnType
     return undefined;
   }
 
-  actions.startEditingMessage({ messageId: lastOwnEditableMessageId, tabId });
+  const lastOwnEditableMessage = chatMessages[lastOwnEditableMessageId];
+  const messageId = lastOwnEditableMessage.isInAlbum
+    ? selectAlbumMessageIdToEdit(global, lastOwnEditableMessage)
+    : lastOwnEditableMessageId;
+
+  actions.startEditingMessage({ messageId, tabId });
   return undefined;
 });
 
@@ -182,7 +245,8 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
       : undefined;
   }
   actions.updateDraftReplyInfo({
-    replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, tabId,
+    replyToMsgId: messageId, replyToPeerId: undefined,
+    quoteText: undefined, quoteRich: undefined, quoteOffset: undefined, tabId,
   });
   actions.focusMessage({
     chatId,
@@ -217,8 +281,9 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
     });
   }
 
-  if (effectiveSource?.type === 'richMessage') {
-    const { chatId, messageId } = effectiveSource;
+  // A partial rich message lists only some of its tracks
+  if (item?.type === 'message' && item.documentId && !item.isScheduled) {
+    const { chatId, messageId } = item;
     if (selectChatMessage(global, chatId, messageId)?.content.richMessage?.isPart) {
       actions.loadRichMessage({ chatId, messageId });
     }
@@ -237,6 +302,8 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
       isMuted: isMuted || tabState.audioPlayer.isMuted,
       shuffle: hasSourceChanged ? undefined : selectTabState(global, tabId).audioPlayer.shuffle,
       pendingStep: undefined,
+      // Only consecutive round videos keep the enlarged or detached player
+      roundVideoMode: selectPlaybackRoundVideo(global, item) ? tabState.audioPlayer.roundVideoMode : undefined,
     },
   }, tabId);
 
@@ -402,7 +469,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
     replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote, quoteOffset,
-    scrollTargetPosition, timestamp, tabId = getCurrentTabId(),
+    scrollTargetPosition, timestamp, todoItemId, pollOption, tabId = getCurrentTabId(),
   } = payload;
 
   let { messageId } = payload;
@@ -450,6 +517,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     isResizingContainer,
     quote,
     quoteOffset,
+    todoItemId,
+    pollOption,
     scrollTargetPosition,
     direction: undefined,
   }, tabId);
@@ -595,13 +664,14 @@ addActionHandler('changeRichMediaUploadBlocking', (global, actions, payload): Ac
 
 addActionHandler('openReplyMenu', (global, actions, payload): ActionReturnType => {
   const {
-    fromChatId, messageId, quoteText, quoteOffset, tabId = getCurrentTabId(),
+    fromChatId, messageId, quoteText, quoteRich, quoteOffset, tabId = getCurrentTabId(),
   } = payload;
   return updateTabState(global, {
     replyingMessage: {
       fromChatId,
       messageId,
       quoteText,
+      quoteRich,
       quoteOffset,
     },
     isShareMessageModalShown: true,

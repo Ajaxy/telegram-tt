@@ -117,6 +117,11 @@ export default function useCardTilt(ref: ElementRef<HTMLElement>, isDisabled?: b
 
     return () => {
       isCancelled = true;
+      // A card disabled mid-tilt straightens at once
+      requestMutation(() => {
+        element.style.removeProperty('--tilt-x');
+        element.style.removeProperty('--tilt-y');
+      });
       element.removeEventListener('pointerdown', handleMove);
       element.removeEventListener('pointermove', handleMove);
       element.removeEventListener('pointerleave', handleRelease);

@@ -21,7 +21,7 @@ import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironm
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { isUserId } from '../../../util/entities/ids';
-import { getFirstLetters } from '../../../util/textFormat';
+import { getFirstLetters } from '../../../util/text/textFormat';
 import renderText from '../helpers/renderText';
 
 import useAppLayout from '../../../hooks/useAppLayout';

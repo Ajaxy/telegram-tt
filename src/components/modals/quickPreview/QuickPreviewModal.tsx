@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { TabState } from '../../../global/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { selectTheme, selectThemeValues } from '../../../global/selectors';
+import { selectChatWallpaperSettings } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -94,7 +94,7 @@ const QuickPreviewModal = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => {
-  const { background: customBackground, backgroundColor } = selectThemeValues(global, selectTheme(global)) || {};
+  const { background: customBackground, backgroundColor } = selectChatWallpaperSettings(global) || {};
 
   return {
     customBackground,

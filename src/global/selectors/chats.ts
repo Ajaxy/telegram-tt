@@ -12,7 +12,7 @@ import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
-  getApplicableRestrictionReasons,
+  getBlockingRestrictionReasons,
   getHasAdminRight,
   isChatAdmin,
   isChatChannel,
@@ -59,6 +59,12 @@ export function selectChatListLoadingParameters<T extends GlobalState>(
 
 export function selectIsChatWithSelf<T extends GlobalState>(global: T, chatId: string) {
   return chatId === global.currentUserId;
+}
+
+export function selectCanSetVideoCover<T extends GlobalState>(global: T, chatId: string) {
+  const chat = selectChat(global, chatId);
+  return selectIsChatWithSelf(global, chatId) || Boolean(chat && isChatChannel(chat))
+    || Boolean(selectIsChatWithBot(global, chatId));
 }
 
 export function selectIsChatWithBot<T extends GlobalState>(global: T, chatId: string) {
@@ -421,7 +427,7 @@ export function selectIsChatRestricted<T extends GlobalState>(global: T, chatId:
   const chat = selectChat(global, chatId);
   if (!chat) return false;
 
-  const activeRestrictions = getApplicableRestrictionReasons(
+  const activeRestrictions = getBlockingRestrictionReasons(
     chat.restrictionReasons, global.appConfig.ignoreRestrictionReasons,
   );
   return activeRestrictions.length > 0;

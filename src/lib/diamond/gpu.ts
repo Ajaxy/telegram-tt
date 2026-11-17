@@ -1,6 +1,10 @@
+import type { GpuDeviceHold } from '../gpu/device';
+import type { GpuLensRenderer } from './lensGpu';
 import type { DiamondPalette } from './model';
 import type { GpuDiamondScene, GpuDiamondTarget, GpuStarRenderer } from './sceneGpu';
 
+import { acquireGpuDevice, getIsGpuAvailable } from '../gpu/device';
+import { createGpuLensRenderer } from './lensGpu';
 import { getFrameTime, loadModel } from './model';
 import { createFrameWatchdog, getIsDiamond3dDegraded, markDiamond3dDegraded } from './performance';
 import {
@@ -10,14 +14,15 @@ import {
 import { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import { getIsInBackground } from '../../hooks/window/useBackgroundMode';
 
-// One WebGPU device, scene and salute for every 3D diamond of the page. Each diamond draws straight into its canvas,
-// and the groups that share a frame loop, the icons of the chats and the standalone diamonds, draw from here.
+// One scene and salute on the shared WebGPU device for every 3D diamond of the page. Each diamond draws straight into
+// its canvas, and the groups that share a frame loop, the icons of the chats and the standalone diamonds, draw from here.
 
-export type GpuRenderer = {
-  device: GPUDevice;
-  format: GPUTextureFormat;
+export type GpuRenderer = GpuDeviceHold & {
   scene: GpuDiamondScene;
   stars: GpuStarRenderer;
+  // Only a held diamond shows the lens, so it comes after the first frames, and the diamonds draw without it until then
+  // or if it fails
+  lens?: GpuLensRenderer;
 };
 
 export type GpuCanvas = {
@@ -50,7 +55,7 @@ const attachmentsBySize = new Map<string, Attachments>();
 const watchdog = createFrameWatchdog();
 let rendererPromise: Promise<GpuRenderer | undefined> | undefined;
 let renderer: GpuRenderer | undefined;
-// Set once WebGPU cannot start, so the diamonds fall back at once and do not ask again
+// Set once the scene cannot start, so the diamonds fall back at once and do not ask again
 let isUnavailable = false;
 let canvasCount = 0;
 let frameId: number | undefined;
@@ -62,7 +67,7 @@ getIsDiamond3dDegraded.subscribe(() => {
 getIsInBackground.subscribe(updateGpuPlayback);
 
 export function getCanUseGpu() {
-  return Boolean(navigator.gpu) && !isUnavailable && !getIsDiamond3dDegraded();
+  return getIsGpuAvailable() && !isUnavailable && !getIsDiamond3dDegraded();
 }
 
 export function requestGpuRenderer(): Promise<GpuRenderer | undefined> {
@@ -83,30 +88,23 @@ async function createRenderer(): Promise<GpuRenderer | undefined> {
     return undefined;
   }
 
-  try {
-    const adapter = await navigator.gpu.requestAdapter();
-    // A software adapter is far too slow for these shaders
-    if (!adapter || adapter.info?.isFallbackAdapter) {
-      isUnavailable = true;
-      return undefined;
-    }
+  const gpu = await acquireGpuDevice();
+  if (!gpu) return undefined;
 
-    const device = await adapter.requestDevice();
-    const format = navigator.gpu.getPreferredCanvasFormat();
+  try {
+    const { device, format } = gpu;
     const [scene, stars] = await Promise.all([
       createGpuDiamondScene(device, format),
       createGpuStarRenderer(device, format),
     ]);
 
-    // The diamonds gave up while the device started
+    // The diamonds gave up while the scene started
     if (getIsDiamond3dDegraded()) {
-      device.destroy();
+      gpu.release();
       return undefined;
     }
 
-    const current: GpuRenderer = {
-      device, format, scene, stars,
-    };
+    const current: GpuRenderer = { ...gpu, scene, stars };
 
     void device.lost.then(({ reason }) => {
       if (reason !== 'destroyed' && renderer === current) markDiamond3dDegraded('WebGPU device lost');
@@ -114,9 +112,13 @@ async function createRenderer(): Promise<GpuRenderer | undefined> {
 
     renderer = current;
     scheduleRelease();
+    createGpuLensRenderer(device, format).then((lens) => {
+      current.lens = lens;
+    }, () => undefined);
 
     return current;
   } catch {
+    gpu.release();
     isUnavailable = true;
     return undefined;
   }
@@ -291,6 +293,7 @@ function destroyRenderer() {
   pause();
   attachmentsBySize.forEach(({ textures }) => textures.forEach((texture) => texture.destroy()));
   attachmentsBySize.clear();
-  renderer.device.destroy();
+  const { release } = renderer;
   renderer = undefined;
+  release();
 }

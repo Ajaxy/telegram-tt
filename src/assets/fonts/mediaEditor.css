@@ -1,0 +1,55 @@
+@font-face {
+  font-family: "Suez One";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("SuezOne-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fugaz One";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("FugazOne-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Courier Prime";
+  font-weight: 700;
+
+  font-display: swap;
+  src: url("CourierPrime-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Chewy";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("Chewy-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Sedan";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("Sedan-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Rubik Bubbles";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("RubikBubbles-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Playwrite BE VLG";
+  font-weight: 400;
+
+  font-display: swap;
+  src: url("PlaywriteBEVLG-Regular.woff2") format("woff2");
+}

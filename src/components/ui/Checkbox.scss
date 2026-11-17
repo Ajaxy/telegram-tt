@@ -48,7 +48,9 @@
 
       &::before {
         background-color: transparent;
-        transition: border-color 0.15s ease, background-color 0.15s ease;
+        transition:
+          border-color var(--message-color-transition-duration, 0.15s) ease,
+          background-color var(--message-color-transition-duration, 0.15s) ease;
       }
 
       &::after {
@@ -141,7 +143,9 @@
       border: 0.125rem solid var(--color-borders-input);
       border-radius: 0.25rem;
       background-color: var(--color-background);
-      transition: border-color 0.1s ease, background-color 0.1s ease;
+      transition:
+        border-color var(--message-color-transition-duration, 0.1s) ease,
+        background-color var(--message-color-transition-duration, 0.1s) ease;
     }
 
     &::after {

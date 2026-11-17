@@ -340,6 +340,7 @@ const MiddleHeader = ({
               storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
               emojiStatusSize={EMOJI_STATUS_SIZE}
               onEmojiStatusClick={handleChannelStatusClick}
+              forceRoundAvatar
               noRtl
             />
           )}

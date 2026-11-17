@@ -1,11 +1,12 @@
 import type { ApiChatType } from '../../../api/types';
+import type { BotAppPermissions } from '../../../types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { selectTabBrowserState } from '../../helpers';
 import { addTabStateResetterAction } from '../../helpers/meta';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { updateSharedSettings } from '../../reducers';
+import { updateBotAppPermissions, updateSharedSettings } from '../../reducers';
 import {
   addBrowserTabToOpenList,
   clearOpenedBrowserTabs,
@@ -303,6 +304,32 @@ addActionHandler('closeLocationAccessModal', (global, actions, payload): ActionR
 
   return updateTabState(global, {
     locationAccessModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openMediaAccessModal', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, webAppKey, kinds, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    mediaAccessModal: { bot, webAppKey, kinds },
+  }, tabId);
+});
+
+addActionHandler('closeMediaAccessModal', (global, actions, payload): ActionReturnType => {
+  const { isAccessGranted, tabId = getCurrentTabId() } = payload;
+  const modal = selectTabState(global, tabId).mediaAccessModal;
+  if (!modal) return;
+
+  const permissions: BotAppPermissions = {};
+  modal.kinds.forEach((kind) => {
+    permissions[kind] = isAccessGranted;
+  });
+  global = updateBotAppPermissions(global, modal.bot.id, permissions);
+
+  return updateTabState(global, {
+    mediaAccessModal: undefined,
   }, tabId);
 });
 

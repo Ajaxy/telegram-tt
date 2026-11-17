@@ -2,10 +2,11 @@ import type {
   ApiInlineButtonAction,
   ApiInputRichMessage,
   ApiKeyboardButton,
-  ApiPageBlock,
   ApiRichButton,
   ApiRichText,
 } from '../../api/types';
+
+import { forEachPageBlocksRichText, forEachRichTextNode } from '../../util/text/richText';
 
 export const MAX_BUTTONS_PER_ROW = 8;
 
@@ -40,37 +41,14 @@ export function normalizeButtonText(text: ApiRichText): ApiRichText {
 
 export function getRichMessageButtons(richMessage: ApiInputRichMessage) {
   const buttons: ApiRichButton[] = [];
-  richMessage.blocks.forEach(visitBlock);
+  forEachPageBlocksRichText(richMessage.blocks, (text) => forEachRichTextNode(text, (node) => {
+    if (node.type === 'button') buttons.push(node);
+  }), (block) => {
+    if (block.type !== 'buttonRow') return true;
+
+    buttons.push(...block.buttons);
+    return false;
+  });
+
   return buttons;
-
-  function visitText(text: ApiRichText) {
-    if (text.type === 'button') buttons.push(text);
-    if (text.type === 'concat') text.texts.forEach(visitText);
-    else if ('text' in text && typeof text.text === 'object') visitText(text.text);
-  }
-
-  function visitBlock(block: ApiPageBlock) {
-    if ('text' in block) visitText(block.text);
-    if ('title' in block && typeof block.title === 'object') visitText(block.title);
-    if ('caption' in block) {
-      if ('type' in block.caption) visitText(block.caption);
-      else {
-        visitText(block.caption.text);
-        visitText(block.caption.credit);
-      }
-    }
-    if ('blocks' in block) block.blocks.forEach(visitBlock);
-    if (block.type === 'buttonRow') {
-      buttons.push(...block.buttons);
-    } else if (block.type === 'list' || block.type === 'orderedList') {
-      block.items.forEach((item) => {
-        if (item.type === 'text') visitText(item.text);
-        else item.blocks.forEach(visitBlock);
-      });
-    } else if (block.type === 'table') {
-      block.rows.forEach((row) => row.cells.forEach((cell) => {
-        if (cell.text) visitText(cell.text);
-      }));
-    }
-  }
 }

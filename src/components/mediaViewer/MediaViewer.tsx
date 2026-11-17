@@ -23,8 +23,13 @@ import { ANIMATION_END_DELAY } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getMediaSearchType,
-  getMessageContentIds,
-  getMessagePaidMedia, isChatAdmin,
+  getMessagePaidMedia,
+  getSharedMediaKey,
+  getSharedMediaKeys,
+  isChatAdmin,
+  isRichMediaMessage,
+  parseSharedMediaKey,
+  type SharedMediaKey,
 } from '../../global/helpers';
 import { hasRichText } from '../../global/helpers/richMessage';
 import {
@@ -193,11 +198,9 @@ const MediaViewer = ({
     return true;
   })();
 
-  const messageMediaIds = useMemo(() => {
-    return withDynamicLoading
-      ? collectedMessageIds
-      : getMessageContentIds(chatMessages || {}, collectedMessageIds || [], contentType || 'media');
-  }, [chatMessages, collectedMessageIds, contentType, withDynamicLoading]);
+  const mediaKeys = useMemo<SharedMediaKey[] | undefined>(() => (
+    getSharedMediaKeys(chatMessages || {}, collectedMessageIds || [], contentType || 'media')
+  ), [chatMessages, collectedMessageIds, contentType]);
 
   if (isOpen && (!prevSenderId || prevSenderId !== senderId || animationKeyRef.current === undefined)) {
     animationKeyRef.current = isSingle ? 0 : (messageId || mediaIndex);
@@ -247,7 +250,9 @@ const MediaViewer = ({
   const prevOrigin = usePrevious(origin);
   const prevItem = usePrevious(currentItem);
   const prevBestImageData = usePrevious(bestImageData);
-  const textMessage = currentItem?.type === 'message' ? currentItem.message : undefined;
+  // A rich message tile uses its block caption instead of the message text
+  const textMessage = currentItem?.type === 'message' && !isRichMediaMessage(currentItem.message)
+    ? currentItem.message : undefined;
   const textParts = textMessage
     ? renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true })
     : undefined;
@@ -424,7 +429,12 @@ const MediaViewer = ({
     }
 
     if (item.type === 'message' && withDynamicLoading) {
-      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: item.message.id });
+      searchChatMediaMessages({
+        chatId,
+        threadId,
+        currentMediaMessageId: item.message.id,
+        mediaType: contentType === 'gif' ? 'gif' : 'media',
+      });
     }
   });
 
@@ -487,13 +497,15 @@ const MediaViewer = ({
       }
     }
 
-    const index = messageMediaIds?.indexOf(fromMessage.id);
+    const index = mediaKeys?.indexOf(getSharedMediaKey(fromMessage, fromMediaIndex));
     if (index === undefined || index === -1) return undefined;
-    const nextIndex = index + direction;
-    const nextMessageId = messageMediaIds![nextIndex];
+    const nextKey = mediaKeys![index + direction];
+    if (nextKey === undefined) return undefined;
+
+    const { messageId: nextMessageId, mediaIndex: nextMediaIndex } = parseSharedMediaKey(nextKey);
     const nextMessage = chatMessages?.[nextMessageId];
     if (nextMessage) {
-      return { type: 'message', message: nextMessage };
+      return { type: 'message', message: nextMessage, mediaIndex: nextMediaIndex };
     }
 
     return undefined;
@@ -528,13 +540,18 @@ const MediaViewer = ({
 
   const handleBeforeDelete = useLastCallback(() => {
     const mediaCount = profilePhotos?.photos.length
-      || standaloneMedia?.length || pageMedia?.blocks.length || messageMediaIds?.length || 0;
+      || standaloneMedia?.length || pageMedia?.blocks.length || mediaKeys?.length || 0;
     if (mediaCount <= 1 || !currentItem) {
       handleClose();
       return;
     }
     // Before deleting, select previous media
-    const prevMedia = getNextItem(currentItem, -1);
+    let prevMedia = getNextItem(currentItem, -1);
+    // The whole message gets deleted, so skip its other tiles
+    while (prevMedia?.type === 'message' && currentItem.type === 'message'
+      && prevMedia.message.id === currentItem.message.id) {
+      prevMedia = getNextItem(prevMedia, -1);
+    }
     if (prevMedia) {
       openMediaViewerItem(prevMedia);
       return;
@@ -676,7 +693,7 @@ export default memo(withGlobal(
       const currentItem = getMediaViewerItem({
         avatarOwner, standaloneMedia, pageMedia, profilePhotos, mediaIndex,
       });
-      const viewableMedia = selectViewableMedia(global, origin, currentItem);
+      const viewableMedia = selectViewableMedia(global, currentItem);
 
       return {
         profilePhotos,
@@ -728,7 +745,7 @@ export default memo(withGlobal(
     const currentItem = getMediaViewerItem({
       message, standaloneMedia, pageMedia, mediaIndex, sponsoredMessage,
     });
-    const viewableMedia = selectViewableMedia(global, origin, currentItem);
+    const viewableMedia = selectViewableMedia(global, currentItem);
 
     let chatMessages: Record<number, ApiMessage> | undefined;
 
@@ -747,7 +764,8 @@ export default memo(withGlobal(
 
     if (chatId && threadId && messageId) {
       if (withDynamicLoading && (isOriginInline || isOriginAlbum)) {
-        const currentSearch = selectCurrentChatMediaSearch(global, 'media');
+        const isGif = viewableMedia && getMediaSearchType(viewableMedia.media) === 'gif';
+        const currentSearch = selectCurrentChatMediaSearch(global, isGif ? 'gif' : 'media');
         isLoadingMoreMedia = Boolean(currentSearch?.isLoading);
         const { foundIds } = (currentSearch?.currentSegment) || {};
         collectedMessageIds = foundIds;

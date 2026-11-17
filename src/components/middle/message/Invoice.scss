@@ -2,7 +2,7 @@
   .title {
     margin-bottom: 0;
     font-weight: var(--font-weight-medium);
-    color: var(--accent-color);
+    color: var(--message-accent, var(--accent-color));
   }
 
   .info {
@@ -49,9 +49,9 @@
         border-radius: var(--border-radius-messages-small);
 
         font-weight: var(--font-weight-medium);
-        color: var(--color-white);
+        color: var(--message-media-text);
 
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: var(--message-media-background);
       }
     }
 

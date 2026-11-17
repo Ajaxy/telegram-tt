@@ -1,3 +1,54 @@
+// Matches `WALLPAPER_TRANSITION_MS` and the `easeInOut` gradient morph, so the pattern and colors change together
+$wallpaper-transition: 0.3s cubic-bezier(0.37, 0, 0.63, 1);
+
+.frame {
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+
+  @media print {
+    display: none;
+  }
+}
+
+.chatWallpaperFrame {
+  @media (max-width: 925px) {
+    :global(#Main.left-column-open) & {
+      transform: translate3d(calc(var(--folders-sidebar-width) + 28.5rem), 0, 0);
+    }
+
+    :global(#Main.left-column-animating) & {
+      transition: transform var(--layer-transition);
+    }
+  }
+
+  @media (min-width: 926px) {
+    position: relative;
+
+    grid-area: 1 / 2;
+
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+
+    :global(#Main.folders-sidebar-visible) & {
+      grid-column: 3;
+    }
+  }
+
+  @media (min-width: 601px) {
+    :global(#Main.right-column-open) & {
+      width: calc(100% - var(--right-column-width));
+    }
+
+    :global(#Main.right-column-animating) & {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+      transition: width var(--layer-transition);
+    }
+  }
+}
+
 .background {
   position: absolute;
   z-index: -1;
@@ -34,7 +85,7 @@
   }
 
   :global(body:not(.no-page-transitions)) &.withTransition {
-    transition: background-color 0.2s;
+    transition: background-color $wallpaper-transition;
 
     &.customBgImage::before {
       transition: background-image var(--layer-transition);
@@ -63,55 +114,182 @@
     opacity: 1;
   }
 
-  // A masked pattern whose mask blob hasn't loaded yet: keep the ready canvas hidden so its full,
-  // unmasked gradient doesn't flash over the whole background before `withMaskedPattern` applies.
-  &.maskedPatternPending .gradientCanvas {
-    opacity: 0;
-  }
-
-  :global(body:not(.no-page-transitions)) & {
-    transition: background-color 0.3s ease;
-  }
-
-  :global(body:not(.no-page-transitions)) & .gradientCanvas {
-    transition: opacity 0.3s ease;
-  }
-
-  :global(body:not(.no-page-transitions)) &.withPattern::after {
-    transition: opacity 0.3s ease;
-  }
-
-  &.withPattern::after {
-    content: "";
-
+  .patternLayer {
+    isolation: isolate;
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
 
-    opacity: var(--pattern-intensity, 0.5);
-    // Strong black doodles soft-lit over the gradient darken it visibly on any background — matching
-    // WebK. A muted `--pattern-color` tint blends to near-nothing here, so it's not used.
-    background-color: #000;
-    mix-blend-mode: soft-light;
-
-    mask-image: var(--custom-pattern, url("../assets/pattern.svg"));
-    mask-repeat: repeat;
-    mask-position: center;
-    mask-size: 26.875rem auto;
+    opacity: 0;
   }
 
-  // Masked mode: the pattern masks the animated gradient itself, so the doodles reveal the
-  // gradient over the black base (used for dark wallpapers, where the intensity is negative)
-  &.withMaskedPattern .gradientCanvas {
-    mask-image: var(--custom-pattern, url("../assets/pattern.svg"));
-    mask-repeat: repeat;
-    mask-position: center;
-    mask-size: 26.875rem auto;
+  .patternCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+  }
+
+  // Crossfading layers add up to full opacity. With normal blending, a filled layer would let
+  // the gradient show through it mid-fade.
+  .patternCanvasEntering,
+  .patternCanvasLeaving {
+    mix-blend-mode: plus-lighter;
+  }
+
+  .patternCanvasEntering {
+    animation: pattern-fade-in $wallpaper-transition;
+  }
+
+  .patternCanvasLeaving {
+    animation: pattern-fade-out $wallpaper-transition forwards;
+  }
+
+  // The layers come from the cached `wallpaper-snapshot.css`, which is empty until one is saved
+  .snapshot {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  .wallpaperSnapshot {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    animation: pattern-fade-out $wallpaper-transition forwards;
+  }
+
+  :global(body:not(.no-page-transitions)) & {
+    transition: background-color $wallpaper-transition;
+  }
+
+  :global(body:not(.no-page-transitions)) & .gradientCanvas,
+  :global(body:not(.no-page-transitions)) &.withPattern .patternLayer {
+    transition: opacity $wallpaper-transition;
+  }
+
+  &.withPattern .patternLayer {
+    opacity: var(--pattern-intensity, 0.5);
+    mix-blend-mode: soft-light;
+  }
+
+  &.withPlainPattern .patternLayer {
+    mix-blend-mode: normal;
+  }
+
+  &.withDimmedPattern.customBgColor::before {
+    z-index: 1;
+    display: block;
+    opacity: var(--pattern-dimming);
+    background: #000;
+  }
+
+  // Masked mode: the pattern canvas covers the gradient with the base color except for the doodles,
+  // which reveal the gradient over the black base in dark mode
+  &.withMaskedPattern .patternLayer {
+    opacity: 1;
   }
 
   &.withMaskedPattern .gradientCanvas[data-ready] {
     opacity: var(--pattern-intensity, 0.5);
+  }
+
+  // Keep the gradient hidden until the current pattern is drawn, so it doesn't flash over the whole background
+  &.maskedPatternPending .gradientCanvas,
+  &.maskedPatternPending .gradientCanvas[data-ready] {
+    opacity: 0;
+  }
+
+  &.noAnimation {
+    &, &::before, .gradientCanvas, .patternLayer {
+      transition: none !important;
+    }
+  }
+}
+
+@keyframes pattern-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pattern-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.leftExtension,
+.rightExtension {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  overflow: hidden;
+  display: none;
+
+  width: 100%;
+
+  background-color: var(--theme-background-color);
+
+  &::before,
+  &::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+    transform: scaleX(-1) scale(1.1);
+
+    background-image: var(--custom-background);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  &::before {
+    filter: blur(1.5rem);
+  }
+
+  &::after {
+    // Align the fade with the visible crop of the scaled image
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: calc(100% / 1.1) 100%;
+  }
+
+  .blurred ~ &::after {
+    filter: blur(12px);
+  }
+
+  .chatWallpaperFrame & {
+    display: block;
+  }
+}
+
+.leftExtension {
+  right: 100%;
+
+  &::after {
+    mask-image: linear-gradient(to right, #000, transparent calc(2rem / 1.1));
+  }
+}
+
+.rightExtension {
+  left: 100%;
+
+  &::after {
+    mask-image: linear-gradient(to left, #000, transparent calc(2rem / 1.1));
   }
 }

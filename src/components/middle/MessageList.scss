@@ -104,6 +104,42 @@
     scroll-snap-type: y proximity;
   }
 
+  .messages-container.with-bubble-canvas {
+    position: relative;
+    z-index: 0;
+
+    // The message must not form a stacking context, so the row highlight can sink under the canvas
+    // instead of shining through transparent bubbles
+    .Message,
+    .ActionMessage {
+      transform: none;
+
+      &::before {
+        z-index: -2;
+      }
+    }
+
+    // Swiping the wrapper keeps the row highlight below the canvas
+    .Message.own:not(.is-deleting) > .message-content-wrapper {
+      transition: transform var(--select-transition), translate 0.2s ease;
+    }
+
+    .Message.own.is-swiped {
+      transform: none !important;
+
+      > .message-content-wrapper {
+        translate: -2.5rem;
+      }
+    }
+  }
+
+  .bubble-canvas {
+    pointer-events: none;
+    position: absolute;
+    z-index: -1;
+    left: 0;
+  }
+
   .messages-container {
     display: flex;
     flex-direction: column;
@@ -566,8 +602,8 @@
     margin-top: -0.375rem;
   }
 
-  .Transition_slide-from > &,
-  .Transition_slide-to > & {
+  .Transition_slide-from &,
+  .Transition_slide-to & {
     scrollbar-color: transparent transparent !important;
 
     &::-webkit-scrollbar-thumb {
@@ -644,7 +680,7 @@
       transform: translate3d(0, 0, 0);
     }
 
-    body.is-symbol-menu-open & {
+    body.has-symbol-menu-shift & {
       transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
     }
   }

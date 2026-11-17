@@ -69,6 +69,7 @@
 }
 
 #FoldersSidebar {
+  grid-area: 1 / 1;
   align-self: stretch;
 }
 
@@ -80,6 +81,7 @@
   position: relative;
 
   overflow: hidden;
+  grid-area: 1 / 1;
 
   width: 33vw;
   min-width: var(--left-column-min-width);
@@ -100,6 +102,7 @@
     .folders-sidebar-visible & {
       --left-column-max-width: calc(40vw - var(--folders-sidebar-width));
 
+      grid-column: 2;
       margin-left: 0.5rem;
     }
   }
@@ -234,6 +237,11 @@
 }
 
 #MiddleColumn {
+  grid-area: 1 / 2;
+
+  .folders-sidebar-visible & {
+    grid-column: 3;
+  }
 
   #Main.history-animation-disabled & {
     transition: none;
@@ -258,7 +266,7 @@
     }
 
     #Main.left-column-open & {
-      transform: translate3d(calc(33.5rem), 0, 0);
+      transform: translate3d(calc(var(--folders-sidebar-width) + 28.5rem), 0, 0);
     }
 
     body.no-right-column-animations #Main.right-column-open &,

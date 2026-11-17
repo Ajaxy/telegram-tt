@@ -32,7 +32,13 @@ type QrCodeStylingOptions = {
   };
 };
 
+type QrCodeMatrix = {
+  getModuleCount(): number;
+};
+
 export default class QrCodeStyling {
+  _qr?: QrCodeMatrix;
+
   constructor(options: QrCodeStylingOptions);
 
   update(options: QrCodeStylingOptions): void;

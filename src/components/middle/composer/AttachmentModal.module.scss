@@ -1,11 +1,8 @@
 .root {
   --border-radius-default: 0.625rem;
 
-  // The Media Editor renders in its own portal and fully covers this modal while open. Hide the
-  // modal's backdrop and dialog so they don't show behind the editor's fade-in transition.
   &.editorActive {
     pointer-events: none;
-    opacity: 0;
   }
 
   :global {
@@ -115,6 +112,12 @@
   @media (max-width: 600px) {
     max-height: 80vh;
   }
+}
+
+.gifSeparateHint {
+  margin: 0.5rem 1.5rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
 }
 
 .caption-wrapper {

@@ -14,12 +14,12 @@ import { ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../../conf
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { makeMessageTrackKey, makeScheduledMessageTrackKey } from '../../../util/audioPlayback/mediaPool';
 import * as playbackController from '../../../util/audioPlayback/playbackController';
-import { isUserId } from '../../../util/entities/ids';
+import { isChannelId, isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
-import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
+import { buildMessageKey, getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { buildSearchResultKey } from '../../../util/keys/searchResultKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
@@ -37,6 +37,7 @@ import {
   isDeletedUser,
   isMessageLocal,
   isUserBot,
+  parseSharedMediaKey,
   pickMatchingTypingDraftMessage,
   runForAllTabs,
   WINDOWED_MEDIA_SEARCH_TYPES,
@@ -57,10 +58,12 @@ import {
   deleteChatMessages,
   deleteChatScheduledMessages,
   deleteEphemeralMessages,
+  deleteMessageWidgetStorage,
   deletePeerPhoto,
   deleteQuickReply,
   deleteQuickReplyMessages,
   deleteTopic,
+  moveMessageWidgetStorage,
   removeChatFromChatLists,
   replaceWebPage,
   updateChatLastMessageId,
@@ -69,6 +72,7 @@ import {
   updateEphemeralMessage,
   updateListedIds,
   updateMessageTranslations,
+  updateMessageWidgetData,
   updatePeerFullInfo,
   updatePoll,
   updatePollVote,
@@ -91,7 +95,6 @@ import {
 } from '../../reducers/threads';
 import { updateUserFullInfo } from '../../reducers/users';
 import {
-  selectCanAnimateSnapEffect,
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
@@ -131,7 +134,6 @@ import {
 } from '../../selectors/threads';
 
 const ANIMATION_DELAY = 350;
-const SNAP_ANIMATION_DELAY = 1000;
 const VIDEO_PROCESSING_NOTIFICATION_DELAY = 1000;
 let lastVideoProcessingNotificationTime = 0;
 
@@ -343,10 +345,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
 
         const playbackSource = selectPlaybackSource(global, tabId);
-        if (playbackSource?.type === 'chat' && playbackSource.chatId === chatId
+        const newKeys = playbackSource?.type === 'chat' && playbackSource.chatId === chatId
           && playbackSource.threadId === messageThreadId
-          && selectPlaylistKeys(global, tabId)?.includes(newMessage.id)) {
-          global = appendShufflePlaylist(global, [newMessage.id], selectIsPlaylistFullyLoaded(global, tabId), tabId);
+          ? selectPlaylistKeys(global, tabId)?.filter((key) => parseSharedMediaKey(key).messageId === newMessage.id)
+          : undefined;
+        if (newKeys?.length) {
+          global = appendShufflePlaylist(global, newKeys, selectIsPlaylistFullyLoaded(global, tabId), tabId);
         }
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message, tabId)) {
@@ -768,6 +772,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const currentMessage = selectChatMessage(global, chatId, localId);
 
+      global = moveMessageWidgetStorage(global, chatId, localId, message.id);
       global = deleteChatMessages(global, chatId, [localId], { shouldPreserveMedia: true });
 
       // Edge case for "Send When Online"
@@ -791,7 +796,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = {
         ...global,
         fileUploads: {
-          byMessageKey: omit(global.fileUploads.byMessageKey, [getMessageKey(message)]),
+          byMessageKey: omit(global.fileUploads.byMessageKey, [buildMessageKey(chatId, localId)]),
         },
       };
 
@@ -810,19 +815,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           );
         }
         const { voice, video } = message.content;
-        const nextSource = source?.type === 'richMessage' && source.messageId === localId
-          ? { ...source, messageId: message.id }
-          : source;
         global = updateTabState(global, {
           audioPlayer: {
             ...selectTabState(global, tabId).audioPlayer,
             activeItem: { ...activeItem, messageId: message.id },
-            source: nextSource?.type === 'single' ? {
+            source: source?.type === 'single' ? {
               type: 'chat',
               chatId,
               threadId: activeItem.threadId,
               mediaType: (voice || video) ? 'voice' : 'audio',
-            } : nextSource,
+            } : source,
           },
         }, tabId);
       });
@@ -893,6 +895,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         previousLocalId: localId,
         isDeleting: undefined,
       });
+      global = {
+        ...global,
+        fileUploads: {
+          byMessageKey: omit(global.fileUploads.byMessageKey, [buildMessageKey(chatId, localId)]),
+        },
+      };
 
       runForAllTabs(global, (tabId) => {
         const { audioPlayer } = selectTabState(global, tabId);
@@ -977,7 +985,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (messagesById && !isUserId(chatId)) {
         const tabId = getCurrentTabId();
-        global = deleteChatMessages(global, chatId, Object.keys(messagesById).map(Number));
+        global = deleteChatMessages(global, chatId, Object.keys(messagesById).map(Number), {
+          shouldPreserveWidgetStorage: true,
+        });
         setGlobal(global);
         actions.loadFullChat({ chatId, force: true });
         actions.loadViewportMessages({ chatId, threadId: MAIN_THREAD_ID, tabId });
@@ -1053,6 +1063,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       global = getGlobal();
+      global = deleteMessageWidgetStorage(global, chatId);
       global = removeChatFromChatLists(global, chatId);
       setGlobal(global);
 
@@ -1104,6 +1115,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       setGlobal(global);
 
+      break;
+    }
+
+    case 'updateMessageWidgetData': {
+      const {
+        chatId, messageId, chatData, publicData, publicDataHash,
+      } = update;
+
+      global = updateMessageWidgetData(global, chatId, messageId, { chatData, publicData, publicDataHash });
+      setGlobal(global);
       break;
     }
 
@@ -1620,15 +1641,17 @@ export function deleteParticipantHistory<T extends GlobalState>(
 ) {
   const byId = selectChatMessages(global, chatId);
 
-  const messageIds = Object.values(byId).filter((message) => {
+  const messageIds = Object.values(byId || {}).filter((message) => {
     return message.senderId === peerId;
   }).map((message) => message.id);
+  const storedIds = Object.entries(global.messageWidgetStorage[chatId] || {})
+    .filter(([, stored]) => stored.senderId === peerId).map(([id]) => Number(id));
 
-  if (!messageIds.length) {
+  if (!messageIds.length && !storedIds.length) {
     return;
   }
 
-  deleteMessages(global, chatId, messageIds, actions);
+  deleteMessages(global, chatId, unique([...messageIds, ...storedIds]), actions);
 }
 
 export function deleteThread<T extends GlobalState>(
@@ -1638,30 +1661,40 @@ export function deleteThread<T extends GlobalState>(
   actions: RequiredGlobalActions,
 ) {
   const byId = selectChatMessages(global, chatId);
-  if (!byId) {
-    return;
-  }
 
-  const messageIds = Object.values(byId).filter((message) => {
+  const messageIds = Object.values(byId || {}).filter((message) => {
     const messageThreadId = selectThreadIdFromMessage(global, message);
     return messageThreadId === threadId;
   }).map((message) => message.id);
+  const storedIds = Object.entries(global.messageWidgetStorage[chatId] || {})
+    .filter(([, stored]) => stored.threadId === threadId).map(([id]) => Number(id));
 
-  if (!messageIds.length) {
+  if (!messageIds.length && !storedIds.length) {
     return;
   }
 
-  deleteMessages(global, chatId, messageIds, actions);
+  deleteMessages(global, chatId, unique([...messageIds, ...storedIds]), actions);
 }
 
 export function deleteMessages<T extends GlobalState>(
   global: T, chatId: string | undefined, ids: number[], actions: RequiredGlobalActions,
 ) {
+  if (chatId) {
+    global = deleteMessageWidgetStorage(global, chatId, ids);
+  } else {
+    Object.keys(global.messageWidgetStorage).forEach((storedChatId) => {
+      if (!isChannelId(storedChatId)) global = deleteMessageWidgetStorage(global, storedChatId, ids);
+    });
+  }
+
   // Channel update
 
   if (chatId) {
     const chat = selectChat(global, chatId);
-    if (!chat) return;
+    if (!chat) {
+      setGlobal(global);
+      return;
+    }
 
     const threadIdsToUpdate = new Set<ThreadId>();
     threadIdsToUpdate.add(MAIN_THREAD_ID);
@@ -1801,14 +1834,13 @@ function deleteChatMessagesWithAnimation<T extends GlobalState>(global: T, chatI
     global = updateChatMessage(global, chatId, id, { isDeleting: true });
   });
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
   setTimeout(() => {
     global = getGlobal();
     // Prevent local deletion of sent messages in case of desync
     const stillDeletedIds = ids.filter((id) => selectChatMessage(global, chatId, id)?.isDeleting);
     global = deleteChatMessages(global, chatId, stillDeletedIds);
     setGlobal(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 
   return global;
 }
@@ -1833,7 +1865,6 @@ export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(
   });
   setGlobal(global);
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
   setTimeout(() => {
     global = getGlobal();
     const stillDeletingIds = messages
@@ -1842,7 +1873,7 @@ export function deleteEphemeralMessagesWithAnimation<T extends GlobalState>(
     global = deleteEphemeralMessages(global, chatId, stillDeletingIds);
     setGlobal(global);
     scheduleEphemeralExpiration(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 }
 
 function isEphemeralMessageInCurrentThread<T extends GlobalState>(
@@ -1883,11 +1914,9 @@ function deleteScheduledMessages<T extends GlobalState>(
     }
   });
 
-  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
-
   setTimeout(() => {
     global = getGlobal();
     global = deleteChatScheduledMessages(global, chatId, ids);
     setGlobal(global);
-  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
+  }, ANIMATION_DELAY);
 }

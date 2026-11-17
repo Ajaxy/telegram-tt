@@ -49,6 +49,95 @@
   margin-top: 1rem;
 }
 
+// `UniqueGiftHeader` positions its backdrop against the nearest positioned ancestor. In gift modals that is the modal;
+// here the header takes that role, so the backdrop stays inside it.
+.giftHeader {
+  position: relative;
+  border-radius: 1.25rem;
+}
+
+.giftNumber {
+  font-size: 0.875em;
+}
+
+.giftActions {
+  z-index: 1;
+
+  display: flex;
+  gap: 0.5rem;
+
+  width: 100%;
+  margin-top: 0.375rem;
+  padding-inline: 1rem;
+}
+
+// Three actions share the header, so the label keeps 8 points from the edges, as in the iOS app, instead of the
+// default button padding
+.giftAction {
+  flex-basis: 0;
+  flex-grow: 1;
+  padding-inline: 0.5rem;
+
+  // The icon and label wrapper of the button keeps its content width, so it would not let the label shrink
+  :global(.with-icon-top) {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
+// As in the iOS app, a gift of a collection that cannot color the card dims the action, which still explains why
+.giftActionRestricted {
+  opacity: 0.5;
+}
+
+// As in the iOS app, a label longer than its button is cut with an ellipsis
+.giftActionText {
+  overflow: hidden;
+
+  max-width: 100%;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-normal);
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.giftActionIcon {
+  font-size: 1.5rem;
+}
+
+// A table value starts at the cell's edge. `WalletAddressGroups` centers its text with a class of the same weight, so
+// the table class lifts this rule above it.
+.table .owner {
+  font-size: 0.875rem;
+  text-align: start;
+}
+
+.giftAttribute,
+.giftValue {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.giftAttribute {
+  cursor: var(--custom-cursor, pointer);
+
+  padding: 0;
+  border: none;
+
+  font: inherit;
+  color: inherit;
+
+  background: none;
+}
+
+.giftAttributeName {
+  color: var(--color-primary);
+}
+
+.showInGifts,
 .done {
   align-self: stretch;
   margin-top: 0.5rem;

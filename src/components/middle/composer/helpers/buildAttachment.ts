@@ -1,4 +1,5 @@
-import type { ApiAttachment, ApiVideo } from '../../../../api/types';
+import type { ApiAttachment, ApiDimensions, ApiVideo } from '../../../../api/types';
+import type { MediaEditorResult } from '../../../ui/mediaEditor/MediaEditor';
 
 import {
   GIF_MIME_TYPE,
@@ -13,6 +14,7 @@ import {
   preloadVideo,
 } from '../../../../util/files';
 import { resizeImageInBackground } from '../../../../util/imageResize';
+import { createEditDocument, getAttachedStickers } from '../../../ui/mediaEditor/editDocument';
 
 const MAX_STANDARD_QUALITY_IMG_SIZE = 1280; // px
 const MAX_HIGH_QUALITY_IMG_SIZE = 2560;
@@ -171,6 +173,31 @@ export async function prepareAttachment(attachment: ApiAttachment): Promise<ApiA
   }
 }
 
+export function applyVideoEdit(attachment: ApiAttachment, result: Extract<MediaEditorResult, { kind: 'video' }>) {
+  let { previewBlobUrl } = attachment;
+  if (result.previewBlob) {
+    revokeGeneratedUrl(previewBlobUrl, attachment.blobUrl);
+    previewBlobUrl = URL.createObjectURL(result.previewBlob);
+  }
+
+  if (attachment.videoCover) URL.revokeObjectURL(attachment.videoCover.blobUrl);
+  const { cover } = result;
+
+  return {
+    ...attachment,
+    quick: { ...result.outputSize, duration: result.outputDuration },
+    previewBlobUrl,
+    isPreparing: undefined,
+    editState: result.editState,
+    videoProcessing: result.processing,
+    videoQualityLevel: result.qualityLevel,
+    shouldSendAsGif: result.isGif || undefined,
+    attachedStickers: getAttachedStickers(result.editState.document),
+    videoCover: cover
+      ? { blobUrl: URL.createObjectURL(cover.blob), width: cover.width, height: cover.height } : undefined,
+  };
+}
+
 export function prepareAttachmentsToSend(
   attachments: ApiAttachment[], shouldSendCompressed?: boolean,
 ): ApiAttachment[] {
@@ -185,10 +212,14 @@ export function prepareAttachmentsToSend(
       return attach;
     }
 
+    const isPhotoGif = attach.shouldSendAsGif && SUPPORTED_PHOTO_CONTENT_TYPES.has(attach.mimeType);
+
     return {
       ...attach,
       shouldSendAsFile: !(attach.voice || attach.audio || attach.isRoundVideo) || undefined,
       shouldSendAsSpoiler: undefined,
+      shouldSendAsGif: isPhotoGif ? undefined : attach.shouldSendAsGif,
+      videoProcessing: isPhotoGif ? undefined : attach.videoProcessing,
     };
   });
 }
@@ -242,4 +273,26 @@ export function buildGifAttachment(gif: ApiVideo): ApiAttachment {
     quick: width && height ? { width, height, duration } : undefined,
     uniqueId: `gif-${gif.id}-${Date.now()}`,
   } satisfies ApiAttachment;
+}
+
+export function buildAttachmentWithVideoCover(
+  attachment: ApiAttachment, coverBlob: Blob, coverSize?: ApiDimensions,
+): ApiAttachment {
+  if (!attachment.quick) return attachment;
+
+  const { width, height } = attachment.quick;
+  const blobUrl = URL.createObjectURL(coverBlob);
+
+  return {
+    ...attachment,
+    videoCover: { blobUrl, width: coverSize?.width ?? width, height: coverSize?.height ?? height },
+    editState: {
+      document: {
+        ...createEditDocument({ width, height }),
+        cover: { type: 'image', blobUrl: URL.createObjectURL(coverBlob) },
+      },
+      undoStack: [],
+      redoStack: [],
+    },
+  };
 }
