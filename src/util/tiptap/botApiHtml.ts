@@ -660,10 +660,8 @@ function parseStoredRichText(value?: string): ApiRichText | undefined {
   if (!value) return undefined;
 
   try {
-    const richText = JSON.parse(value) as Partial<ApiRichText>;
-    return richText && typeof richText === 'object' && typeof richText.type === 'string'
-      ? richText as ApiRichText
-      : undefined;
+    const richText: unknown = JSON.parse(value);
+    return isApiRichText(richText) ? richText : undefined;
   } catch {
     return undefined;
   }

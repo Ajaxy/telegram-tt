@@ -292,6 +292,65 @@ function isRichMediaItem(value: unknown): value is RichEditorMediaItem {
     && isApiRichText(item.caption?.credit);
 }
 
+// Rich text can come from pasted HTML, so its whole tree has to match `ApiRichText`
 export function isApiRichText(value: unknown): value is ApiRichText {
-  return Boolean(value && typeof value === 'object' && typeof (value as { type?: unknown }).type === 'string');
+  if (!isObject(value)) return false;
+
+  const text = value as AnyLiteral;
+  switch (text.type) {
+    case 'empty':
+      return true;
+    case 'plain':
+      return typeof text.text === 'string';
+    case 'math':
+      return typeof text.source === 'string';
+    case 'concat':
+      return Array.isArray(text.texts) && text.texts.every(isApiRichText);
+    case 'customEmoji':
+      return typeof text.documentId === 'string' && typeof text.alt === 'string'
+        && (text.document === undefined || isObject(text.document));
+    case 'image':
+      return isObject(text.document) && typeof text.width === 'number' && typeof text.height === 'number';
+    case 'url':
+      return typeof text.url === 'string'
+        && (text.webPageId === undefined || typeof text.webPageId === 'string')
+        && isApiRichText(text.text);
+    case 'email':
+      return typeof text.email === 'string' && isApiRichText(text.text);
+    case 'phone':
+      return typeof text.phone === 'string' && isApiRichText(text.text);
+    case 'anchor':
+      return typeof text.name === 'string' && isApiRichText(text.text);
+    case 'mentionName':
+      return typeof text.userId === 'string' && isApiRichText(text.text);
+    case 'date':
+      return typeof text.date === 'number' && isApiRichText(text.text);
+    case 'button':
+      return isObject(text.action) && isApiRichText(text.text);
+    case 'bold':
+    case 'italic':
+    case 'underline':
+    case 'strike':
+    case 'fixed':
+    case 'subscript':
+    case 'superscript':
+    case 'marked':
+    case 'spoiler':
+    case 'mention':
+    case 'hashtag':
+    case 'botCommand':
+    case 'cashtag':
+    case 'autoUrl':
+    case 'autoEmail':
+    case 'autoPhone':
+    case 'bankCard':
+    case 'tonAddress':
+      return isApiRichText(text.text);
+    default:
+      return false;
+  }
+}
+
+function isObject(value: unknown): value is object {
+  return Boolean(value) && typeof value === 'object';
 }

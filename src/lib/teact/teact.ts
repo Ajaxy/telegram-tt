@@ -27,6 +27,8 @@ export enum VirtualType {
   Fragment,
 }
 
+const ELEMENT_BRAND = Symbol('TeactElement');
+
 interface VirtualElementEmpty {
   type: VirtualType.Empty;
   target?: Node;
@@ -44,6 +46,7 @@ export interface VirtualElementTag {
   tag: string;
   props: Props;
   children: VirtualElementChildren;
+  [ELEMENT_BRAND]: true;
 }
 
 export interface VirtualElementComponent {
@@ -51,12 +54,14 @@ export interface VirtualElementComponent {
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
+  [ELEMENT_BRAND]: true;
 }
 
 export interface VirtualElementFragment {
   type: VirtualType.Fragment;
   children: VirtualElementChildren;
   placeholderTarget?: Comment;
+  [ELEMENT_BRAND]: true;
 }
 
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
@@ -182,6 +187,7 @@ function cloneElement($element: VirtualElement): VirtualElement {
         tag: $element.tag,
         props: $element.props,
         children: $element.children.map(cloneElement),
+        [ELEMENT_BRAND]: true,
       };
     case VirtualType.Component: {
       const { componentInstance } = $element;
@@ -191,6 +197,7 @@ function cloneElement($element: VirtualElement): VirtualElement {
       return {
         type: VirtualType.Fragment,
         children: $element.children.map(cloneElement),
+        [ELEMENT_BRAND]: true,
       };
   }
 }
@@ -227,6 +234,7 @@ function buildFragmentElement(children: any[]): VirtualElementFragment {
   return {
     type: VirtualType.Fragment,
     children: buildChildren(children, true),
+    [ELEMENT_BRAND]: true,
   };
 }
 
@@ -258,6 +266,7 @@ function buildComponentElement(
     componentInstance,
     props: componentInstance.props,
     children: children ? buildChildren(children, true) : [],
+    [ELEMENT_BRAND]: true,
   };
 }
 
@@ -267,6 +276,7 @@ function buildTagElement(tag: string, props: Props, children: any[]): VirtualEle
     tag,
     props,
     children: buildChildren(children),
+    [ELEMENT_BRAND]: true,
   };
 }
 
@@ -314,7 +324,7 @@ function isEmptyPlaceholder(child: any) {
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
     return { type: VirtualType.Empty };
-  } else if (isParentElement(child)) {
+  } else if (isParentElement(child) && child[ELEMENT_BRAND]) {
     return child;
   } else {
     return {
