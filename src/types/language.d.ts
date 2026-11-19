@@ -5900,6 +5900,12 @@ export interface LangPairWithVariables<V = LangVariable> {
   'PeerPickerUnknownPeer': {
     'id': V;
   };
+  'VoiceChatJoinConfirm': {
+    'chat': V;
+  };
+  'VoiceChatJoinConfirmChannel': {
+    'chat': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -6961,7 +6967,9 @@ export interface LangKeyGroups {
       | 'ChatGiveawayInfoParticipating'
       | 'ClearHistoryMessageSingle'
       | 'StarsNeededTextReactions'
-      | 'StarsReactionText';
+      | 'StarsReactionText'
+      | 'VoiceChatJoinConfirm'
+      | 'VoiceChatJoinConfirmChannel';
     variables: 'chat';
   };
   'action': {

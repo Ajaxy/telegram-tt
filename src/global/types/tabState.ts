@@ -883,6 +883,13 @@ export type TabState = {
     peerId: string;
   };
 
+  joinGroupCallModal?: {
+    chatId: string;
+    id: string;
+    accessHash: string;
+    inviteHash?: string;
+  };
+
   isBrowserCloseConfirmationModalOpen?: boolean;
 
   isGiftRecipientPickerOpen?: boolean;

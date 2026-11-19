@@ -4708,6 +4708,8 @@
 "ReportSubmitError" = "An error occurred while submitting your report. Please, try again later.";
 "VoiceChatInactive" = "This video chat is not active";
 "VoiceChatJoinFailed" = "Failed to join video chat";
+"VoiceChatJoinConfirm" = "Join the video chat **{chat}**?";
+"VoiceChatJoinConfirmChannel" = "Do you want to join the live stream **{chat}**?";
 "LiveStreamUnsupported" = "Big live streams are not yet supported";
 "GroupCallsUnsupported" = "Sorry, your browser doesn't support group calls";
 "MiniAppQrScanUnsupported" = "Scanning QR code is not supported in this client yet";

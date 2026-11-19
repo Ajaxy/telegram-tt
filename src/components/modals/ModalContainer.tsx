@@ -60,6 +60,7 @@ import GiftInfoValueModal from './gift/value/GiftInfoValueModal.async';
 import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
+import JoinGroupCallModal from './joinGroupCall/JoinGroupCallModal.async';
 import LanguageModal from './language/LanguageModal.async';
 import LeaveGroupModal from './leaveGroup/LeaveGroupModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
@@ -187,10 +188,11 @@ type ModalKey = keyof Pick<TabState,
   'autoDeleteTimerModal' |
   'botCreationModal' |
   'settingsConfirmation' |
-  'mediaAccessModal'
+  'mediaAccessModal' |
+  'joinGroupCallModal'
 >;
 type WrappedModalKey = 'pollModal' | 'musicPicker' | 'mapModal' | 'safeLinkModalUrl' | 'autoDeleteTimerModal'
-  | 'botCreationModal' | 'settingsConfirmation' | 'mediaAccessModal';
+  | 'botCreationModal' | 'settingsConfirmation' | 'mediaAccessModal' | 'joinGroupCallModal';
 type LegacyModalKey = Exclude<ModalKey, WrappedModalKey>;
 
 type ModalStateProps = {
@@ -337,6 +339,7 @@ const WRAPPED_MODALS: WrappedModalRegistry = {
   botCreationModal: BotCreationModal,
   settingsConfirmation: SettingsConfirmationModal,
   mediaAccessModal: MediaAccessModal,
+  joinGroupCallModal: JoinGroupCallModal,
 };
 
 const LEGACY_MODAL_KEYS = Object.keys(LEGACY_MODALS) as LegacyModalKey[];

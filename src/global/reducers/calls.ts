@@ -3,9 +3,9 @@ import type { GroupCallParticipant } from '../../lib/vibecalls';
 import type { GlobalState } from '../types';
 
 import { omit } from '../../util/iteratees';
-import { selectChat } from '../selectors';
+import { selectChat, selectChatFullInfo } from '../selectors';
 import { selectGroupCall } from '../selectors/calls';
-import { updateChatFullInfo } from './chats';
+import { updateChat, updateChatFullInfo } from './chats';
 
 export function updateGroupCall<T extends GlobalState>(
   global: T,
@@ -53,9 +53,14 @@ export function removeGroupCall<T extends GlobalState>(
   const groupCall = selectGroupCall(global, groupCallId);
   if (groupCall && groupCall.chatId) {
     const chat = selectChat(global, groupCall.chatId);
-    if (chat) {
+    const chatGroupCallId = selectChatFullInfo(global, groupCall.chatId)?.groupCallId;
+    if (chat && (!chatGroupCallId || chatGroupCallId === groupCallId)) {
       global = updateChatFullInfo(global, groupCall.chatId, {
         groupCallId: undefined,
+      });
+      global = updateChat(global, groupCall.chatId, {
+        isCallActive: undefined,
+        isCallNotEmpty: undefined,
       });
     }
   }

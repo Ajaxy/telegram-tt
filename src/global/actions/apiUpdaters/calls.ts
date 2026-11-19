@@ -18,7 +18,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateGroupCall': {
       if (update.call.connectionState === 'discarded') {
-        if (global.groupCalls.activeGroupCallId) {
+        if (global.groupCalls.activeGroupCallId === update.call.id) {
           if ('leaveGroupCall' in actions) actions.leaveGroupCall({ shouldRemove: true, tabId: getCurrentTabId() });
           return undefined;
         } else {

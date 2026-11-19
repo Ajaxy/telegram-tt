@@ -3035,6 +3035,7 @@ export interface ActionPayloads {
     username: string;
     inviteHash: string;
   } & WithTabId;
+  closeJoinGroupCallModal: WithTabId | undefined;
   createGroupCallInviteLink: WithTabId | undefined;
 
   loadMoreGroupCallParticipants: undefined;
