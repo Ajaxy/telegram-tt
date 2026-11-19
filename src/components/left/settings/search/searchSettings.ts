@@ -207,6 +207,6 @@ export function searchSettings(index: SettingsSearchItem[], query: string) {
   ]);
 }
 
-function splitWords(text: string) {
+export function splitWords(text: string) {
   return text.toLowerCase().normalize('NFD').replace(RE_COMBINING_MARKS, '').split(RE_WORD_BOUNDARY).filter(Boolean);
 }

@@ -19,6 +19,7 @@ import useSettingsHighlight from './hooks/useSettingsHighlight';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
+import SettingsKeyboardShortcuts from './keyboardShortcuts/SettingsKeyboardShortcuts';
 import SettingsPasscode from './passcode/SettingsPasscode';
 import PrivacyMessages from './PrivacyMessages';
 import SettingsSearch from './search/SettingsSearch';
@@ -554,6 +555,14 @@ const Settings = ({
       case SettingsScreens.Passkeys:
         return (
           <SettingsPasskeys
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.KeyboardShortcuts:
+        return (
+          <SettingsKeyboardShortcuts
             isActive={isScreenActive}
             onReset={handleReset}
           />

@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/core';
 import { memo, useEffect, useState } from '../../../lib/teact/teact';
 
 import type { IconName } from '../../../types/icons';
+import type { KeyboardShortcutId } from '../../../util/keyboardShortcuts/registry';
 import type { RichEditorFormatterState } from '../../common/tooltips/types';
 
 import { normalizeButtonText } from '../../../global/helpers/buttons';
@@ -13,6 +14,7 @@ import { isRichEditorBlockquoteActive } from './richEditorFormatting';
 import { buildRichTextFromTiptapContent, buildTiptapInlineContentFromRichText } from './richText';
 
 import useFlag from '../../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../../hooks/useKeyboardShortcutHint';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -252,12 +254,14 @@ const TextFormatter = ({
       <div className={buildClassName(styles.buttons, 'no-scrollbar')}>
         <FormatButton
           ariaLabel={lang('RichEditorBlockquote')}
+          shortcutId="blockquote"
           className={getFormatButtonClassName('blockquote')}
           iconName="blockquote"
           onClick={() => handleStructuralText('blockquote')}
         />
         <FormatButton
           ariaLabel={lang('FormattingSpoilerAria')}
+          shortcutId="spoiler"
           className={getFormatButtonClassName('spoiler')}
           iconName="spoiler-text"
           isDisabled={isFormatButtonDisabled('spoiler')}
@@ -266,6 +270,7 @@ const TextFormatter = ({
         <div className={styles.divider} />
         <FormatButton
           ariaLabel={lang('FormattingBoldAria')}
+          shortcutId="bold"
           className={getFormatButtonClassName('bold')}
           iconName="bold"
           isDisabled={isFormatButtonDisabled('bold')}
@@ -273,6 +278,7 @@ const TextFormatter = ({
         />
         <FormatButton
           ariaLabel={lang('FormattingItalicAria')}
+          shortcutId="italic"
           className={getFormatButtonClassName('italic')}
           iconName="italic"
           isDisabled={isFormatButtonDisabled('italic')}
@@ -280,6 +286,7 @@ const TextFormatter = ({
         />
         <FormatButton
           ariaLabel={lang('FormattingUnderlineAria')}
+          shortcutId="underline"
           className={getFormatButtonClassName('underline')}
           iconName="underlined"
           isDisabled={isFormatButtonDisabled('underline')}
@@ -287,6 +294,7 @@ const TextFormatter = ({
         />
         <FormatButton
           ariaLabel={lang('FormattingStrikethroughAria')}
+          shortcutId="strikethrough"
           className={getFormatButtonClassName('strikethrough')}
           iconName="strikethrough"
           isDisabled={isFormatButtonDisabled('strikethrough')}
@@ -294,6 +302,7 @@ const TextFormatter = ({
         />
         <FormatButton
           ariaLabel={lang('FormattingMonospaceAria')}
+          shortcutId="monospace"
           className={getFormatButtonClassName('monospace')}
           iconName="monospace"
           onClick={() => handleStructuralText('code')}
@@ -301,11 +310,13 @@ const TextFormatter = ({
         <div className={styles.divider} />
         <FormatButton
           ariaLabel={lang('FormattingAddDateAria')}
+          shortcutId="date"
           iconName="calendar"
           onClick={handleOpenDatePicker}
         />
         <FormatButton
           ariaLabel={lang(selectedLinkHref !== undefined ? 'EditLink' : 'FormattingAddLinkAria')}
+          shortcutId="link"
           iconName="link"
           onClick={handleOpenLinkControl}
         />
@@ -323,6 +334,7 @@ const TextFormatter = ({
             />
             <FormatButton
               ariaLabel={lang('FormattingSubscriptAria')}
+              shortcutId="subscript"
               className={getFormatButtonClassName('subscript')}
               iconName="subscript"
               hasPremiumBadge
@@ -331,6 +343,7 @@ const TextFormatter = ({
             />
             <FormatButton
               ariaLabel={lang('FormattingSuperscriptAria')}
+              shortcutId="superscript"
               className={getFormatButtonClassName('superscript')}
               iconName="superscript"
               hasPremiumBadge
@@ -342,6 +355,7 @@ const TextFormatter = ({
         <div className={styles.divider} />
         <FormatButton
           ariaLabel={lang('FormattingClearAria')}
+          shortcutId="clearFormatting"
           iconName="clear-formatting"
           isDisabled={!hasSelectedTextFormatting}
           onClick={handleClearFormatting}
@@ -385,6 +399,7 @@ export default memo(TextFormatter);
 
 function FormatButton({
   ariaLabel,
+  shortcutId,
   className,
   iconName,
   hasPremiumBadge,
@@ -392,16 +407,19 @@ function FormatButton({
   onClick,
 }: {
   ariaLabel: string;
+  shortcutId?: KeyboardShortcutId;
   className?: string;
   iconName: IconName;
   hasPremiumBadge?: boolean;
   isDisabled?: boolean;
   onClick: NoneToVoidFunction;
 }) {
+  const label = useKeyboardShortcutHint(ariaLabel, shortcutId);
+
   return (
     <Button
       color="translucent"
-      ariaLabel={ariaLabel}
+      ariaLabel={label}
       className={className}
       iconName={iconName}
       iconHasPremiumBadge={hasPremiumBadge}

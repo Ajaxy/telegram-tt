@@ -138,7 +138,6 @@ export function buildRichEditorBlockquote(getIsRichInputExpanded: () => boolean)
 
     addKeyboardShortcuts() {
       return {
-        'Mod-Shift-b': () => this.editor.commands.toggleBlockquote(),
         Backspace: () => handleRichEditorQuoteBackspace(this.editor, this.name),
         ArrowUp: () => handleRichEditorQuoteArrow(this.editor, this.name, -1),
         ArrowDown: () => handleRichEditorQuoteArrow(this.editor, this.name, 1),

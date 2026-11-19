@@ -424,6 +424,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cachedSharedSettings.shouldReplaceTextShortcuts = true;
   }
 
+  if (!cachedSharedSettings.keyboardShortcuts) {
+    cachedSharedSettings.keyboardShortcuts = {};
+  }
+
   if (cached.appConfig.webAppAllowedProtocols === undefined) {
     cached.appConfig.webAppAllowedProtocols = initialState.appConfig.webAppAllowedProtocols;
   }

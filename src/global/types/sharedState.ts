@@ -2,6 +2,7 @@ import type { ApiLanguage } from '../../api/types';
 import type {
   AnimationLevel, FoldersPosition, IThemeSettings, PerformanceType, Point, Size, ThemeKey, TimeFormat,
 } from '../../types';
+import type { KeyboardShortcutId } from '../../util/keyboardShortcuts/registry';
 
 export interface SharedState {
   cacheVersion: number;
@@ -24,6 +25,7 @@ export interface SharedSettings {
   // This can be deleted after September 2025, along with the corresponding migration
   wasAnimationLevelSetManually?: boolean;
   messageSendKeyCombo: 'enter' | 'ctrl-enter';
+  keyboardShortcuts: Partial<Record<KeyboardShortcutId, string | false>>;
   shouldReplaceTextShortcuts: boolean;
   browserCachedPosition?: Point;
   browserCachedSize?: Size;

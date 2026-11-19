@@ -32,6 +32,7 @@ import { getMediaViewerMedia } from './helpers/ghostAnimation';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
@@ -117,6 +118,7 @@ const MediaViewerActions = ({
   } = getActions();
 
   const lang = useLang();
+  const closeLabel = useKeyboardShortcutHint(lang('Close'), 'closeMediaViewer');
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
   const [getZoomChange, setZoomChange] = useZoomChange();
   const { isMobile } = useAppLayout();
@@ -470,7 +472,7 @@ const MediaViewerActions = ({
         round
         size="smaller"
         color="translucent-white"
-        ariaLabel={lang('Close')}
+        ariaLabel={closeLabel}
         onClick={onCloseMediaViewer}
         iconName="close"
       />

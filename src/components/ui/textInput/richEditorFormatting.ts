@@ -28,6 +28,30 @@ declare module '@tiptap/core' {
   }
 }
 
+export function clearRichEditorFormatting(editor: Editor) {
+  const { state, view } = editor;
+  const {
+    doc, schema, selection, storedMarks,
+  } = state;
+  if (selection.empty) {
+    const activeMarks = storedMarks || selection.$from.marks();
+    if (!activeMarks.length) {
+      return false;
+    }
+
+    view.dispatch(state.tr.setStoredMarks([]));
+    return true;
+  }
+
+  const hasSelectedMarks = Object.values(schema.marks)
+    .some((mark) => doc.rangeHasMark(selection.from, selection.to, mark));
+  if (!hasSelectedMarks) {
+    return false;
+  }
+
+  return editor.commands.unsetAllMarks({ ignoreClearable: true });
+}
+
 export function buildRichEditorFormatting(getIsRichInputExpanded: () => boolean) {
   return Extension.create({
     name: 'richEditorFormatting',
@@ -99,37 +123,6 @@ export function buildRichEditorFormatting(getIsRichInputExpanded: () => boolean)
           }
           return true;
         },
-      };
-    },
-
-    addKeyboardShortcuts() {
-      const handleClearFormatting = () => {
-        const { state, view } = this.editor;
-        const {
-          doc, schema, selection, storedMarks,
-        } = state;
-        if (selection.empty) {
-          const activeMarks = storedMarks || selection.$from.marks();
-          if (!activeMarks.length) {
-            return false;
-          }
-
-          view.dispatch(state.tr.setStoredMarks([]));
-          return true;
-        }
-
-        const hasSelectedMarks = Object.values(schema.marks)
-          .some((mark) => doc.rangeHasMark(selection.from, selection.to, mark));
-        if (!hasSelectedMarks) {
-          return false;
-        }
-
-        return this.editor.commands.unsetAllMarks({ ignoreClearable: true });
-      };
-
-      return {
-        'Mod-n': handleClearFormatting,
-        'Mod-N': handleClearFormatting,
       };
     },
 

@@ -17,16 +17,14 @@ import {
   selectPeerHasProfileBackground, selectTabState,
 } from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
-import {
-  IS_APP, IS_FIREFOX, IS_MAC_OS, IS_TOUCH_ENV,
-} from '../../util/browser/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { resolveTransitionName } from '../../util/resolveTransitionName';
 import { captureControlledSwipe } from '../../util/swipeController';
 import { isComposerHasSelection } from '../middle/composer/helpers/selection';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
-import { useHotkeys } from '../../hooks/useHotkeys';
+import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
@@ -216,6 +214,7 @@ function LeftColumn({
         case SettingsScreens.DataStorage:
         case SettingsScreens.Privacy:
         case SettingsScreens.Performance:
+        case SettingsScreens.KeyboardShortcuts:
         case SettingsScreens.ActiveSessions:
         case SettingsScreens.Language:
         case SettingsScreens.Stickers:
@@ -453,49 +452,40 @@ function LeftColumn({
     [isFirstChatFolderActive, contentKey, handleReset, isChatOpen, isChatListPanelOpen],
   );
 
-  const handleHotkeySearch = useLastCallback((e: KeyboardEvent) => {
+  const handleHotkeySearch = useLastCallback(() => {
     if (contentKey === LeftColumnContent.GlobalSearch) {
-      return;
+      return false;
     }
 
-    e.preventDefault();
     openLeftColumnContent({ contentKey: LeftColumnContent.GlobalSearch });
+    return true;
   });
 
-  const handleHotkeySavedMessages = useLastCallback((e: KeyboardEvent) => {
-    e.preventDefault();
+  const handleHotkeySavedMessages = useLastCallback(() => {
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   });
 
-  const handleArchivedChats = useLastCallback((e: KeyboardEvent) => {
-    e.preventDefault();
+  const handleArchivedChats = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
   });
 
-  const handleHotkeySettings = useLastCallback((e: KeyboardEvent) => {
-    e.preventDefault();
+  const handleHotkeySettings = useLastCallback(() => {
     openLeftColumnContent({ contentKey: LeftColumnContent.Settings });
   });
 
-  const handleQuickChatPicker = useLastCallback((e: KeyboardEvent) => {
-    if (isComposerHasSelection()) return;
+  const handleQuickChatPicker = useLastCallback(() => {
+    if (isComposerHasSelection()) return false;
 
-    e.preventDefault();
     openQuickChatPicker();
+    return true;
   });
 
-  useHotkeys(useMemo(() => ({
-    'Mod+Shift+F': handleHotkeySearch,
-    'Mod+K': handleQuickChatPicker,
-    // https://support.mozilla.org/en-US/kb/take-screenshots-firefox
-    ...(!IS_FIREFOX && {
-      'Mod+Shift+S': handleHotkeySavedMessages,
-    }),
-    ...(IS_APP && {
-      'Mod+0': handleHotkeySavedMessages,
-      'Mod+9': handleArchivedChats,
-    }),
-    ...(IS_MAC_OS && IS_APP && { 'Mod+,': handleHotkeySettings }),
+  useKeyboardShortcuts(useMemo(() => ({
+    globalSearch: handleHotkeySearch,
+    quickChatPicker: handleQuickChatPicker,
+    savedMessages: handleHotkeySavedMessages,
+    archivedChats: handleArchivedChats,
+    openSettings: handleHotkeySettings,
   }), []));
 
   useEffect(() => {

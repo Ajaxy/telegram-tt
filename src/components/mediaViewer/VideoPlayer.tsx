@@ -7,6 +7,7 @@ import type { ApiDimensions, StoryboardInfo } from '../../api/types';
 
 import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/browser/windowEnvironment';
 import getPointerPosition from '../../util/events/getPointerPosition';
+import { getIsKeyboardShortcut } from '../../util/keyboardShortcuts';
 import { clamp } from '../../util/math';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
@@ -302,22 +303,13 @@ const VideoPlayer = ({
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isInPictureInPicture) return;
-      switch (e.key) {
-        case ' ':
-        case 'Enter':
-          e.preventDefault();
-          togglePlayState(e);
-          break;
-        case 'Left': // IE/Edge specific value
-        case 'ArrowLeft':
-          e.preventDefault();
-          rewind(-1);
-          break;
-        case 'Right': // IE/Edge specific value
-        case 'ArrowRight':
-          e.preventDefault();
-          rewind(1);
-          break;
+
+      if (getIsKeyboardShortcut(e, 'toggleVideoPlayback')) {
+        e.preventDefault();
+        togglePlayState(e);
+      } else if (getIsKeyboardShortcut(e, 'seekVideo')) {
+        e.preventDefault();
+        rewind(e.key === 'ArrowLeft' ? -1 : 1);
       }
     };
 

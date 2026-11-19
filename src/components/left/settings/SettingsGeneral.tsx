@@ -9,12 +9,9 @@ import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
-import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS,
-} from '../../../util/browser/windowEnvironment';
+import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { getSystemTheme } from '../../../util/systemTheme';
 
-import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -34,7 +31,6 @@ type OwnProps = {
 type StateProps =
   Pick<SharedSettings, (
     'messageTextSize' |
-    'messageSendKeyCombo' |
     'shouldReplaceTextShortcuts' |
     'timeFormat' |
     'theme' |
@@ -44,7 +40,6 @@ type StateProps =
 const SettingsGeneral = ({
   isActive,
   messageTextSize,
-  messageSendKeyCombo,
   shouldReplaceTextShortcuts,
   timeFormat,
   theme,
@@ -56,9 +51,6 @@ const SettingsGeneral = ({
   } = getActions();
 
   const lang = useLang();
-
-  const { isMobile } = useAppLayout();
-  const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
 
   const timeFormatOptions: IRadioOption[] = [{
     label: lang('SettingsTimeFormat12'),
@@ -78,15 +70,6 @@ const SettingsGeneral = ({
     label: lang('EmptyChatAppearanceDark'),
     value: 'dark',
   }];
-
-  const keyboardSendOptions = !isMobileDevice ? [
-    { value: 'enter', label: lang('SettingsSendEnter'), subLabel: lang('SettingsSendEnterDescription') },
-    {
-      value: 'ctrl-enter',
-      label: lang(IS_MAC_OS || IS_IOS ? 'SettingsSendCmdenter' : 'SettingsSendCtrlenter'),
-      subLabel: lang('SettingsSendPlusEnterDescription'),
-    },
-  ] : undefined;
 
   const handleMessageTextSizeChange = useCallback((newSize: number) => {
     document.documentElement.style.setProperty(
@@ -109,10 +92,6 @@ const SettingsGeneral = ({
   const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
     setSharedSettingOption({ timeFormat: newTimeFormat as TimeFormat });
     setSharedSettingOption({ wasTimeFormatSetManually: true });
-  }, []);
-
-  const handleMessageSendComboChange = useCallback((newCombo: string) => {
-    setSharedSettingOption({ messageSendKeyCombo: newCombo as SharedSettings['messageSendKeyCombo'] });
   }, []);
 
   const handleTextShortcutReplacementChange = useLastCallback((shouldReplace: boolean) => {
@@ -168,14 +147,6 @@ const SettingsGeneral = ({
 
       <IslandTitle dir={lang.isRtl ? 'rtl' : undefined}>{lang('SettingsKeyboard')}</IslandTitle>
       <Island>
-        {keyboardSendOptions && (
-          <RadioGroup
-            name="keyboard-send-settings"
-            options={keyboardSendOptions}
-            onChange={handleMessageSendComboChange}
-            selected={messageSendKeyCombo}
-          />
-        )}
         <Checkbox
           label={lang('SettingsAutomaticTextReplacements')}
           subLabel={lang('SettingsAutomaticTextReplacementsInfo')}
@@ -192,14 +163,12 @@ export default memo(withGlobal<OwnProps>(
     const {
       theme,
       shouldUseSystemTheme,
-      messageSendKeyCombo,
       shouldReplaceTextShortcuts,
       messageTextSize,
       timeFormat,
     } = selectSharedSettings(global);
 
     return {
-      messageSendKeyCombo,
       shouldReplaceTextShortcuts,
       messageTextSize,
       timeFormat,

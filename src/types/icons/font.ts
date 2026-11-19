@@ -190,6 +190,7 @@ export type FontIconName =
   | 'key'
   | 'key-filled'
   | 'keyboard'
+  | 'keyboard-filled'
   | 'lamp'
   | 'language'
   | 'link'

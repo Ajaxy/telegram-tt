@@ -17,6 +17,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import useFlag from '../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useControlsSignal, { isMouseInsideControls, registerControlsElement } from './hooks/useControlsSignal';
@@ -95,6 +96,9 @@ const VideoPlayerControls = ({
   onSeekingChange,
 }: OwnProps) => {
   const lang = useLang();
+  const playLabel = useKeyboardShortcutHint(
+    lang(isPlaying ? 'AccActionPause' : 'AccActionPlay'), 'toggleVideoPlayback',
+  );
   const [isPlaybackMenuOpen, openPlaybackMenu, closePlaybackMenu] = useFlag();
   const [getCurrentTime] = useCurrentTimeSignal();
   const currentTime = useDerivedState(() => Math.trunc(getCurrentTime()), [getCurrentTime]);
@@ -188,7 +192,7 @@ const VideoPlayerControls = ({
       />
       <div className="buttons">
         <Button
-          ariaLabel={lang('AccActionPlay')}
+          ariaLabel={playLabel}
           size="tiny"
           ripple={!isMobile}
           color="translucent-white"

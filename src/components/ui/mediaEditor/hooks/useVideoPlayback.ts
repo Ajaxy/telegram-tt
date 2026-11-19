@@ -4,6 +4,7 @@ import type { VideoTrim } from '../../../../types/mediaEditor';
 
 import { VIDEO_TIME_PRECISION } from '../../../../config';
 import isTextInputTarget from '../../../../util/events/isTextInputTarget';
+import { getIsKeyboardShortcut } from '../../../../util/keyboardShortcuts';
 import { clamp } from '../../../../util/math';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -140,19 +141,19 @@ export default function useVideoPlayback({
   const handleKeyDown = useLastCallback((e: KeyboardEvent) => {
     if (isTextInputTarget(e.target)) return;
 
-    if (e.key === ' ') {
+    if (getIsKeyboardShortcut(e, 'mediaEditorPlayback')) {
       if (e.target instanceof Element && e.target.closest(SPACE_CONTROL_SELECTOR)) return;
 
       e.preventDefault();
       toggle();
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    } else if (getIsKeyboardShortcut(e, 'mediaEditorSeek') || getIsKeyboardShortcut(e, 'mediaEditorFrameStep')) {
       if (e.target instanceof Element && e.target.closest(ARROW_CONTROL_SELECTOR)) return;
 
       e.preventDefault();
       const step = e.shiftKey ? 1 / frameRate : SEEK_STEP;
       const direction = e.key === 'ArrowLeft' ? -1 : 1;
       seek(clamp(getCurrentTime() + step * direction, start, end));
-    } else if (e.code === 'KeyM' && onToggleMute && !e.metaKey && !e.ctrlKey) {
+    } else if (onToggleMute && getIsKeyboardShortcut(e, 'mediaEditorMute')) {
       e.preventDefault();
       onToggleMute();
     }

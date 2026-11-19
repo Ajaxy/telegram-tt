@@ -137,7 +137,7 @@ import {
 } from '../../global/selectors/threads';
 import { revokeAttachmentUrls } from '../../util/attachments';
 import {
-  IS_IOS, IS_TOUCH_ENV, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
+  IS_ANDROID, IS_IOS, IS_TOUCH_ENV, IS_VIDEO_RECORDING_SUPPORTED, IS_VOICE_RECORDING_SUPPORTED,
 } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -183,6 +183,7 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePeerColor from '../../hooks/usePeerColor';
@@ -2651,6 +2652,17 @@ const Composer = ({
       }
   }
 
+  const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
+  const isSendShortcutButton = !isMobileDevice
+    && (mainButtonState === MainButtonState.Send || mainButtonState === MainButtonState.Edit);
+  const sendButtonLabel = useKeyboardShortcutHint(
+    lang(sendButtonAriaLabel),
+    isSendShortcutButton ? 'sendMessage' : undefined,
+    isRichInputExpansionActive ? 'ctrl-enter' : undefined,
+  );
+  const undoLabel = useKeyboardShortcutHint(lang('Undo'), 'undo');
+  const redoLabel = useKeyboardShortcutHint(lang('Redo'), 'redo');
+
   const fullClassName = buildClassName(
     'Composer',
     isInMessageList && 'is-chat-composer',
@@ -3062,7 +3074,7 @@ const Composer = ({
               faded
               size="smaller"
               color="translucent"
-              ariaLabel={lang('Undo')}
+              ariaLabel={undoLabel}
               iconName="undo"
               disabled={!richEditor.canUndo}
               onClick={richEditor.undo}
@@ -3072,7 +3084,7 @@ const Composer = ({
               faded
               size="smaller"
               color="translucent"
-              ariaLabel={lang('Redo')}
+              ariaLabel={redoLabel}
               iconName="redo"
               disabled={!richEditor.canRedo}
               onClick={richEditor.redo}
@@ -3337,7 +3349,7 @@ const Composer = ({
         disabled={areRecordingsNotAllowed || hasRichMediaBlocking}
         allowDisabledClick
         noFastClick
-        ariaLabel={mainButtonState === MainButtonState.Stop ? lang('BotDraftStop') : lang(sendButtonAriaLabel)}
+        ariaLabel={mainButtonState === MainButtonState.Stop ? lang('BotDraftStop') : sendButtonLabel}
         onClick={mainButtonHandler}
         onContextMenu={mainButtonContextMenuHandler}
       >

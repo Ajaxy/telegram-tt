@@ -22,6 +22,7 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useFlag from '../../hooks/useFlag';
 import useFrozenProps from '../../hooks/useFrozenProps';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -84,6 +85,9 @@ const MessageSelectToolbar = ({
     setSharedSettingOption,
   } = getActions();
   const lang = useLang();
+  const closeLabel = useKeyboardShortcutHint(lang('Close'), 'closeOrGoBack');
+  const deleteLabel = useKeyboardShortcutHint(lang('EditAdminGroupDeleteMessages'), 'deleteSelectedMessages');
+  const copyLabel = useKeyboardShortcutHint(lang('ContextCopySelectedItems'), 'copySelectedMessages');
 
   useCopySelectedMessages(Boolean(isActive && !reportContext));
 
@@ -215,7 +219,7 @@ const MessageSelectToolbar = ({
         <div className="MessageSelectToolbar-inner">
           {rendering.reportContext ? (
             <>
-              {renderButton('close', lang('Close'), handleExitMessageSelectMode)}
+              {renderButton('close', closeLabel, handleExitMessageSelectMode)}
               <div className="MessageSelectToolbar-reportText">
                 <span
                   className="MessageSelectToolbar-reportTitle"
@@ -241,7 +245,7 @@ const MessageSelectToolbar = ({
           ) : (
             <>
               {Boolean(rendering.selectedMessagesCount) && rendering.canDeleteMessages && (
-                renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
+                renderButton('delete', deleteLabel, handleDelete, true)
               )}
               <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
                 {formattedMessagesCount}
@@ -256,7 +260,7 @@ const MessageSelectToolbar = ({
                     renderButton('download', lang('AccActionDownload'), handleMessageDownload)
                   )}
                   {!rendering.hasProtectedMessage && (
-                    renderButton('copy', lang('ContextCopySelectedItems'), handleCopy)
+                    renderButton('copy', copyLabel, handleCopy)
                   )}
                   {rendering.messageListType !== 'scheduled' && rendering.canForwardMessages && (
                     renderButton(

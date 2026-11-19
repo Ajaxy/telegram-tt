@@ -32,11 +32,12 @@ import {
   selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
-import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/browser/windowEnvironment';
+import { ARE_CALLS_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
 import focusNoScroll from '../../util/focusNoScroll';
 
-import { useHotkeys } from '../../hooks/useHotkeys';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
+import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -137,6 +138,7 @@ const HeaderActions = ({
   const menuButtonRef = useRef<HTMLButtonElement>();
 
   const lang = useLang();
+  const searchLabel = useKeyboardShortcutHint(lang('ConversationSearchPlaceholder'), 'searchInChat');
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
@@ -199,15 +201,6 @@ const HeaderActions = ({
     requestMasterAndRequestCall({ userId: chatId });
   });
 
-  const handleHotkeySearchClick = useLastCallback((e: KeyboardEvent) => {
-    if (!canSearch || !IS_APP || e.shiftKey) {
-      return;
-    }
-
-    e.preventDefault();
-    handleSearchClick();
-  });
-
   const getTextWithLanguage = useCallback((
     key: 'TranslateToButton' | 'DoNotTranslateLanguage' | 'AddedToDoNotTranslate',
     langCode: string,
@@ -258,9 +251,9 @@ const HeaderActions = ({
     setSettingOption({ translationTone: tone });
   });
 
-  useHotkeys(useMemo(() => ({
-    'Mod+F': handleHotkeySearchClick,
-  }), []));
+  useKeyboardShortcuts(useMemo(() => (canSearch ? {
+    searchInChat: handleSearchClick,
+  } : undefined), [canSearch]));
 
   const MoreMenuButton = useMemo(() => {
     return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
@@ -353,7 +346,7 @@ const HeaderActions = ({
               color="translucent"
               size="smaller"
               onClick={handleSearchClick}
-              ariaLabel={lang('ConversationSearchPlaceholder')}
+              ariaLabel={searchLabel}
               iconName="search"
             />
           )}

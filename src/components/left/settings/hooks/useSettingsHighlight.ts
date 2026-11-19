@@ -14,8 +14,8 @@ import { useStateRef } from '../../../../hooks/useStateRef';
 
 import { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../../ui/Transition';
 
-const HIGHLIGHT_CLASS_NAME = 'settings-highlight';
-const HIGHLIGHT_DURATION = 1800;
+export const HIGHLIGHT_CLASS_NAME = 'settings-highlight';
+export const HIGHLIGHT_DURATION = 1800;
 const WAIT_TIMEOUT = 3000;
 const ANCHOR_ATTRIBUTE = 'data-settings-anchor';
 const ROW_SELECTOR = '.ListItem, .Checkbox, .Radio';
@@ -145,7 +145,7 @@ function findElementByText(root: HTMLElement, text: string) {
   return firstElement;
 }
 
-function getCenteredScrollTop(scrollContainer: HTMLElement, anchor: HTMLElement) {
+export function getCenteredScrollTop(scrollContainer: HTMLElement, anchor: HTMLElement) {
   const containerRect = scrollContainer.getBoundingClientRect();
   const anchorRect = anchor.getBoundingClientRect();
   const offset = anchorRect.top - containerRect.top - (containerRect.height - anchorRect.height) / 2;

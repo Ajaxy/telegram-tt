@@ -140,6 +140,7 @@ import type { BrowserModalStateType, BrowserTab } from '../../types/browser';
 import type { MediaEditorSettings } from '../../types/mediaEditor';
 import type { ClipboardTextFormat, MessageCopyRequest } from '../../types/messageCopy';
 import type { WebApp, WebAppMediaKind, WebAppOutboundEvent } from '../../types/webapp';
+import type { KeyboardShortcutId } from '../../util/keyboardShortcuts/registry';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { DownloadableMedia } from '../helpers';
 import type { SharedState } from './sharedState';
@@ -228,6 +229,13 @@ export interface ActionPayloads {
   // settings
   setSettingOption: Partial<AccountSettings> | undefined;
   setSharedSettingOption: Partial<SharedState['settings']> | undefined;
+  setKeyboardShortcut: {
+    id: KeyboardShortcutId;
+    combo: string | false;
+  };
+  resetKeyboardShortcuts: {
+    id: KeyboardShortcutId;
+  } | undefined;
   updatePerformanceSettings: Partial<PerformanceType>;
   loadPasswordInfo: undefined;
   clearTwoFaError: undefined;

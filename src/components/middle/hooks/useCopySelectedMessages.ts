@@ -1,16 +1,15 @@
 import { useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { useHotkeys } from '../../../hooks/useHotkeys';
+import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 
 const useCopySelectedMessages = (isActive?: boolean) => {
-  function handleCopy(e: KeyboardEvent) {
-    e.preventDefault();
+  function handleCopy() {
     getActions().copySelectedMessages();
   }
 
-  useHotkeys(useMemo(() => (isActive ? {
-    'Mod+C': handleCopy,
+  useKeyboardShortcuts(useMemo(() => (isActive ? {
+    copySelectedMessages: handleCopy,
   } : undefined), [isActive]));
 };
 

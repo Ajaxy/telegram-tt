@@ -35,6 +35,7 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { formatMediaDuration } from '../../util/dates/duration';
 import download from '../../util/download';
 import { isUserId } from '../../util/entities/ids';
+import { getIsKeyboardShortcut } from '../../util/keyboardShortcuts';
 import { formatRecentTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { round } from '../../util/math';
@@ -49,6 +50,7 @@ import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
@@ -111,7 +113,6 @@ interface StateProps {
 }
 
 const VIDEO_MIN_READY_STATE = IS_SAFARI ? 4 : 3;
-const SPACEBAR_CODE = 32;
 
 const STEALTH_MODE_NOTIFICATION_DURATION = 4000;
 const NOTIFICATION_OPTIONS = {
@@ -168,6 +169,7 @@ function Story({
   const serverTime = getServerTime();
 
   const lang = useLang();
+  const closeLabel = useKeyboardShortcutHint(lang('Close'), 'closeStoryViewer');
   const { isMobile } = useAppLayout();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
   const [isStoryPlaybackRequested, playStory, pauseStory] = useFlag(false);
@@ -395,10 +397,10 @@ function Story({
     }
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.keyCode === SPACEBAR_CODE) {
-        e.preventDefault();
-        setIsPausedBySpacebar(!isPausedBySpacebar);
-      }
+      if (!getIsKeyboardShortcut(e, 'toggleStoryPlayback')) return;
+
+      e.preventDefault();
+      setIsPausedBySpacebar(!isPausedBySpacebar);
     }
 
     document.addEventListener('keydown', handleKeyDown);
@@ -469,10 +471,22 @@ function Story({
     }
   });
 
+  const handleArrowKey = useLastCallback((e: KeyboardEvent) => {
+    if (getIsKeyboardShortcut(e, 'previousStory')) {
+      handleOpenPrevStory();
+    } else if (getIsKeyboardShortcut(e, 'nextStory')) {
+      handleOpenNextStory();
+    } else {
+      return false;
+    }
+
+    return true;
+  });
+
   useEffect(() => {
     return !getIsAnimating() && !isComposerHasFocus ? captureKeyboardListeners({
-      onRight: handleOpenNextStory,
-      onLeft: handleOpenPrevStory,
+      onRight: handleArrowKey,
+      onLeft: handleArrowKey,
     }) : undefined;
   }, [getIsAnimating, isComposerHasFocus]);
 
@@ -773,7 +787,7 @@ function Story({
             round
             size="tiny"
             color="translucent-white"
-            ariaLabel={lang('Close')}
+            ariaLabel={closeLabel}
             onClick={onClose}
             iconName="close"
           />

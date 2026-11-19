@@ -5,6 +5,9 @@ import type { IconBackdropColor } from '../../../gili/primitives/IconBackdrop';
 import { SettingsScreens } from '../../../../types';
 
 import { IS_IOS, IS_MAC_OS } from '../../../../util/browser/windowEnvironment';
+import { unique } from '../../../../util/iteratees';
+import { getIsKeyboardShortcutAvailable } from '../../../../util/keyboardShortcuts';
+import { KEYBOARD_SHORTCUT_IDS, KEYBOARD_SHORTCUTS } from '../../../../util/keyboardShortcuts/registry';
 
 export type SettingsSearchFlag =
   'isDesktopLayout' | 'canSendWithKeyboard' | keyof ReturnType<typeof selectSettingsSearchFlags>;
@@ -121,6 +124,15 @@ export const SETTINGS_SEARCH_SECTIONS: SettingsSearchSection[] = [
     keywordsKey: 'SettingsKeywordsLanguage',
     icon: 'web-filled',
     iconBg: 'purple',
+  },
+  {
+    screen: SettingsScreens.KeyboardShortcuts,
+    parent: SettingsScreens.Main,
+    titleKey: 'KeyboardShortcuts',
+    keywordsKey: 'SettingsKeywordsShortcuts',
+    icon: 'keyboard-filled',
+    iconBg: 'gray',
+    requires: 'canSendWithKeyboard',
   },
   {
     screen: SettingsScreens.ActiveSessions,
@@ -291,6 +303,15 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
     'FirstName', 'LastName', 'UserBio', 'SettingsBirthday', 'Username', 'PersonalChannelTitle',
   ]),
 
+  ...buildEntries(SettingsScreens.KeyboardShortcuts, [
+    'SettingsSendEnter', IS_MAC_OS || IS_IOS ? 'SettingsSendCmdenter' : 'SettingsSendCtrlenter',
+  ], { requires: 'canSendWithKeyboard' }),
+  ...buildEntries(
+    SettingsScreens.KeyboardShortcuts,
+    unique(KEYBOARD_SHORTCUT_IDS.filter(getIsKeyboardShortcutAvailable).map((id) => KEYBOARD_SHORTCUTS[id].titleKey)),
+    { requires: 'canSendWithKeyboard' },
+  ),
+
   ...buildEntries(SettingsScreens.General, ['TextSize'], { keywordsKey: 'SettingsKeywordsTextSize' }),
   ...buildEntries(SettingsScreens.General, ['ColorTheme'], { keywordsKey: 'SettingsKeywordsTheme' }),
   ...buildEntries(SettingsScreens.General, ['SettingsTimeFormat'], { keywordsKey: 'SettingsKeywordsTimeFormat' }),
@@ -298,9 +319,6 @@ export const SETTINGS_SEARCH_ENTRIES: SettingsSearchEntry[] = [
     'EmptyChatAppearanceLight', 'EmptyChatAppearanceDark', 'EmptyChatAppearanceSystem', 'SettingsTimeFormat12',
     'SettingsTimeFormat24', 'SettingsAutomaticTextReplacements', 'SettingsKeyboard',
   ]),
-  ...buildEntries(SettingsScreens.General, [
-    'SettingsSendEnter', IS_MAC_OS || IS_IOS ? 'SettingsSendCmdenter' : 'SettingsSendCtrlenter',
-  ], { requires: 'canSendWithKeyboard' }),
 
   ...buildEntries(SettingsScreens.GeneralChatBackground, [
     'UploadImage', 'ThemeResetToDefaults', 'BackgroundPatternIntensity', 'BackgroundBlurred',

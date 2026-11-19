@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from '@teact';
+import { memo, useMemo, useRef, useState } from '@teact';
 import { getActions } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
@@ -13,7 +13,6 @@ import {
   CHAT_LIST_SLICE,
   SAVED_FOLDER_ID,
 } from '../../../config';
-import { IS_APP, IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
 import { ARCHIVE_ANIMATION_ID } from './hooks';
@@ -21,9 +20,9 @@ import { ARCHIVE_ANIMATION_ID } from './hooks';
 import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling';
 import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
-import { useHotkeys } from '../../../hooks/useHotkeys';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOrderDiff from './hooks/useOrderDiff';
 
@@ -56,7 +55,6 @@ type OwnProps = {
 };
 
 const INTERSECTION_THROTTLE = 200;
-const RESERVED_HOTKEYS = new Set(['9', '0']);
 
 const ChatList = ({
   className,
@@ -114,53 +112,32 @@ const ChatList = ({
     : CHAT_LIST_SLICE;
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, chatListSlice);
 
-  // Support <Alt>+<Up/Down> to navigate between chats
-  useHotkeys(useMemo(() => (isActive && orderedIds?.length ? {
-    'Alt+ArrowUp': (e: KeyboardEvent) => {
-      e.preventDefault();
-      openNextChat({ targetIndexDelta: -1, orderedIds });
-    },
-    'Alt+ArrowDown': (e: KeyboardEvent) => {
-      e.preventDefault();
-      openNextChat({ targetIndexDelta: 1, orderedIds });
-    },
+  useKeyboardShortcuts(useMemo(() => (isActive && orderedIds?.length ? {
+    previousChat: () => openNextChat({ targetIndexDelta: -1, orderedIds }),
+    nextChat: () => openNextChat({ targetIndexDelta: 1, orderedIds }),
   } : undefined), [isActive, orderedIds]));
 
-  // Support <Cmd>+<Digit> to navigate between chats
-  useEffect(() => {
-    if (!isActive || isSaved || !orderedIds || !IS_APP) {
-      return undefined;
-    }
+  useKeyboardShortcuts(useMemo(() => (isActive && !isSaved && orderedIds ? {
+    openChatByNumber: (e: KeyboardEvent) => {
+      const [, digit] = e.code.match(/Digit(\d)/) || [];
+      const isArchiveInList = shouldDisplayArchive && archiveSettings && !archiveSettings.isMinimized;
 
-    function handleKeyDown(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
-        const [, digit] = e.code.match(/Digit(\d)/) || [];
-        if (!digit || RESERVED_HOTKEYS.has(digit)) return;
+      const shift = isArchiveInList ? -1 : 0;
+      const position = Number(digit) + shift - 1;
 
-        const isArchiveInList = shouldDisplayArchive && archiveSettings && !archiveSettings.isMinimized;
+      if (isArchiveInList && position === -1) {
+        if (!isMainList) return false;
 
-        const shift = isArchiveInList ? -1 : 0;
-        const position = Number(digit) + shift - 1;
-
-        if (isArchiveInList && position === -1) {
-          if (isMainList) openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
-          return;
-        }
-
-        if (position > orderedIds!.length - 1) return;
-
-        openChat({ id: orderedIds![position], shouldReplaceHistory: true });
+        openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
+        return true;
       }
-    }
 
-    document.addEventListener('keydown', handleKeyDown);
+      if (position > orderedIds.length - 1) return false;
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [
-    archiveSettings, isSaved, isActive, openChat, openNextChat, orderedIds, shouldDisplayArchive, isMainList,
-  ]);
+      openChat({ id: orderedIds[position], shouldReplaceHistory: true });
+      return true;
+    },
+  } : undefined), [archiveSettings, isActive, isMainList, isSaved, orderedIds, shouldDisplayArchive]));
 
   const { observe } = useIntersectionObserver({
     rootRef: containerRef,

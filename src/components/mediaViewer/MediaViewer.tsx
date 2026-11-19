@@ -64,6 +64,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import { exitPictureInPictureIfNeeded, PICTURE_IN_PICTURE_SIGNAL } from '../../hooks/usePictureInPicture';
@@ -153,6 +154,7 @@ const MediaViewer = ({
   } = getActions();
 
   const lang = useLang();
+  const closeLabel = useKeyboardShortcutHint(lang('Close'), 'closeMediaViewer');
   const dialogRef = useRef<HTMLDialogElement>();
   const isOpen = Boolean(avatarOwner || message || standaloneMedia || pageMedia || sponsoredMessage);
   const prevIsOpen = usePreviousDeprecated(isOpen);
@@ -583,7 +585,7 @@ const MediaViewer = ({
             size="smaller"
             color="translucent-white"
             iconName="close"
-            ariaLabel={lang('Close')}
+            ariaLabel={closeLabel}
             onClick={handleClose}
           />
         )}

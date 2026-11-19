@@ -15,6 +15,7 @@ import {
   SWIPE_DIRECTION_THRESHOLD,
   SWIPE_DIRECTION_TOLERANCE,
 } from '../../util/captureEvents';
+import { getIsKeyboardShortcut } from '../../util/keyboardShortcuts';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
 
@@ -256,16 +257,11 @@ const MediaViewerSlides = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       const { scale } = transformRef.current;
       if (scale !== 1) return;
-      switch (e.key) {
-        case 'Left': // IE/Edge specific value
-        case 'ArrowLeft':
-          changeSlide(-1);
-          break;
 
-        case 'Right': // IE/Edge specific value
-        case 'ArrowRight':
-          changeSlide(1);
-          break;
+      if (getIsKeyboardShortcut(e, 'previousMedia')) {
+        changeSlide(-1);
+      } else if (getIsKeyboardShortcut(e, 'nextMedia')) {
+        changeSlide(1);
       }
     };
 

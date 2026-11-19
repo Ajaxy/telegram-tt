@@ -422,14 +422,76 @@ export interface LangPair {
   'SettingsSendEnter': undefined;
   'SettingsSendCmdenter': undefined;
   'SettingsSendCtrlenter': undefined;
-  'SettingsSendEnterDescription': undefined;
-  'SettingsSendPlusEnterDescription': undefined;
   'SettingsTimeFormat': undefined;
   'SettingsTimeFormat12': undefined;
   'SettingsTimeFormat24': undefined;
   'SettingsKeyboard': undefined;
   'SettingsAutomaticTextReplacements': undefined;
   'SettingsAutomaticTextReplacementsInfo': undefined;
+  'KeyboardShortcuts': undefined;
+  'KeyboardShortcutsDesc': undefined;
+  'ShortcutsSectionGeneral': undefined;
+  'ShortcutsSectionChatList': undefined;
+  'ShortcutsSectionChat': undefined;
+  'ShortcutsSectionSending': undefined;
+  'ShortcutsSectionFormatting': undefined;
+  'ShortcutsFormattingInfo': undefined;
+  'ShortcutsSectionMediaViewer': undefined;
+  'ShortcutsSectionStories': undefined;
+  'ShortcutsSectionMediaEditor': undefined;
+  'ShortcutGlobalSearch': undefined;
+  'ShortcutQuickChatPicker': undefined;
+  'ShortcutCloseOrGoBack': undefined;
+  'ShortcutPreviousChat': undefined;
+  'ShortcutNextChat': undefined;
+  'ShortcutChatByNumber': undefined;
+  'ShortcutFolderByNumber': undefined;
+  'ShortcutSearchInChat': undefined;
+  'ShortcutEditLastMessage': undefined;
+  'ShortcutReplyToPrevious': undefined;
+  'ShortcutReplyToNext': undefined;
+  'ShortcutCopySelected': undefined;
+  'ShortcutDeleteSelected': undefined;
+  'ShortcutPauseRecording': undefined;
+  'ShortcutCopyFormats': undefined;
+  'ShortcutHoldInMessageMenu': undefined;
+  'ShortcutSendMessage': undefined;
+  'ShortcutNewLine': undefined;
+  'ShortcutBold': undefined;
+  'ShortcutItalic': undefined;
+  'ShortcutUnderline': undefined;
+  'ShortcutStrikethrough': undefined;
+  'ShortcutMonospace': undefined;
+  'ShortcutSubscript': undefined;
+  'ShortcutSuperscript': undefined;
+  'ShortcutHeadings': undefined;
+  'ShortcutPreviousMedia': undefined;
+  'ShortcutNextMedia': undefined;
+  'ShortcutPlayPause': undefined;
+  'ShortcutSeekVideo': undefined;
+  'ShortcutInFullscreen': undefined;
+  'ShortcutsSectionRoundVideo': undefined;
+  'ShortcutFocusMessageInput': undefined;
+  'ShortcutFrameStep': undefined;
+  'ShortcutMuteUnmute': undefined;
+  'ShortcutPreviousStory': undefined;
+  'ShortcutNextStory': undefined;
+  'ShortcutDeleteLayer': undefined;
+  'ShortcutWhenInputEmpty': undefined;
+  'ShortcutWhenSelection': undefined;
+  'ShortcutWhenNoSelection': undefined;
+  'ShortcutNotSet': undefined;
+  'ShortcutRecording': undefined;
+  'ShortcutRecordingHint': undefined;
+  'ShortcutReplaceTitle': undefined;
+  'ShortcutResetAll': undefined;
+  'ShortcutResetAllText': undefined;
+  'KeyboardKeySpace': undefined;
+  'KeyboardKeyEnter': undefined;
+  'KeyboardKeyEsc': undefined;
+  'KeyboardKeyBackspace': undefined;
+  'KeyboardKeyDelete': undefined;
+  'KeyboardKeyTab': undefined;
   'SettingsOfflineNotificationUnsupported': undefined;
   'TextSize': undefined;
   'ChatBackground': undefined;
@@ -3511,6 +3573,7 @@ export interface LangPair {
   'SettingsKeywordsLanguage': undefined;
   'SettingsKeywordsLastSeen': undefined;
   'SettingsKeywordsLogOut': undefined;
+  'SettingsKeywordsShortcuts': undefined;
   'SettingsSearchEmpty': undefined;
 }
 
@@ -3708,6 +3771,31 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'AutodownloadSizeLimitUpTo': {
     'limit': V;
+  };
+  'ShortcutAlsoUsedBy': {
+    'action': V;
+  };
+  'ShortcutComboCondition': {
+    'keys': V;
+    'condition': V;
+  };
+  'ShortcutHint': {
+    'action': V;
+    'keys': V;
+  };
+  'ShortcutNeedsModifier': {
+    'modifiers': V;
+  };
+  'ShortcutReserved': {
+    'keys': V;
+  };
+  'ShortcutUsedByFixed': {
+    'keys': V;
+    'action': V;
+  };
+  'ShortcutReplaceText': {
+    'keys': V;
+    'actions': V;
   };
   'LanguageAlert': {
     'language': V;
@@ -6872,6 +6960,37 @@ export interface LangKeyGroups {
       | 'StarsNeededTextReactions'
       | 'StarsReactionText';
     variables: 'chat';
+  };
+  'action': {
+    keys:
+      | 'ShortcutAlsoUsedBy';
+    variables: 'action';
+  };
+  'condition,keys': {
+    keys:
+      | 'ShortcutComboCondition';
+    variables: 'condition' | 'keys';
+  };
+  'action,keys': {
+    keys:
+      | 'ShortcutHint'
+      | 'ShortcutUsedByFixed';
+    variables: 'action' | 'keys';
+  };
+  'modifiers': {
+    keys:
+      | 'ShortcutNeedsModifier';
+    variables: 'modifiers';
+  };
+  'keys': {
+    keys:
+      | 'ShortcutReserved';
+    variables: 'keys';
+  };
+  'actions,keys': {
+    keys:
+      | 'ShortcutReplaceText';
+    variables: 'actions' | 'keys';
   };
   'language,link,percent,settings': {
     keys:

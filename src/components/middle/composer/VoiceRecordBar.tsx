@@ -5,12 +5,14 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { formatVoiceRecordDuration } from '../../../util/dates/duration';
+import { getIsKeyboardShortcut } from '../../../util/keyboardShortcuts';
 import { oggToWav } from '../../../util/oggToWav';
 import { fastRaf } from '../../../util/schedulers';
 import LiveWaveformRenderer from '../../../util/voiceRecording/liveWaveformRenderer';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../../hooks/useKeyboardShortcutHint';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useResizeObserver from '../../../hooks/useResizeObserver';
@@ -73,6 +75,9 @@ const VoiceRecordBar = ({
   useTimeout(markMounted, ICON_SWAP_ANIMATION_MS);
 
   const lang = useLang();
+  const pauseLabel = useKeyboardShortcutHint(lang(isPaused
+    ? (isVideo ? 'AriaComposerResumeVideo' : 'AriaComposerResumeVoice')
+    : (isVideo ? 'AriaComposerPauseVideo' : 'AriaComposerPauseVoice')), isPaused ? undefined : 'pauseVoiceRecording');
 
   const canReplay = Boolean(recording.getSnapshot || recording.getPlaybackMedia);
 
@@ -205,6 +210,8 @@ const VoiceRecordBar = ({
 
   // Space toggles recording pause/resume, or playback play/pause once a listening session has started
   const handleSpaceKey = useLastCallback((e: KeyboardEvent) => {
+    if (!getIsKeyboardShortcut(e, 'pauseVoiceRecording')) return false;
+
     const target = e.target as HTMLElement | undefined;
     if (target?.closest('button, a, [role="button"]')) {
       return false;
@@ -358,9 +365,7 @@ const VoiceRecordBar = ({
         className={styles.sideButton}
         round
         color="translucent"
-        ariaLabel={lang(isPaused
-          ? (isVideo ? 'AriaComposerResumeVideo' : 'AriaComposerResumeVoice')
-          : (isVideo ? 'AriaComposerPauseVideo' : 'AriaComposerPauseVoice'))}
+        ariaLabel={pauseLabel}
         onClick={isPaused ? onResume : onPause}
       >
         <Icon name="pause-circle" className={buildClassName(styles.swapIcon, !isPaused && styles.swapIconActive)} />

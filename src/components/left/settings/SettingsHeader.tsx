@@ -170,6 +170,8 @@ const SettingsHeader = ({
 
       case SettingsScreens.Performance:
         return <h3>{lang('MenuAnimations')}</h3>;
+      case SettingsScreens.KeyboardShortcuts:
+        return <h3>{lang('KeyboardShortcuts')}</h3>;
 
       case SettingsScreens.ActiveSessions:
         return <h3>{lang('SessionsTitle')}</h3>;

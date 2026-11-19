@@ -19,6 +19,7 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useFlag from '../../hooks/useFlag';
+import useKeyboardShortcutHint from '../../hooks/useKeyboardShortcutHint';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -61,6 +62,7 @@ function StoryViewer({
   const { closeStoryViewer, closeStoryPrivacyEditor, reportStory } = getActions();
 
   const lang = useLang();
+  const closeLabel = useKeyboardShortcutHint(lang('Close'), 'closeStoryViewer');
   const [storyToDelete, setStoryToDelete] = useState<ApiTypeStory | undefined>(undefined);
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
 
@@ -153,7 +155,7 @@ function StoryViewer({
         round
         size="tiny"
         color="translucent-white"
-        ariaLabel={lang('Close')}
+        ariaLabel={closeLabel}
         onClick={handleClose}
         iconName="close"
       />

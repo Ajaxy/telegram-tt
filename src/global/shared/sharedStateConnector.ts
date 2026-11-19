@@ -48,7 +48,10 @@ function onMessage(event: MessageEvent<ClientBoundMessageEvent>) {
     }
     case 'fullState':
       synced = true;
-      updateGlobal(data.state);
+      updateGlobal({
+        ...data.state,
+        settings: { ...INITIAL_SHARED_STATE.settings, ...data.state.settings },
+      });
       break;
   }
 }

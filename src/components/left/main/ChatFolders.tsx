@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from '@teact';
+import { memo, useEffect, useMemo, useRef } from '@teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../api/types';
@@ -19,6 +19,7 @@ import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFolderTabs from '../../../hooks/useFolderTabs';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useScrolledState from '../../../hooks/useScrolledState';
@@ -40,7 +41,6 @@ type StateProps = {
   folderInvitesById: Record<number, ApiChatlistExportedInvite[]>;
   orderedFolderIds?: number[];
   activeChatFolder: number;
-  currentUserId?: string;
   animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
@@ -52,7 +52,6 @@ type StateProps = {
   isStoryRibbonShown?: boolean;
 };
 
-const SAVED_MESSAGES_HOTKEY = '0';
 const FIRST_FOLDER_INDEX = 0;
 
 const ChatFolders = ({
@@ -60,7 +59,6 @@ const ChatFolders = ({
   chatFoldersById,
   orderedFolderIds,
   activeChatFolder,
-  currentUserId,
   isForumPanelOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
@@ -77,7 +75,6 @@ const ChatFolders = ({
   const {
     loadChatFolders,
     setActiveChatFolder,
-    openChat,
   } = getActions();
 
   const transitionRef = useRef<HTMLDivElement>();
@@ -192,31 +189,16 @@ const ChatFolders = ({
     onBack: () => setActiveChatFolder({ activeChatFolder: FIRST_FOLDER_INDEX }, { forceOnHeavyAnimation: true }),
   });
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.code.startsWith('Digit') && folderTabs) {
-        const [, digit] = e.code.match(/Digit(\d)/) || [];
-        if (!digit) return;
+  useKeyboardShortcuts(useMemo(() => (folderTabs ? {
+    openFolderByNumber: (e: KeyboardEvent) => {
+      const [, digit] = e.code.match(/Digit(\d)/) || [];
+      const folder = Number(digit) - 1;
+      if (folder > folderTabs.length - 1) return false;
 
-        if (digit === SAVED_MESSAGES_HOTKEY) {
-          openChat({ id: currentUserId, shouldReplaceHistory: true });
-          return;
-        }
-
-        const folder = Number(digit) - 1;
-        if (folder > folderTabs.length - 1) return;
-
-        setActiveChatFolder({ activeChatFolder: folder }, { forceOnHeavyAnimation: true });
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown, true);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown, true);
-    };
-  }, [currentUserId, folderTabs, openChat, setActiveChatFolder]);
+      setActiveChatFolder({ activeChatFolder: folder }, { forceOnHeavyAnimation: true });
+      return true;
+    },
+  } : undefined), [folderTabs]));
 
   const {
     ref: placeholderRef,
@@ -310,7 +292,6 @@ export default memo(withGlobal<OwnProps>(
           archived: archivedStories,
         },
       },
-      currentUserId,
       archiveSettings,
     } = global;
     const { animationLevel } = selectSharedSettings(global);
@@ -322,7 +303,6 @@ export default memo(withGlobal<OwnProps>(
       folderInvitesById,
       orderedFolderIds,
       activeChatFolder,
-      currentUserId,
       animationLevel,
       shouldSkipHistoryAnimations,
       hasArchivedChats: Boolean(archived?.length),

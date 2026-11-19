@@ -32,6 +32,7 @@ import captureKeyboardListeners, { hasActiveHandler } from '../../../util/captur
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import focusEditableElement from '../../../util/focusEditableElement';
 import { CODE_HIGHLIGHTING_CHANGED_META, subscribeToCodeLanguageLoad } from '../../../util/highlightCode';
+import { getIsKeyboardShortcut, markKeyboardShortcutHandled } from '../../../util/keyboardShortcuts';
 import { debounce, fastRaf, throttleWith } from '../../../util/schedulers';
 import { getUtf8Length } from '../../../util/text/textFormat';
 import tiptapStyles from '../../../util/tiptap/styling.module.scss';
@@ -596,31 +597,36 @@ const MessageInput = ({
       return;
     }
 
+    if (e.isComposing) return;
+
     // Capture send shortcuts before ProseMirror handles them as editor commands
-    if (!e.isComposing && isSendShortcut(e)) {
+    if (isSendShortcut(e)) {
       handleSendShortcut(e);
+      return;
+    }
+
+    if (!richEditor.isEmpty()) return;
+
+    if (getIsKeyboardShortcut(e, 'editLastMessage')) {
+      handleEmptyInputShortcut(e);
+      editLastMessage();
+    } else if (getIsKeyboardShortcut(e, 'replyToPreviousMessage')) {
+      handleEmptyInputShortcut(e);
+      replyToNextMessage({ targetIndexDelta: -1 });
+    } else if (getIsKeyboardShortcut(e, 'replyToNextMessage')) {
+      handleEmptyInputShortcut(e);
+      replyToNextMessage({ targetIndexDelta: 1 });
     }
   }
 
+  function handleEmptyInputShortcut(e: React.KeyboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+    markKeyboardShortcutHandled(e);
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    const { isComposing } = e;
-
-    const isEmpty = richEditor.isEmpty();
-    if (!isComposing && isEmpty && (e.metaKey || e.ctrlKey)) {
-      const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
-      if (targetIndexDelta) {
-        e.preventDefault();
-
-        replyToNextMessage({ targetIndexDelta });
-        return;
-      }
-    }
-
-    if (!isComposing && e.key === 'Escape' && isRichInputExpanded) {
+    if (!e.isComposing && e.key === 'Escape' && isRichInputExpanded) {
       onRichInputCollapse?.();
-    } else if (!isComposing && e.key === 'ArrowUp' && isEmpty && !e.metaKey && !e.ctrlKey && !e.altKey) {
-      e.preventDefault();
-      editLastMessage();
     }
   }
 

@@ -33,7 +33,6 @@ import { selectCanAnimateInterface } from '../../../global/selectors/ui';
 import { selectCurrentUserId } from '../../../global/selectors/users';
 import { areRecordsShallowEqual } from '../../../util/areShallowEqual';
 import { getEditStateCoverUrls } from '../../../util/attachments';
-import { IS_WINDOWS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -43,6 +42,7 @@ import { blobToFile, fetchBlob } from '../../../util/files';
 import forceReflow from '../../../util/forceReflow';
 import generateUniqueId from '../../../util/generateUniqueId';
 import { omit } from '../../../util/iteratees';
+import { getIsKeyboardShortcut } from '../../../util/keyboardShortcuts';
 import { cancelVideoProcessing, requestVideoProcessing } from '../../../util/launchVideoProcessingWorker';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
 import { formatFileSize } from '../../../util/text/textFormat';
@@ -1045,16 +1045,13 @@ const MediaEditor = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isTextInputTarget(e.target)) return;
 
-      const isMeta = e.metaKey || e.ctrlKey;
-      const key = e.key.toLowerCase();
-
-      if (isMeta && key === 'z' && !e.shiftKey) {
+      if (getIsKeyboardShortcut(e, 'mediaEditorUndo')) {
         e.preventDefault();
         handleUndo();
-      } else if ((isMeta && key === 'z' && e.shiftKey) || (IS_WINDOWS && isMeta && key === 'y')) {
+      } else if (getIsKeyboardShortcut(e, 'mediaEditorRedo')) {
         e.preventDefault();
         handleRedo();
-      } else if ((key === 'delete' || key === 'backspace') && selectedLayerId && !editingLayerId) {
+      } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedLayerId && !editingLayerId) {
         e.preventDefault();
         const currentLayers = getDoc().layers ?? EMPTY_LAYERS;
         if (currentLayers.some((layer) => layer.id === selectedLayerId)) {

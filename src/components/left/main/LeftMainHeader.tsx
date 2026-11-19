@@ -17,14 +17,15 @@ import {
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_TAURI } from '../../../util/browser/globalEnvironment';
-import { IS_APP, IS_MAC_OS } from '../../../util/browser/windowEnvironment';
+import { IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
-import { useHotkeys } from '../../../hooks/useHotkeys';
+import useKeyboardShortcutHint from '../../../hooks/useKeyboardShortcutHint';
+import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -130,7 +131,6 @@ const LeftMainHeader = ({
   );
 
   const handleLockScreenHotkey = useLastCallback((e: KeyboardEvent) => {
-    e.preventDefault();
     e.stopPropagation();
     if (hasPasscode) {
       lockScreen();
@@ -143,12 +143,11 @@ const LeftMainHeader = ({
     closeForumPanel();
   });
 
-  useHotkeys(useMemo(() => (canSetPasscode ? {
-    'Ctrl+Shift+L': handleLockScreenHotkey,
-    'Alt+Shift+L': handleLockScreenHotkey,
-    'Meta+Shift+L': handleLockScreenHotkey,
-    ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
+  useKeyboardShortcuts(useMemo(() => (canSetPasscode ? {
+    lockScreen: handleLockScreenHotkey,
   } : undefined), [canSetPasscode]));
+
+  const lockScreenLabel = useKeyboardShortcutHint(lang('ShortcutsControllerOthersLockByPasscode'), 'lockScreen');
 
   const MainButton = useMemo(() => {
     return ({ onTrigger, isOpen }: { onTrigger: () => void; isOpen?: boolean }) => (
@@ -291,7 +290,7 @@ const LeftMainHeader = ({
             ripple={!isMobile}
             size="smaller"
             color="translucent"
-            ariaLabel={`${lang('ShortcutsControllerOthersLockByPasscode')} (Ctrl+Shift+L)`}
+            ariaLabel={lockScreenLabel}
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
             iconName="unlock"

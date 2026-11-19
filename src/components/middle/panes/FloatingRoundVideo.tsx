@@ -25,6 +25,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { formatMediaDuration } from '../../../util/dates/duration';
 import { disableDirectTextInput, enableDirectTextInput } from '../../../util/directInputManager';
+import { getIsKeyboardShortcut } from '../../../util/keyboardShortcuts';
 import stopEvent from '../../../util/stopEvent';
 import { focusNextWithin } from '../../../util/trapFocus';
 
@@ -250,7 +251,7 @@ function FloatingRoundVideo({
 
   const handlePlaybackKey = useLastCallback((e: KeyboardEvent) => {
     // Focused controls keep their own activation
-    if (e.target !== ref.current) return false;
+    if (e.target !== ref.current || !getIsKeyboardShortcut(e, 'toggleRoundVideoPlayback')) return false;
 
     e.preventDefault();
     playPause();

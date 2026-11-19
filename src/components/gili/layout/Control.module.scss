@@ -54,7 +54,7 @@
   }
 
   .controlLabel {
-    cursor: var(--custom-cursor, pointer);
+    cursor: inherit;
 
     grid-area: label;
     align-self: center;

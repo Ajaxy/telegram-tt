@@ -27,9 +27,9 @@ import {
   groupStatefulContent,
 } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
-import { IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../util/entities/ids';
+import { EXTENDED_MENU_KEY } from '../../../util/keyboardShortcuts/registry';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
@@ -161,8 +161,6 @@ type OwnProps = {
 const SCROLLBAR_WIDTH = 10;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
 const ANIMATION_DURATION = 200;
-// Option reveals alternate items on macOS, Shift reveals extended items on Windows
-const EXTENDED_MENU_KEY = IS_MAC_OS ? 'Alt' : 'Shift';
 
 const MessageContextMenu = ({
   isReactionPickerOpen,

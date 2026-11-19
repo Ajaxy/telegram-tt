@@ -14,9 +14,11 @@ import {
   selectIsPremiumPurchaseBlocked,
   selectIsWalletAvailable,
 } from '../../../global/selectors';
+import { IS_ANDROID, IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon, formatTonAsIcon, formatTonNumber } from '../../../util/localization/format';
 
+import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
@@ -70,6 +72,9 @@ const SettingsMain = ({
   } = getActions();
 
   const lang = useLang();
+
+  const { isMobile } = useAppLayout();
+  const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
 
   useEffect(() => {
     if (currentUserId) {
@@ -229,6 +234,19 @@ const SettingsMain = ({
               {lang('SettingsLanguageDesc', { language: lang.languageInfo?.nativeName || lang.rawCode })}
             </span>
           </ListItem>
+
+          {!isMobileDevice && (
+            <ListItem
+              icon="keyboard-filled"
+              iconBg="gray"
+              multiline
+              narrow
+              onClick={() => openSettingsScreen({ screen: SettingsScreens.KeyboardShortcuts })}
+            >
+              <span className="title">{lang('KeyboardShortcuts')}</span>
+              <span className="subtitle">{lang('KeyboardShortcutsDesc')}</span>
+            </ListItem>
+          )}
 
           <ListItem
             icon="devices-filled"

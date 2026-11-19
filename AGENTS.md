@@ -116,6 +116,16 @@ Teact and Fasterdom separate DOM measurement from mutation. The frame order is e
 - A registry entry is located on its screen by the visible text of its `titleKey`, so use the lang key the screen renders. For a row whose text depends on state, add `data-settings-anchor="<titleKey>"` to its element.
 - `tg://settings/<path>` links are mapped in `src/util/settingsLinks.ts`. Add a path only when native clients support it and it targets an existing screen or registry entry.
 
+## Keyboard shortcuts
+
+- Declare every shortcut once in `KEYBOARD_SHORTCUTS` (`src/util/keyboardShortcuts/registry.ts`) and add its id to `KeyboardShortcutId`. The settings screen, conflict checks, button hints, settings search, and handlers read it; entry order is the row order within its `section`.
+- Set `scope` to where the shortcut works, since conflicts are checked only between overlapping scopes, and `titleKey` to the action name. Add `isEditable: true` only when users may rebind the shortcut.
+- Write defaults as modifiers and a key joined with `+` (`Mod+Shift+F`): `Mod` is ⌘ on macOS and Ctrl elsewhere, named keys follow `KeyboardEvent.key` plus `Space`, and digits and punctuation use the unshifted key. Narrow a default with `platform`, `environment`, `condition`, or `sendKeyCombo`, and keep literal `Meta` behind `platform: 'mac'`. Use `displayKeys` to show a key range as one row.
+- Defaults must not conflict in any environment: with no custom shortcuts, the screen shows no "Also used by" warnings.
+- Handle app shortcuts with `useKeyboardShortcuts` and a memoized `{ [id]: handler }` map. The hook calls `preventDefault` unless the handler returns `false`, so a handler that decides not to act returns `false` and the browser keeps its default. In `input`, `textarea`, and `select` the hook runs only Ctrl/⌘ combos other than text editing and caret movement ones; the contenteditable composer is not filtered. Handle composer formatting through `EDITOR_COMMANDS` in `richEditorKeyboardShortcuts.ts`; it also consumes the registry defaults, so make a Tiptap extension's `addKeyboardShortcuts` return `{}` only when its built-in combos differ from them. Headings, undo, and redo stay on Tiptap keymaps. Other listeners match with `getIsKeyboardShortcut(e, id)` so that combos with extra modifiers reach their own handlers; only keys that users cannot rebind (Enter, Tab, Escape, Backspace, Delete) may be matched by `e.key`. A composer handler that consumes a shortcut calls `markKeyboardShortcutHandled(e)`.
+- Add current combos to button hints with `useKeyboardShortcutHint(label, id)`.
+- `SharedSettings.keyboardShortcuts` stores only overrides, so changed defaults need no migration; renaming or removing an id needs a `migrateCache` step.
+
 ## Telegram API
 
 - GramJS runs in a web worker; UI and global state use plain `Api*` objects from `src/api/types`.

@@ -7,7 +7,8 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { areSortedArraysEqual } from '../../../util/iteratees';
+import { areSortedArraysEqual, omit } from '../../../util/iteratees';
+import { getDefaultKeyboardShortcutCombos } from '../../../util/keyboardShortcuts';
 import { loadAndChangeLanguage, setTimeFormat } from '../../../util/localization';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme, { hasActiveThemeTransition } from '../../../util/switchTheme';
@@ -168,6 +169,25 @@ addActionHandler('setSettingOption', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('setSharedSettingOption', (global, actions, payload): ActionReturnType => {
   return updateSharedSettings(global, payload);
+});
+
+addActionHandler('setKeyboardShortcut', (global, actions, payload): ActionReturnType => {
+  const { id, combo } = payload;
+  const { keyboardShortcuts, messageSendKeyCombo } = selectSharedSettings(global);
+  const defaults = getDefaultKeyboardShortcutCombos(id, messageSendKeyCombo);
+  const isDefault = combo === false ? !defaults.length : defaults.length === 1 && defaults[0].combo === combo;
+
+  return updateSharedSettings(global, {
+    keyboardShortcuts: isDefault ? omit(keyboardShortcuts, [id]) : { ...keyboardShortcuts, [id]: combo },
+  });
+});
+
+addActionHandler('resetKeyboardShortcuts', (global, actions, payload): ActionReturnType => {
+  const id = payload?.id;
+
+  return updateSharedSettings(global, {
+    keyboardShortcuts: id ? omit(selectSharedSettings(global).keyboardShortcuts, [id]) : {},
+  });
 });
 
 addActionHandler('updatePerformanceSettings', (global, actions, payload): ActionReturnType => {
