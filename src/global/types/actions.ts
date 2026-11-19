@@ -817,6 +817,8 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     startParam?: string;
+    // Sends the start parameter at once; only for links the client itself opens
+    shouldStartBot?: boolean;
     startGroup?: string;
     ref?: string;
     startAttach?: string;

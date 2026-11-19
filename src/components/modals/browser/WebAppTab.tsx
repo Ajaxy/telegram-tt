@@ -709,6 +709,8 @@ const WebAppTab = ({
     }
 
     if (eventType === 'web_app_open_tg_link') {
+      // A background tab must not navigate the client
+      if (!isActive) return;
       changeBrowserModalState({ state: 'minimized' });
 
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;

@@ -148,6 +148,7 @@ type StateProps = {
   arePeerSettingsLoaded?: boolean;
   canSubscribe?: boolean;
   canStartBot?: boolean;
+  botStartParam?: string;
   canRestartBot?: boolean;
   shouldLoadFullChat?: boolean;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
@@ -225,6 +226,7 @@ function MiddleColumn({
   arePeerSettingsLoaded,
   canSubscribe,
   canStartBot,
+  botStartParam,
   canRestartBot,
   activeEmojiInteractions,
   shouldJoinToSend,
@@ -685,6 +687,7 @@ function MiddleColumn({
                     shouldJoinToSend={renderingShouldJoinToSend}
                     shouldSendJoinRequest={renderingShouldSendJoinRequest}
                     canStartBot={renderingCanStartBot}
+                    botStartParam={botStartParam}
                     canRestartBot={renderingCanRestartBot}
                     canUnblock={renderingCanUnblock}
                     isChannelMuteBar={renderingIsChannelMuteBar}
@@ -746,7 +749,7 @@ export default memo(withGlobal<OwnProps>(
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, reactorModal, shouldSkipHistoryAnimations,
       chatLanguageModal, privacySettingsNoticeModal,
-      uiReadyState, isRichInputExpanded,
+      uiReadyState, isRichInputExpanded, pendingBotStart,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -803,7 +806,8 @@ export default memo(withGlobal<OwnProps>(
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const isUserBlocked = isPrivate ? selectIsUserBlocked(global, chatId) : false;
     const canRestartBot = Boolean(bot && isUserBlocked);
-    const canStartBot = !canRestartBot && isBotNotStarted;
+    const botStartParam = pendingBotStart?.botId === chatId ? pendingBotStart.param : undefined;
+    const canStartBot = !canRestartBot && (isBotNotStarted || Boolean(botStartParam));
     const canUnblock = Boolean(isUserBlocked && !bot);
     const shouldLoadFullChat = Boolean(
       chat && (isChatGroup(chat) || isChannel) && !chatFullInfo,
@@ -860,6 +864,7 @@ export default memo(withGlobal<OwnProps>(
       isChannel,
       canSubscribe,
       canStartBot,
+      botStartParam,
       canRestartBot,
       shouldJoinToSend,
       shouldSendJoinRequest,

@@ -20,6 +20,7 @@ type OwnProps = {
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
   canStartBot?: boolean;
+  botStartParam?: string;
   canRestartBot?: boolean;
   canUnblock?: boolean;
   isChannelMuteBar?: boolean;
@@ -48,6 +49,7 @@ const FooterActionBar = ({
   shouldJoinToSend,
   shouldSendJoinRequest,
   canStartBot,
+  botStartParam,
   canRestartBot,
   canUnblock,
   isChannelMuteBar,
@@ -63,6 +65,7 @@ const FooterActionBar = ({
   const {
     joinChannel,
     sendBotCommand,
+    startBot,
     restartBot,
     unblockUser,
     updateChatMutedState,
@@ -77,6 +80,10 @@ const FooterActionBar = ({
   });
 
   const handleStartBot = useLastCallback(() => {
+    if (botStartParam) {
+      startBot({ botId: chatId, param: botStartParam });
+      return;
+    }
     sendBotCommand({ command: '/start' });
   });
 

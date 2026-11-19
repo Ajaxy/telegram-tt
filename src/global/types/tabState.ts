@@ -745,6 +745,11 @@ export type TabState = {
     bot: ApiUser;
     startParam?: string;
   };
+  // A start parameter from a link waits for the user to press START
+  pendingBotStart?: {
+    botId: string;
+    param: string;
+  };
 
   emojiStatusAccessModal?: {
     bot: ApiUser;

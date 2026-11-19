@@ -364,6 +364,8 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   }
 
   const lastMessageId = selectChatLastMessageId(global, chat.id);
+  const { pendingBotStart } = selectTabState(global, tabId);
+  const startParam = pendingBotStart?.botId === bot.id ? pendingBotStart.param : undefined;
 
   const result = await callApi('unblockUser', { user: bot });
   if (!result) {
@@ -372,7 +374,12 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
 
   global = getGlobal();
   global = removeBlockedUser(global, bot.id);
+  global = updateTabState(global, { pendingBotStart: undefined }, tabId);
   setGlobal(global);
+  if (startParam) {
+    void callApi('startBot', { bot, startParam });
+    return;
+  }
   void sendBotCommand(chat, MAIN_THREAD_ID, '/start', undefined, selectSendAs(global, chatId), lastMessageId);
 });
 
@@ -582,10 +589,10 @@ addActionHandler('resetAllInlineBots', (global, actions, payload): ActionReturnT
 
 addActionHandler('startBot', async (global, actions, payload): Promise<void> => {
   const {
-    botId, chatId, param,
+    botId, chatId, param, tabId = getCurrentTabId(),
   } = payload;
 
-  const bot = selectUser(global, botId);
+  const bot = selectBot(global, botId);
   const chat = chatId ? selectChat(global, chatId) : undefined;
   if (!bot || (chatId && !chat)) {
     return;
@@ -602,6 +609,9 @@ addActionHandler('startBot', async (global, actions, payload): Promise<void> => 
   }
 
   if (!chat) {
+    global = getGlobal();
+    global = updateTabState(global, { pendingBotStart: undefined }, tabId);
+    setGlobal(global);
     await callApi('startBot', {
       bot,
       startParam: param,

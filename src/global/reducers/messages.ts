@@ -79,7 +79,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const {
-    messageLists, globalThemePreviewChatId, aiMessageEditorModal, aiMessageEditorPendingResult,
+    messageLists, globalThemePreviewChatId, aiMessageEditorModal, aiMessageEditorPendingResult, pendingBotStart,
   } = selectTabState(global, tabId);
   let newMessageLists: MessageList[];
   if (shouldReplaceHistory || IS_TEST) {
@@ -113,6 +113,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   return updateTabState(global, {
     messageLists: newMessageLists,
     globalThemePreviewChatId: nextList?.chatId === globalThemePreviewChatId ? globalThemePreviewChatId : undefined,
+    pendingBotStart: nextList?.chatId === pendingBotStart?.botId ? pendingBotStart : undefined,
     aiMessageEditorModal: hasChanged ? undefined : aiMessageEditorModal,
     aiMessageEditorPendingResult: hasChanged ? undefined : aiMessageEditorPendingResult,
   }, tabId);
