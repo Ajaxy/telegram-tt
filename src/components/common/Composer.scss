@@ -451,6 +451,10 @@
       }
     }
 
+    .composer-action-button.scheduled-button .icon {
+      font-size: 1.75rem;
+    }
+
     .rich-editor-button {
       z-index: 2;
       top: 0;
@@ -851,21 +855,6 @@
 
     &.bot-commands {
       color: var(--color-primary) !important;
-    }
-
-    &.scheduled-button .icon::after {
-      content: "";
-
-      position: absolute;
-      top: 0.3125rem;
-      right: 0.3125rem;
-
-      box-sizing: content-box;
-      width: 0.5rem;
-      height: 0.5rem;
-      border-radius: 50%;
-
-      background: var(--color-active-darker);
     }
   }
 }
