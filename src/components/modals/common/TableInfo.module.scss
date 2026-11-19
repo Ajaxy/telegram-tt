@@ -43,3 +43,11 @@
   color: var(--color-primary);
   background-color: var(--color-background);
 }
+
+.customPeerItem {
+  color: inherit;
+
+  &:hover {
+    background-color: var(--color-background);
+  }
+}

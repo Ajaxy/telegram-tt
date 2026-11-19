@@ -33,7 +33,6 @@ import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
-import Avatar from '../../../common/Avatar';
 import BadgeButton from '../../../common/BadgeButton';
 import GiftMenuItems from '../../../common/gift/GiftMenuItems';
 import GiftTransferPreview from '../../../common/gift/GiftTransferPreview';
@@ -614,12 +613,7 @@ const GiftInfoModal = ({
     if (hasFrom) {
       tableData.push([
         lang('GiftInfoFrom'),
-        !fromId ? (
-          <>
-            <Avatar size="small" peer={CUSTOM_PEER_HIDDEN} />
-            <span className={styles.unknown}>{lang(CUSTOM_PEER_HIDDEN.titleKey!)}</span>
-          </>
-        ) : { chatId: fromId },
+        fromId ? { chatId: fromId } : { customPeer: CUSTOM_PEER_HIDDEN },
       ]);
     }
 
