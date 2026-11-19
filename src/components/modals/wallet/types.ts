@@ -25,8 +25,8 @@ export enum WalletScreen {
   Intro,
 }
 
-export type PasswordIntent = 'phrase' | 'send' | 'decrypt' | 'enableBackup' | 'disableBackup' | 'replace'
-  | 'tonConnect';
+export type PasswordIntent = 'phrase' | 'send' | 'decrypt' | 'enableBackup' | 'disableBackup' | 'confirmKeyRotation'
+  | 'replace' | 'removeSaved' | 'tonConnect';
 
 export type WalletTransferPayload = {
   toAddress: string;

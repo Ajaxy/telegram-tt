@@ -3537,7 +3537,7 @@
 "WalletDecryptError" = "Failed to decrypt the comment. Please try again.";
 "WalletSendInvalidAddress" = "Invalid wallet address.";
 "AreYouSureLogoutGrams" = "Are you sure you want to log out?\n\nThis will **delete wallet backups holding {amount}**. Without their Secret Phrases, you'll lose access to these funds.\n\nYou can use Telegram on all your devices at once and use several accounts in the same app.";
-"WalletLogoutKeyRotation" = "A key change for your wallet is not confirmed yet. Its new key is stored only on this device. If you log out and the change goes through, you will lose access to the wallet.";
+"WalletLogoutKeyRotation" = "The new key of your wallet is stored only on this device, and its backup is not updated yet. If you log out, you may lose access to the wallet.";
 "WalletSendDomainNotFound" = "This domain has no wallet address";
 "WalletSendDomainLookupFailed" = "Couldn't check the domain. Please try again.";
 "WalletLinkNoWallet" = "This user has no wallet yet.";
@@ -3672,9 +3672,12 @@
 "WalletConnectActionExcess" = "Excess";
 "WalletConnectActionCallContract" = "Call Contract";
 "WalletConnectActionDeployContract" = "Deploy Contract";
+"WalletConnectActionCollectible" = "Collectible Transfer";
+"WalletConnectActionToken" = "Token Transfer";
 "WalletConnectActionUnknown" = "Unknown Operation";
 "WalletConnectEmulationFailed" = "The preview shows that part of this transaction may fail.";
 "WalletConnectEmulationIncomplete" = "The preview of this transaction is incomplete.";
+"WalletTransactionSimulationFailed" = "Transaction simulation failed";
 "WalletConnectFeeEstimating" = "Estimating network fee…";
 "WalletConnectData" = "Data";
 "WalletConnectRecipients_one" = "{count} recipient";

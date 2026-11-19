@@ -11,8 +11,12 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
+import FakeIcon from '../../common/FakeIcon';
+import VerifiedIcon from '../../common/VerifiedIcon';
 import Control, { ControlBefore, ControlDescription, ControlLabel } from '@gili/layout/Control';
 import Interactive from '@gili/layout/Interactive';
+
+import styles from './WalletRecentRecipient.module.scss';
 
 type OwnProps = {
   userId: string;
@@ -49,7 +53,11 @@ const WalletRecentRecipient = ({
         <ControlBefore>
           <Avatar peer={user} size="medium" />
         </ControlBefore>
-        <ControlLabel>{renderText(name)}</ControlLabel>
+        <ControlLabel className={styles.label}>
+          {renderText(name)}
+          {user.isVerified && <VerifiedIcon />}
+          {user.fakeType && <FakeIcon fakeType={user.fakeType} />}
+        </ControlLabel>
         <ControlDescription>
           {isLinkedAddress
             ? lang('WalletSendAddressLinked', { name }, {

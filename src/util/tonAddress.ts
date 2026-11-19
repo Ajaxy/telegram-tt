@@ -1,5 +1,7 @@
+import type { ApiUser } from '../api/types';
+
 import { WALLET_COMMENT_MAX_BYTES } from '../config';
-import { parseAddress } from '../lib/ton/address';
+import { parseAddress, toBounceableAddress, toNonBounceableAddress } from '../lib/ton/address';
 import { truncateUtf8 } from './encoding/buffer';
 
 type TonTransferLink = {
@@ -20,6 +22,20 @@ export function parseTonTransferAddress(value: string) {
   const address = parseAddress(value);
 
   return address && !address.isTestOnly ? address : undefined;
+}
+
+// As in Telegram Desktop, the form of the address decides whether a plain transfer bounces. The wallet of a Telegram
+// user can be not deployed yet, so a transfer to a Telegram user never bounces.
+export function getIsTransferBounceable(to: { isBounceable: boolean }, toUser?: ApiUser) {
+  return !toUser && to.isBounceable;
+}
+
+// The form a plain transfer goes to, so the user sees whether the money can come back
+export function formatTransferRecipient(address: string, toUser?: ApiUser) {
+  const to = parseTonTransferAddress(address);
+  if (!to) return address;
+
+  return getIsTransferBounceable(to, toUser) ? toBounceableAddress(address) : toNonBounceableAddress(address);
 }
 
 export function splitAddressIntoGroups(address: string): string[] {
@@ -54,11 +70,12 @@ export function splitAddressInHalves(address: string): [string, string] {
   return [groups.slice(0, half).join(' '), groups.slice(half).join(' ')];
 }
 
-export function shortenAddress(address: string): string {
-  return `${address.slice(0, ADDRESS_EDGE_LENGTH)}…${address.slice(-ADDRESS_EDGE_LENGTH)}`;
+export function shortenAddress(address: string, edgeLength = ADDRESS_EDGE_LENGTH): string {
+  return `${address.slice(0, edgeLength)}…${address.slice(-edgeLength)}`;
 }
 
 const RE_NANOTONS = /^\d{1,20}$/;
+const UNSUPPORTED_TRANSFER_PARAMS = ['jetton', 'bin', 'init'];
 // A flag counts as set unless it says otherwise, as `getBooleanQueryParameter` reads it in the Android app
 const RE_FALSE_FLAG = /^(?:false|0)$/i;
 
@@ -80,6 +97,11 @@ export function parseTonTransferLink(value: string): TonTransferLink | undefined
   if (address && !parseTonTransferAddress(address)) return undefined;
 
   const params = new URLSearchParams(match[2] || '');
+  // The app sends only plain Gram transfers, so a link with a token (`jetton`), a contract payload (`bin`) or a
+  // contract deploy (`init`) is refused, as in the iOS app. Dropping these parameters would send something other than
+  // what the link asks for, for example read a token amount as Grams.
+  if (UNSUPPORTED_TRANSFER_PARAMS.some((name) => params.has(name))) return undefined;
+
   const amountParam = params.get('amount');
 
   // The `amount` parameter is plain digits in nanotons. `BigInt` alone would also accept hex and surrounding spaces.

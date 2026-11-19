@@ -12,7 +12,9 @@ import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
+import FakeIcon from '../../common/FakeIcon';
 import GramIcon from '../../common/icons/GramIcon';
+import VerifiedIcon from '../../common/VerifiedIcon';
 import Button from '../../ui/Button';
 import WalletRecipientMatrix from './WalletRecipientMatrix';
 
@@ -22,39 +24,44 @@ type OwnProps = {
   address: string;
   user?: ApiUser;
   infoLabel: string;
-  isResolved: boolean;
+  // The chip waits until the server tells if the address belongs to a user. So the chip appears one time, with all its
+  // parts.
+  isReady: boolean;
   isActive: boolean;
   noAnimation?: boolean;
   onCopyAddress: NoneToVoidFunction;
   onOpenChat?: NoneToVoidFunction;
   onOpenInfo?: NoneToVoidFunction;
+  // The name and the address can be read: the chip is ready and its assembly has ended or did not run
+  onReadableChange?: (isReadable: boolean) => void;
 };
 
 // Two lines of six groups fit the chip, where the usual four would take three
 const ADDRESS_GROUPS_PER_LINE = 6;
 const AVATAR_SIZE = 36;
-const RESOLVE_TIMEOUT = 2000;
 
 const WalletRecipientChip = ({
-  address, user, infoLabel, isResolved, isActive, noAnimation,
-  onCopyAddress, onOpenChat, onOpenInfo,
+  address, user, infoLabel, isReady, isActive, noAnimation,
+  onCopyAddress, onOpenChat, onOpenInfo, onReadableChange,
 }: OwnProps) => {
   const lang = useLang();
 
   const ref = useRef<HTMLDivElement>();
   const avatarRef = useRef<HTMLDivElement>();
 
-  // The chip waits for the server to tell whether the address belongs to someone, so it is assembled once and whole
-  const [timedOutAddress, setTimedOutAddress] = useState<string>();
-  const isReady = isResolved || timedOutAddress === address;
+  // Every new key plays the assembly again, and the drawn parts stay transparent until it ends. A key that comes back
+  // after the chip was left plays again too.
+  const playKey = isActive && isReady ? `${address}${user?.id ?? ''}` : undefined;
+  const [assembledKey, setAssembledKey] = useState<string>();
+  const isReadable = isReady && (!playKey || assembledKey === playKey);
 
   useEffect(() => {
-    if (isReady) return undefined;
+    if (!playKey) setAssembledKey(undefined);
+  }, [playKey]);
 
-    const timeout = window.setTimeout(() => setTimedOutAddress(address), RESOLVE_TIMEOUT);
-
-    return () => window.clearTimeout(timeout);
-  }, [isReady, address]);
+  useEffect(() => {
+    onReadableChange?.(isReadable);
+  }, [isReadable, onReadableChange]);
 
   const name = user && getUserFullName(lang, user);
   const username = user && getMainUsername(user);
@@ -80,6 +87,8 @@ const WalletRecipientChip = ({
           <span className={styles.name} data-matrix="name">
             {name !== undefined ? renderText(name) : lang('WalletRecipientGramWallet')}
           </span>
+          {user?.isVerified && <VerifiedIcon />}
+          {user?.fakeType && <FakeIcon fakeType={user.fakeType} />}
           {username && (
             <span className={styles.username} data-matrix="username">{`@${username}`}</span>
           )}
@@ -115,8 +124,9 @@ const WalletRecipientChip = ({
         chipRef={ref}
         avatarRef={avatarRef}
         assemblingClassName={styles.assembling}
-        playKey={isActive && isReady ? `${address}${user?.id ?? ''}` : undefined}
+        playKey={playKey}
         noAnimation={noAnimation}
+        onPlayEnd={setAssembledKey}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
+import { RPCError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
@@ -62,8 +62,8 @@ import { invokeBotWidgetQuery } from './bots';
 import { invokeRequest } from './client';
 import {
   checkIsAddressActive, deriveWalletSeeds, emulateTransfer, estimateFee, exportWalletSecretPhrase,
-  fetchToncenterWalletState, forgetRefusedTransfer, isTransferPending, isTransferUnanswered, loadSentTransfer,
-  markSentTransferAccepted, rememberSentTransfer, runWalletSend, sendTransferData,
+  fetchToncenterWalletState, forgetRefusedTransfer, getIsServerRefusal, isTransferPending, isTransferUnanswered,
+  loadSentTransfer, markSentTransferAccepted, rememberSentTransfer, runWalletSend, sendTransferData,
 } from './wallet';
 
 type TonConnectCredentials = {
@@ -704,7 +704,7 @@ async function signTonConnectMessage(
 
     const params = buildBatchParams(ownAddress, keys, current, messages, requestedUntil);
     const signed = await buildSignedInternalBatchTransfer({ ...params, secretSeed: keys.seeds.signing });
-    await rememberSentTransfer(ownAddress, current.seqno, params.validUntil);
+    await rememberSentTransfer(ownAddress, current.seqno, params.validUntil, undefined, true);
 
     return signed;
   });
@@ -884,8 +884,8 @@ export function respondWidgetWalletCall({
 
         const updates = await sendTransferData(signed.boc, undefined, generateRandomBigInt()).catch((err: unknown) => {
           forgetRefusedTransfer(ownAddress, current.seqno, err);
-          // A timeout means the server stopped waiting, not that it refused
-          isMaybeSent = !(err instanceof RPCError) || err instanceof TimedOutError;
+          // By the rule of the record kept for the transfer, so the window offers no retry that the record would block
+          isMaybeSent = !getIsServerRefusal(err);
           throw err;
         });
         const accepted = buildApiWalletSentTransfer(updates, {
@@ -1028,19 +1028,32 @@ async function deriveTonConnectKeys(
     const seeds = await deriveWalletSeeds(exported.words, credentials.ownAddress, credentials.ownPublicKey);
     if (!seeds) throw new TonConnectError('UNSUPPORTED_WALLET');
 
-    const sessionKey = await deriveTonConnectSessionKey(
-      seeds.anchor, session.dappClientId, deserializeBytes(session.nonce),
-    );
+    // The server remembers the client id each session was connected with, and every request must derive the same id.
+    // New sessions take the key from the signing half of the phrase, like the native apps. Some existing sessions were
+    // connected with a key from the anchor half, so that half is tried when the first one does not match. Until the
+    // first key rotation, both halves are the same key.
+    const nonce = deserializeBytes(session.nonce);
+    let sessionKey = await deriveTonConnectSessionKey(seeds.signing, session.dappClientId, nonce);
+    if (session.clientId && session.clientId.toLowerCase() !== sessionKey.clientId) {
+      sessionKey = await deriveTonConnectSessionKey(seeds.anchor, session.dappClientId, nonce);
+    }
 
     keys = { ...sessionKey, seeds, anchorPublicKey: await getEd25519PublicKey(seeds.anchor) };
-    rememberTonConnectKeys(cacheKey, keys);
+
+    // The cache key leaves the session's client id out, so a key the server's id refuses is not kept: a session with
+    // the right id derives its key again
+    if (getIsTonConnectClientIdValid(session, keys)) rememberTonConnectKeys(cacheKey, keys);
   }
 
-  if (session.clientId && session.clientId.toLowerCase() !== keys.clientId) {
+  if (!getIsTonConnectClientIdValid(session, keys)) {
     throw new TonConnectError('TONCONNECT_CLIENT_ID_INVALID');
   }
 
   return keys;
+}
+
+function getIsTonConnectClientIdValid(session: ApiTonConnectSession, keys: TonConnectKeys) {
+  return !session.clientId || session.clientId.toLowerCase() === keys.clientId;
 }
 
 function rememberTonConnectKeys(cacheKey: string, keys: TonConnectKeys) {
@@ -1050,6 +1063,11 @@ function rememberTonConnectKeys(cacheKey: string, keys: TonConnectKeys) {
   sessionKeys.set(cacheKey, {
     keys, timeoutId: setTimeout(() => sessionKeys.delete(cacheKey), SESSION_KEY_RETENTION_MS),
   });
+}
+
+export function clearTonConnectKeys() {
+  sessionKeys.forEach(({ timeoutId }) => clearTimeout(timeoutId));
+  sessionKeys.clear();
 }
 
 function forgetTonConnectKeys(sessionId: string) {
@@ -1120,6 +1138,11 @@ export function createTonConnectSession(params: {
 }): Promise<ApiTonConnectResult<{ session: ApiTonConnectSession }>> {
   return runTonConnect(async () => {
     const session = await invokeTonConnectCreateSession(params);
+    // Every answer to the dApp is encrypted to the session's key, so it must be the key from the link
+    if (session.dappClientId.toLowerCase() !== params.dappClientId.toLowerCase()) {
+      throw new TonConnectError('DAPP_CLIENT_ID_INVALID');
+    }
+
     // The sheet shows the host the manifest names, so a foreign one is refused before the user sees it
     if (session.manifest) validateManifestDomain(session.manifest.url, params.manifestUrl);
 

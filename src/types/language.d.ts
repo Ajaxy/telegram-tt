@@ -2767,9 +2767,12 @@ export interface LangPair {
   'WalletConnectActionExcess': undefined;
   'WalletConnectActionCallContract': undefined;
   'WalletConnectActionDeployContract': undefined;
+  'WalletConnectActionCollectible': undefined;
+  'WalletConnectActionToken': undefined;
   'WalletConnectActionUnknown': undefined;
   'WalletConnectEmulationFailed': undefined;
   'WalletConnectEmulationIncomplete': undefined;
+  'WalletTransactionSimulationFailed': undefined;
   'WalletConnectFeeEstimating': undefined;
   'WalletConnectData': undefined;
   'RichMediaCollage': undefined;

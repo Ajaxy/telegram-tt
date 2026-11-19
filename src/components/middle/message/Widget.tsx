@@ -26,7 +26,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectCanAnimateInterface, selectChat, selectIsWalletAvailable, selectMessageWidgetHeight, selectMessageWidgetStorage,
-  selectUser, selectUserFullInfo, selectWidgetBotId, selectWidgetChatType,
+  selectTabState, selectUser, selectUserFullInfo, selectWidgetBotId, selectWidgetChatType,
 } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
@@ -34,6 +34,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { bufferToHex } from '../../../util/encoding/buffer';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
 import loadWidgetSandbox from '../../../util/loadWidgetSandbox';
+import { getOpenModalCount } from '../../../util/openModals';
 import trimText from '../../../util/text/trimText';
 import { extractCurrentThemeParams, prepareHexColor } from '../../../util/themeStyle';
 import {
@@ -271,7 +272,7 @@ function Widget({
     const global = getGlobal();
     if (!isVisible || isInSelectMode || global.currentUserId !== accountId || global.passcode.isScreenLocked) return;
     // One dialog at a time: a link that arrives while one is shown is dropped. Web ignores haptics.
-    if (document.querySelector('.Modal')) return;
+    if (getOpenModalCount()) return;
     if (action.kind === 'openLink') {
       toggleSafeLinkModal({ url: action.url, isWidget: true });
     } else if (action.kind === 'openTelegramLink') {
@@ -295,7 +296,16 @@ function Widget({
   const handleWallet = useLastCallback((call: WalletCall): Promise<WidgetRequestAnswer> => {
     const global = getGlobal();
     const botId = selectWidgetBotId(global, message);
-    if (!botId || global.currentUserId !== accountId || global.passcode.isScreenLocked) return Promise.reject();
+    // The bot can make the next call from the answer to the previous one, while the wallet window of that call is still
+    // closing and counted as open. That window is not counted, and the wallet action refuses a call while another one
+    // is still answered.
+    const { walletModal, walletTonConnect } = selectTabState(global);
+    const isWalletWindowClosing = !walletModal && walletTonConnect?.widget && walletTonConnect.status === 'done';
+    if (!botId || !isVisible || isInSelectMode || global.currentUserId !== accountId || global.passcode.isScreenLocked
+      // The wallet window does not open on top of another dialog
+      || getOpenModalCount() > (isWalletWindowClosing ? 1 : 0)) {
+      return Promise.reject();
+    }
 
     return new Promise((resolve, reject) => {
       const callId = registerWidgetWalletCall((outcome) => {

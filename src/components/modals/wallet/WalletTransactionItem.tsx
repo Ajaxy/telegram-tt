@@ -43,6 +43,9 @@ type OwnProps = {
 };
 
 const AVATAR_SIZE = 42;
+// A row shows more characters of an address than other places, as in the iOS app. In a row, a user can take a similar
+// address for a known one.
+const ADDRESS_EDGE_LENGTH = 6;
 // The @walt bot reports itself as `wallet` or `walt`
 const WALT_PROVIDER_NAMES = new Set(['walt', 'wallet']);
 const EXPAND_DURATION = 520;
@@ -68,7 +71,7 @@ const WalletTransactionItem = ({
   transaction, className, onClick,
 }: OwnProps) => {
   const {
-    isIncoming, peer, amount, comment, isPending, isFailed, timestamp, collectible,
+    isIncoming, peer, amount, isPending, isFailed, timestamp, collectible,
   } = transaction;
 
   const lang = useLang();
@@ -118,8 +121,7 @@ const WalletTransactionItem = ({
 
   const onrampIcon = peer.type !== 'onramp' ? undefined : isWaltProvider(peer.providerName) ? 'walt' : 'card-alt';
   const title = getTitle(lang, peer, counterparty);
-  const description = comment
-    || (peer.type === 'onramp' ? capitalizeName(peer.providerName) : lang(getDescriptionKey(transaction)));
+  const description = peer.type === 'onramp' ? capitalizeName(peer.providerName) : lang(getDescriptionKey(transaction));
   const status = isPending ? lang('WalletTransactionSending') : isFailed ? lang('WalletTransactionFailed') : undefined;
 
   const handleClick = useLastCallback(() => {
@@ -239,7 +241,7 @@ function getTitle(lang: LangFn, peer: ApiWalletTransactionPeer, counterparty?: A
     case 'unsupported':
       return lang('WalletTransactionUnsupportedPeer');
     default:
-      return peer.domain || shortenAddress(peer.address);
+      return peer.domain || shortenAddress(peer.address, ADDRESS_EDGE_LENGTH);
   }
 }
 

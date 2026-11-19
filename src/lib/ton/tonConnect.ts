@@ -24,7 +24,7 @@ const CHALLENGE_BYTES = KEY_BYTES + NONCE_BYTES + TAG_BYTES + KEY_BYTES;
 const MAX_UINT32 = 0xffffffff;
 // The server accepts 1 to 100 printable ASCII characters and rejects an id it has already seen in the session
 const REQUEST_ID_REGEX = /^[\x20-\x7e]{1,100}$/;
-const IMPORT_PROOF_DOMAIN = 'telegram.org';
+export const IMPORT_PROOF_DOMAIN = 'telegram.org';
 const TEXT_COMMENT_OPCODE_BITS = 32;
 const MAX_COMMENT_BYTES = 1024;
 const textDecoder = new TextDecoder('utf-8', { fatal: true });

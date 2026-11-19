@@ -1144,6 +1144,19 @@ export type TabState = {
     error?: WalletBackupError;
   };
 
+  // A key rotation that is prepared to turn the backup off. The user sees and confirms its phrase before anything is
+  // sent to the blockchain. Like all tab state, it is never saved to the cache.
+  walletKeyRotation?: {
+    fromAddress: string;
+    words: string[];
+  };
+
+  // The removal of a phrase that the device keeps for another wallet. It requires the passcode.
+  walletSavedRemoval?: {
+    status: 'pending' | 'done' | 'error';
+    error?: 'PASSCODE_INVALID' | 'PASSCODE_LOCKED';
+  };
+
   walletReplace?: {
     status: 'pending' | 'done' | 'error';
     error?: ReplaceWalletError;

@@ -1,5 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
-import { RPCError, TimedOutError } from '../../../lib/gramjs/errors';
+import { RPCError } from '../../../lib/gramjs/errors';
 import { generateRandomBigInt } from '../../../lib/gramjs/Helpers';
 
 import type { WalletSeeds } from '../../../lib/ton/bip39';
@@ -9,12 +9,14 @@ import type {
   ApiChat,
   ApiMessage,
   ApiTonConnectEmulatedAction,
+  ApiTonConnectEmulatedActionType,
   ApiTonConnectEmulation,
   ApiUser,
   ApiWalletCardSticker,
   ApiWalletGiftDeposit,
   ApiWalletStateResult,
   ApiWalletTransferFee,
+  ApiWalletTransferProgress,
   ApiWalletUserAddress,
   DecryptWalletCommentResult,
   ExportSecretPhraseResult,
@@ -48,6 +50,7 @@ import {
   decryptMessageComment, encryptMessageComment, getEncryptedCommentLength,
 } from '../../../lib/ton/encryption';
 import { signOwnershipProof } from '../../../lib/ton/proof';
+import { IMPORT_PROOF_DOMAIN } from '../../../lib/ton/tonConnect';
 import {
   buildNftTransferPayload,
   buildSignedGaslessTransfer,
@@ -68,7 +71,7 @@ import {
 import { getBigIntMax } from '../../../util/numbers';
 import { pause } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
-import { parseTonTransferAddress } from '../../../util/tonAddress';
+import { getIsTransferBounceable, parseTonTransferAddress } from '../../../util/tonAddress';
 import { buildLocalMessage } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
@@ -145,6 +148,13 @@ type EmulateTraceResponse = ToncenterError & {
   is_incomplete?: boolean;
 };
 
+type TonApiRequestParams = {
+  endpoint: string;
+  query?: string;
+  payload?: string;
+  isPost?: boolean;
+};
+
 type EstimateFeeResponse = ToncenterError & {
   source_fees?: {
     in_fwd_fee?: number;
@@ -170,8 +180,8 @@ const KEY_ROTATION_MIN_BALANCE = 10_000_000n;
 const KEY_ROTATION_POLL_INTERVAL = 3000;
 const PENDING_TRANSFER_POLL_INTERVAL = 1000;
 const MAX_FAILED_PENDING_POLLS = 3;
-// A transfer without an answer is looked up only while its history row exists (up to 5 minutes), so the latest
-// transactions are enough
+// A transfer without an answer is searched for only while its row is in the history. This is a few minutes, so the
+// latest transactions are enough.
 const UNANSWERED_TRANSFER_LOOKUP_LIMIT = 20;
 // A transfer waits behind the previous one no longer than a transfer of ours lives, even when a TON Connect request
 // keeps its message valid for minutes: the wallet lock and the queued row should not hang that long
@@ -179,7 +189,15 @@ const MAX_PENDING_TRANSFER_WAIT = TRANSFER_TTL_SECONDS * 1000;
 // Seconds past the request's expiry before it counts as never executed: the indexer and the local clock can lag
 // behind the chain, as the iOS app assumes too
 const KEY_ROTATION_EXPIRY_MARGIN = 120;
+// As in Telegram Desktop. A request to the webfile DC can hang on a connection gone stale while the main DC answers, and
+// GramJS sets no deadline of its own, so the request counts as unanswered after this long.
+const TON_API_REQUEST_TIMEOUT = 30000;
 const KEY_CHANGES_PAGE_SIZE = 100;
+const SERVER_ERROR_CODE = 500;
+const MAX_KEY_CHANGES_PAGES = 10;
+// Public keys and encrypted seeds in the key change history are 32 bytes (64 hex characters). A record of any other
+// length is malformed and is skipped.
+const KEY_HEX_PATTERN = /^[0-9a-f]{64}$/i;
 // Derived from the phrase and the published history, so kept only while the worker lives
 const previousSigningKeysCache = new Map<string, WalletKeys[]>();
 // The last transfer broadcast per wallet, until its seqno moves on or it expires. Kept on disk as well:
@@ -189,7 +207,8 @@ type SentTransfer = {
   validUntil: number;
   isKeyRotation?: boolean;
   isAccepted?: boolean;
-  // Set when the send got no answer: the transfer may still go through, see `isTransferUnanswered`
+  // True for a transfer until the server answers. True for a key rotation when its request gets no answer. In both
+  // cases the message can still reach the blockchain, see `isTransferUnanswered`.
   isUnanswered?: boolean;
   replacedRotation?: SentTransfer;
 };
@@ -197,6 +216,13 @@ const sentTransfers = new Map<string, SentTransfer>();
 let sentTransfersRestored: Promise<void> | undefined;
 const SEND_LOCK_PREFIX = 'wallet-send:';
 const SENT_TRANSFER_KEY_PREFIX = 'sent:';
+// A key rotation that is sent, while the backup is still on. After the rotation reaches the blockchain, only the new
+// phrase on the device can sign. The server still keeps the old phrase as the backup.
+type UnfinishedKeyRotation = {
+  newPublicKey: Uint8Array;
+  validUntil: number;
+};
+const KEY_ROTATION_KEY_PREFIX = 'rotation:';
 // The width the server pads the phrase (words joined by single spaces) to before splitting it
 const MNEMONIC_PADDED_LENGTH = 215;
 const MNEMONIC_PADDING_BYTE = 0x20;
@@ -466,7 +492,8 @@ export async function estimateWalletTransferFee({
   const shouldEncrypt = Boolean(comment && shouldEncryptComment && !collectible);
   const canEncryptComment = shouldEncrypt ? Boolean(await fetchRecipientPublicKey(toAddress)) : undefined;
 
-  // The bounce flags are those of `sendWalletTransfer`
+  // The bounce flags are the same as in `sendTonTransfer`. There, a transfer to a Telegram user never bounces. This
+  // difference does not change the fee.
   const body = await buildUnsignedTransferBodyBoc(collectible ? {
     to: { ...collectible, isBounceable: true },
     amount: NFT_TRANSFER_ATTACHED_NANOS,
@@ -476,7 +503,7 @@ export async function estimateWalletTransferFee({
       newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
     }),
   } : {
-    to: { ...to, isBounceable: false },
+    to,
     amount,
     seqno: state.seqno,
     now: getServerTime(),
@@ -520,9 +547,16 @@ export async function estimateFee(
 
 const EXCESS_OPCODE = 0xd53276db;
 const EMULATED_TRANSFER_TYPES = new Set(['ton_transfer', 'extra_currency_transfer']);
+// For an item or a token transfer, Toncenter puts the two owners in these fields
+const EMULATED_ASSET_TRANSFERS = new Map<string, {
+  type: ApiTonConnectEmulatedActionType; sourceField: string; destinationField: string;
+}>([
+  ['nft_transfer', { type: 'nftTransfer', sourceField: 'old_owner', destinationField: 'new_owner' }],
+  ['jetton_transfer', { type: 'jettonTransfer', sourceField: 'sender', destinationField: 'receiver' }],
+]);
 
-// What the transaction would do, by the same rules as Telegram Desktop: the wallet's own transfers, contract calls and
-// deployments, and everything else as an unknown action
+// Returns what the transaction will do. Transfers of the wallet, contract calls and deployments follow the rules of
+// Telegram Desktop. Item and token transfers get their own type. Everything else is an unknown action.
 export async function emulateTransfer(
   ownAddress: string, boc: string,
 ): Promise<ApiTonConnectEmulation | undefined> {
@@ -555,8 +589,9 @@ export async function emulateTransfer(
     if (type === 'unknown') continue;
     if (success === false) hasFailedAction = true;
 
-    const source = readEmulatedAddress(details.source);
-    const destination = readEmulatedAddress(details.destination);
+    const assetTransfer = type ? EMULATED_ASSET_TRANSFERS.get(type) : undefined;
+    const source = readEmulatedAddress(details[assetTransfer?.sourceField ?? 'source']);
+    const destination = readEmulatedAddress(details[assetTransfer?.destinationField ?? 'destination']);
     const amount = typeof details.value === 'string' && /^\d+$/.test(details.value) ? details.value : undefined;
 
     if (type === 'contract_deploy') {
@@ -576,6 +611,8 @@ export async function emulateTransfer(
     } else if (type === 'call_contract') {
       const opcode = readEmulatedOpcode(details.opcode);
       actions.push({ type: opcode === EXCESS_OPCODE ? 'excess' : 'callContract', amount, address: counterparty });
+    } else if (assetTransfer) {
+      actions.push({ type: assetTransfer.type, address: counterparty });
     } else {
       actions.push({ type: 'unknown', address: counterparty });
     }
@@ -705,6 +742,9 @@ export async function enableWalletBackup({
       return { error: 'BACKUP_FAILED' };
     }
 
+    // Now the backup holds the phrase that the blockchain accepts, so no key rotation is unfinished
+    await forgetUnfinishedKeyRotation(ownAddress);
+
     return { state: buildApiWalletStateResult(result) };
   } catch (err: unknown) {
     if (err instanceof RPCError) {
@@ -727,9 +767,16 @@ async function invokeEnableBackup(parts: Uint8Array<ArrayBuffer>[], ownAddress: 
   }), { shouldThrow: true });
 }
 
-// A single-use challenge signed as a TonConnect `ton-proof`; a repeated proof is refused with `WALLET_PROOF_EXPIRED`
+// Signs a challenge in the TonConnect `ton-proof` format. A challenge works one time: the server refuses a repeated
+// proof with `WALLET_PROOF_EXPIRED`. A proof for another domain can log the wallet in to that site. So the code signs
+// only for the domain of Telegram, as the iOS app does.
 async function buildOwnershipProof(address: string, seed: Uint8Array) {
   const challenge = (await invokeRequest(new GramJs.wallet.GetProofChallenge(), { shouldThrow: true }))!;
+
+  if (challenge.domain !== IMPORT_PROOF_DOMAIN) {
+    throw new Error('Unexpected proof domain');
+  }
+
   const timestamp = getServerTime();
   const signature = await signOwnershipProof({
     address: parseAddress(address)!,
@@ -823,8 +870,11 @@ export async function rotateWalletKey({
 
   try {
     const result = await invokeDisableBackup(ownAddress, newSeeds.signing);
+    if (!result) return { error: 'BACKUP_FAILED', isSent: true };
 
-    return result ? { state: buildApiWalletStateResult(result) } : { error: 'BACKUP_FAILED', isSent: true };
+    await forgetUnfinishedKeyRotation(ownAddress);
+
+    return { state: buildApiWalletStateResult(result) };
   } catch (err: unknown) {
     return { error: mapWalletRpcError(err, 'BACKUP_FAILED'), isSent: true };
   }
@@ -862,7 +912,16 @@ async function sendKeyRotation({
       newSecretSeed,
     });
 
-    await rememberSentTransfer(ownAddress, state.seqno, now + TRANSFER_TTL_SECONDS, true);
+    const validUntil = now + TRANSFER_TTL_SECONDS;
+
+    // Without the marker, a sign-out gives no warning that the new phrase is the only copy of the key
+    try {
+      await rememberUnfinishedKeyRotation(ownAddress, newPublicKey, validUntil);
+    } catch {
+      return { error: 'BACKUP_FAILED' };
+    }
+
+    await rememberSentTransfer(ownAddress, state.seqno, validUntil, true);
 
     try {
       await invokeRequest(new GramJs.wallet.SendTransfer({
@@ -874,7 +933,10 @@ async function sendKeyRotation({
       // A lost connection leaves the outcome unknown, so the new phrase must stay on the device
       forgetRefusedTransfer(ownAddress, state.seqno, err);
 
-      return { error: mapWalletRpcError(err, 'BACKUP_FAILED'), isSent: getIsServerRefusal(err) ? undefined : true };
+      const isRefused = getIsServerRefusal(err);
+      if (isRefused) await forgetUnfinishedKeyRotation(ownAddress);
+
+      return { error: mapWalletRpcError(err, 'BACKUP_FAILED'), isSent: isRefused ? undefined : true };
     }
 
     return { now };
@@ -892,8 +954,26 @@ export async function fetchWalletChainPublicKey({ ownAddress }: { ownAddress: st
   return publicKey && serializeBytes(publicKey);
 }
 
-// Until a rotation sent from here executes or expires, its new phrase is the only copy of the key it may install
-export async function fetchIsWalletKeyRotationPending({ ownAddress }: { ownAddress: string }) {
+// A key rotation sent from this device can still reach the blockchain until it expires. During this time its new phrase
+// is the only copy of the new key. After the rotation is executed, the phrase stays the only copy until the backup is
+// turned off.
+export async function fetchIsWalletKeyRotationPending({
+  ownAddress, isBackupEnabled, hasVaultSecret,
+}: {
+  ownAddress: string;
+  // The last value from the server, or `undefined` when it is not known. When the backup is off, no key rotation is
+  // unfinished.
+  isBackupEnabled?: boolean;
+  // True when the device keeps a phrase for this wallet, or `undefined` when it is not known. Without a phrase on the
+  // device, the warning has nothing to protect.
+  hasVaultSecret?: boolean;
+}) {
+  if (isBackupEnabled === false || hasVaultSecret === false) {
+    await forgetUnfinishedKeyRotation(ownAddress);
+  } else if (await checkIsKeyRotationUnfinished(ownAddress)) {
+    return true;
+  }
+
   const rotation = await getSentKeyRotation(ownAddress);
   if (!rotation) return false;
 
@@ -922,6 +1002,36 @@ async function getSentKeyRotation(ownAddress: string) {
   const sent = sentTransfers.get(toRawAddress(ownAddress)!);
 
   return sent?.isKeyRotation ? sent : undefined;
+}
+
+// After the expiry time and the margin, the record is removed if the blockchain did not accept the key rotation. When
+// the blockchain gives no answer, the rotation can be accepted, so the record stays.
+async function checkIsKeyRotationUnfinished(ownAddress: string) {
+  const rotation = await WALLET_IDB_STORE.get<UnfinishedKeyRotation>(buildKeyRotationStoreKey(ownAddress));
+  if (!rotation) return false;
+
+  if (getServerTime() < rotation.validUntil + KEY_ROTATION_EXPIRY_MARGIN) return true;
+
+  const publicKey = await fetchWalletPublicKey(ownAddress);
+  if (!publicKey || buffersEqual(publicKey, rotation.newPublicKey)) return true;
+
+  await forgetUnfinishedKeyRotation(ownAddress);
+
+  return false;
+}
+
+function rememberUnfinishedKeyRotation(ownAddress: string, newPublicKey: Uint8Array, validUntil: number) {
+  const rotation: UnfinishedKeyRotation = { newPublicKey, validUntil };
+
+  return WALLET_IDB_STORE.set(buildKeyRotationStoreKey(ownAddress), rotation);
+}
+
+function forgetUnfinishedKeyRotation(ownAddress: string) {
+  return WALLET_IDB_STORE.del(buildKeyRotationStoreKey(ownAddress)).catch(() => undefined);
+}
+
+function buildKeyRotationStoreKey(ownAddress: string) {
+  return `${KEY_ROTATION_KEY_PREFIX}${toRawAddress(ownAddress)!}`;
 }
 
 // Nanotons
@@ -1155,6 +1265,10 @@ async function tryDecryptComment(payload: Uint8Array, keys: WalletKeys, salt: Ui
   }
 }
 
+export function clearPreviousSigningKeys() {
+  previousSigningKeysCache.clear();
+}
+
 async function loadPreviousSigningKeys(ownAddress: string, currentKeys: WalletKeys): Promise<WalletKeys[]> {
   const cacheKey = `${toRawAddress(ownAddress)!}:${bufferToHex(currentKeys.publicKey)}`;
   const cached = previousSigningKeysCache.get(cacheKey);
@@ -1202,11 +1316,11 @@ async function recoverPreviousSigningKeys(
 async function fetchWalletKeyChanges(ownAddress: string): Promise<WalletKeyChange[] | undefined> {
   const changes: WalletKeyChange[] = [];
 
-  for (let offset = 0; ; offset += KEY_CHANGES_PAGE_SIZE) {
+  for (let page = 0; page < MAX_KEY_CHANGES_PAGES; page++) {
     const result = await invokeTonApiRequest<WalletKeyChangesResponse>({
       endpoint: '/api/v3/actions',
       query: `account=${encodeURIComponent(ownAddress)}&action_type=change_wallet_key`
-        + `&limit=${KEY_CHANGES_PAGE_SIZE}&offset=${offset}`,
+        + `&limit=${KEY_CHANGES_PAGE_SIZE}&offset=${page * KEY_CHANGES_PAGE_SIZE}`,
     });
 
     if (!result || result.error) {
@@ -1220,12 +1334,14 @@ async function fetchWalletKeyChanges(ownAddress: string): Promise<WalletKeyChang
     }
 
     for (const { details } of actions) {
-      if (!details?.new_public_key) continue;
+      if (!details?.new_public_key || !KEY_HEX_PATTERN.test(details.new_public_key)) continue;
+
+      const encryptedOldSeed = details.encrypted_old_private_key;
 
       changes.push({
         newPublicKey: bufferFromHex(details.new_public_key),
-        encryptedOldSeed: details.encrypted_old_private_key
-          ? bufferFromHex(details.encrypted_old_private_key)
+        encryptedOldSeed: encryptedOldSeed && KEY_HEX_PATTERN.test(encryptedOldSeed)
+          ? bufferFromHex(encryptedOldSeed)
           : undefined,
       });
     }
@@ -1268,7 +1384,7 @@ export async function sendTonTransfer({
   password?: string;
   // As last loaded, so it may be out of date
   hasPassword?: boolean;
-}, onQueued?: (localMessageId?: number) => void): Promise<SendTonTransferResult | undefined> {
+}, onProgress?: (progress: ApiWalletTransferProgress) => void): Promise<SendTonTransferResult | undefined> {
   const collectible = collectibleAddress ? parseTonTransferAddress(collectibleAddress) : undefined;
 
   if (collectible && !collectiblePayload) {
@@ -1328,7 +1444,7 @@ export async function sendTonTransfer({
   }
 
   // As in the iOS app, the transfer is queued before the keys and the comment are prepared, so the form closes at once
-  onQueued?.(localMessage?.id);
+  onProgress?.({ localMessageId: localMessage?.id });
 
   // The wait is counted from the moment the transfer is queued. Otherwise a transfer that waits for the lock could wait
   // longer than its pending row stays in the history.
@@ -1437,9 +1553,9 @@ export async function sendTonTransfer({
       return { error: 'GASLESS_UNAVAILABLE' };
     }
 
-    // A bounceable message to an account with no code comes straight back with the fees spent, so a plain
-    // transfer never bounces and a wallet not deployed yet gets its first coins. The item contract must
-    // return the value if it refuses the call.
+    // A bounceable message to an account without code comes back at once, and the fees are lost, so the address tells if
+    // a plain transfer can bounce, see `getIsTransferBounceable`. The item contract must return the value when it
+    // refuses the call.
     const transfer = collectible ? {
       to: { ...collectible, isBounceable: true },
       amount,
@@ -1450,7 +1566,7 @@ export async function sendTonTransfer({
         newOwner: to, responseDestination: own, forwardAmount: NFT_TRANSFER_FORWARD_NANOS, comment,
       }),
     } : {
-      to: { ...to, isBounceable: false },
+      to: { ...to, isBounceable: getIsTransferBounceable(to, toUser) },
       amount,
       seqno: state.seqno,
       now: getServerTime(),
@@ -1487,12 +1603,12 @@ export async function sendTonTransfer({
 
     const validUntil = transfer.now + TRANSFER_TTL_SECONDS;
     await rememberSentTransfer(ownAddress, transfer.seqno, validUntil);
+    onProgress?.({ broadcast: { bodyHashes, seqno: transfer.seqno, validUntil } });
 
     try {
       const result = await sendTransferData(dataNormal.boc, dataGasless?.boc, randomId, toUser, localMessage);
       const sent = buildApiWalletSentTransfer(result, { seqno: transfer.seqno, validUntil });
       if (!sent) {
-        await updateSentTransfer(ownAddress, transfer.seqno, { isUnanswered: true });
         return { error: 'SEND_FAILED', isSent: true, bodyHashes };
       }
 
@@ -1699,9 +1815,11 @@ function getSentTransferExpiry({ validUntil, isKeyRotation }: SentTransfer) {
   return isKeyRotation ? validUntil + KEY_ROTATION_EXPIRY_MARGIN : validUntil;
 }
 
-// Written before the broadcast: a request whose answer got lost may still have gone out
+// The record is written before the request is sent. A request can reach the server even when its answer is lost or the
+// worker stops before the answer. A key rotation and a message that is only signed for a dApp never get the mark of an
+// answer. So these two block the next transfers only while the seqno is the same.
 export async function rememberSentTransfer(
-  ownAddress: string, seqno: number, validUntil: number, isKeyRotation?: boolean,
+  ownAddress: string, seqno: number, validUntil: number, isKeyRotation?: boolean, isSignedOnly?: boolean,
 ) {
   const rawAddress = toRawAddress(ownAddress)!;
   const previous = sentTransfers.get(rawAddress);
@@ -1714,6 +1832,7 @@ export async function rememberSentTransfer(
     seqno,
     validUntil,
     isKeyRotation: isKeyRotation || Boolean(replacedRotation),
+    isUnanswered: !isKeyRotation && !isSignedOnly,
     replacedRotation,
   };
   sentTransfers.set(rawAddress, sent);
@@ -1721,7 +1840,7 @@ export async function rememberSentTransfer(
 }
 
 export function markSentTransferAccepted(ownAddress: string, seqno: number) {
-  return updateSentTransfer(ownAddress, seqno, { isAccepted: true });
+  return updateSentTransfer(ownAddress, seqno, { isAccepted: true, isUnanswered: false });
 }
 
 async function updateSentTransfer(ownAddress: string, seqno: number, update: Partial<SentTransfer>) {
@@ -1780,9 +1899,11 @@ export function isTransferUnanswered(ownAddress: string, seqno: number) {
   return sent.isUnanswered || (seqno === sent.seqno && !sent.isAccepted);
 }
 
-// A timeout means the server stopped waiting, not that it refused: the request may still have gone through
-function getIsServerRefusal(err: unknown) {
-  return err instanceof RPCError && !(err instanceof TimedOutError);
+// Tells whether the server surely did not send the transfer, so it is safe to try again. An error code below 500
+// means the server rejected the request. Code 500 (internal error) and a timeout (negative code) can come after the
+// server has already sent the transfer, so the result is unknown and a second try could pay twice.
+export function getIsServerRefusal(err: unknown) {
+  return err instanceof RPCError && err.code > 0 && err.code < SERVER_ERROR_CODE;
 }
 
 // The server broadcasts whichever message of the pair it chooses
@@ -2097,14 +2218,24 @@ export async function checkIsAddressActive(address: string): Promise<boolean | u
 
 // `endpoint` is a full path from https://toncenter.com/api/v3/index.html, e.g. `/api/v3/masterchainInfo`;
 // a bare name is rejected with `ENDPOINT_INVALID`
-async function invokeTonApiRequest<T = AnyLiteral>({
+async function invokeTonApiRequest<T = AnyLiteral>(params: TonApiRequestParams): Promise<T | undefined> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      requestTonApi<T>(params),
+      new Promise<undefined>((resolve) => {
+        timeout = setTimeout(resolve, TON_API_REQUEST_TIMEOUT);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function requestTonApi<T>({
   endpoint, query, payload, isPost,
-}: {
-  endpoint: string;
-  query?: string;
-  payload?: string;
-  isPost?: boolean;
-}): Promise<T | undefined> {
+}: TonApiRequestParams): Promise<T | undefined> {
   const dcId = await getClient().getWebfileDcId();
 
   const result = await invokeRequest(new GramJs.toncenter.PerformApiRequest({

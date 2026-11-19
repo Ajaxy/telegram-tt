@@ -1,5 +1,5 @@
 import { memo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { withGlobal } from '../../../global';
 
 import type { ApiWalletSavedWallet } from '../../../api/types';
 
@@ -27,6 +27,7 @@ type OwnProps = {
   onDeleteWallet: NoneToVoidFunction;
   onImportSavedWallet: (address: string) => void;
   onShowSavedPhrase: (address: string) => void;
+  onRemoveSavedWallet: (address: string) => void;
   onEnterOwnPhrase: NoneToVoidFunction;
 };
 
@@ -42,12 +43,13 @@ type SavedWalletOwnProps = {
   wallet: ApiWalletSavedWallet;
   onImport: (address: string) => void;
   onShowPhrase: (address: string) => void;
+  onRemove: (address: string) => void;
 };
 
 const WalletKeySection = ({
   canExportPhrase, isKeyMissing, canEnableBackup, isBackupEnabled, savedWallets,
   onShowPhrase, onEnableBackup, onDisableBackup, onDeleteWallet, onImportSavedWallet, onShowSavedPhrase,
-  onEnterOwnPhrase,
+  onRemoveSavedWallet, onEnterOwnPhrase,
 }: OwnProps & StateProps) => {
   const lang = useLang();
 
@@ -118,6 +120,7 @@ const WalletKeySection = ({
                 wallet={wallet}
                 onImport={onImportSavedWallet}
                 onShowPhrase={onShowSavedPhrase}
+                onRemove={onRemoveSavedWallet}
               />
             ))}
           </Island>
@@ -129,10 +132,8 @@ const WalletKeySection = ({
 };
 
 const SavedWallet = memo(({
-  wallet, onImport, onShowPhrase,
+  wallet, onImport, onShowPhrase, onRemove,
 }: SavedWalletOwnProps) => {
-  const { removeSavedWallet } = getActions();
-
   const lang = useLang();
 
   const [isRemoveConfirmOpen, openRemoveConfirm, closeRemoveConfirm] = useFlag();
@@ -150,7 +151,7 @@ const SavedWallet = memo(({
   });
   const handleRemove = useLastCallback(() => {
     closeRemoveConfirm();
-    removeSavedWallet({ address: wallet.address });
+    onRemove(wallet.address);
   });
 
   return (

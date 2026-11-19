@@ -34,15 +34,13 @@ const X25519_BASE_POINT_U = 9n;
 export async function signEd25519(
   message: Uint8Array<ArrayBuffer>, seed: Uint8Array,
 ): Promise<Uint8Array<ArrayBuffer>> {
-  if (isNativeEd25519Supported !== false) {
+  if (await checkNativeEd25519()) {
     try {
       const key = await importEd25519PrivateKey(seed, false, ['sign']);
-      const signature = new Uint8Array(await crypto.subtle.sign('Ed25519', key, message));
-      isNativeEd25519Supported = true;
 
-      return signature;
+      return new Uint8Array(await crypto.subtle.sign('Ed25519', key, message));
     } catch {
-      isNativeEd25519Supported = false;
+      // WebCrypto rejects a malformed seed, for example one of the wrong length. The fallback below accepts any seed.
     }
   }
 
@@ -62,16 +60,11 @@ export async function signEd25519(
 }
 
 export async function getEd25519PublicKey(seed: Uint8Array): Promise<Uint8Array<ArrayBuffer>> {
-  if (isNativeEd25519Supported !== false) {
+  if (await checkNativeEd25519()) {
     try {
-      // The JWK of the private key carries the public half in `x`
-      const key = await importEd25519PrivateKey(seed, true, ['sign']);
-      const jwk = await crypto.subtle.exportKey('jwk', key);
-      isNativeEd25519Supported = true;
-
-      return base64UrlToBuffer(jwk.x!);
+      return await getEd25519PublicKeyNative(seed);
     } catch {
-      isNativeEd25519Supported = false;
+      // WebCrypto rejects a malformed seed, for example one of the wrong length. The fallback below accepts any seed.
     }
   }
 
@@ -137,6 +130,31 @@ async function deriveX25519Native(
   const publicKey = await crypto.subtle.importKey('raw', theirU, 'X25519', false, []);
 
   return new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: publicKey }, privateKey, 256));
+}
+
+// Checks once, on a fixed valid seed, whether the browser supports Ed25519 in WebCrypto. A check on the caller's seed
+// would be wrong: one malformed seed would switch every later signature to the slower fallback.
+async function checkNativeEd25519(): Promise<boolean> {
+  if (isNativeEd25519Supported === undefined) {
+    try {
+      const seed = new Uint8Array(32).fill(1);
+      await getEd25519PublicKeyNative(seed);
+      await crypto.subtle.sign('Ed25519', await importEd25519PrivateKey(seed, false, ['sign']), new Uint8Array());
+      isNativeEd25519Supported = true;
+    } catch {
+      isNativeEd25519Supported = false;
+    }
+  }
+
+  return isNativeEd25519Supported;
+}
+
+// The JWK of the private key carries the public half in `x`
+async function getEd25519PublicKeyNative(seed: Uint8Array) {
+  const key = await importEd25519PrivateKey(seed, true, ['sign']);
+  const jwk = await crypto.subtle.exportKey('jwk', key);
+
+  return base64UrlToBuffer(jwk.x!);
 }
 
 // Checked once on fixed keys: a failure on a caller's key must not demote later exchanges to the fallback

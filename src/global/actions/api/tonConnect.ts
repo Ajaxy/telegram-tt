@@ -20,7 +20,7 @@ import { addPendingWalletTransaction, finishWalletTonConnect, updateWallet } fro
 import { selectChat } from '../../selectors';
 import { selectTabState } from '../../selectors/tabs';
 import { selectWalletAddress, selectWalletPublicKey, selectWalletTransferInFlight } from '../../selectors/wallet';
-import { readLocalSecret } from './wallet';
+import { readSigningSecret } from './wallet';
 
 type Flow = NonNullable<TabState['walletTonConnect']>;
 
@@ -134,7 +134,7 @@ addActionHandler('unlockWalletTonConnectRequest', async (global, actions, payloa
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
@@ -205,7 +205,7 @@ addActionHandler('respondWalletTonConnect', async (global, actions, payload): Pr
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
@@ -321,7 +321,7 @@ addActionHandler('connectWalletTonConnectOauth', async (global, actions, payload
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
@@ -346,19 +346,10 @@ addActionHandler('connectWalletTonConnectOauth', async (global, actions, payload
 
   global = updateTabState(global, { urlAuth: { ...currentUrlAuth, isWalletConnected: true } }, tabId);
   setGlobal(global);
+
+  // The login dialog opens again with the wallet connected. It shows the browser, the IP address and the region where
+  // the login started. The user accepts the login in this dialog.
   actions.closeWalletModal({ tabId });
-
-  // As in the Android app, the login dialog comes back only when it has something left to ask
-  const { request, matchCode } = currentUrlAuth;
-  const isDialogNeeded = request.shouldRequestWriteAccess || request.shouldRequestPhoneNumber
-    || Boolean(request.matchCodes?.length && !matchCode);
-  if (isDialogNeeded) return;
-
-  if (currentUrlAuth.button) {
-    actions.acceptBotUrlAuth({ tabId });
-  } else {
-    actions.acceptLinkUrlAuth({ tabId });
-  }
 });
 
 addActionHandler('disconnectWalletTonConnect', async (global, actions, payload): Promise<void> => {
@@ -376,7 +367,7 @@ addActionHandler('disconnectWalletTonConnect', async (global, actions, payload):
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
@@ -417,7 +408,7 @@ addActionHandler('disconnectAllWalletTonConnect', async (global, actions, payloa
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });
@@ -528,7 +519,7 @@ addActionHandler('respondWidgetWalletCall', async (global, actions, payload): Pr
   global = updateTabState(global, { walletTonConnect: pending }, tabId);
   setGlobal(global);
 
-  const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+  const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
   if ('error' in secret) {
     finishTonConnect(tabId, pending, { status: 'error', error: secret.error });

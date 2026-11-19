@@ -7,6 +7,7 @@ import {
   ensureProtocol, getSuspiciousDomainCharacters, hasSuspiciousUrlCredentials, isSuspiciousUrl,
 } from '../../util/browser/url';
 import buildClassName from '../../util/buildClassName';
+import { RE_TON_TRANSFER_LINK } from '../../util/deepLinkParser';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
@@ -35,14 +36,20 @@ const URL_PARTS_PATTERN = /^([a-z][a-z\d+.-]*:\/\/)([^/?#]*@)?(\[[^\]]+\]|[^:/?#
 const INVISIBLE_CHARACTER_PATTERN = /[\p{Default_Ignorable_Code_Point}\p{Cc}]/gu;
 
 const SafeLinkModal = ({ modal, isOpen, isWidget }: OwnProps & StateProps) => {
-  const { toggleSafeLinkModal } = getActions();
+  const { openUrl, toggleSafeLinkModal } = getActions();
 
   const lang = useLang();
   const renderedUrl = useMemo(() => (isWidget ? modal : renderUrl(modal)), [isWidget, modal]);
   const isSuspicious = useMemo(() => isSuspiciousUrl(modal), [modal]);
 
   const handleOpen = useLastCallback(() => {
-    window.open(ensureProtocol(modal), '_blank', 'noopener noreferrer');
+    // A transfer link opens the wallet in this app. The system would open it in another app.
+    if (RE_TON_TRANSFER_LINK.test(modal)) {
+      openUrl({ url: modal, shouldSkipModal: true });
+    } else {
+      window.open(ensureProtocol(modal), '_blank', 'noopener noreferrer');
+    }
+
     toggleSafeLinkModal({ url: undefined });
   });
 

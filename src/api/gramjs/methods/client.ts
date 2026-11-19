@@ -76,6 +76,8 @@ import {
   onWebAuthTokenFailed,
 } from './auth';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
+import { clearTonConnectKeys } from './tonConnect';
+import { clearPreviousSigningKeys } from './wallet';
 
 import { ChatAbortController } from '../ChatAbortController';
 
@@ -214,6 +216,8 @@ export async function destroy(noLogOut = false, noClearLocalDb = false) {
   if (!noClearLocalDb) {
     clearLocalDb();
     resetUpdatesManager();
+    clearTonConnectKeys();
+    clearPreviousSigningKeys();
   }
 
   resetGiftTmpPassword();

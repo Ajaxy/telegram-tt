@@ -4,6 +4,8 @@ import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdo
 import { animateInstantly } from '../../../util/animation';
 import { drawFrame, MATRIX_DURATION, measureLayout } from './helpers/matrix';
 
+import useLastCallback from '../../../hooks/useLastCallback';
+
 import styles from './WalletRecipientMatrix.module.scss';
 
 type OwnProps = {
@@ -14,23 +16,36 @@ type OwnProps = {
   // Every new key plays again; nothing plays without one
   playKey?: string;
   noAnimation?: boolean;
+  // The chip can be read again: the play of the key has ended, or it did not run
+  onPlayEnd?: (playKey: string) => void;
 };
 
 const WalletRecipientMatrix = ({
-  chipRef, avatarRef, assemblingClassName, playKey, noAnimation,
+  chipRef, avatarRef, assemblingClassName, playKey, noAnimation, onPlayEnd,
 }: OwnProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
+  const handlePlayEnd = useLastCallback((key: string) => onPlayEnd?.(key));
 
   useLayoutEffect(() => {
+    if (!playKey) return undefined;
+
     const chip = chipRef.current;
     const canvas = canvasRef.current;
-    if (!playKey || noAnimation || !chip || !canvas) return undefined;
+    const context = !noAnimation && chip && canvas ? canvas.getContext('2d') : undefined;
 
-    const context = canvas.getContext('2d');
-    if (!context) return undefined;
+    if (!chip || !canvas || !context) {
+      handlePlayEnd(playKey);
+      return undefined;
+    }
 
     const startTime = performance.now();
     let isStopped = false;
+    // The play also stops itself at its end, so a separate flag tells that this effect is gone. A mutation queued
+    // before the cleanup must not report the end of an old key.
+    let isCleanedUp = false;
+    const reportEnd = () => {
+      if (!isCleanedUp) handlePlayEnd(playKey);
+    };
 
     chip.classList.add(assemblingClassName);
     canvas.classList.remove(styles.fading);
@@ -40,7 +55,10 @@ const WalletRecipientMatrix = ({
 
       const layout = measureLayout(chip, avatarRef.current, context);
       if (!layout) {
-        requestMutation(() => chip.classList.remove(assemblingClassName));
+        requestMutation(() => {
+          chip.classList.remove(assemblingClassName);
+          reportEnd();
+        });
         return;
       }
 
@@ -64,6 +82,7 @@ const WalletRecipientMatrix = ({
             requestMutation(() => {
               chip.classList.remove(assemblingClassName);
               canvas.classList.add(styles.fading);
+              reportEnd();
             });
             return false;
           }
@@ -76,10 +95,11 @@ const WalletRecipientMatrix = ({
 
     return () => {
       isStopped = true;
+      isCleanedUp = true;
       context.clearRect(0, 0, canvas.width, canvas.height);
       chip.classList.remove(assemblingClassName);
     };
-  }, [chipRef, avatarRef, assemblingClassName, playKey, noAnimation]);
+  }, [chipRef, avatarRef, assemblingClassName, playKey, noAnimation, handlePlayEnd]);
 
   return <canvas ref={canvasRef} className={styles.canvas} aria-hidden />;
 };

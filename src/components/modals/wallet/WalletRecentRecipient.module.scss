@@ -1,0 +1,6 @@
+// The badges stay in the text line after the name, so a right-to-left name keeps its place. The verified badge has the
+// height of the line. On the baseline it would be higher than the name, so it is centered.
+.label > :global(.VerifiedIcon) {
+  margin-inline-start: 0.25rem;
+  vertical-align: middle;
+}

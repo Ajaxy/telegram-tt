@@ -14,8 +14,10 @@ const RAW_ADDRESS_REGEX = /^(-?\d+):([0-9a-f]{64})$/i;
 const TAG_BOUNCEABLE = 0x11;
 const TAG_NON_BOUNCEABLE = 0x51;
 const TAG_TEST_ONLY_FLAG = 0x80;
-const MIN_WORKCHAIN = -128;
-const MAX_WORKCHAIN = 127;
+// TON currently runs only these two workchains. A transfer to any other workchain fails on the chain: the coins stay
+// on the wallet, but the fee is spent.
+const BASECHAIN = 0;
+const MASTERCHAIN = -1;
 
 export function parseAddress(value: string): TonAddress | undefined {
   const trimmed = value.trim();
@@ -25,7 +27,7 @@ export function parseAddress(value: string): TonAddress | undefined {
   if (rawMatch) {
     const workchain = Number(rawMatch[1]);
 
-    if (workchain < MIN_WORKCHAIN || workchain > MAX_WORKCHAIN) {
+    if (workchain !== BASECHAIN && workchain !== MASTERCHAIN) {
       return undefined;
     }
 
@@ -67,7 +69,11 @@ export function parseAddress(value: string): TonAddress | undefined {
   }
 
   // Workchain byte is signed: `0xff` means the masterchain (-1)
-  const workchain = bytes[1] === 0xff ? -1 : bytes[1];
+  const workchain = bytes[1] === 0xff ? MASTERCHAIN : bytes[1];
+
+  if (workchain !== BASECHAIN && workchain !== MASTERCHAIN) {
+    return undefined;
+  }
 
   return {
     workchain,

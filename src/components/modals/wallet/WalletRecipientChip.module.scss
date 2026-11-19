@@ -71,6 +71,12 @@
   align-items: baseline;
 
   white-space: nowrap;
+
+  // The badge has the height of the name line. On the baseline it would be higher than the name, so it is centered on
+  // the line, as in `FullNameTitle`.
+  > :global(.VerifiedIcon) {
+    align-self: center;
+  }
 }
 
 .name {

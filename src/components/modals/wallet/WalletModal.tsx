@@ -99,7 +99,9 @@ type StateProps = {
   walletTransfer?: TabState['walletTransfer'];
   walletMnemonic?: TabState['walletMnemonic'];
   walletBackup?: TabState['walletBackup'];
+  walletKeyRotation?: TabState['walletKeyRotation'];
   walletReplace?: TabState['walletReplace'];
+  walletSavedRemoval?: TabState['walletSavedRemoval'];
   walletCommentDecryption?: TabState['walletCommentDecryption'];
   walletTonConnect?: TabState['walletTonConnect'];
   tonConnectSessions?: ApiTonConnectSession[];
@@ -132,8 +134,9 @@ const WIDGET_SHIELD_DELAY = 700;
 
 const WalletModal = ({
   modal, canExportPhrase, isKeyMissing, hasLocalSecret, hasAppPasscode, address, publicKey, balance, tonExplorerUrl,
-  transactions, loadedTransactions, collectibles, walletTransfer, walletMnemonic, walletBackup, walletReplace,
-  walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments, animationLevel, widgetBot,
+  transactions, loadedTransactions, collectibles, walletTransfer, walletMnemonic, walletBackup, walletKeyRotation,
+  walletReplace, walletSavedRemoval, walletCommentDecryption, walletTonConnect, tonConnectSessions, decryptedComments,
+  animationLevel, widgetBot,
 }: OwnProps & StateProps) => {
   const {
     openWalletModal, closeWalletModal, loadWalletState, loadWalletTransactions,
@@ -178,10 +181,12 @@ const WalletModal = ({
   const credentials = useWalletCredentials({
     navigation,
     hasLocalSecret,
+    hasAppPasscode,
     walletTransfer,
     walletMnemonic,
     walletBackup,
     walletReplace,
+    walletSavedRemoval,
     walletCommentDecryption,
     walletTonConnect,
   });
@@ -195,7 +200,9 @@ const WalletModal = ({
     hasLocalSecret,
     walletMnemonic,
     walletBackup,
+    walletKeyRotation,
     walletReplace,
+    walletSavedRemoval,
     ownAddress: address,
     ownPublicKey: publicKey,
   });
@@ -342,18 +349,21 @@ const WalletModal = ({
   const isRequestPending = (credentials.flow?.status === 'pending' && !isReading)
     || walletTonConnect?.status === 'pending';
 
-  // A widget's call opens the window under the finger that tapped it: the second tap of a double tap must land on
-  // nothing in it, the backdrop included (iOS and tdesktop shield the whole window as well)
+  // A widget opens this window right under the user's finger. For a short time after it opens, the whole window
+  // ignores taps, including the backdrop, so the second tap of a double tap cannot confirm anything (iOS and tdesktop
+  // do the same). The Confirm button becomes active only when the preview arrives, so the protection starts again at
+  // that moment. Otherwise a slow preview would enable Confirm right under a tap.
   const tonConnectWidget = walletTonConnect?.widget;
-  const [armedWidget, setArmedWidget] = useState<typeof tonConnectWidget>();
-  const isWidgetShielded = Boolean(tonConnectWidget) && armedWidget !== tonConnectWidget;
+  const shieldKey = tonConnectWidget && (walletTonConnect?.preview ?? tonConnectWidget);
+  const [armedKey, setArmedKey] = useState<typeof shieldKey>();
+  const isWidgetShielded = Boolean(shieldKey) && armedKey !== shieldKey;
 
   useEffect(() => {
-    if (!tonConnectWidget) return undefined;
+    if (!shieldKey) return undefined;
 
-    const timeout = setTimeout(() => setArmedWidget(tonConnectWidget), WIDGET_SHIELD_DELAY);
+    const timeout = setTimeout(() => setArmedKey(shieldKey), WIDGET_SHIELD_DELAY);
     return () => clearTimeout(timeout);
-  }, [tonConnectWidget]);
+  }, [shieldKey]);
 
   const handleClose = useLastCallback(() => {
     if (isRequestPending) return;
@@ -405,10 +415,10 @@ const WalletModal = ({
   });
 
   const handleTonConnectConfirm = useLastCallback(() => {
-    const { session, request, oauth, widget } = walletTonConnect!;
+    const { session, request, connectRequest, oauth, widget } = walletTonConnect!;
 
     if (widget) {
-      credentials.ask({ intent: 'tonConnect', run: (entered) => {
+      credentials.ask({ intent: 'tonConnect', isSigning: true, run: (entered) => {
         hasSubmittedTonConnectRef.current = true;
         respondWidgetWalletCall(entered);
       } });
@@ -417,7 +427,11 @@ const WalletModal = ({
 
     if (!session && !oauth) return;
 
-    credentials.ask({ intent: 'tonConnect', run: (entered) => {
+    // A connect signs only the ownership proof, and only when the app asks for it. A login with the wallet always asks
+    // for the proof.
+    const isSigning = !connectRequest || connectRequest.items.some(({ name }) => name === 'ton_proof');
+
+    credentials.ask({ intent: 'tonConnect', isSigning, run: (entered) => {
       hasSubmittedTonConnectRef.current = true;
 
       if (oauth) {
@@ -852,6 +866,7 @@ const WalletModal = ({
             onDeleteWallet={keysFlows.handleDeleteWallet}
             onImportSavedWallet={keysFlows.handleImportSavedWallet}
             onShowSavedPhrase={keysFlows.handleShowSavedPhrase}
+            onRemoveSavedWallet={keysFlows.handleRemoveSavedWallet}
             onEnterOwnPhrase={keysFlows.handleImportOwnWallet}
           />
         );
@@ -939,7 +954,12 @@ const WalletModal = ({
           />
         );
       case WalletScreen.Phrase:
-        return <WalletPhraseScreen mnemonic={walletMnemonic?.words} onDone={keysFlows.handlePhraseDone} />;
+        return (
+          <WalletPhraseScreen
+            mnemonic={walletKeyRotation?.words ?? walletMnemonic?.words}
+            onDone={keysFlows.handlePhraseDone}
+          />
+        );
       default:
         return (
           <WalletMainScreen
@@ -998,6 +1018,16 @@ const WalletModal = ({
         isOnlyConfirm
         onClose={closePhraseWhy}
       />
+      <ConfirmDialog
+        isOpen={keysFlows.isKeyRotationConfirmOpen}
+        title={lang('WalletDisableBackupTitle')}
+        text={lang('WalletDisableBackupRotateText')}
+        confirmLabel={lang('WalletDisableBackupConfirm')}
+        confirmIsDestructive
+        isConfirmLoading={walletBackup?.status === 'pending'}
+        confirmHandler={keysFlows.handleKeyRotationConfirm}
+        onClose={keysFlows.closeKeyRotationConfirm}
+      />
       {/* If the typed words open some other wallet, its address is shown so the user sees which phrase they typed */}
       <ConfirmDialog
         isOpen={Boolean(wrongPhrase)}
@@ -1052,7 +1082,9 @@ export default memo(withGlobal<OwnProps>(
       walletTransfer: tabState.walletTransfer,
       walletMnemonic: tabState.walletMnemonic,
       walletBackup: tabState.walletBackup,
+      walletKeyRotation: tabState.walletKeyRotation,
       walletReplace: tabState.walletReplace,
+      walletSavedRemoval: tabState.walletSavedRemoval,
       walletCommentDecryption: tabState.walletCommentDecryption,
       walletTonConnect: tabState.walletTonConnect,
       tonConnectSessions: global.wallet?.tonConnectSessions,

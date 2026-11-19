@@ -450,8 +450,12 @@ const Main = ({
     updatePageTitle();
 
     const parsedInitialLocationHash = parseInitialLocationHash();
+    // The link is deleted after the first use. `isSynced` turns true again after every reconnect and unlock, and the
+    // same link would open again each time, for example putting its amount into a transfer the user is filling in.
     if (parsedInitialLocationHash?.tgaddr) {
-      processDeepLink(parsedInitialLocationHash.tgaddr, { type: 'inner' });
+      const link = parsedInitialLocationHash.tgaddr;
+      delete parsedInitialLocationHash.tgaddr;
+      processDeepLink(link, { type: 'inner' });
     }
   }, [isSynced]);
 

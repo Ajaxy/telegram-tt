@@ -5,6 +5,7 @@ import type {
   ApiWalletState,
   ApiWalletStatus,
   ApiWalletTransaction,
+  RotateWalletKeyResult,
 } from '../../api/types';
 import type { GlobalState, TabState } from '../types';
 
@@ -108,6 +109,24 @@ export function updateWalletServerState<T extends GlobalState>(
   });
 }
 
+// The server changes the backup state even when the flow is cancelled. A phrase that was sent to the blockchain stays
+// on the device even when the flow fails after that.
+export function updateWalletAfterBackupDisable<T extends GlobalState>(
+  global: T, ownAddress: string, result: RotateWalletKeyResult | undefined,
+): T {
+  if (!result || selectWalletAddress(global) !== ownAddress) return global;
+
+  if (!('error' in result)) {
+    global = updateWalletServerState(global, result.state.status, result.state.state);
+  }
+
+  if (!('error' in result) || result.isSent) {
+    global = updateWallet(global, { hasLocalSecret: true });
+  }
+
+  return global;
+}
+
 export function updateWalletCollectibleGift<T extends GlobalState>(
   global: T, collectibleAddress: string, gift: ApiStarGiftUnique,
 ): T {
@@ -154,16 +173,28 @@ export function replacePendingWalletTransaction<T extends GlobalState>(
   global: T, pendingId: string, transaction: ApiWalletTransaction,
 ): T {
   const current = selectWalletTransactions(global) || [];
-  const pending = current.find(({ id }) => id === pendingId);
+  // The server confirms a transfer under an id other than the one its history lists it under, so a record that took
+  // that id is found by its message hash
+  const pending = current.find(({ id }) => id === pendingId)
+    ?? (transaction.msgHash ? current.find(({ msgHash }) => msgHash === transaction.msgHash) : undefined);
+  const pendingRowId = pending?.id ?? pendingId;
   const localId = transaction.localId ?? pending?.localId;
-  const isListed = transaction.id !== pendingId && current.some(({ id }) => id === transaction.id);
+  const balanceDeduction = transaction.balanceDeduction ?? pending?.balanceDeduction;
+  const isListed = transaction.id !== pendingRowId && current.some(({ id }) => id === transaction.id);
   const transactions = current.flatMap((item) => {
-    if (item.id === pendingId) {
-      return isListed ? [] : [{ ...transaction, peer: keepRecipientUser(transaction.peer, pending?.peer), localId }];
+    if (item.id === pendingRowId) {
+      return isListed ? [] : [{
+        ...transaction, peer: keepRecipientUser(transaction.peer, pending?.peer), localId, balanceDeduction,
+      }];
     }
 
     if (item.id === transaction.id) {
-      return [{ ...item, peer: keepRecipientUser(item.peer, pending?.peer), localId: localId ?? item.localId }];
+      return [{
+        ...item,
+        peer: keepRecipientUser(item.peer, pending?.peer),
+        localId: localId ?? item.localId,
+        balanceDeduction: balanceDeduction ?? item.balanceDeduction,
+      }];
     }
 
     return [item];
@@ -173,7 +204,44 @@ export function replacePendingWalletTransaction<T extends GlobalState>(
     transactions.unshift(transaction);
   }
 
-  return updateWallet(global, { transactions });
+  global = updateWallet(global, { transactions });
+
+  const isNewlyFailed = Boolean(pending && !pending.isFailed && transaction.isFailed);
+
+  return isNewlyFailed && balanceDeduction
+    ? returnFailedTransferAmount(global, transaction.id, balanceDeduction)
+    : global;
+}
+
+// A history page can be the first to list a transfer as failed. Its row keeps what was taken off for it until that is
+// added back, so this runs once for each transfer.
+export function returnFailedTransferAmounts<T extends GlobalState>(global: T): T {
+  selectWalletTransactions(global)?.forEach(({ id, isFailed, balanceDeduction }) => {
+    if (isFailed && balanceDeduction) global = returnFailedTransferAmount(global, id, balanceDeduction);
+  });
+
+  return global;
+}
+
+// The app takes a sent amount off the balance before the server knows about the transfer, see `staleBalance`. A
+// transfer can still fail after that, for example when the money bounces back. Then what was taken off for it is added
+// back once, or the correct balance from the server would look like a server that is behind.
+function returnFailedTransferAmount<T extends GlobalState>(global: T, transactionId: string, amount: bigint): T {
+  const { state, staleBalance } = global.wallet || {};
+
+  global = updateWallet(global, {
+    transactions: selectWalletTransactions(global)?.map((item) => (
+      item.id === transactionId ? { ...item, balanceDeduction: undefined } : item
+    )),
+  });
+
+  if (!state || !staleBalance) return global;
+
+  const balance = state.balance + amount;
+
+  return updateWallet(global, {
+    state: { ...state, balance: balance < staleBalance.amount ? balance : staleBalance.amount },
+  });
 }
 
 export function markWalletTransactionFailed<T extends GlobalState>(global: T, transactionId: string): T {

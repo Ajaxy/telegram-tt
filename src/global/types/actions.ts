@@ -1624,6 +1624,11 @@ export interface ActionPayloads {
     shouldRotateKey?: boolean;
     password?: string;
   } & WithTabId;
+  // Sends the key rotation that `disableWalletBackup` prepared, with the phrase that the user saw
+  confirmWalletKeyRotation: {
+    password?: string;
+  } & WithTabId;
+  clearWalletKeyRotation: WithTabId | undefined;
   loadWalletKeyRotationFee: undefined;
   clearWalletBackup: WithTabId | undefined;
   dropWalletVaultSecrets: WithTabId | undefined;
@@ -1634,6 +1639,8 @@ export interface ActionPayloads {
     savedAddress?: string;
     shouldSaveCurrent?: boolean;
     password?: string;
+    // Required for `savedAddress`, because its phrase is read from the device
+    passcode?: string;
   } & WithTabId;
   clearWalletReplace: WithTabId | undefined;
   keepWalletPhrase: {
@@ -1643,7 +1650,9 @@ export interface ActionPayloads {
   loadWalletKeyRotationPending: undefined;
   removeSavedWallet: {
     address: string;
-  };
+    passcode: string;
+  } & WithTabId;
+  clearWalletSavedRemoval: WithTabId | undefined;
   loadWalletState: undefined;
   loadExistingWaltBalance: undefined;
   openWalletTransferLink: {

@@ -52,7 +52,7 @@ import { ensureProtocol } from '../../../util/browser/url';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildUploadingMedia from '../../../util/buildUploadingMedia';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
-import { isDeepLink } from '../../../util/deepLinkParser';
+import { isDeepLink, RE_TON_TRANSFER_LINK } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
 import {
@@ -3348,6 +3348,12 @@ addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
   const parsedUrl = new URL(urlWithProtocol);
 
   if (!ignoreDeepLinks && isDeepLink(urlWithProtocol)) {
+    // A transfer link hidden under other text is first shown to the user for confirmation, as in the native apps
+    if (!shouldSkipModal && RE_TON_TRANSFER_LINK.test(urlWithProtocol)) {
+      actions.toggleSafeLinkModal({ url: urlWithProtocol, tabId });
+      return;
+    }
+
     actions.closeStoryViewer({ tabId });
     actions.closePaymentModal({ tabId });
 

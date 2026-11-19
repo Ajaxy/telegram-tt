@@ -249,6 +249,7 @@ export default function useWalletSendFlow({
     // that closes after the transfer has no history for it to land in
     credentials.ask({
       intent: 'send',
+      isSigning: true,
       run: (entered) => {
         const isAnimated = payload.isAnimated && canFlightLand && !entered.passcode && !entered.password
           && !shouldCloseAfterSendRef.current;

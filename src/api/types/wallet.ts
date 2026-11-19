@@ -67,9 +67,9 @@ export type ApiTonConnectError = ExportSecretPhraseError | 'TONCONNECT_FAILED' |
 
 export type ApiTonConnectResult<T> = T | { error: ApiTonConnectError };
 
-// What an emulated action did to the wallet; anything else the emulator reports is `unknown`, as in the native apps
+// What an emulated action does to the wallet. All other actions from the emulator are `unknown`.
 export type ApiTonConnectEmulatedActionType = 'withdraw' | 'deposit' | 'transfer' | 'excess' | 'callContract'
-  | 'deployContract' | 'unknown';
+  | 'deployContract' | 'nftTransfer' | 'jettonTransfer' | 'unknown';
 
 export interface ApiTonConnectEmulatedAction {
   type: ApiTonConnectEmulatedActionType;
@@ -154,6 +154,9 @@ export interface ApiWalletTransaction {
   // A transfer sent from this device keeps it from the moment it is queued, while `id` changes as the server
   // takes it and the chain confirms it
   localId?: string;
+  // Nanotons this device took off the balance when it sent the transfer, until a failure gives them back. It moves with
+  // `localId`, as the id changes.
+  balanceDeduction?: bigint;
   seqno?: number;
   validUntil?: number;
   isIncoming: boolean;
@@ -315,3 +318,8 @@ export type SendTonTransferError =
 // shows it under one of `bodyHashes`: base64 hashes of the message bodies that the server may have sent.
 export type SendTonTransferResult = ApiWalletSentTransfer
   | { error: SendTonTransferError; isSent?: true; bodyHashes?: string[] };
+
+// `sendTonTransfer` reports these steps before it answers. First: the transfer is in the queue. Then: the transfer is
+// given to the server. After this step the transfer can be sent even when no answer comes.
+export type ApiWalletTransferProgress = { localMessageId?: number }
+  | { broadcast: { bodyHashes: string[]; seqno: number; validUntil: number } };

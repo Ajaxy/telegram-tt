@@ -69,6 +69,8 @@ const EMULATED_ACTION_KEYS: Record<ApiTonConnectEmulatedActionType, RegularLangK
   excess: 'WalletConnectActionExcess',
   callContract: 'WalletConnectActionCallContract',
   deployContract: 'WalletConnectActionDeployContract',
+  nftTransfer: 'WalletConnectActionCollectible',
+  jettonTransfer: 'WalletConnectActionToken',
   unknown: 'WalletConnectActionUnknown',
 };
 const DIGITS_REGEX = /^\d+$/;
@@ -101,8 +103,15 @@ const WalletTonConnectScreen = ({
   const appUrl = connectRequest?.manifestUrl ?? manifest?.url;
   const hasManifestError = Boolean(session?.manifestError);
 
-  // Without the simulation the fee is unknown, and a failed one usually means the transfer would fail on the chain
-  const isSimulated = Boolean(preview?.transaction && !preview.isInvalid && preview.fee !== undefined);
+  // Confirm needs both parts of the preview. Without the fee estimate the cost is unknown, and a failed estimate
+  // usually means the transfer would fail on the chain. Without the emulation the user cannot see what the
+  // transaction does, for example that it moves an NFT. The native apps block Confirm in this case too, and also when
+  // the emulation shows that the transaction fails. Android and iOS also block it for an emulation that did not run to
+  // its end.
+  const isSimulated = Boolean(
+    preview?.transaction && !preview.isInvalid && preview.fee !== undefined && preview.emulation
+    && !preview.emulation.isFailed && !preview.emulation.isIncomplete,
+  );
 
   // Neither signing data nor a signed message is simulated: the dApp relays the message later and pays the gas
   const signData = preview?.signData;
@@ -134,6 +143,7 @@ const WalletTonConnectScreen = ({
   const hasDetails = transaction && (transaction.messages.length > 1
     || transaction.messages.some(({ payload, comment, stateInit }) => (payload && comment === undefined) || stateInit));
   const emulation = isSignMessage ? undefined : preview?.emulation;
+  const isEmulationMissing = Boolean(transaction && !isSignMessage && !preview.isInvalid && !emulation);
   // The card shows a plain payment whole; anything else the transaction would do is listed, as the native apps do
   const hasEmulatedActions = emulation?.actions.some(({ type }) => type !== 'withdraw');
   const fiatFee = preview?.fee !== undefined
@@ -243,9 +253,10 @@ const WalletTonConnectScreen = ({
             </Island>
           </>
         )}
-        {(emulation?.isFailed || emulation?.isIncomplete) && (
+        {(isEmulationMissing || emulation?.isFailed || emulation?.isIncomplete) && (
           <IslandDescription className={buildClassName(styles.description, styles.dangerLabel)}>
-            {lang(emulation.isFailed ? 'WalletConnectEmulationFailed' : 'WalletConnectEmulationIncomplete')}
+            {lang(isEmulationMissing ? 'WalletTransactionSimulationFailed'
+              : emulation!.isFailed ? 'WalletConnectEmulationFailed' : 'WalletConnectEmulationIncomplete')}
           </IslandDescription>
         )}
         {signData && <IslandTitle className={styles.dataTitle}>{lang('WalletConnectData')}</IslandTitle>}

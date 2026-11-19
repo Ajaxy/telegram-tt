@@ -15,28 +15,33 @@ type WalletCredentials = {
 
 type CredentialRequest = {
   intent: PasswordIntent;
+  // A transfer, or a signature for an app
+  isSigning?: boolean;
   run: (credentials: WalletCredentials) => void;
 };
 
 type CredentialFlows = Pick<
-  TabState, 'walletTransfer' | 'walletMnemonic' | 'walletBackup' | 'walletReplace' | 'walletCommentDecryption'
-  | 'walletTonConnect'
+  TabState, 'walletTransfer' | 'walletMnemonic' | 'walletBackup' | 'walletReplace' | 'walletSavedRemoval'
+  | 'walletCommentDecryption' | 'walletTonConnect'
 >;
 
 type Options = CredentialFlows & {
   navigation: ReturnType<typeof useWalletNavigation>;
   hasLocalSecret?: boolean;
+  hasAppPasscode?: boolean;
 };
 
 type ClearAction = 'clearWalletTransfer' | 'clearWalletCommentDecryption' | 'clearWalletBackup' | 'clearWalletReplace'
-  | 'clearWalletMnemonic' | 'clearWalletTonConnectError';
+  | 'clearWalletSavedRemoval' | 'clearWalletMnemonic' | 'clearWalletTonConnectError';
 
 const FLOWS_BY_INTENT: Record<PasswordIntent, { flowKey: keyof CredentialFlows; clearAction: ClearAction }> = {
   send: { flowKey: 'walletTransfer', clearAction: 'clearWalletTransfer' },
   decrypt: { flowKey: 'walletCommentDecryption', clearAction: 'clearWalletCommentDecryption' },
   enableBackup: { flowKey: 'walletBackup', clearAction: 'clearWalletBackup' },
   disableBackup: { flowKey: 'walletBackup', clearAction: 'clearWalletBackup' },
+  confirmKeyRotation: { flowKey: 'walletBackup', clearAction: 'clearWalletBackup' },
   replace: { flowKey: 'walletReplace', clearAction: 'clearWalletReplace' },
+  removeSaved: { flowKey: 'walletSavedRemoval', clearAction: 'clearWalletSavedRemoval' },
   phrase: { flowKey: 'walletMnemonic', clearAction: 'clearWalletMnemonic' },
   tonConnect: { flowKey: 'walletTonConnect', clearAction: 'clearWalletTonConnectError' },
 };
@@ -44,11 +49,13 @@ const FLOWS_BY_INTENT: Record<PasswordIntent, { flowKey: keyof CredentialFlows; 
 // The cloud password is never asked up front: every request first runs without it, and only a
 // `PASSWORD_MISSING` answer opens the password screen and runs the request again with it
 export default function useWalletCredentials({
-  navigation, hasLocalSecret,
-  walletTransfer, walletMnemonic, walletBackup, walletReplace, walletCommentDecryption, walletTonConnect,
+  navigation, hasLocalSecret, hasAppPasscode,
+  walletTransfer, walletMnemonic, walletBackup, walletReplace, walletSavedRemoval, walletCommentDecryption,
+  walletTonConnect,
 }: Options) {
   const {
     clearWalletTransfer, clearWalletMnemonic, clearWalletCommentDecryption, clearWalletBackup, clearWalletReplace,
+    clearWalletSavedRemoval,
   } = getActions();
 
   const {
@@ -65,9 +72,13 @@ export default function useWalletCredentials({
 
   // A phrase kept on the device signs directly, even when the server could export it too
   const shouldUseLocalKey = Boolean(hasLocalSecret);
+  // The passcode confirms every transfer and every signature for an app. The server can give out the phrase from the
+  // backup without the cloud password, so the passcode is the only check the app can be sure of.
+  const shouldConfirmSigning = Boolean(hasAppPasscode);
 
   const flows: CredentialFlows = {
-    walletTransfer, walletMnemonic, walletBackup, walletReplace, walletCommentDecryption, walletTonConnect,
+    walletTransfer, walletMnemonic, walletBackup, walletReplace, walletSavedRemoval, walletCommentDecryption,
+    walletTonConnect,
   };
   const flow = intent ? flows[FLOWS_BY_INTENT[intent].flowKey] : undefined;
 
@@ -87,8 +98,15 @@ export default function useWalletCredentials({
     runRequest({});
   });
 
+  // The next step of a flow uses the credentials from the step before, so the user enters nothing twice
+  const proceed = useLastCallback((request: CredentialRequest) => {
+    requestRef.current = request;
+    setIntent(request.intent);
+    runRequest(enteredRef.current);
+  });
+
   const ask = useLastCallback((request: CredentialRequest) => {
-    if (!shouldUseLocalKey) {
+    if (!shouldUseLocalKey && !(request.isSigning && shouldConfirmSigning)) {
       run(request);
       return;
     }
@@ -109,6 +127,7 @@ export default function useWalletCredentials({
     clearWalletCommentDecryption();
     clearWalletBackup();
     clearWalletReplace();
+    clearWalletSavedRemoval();
   });
 
   const reset = useLastCallback(() => {
@@ -178,6 +197,7 @@ export default function useWalletCredentials({
     flow,
     start,
     run,
+    proceed,
     ask,
     drop,
     reset,

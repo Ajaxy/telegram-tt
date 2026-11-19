@@ -1,3 +1,5 @@
+import { MAX_INT_32 } from '../../config';
+
 // The protocol of the Android app: the subscription is acknowledged by its `id`, and a `ping` keeps the socket checked
 const SUBSCRIPTION_TYPES = ['transactions', 'account_state_change'];
 const ACTIVITY_TYPES = [...SUBSCRIPTION_TYPES, 'trace_invalidated'];
@@ -64,7 +66,7 @@ async function connect() {
   const streaming = await fetchUrl();
   if (attempt !== attemptId) return;
 
-  if (!streaming || streaming.lifetimeMs <= 0) {
+  if (!streaming || streaming.lifetimeMs <= 0 || !getIsStreamUrlAllowed(streaming.url)) {
     scheduleReconnect();
     return;
   }
@@ -87,11 +89,13 @@ async function connect() {
   let pingInterval: ReturnType<typeof setInterval> | undefined;
   const connectTimeout = setTimeout(() => current.close(), CONNECT_TIMEOUT_MS);
 
-  // An expiring URL is replaced right away rather than after the reconnect delay
+  // When the URL expires, the stream reconnects at once instead of waiting for the reconnect delay. `setTimeout`
+  // does not support delays above `MAX_INT_32` ms (about 24.8 days) and fires them almost at once, so a long lifetime
+  // would reconnect in a loop.
   const expiryTimeout = setTimeout(() => {
     isExpired = true;
     current.close();
-  }, streaming.lifetimeMs);
+  }, Math.min(streaming.lifetimeMs, MAX_INT_32));
 
   current.onopen = () => {
     current.send(JSON.stringify({
@@ -159,6 +163,18 @@ async function connect() {
       scheduleReconnect();
     }
   };
+}
+
+// As in the native apps: the server names the URL, and only a secure socket to a host with no credentials in the URL
+// is opened
+function getIsStreamUrlAllowed(value: string) {
+  try {
+    const url = new URL(value);
+
+    return url.protocol === 'wss:' && Boolean(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
 }
 
 function scheduleReconnect() {

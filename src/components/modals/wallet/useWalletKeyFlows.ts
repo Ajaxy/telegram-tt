@@ -30,24 +30,30 @@ type Options = {
   ownPublicKey?: string;
   walletMnemonic?: TabState['walletMnemonic'];
   walletBackup?: TabState['walletBackup'];
+  walletKeyRotation?: TabState['walletKeyRotation'];
   walletReplace?: TabState['walletReplace'];
+  walletSavedRemoval?: TabState['walletSavedRemoval'];
 };
 
 export default function useWalletKeyFlows({
   navigation, credentials, hasAppPasscode, hasLocalSecret, ownAddress, ownPublicKey,
-  walletMnemonic, walletBackup, walletReplace,
+  walletMnemonic, walletBackup, walletKeyRotation, walletReplace, walletSavedRemoval,
 }: Options) {
   const {
     loadWalletMnemonic, clearWalletMnemonic, enableWalletBackup, disableWalletBackup, clearWalletBackup,
-    replaceWallet, clearWalletReplace, keepWalletPhrase,
+    confirmWalletKeyRotation, clearWalletKeyRotation, replaceWallet, clearWalletReplace, keepWalletPhrase,
+    removeSavedWallet, clearWalletSavedRemoval,
   } = getActions();
 
   const {
     screen, push, replace, back, reset: resetNavigation,
   } = navigation;
   const {
-    intent: credentialIntent, start: startCredentials, run: runCredentials, ask: askCredentials, drop: dropCredentials,
+    intent: credentialIntent, start: startCredentials, run: runCredentials, proceed: proceedCredentials,
+    ask: askCredentials, drop: dropCredentials,
   } = credentials;
+
+  const [isKeyRotationConfirmOpen, openKeyRotationConfirm, closeKeyRotationConfirm] = useFlag();
 
   // Its presence also tells the phrase screen that the words bring in another wallet
   const [pendingReplace, setPendingReplace] = useState<ReplaceRequest | undefined>();
@@ -66,19 +72,25 @@ export default function useWalletKeyFlows({
     unmarkPhraseValidating();
   }, [ownAddress, ownPublicKey, unmarkPhraseValidating]);
 
-  const handleShowPhrase = useLastCallback(() => {
-    // A leftover of an earlier export must not pop the phrase before the credentials are asked
+  // A phrase left from an earlier export must not appear before the credentials are asked. The phrase of a key rotation
+  // that was not confirmed must not be shown as the current phrase.
+  const clearShownPhrase = useLastCallback(() => {
     clearWalletMnemonic();
+    clearWalletKeyRotation();
+  });
+
+  const handleShowPhrase = useLastCallback(() => {
+    clearShownPhrase();
     push(WalletScreen.PhraseInfo);
   });
 
   const handlePhraseInfoShow = useLastCallback(() => {
-    clearWalletMnemonic();
+    clearShownPhrase();
     askCredentials({ intent: 'phrase', run: (entered) => loadWalletMnemonic(entered) });
   });
 
   const handleShowSavedPhrase = useLastCallback((savedAddress: string) => {
-    clearWalletMnemonic();
+    clearShownPhrase();
     startCredentials({ intent: 'phrase', run: ({ passcode }) => loadWalletMnemonic({ passcode, savedAddress }) });
     push(WalletScreen.Passcode);
   });
@@ -150,7 +162,24 @@ export default function useWalletKeyFlows({
     }
   });
 
+  // The user confirms the phrase of a key rotation before the rotation is sent to the blockchain
   const handlePhraseDone = useLastCallback(() => {
+    if (walletKeyRotation) {
+      openKeyRotationConfirm();
+      return;
+    }
+
+    finishPhrase();
+  });
+
+  const handleKeyRotationConfirm = useLastCallback(() => {
+    proceedCredentials({
+      intent: 'confirmKeyRotation',
+      run: ({ password }) => confirmWalletKeyRotation({ password }),
+    });
+  });
+
+  const finishPhrase = useLastCallback(() => {
     clearWalletMnemonic();
     dropCredentials();
 
@@ -195,7 +224,7 @@ export default function useWalletKeyFlows({
     if (walletBackup?.status === 'pending') return;
 
     clearWalletBackup();
-    clearWalletMnemonic();
+    clearShownPhrase();
 
     if (!hasAppPasscode) {
       // Replacing keeps one `back` between the notice and the keys list
@@ -244,10 +273,30 @@ export default function useWalletKeyFlows({
       return;
     }
 
-    runCredentials({
-      intent: 'replace',
-      run: ({ password }) => replaceWallet({ ...request, fromAddress: request.fromAddress ?? ownAddress!, password }),
+    const run = ({ password, passcode }: { password?: string; passcode?: string }) => replaceWallet({
+      ...request, fromAddress: request.fromAddress ?? ownAddress!, password, passcode,
     });
+
+    // The phrase of a saved wallet is read only with the passcode, the same as when it is shown. A swap that does not
+    // save the current wallet drops it from the account, so the passcode guards that too.
+    if (request.savedAddress || (!request.shouldSaveCurrent && hasAppPasscode)) {
+      startCredentials({ intent: 'replace', run });
+      push(WalletScreen.Passcode);
+      return;
+    }
+
+    runCredentials({ intent: 'replace', run });
+  });
+
+  // The confirmation dialog comes first and the passcode comes after it, the same as when the user switches to a saved
+  // wallet. The phrase can have no other copy, so the action checks the passcode before it deletes anything.
+  const handleRemoveSavedWallet = useLastCallback((address: string) => {
+    clearWalletSavedRemoval();
+    startCredentials({
+      intent: 'removeSaved',
+      run: ({ passcode }) => removeSavedWallet({ address, passcode: passcode! }),
+    });
+    push(WalletScreen.Passcode);
   });
 
   const handleReplaceCreate = useLastCallback(() => {
@@ -275,6 +324,13 @@ export default function useWalletKeyFlows({
       clearWalletMnemonic();
     }
 
+    // When the user leaves the phrase screen of a key rotation, the rotation is cancelled. If the rotation was already
+    // sent, its phrase stays in the vault, and the next try finds it there.
+    if (screen === WalletScreen.Phrase && walletKeyRotation) {
+      clearWalletKeyRotation();
+      dropCredentials();
+    }
+
     if (screen === WalletScreen.EnterPhrase) {
       handleEnterPhraseErrorClear();
       clearWalletBackup();
@@ -300,6 +356,8 @@ export default function useWalletKeyFlows({
     setPhraseError(undefined);
     setPendingReplace(undefined);
     setWrongPhrase(undefined);
+    closeKeyRotationConfirm();
+    clearWalletKeyRotation();
   });
 
   // The intent check keeps a stale export from replacing a credential screen of an unrelated flow
@@ -332,27 +390,83 @@ export default function useWalletKeyFlows({
     resetNavigation();
   }, [walletReplace?.status, dropCredentials, resetNavigation]);
 
+  useEffect(() => {
+    if (walletSavedRemoval?.status !== 'done') return;
+
+    clearWalletSavedRemoval();
+    dropCredentials();
+
+    if (screen === WalletScreen.Passcode) back();
+  }, [walletSavedRemoval?.status, screen, dropCredentials, back]);
+
+  // A key change the server wants the password for goes to the password screen, which the dialog would cover. The
+  // prepared change stays for the next try. A missing password opens that screen in the credential flow; a wrong one
+  // from an earlier step is shown on it here.
+  const keyRotationPasswordError = credentialIntent === 'confirmKeyRotation' && walletBackup?.status === 'error'
+    && (walletBackup.error === 'PASSWORD_MISSING' || walletBackup.error === 'PASSWORD_INVALID')
+    ? walletBackup.error : undefined;
+
+  useEffect(() => {
+    if (!keyRotationPasswordError) return;
+
+    closeKeyRotationConfirm();
+
+    if (keyRotationPasswordError === 'PASSWORD_INVALID' && screen !== WalletScreen.Password) {
+      push(WalletScreen.Password);
+    }
+  }, [keyRotationPasswordError, screen, closeKeyRotationConfirm, push]);
+
   // Only a backup turned on pops a screen, so a success landing mid-navigation does not pop an unrelated one
   useEffect(() => {
     if (walletBackup?.status !== 'done') return;
 
     clearWalletBackup();
 
+    const isOnCredentialScreen = screen === WalletScreen.Password || screen === WalletScreen.Passcode;
+
+    // A prepared key rotation shows its phrase in place of the warning screen. The password screen over the warning
+    // closes too. The credentials are kept for the confirmation that sends the rotation. A rotation that is prepared
+    // after the user left these screens is cancelled.
+    if (credentialIntent === 'disableBackup' && walletKeyRotation) {
+      if (isOnCredentialScreen) {
+        back();
+        replace(WalletScreen.Phrase);
+      } else if (screen === WalletScreen.DisableBackup) {
+        replace(WalletScreen.Phrase);
+      } else {
+        clearWalletKeyRotation();
+        dropCredentials();
+      }
+      return;
+    }
+
+    if (credentialIntent === 'confirmKeyRotation') {
+      closeKeyRotationConfirm();
+      finishPhrase();
+      return;
+    }
+
     // A backup turned off leaves its screens to the phrase effect above
     if (credentialIntent === 'disableBackup') return;
 
     dropCredentials();
 
-    if (screen === WalletScreen.Password || screen === WalletScreen.EnterPhrase || screen === WalletScreen.Passcode) {
+    if (isOnCredentialScreen || screen === WalletScreen.EnterPhrase) {
       back();
     }
-  }, [walletBackup?.status, screen, credentialIntent, dropCredentials, back]);
+  }, [
+    walletBackup?.status, walletKeyRotation, screen, credentialIntent, dropCredentials, back, replace,
+    closeKeyRotationConfirm, finishPhrase,
+  ]);
 
   return {
     pendingReplace,
     isPhraseValidating,
     phraseError,
     wrongPhrase,
+    isKeyRotationConfirmOpen,
+    closeKeyRotationConfirm,
+    handleKeyRotationConfirm,
     handleWrongPhraseClose,
     handleImportOwnWallet,
     handlePhraseDone,
@@ -369,6 +483,7 @@ export default function useWalletKeyFlows({
     handleReplaceCreate,
     handleReplaceImport,
     handleImportSavedWallet,
+    handleRemoveSavedWallet,
     handleBack,
     reset,
   };

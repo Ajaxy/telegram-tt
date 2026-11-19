@@ -23,12 +23,13 @@ type OwnProps = {
   onDeleteWallet: NoneToVoidFunction;
   onImportSavedWallet: (address: string) => void;
   onShowSavedPhrase: (address: string) => void;
+  onRemoveSavedWallet: (address: string) => void;
   onEnterOwnPhrase: NoneToVoidFunction;
 };
 
 const WalletSettingsScreen = ({
   onCurrencyClick, onPasscodeClick, onHowItWorksClick, onShowPhrase, onEnableBackup, onDisableBackup,
-  onDeleteWallet, onImportSavedWallet, onShowSavedPhrase, onEnterOwnPhrase, onConnectedAppsClick,
+  onDeleteWallet, onImportSavedWallet, onShowSavedPhrase, onRemoveSavedWallet, onEnterOwnPhrase, onConnectedAppsClick,
 }: OwnProps) => {
   const lang = useLang();
 
@@ -66,6 +67,7 @@ const WalletSettingsScreen = ({
         onDeleteWallet={onDeleteWallet}
         onImportSavedWallet={onImportSavedWallet}
         onShowSavedPhrase={onShowSavedPhrase}
+        onRemoveSavedWallet={onRemoveSavedWallet}
         onEnterOwnPhrase={onEnterOwnPhrase}
       />
     </div>

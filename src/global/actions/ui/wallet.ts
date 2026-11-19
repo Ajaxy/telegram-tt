@@ -67,6 +67,10 @@ addTabStateResetterAction('clearWalletMnemonic', 'walletMnemonic');
 
 addTabStateResetterAction('clearWalletBackup', 'walletBackup');
 
+addTabStateResetterAction('clearWalletKeyRotation', 'walletKeyRotation');
+
+addTabStateResetterAction('clearWalletSavedRemoval', 'walletSavedRemoval');
+
 addTabStateResetterAction('clearWalletReplace', 'walletReplace');
 
 addTabStateResetterAction('clearWalletCommentDecryption', 'walletCommentDecryption');

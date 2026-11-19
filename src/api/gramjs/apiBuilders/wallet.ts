@@ -28,12 +28,19 @@ const FRAGMENT_NFT_HOST = 'nft.fragment.com';
 const MAX_PERCENT = 100;
 const FRAGMENT_URL = 'https://fragment.com';
 const FRAGMENT_METADATA_EXTENSION = '.json';
-// Fragment puts the item type in the first segment of its metadata and image paths
-const FRAGMENT_TYPES = ['gift', 'username', 'number'] as const;
+// Usernames and numbers come only from these Telegram collections: anyone can point an item's metadata at Fragment
+const FRAGMENT_COLLECTION_TYPES: Record<string, 'username' | 'number'> = {
+  '0:80d78a35f955a14b679faa887ff4cd5bfc0f43b4a4eea2a7e6927f3701b273c2': 'username',
+  '0:0e41dc1dc3c9067ed24248580e12b3359818d83dee0304fabcf80845eafafdb2': 'number',
+};
+const FRAGMENT_GIFT_URL = `https://${FRAGMENT_NFT_HOST}/gift/`;
 
 export function buildApiTonConnectSession(session: GramJs.TonConnectSession): ApiTonConnectSession {
-  if (session.manifest?.icon) {
-    addWebDocumentToLocalDb(session.manifest.icon);
+  // A document without the proxy would be downloaded straight from the dApp's host, which then sees the user's IP
+  const icon = session.manifest?.icon instanceof GramJs.WebDocument ? session.manifest.icon : undefined;
+
+  if (icon) {
+    addWebDocumentToLocalDb(icon);
   }
 
   return {
@@ -44,7 +51,7 @@ export function buildApiTonConnectSession(session: GramJs.TonConnectSession): Ap
     manifest: session.manifest && {
       url: session.manifest.url,
       name: session.manifest.name,
-      icon: buildApiWebDocument(session.manifest.icon),
+      icon: buildApiWebDocument(icon),
     },
     manifestError: session.manifestError,
     isPending: session.pending,
@@ -204,7 +211,7 @@ export function buildApiWalletCollectible(item: GramJs.wallet.NftItem): ApiWalle
     fragmentUrl: buildFragmentUrl(contentUrl?.url) || FRAGMENT_URL,
   };
   const gift = buildUniqueGiftFromNft(item);
-  const type = gift ? 'gift' : getCollectibleType(contentUrl?.url, item.image?.url);
+  const type = gift ? 'gift' : getCollectibleType(item);
 
   return type === 'gift' ? { ...base, type, gift } : { ...base, type };
 }
@@ -265,13 +272,12 @@ function buildUniqueGiftFromNft(nft: GramJs.wallet.NftItem) {
   return gift?.type === 'starGiftUnique' ? gift : undefined;
 }
 
-function getCollectibleType(metadataUrl?: string, imageUrl?: string): ApiWalletCollectible['type'] {
-  for (const url of [metadataUrl, imageUrl]) {
-    const type = url && FRAGMENT_TYPES.find((item) => url.startsWith(`https://${FRAGMENT_NFT_HOST}/${item}/`));
-    if (type) return type;
-  }
+function getCollectibleType(item: GramJs.wallet.NftItem): ApiWalletCollectible['type'] {
+  const collectionAddress = item.collectionAddress && toRawAddress(item.collectionAddress);
+  const collectionType = collectionAddress && FRAGMENT_COLLECTION_TYPES[collectionAddress];
+  if (collectionType) return collectionType;
 
-  return 'other';
+  return [item.contentUrl?.url, item.image?.url].some((url) => url?.startsWith(FRAGMENT_GIFT_URL)) ? 'gift' : 'other';
 }
 
 // The item's page is at the metadata path (`nft.fragment.com/<path>.json`) on `fragment.com`

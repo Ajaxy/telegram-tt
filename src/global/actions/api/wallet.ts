@@ -11,6 +11,7 @@ import type {
   SendTonTransferError,
   SendTonTransferResult,
   SetWalletCardStickersError,
+  WalletBackupError,
   WalletBackupResult,
 } from '../../../api/types';
 import type { RegularLangKey } from '../../../types/language';
@@ -56,7 +57,9 @@ import {
   filterWalletCardStickers,
   markWalletTransactionFailed,
   replacePendingWalletTransaction,
+  returnFailedTransferAmounts,
   updateWallet,
+  updateWalletAfterBackupDisable,
   updateWalletCollectibleGift,
   updateWalletServerState,
 } from '../../reducers/wallet';
@@ -74,6 +77,9 @@ import { verifyPasscodeWithLimit } from './passcode';
 const NOT_FOUND_NOTIFICATION_DURATION = 6000;
 
 const PENDING_TTL_SECONDS = 300;
+// The time in seconds after `validUntil`. After it, a transfer without an answer counts as not executed. The indexer
+// and the clock can be behind the blockchain, the same as for a key rotation.
+const UNANSWERED_TRANSFER_EXPIRY_MARGIN = 120;
 const WALLET_BACKUP_LOCK_PREFIX = 'wallet-backup:';
 // The server indexes a confirmed transfer with a lag, so the lookup backs off for about a minute
 const SENT_LOOKUP_ATTEMPTS = 8;
@@ -92,11 +98,13 @@ const CARD_ERROR_LANG_KEYS: Record<Exclude<SetWalletCardStickersError, 'CARD_STI
 
 addActionHandler('replaceWallet', async (global, actions, payload): Promise<void> => {
   const {
-    fromAddress, words, savedAddress, shouldSaveCurrent, password, tabId = getCurrentTabId(),
+    fromAddress, words, savedAddress, shouldSaveCurrent, password, passcode, tabId = getCurrentTabId(),
   } = payload;
 
+  // A saved wallet's phrase is read, and a current wallet that is not saved is dropped, only with the passcode
+  const isPasscodeNeeded = Boolean(savedAddress) || (!shouldSaveCurrent && global.passcode.hasPasscode);
   const ownAddress = selectWalletAddress(global);
-  if (!ownAddress) return;
+  if (!ownAddress || (isPasscodeNeeded && !passcode)) return;
 
   if (ownAddress !== fromAddress) {
     global = updateTabState(global, { walletReplace: { status: 'error', error: 'WALLET_CHANGED' } }, tabId);
@@ -123,7 +131,7 @@ addActionHandler('replaceWallet', async (global, actions, payload): Promise<void
       }
 
       result = await replaceWalletWithSecrets({
-        ownAddress, words, savedAddress, shouldSaveCurrent, password,
+        ownAddress, words, savedAddress, shouldSaveCurrent, password, passcode: isPasscodeNeeded ? passcode : undefined,
       });
     } catch {
       result = undefined;
@@ -154,7 +162,7 @@ addActionHandler('replaceWallet', async (global, actions, payload): Promise<void
     setGlobal(global);
 
     // Without a credential screen the error has nowhere to go but a toast
-    if (!words && !password && error !== 'PASSWORD_MISSING') {
+    if (!words && !password && !passcode && error !== 'PASSWORD_MISSING') {
       actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS[error] }, tabId });
     }
     return;
@@ -301,8 +309,11 @@ addActionHandler('loadWalletKeyRotationPending', async (global): Promise<void> =
   const ownAddress = selectWalletAddress(global);
   if (!ownAddress) return;
 
-  const isKeyRotationPending = await callApi('fetchIsWalletKeyRotationPending', { ownAddress })
-    .catch(() => undefined);
+  const hasVaultSecret = await hasWalletVaultSecret(ACCOUNT_SLOT, ownAddress).catch(() => undefined);
+  // The server sends no flag when the backup is off
+  const isKeyRotationPending = await callApi('fetchIsWalletKeyRotationPending', {
+    ownAddress, isBackupEnabled: Boolean(global.wallet!.state!.isBackupEnabled), hasVaultSecret,
+  }).catch(() => undefined);
 
   global = getGlobal();
   if (selectWalletAddress(global) !== ownAddress) return;
@@ -340,18 +351,46 @@ async function findStaleSavedWallets(addresses: string[]) {
 }
 
 addActionHandler('removeSavedWallet', async (global, actions, payload): Promise<void> => {
-  const { address } = payload;
+  const { address, passcode, tabId = getCurrentTabId() } = payload;
 
-  // A switch in another tab holds the lock of the wallet it replaces
-  const ownAddress = selectWalletAddress(global);
+  global = updateTabState(global, { walletSavedRemoval: { status: 'pending' } }, tabId);
+  setGlobal(global);
 
-  await navigator.locks.request(`${WALLET_BACKUP_LOCK_PREFIX}${ownAddress || address}`, async () => {
+  let removal: NonNullable<TabState['walletSavedRemoval']>;
+
+  try {
+    // The phrase can have no other copy, so it is deleted only with the right passcode
+    const passcodeError = await verifyPasscodeWithLimit(passcode);
+
     global = getGlobal();
+    if (selectTabState(global, tabId).walletSavedRemoval?.status !== 'pending') return;
 
-    if (selectWalletAddress(global) === address) return;
+    // A switch in another tab holds the lock of the wallet it replaces. The wallet can change during the passcode check,
+    // so it is read after it.
+    const ownAddress = selectWalletAddress(global);
 
-    await removeWalletVaultSecret(ACCOUNT_SLOT, address);
-  });
+    if (passcodeError) {
+      removal = { status: 'error', error: passcodeError };
+    } else {
+      await navigator.locks.request(`${WALLET_BACKUP_LOCK_PREFIX}${ownAddress || address}`, async () => {
+        global = getGlobal();
+
+        if (selectWalletAddress(global) === address) return;
+
+        await removeWalletVaultSecret(ACCOUNT_SLOT, address);
+      });
+
+      removal = { status: 'done' };
+    }
+  } catch {
+    // The passcode screen waits while the removal is pending, so a failure it has no words for still ends the wait
+    removal = { status: 'error' };
+    actions.showNotification({ message: { key: 'ErrorUnexpected' }, tabId });
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, { walletSavedRemoval: removal }, tabId);
+  setGlobal(global);
 
   actions.loadSavedWallets();
 });
@@ -556,10 +595,12 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   const known = new Map(current.map((item) => [item.id, item]));
   // The server may list one transaction twice, with different fees
   const page = uniqueByField(result.transactions, 'id').map((transaction) => {
-    const { peer: knownPeer, localId } = known.get(transaction.id) || {};
+    const { peer: knownPeer, localId, balanceDeduction } = known.get(transaction.id) || {};
     const peer = keepRecipientUser(transaction.peer, knownPeer);
 
-    return peer === transaction.peer && !localId ? transaction : { ...transaction, peer, localId };
+    return peer === transaction.peer && !localId && !balanceDeduction
+      ? transaction
+      : { ...transaction, peer, localId, balanceDeduction };
   });
   const freshIds = new Set(page.map(({ id }) => id));
   let transactions: ApiWalletTransaction[];
@@ -583,6 +624,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   }
 
   global = updateWallet(global, { transactions, nextOffset });
+  global = returnFailedTransferAmounts(global);
   global = removeSentCardStickers(global, current);
   setGlobal(global);
 
@@ -596,9 +638,10 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
   }
 
   // For a local row that the fresh page does not list, the transaction is looked up by the message hash, or by the body
-  // hashes when there is no message hash
+  // hashes when there is no message hash. A row the server has confirmed is looked up too: the server confirms a
+  // transfer under an id other than the one its history uses, and only the lookup by hash gives the history's id.
   const unresolved = transactions.filter(({ id, isPending, msgHash, bodyHashes }) => (
-    isPending && (msgHash || bodyHashes) && !freshIds.has(id)
+    (msgHash || (isPending && bodyHashes)) && !freshIds.has(id)
   ));
 
   for (const transaction of unresolved) {
@@ -606,7 +649,18 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
     const msgHash = knownMsgHash
       ?? await callApi('fetchWalletMsgHashByBody', { ownAddress: ownAddress!, bodyHashes: bodyHashes! });
     const confirmed = msgHash && await lookupSentTransaction(msgHash);
-    if (!confirmed) continue;
+
+    if (!confirmed) {
+      if (bodyHashes && await checkIsUnansweredTransferExpired(ownAddress!, transaction)) {
+        global = getGlobal();
+        if (selectWalletAddress(global) !== ownAddress) return;
+
+        global = markWalletTransactionFailed(global, id);
+        setGlobal(global);
+      }
+
+      continue;
+    }
 
     global = getGlobal();
 
@@ -617,7 +671,7 @@ addActionHandler('loadWalletTransactions', async (global, actions, payload): Pro
     global = removeSentCardStickers(global, previous);
     setGlobal(global);
 
-    if (getIsWalletGiftDepositConfirmed(confirmed)) {
+    if (getIsWalletGiftDepositConfirmed(confirmed) && !getIsWalletGiftDepositConfirmed(transaction)) {
       actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
     }
 
@@ -1215,6 +1269,7 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
   // Serialized across tabs: a rotation in another tab would roll back this tab's phrase on its own failure
   let result: RotateWalletKeyResult | undefined;
   let words: string[] | undefined;
+  let preparedWords: string[] | undefined;
 
   await navigator.locks.request(`${WALLET_BACKUP_LOCK_PREFIX}${ownAddress}`, async () => {
     try {
@@ -1234,42 +1289,27 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
         return;
       }
 
-      // A local phrase other than the backed-up one is left by a rotation that did not finish; it is finished first
-      const localWords = local ? decodeWords(local) : undefined;
-      const candidateWords = localWords?.join(' ') !== exported.words.join(' ') ? localWords : undefined;
+      const unfinished = await findUnfinishedKeyRotation(ownAddress, exported.words, local);
 
-      // The chain is read once a rotation sent from this device has executed or expired. A phrase it does not know
-      // then is a stale copy from a rotation made on another device.
-      const chainPublicKey = candidateWords ? await callApi('fetchWalletChainPublicKey', { ownAddress }) : undefined;
-      const isCandidateCurrent = candidateWords && chainPublicKey ? await callApi('validateWalletPhrase', {
-        words: candidateWords, ownAddress, ownPublicKey: chainPublicKey,
-      }) : undefined;
-
-      // Without the chain's answer, the stale and the current copy cannot be told apart. The branches below would
-      // overwrite the local one, so the flow stops before touching the vault.
-      if (candidateWords && isCandidateCurrent === undefined) {
-        result = { error: 'BACKUP_FAILED' };
+      if (unfinished && 'error' in unfinished) {
+        result = unfinished;
         return;
       }
 
-      const resumedWords = isCandidateCurrent ? candidateWords : undefined;
-
-      if (resumedWords) {
-        words = resumedWords;
-
-        const inFlight = selectWalletTransferInFlight(global);
-
-        result = await callApi('rotateWalletKey', {
-          ownAddress,
-          words: exported.words,
-          newWords: words,
-          pendingSeqno: inFlight?.seqno,
-          pendingValidUntil: inFlight?.validUntil,
-        });
+      // A key rotation is sent only after the user sees its phrase and confirms it, as in the native apps. An
+      // unfinished key rotation is finished with its own phrase, never with a new one.
+      if (unfinished) {
+        preparedWords = unfinished.words;
       } else if (shouldRotateKey) {
         const { generateBip39Mnemonic, PHRASE_WORD_COUNT } = await import('../../../lib/ton/bip39');
-        words = [...exported.words.slice(0, PHRASE_WORD_COUNT), ...(await generateBip39Mnemonic())];
-        result = await rotateWalletKey(ownAddress, exported.words, words, Boolean(local));
+        const newWords = [...exported.words.slice(0, PHRASE_WORD_COUNT), ...(await generateBip39Mnemonic())];
+
+        // A TON-native wallet has no anchor half, so a new phrase would give another address
+        if (await callApi('validateWalletPhrase', { words: newWords, ownAddress })) {
+          preparedWords = newWords;
+        } else {
+          result = { error: 'UNSUPPORTED_WALLET' };
+        }
       } else {
         words = exported.words;
         await encryptWordsIntoVault(words, ownAddress);
@@ -1285,17 +1325,18 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
 
   global = getGlobal();
 
-  // The server has flipped the backup even for a cancelled flow
-  const isSameWallet = selectWalletAddress(global) === ownAddress;
+  if (preparedWords) {
+    if (selectTabState(global, tabId).walletBackup?.status !== 'pending') return;
 
-  if (result && !('error' in result) && isSameWallet) {
-    global = updateWalletServerState(global, result.state.status, result.state.state);
+    global = updateTabState(global, {
+      walletBackup: { status: 'done' },
+      walletKeyRotation: { fromAddress: ownAddress, words: preparedWords },
+    }, tabId);
+    setGlobal(global);
+    return;
   }
 
-  // A phrase that went out to the chain stays on the device even when the flow failed after that
-  if (result && (!('error' in result) || result.isSent) && isSameWallet) {
-    global = updateWallet(global, { hasLocalSecret: true });
-  }
+  global = updateWalletAfterBackupDisable(global, ownAddress, result);
 
   if (selectTabState(global, tabId).walletBackup?.status !== 'pending') {
     setGlobal(global);
@@ -1303,14 +1344,7 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
   }
 
   if (!result || 'error' in result) {
-    const error = result ? result.error : 'BACKUP_FAILED';
-    global = updateTabState(global, { walletBackup: { status: 'error', error } }, tabId);
-    setGlobal(global);
-
-    // Only the password errors have a screen of their own
-    if (error !== 'PASSWORD_MISSING' && error !== 'PASSWORD_INVALID') {
-      actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS[error] }, tabId });
-    }
+    showBackupDisableError(global, actions, tabId, result);
     return;
   }
 
@@ -1320,14 +1354,141 @@ addActionHandler('disableWalletBackup', async (global, actions, payload): Promis
   }, tabId);
 
   setGlobal(global);
+});
+
+addActionHandler('confirmWalletKeyRotation', async (global, actions, payload): Promise<void> => {
+  const { password, tabId = getCurrentTabId() } = payload;
+
+  const prepared = selectTabState(global, tabId).walletKeyRotation;
+  const ownAddress = selectWalletAddress(global);
+  if (!prepared || !ownAddress || selectTabState(global, tabId).walletBackup?.status === 'pending') return;
+
+  if (ownAddress !== prepared.fromAddress) {
+    global = updateTabState(global, { walletBackup: { status: 'error', error: 'WALLET_CHANGED' } }, tabId);
+    setGlobal(global);
+    actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS.WALLET_CHANGED }, tabId });
+    return;
+  }
+
+  global = updateTabState(global, { walletBackup: { status: 'pending' } }, tabId);
+  setGlobal(global);
+
+  const { words } = prepared;
+  let result: RotateWalletKeyResult | undefined;
+
+  await navigator.locks.request(`${WALLET_BACKUP_LOCK_PREFIX}${ownAddress}`, async () => {
+    try {
+      global = getGlobal();
+
+      const currentPublicKey = selectWalletPublicKey(global);
+      if (selectWalletAddress(global) !== ownAddress || !currentPublicKey) return;
+
+      const local = await readWalletVaultSecret(ACCOUNT_SLOT, ownAddress);
+      const exported = await callApi('exportWalletSecretPhrase', {
+        ownAddress, ownPublicKey: currentPublicKey, password,
+      });
+
+      if (!exported || 'error' in exported) {
+        result = exported;
+        return;
+      }
+
+      // The key can change in another tab or on another device after the phrase is shown. So the checks from the
+      // preparation run again. Only the words that the user saw are sent. When the state is different now, nothing is
+      // sent.
+      const unfinished = await findUnfinishedKeyRotation(ownAddress, exported.words, local);
+
+      if (unfinished && 'error' in unfinished) {
+        result = unfinished;
+        return;
+      }
+
+      const { PHRASE_WORD_COUNT } = await import('../../../lib/ton/bip39');
+      const isPreparedState = unfinished
+        ? unfinished.words.join(' ') === words.join(' ')
+        : exported.words.slice(0, PHRASE_WORD_COUNT).join(' ') === words.slice(0, PHRASE_WORD_COUNT).join(' ');
+
+      if (!isPreparedState) {
+        result = { error: 'BACKUP_FAILED' };
+        return;
+      }
+
+      if (unfinished) {
+        const inFlight = selectWalletTransferInFlight(global);
+
+        result = await callApi('rotateWalletKey', {
+          ownAddress,
+          words: exported.words,
+          newWords: words,
+          pendingSeqno: inFlight?.seqno,
+          pendingValidUntil: inFlight?.validUntil,
+        });
+      } else {
+        result = await rotateWalletKey(ownAddress, exported.words, words, Boolean(local));
+      }
+    } catch {
+      result = undefined;
+    }
+  });
+
+  global = getGlobal();
+  global = updateWalletAfterBackupDisable(global, ownAddress, result);
+
+  if (selectTabState(global, tabId).walletBackup?.status !== 'pending') {
+    setGlobal(global);
+    return;
+  }
+
+  // The prepared phrase stays for the next try. That try finishes the key rotation if it was already sent.
+  if (!result || 'error' in result) {
+    showBackupDisableError(global, actions, tabId, result);
+    return;
+  }
+
+  global = updateTabState(global, { walletBackup: { status: 'done' }, walletKeyRotation: undefined }, tabId);
+  setGlobal(global);
 
   // The rotating device still has the fresh phrase, so it can close sessions without keeping their keys
-  if (shouldRotateKey && result.state.state) {
+  if (result.state.state) {
     await callApi('finishTonConnectKeyRotation', {
-      ownAddress, ownPublicKey: result.state.state.publicKey, words: words!,
+      ownAddress, ownPublicKey: result.state.state.publicKey, words,
     });
   }
 });
+
+// When the phrase on the device differs from the phrase in the backup, a key rotation did not finish. The blockchain is
+// read after a key rotation from this device is executed or expires. If the blockchain does not accept the phrase on
+// the device then, this phrase is an old copy: another device made a key rotation. Without an answer from the
+// blockchain, the old copy and the current copy look the same, so the flow stops before it changes the vault.
+async function findUnfinishedKeyRotation(
+  ownAddress: string, exportedWords: string[], local: ArrayBuffer | undefined,
+): Promise<{ words: string[] } | { error: 'BACKUP_FAILED' } | undefined> {
+  const localWords = local ? decodeWords(local) : undefined;
+  const candidateWords = localWords?.join(' ') !== exportedWords.join(' ') ? localWords : undefined;
+  if (!candidateWords) return undefined;
+
+  const chainPublicKey = await callApi('fetchWalletChainPublicKey', { ownAddress });
+  const isCandidateCurrent = chainPublicKey ? await callApi('validateWalletPhrase', {
+    words: candidateWords, ownAddress, ownPublicKey: chainPublicKey,
+  }) : undefined;
+
+  if (isCandidateCurrent === undefined) return { error: 'BACKUP_FAILED' };
+
+  return isCandidateCurrent ? { words: candidateWords } : undefined;
+}
+
+function showBackupDisableError<T extends GlobalState>(
+  global: T, actions: RequiredGlobalActions, tabId: number, result: { error: WalletBackupError } | undefined,
+) {
+  const error = result ? result.error : 'BACKUP_FAILED';
+  global = updateTabState(global, { walletBackup: { status: 'error', error } }, tabId);
+  setGlobal(global);
+
+  // Only password errors are shown on their own screen
+  if (error !== 'PASSWORD_MISSING' && error !== 'PASSWORD_INVALID') {
+    actions.showNotification({ message: { key: WALLET_ERROR_LANG_KEYS[error] }, tabId });
+  }
+}
 
 addActionHandler('loadWalletKeyRotationFee', async (global): Promise<void> => {
   const ownAddress = selectWalletAddress(global);
@@ -1393,11 +1554,12 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
       : undefined,
   };
   let isQueued = false;
+  let broadcast: Pick<ApiWalletTransaction, 'bodyHashes' | 'seqno' | 'validUntil'> | undefined;
 
   let result: SendTonTransferResult | undefined;
 
   try {
-    const secret: LocalSecret = passcode ? await readLocalSecret(passcode, ownAddress) : {};
+    const secret: LocalSecret = passcode ? await readSigningSecret(global, passcode, ownAddress) : {};
 
     result = 'error' in secret
       ? secret
@@ -1420,9 +1582,22 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
         words: secret.words,
         password,
         hasPassword: global.settings.byKey.hasPassword,
-      }, (localMessageId?: number) => {
+      }, (progress) => {
+        // From this point the transfer can be sent without an answer. Its row keeps the data to find it on the
+        // blockchain. The cache keeps the row after a reload.
+        if ('broadcast' in progress) {
+          broadcast = progress.broadcast;
+
+          global = getGlobal();
+          if (selectWalletAddress(global) !== ownAddress) return;
+
+          global = replacePendingWalletTransaction(global, localId, { ...queuedRecord, ...broadcast });
+          setGlobal(global);
+          return;
+        }
+
         isQueued = true;
-        queuedRecord = { ...queuedRecord, localMessageId };
+        queuedRecord = { ...queuedRecord, localMessageId: progress.localMessageId };
 
         // The transfer waits for its turn in the history, and the form is done with it
         global = getGlobal();
@@ -1453,21 +1628,35 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
   if (!result || 'error' in result) {
     const error: SendTonTransferError = result ? result.error : 'SEND_FAILED';
 
-    // A transfer without an answer may still execute, so its row stays pending and a dialog warns against sending it
-    // again, as in the iOS app
-    if (result?.isSent) {
+    // A transfer without an answer can still be executed. This is also true when the worker stops after it gives the
+    // transfer to the server. The row stays pending, and a dialog warns the user not to send the transfer again, as in
+    // the iOS app.
+    if (result?.isSent || (!result && broadcast)) {
       if (isSameWallet) {
-        global = replacePendingWalletTransaction(global, localId, { ...queuedRecord, bodyHashes: result.bodyHashes });
+        global = replacePendingWalletTransaction(global, localId, {
+          ...queuedRecord,
+          bodyHashes: result?.bodyHashes ?? broadcast?.bodyHashes,
+          seqno: broadcast?.seqno,
+          validUntil: broadcast?.validUntil,
+        });
         setGlobal(global);
       }
 
       actions.showDialog({ data: { type: 'localized', text: { key: 'WalletSendPending' } }, tabId });
+
+      // Nothing else checks the blockchain for a transfer that was never sent. So the history checks it when it
+      // expires.
+      if (broadcast?.validUntil !== undefined) {
+        const delay = (getUnansweredTransferExpiry(broadcast.validUntil) - getServerTime() + 1) * 1000;
+        window.setTimeout(() => actions.loadWalletTransactions({ shouldRefresh: true }), delay);
+      }
       return;
     }
 
-    // A queued transfer has left the form, so its row and a dialog that waits for the user tell of the failure, as in
-    // the iOS app
+    // A queued transfer is no longer in the form. So its row and a dialog that waits for the user show the failure, as
+    // in the iOS app. A refused transfer was never sent, so its row removes the data used to find it on the blockchain.
     if (isQueued) {
+      if (broadcast && isSameWallet) global = replacePendingWalletTransaction(global, localId, queuedRecord);
       global = markWalletTransactionFailed(global, localId);
       setGlobal(global);
 
@@ -1531,10 +1720,13 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
 
   if (isSameWallet) {
     const previous = selectWalletTransactions(global);
+    // The record knows what was taken off for it, so only that comes back if the transfer fails
+    const balanceDeduction = walletState ? spentAmount : undefined;
     global = replacePendingWalletTransaction(global, localId, result.transaction ? {
       ...result.transaction,
       peer: keepRecipientUser(result.transaction.peer, queuedRecord.peer),
       msgHash: result.msgHash,
+      balanceDeduction,
     } : {
       ...queuedRecord,
       id: result.msgHash,
@@ -1545,6 +1737,7 @@ addActionHandler('sendWalletTransfer', async (global, actions, payload): Promise
       // The cache keeps pending records, so a private comment is held only encrypted, as the server lists it
       comment: result.encryptedComment ? undefined : comment,
       encryptedComment: result.encryptedComment,
+      balanceDeduction,
     });
     global = removeSentCardStickers(global, previous);
   }
@@ -1803,10 +1996,33 @@ function mergeLocalTransactions(
   // A queued transfer expires as well, as its answer is lost if the tab running the worker closes. An answer that
   // comes later brings the row back.
   const stillLocal = (current || []).filter((item) => (
-    getIsLocalTransaction(item) && !confirmedIds.has(item.id) && item.timestamp > now - PENDING_TTL_SECONDS
+    getIsLocalTransaction(item) && !confirmedIds.has(item.id)
+    && getLocalTransactionTime(item) > now - PENDING_TTL_SECONDS
   ));
 
   return stillLocal.concat(confirmed);
+}
+
+// For a transfer without an answer, the time starts when the app can tell if the transfer was sent. So the row is not
+// removed before it is shown as failed.
+function getLocalTransactionTime({ timestamp, bodyHashes, validUntil }: ApiWalletTransaction) {
+  return bodyHashes && validUntil !== undefined ? getUnansweredTransferExpiry(validUntil) : timestamp;
+}
+
+// After this time, a transfer without an answer cannot be executed if its seqno is still the same
+function getUnansweredTransferExpiry(validUntil: number) {
+  return validUntil + UNANSWERED_TRANSFER_EXPIRY_MARGIN;
+}
+
+// The same rule as in the iOS app: when the seqno is higher, this transfer or another one used it
+async function checkIsUnansweredTransferExpired(ownAddress: string, { seqno, validUntil }: ApiWalletTransaction) {
+  if (seqno === undefined || validUntil === undefined || getServerTime() <= getUnansweredTransferExpiry(validUntil)) {
+    return false;
+  }
+
+  const state = await callApi('fetchToncenterWalletState', ownAddress);
+
+  return Boolean(state && state.seqno <= seqno);
 }
 
 // A queued transfer has only its local id, and one the server took has its message hash
@@ -1841,8 +2057,25 @@ async function lookupSentTransaction(msgHash: string): Promise<ApiWalletTransact
 
 type LocalSecret = { words?: string[] } | { error: ExportSecretPhraseError };
 
+// The passcode confirms every signature, but the phrase on the device signs only when its check accepted it. A copy
+// left by a rotation on another device, or by one that never landed, would be refused, so the backup signs then.
+export async function readSigningSecret(
+  global: GlobalState, passcode: string, ownAddress: string,
+): Promise<LocalSecret> {
+  if (global.wallet?.hasLocalSecret !== true) {
+    const passcodeError = await verifyPasscodeWithLimit(passcode);
+
+    return passcodeError ? { error: passcodeError } : {};
+  }
+
+  const secret = await readLocalSecret(passcode, ownAddress);
+
+  // The phrase can be gone from the device since its check, and the phrase from the backup signs then
+  return 'error' in secret && secret.error === 'NO_LOCAL_SECRET' ? {} : secret;
+}
+
 // Decrypted here, where the passcode key lives, and handed to the worker for one operation
-export async function readLocalSecret(
+async function readLocalSecret(
   passcode: string, address: string,
 ): Promise<{ words: string[] } | { error: ExportSecretPhraseError }> {
   const passcodeError = await verifyPasscodeWithLimit(passcode);
@@ -1857,19 +2090,21 @@ export async function readLocalSecret(
 }
 
 async function replaceWalletWithSecrets({
-  ownAddress, words, savedAddress, shouldSaveCurrent, password,
+  ownAddress, words, savedAddress, shouldSaveCurrent, password, passcode,
 }: {
   ownAddress: string;
   words?: string[];
   savedAddress?: string;
   shouldSaveCurrent?: boolean;
   password?: string;
+  passcode?: string;
 }): Promise<ReplaceWalletResult & { isPhraseLost?: boolean }> {
-  if (shouldSaveCurrent) {
-    const error = await saveCurrentWallet(ownAddress, password);
+  // Checked before anything else changes
+  if (passcode !== undefined) {
+    const passcodeError = await verifyPasscodeWithLimit(passcode);
 
-    if (error) {
-      return { error };
+    if (passcodeError) {
+      return { error: passcodeError };
     }
   }
 
@@ -1883,6 +2118,14 @@ async function replaceWalletWithSecrets({
     }
 
     importedWords = decodeWords(secret);
+  }
+
+  if (shouldSaveCurrent) {
+    const error = await saveCurrentWallet(ownAddress, password);
+
+    if (error) {
+      return { error };
+    }
   }
 
   // Closing the sessions needs the old wallet's phrase, which the server no longer holds after the swap,
@@ -2012,9 +2255,10 @@ async function rotateWalletKey(
     ownAddress, words, newWords, pendingSeqno: inFlight?.seqno, pendingValidUntil: inFlight?.validUntil,
   });
 
-  const isSent = result && 'error' in result && result.isSent;
-
-  if ((!result || 'error' in result) && !isSent) {
+  // The old phrase is restored only when the server clearly refused the rotation. `undefined` means there was no
+  // answer (for example, the API restarted after a lock or a reconnect), and the rotation may still go through. If the
+  // new phrase were deleted then, nothing could sign for the wallet anymore.
+  if (result && 'error' in result && !result.isSent) {
     if (hadLocalSecret) {
       await encryptWordsIntoVault(words, ownAddress);
     } else {

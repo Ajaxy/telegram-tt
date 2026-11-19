@@ -42,6 +42,7 @@ const WalletPasswordScreen = ({
         hint={isPasscode ? undefined : passwordHint}
         isLoading={isLoading}
         shouldResetValue={isActive}
+        shouldDisablePasswordManager={isPasscode}
         isPasswordVisible={isPasswordVisible}
         onChangePasswordVisibility={setIsPasswordVisible}
         onClearError={onClearError}

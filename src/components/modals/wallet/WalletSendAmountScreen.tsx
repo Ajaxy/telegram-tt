@@ -27,7 +27,7 @@ import { bufferFromUtf8 } from '../../../util/encoding/buffer';
 import { formatTonInFiat, parseTonToNanos } from '../../../util/formatCurrency';
 import { formatTonNumber } from '../../../util/localization/format';
 import { getBigIntMax } from '../../../util/numbers';
-import { parseTonTransferAddress } from '../../../util/tonAddress';
+import { formatTransferRecipient, parseTonTransferAddress } from '../../../util/tonAddress';
 import { REFUSAL_VIBRATION } from './helpers/amountFrames';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -83,6 +83,7 @@ type StateProps = {
 
 const FEE_DEBOUNCE_MS = 400;
 const COMMENT_COUNTER_THRESHOLD = 100;
+const RECIPIENT_RESOLVE_TIMEOUT = 2000;
 
 const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
   const {
@@ -140,6 +141,21 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
     || Object.entries(userAddresses || {}).find(([, address]) => address === normalizedRecipient)?.[0];
   const isRecipientResolved = Boolean(recipientUserId) || !normalizedRecipient || resolvedRecipient !== undefined;
 
+  // The transfer waits until the chip shows the owner of the address. When the server does not answer in time, the chip
+  // appears without a name.
+  const [timedOutRecipient, setTimedOutRecipient] = useState<string>();
+  const isRecipientReady = isRecipientResolved || timedOutRecipient === normalizedRecipient;
+  // The chip draws its assembly over the name and the address, and reports when they can be read
+  const [isRecipientReadable, setIsRecipientReadable] = useState(false);
+
+  useEffect(() => {
+    if (isRecipientReady) return undefined;
+
+    const timeout = window.setTimeout(() => setTimedOutRecipient(normalizedRecipient), RECIPIENT_RESOLVE_TIMEOUT);
+
+    return () => window.clearTimeout(timeout);
+  }, [isRecipientReady, normalizedRecipient]);
+
   const recipientUser = recipientUserId ? usersById[recipientUserId] : undefined;
   const recipientUsername = recipientUser && getMainUsername(recipientUser);
 
@@ -189,6 +205,7 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
   const isInsufficient = balance !== undefined && amountNanos > 0n && requiredNanos > balance;
 
   const canSubmit = Boolean(normalizedRecipient)
+    && isRecipientReadable
     && amountNanos > 0n
     && !isBelowMin
     && !isCommentTooLong
@@ -340,7 +357,11 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
         amount: `${formatTonNumber(lang, amountNanos)} ${lang('WalletCurrencyTicker')}`,
       })
       : lang('WalletSendTitle');
-  const shownAddress = normalizedRecipient || toAddress;
+  // A plain transfer shows the form it goes to, which tells whether the money can come back. The item contract does
+  // the bouncing for a collectible, so its new owner keeps the usual form.
+  const shownAddress = normalizedRecipient && !collectibleAddress
+    ? formatTransferRecipient(toAddress, recipientUser)
+    : normalizedRecipient || toAddress;
   const recipientName = recipientUser && getUserFullName(lang, recipientUser);
   const recipientInfoTitle = recipientName
     ? lang('WalletSendRecipientWallet', { name: recipientUser.firstName || recipientName })
@@ -352,12 +373,13 @@ const WalletSendAmountScreen = (props: OwnProps & StateProps) => {
         address={shownAddress}
         user={recipientUser}
         infoLabel={recipientInfoTitle}
-        isResolved={isRecipientResolved}
+        isReady={isRecipientReady}
         isActive={isActive}
         noAnimation={!canAnimate}
         onCopyAddress={handleCopyAddress}
         onOpenChat={isSubmitted ? undefined : handleOpenRecipientChat}
         onOpenInfo={normalizedRecipient && !isSubmitted ? openRecipientInfo : undefined}
+        onReadableChange={setIsRecipientReadable}
       />
       {collectible ? (
         <div className={styles.collectible}>
