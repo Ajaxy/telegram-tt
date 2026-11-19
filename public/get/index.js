@@ -83,15 +83,19 @@ function getPlatform() {
 function setupDownloadButton() {
   document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.querySelector('.download-btn');
-    downloadBtn.innerHTML += ` for ${platform}`;
+    downloadBtn.append(` for ${platform}`);
   });
 }
 
 function setupVersion() {
   document.addEventListener('DOMContentLoaded', () => {
     packagesPromise.then((packages) => {
+      const version = packages?.$version;
+      // Release title comes from an external API, never render it as HTML
+      if (typeof version !== 'string' || !/^[\w .-]+$/.test(version)) return;
+
       const versionEl = document.querySelector('.version');
-      versionEl.innerHTML = `v. ${packages.$version} · `;
+      versionEl.textContent = `v. ${version} · `;
     });
   });
 }
