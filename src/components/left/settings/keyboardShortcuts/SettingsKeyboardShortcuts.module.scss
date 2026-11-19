@@ -54,8 +54,9 @@
 
 .fixedIcon {
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
+  opacity: 0.8;
 }
 
 .crossfade {
