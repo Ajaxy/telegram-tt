@@ -5,9 +5,12 @@ $column-gap: 0.3125rem;
 $island-padding: 0.375rem;
 $corner-radius: calc(var(--composer-pill-radius) - #{$island-padding});
 $top-gap: 0.875rem;
-$max-height: min(16.75rem, calc(var(--vh, 1vh) * 40));
+$max-height: min(17rem, calc(var(--vh, 1vh) * 40));
 $rows-height: calc(var(--bot-keyboard-rows) * #{$button-height + $row-gap} - #{$row-gap});
-$island-height: min(calc(#{$rows-height} + #{2 * $island-padding}), #{$max-height});
+$content-height: calc(#{$rows-height} + #{2 * $island-padding});
+$island-height: min(#{$content-height}, #{$max-height});
+// A classic scrollbar takes the end padding instead of adding to it, only while the rows overflow
+$scrollbar-inset: clamp(0px, (#{$content-height} - #{$max-height}) * 1000, var(--scrollbar-width));
 
 @mixin root-height($bottom-gap) {
   height: $bottom-gap;
@@ -90,6 +93,7 @@ $island-height: min(calc(#{$rows-height} + #{2 * $island-padding}), #{$max-heigh
 
   max-height: $max-height;
   padding: $island-padding;
+  padding-inline-end: max(0px, #{$island-padding} - #{$scrollbar-inset});
 
   .fullSize & {
     grid-auto-rows: minmax($button-height, 1fr);
