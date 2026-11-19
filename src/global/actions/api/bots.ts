@@ -252,14 +252,14 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
 
     case 'simpleWebView': {
       const { url } = button.action;
-      const sender = selectSender(global, message);
-      if (!sender) {
+      const botId = message.ephemeralBotId || selectSender(global, message)?.id;
+      if (!botId) {
         return;
       }
 
       const theme = extractCurrentThemeParams();
       actions.requestSimpleWebView({
-        url, botId: sender.id, theme, buttonText: button.text, tabId,
+        url, botId, theme, buttonText: button.text, tabId,
       });
       break;
     }
@@ -267,7 +267,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
     case 'webView': {
       const { url } = button.action;
       const sender = selectSender(global, message);
-      const botId = message.viaBotId || sender?.id;
+      const botId = message.ephemeralBotId || message.viaBotId || sender?.id;
       if (!botId) {
         return;
       }
