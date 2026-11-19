@@ -117,7 +117,6 @@ const VideoPlayerControls = ({
   }, []);
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV && !isForceMobileVersion) return undefined;
     if (!isVisible || !isPlaying || isPlaybackMenuOpen || getIsSeeking()) {
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
       return undefined;
@@ -132,11 +131,17 @@ const VideoPlayerControls = ({
         setVisibility(false);
       }, HIDE_CONTROLS_TIMEOUT_MS);
     };
+    const restartHide = () => {
+      window.clearTimeout(closeTimeoutRef.current);
+      scheduleHide();
+    };
     scheduleHide();
+    if (!IS_TOUCH_ENV) window.addEventListener('mousemove', restartHide);
     return () => {
       if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+      window.removeEventListener('mousemove', restartHide);
     };
-  }, [isPlaying, isVisible, setVisibility, isPlaybackMenuOpen, getIsSeeking, isForceMobileVersion]);
+  }, [isPlaying, isVisible, setVisibility, isPlaybackMenuOpen, getIsSeeking]);
 
   useLayoutEffect(() => {
     if (isVisible) {
