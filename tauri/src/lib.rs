@@ -414,5 +414,8 @@ fn resolve_app_url(url: &str, base_url: &Url) -> Option<Url> {
 }
 
 fn is_allowed_app_url(url: &Url, base_url: &Url) -> bool {
-  matches!(url.scheme(), "http" | "https") && url.origin() == base_url.origin()
+  // Exact path, not prefix: other pages under the base path (e.g. `get/`) must not get IPC
+  matches!(url.scheme(), "http" | "https")
+    && url.origin() == base_url.origin()
+    && url.path().trim_end_matches('/') == base_url.path().trim_end_matches('/')
 }

@@ -79,7 +79,8 @@ export default function setupTauriListeners() {
 async function openLink(url: string | URL) {
   try {
     const urlObject = url instanceof URL ? url : new URL(url, window.location.href);
-    if (window.location.origin === urlObject.origin) {
+    // Only the app itself gets a native window with IPC; other pages on the origin open in the browser
+    if (window.location.origin === urlObject.origin && window.location.pathname === urlObject.pathname) {
       await window.tauri.openNewWindow(urlObject.toString());
     } else {
       const shellPlugin = await import('@tauri-apps/plugin-shell');
