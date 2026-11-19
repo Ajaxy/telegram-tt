@@ -46,6 +46,13 @@
     transition: none !important;
   }
 
+  &.Transition-fade {
+    > .Transition_slide-from,
+    > .Transition_slide-to {
+      animation-duration: 0.3s;
+    }
+  }
+
   .messages-layout & {
     --message-list-header-base: calc(var(--middle-header-height) + var(--middle-panel-inline-padding));
     --message-list-top-stack: calc(var(--middle-header-player-height, 0px) + var(--message-list-header-base));
