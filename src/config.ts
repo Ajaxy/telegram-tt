@@ -60,6 +60,7 @@ export const MEDIA_CACHE_NAME = 'tt-media';
 export const MEDIA_CACHE_NAME_AVATARS = 'tt-media-avatars';
 export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
+export const DOWNLOAD_KEY_CACHE_NAME = 'tt-download-key';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const ASSET_CACHE_NAME = 'tt-assets';

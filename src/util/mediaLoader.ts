@@ -143,6 +143,21 @@ function getDownloadUrl(url: string) {
   return base.href;
 }
 
+// The service worker serves only download URLs it signed, so other sites cannot trigger downloads
+export function signDownloadUrl(url: string) {
+  const { controller } = navigator.serviceWorker;
+  if (!controller) return Promise.resolve(url);
+
+  const { port1, port2 } = new MessageChannel();
+  return new Promise<string | undefined>((resolve) => {
+    port1.onmessage = (e) => {
+      port1.close();
+      resolve(e.data);
+    };
+    controller.postMessage({ type: 'signDownload', url }, [port2]);
+  });
+}
+
 async function fetchFromCacheOrRemote(
   url: string,
   mediaFormat: ApiMediaFormat,

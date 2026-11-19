@@ -3,7 +3,7 @@ import {
 } from '../config';
 import { pause } from '../util/schedulers';
 import { clearAssetCache, respondWithCache, respondWithCacheNetworkFirst } from './assetCache';
-import { respondForDownload } from './download';
+import { handleDownloadMessage, respondForDownload } from './download';
 import { respondForProgressive } from './progressive';
 import {
   handleClientMessage as handleNotificationMessage,
@@ -130,4 +130,5 @@ self.addEventListener('message', (event) => {
 
   handleNotificationMessage(event);
   handleShareMessage(event);
+  handleDownloadMessage(event);
 });

@@ -76,11 +76,12 @@ const DownloadManager = ({
         }
       };
 
-      mediaLoader.fetch(mediaHash, mediaFormat, handleProgress, generateUniqueId()).then((result) => {
+      mediaLoader.fetch(mediaHash, mediaFormat, handleProgress, generateUniqueId()).then(async (result) => {
         if (mediaFormat === ApiMediaFormat.DownloadUrl) {
           const url = new URL(result, window.document.baseURI);
           url.searchParams.set('filename', encodeURIComponent(filename));
-          const downloadWindow = window.open(url.toString());
+          const signedUrl = await mediaLoader.signDownloadUrl(url.toString());
+          const downloadWindow = signedUrl ? window.open(signedUrl) : undefined;
 
           downloadWindow?.addEventListener('beforeunload', () => {
             showNotification({
