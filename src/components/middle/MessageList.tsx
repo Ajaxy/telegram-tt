@@ -504,14 +504,15 @@ const MessageList = ({
     clearTimeout(liveTailReleaseTimerRef.current);
   });
 
+  const hasLastMessagePreview = Boolean(lastMessage);
   useSyncEffect(() => {
-    // We only need it first time when message list appears
-    if (areMessagesLoaded) {
+    // We only need it first time when the loaded history replaces the last message preview
+    if (!hasLastMessagePreview) {
       onTickEnd(() => {
         shouldAnimateAppearanceRef.current = false;
       });
     }
-  }, [areMessagesLoaded]);
+  }, [hasLastMessagePreview]);
 
   // Updated every time (to be used from intersection callback closure)
   useSyncEffect(() => {
@@ -1543,9 +1544,11 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const focusingId = selectFocusedMessageId(global, chatId);
 
+    // A single viewport message is the last message shown until the rest of the history loads
     const withLastMessageWhenPreloading = (
       threadId === MAIN_THREAD_ID
-      && !messageIds && readState && !readState.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
+      && (!messageIds || messageIds.length === 1)
+      && readState && !readState.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
     );
 
     const chatBot = selectBot(global, chatId);
