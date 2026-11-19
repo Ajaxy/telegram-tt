@@ -231,6 +231,18 @@ function valueIsSafe(value: csstree.CssNode, urlKind: UrlKind, diag: Diag, where
           fnStack.push(name);
           break;
         }
+        case 'Identifier': case 'Hash':
+          if ((node.type === 'Identifier' ? node.name : node.value).includes('\\')) {
+            ok = false;
+            diag('css-dropped', `${where}: escaped identifier`);
+          }
+          break;
+        case 'Parentheses':
+          if (item?.prev?.data.type === 'Identifier') {
+            ok = false;
+            diag('css-dropped', `${where}: identifier before a parenthesised block`);
+          }
+          break;
         case 'String':
           if (fnStack.some((f) => URL_FUNCTIONS.has(f))) {
             const checked = checkUrl(node.value, 'image');
@@ -439,7 +451,7 @@ export function sanitizeFontValue(prop: 'font' | 'font-family', value: string, d
   try {
     const ast = parse(`${prop}:${value}`, 'declaration');
     if (ast.type !== 'Declaration' || !declarationIsSafe(ast, diag, DEFAULT_ENV)) return null;
-    return csstree.generate(ast.value);
+    return generate(ast.value);
   } catch {
     return null;
   }
@@ -716,6 +728,37 @@ function parse(css: string, context: string): csstree.CssNode {
   return csstree.parse(stripUnicodeControls(css), { ...PARSE_OPTS, context } as csstree.ParseOptions);
 }
 
+/** A hex escape with no terminator at the end of a token: it swallows one white space after it. */
+const OPEN_HEX_ESCAPE = /(?:^|[^\\])(?:\\\\)*\\[0-9a-fA-F]{1,6}$/;
+const WHITE_SPACE_ONLY = /^[\t\n\f\r ]+$/;
+
+/** The text of sanitized CSS; throws when a browser would merge two of its tokens (local patch, NOTICE.md). */
+function generate(ast: csstree.CssNode): string {
+  const ends: number[] = [];
+  let length = 0;
+  const text = csstree.generate(ast, {
+    decorator: (handlers) => ({
+      ...handlers,
+      token(type, value, suppressAutoWhiteSpace) {
+        handlers.token.call(this, type, OPEN_HEX_ESCAPE.test(value) ? value + ' ' : value, suppressAutoWhiteSpace);
+      },
+      emit(value, type, auto) {
+        length += value.length;
+        ends.push(length);
+        handlers.emit.call(this, value, type, auto);
+      },
+    }),
+  });
+  let next = 0;
+  csstree.tokenize(text, (_type, start, end) => {
+    while (next < ends.length && ends[next] <= start) next++;
+    if (next < ends.length && ends[next] < end && !WHITE_SPACE_ONLY.test(text.slice(start, end))) {
+      throw new Error('generated CSS does not tokenize back into its tokens');
+    }
+  });
+  return text;
+}
+
 /** Sanitize the text of a <style> element. */
 // Sanitized stylesheets by colour scheme, scope and text, with the diagnostics they
 // produced (replayed on every use, so a cached result reports exactly what a fresh
@@ -748,7 +791,7 @@ function sanitizeStylesheetUncached(css: string, diag: Diag, env: CssEnv): strin
   try {
     const ast = parse(css, 'stylesheet');
     sanitizeTree(ast, diag, env);
-    return csstree.generate(ast);
+    return generate(ast);
   } catch (e) {
     diag('css-dropped', 'stylesheet: ' + (e as Error).message);
     return '';
@@ -760,7 +803,7 @@ export function sanitizeStyleAttribute(css: string, diag: Diag, env: CssEnv = DE
   try {
     const ast = parse(css, 'declarationList');
     sanitizeTree(ast, diag, env);
-    return csstree.generate(ast);
+    return generate(ast);
   } catch (e) {
     diag('css-dropped', 'style attribute: ' + (e as Error).message);
     return '';
@@ -995,7 +1038,7 @@ export function sanitizeStylePropertyFull(name: string, value: string, diag: Dia
   try {
     const ast = parse(`${name}:${value}`, 'declaration');
     if (ast.type !== 'Declaration' || !declarationIsSafe(ast, diag, env)) return null;
-    return { name, value: csstree.generate(ast.value) };
+    return { name, value: generate(ast.value) };
   } catch {
     return null;
   }
@@ -1009,7 +1052,7 @@ export function sanitizeCssValue(value: string, diag: Diag, where = 'value', env
   try {
     const ast = parse(value, 'value');
     if (!valueIsSafe(ast, 'image', diag, where, env)) return null;
-    return csstree.generate(ast);
+    return generate(ast);
   } catch {
     return null;
   }

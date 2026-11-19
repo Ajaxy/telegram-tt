@@ -22,6 +22,9 @@ declare module 'css-tree/generator' {
   const generate: typeof import('css-tree').generate;
   export default generate;
 }
+declare module 'css-tree/tokenizer' {
+  export { tokenize } from 'css-tree';
+}
 declare module 'css-tree/utils' {
   export { List } from 'css-tree';
 }

@@ -1,6 +1,7 @@
 .root {
   position: relative;
 
+  contain: strict;
   overflow: hidden;
 
   width: var(--widget-width);
