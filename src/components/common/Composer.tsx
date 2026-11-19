@@ -3171,7 +3171,6 @@ const Composer = ({
                       >
                         <Button
                           round
-                          faded
                           className="composer-action-button"
                           color="translucent"
                           onClick={handleToggleSilentPosting}
@@ -3185,7 +3184,6 @@ const Composer = ({
                     {withScheduledButton && (
                       <Button
                         round
-                        faded
                         className="composer-action-button scheduled-button"
                         color="translucent"
                         onClick={handleAllScheduledClick}
@@ -3196,7 +3194,6 @@ const Composer = ({
                     {Boolean(autoDeletePeriod) && (
                       <Button
                         round
-                        faded
                         className="composer-action-button"
                         color="translucent"
                         onClick={handleAutoDeleteClick}
@@ -3208,7 +3205,6 @@ const Composer = ({
                     {shouldShowGiftButton && (
                       <Button
                         round
-                        faded
                         className="composer-action-button"
                         color="translucent"
                         onClick={handleGiftClick}
@@ -3218,7 +3214,6 @@ const Composer = ({
                     {shouldShowSuggestedPostButton && (
                       <Button
                         round
-                        faded
                         className="composer-action-button"
                         color="translucent"
                         onClick={handleSuggestPostClick}

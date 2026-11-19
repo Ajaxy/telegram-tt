@@ -795,7 +795,7 @@
 
     background: none !important;
 
-    &:not(.faded):not(.activated) {
+    &:not(.activated) {
       color: var(--color-composer-button);
     }
 
