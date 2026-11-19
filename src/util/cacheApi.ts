@@ -6,6 +6,7 @@ import {
   SNAPSHOT_CACHE_NAME,
 } from '../config';
 import { yieldToMain } from './browser/scheduler';
+import { getSafeMimeType } from './media/safeMimeType';
 import { loadPasscodeMeta, requestPasscodeStateLock } from './passcode/meta';
 import { ACCOUNT_SLOT } from './multiaccount';
 
@@ -46,23 +47,23 @@ function getAccountScopedCacheName(cacheName: string) {
 }
 
 export async function fetch(
-  cacheName: string, key: string, type: Type, isHtmlAllowed = false,
+  cacheName: string, key: string, type: Type,
 ) {
-  return fetchFromCache(getAccountScopedCacheName(cacheName), key, type, isHtmlAllowed);
+  return fetchFromCache(getAccountScopedCacheName(cacheName), key, type);
 }
 
 export async function fetchShared(
-  cacheName: string, key: string, type: Type, isHtmlAllowed = false,
+  cacheName: string, key: string, type: Type,
 ) {
-  return fetchFromCache(cacheName, key, type, isHtmlAllowed);
+  return fetchFromCache(cacheName, key, type);
 }
 
 export async function fetchFromAccountScopes(
-  cacheName: string, key: string, type: Type, isHtmlAllowed = false,
+  cacheName: string, key: string, type: Type,
 ) {
   const accountCacheNames = await getAccountScopedCacheNames(cacheName);
   for (const accountCacheName of accountCacheNames) {
-    const result = await fetchFromCache(accountCacheName, key, type, isHtmlAllowed);
+    const result = await fetchFromCache(accountCacheName, key, type);
     if (result !== undefined) return result;
   }
 
@@ -70,13 +71,13 @@ export async function fetchFromAccountScopes(
 }
 
 export async function fetchFromCurrentAccountScope(
-  cacheName: string, key: string, type: Type, isHtmlAllowed = false,
+  cacheName: string, key: string, type: Type,
 ) {
-  return fetchFromCache(getAccountScopedCacheName(cacheName), key, type, isHtmlAllowed);
+  return fetchFromCache(getAccountScopedCacheName(cacheName), key, type);
 }
 
 async function fetchFromCache(
-  resolvedCacheName: string, key: string, type: Type, isHtmlAllowed: boolean,
+  resolvedCacheName: string, key: string, type: Type,
 ) {
   if (!cacheApi) {
     return undefined;
@@ -111,21 +112,8 @@ async function fetchFromCache(
           return undefined;
         }
 
-        const blob = await response.blob();
-        const shouldRecreate = !blob.type || (!isHtmlAllowed && blob.type.includes('html'));
-        // iOS Safari fails to preserve `type` in cache
-        let resolvedType = blob.type || contentType;
-
-        if (!(shouldRecreate && resolvedType)) {
-          return blob;
-        }
-
-        // Prevent HTML-in-video attacks (for files that were cached before fix)
-        if (!isHtmlAllowed) {
-          resolvedType = resolvedType.replace(/html/gi, '');
-        }
-
-        return new Blob([blob], { type: resolvedType });
+        // Entries saved before the allowlist may hold a scriptable type
+        return new Blob([await response.blob()], { type: getSafeMimeType(contentType || '') });
       }
       case Type.Json:
         return await response.json();

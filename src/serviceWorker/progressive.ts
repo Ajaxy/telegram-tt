@@ -60,6 +60,7 @@ export async function respondForProgressive(e: FetchEvent) {
           ['Accept-Ranges', 'bytes'],
           ['Content-Length', '2'],
           ['Content-Type', mimeType],
+          ...MEDIA_SECURITY_HEADERS,
         ],
       });
     }
@@ -83,7 +84,7 @@ export async function respondForProgressive(e: FetchEvent) {
     return new Response(cachedArrayBuffer, {
       status: 206,
       statusText: 'Partial Content',
-      headers: cachedHeaders,
+      headers: [...(cachedHeaders || []), ...MEDIA_SECURITY_HEADERS],
     });
   }
 
@@ -131,7 +132,7 @@ export async function respondForProgressive(e: FetchEvent) {
   return new Response(arrayBufferPart, {
     status: 206,
     statusText: 'Partial Content',
-    headers,
+    headers: [...headers, ...MEDIA_SECURITY_HEADERS],
   });
 }
 
@@ -157,6 +158,12 @@ async function saveToCache(
     cache.put(new Request(`${cacheKey}&type=headers`), new Response(JSON.stringify(headers))),
   ]);
 }
+
+// Media bytes are sender-controlled, so they must never run as a page or a script on this origin
+export const MEDIA_SECURITY_HEADERS: [string, string][] = [
+  ['Content-Security-Policy', 'sandbox'],
+  ['X-Content-Type-Options', 'nosniff'],
+];
 
 export async function requestPart(
   e: FetchEvent,

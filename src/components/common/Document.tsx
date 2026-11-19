@@ -109,7 +109,7 @@ const Document = ({
 
   const documentHash = getDocumentMediaHash(document, 'download');
   const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress(
-    documentHash, !shouldDownload, getMediaFormat(document, 'download'), undefined, true,
+    documentHash, !shouldDownload, getMediaFormat(document, 'download'),
   );
   const isLoaded = Boolean(mediaData);
 

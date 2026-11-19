@@ -15,6 +15,7 @@ import {
 } from '../../../config';
 import * as cacheApi from '../../../util/cacheApi';
 import { bufferToUtf8 } from '../../../util/encoding/buffer';
+import { getSafeMimeType } from '../../../util/media/safeMimeType';
 import { toJSNumber } from '../../../util/numbers';
 import { getEntityTypeById } from '../gramjsBuilders';
 import localDb from '../localDb';
@@ -28,16 +29,16 @@ const MP4_SIZES_TYPES = new Set(['u', 'v']);
 
 export default async function downloadMedia(
   {
-    url, mediaFormat, start, end, isHtmlAllowed,
+    url, mediaFormat, start, end,
   }: {
-    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean;
+    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number;
   },
   client: TelegramClient,
   onProgress?: ApiOnProgress,
 ) {
   const {
     data, mimeType, fullSize,
-  } = await download(url, client, onProgress, start, end, isHtmlAllowed) || {};
+  } = await download(url, client, onProgress, start, end) || {};
 
   if (!data) {
     return undefined;
@@ -79,7 +80,6 @@ async function download(
   onProgress?: ApiOnProgress,
   start?: number,
   end?: number,
-  isHtmlAllowed?: boolean,
 ) {
   const parsed = parseMediaUrl(url);
 
@@ -166,9 +166,8 @@ async function download(
       fullSize = toJSNumber(entity.size);
     }
 
-    // Prevent HTML-in-video attacks
-    if (!isHtmlAllowed && mimeType) {
-      mimeType = mimeType.replace(/html/gi, '');
+    if (mimeType) {
+      mimeType = getSafeMimeType(mimeType);
     }
 
     return { mimeType, data, fullSize };
@@ -189,7 +188,8 @@ function parseMedia(
   data: Uint8Array | File, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): ApiParsedMedia | undefined {
   if (data instanceof File) {
-    return data;
+    // Large downloads are typeless OPFS files, so the sanitized type must be applied here too
+    return mediaFormat === ApiMediaFormat.BlobUrl ? new Blob([data], { type: mimeType }) : data;
   }
 
   const dataBytes = new Uint8Array(data);

@@ -76,7 +76,7 @@ const DownloadManager = ({
         }
       };
 
-      mediaLoader.fetch(mediaHash, mediaFormat, true, handleProgress, generateUniqueId()).then((result) => {
+      mediaLoader.fetch(mediaHash, mediaFormat, handleProgress, generateUniqueId()).then((result) => {
         if (mediaFormat === ApiMediaFormat.DownloadUrl) {
           const url = new URL(result, window.document.baseURI);
           url.searchParams.set('filename', encodeURIComponent(filename));

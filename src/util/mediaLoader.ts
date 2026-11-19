@@ -41,7 +41,6 @@ let memoryCacheGeneration = 0;
 export function fetch<T extends ApiMediaFormat>(
   url: string,
   mediaFormat: T,
-  isHtmlAllowed = false,
   onProgress?: ApiOnProgress,
   callbackUniqueId?: string,
 ): Promise<ApiPreparedMedia> {
@@ -49,7 +48,7 @@ export function fetch<T extends ApiMediaFormat>(
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? Promise.resolve(getProgressiveUrl(url))
-        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
+        : fetch(url, ApiMediaFormat.BlobUrl, onProgress, callbackUniqueId)
     );
   }
 
@@ -57,13 +56,13 @@ export function fetch<T extends ApiMediaFormat>(
     return (
       IS_PROGRESSIVE_SUPPORTED
         ? Promise.resolve(getDownloadUrl(url))
-        : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
+        : fetch(url, ApiMediaFormat.BlobUrl, onProgress, callbackUniqueId)
     );
   }
 
   if (!fetchPromises.has(url)) {
     const generation = memoryCacheGeneration;
-    const promise = fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed, generation)
+    const promise = fetchFromCacheOrRemote(url, mediaFormat, generation)
       .catch((err) => {
         if (DEBUG) {
           // eslint-disable-next-line no-console
@@ -147,7 +146,6 @@ function getDownloadUrl(url: string) {
 async function fetchFromCacheOrRemote(
   url: string,
   mediaFormat: ApiMediaFormat,
-  isHtmlAllowed: boolean,
   generation: number,
   retryNumber = 0,
 ): Promise<string> {
@@ -155,7 +153,7 @@ async function fetchFromCacheOrRemote(
 
   if (!MEDIA_CACHE_DISABLED) {
     const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
-    const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!, isHtmlAllowed);
+    const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!);
 
     if (cached) {
       let media = cached;
@@ -176,7 +174,7 @@ async function fetchFromCacheOrRemote(
   const onProgress = makeOnProgress(url, generation);
   cancellableCallbacks.set(url, onProgress);
 
-  const remote = await callApi('downloadMedia', { url, mediaFormat, isHtmlAllowed }, onProgress);
+  const remote = await callApi('downloadMedia', { url, mediaFormat }, onProgress);
   ensureCurrentMemoryCacheGeneration(generation);
   if (!remote) {
     if (retryNumber >= MAX_MEDIA_RETRIES) {
@@ -187,7 +185,7 @@ async function fetchFromCacheOrRemote(
     });
     // eslint-disable-next-line no-console
     if (DEBUG) console.debug(`Retrying to fetch media ${url}`);
-    return fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed, generation, retryNumber + 1);
+    return fetchFromCacheOrRemote(url, mediaFormat, generation, retryNumber + 1);
   }
 
   const { mimeType } = remote;

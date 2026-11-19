@@ -1,5 +1,5 @@
 import { DEBUG } from '../config';
-import { requestPart } from './progressive';
+import { MEDIA_SECURITY_HEADERS, requestPart } from './progressive';
 
 const DOWNLOAD_PART_SIZE = 1024 * 1024;
 const TEST_PART_SIZE = 64 * 1024;
@@ -54,6 +54,7 @@ export async function respondForDownload(e: FetchEvent) {
     ['Content-Length', String(fullSize)],
     ['Content-Type', mimeType],
     ['Content-Disposition', `attachment${filenameHeader ? `; ${filenameHeader}` : ''}`],
+    ...MEDIA_SECURITY_HEADERS,
   ];
 
   const queue = new FilePartQueue<ArrayBuffer | undefined>();

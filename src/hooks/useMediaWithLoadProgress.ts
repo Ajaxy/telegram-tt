@@ -21,7 +21,6 @@ export default function useMediaWithLoadProgress(
   noLoad = false,
   mediaFormat = ApiMediaFormat.BlobUrl,
   delay?: number | false,
-  isHtmlAllowed = false,
 ) {
   const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
   const mediaData = mediaHash
@@ -51,7 +50,7 @@ export default function useMediaWithLoadProgress(
 
         startedAtRef.current = Date.now();
 
-        mediaLoader.fetch(mediaHash, mediaFormat, isHtmlAllowed, handleProgress, id).then(() => {
+        mediaLoader.fetch(mediaHash, mediaFormat, handleProgress, id).then(() => {
           const spentTime = Date.now() - startedAtRef.current!;
           startedAtRef.current = undefined;
 
@@ -68,7 +67,7 @@ export default function useMediaWithLoadProgress(
       }
     }
   }, [
-    noLoad, mediaHash, mediaData, mediaFormat, isStreaming, delay, handleProgress, isHtmlAllowed, id, isSynced,
+    noLoad, mediaHash, mediaData, mediaFormat, isStreaming, delay, handleProgress, id, isSynced,
   ]);
 
   useEffect(() => {
