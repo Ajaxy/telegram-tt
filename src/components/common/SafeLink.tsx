@@ -44,7 +44,8 @@ const SafeLink = ({
   const { openUrl } = getActions();
 
   const content = children || text;
-  const isRegularLink = url === text;
+  // Spoilers, dates or custom emoji can hide or replace parts of link
+  const isRegularLink = Boolean(url) && getSinglePlainText(content) === url;
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!url) return true;
@@ -94,5 +95,10 @@ const SafeLink = ({
     </a>
   );
 };
+
+function getSinglePlainText(node: TeactNode): string | undefined {
+  if (Array.isArray(node)) return node.length === 1 ? getSinglePlainText(node[0]) : undefined;
+  return typeof node === 'string' ? node : undefined;
+}
 
 export default SafeLink;

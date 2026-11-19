@@ -137,7 +137,7 @@ const RichText = ({
           tryInstantView
           entityType={ApiMessageEntityTypes.TextUrl}
         >
-          {renderNestedText()}
+          {renderLinkText()}
         </SafeLink>
       );
     }
@@ -190,7 +190,7 @@ const RichText = ({
           threadId={threadId}
           entityType={ApiMessageEntityTypes.Url}
         >
-          {renderNestedText()}
+          {renderLinkText()}
         </SafeLink>
       );
     }
@@ -290,6 +290,12 @@ const RichText = ({
         observeIntersectionForPlaying={observeIntersectionForPlaying}
       />
     );
+  }
+
+  // `SafeLink` skips its confirmation only for a plain string child, so don't wrap plain text in `RichText`
+  function renderLinkText() {
+    const nestedText = getNestedRichText(text);
+    return nestedText.type === 'plain' ? renderText(nestedText.text, ['emoji', 'br']) : renderNestedText();
   }
 
   function renderCustomEmoji(customEmojiText: ApiRichTextCustomEmoji) {
