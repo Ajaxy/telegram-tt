@@ -4,7 +4,7 @@ import type { ApiWallpaper } from '../../api/types';
 import type { IThemeSettings, ThemeKey } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { CUSTOM_BG_CACHE_NAME, WALLPAPER_SNAPSHOT_CACHE_NAME } from '../../config';
+import { CUSTOM_BG_CACHE_NAME, SNAPSHOT_CACHE_NAME } from '../../config';
 import { MAIN_IDB_STORE } from '../browser/idb';
 import { IS_IOS } from '../browser/windowEnvironment';
 import * as cacheApi from '../cacheApi';
@@ -162,7 +162,7 @@ export async function clearWallpaperBlobs() {
       clearLockScreenWallpaperBlobs(),
       clearWallpaperVaultBlobs(),
       cacheApi.clearShared(CUSTOM_BG_CACHE_NAME),
-      cacheApi.clearShared(WALLPAPER_SNAPSHOT_CACHE_NAME),
+      cacheApi.clearShared(SNAPSHOT_CACHE_NAME),
       cacheApi.clearAccountScopes(CUSTOM_BG_CACHE_NAME),
     ]);
   } catch (err) {

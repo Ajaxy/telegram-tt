@@ -148,7 +148,7 @@ export default function useChatBackground({
   useEffectWithPrevDeps(([prevGlobalModelKey]) => {
     // A chat wallpaper may be shown instead, so the outdated snapshot can't wait to be replaced
     if (prevGlobalModelKey && prevGlobalModelKey !== globalModelKey) {
-      void clearWallpaperSnapshot()?.catch(() => undefined);
+      void clearWallpaperSnapshot().catch(() => undefined);
     }
   }, [globalModelKey]);
 

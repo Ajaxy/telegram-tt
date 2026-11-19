@@ -1,4 +1,6 @@
-import { DEBUG, WALLPAPER_SNAPSHOT_CACHE_NAME, WALLPAPER_SNAPSHOT_PATH } from '../config';
+import {
+  DEBUG, SKELETON_SNAPSHOT_PATH, SNAPSHOT_CACHE_NAME, WALLPAPER_SNAPSHOT_PATH,
+} from '../config';
 import { pause } from '../util/schedulers';
 import { clearAssetCache, respondWithCache, respondWithCacheNetworkFirst } from './assetCache';
 import { respondForDownload } from './download';
@@ -20,6 +22,7 @@ const RE_CACHE_FIRST_ASSETS = new RegExp(
   + `\\.(${CACHE_FIRST_ASSET_EXTENSIONS})$`,
 );
 const ACTIVATE_TIMEOUT = 3000;
+const SNAPSHOT_PATHS = [WALLPAPER_SNAPSHOT_PATH, SKELETON_SNAPSHOT_PATH];
 // A worker loaded from a URL runs under the policy of its own response, not the page's: the widget runtime's worker
 // may load same-origin code and WASM and fetch its WASM, nothing else
 const RE_WIDGET_WORKER = /\/widgetSandbox\.worker-[\w-]{8}\.js$/;
@@ -65,8 +68,8 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   const { pathname, protocol } = new URL(url);
   const { pathname: scopePathname } = new URL(scope);
 
-  if (pathname.endsWith(`/${WALLPAPER_SNAPSHOT_PATH}`)) {
-    e.respondWith(respondWithWallpaperSnapshot(e.request));
+  if (SNAPSHOT_PATHS.some((path) => pathname.endsWith(`/${path}`))) {
+    e.respondWith(respondWithSnapshot(e.request));
     return true;
   }
 
@@ -111,8 +114,8 @@ function withWidgetWorkerPolicy(response: Response) {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-async function respondWithWallpaperSnapshot(request: Request) {
-  const cached = await self.caches.match(request, { cacheName: WALLPAPER_SNAPSHOT_CACHE_NAME });
+async function respondWithSnapshot(request: Request) {
+  const cached = await self.caches.match(request, { cacheName: SNAPSHOT_CACHE_NAME });
   return cached || fetch(request);
 }
 

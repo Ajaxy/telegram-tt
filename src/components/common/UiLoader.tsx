@@ -1,11 +1,16 @@
+import { onFullyIdle } from '../../lib/teact/heavyAnimation';
+import { useEffect, useState } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
+import type { IThemeSettings, ThemeKey } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { FOLDERS_POSITION_LEFT } from '../../config';
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
-import { selectAreFoldersPresent, selectIsRightColumnShown, selectTabState } from '../../global/selectors';
+import {
+  selectAreFoldersPresent, selectIsRightColumnShown, selectTabState, selectTheme, selectThemeValues,
+} from '../../global/selectors';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import { preloadImage } from '../../util/files';
@@ -14,6 +19,7 @@ import { localizationReadyPromise } from '../../util/localization';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import { pause } from '../../util/schedulers';
+import { saveSkeletonSnapshot } from '../../util/skeletonSnapshot';
 
 import useEffectOnce from '../../hooks/useEffectOnce';
 import useFlag from '../../hooks/useFlag';
@@ -50,10 +56,14 @@ type StateProps = Pick<TabState, 'uiReadyState' | 'shouldSkipHistoryAnimations'>
   isRightColumnShown?: boolean;
   leftColumnWidth?: number;
   isFoldersSidebarShown?: boolean;
+  theme: ThemeKey;
+  themeSettings?: IThemeSettings;
+  shouldUseSystemTheme?: boolean;
 };
 
 const MAX_PRELOAD_DELAY = 700;
 const SECOND_STATE_DELAY = 1000;
+const SKELETON_SAVE_DELAY = 1000;
 const AVATARS_TO_PRELOAD = 10;
 
 function loadRequiredBundle(page?: UiLoaderPage) {
@@ -122,14 +132,27 @@ const UiLoader = ({
   isFoldersSidebarShown,
   uiReadyState,
   hasCachedChats,
+  theme,
+  themeSettings,
+  shouldUseSystemTheme,
 }: OwnProps & StateProps) => {
   const { setIsUiReady } = getActions();
 
   const [isReady, markReady] = useFlag();
+  // An account switch reveals the page through a view transition, which already cross-fades it
+  const [isRevealedByTransition] = useState(() => Boolean(document.activeViewTransition));
   const isReloading = isReady && uiReadyState === 0;
   const {
     shouldRender: shouldRenderMask, transitionClassNames,
-  } = useShowTransitionDeprecated(!isReady || isReloading, undefined, true, 'fast', page === 'main' && hasCachedChats);
+  } = useShowTransitionDeprecated(
+    !isReady || isReloading,
+    undefined,
+    true,
+    // The islands skeleton dissolves into the loaded ones slowly enough to be seen
+    page === 'main' && !isReloading ? 'slow' : 'fast',
+    isRevealedByTransition && page === 'main' && hasCachedChats,
+  );
+  const canSaveSkeleton = page === 'main' && uiReadyState === 2;
 
   useEffectOnce(() => {
     let timeout: number | undefined;
@@ -170,6 +193,31 @@ const UiLoader = ({
     };
   });
 
+  // Remeasures the islands for the next page load whenever their layout, width or colors may change
+  useEffect(() => {
+    if (!canSaveSkeleton) return undefined;
+
+    let timeout: number | undefined;
+    const scheduleSave = () => {
+      window.clearTimeout(timeout);
+      // Waits out layout and theme transitions
+      timeout = window.setTimeout(() => onFullyIdle(() => {
+        saveSkeletonSnapshot(shouldUseSystemTheme ? theme : undefined);
+      }), SKELETON_SAVE_DELAY);
+    };
+
+    scheduleSave();
+    window.addEventListener('resize', scheduleSave);
+
+    return () => {
+      window.clearTimeout(timeout);
+      window.removeEventListener('resize', scheduleSave);
+    };
+  }, [
+    canSaveSkeleton, theme, themeSettings, shouldUseSystemTheme,
+    leftColumnWidth, isFoldersSidebarShown, isRightColumnShown,
+  ]);
+
   return (
     <>
       {children}
@@ -201,7 +249,8 @@ export default withGlobal<OwnProps>(
   (global, { isMobile }): Complete<StateProps> => {
     const tabState = selectTabState(global);
 
-    const { foldersPosition } = selectSharedSettings(global);
+    const { foldersPosition, shouldUseSystemTheme } = selectSharedSettings(global);
+    const theme = selectTheme(global);
 
     return {
       hasCachedChats: Boolean(global.chats.listIds.active),
@@ -210,6 +259,9 @@ export default withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       leftColumnWidth: global.leftColumnWidth,
       isFoldersSidebarShown: foldersPosition === FOLDERS_POSITION_LEFT && !isMobile && selectAreFoldersPresent(global),
+      theme,
+      themeSettings: selectThemeValues(global, theme),
+      shouldUseSystemTheme,
     };
   },
 )(UiLoader);

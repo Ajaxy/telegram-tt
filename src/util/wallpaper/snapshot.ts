@@ -1,12 +1,11 @@
 // The main wallpaper as a stylesheet: its layers composed by CSS the way the canvases and
-// `_patternBackground.module.scss` compose them, so it fits any window size. `index.html` links it
-// and the service worker serves it from the cache, so a page load paints it before any script runs.
-// Like other wallpaper caches, it is not kept while a passcode is set.
+// `_patternBackground.module.scss` compose them, so it fits any window size. It is saved as a CSS snapshot,
+// which a page load paints before any script runs.
 import type { ThemeKey } from '../../types';
 import type { WallpaperRenderModel } from './index';
 
-import { WALLPAPER_SNAPSHOT_CACHE_NAME, WALLPAPER_SNAPSHOT_PATH } from '../../config';
-import { loadPasscodeMeta, requestPasscodeStateLock } from '../passcode';
+import { WALLPAPER_SNAPSHOT_PATH } from '../../config';
+import { clearCssSnapshot, saveCssSnapshot } from '../cssSnapshot';
 import { renderStaticGradient } from './gradient';
 import { MIN_PATTERN_VIEW_HEIGHT } from './index';
 
@@ -23,59 +22,36 @@ const HOST_SELECTORS = ['html.initial body', '.wallpaper-snapshot'];
 const IMAGE_TYPE = 'image/webp';
 // Encodes lossless: lossy alpha breaks doodle edges into blocks, which soft-light blending makes visible
 const IMAGE_QUALITY = 1;
-const KEY_HEADER = 'X-Snapshot-Key';
 
-export async function saveWallpaperSnapshot(
+export function saveWallpaperSnapshot(
   model: WallpaperRenderModel, { aspectRatio, patternTile, systemTheme }: SnapshotLayers,
 ) {
-  if (!self.caches || await loadPasscodeMeta()) return;
-
   // Images load asynchronously anyway, and a stale snapshot would show before them
   if (model.isImage || !model.baseColor || (model.isPattern && !patternTile)) {
-    await clearWallpaperSnapshot();
-    return;
+    return clearWallpaperSnapshot();
   }
 
   // The gradient direction depends on the aspect ratio only when rotated
   const key = JSON.stringify([
     model, model.backgroundRotation ? aspectRatio : undefined, patternTile?.width, patternTile?.height, systemTheme,
   ]);
-  // Read on each save, as logout and passcode purges delete the cache from elsewhere
-  if (await loadSavedKey() === key) return;
 
-  let gradientUrl: string | undefined;
-  if (model.colors.length >= 2) {
-    const gradient = document.createElement('canvas');
-    renderStaticGradient(gradient, model.colors, model.backgroundRotation, aspectRatio);
-    gradientUrl = await encodeCanvas(gradient);
-  }
-  const patternUrl = patternTile && await encodeCanvas(patternTile);
+  return saveCssSnapshot(WALLPAPER_SNAPSHOT_PATH, key, async () => {
+    let gradientUrl: string | undefined;
+    if (model.colors.length >= 2) {
+      const gradient = document.createElement('canvas');
+      renderStaticGradient(gradient, model.colors, model.backgroundRotation, aspectRatio);
+      gradientUrl = await encodeCanvas(gradient);
+    }
+    const patternUrl = patternTile && await encodeCanvas(patternTile);
 
-  const css = buildSnapshotCss(model, gradientUrl, patternUrl);
-  const response = new Response(systemTheme ? `@media (prefers-color-scheme: ${systemTheme}) {\n${css}\n}` : css, {
-    headers: { 'Content-Type': 'text/css', [KEY_HEADER]: key },
-  });
-
-  await requestPasscodeStateLock(async () => {
-    if (await loadPasscodeMeta()) return;
-
-    const cache = await self.caches.open(WALLPAPER_SNAPSHOT_CACHE_NAME);
-    await cache.put(buildSnapshotUrl(), response);
+    const css = buildSnapshotCss(model, gradientUrl, patternUrl);
+    return systemTheme ? `@media (prefers-color-scheme: ${systemTheme}) {\n${css}\n}` : css;
   });
 }
 
 export function clearWallpaperSnapshot() {
-  return self.caches?.delete(WALLPAPER_SNAPSHOT_CACHE_NAME);
-}
-
-async function loadSavedKey() {
-  const response = await self.caches.match(buildSnapshotUrl(), { cacheName: WALLPAPER_SNAPSHOT_CACHE_NAME });
-  return response?.headers.get(KEY_HEADER) || undefined;
-}
-
-// The URL `index.html` requests, relative to the app root
-function buildSnapshotUrl() {
-  return new URL(WALLPAPER_SNAPSHOT_PATH, document.baseURI).href;
+  return clearCssSnapshot(WALLPAPER_SNAPSHOT_PATH);
 }
 
 function buildSnapshotCss(model: WallpaperRenderModel, gradientUrl?: string, patternUrl?: string) {

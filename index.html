@@ -44,7 +44,10 @@
   <link rel="stylesheet" href="./view-transitions.css">
   <!-- The last main wallpaper, served by the service worker, so the first paint already has it -->
   <link rel="stylesheet" href="./wallpaper-snapshot.css">
+  <!-- The last islands layout, served the same way, for the elements at the start of `body` -->
+  <link rel="stylesheet" href="./skeleton-snapshot.css">
   <script vite-ignore src="./redirect.js"></script>
+  <script vite-ignore src="./initialChat.js"></script>
   <style>
     @layer reset, variables, ui, components;
     @layer ui {
@@ -54,6 +57,9 @@
 </head>
 
 <body id="root">
+  <div class="initial-folders-sidebar" aria-hidden="true"></div>
+  <div class="initial-left-column" aria-hidden="true"></div>
+  <div class="initial-right-column" aria-hidden="true"></div>
   <noscript>
     <video src="./nojs.mp4" class="nojs-video" muted loop autoplay playsinline disablePictureInPicture></video>
     <h1>Telegram Web</h1>
