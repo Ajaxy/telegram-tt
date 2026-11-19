@@ -12,6 +12,8 @@ import LimitedMap from './primitives/LimitedMap';
 
 // The whole audio is decoded into memory, so longer voices keep the empty waveform
 export const MAX_GENERATED_WAVEFORM_DURATION = 10 * 60;
+// Duration is sender-declared, so the file size is capped too
+export const MAX_GENERATED_WAVEFORM_SIZE = 4 * 1024 * 1024;
 // Peaks survive downsampling well, and decoding at a low rate keeps the buffer small
 const DECODE_SAMPLE_RATE = 8000;
 const CACHE_LIMIT = 500;

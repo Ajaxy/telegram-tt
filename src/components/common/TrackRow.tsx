@@ -20,7 +20,7 @@ import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDuration } from '../../util/dates/duration';
 import { formatCalendarDate, formatCompactTimestamp, secondsToDate } from '../../util/localization/dateFormat';
 import {
-  generateVoiceWaveform, getGeneratedVoiceWaveform, MAX_GENERATED_WAVEFORM_DURATION,
+  generateVoiceWaveform, getGeneratedVoiceWaveform, MAX_GENERATED_WAVEFORM_DURATION, MAX_GENERATED_WAVEFORM_SIZE,
   releaseVoiceWaveformRequest, retainVoiceWaveformRequest,
 } from '../../util/voiceWaveform';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
@@ -773,7 +773,7 @@ function useGeneratedVoiceWaveform(
 ) {
   const voice = (
     isEnabled && media?.mediaType === 'voice' && !media.waveform?.length
-    && media.duration <= MAX_GENERATED_WAVEFORM_DURATION
+    && media.duration <= MAX_GENERATED_WAVEFORM_DURATION && media.size <= MAX_GENERATED_WAVEFORM_SIZE
   ) ? media : undefined;
   const generatedWaveform = voice && getGeneratedVoiceWaveform(voice);
   const forceUpdate = useForceUpdate();
