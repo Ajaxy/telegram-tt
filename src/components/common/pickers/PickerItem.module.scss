@@ -111,6 +111,12 @@
   margin-inline-end: 1.1875rem;
 }
 
+.root:not(.withAvatar) > .startInput {
+  width: 3rem;
+  margin-inline-end: 0;
+  padding-inline: 0.625rem 0;
+}
+
 .endInput {
   grid-column: 4;
   grid-row: 1 / 3;

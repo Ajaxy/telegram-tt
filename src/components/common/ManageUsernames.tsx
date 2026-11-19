@@ -31,7 +31,7 @@ type OwnProps = {
   onEditUsername: (username: string) => void;
 };
 
-const USERNAME_HEIGHT_PX = 56;
+const USERNAME_HEIGHT_PX = 64;
 
 const ManageUsernames = ({
   chatId,

@@ -250,11 +250,19 @@ const ListItem = ({
           <RippleEffect />
         )}
         {leftElement}
-        {icon && (iconBg ? (
-          <IconBackdrop className={buildClassName('ListItem-main-icon', iconClassName)} color={iconBg} icon={icon} />
-        ) : (
-          <Icon name={icon} className={buildClassName('ListItem-main-icon', iconClassName)} />
-        ))}
+        {icon && (
+          <span className="ListItem-main-icon-slot">
+            {iconBg ? (
+              <IconBackdrop
+                className={buildClassName('ListItem-main-icon', iconClassName)}
+                color={iconBg}
+                icon={icon}
+              />
+            ) : (
+              <Icon name={icon} className={buildClassName('ListItem-main-icon', iconClassName)} />
+            )}
+          </span>
+        )}
         {multiline && (<div className="multiline-item">{children}</div>)}
         {!multiline && children}
         {secondaryIcon && (

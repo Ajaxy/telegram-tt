@@ -8,6 +8,11 @@
 
     .multiline-item {
       align-self: center;
+      padding-block: 0.4375rem 0.5625rem;
+
+      .subtitle {
+        margin-top: 0.25rem;
+      }
     }
 
     .title {

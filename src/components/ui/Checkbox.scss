@@ -11,7 +11,7 @@
 
   min-height: 3rem;
   margin-bottom: 0;
-  padding-inline-start: 4rem;
+  padding-inline-start: 3.25rem;
 
   text-align: left;
 
@@ -168,7 +168,7 @@
     &::after {
       position: absolute;
       top: 50%;
-      left: 1.125rem; // 1 + ((1.5 - 1.25) / 2)
+      left: 0.875rem; // 0.75 + ((1.5 - 1.25) / 2)
       transform: translateY(-50%);
     }
 
@@ -271,7 +271,7 @@
       .user-avatar,
       &::before,
       &::after {
-        right: 1rem;
+        right: 0.875rem;
         left: auto;
       }
     }
@@ -284,7 +284,7 @@
     justify-content: space-between;
 
     margin-block: 0;
-    padding: 0 0 0 4rem;
+    padding: 0 0 0 3.25rem;
 
     &:hover,
     &:focus-visible {

@@ -115,7 +115,7 @@ const SettingsStickers = ({
           >
             <ReactionStaticEmoji
               reaction={defaultReaction}
-              className="current-default-reaction"
+              className="ListItem-main-icon"
               size={DEFAULT_REACTION_SIZE}
               availableReactions={availableReactions}
             />

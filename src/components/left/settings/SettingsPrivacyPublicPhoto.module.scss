@@ -1,4 +1,8 @@
+:global(.ListItem-button):has(> .fallback-photo) {
+  padding-inline-start: 0.75rem;
+}
+
 .fallback-photo {
   transform: scale(1.25);
-  margin-right: 2rem;
+  margin-inline-end: 1rem;
 }

@@ -61,7 +61,7 @@ type SortState = {
   draggedIndex?: number;
 };
 
-const FOLDER_HEIGHT_PX = 56;
+const FOLDER_HEIGHT_PX = 64;
 const runThrottledForLoadRecommended = throttle((cb) => cb(), 60000, true);
 
 const SettingsFoldersMain = ({

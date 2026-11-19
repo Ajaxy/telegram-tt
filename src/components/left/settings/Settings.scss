@@ -298,10 +298,6 @@
     }
   }
 
-  > .Checkbox, > .Radio {
-    padding-inline-start: 4.1875rem;
-  }
-
   &__current-value {
     margin-inline-start: auto;
     padding-inline-start: 0.5rem;
@@ -398,6 +394,10 @@
 }
 
 .settings-quick-reaction {
+  .Radio.with-icon {
+    padding-inline-start: 0.75rem;
+  }
+
   .Radio-main .label {
     display: flex;
     align-items: center;
@@ -412,17 +412,11 @@
 .settings-dropdown-section {
   .DropdownList {
     position: relative;
-    padding: 0 0 0 3rem;
+    padding: 0 0 0 2.375rem;
 
     &--open {
       transform: translate(0, 0);
     }
-  }
-}
-
-.SettingsDefaultReaction {
-  .current-default-reaction {
-    margin-inline-end: 1.75rem;
   }
 }
 

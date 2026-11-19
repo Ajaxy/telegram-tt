@@ -7,14 +7,18 @@
       content: "";
 
       position: absolute;
-      right: 0;
+      inset-inline: calc(4.5rem + var(--divider-shift, 0rem)) 0;
       bottom: 0;
-      left: 4.5rem;
 
       height: 0.0625rem;
 
       /* stylelint-disable-next-line plugin/whole-pixel */
       box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers);
+    }
+
+    // Rows with an icon start their text 1rem closer to the edge, and the divider follows the text
+    &:has(> .ListItem-button > .ListItem-main-icon-slot, > .ListItem-button > .ListItem-main-icon) {
+      --divider-shift: -1rem;
     }
 
     &.selected::after,
@@ -27,9 +31,8 @@
       content: "";
 
       position: absolute;
+      inset-inline: calc(4.5rem + var(--divider-shift, 0rem)) 0;
       top: -0.0625rem;
-      right: 0;
-      left: 4.5rem;
 
       height: 0.0625rem;
       /* stylelint-disable-next-line plugin/whole-pixel */
@@ -41,19 +44,19 @@
     }
 
     &.small-icon::after {
-      left: 3.875rem;
+      inset-inline-start: calc(3.875rem + var(--divider-shift, 0rem));
     }
 
     &.smaller-icon::after {
-      left: 3.25rem;
+      inset-inline-start: calc(3.25rem + var(--divider-shift, 0rem));
     }
 
     &.narrow::after {
-      left: 4.1875rem;
+      inset-inline-start: calc(4.1875rem + var(--divider-shift, 0rem));
     }
 
     &.no-icon::after {
-      left: 1rem;
+      inset-inline-start: 1rem;
     }
   }
 
@@ -71,7 +74,7 @@
     display: flex;
     align-items: center;
 
-    min-height: 3rem;
+    min-height: 3.25rem;
     padding: 0 1rem;
     border: none !important;
     border-radius: var(--border-radius-list-item);
@@ -91,8 +94,23 @@
       border-radius: 0;
     }
 
-    > .ListItem-main-icon {
-      margin-inline-end: 1.75rem;
+    &:where(:has(> .ListItem-main-icon-slot, > .ListItem-main-icon)) {
+      padding-inline-start: 0.75rem;
+    }
+
+    // Up to the height of a two-line row the icon is centered, in a taller row it stays at the top
+    > .ListItem-main-icon-slot {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      align-self: stretch;
+
+      max-height: 4rem;
+    }
+
+    > .ListItem-main-icon,
+    > :where(.ListItem-main-icon-slot) > .ListItem-main-icon {
+      margin-inline-end: 1rem;
       font-size: 1.5rem;
     }
 
@@ -132,7 +150,8 @@
   }
 
   &.multiline {
-    .ListItem-button > .ListItem-main-icon {
+    .ListItem-button > .ListItem-main-icon,
+    .ListItem-button > :where(.ListItem-main-icon-slot) > .ListItem-main-icon {
       position: relative;
     }
   }
@@ -410,7 +429,7 @@
   .multiline-item {
     overflow: hidden;
     flex-grow: 1;
-    padding: 0.4375rem 0 0.5625rem 0;
+    padding: 0.75rem 0 0.875rem 0;
     white-space: initial;
 
     .word-break {
@@ -434,7 +453,7 @@
     }
 
     .subtitle {
-      margin-top: 0.25rem;
+      margin-top: 0.125rem;
       font-size: 0.875rem;
       line-height: 1rem;
       color: var(--color-text-secondary);

@@ -16,8 +16,12 @@
       padding-inline: 1.5rem;
     }
 
+    :global(.ListItem-button > .ListItem-main-icon-slot) {
+      align-items: flex-start;
+    }
+
     :global(.ListItem-main-icon) {
-      margin-top: 0.875rem;
+      margin-top: 1.1875rem;
       margin-right: 0.875rem;
       font-size: 1.5rem;
       color: var(--accent-color);

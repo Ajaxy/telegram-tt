@@ -16,9 +16,13 @@
     @include mixins.adapt-padding-to-scrollbar(1rem);
   }
 
+  .ListItem-button:has(> .personal-photo) {
+    padding-inline-start: 0.75rem;
+  }
+
   .personal-photo {
     transform: scale(1.25);
-    margin-right: 2rem;
+    margin-inline-end: 1rem;
   }
 
   .section-icon {
@@ -49,7 +53,11 @@
 
     .ReactionStaticEmoji {
       width: 1.5rem;
-      margin-right: 1.6875rem;
+      margin-inline-end: 1rem;
+    }
+
+    .Checkbox.withIcon {
+      padding-inline-start: 0.75rem;
     }
 
     &.with-checkbox {
@@ -122,7 +130,7 @@
 
   .create-item {
     .icon-group {
-      margin-inline-start: 0.1875rem;
+      margin-inline-start: 0.4375rem;
       margin-inline-end: 1.1875rem;
     }
   }
@@ -159,9 +167,13 @@
   .create-item {
     margin-bottom: 0.5rem;
     .icon-add {
-      margin-inline-start: 0.1875rem;
+      margin-inline-start: 0.4375rem;
       margin-inline-end: 1.1875rem;
     }
+  }
+
+  .ListItem.destructive .ListItem-main-icon {
+    margin-inline: 0.4375rem 1.1875rem;
   }
 
   .ListItem-button {
@@ -263,7 +275,7 @@
   transform: translateY(calc(-100%));
 
   width: 100%;
-  padding: 0 0.5rem 0 3.5rem;
+  padding: 0 0.5rem 0 2.875rem;
 
   background: var(--color-background);
 
