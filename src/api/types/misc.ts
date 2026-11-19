@@ -238,6 +238,7 @@ export type ApiDialogError = {
 
 export type ApiDialogMessage = {
   type: 'message';
+  title?: string;
   text: ApiFormattedText;
 };
 

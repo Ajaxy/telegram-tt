@@ -35,6 +35,7 @@ import {
   resolveEphemeralCommand,
 } from '../../helpers';
 import { isButtonUnsupported } from '../../helpers/buttons';
+import { getPeerFullTitle } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -163,6 +164,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       void answerCallbackButton(global, {
         chat,
         messageId: message.ephemeralId || message.id,
+        botId: message.viaBotId || message.ephemeralBotId || message.senderId || chatId,
         threadId,
         data: button.action.data,
         isEphemeral: message.isEphemeral,
@@ -236,6 +238,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       void answerCallbackButton(global, {
         chat,
         messageId,
+        botId: message.viaBotId || message.ephemeralBotId || message.senderId || chatId,
         threadId,
         isGame: true,
         isEphemeral: message.isEphemeral,
@@ -1615,10 +1618,11 @@ async function sendBotCommand(
 async function answerCallbackButton<T extends GlobalState>(
   global: T,
   {
-    chat, messageId, threadId, data, isGame, isEphemeral,
+    chat, messageId, botId, threadId, data, isGame, isEphemeral,
   }: {
     chat: ApiChat;
     messageId: number;
+    botId?: string;
     threadId?: ThreadId;
     data?: string;
     isGame?: true;
@@ -1649,9 +1653,14 @@ async function answerCallbackButton<T extends GlobalState>(
   }
   const { message, alert: isError, url } = result;
 
-  if (isError) {
+  if (isError && message) {
+    // Attribute the alert to the bot so it can't pose as a client error
+    global = getGlobal();
+    const lang = getTranslationFn();
+    const bot = botId ? selectPeer(global, botId) : undefined;
+    const title = (bot && getPeerFullTitle(lang, bot)) || lang('Bot');
     showDialog({
-      data: message ? { type: 'error', message } : { type: 'localized', text: { key: 'ErrorUnspecified' } },
+      data: { type: 'message', title, text: { text: message } },
       tabId,
     });
   } else if (message) {

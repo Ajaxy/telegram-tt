@@ -106,10 +106,10 @@ const Dialogs = ({ dialogs, currentMessageList }: StateProps) => {
     );
   };
 
-  const renderFormattedTextDialog = (dialog: ApiDialogMessage, title?: string) => {
+  const renderFormattedTextDialog = (dialog: ApiDialogMessage) => {
     const renderedText = renderTextWithEntities(dialog.text);
 
-    return renderTextDialog(renderedText, title);
+    return renderTextDialog(renderedText, dialog.title);
   };
 
   const renderLocalizedDialog = (dialog: ApiDialogLocalizedMessage) => {
