@@ -44,37 +44,45 @@
   <link rel="stylesheet" href="./view-transitions.css">
   <!-- The last main wallpaper, served by the service worker, so the first paint already has it -->
   <link rel="stylesheet" href="./wallpaper-snapshot.css">
+  <!-- The last islands layout, served the same way, for the elements at the start of `body` -->
+  <link rel="stylesheet" href="./skeleton-snapshot.css">
   <script  src="./redirect.js"></script>
+  <script  src="./initialChat.js"></script>
   <style>@layer reset,variables;@layer ui{@layer tablist,spinner,button,input,layout;}@layer components;</style>
-  <script type="module" crossorigin src="./assets/index-4r5-hDP6.js"></script>
+  <script type="module" crossorigin src="./assets/index-DorksKzN.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-hePW80VL.js">
   <link rel="modulepreload" crossorigin href="./assets/core-wqAUrhUS.js">
-  <link rel="modulepreload" crossorigin href="./assets/fasterdom-BDX4I7h3.js">
-  <link rel="modulepreload" crossorigin href="./assets/teact-CquobPY5.js">
-  <link rel="modulepreload" crossorigin href="./assets/colors-BYwPMJZr.js">
+  <link rel="modulepreload" crossorigin href="./assets/teact-2njdWJTE.js">
+  <link rel="modulepreload" crossorigin href="./assets/colors-DFlv_YSz.js">
   <link rel="modulepreload" crossorigin href="./assets/buffer-CJ4aTzVB.js">
   <link rel="modulepreload" crossorigin href="./assets/base64-NShRejUv.js">
-  <link rel="modulepreload" crossorigin href="./assets/useBackgroundMode-Dq1V3FiV.js">
+  <link rel="modulepreload" crossorigin href="./assets/useBackgroundMode-D6OxcJPZ.js">
   <link rel="modulepreload" crossorigin href="./assets/preload-helper-CRzLMJPS.js">
   <link rel="modulepreload" crossorigin href="./assets/math-BFWfKrQs.js">
-  <link rel="modulepreload" crossorigin href="./assets/InputText-Tenhrs74.js">
-  <link rel="modulepreload" crossorigin href="./assets/animation-D8_k45iZ.js">
-  <link rel="modulepreload" crossorigin href="./assets/Transition-DdJXGcSw.js">
-  <link rel="modulepreload" crossorigin href="./assets/captureEscKeyListener-DwGiPGpb.js">
+  <link rel="modulepreload" crossorigin href="./assets/usePriorityPlaybackCheck-BQ6D5oiz.js">
+  <link rel="modulepreload" crossorigin href="./assets/InputText-BNmmusFw.js">
+  <link rel="modulepreload" crossorigin href="./assets/device-DtUaxcTW.js">
+  <link rel="modulepreload" crossorigin href="./assets/gpuCanvas-C6qp7skC.js">
+  <link rel="modulepreload" crossorigin href="./assets/animation-Dfb4_KSt.js">
+  <link rel="modulepreload" crossorigin href="./assets/Transition-DD5iNpFO.js">
+  <link rel="modulepreload" crossorigin href="./assets/registry-D_TDb4Xy.js">
+  <link rel="modulepreload" crossorigin href="./assets/captureEscKeyListener-BOoDIXp2.js">
   <link rel="modulepreload" crossorigin href="./assets/cycleRestrict-Bb2qNUJe.js">
-  <link rel="modulepreload" crossorigin href="./assets/launchMediaWorkers-DrLa29St.js">
-  <link rel="modulepreload" crossorigin href="./assets/useMultiaccountInfo-DytrWA-B.js">
+  <link rel="modulepreload" crossorigin href="./assets/useMultiaccountInfo-wqXT40ms.js">
   <link rel="modulepreload" crossorigin href="./assets/codeLanguages-CQGpvknJ.js">
-  <link rel="modulepreload" crossorigin href="./assets/useModuleLoader-Dlt1zPvX.js">
-  <link rel="modulepreload" crossorigin href="./assets/Checkbox-D-5dQxVn.js">
-  <link rel="modulepreload" crossorigin href="./assets/messageSummary-DvMXXg76.js">
+  <link rel="modulepreload" crossorigin href="./assets/useModuleLoader-ClK6Yp1R.js">
+  <link rel="modulepreload" crossorigin href="./assets/Checkbox-qOvP2esB.js">
+  <link rel="modulepreload" crossorigin href="./assets/messageSummary-DgUMKww1.js">
   <link rel="stylesheet" crossorigin href="./assets/InputText-CmlujDKi.css">
-  <link rel="stylesheet" crossorigin href="./assets/Transition-Cf1E0Pnr.css">
-  <link rel="stylesheet" crossorigin href="./assets/Checkbox-CL2oP3aV.css">
-  <link rel="stylesheet" crossorigin href="./assets/index-CX41PYC7.css">
+  <link rel="stylesheet" crossorigin href="./assets/Transition-Cj4B4ITA.css">
+  <link rel="stylesheet" crossorigin href="./assets/Checkbox-BHMhHuvQ.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-BDwqW33i.css">
 </head>
 
 <body id="root">
+  <div class="initial-folders-sidebar" aria-hidden="true"></div>
+  <div class="initial-left-column" aria-hidden="true"></div>
+  <div class="initial-right-column" aria-hidden="true"></div>
   <noscript>
     <video src="./nojs.mp4" class="nojs-video" muted loop autoplay playsinline disablePictureInPicture></video>
     <h1>Telegram Web</h1>

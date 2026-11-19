@@ -1,0 +1,2 @@
+import{b as e,cr as t}from"./teact-2njdWJTE.js";import{i as n}from"./useBackgroundMode-D6OxcJPZ.js";var r=t(),i=t(),a=0,o=(t,o,s=!1)=>{let c=n(t),l=n(o);e(()=>{if(!s)return a&&c(),r.addCallback(c),i.addCallback(l),()=>{i.removeCallback(l),r.removeCallback(c)}},[s,c,l])};function s(){return a>0}function c(){a++,a===1&&r.runCallbacks();let e=!1;function t(){e||(e=!0,a--,a||i.runCallbacks())}return t}export{s as n,o as r,c as t};
+//# sourceMappingURL=usePriorityPlaybackCheck-BQ6D5oiz.js.map

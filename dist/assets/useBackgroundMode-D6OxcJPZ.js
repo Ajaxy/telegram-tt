@@ -1,0 +1,2 @@
+import{C as e,H as t,b as n,v as r}from"./teact-2njdWJTE.js";function i(t){let n=e(t);return n.current=t,n}function a(e){let t=i(e);return r((...e)=>t.current?.(...e),[])}var[o,s]=t(!document.hasFocus()),c=o;function l(){s(!0)}function u(){s(!1)}window.addEventListener(`blur`,l),window.addEventListener(`focus`,u);function d(e,t,r=!1){let i=a(e),o=a(t);n(()=>{if(!r)return c()&&i(),c.subscribe(()=>{c()?i():o()})},[r,i,o])}function f(){return c()}export{i as a,a as i,f as n,d as r,c as t};
+//# sourceMappingURL=useBackgroundMode-D6OxcJPZ.js.map

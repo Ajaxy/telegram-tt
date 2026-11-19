@@ -34,7 +34,7 @@ Paths are relative to this directory; `host/`, `renderer/`, `sandbox/` and `shar
   their maps.
 - The worker imports the sandbox bundle itself (`virtual:sandbox-bundle`, through `workerPlugin` in `vite.ts`), so
   `init` and `warm` do not carry it and the ~600 KB string stays out of the main thread's code.
-- The CSS sanitizer takes css-tree's parser, walker, generator and `List` from their entry points
+- The CSS sanitizer takes css-tree's parser, walker, generator, tokenizer and `List` from their entry points
   (`host/css-tree.ts`), which leaves out the lexer and its syntax data.
 - `quickjs/build.sh` takes the fork checkout as its argument, builds the browser module only into
   `quickjs/prebuilt/` (upstream `dist/`), and `--check` compares with `quickjs/prebuilt.sha256`.
@@ -77,6 +77,11 @@ Paths are relative to this directory; `host/`, `renderer/`, `sandbox/` and `shar
 - An SVG `<style>` goes to the renderer as an HTML `<style>`, whose sheet the paint limits and the touch-action
   widening watch.
 - `cursor` takes keywords only; `aria-live` and the live-region roles are dropped.
+- Sanitized CSS cannot merge tokens through an escape. css-tree writes escapes back raw, and a hex escape swallows the
+  white space after it, so `ur\6c/**/(…)` came out as `ur\6c (…)`, which a browser reads as `url(…)`. The generator
+  terminates a token that ends in an open hex escape, and output that does not tokenize back into the tokens written
+  is dropped. A value with an escaped identifier or hash, or an identifier right before a parenthesised block, is
+  dropped too; escapes in selectors stay.
 - The protocol does not take a native `addPath`, which the shim never sends and which can copy a path into itself.
 - `Path2D.addPath` of a path made from SVG data sends that data as `['pc', pid, 'addSvgPath', d]`, at most as long as
   a `pn`'s SVG data, and the renderer adds it before the path's own commands (with `sandbox/canvas.ts` and
