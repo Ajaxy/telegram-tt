@@ -66,8 +66,8 @@ export function extractCurrentThemeParams(element = document.documentElement): A
   };
 }
 
-export function validateHexColor(color: string) {
-  return /^#[0-9A-F]{6}$/i.test(color);
+export function validateHexColor(color: unknown): color is string {
+  return typeof color === 'string' && /^#[0-9A-F]{6}$/i.test(color);
 }
 
 export function getPropertyHexColor(style: CSSStyleDeclaration, property: string) {

@@ -733,7 +733,7 @@ const WebAppTab = ({
     if (eventType === 'web_app_set_header_color') {
       const validColor = getValidHexColor(eventData.color);
       const key = eventData.color_key;
-      const fallback = key ? themeParams[key] : undefined;
+      const fallback = key === 'bg_color' || key === 'secondary_bg_color' ? themeParams[key] : undefined;
       const color = validColor || fallback;
       if (color) setHeaderColorFromEvent(color);
     }
