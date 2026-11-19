@@ -3,6 +3,7 @@ import type { CancellableCallback } from '../../util/PostMessageConnector';
 import type { GpuCanvasFrame } from '../gpuCanvas/types';
 
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
+import { readStreamWithLimit } from '../../util/encoding/readStreamWithLimit';
 import simdWasmUrl from './tlottie.wasm?url';
 import noSimdWasmUrl from './tlottie-no-simd.wasm?url';
 
@@ -32,6 +33,8 @@ interface TLottieExports {
 const HIGH_PRIORITY_MAX_FPS = 60;
 const LOW_PRIORITY_MAX_FPS = 30;
 const RGBA_BYTES_PER_PIXEL = 4;
+// Same cap as Telegram iOS, macOS and tweb; guards against gzip bombs
+const MAX_DECOMPRESSED_SIZE = 8 * 1024 * 1024;
 // This module uses `i8x16.splat` and `i8x16.popcnt` to detect SIMD support
 const SIMD_TEST = new Uint8Array([
   0x00, 0x61, 0x73, 0x6D, 0x01, 0x00, 0x00, 0x00,
@@ -148,8 +151,7 @@ async function fetchAnimationData(tgsUrl: string) {
 
   // Prefer native gzip decompression over library. This use case has ~same speed
   const decompressionStream = response.body.pipeThrough(new DecompressionStream('gzip'));
-  const result = await new Response(decompressionStream).arrayBuffer();
-  return new Uint8Array(result);
+  return await readStreamWithLimit(decompressionStream, MAX_DECOMPRESSED_SIZE) || new Uint8Array(0);
 }
 
 function createInstance(animationData: Uint8Array, fitzModifier?: EmojiFitzModifier) {
