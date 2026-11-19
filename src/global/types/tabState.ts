@@ -496,8 +496,6 @@ export type TabState = {
 
   isAudioPlaylistModalOpen?: boolean;
 
-  webPagePreviewId?: string;
-
   loadingThread?: {
     loadingChatId: string;
     loadingMessageId: number;

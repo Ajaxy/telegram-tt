@@ -6,6 +6,7 @@ import { getActions, getGlobal } from '../../../../../global';
 
 import type { ApiBotCommand } from '../../../../../api/types';
 import type { RichEditorTooltipItem, RichEditorTooltipsConfig } from '../../types';
+import { MAIN_THREAD_ID } from '../../../../../api/types';
 
 import { getMainUsername } from '../../../../../global/helpers';
 import { replaceEditorRange } from '../../../../middle/composer/helpers/richEditorComposer';
@@ -47,6 +48,8 @@ export function buildCommandSuggestion(
         replaceEditorRange(currentEditor, range, { type: 'text', text: commandText });
         sendBotCommand({
           command: commandText,
+          chatId: context.chatId,
+          threadId: context.threadId ?? MAIN_THREAD_ID,
           botId: command.botId,
         });
       }

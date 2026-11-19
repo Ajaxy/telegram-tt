@@ -1,8 +1,8 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiBotCommand } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 
@@ -17,13 +17,15 @@ import './BotCommandMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  chatId: string;
+  threadId: ThreadId;
   botCommands: ApiBotCommand[];
   onClose: NoneToVoidFunction;
 };
 
-const BotCommandMenu: FC<OwnProps> = ({
-  isOpen, botCommands, onClose,
-}) => {
+const BotCommandMenu = ({
+  isOpen, chatId, threadId, botCommands, onClose,
+}: OwnProps) => {
   const { sendBotCommand } = getActions();
   const { isMobile } = useAppLayout();
 
@@ -32,6 +34,8 @@ const BotCommandMenu: FC<OwnProps> = ({
   const handleClick = useLastCallback((command: ApiBotCommand) => {
     sendBotCommand({
       command: `/${command.command}`,
+      chatId,
+      threadId,
       botId: command.botId,
     });
     onClose();

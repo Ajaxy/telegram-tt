@@ -156,7 +156,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       Object.values(global.byTabId).forEach((tabState) => {
         Object.entries(selectTabBrowserState(tabState).openedTabs).forEach(([tabKey, browserTab]) => {
           if (browserTab.type === 'webApp' && browserTab.webApp.queryId === update.queryId) {
-            actions.resetDraftReplyInfo({ tabId: tabState.id });
+            const { peerId, threadId } = browserTab.webApp;
+            if (peerId && threadId !== undefined) actions.resetDraftReplyInfo({ chatId: peerId, threadId });
             actions.closeBrowserTab({ key: tabKey, skipClosingConfirmation: true, tabId: tabState.id });
           }
         });

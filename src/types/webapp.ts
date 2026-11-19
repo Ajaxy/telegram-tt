@@ -1,4 +1,5 @@
 import type { ApiInputMessageReplyInfo } from '../api/types';
+import type { ThreadId } from './index';
 
 export type WebApp = {
   url: string;
@@ -7,6 +8,7 @@ export type WebApp = {
   appName?: string;
   buttonText: string;
   peerId?: string;
+  threadId?: ThreadId;
   queryId?: string;
   isSameOrigin?: true;
   isJoinChat?: boolean;

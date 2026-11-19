@@ -962,6 +962,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
           ...thread.localState,
           listedIds: thread.localState?.lastViewportIds,
           draft: thread.localState?.draft,
+          webPagePreviewId: undefined,
           typingStatusByPeerId: undefined,
         },
       };

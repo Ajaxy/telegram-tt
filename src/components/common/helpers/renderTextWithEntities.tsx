@@ -1,11 +1,16 @@
-import { getActions } from '../../../global';
+import { getActions, getGlobal } from '../../../global';
 
 import type { ApiMessageEntity } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { TextPart, ThreadId } from '../../../types';
 import type { TextFilter } from './renderText';
-import { ApiMessageEntityTypes } from '../../../api/types';
+import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../../api/types';
 
+import { isChatChannel } from '../../../global/helpers';
+import {
+  selectChat, selectChatFullInfo, selectChatMessage, selectIsChatWithBot,
+} from '../../../global/selectors';
+import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -437,9 +442,11 @@ function processEntity({
         </Blockquote>
       );
     case ApiMessageEntityTypes.BotCommand:
+      // No chat context (stories, gifts, etc.): nowhere safe to send it
+      if (!chatId) return renderNestedMessagePart();
       return (
         <a
-          onClick={handleBotCommandClick}
+          onClick={(e) => handleBotCommandClick(e, chatId, threadId, messageId)}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -697,8 +704,24 @@ function getHtmlLinkUrl(entityContent: string, entity: ApiMessageEntity) {
   return escapeHtmlAttribute(ensureProtocol(getLinkUrl(entityContent, entity)));
 }
 
-export function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
-  getActions().sendBotCommand({ command: e.currentTarget.innerText });
+export function handleBotCommandClick(
+  e: React.MouseEvent<HTMLAnchorElement>, chatId: string, threadId?: ThreadId, messageId?: number,
+) {
+  const global = getGlobal();
+  const chat = selectChat(global, chatId);
+  // Like official clients, only where a bot can read it
+  const hasBots = selectIsChatWithBot(global, chatId) || selectChatFullInfo(global, chatId)?.botIds?.length;
+  if (!chat || isChatChannel(chat) || !hasBots) return;
+
+  // Media viewer captions have no list thread, so take the message's own
+  const message = threadId === undefined && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
+  const { closeMediaViewer, sendBotCommand } = getActions();
+  closeMediaViewer();
+  sendBotCommand({
+    command: e.currentTarget.innerText,
+    chatId,
+    threadId: threadId ?? (message ? selectThreadIdFromMessage(global, message) : MAIN_THREAD_ID),
+  });
 }
 
 export function handleHashtagClick(hashtag?: string, username?: string) {

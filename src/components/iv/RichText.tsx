@@ -247,8 +247,13 @@ const RichText = ({
       );
     }
     case 'botCommand':
+      if (!chatId) return renderNestedText();
       return (
-        <a onClick={handleBotCommandClick} className="text-entity-link" dir="auto">
+        <a
+          onClick={(e) => handleBotCommandClick(e, chatId, threadId, messageId)}
+          className="text-entity-link"
+          dir="auto"
+        >
           {renderNestedText()}
         </a>
       );

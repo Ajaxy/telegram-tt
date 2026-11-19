@@ -54,15 +54,15 @@ export default function useLoadLinkPreview({
     const formattedText = formattedTextWithLinkRef.current;
 
     if (link) {
-      loadWebPagePreview({ text: formattedText! });
+      loadWebPagePreview({ chatId, threadId, text: formattedText! });
     } else {
-      clearWebPagePreview();
+      clearWebPagePreview({ chatId, threadId });
       toggleMessageWebPage({ chatId, threadId });
     }
   }, [getLink, chatId, threadId]);
 
   useSyncEffect(() => {
-    clearWebPagePreview();
+    clearWebPagePreview({ chatId, threadId });
     toggleMessageWebPage({ chatId, threadId });
   }, [chatId, clearWebPagePreview, threadId, toggleMessageWebPage]);
 }

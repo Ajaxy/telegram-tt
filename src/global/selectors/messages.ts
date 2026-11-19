@@ -512,6 +512,11 @@ export function selectWebPage<T extends GlobalState>(global: T, webPageId: strin
   return global.messages.webPageById[webPageId];
 }
 
+export function selectWebPagePreview<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
+  const webPageId = selectThreadLocalStateParam(global, chatId, threadId, 'webPagePreviewId');
+  return webPageId ? selectWebPage(global, webPageId) : undefined;
+}
+
 export function selectWebPageFromMessage<T extends GlobalState>(global: T, message: MediaContainer) {
   if (!message.content.webPage) return undefined;
   return selectWebPage(global, message.content.webPage.id);

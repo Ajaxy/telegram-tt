@@ -563,6 +563,8 @@ const HeaderMenuContainer = ({
       const handleClick = () => {
         sendBotCommand({
           command: `/${command}`,
+          chatId,
+          threadId,
           botId: botCommand.botId,
         });
         closeMenu();
@@ -597,7 +599,7 @@ const HeaderMenuContainer = ({
 
         onClick={() => {
           if (hasPrivacyCommand && !botPrivacyPolicyUrl) {
-            sendBotCommand({ command: '/privacy' });
+            sendBotCommand({ command: '/privacy', chatId, threadId });
           } else {
             openUrl({ url: botPrivacyPolicyUrl || lang('BotDefaultPrivacyPolicy') });
           }
@@ -609,7 +611,7 @@ const HeaderMenuContainer = ({
     );
 
     return [...commandButtons || [], privacyButton].filter(Boolean);
-  }, [botCommands, lang, botPrivacyPolicyUrl, isBot]);
+  }, [botCommands, lang, botPrivacyPolicyUrl, isBot, chatId, threadId]);
 
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;

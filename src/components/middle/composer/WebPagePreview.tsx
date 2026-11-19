@@ -16,7 +16,7 @@ import {
   getWebPagePhoto,
   getWebPageVideo,
 } from '../../../global/helpers';
-import { selectTabState, selectWebPage } from '../../../global/selectors';
+import { selectWebPagePreview } from '../../../global/selectors';
 import { selectNoWebPage } from '../../../global/selectors/threads';
 import buildClassName from '../../../util/buildClassName';
 
@@ -256,13 +256,12 @@ function getMediaTypeKey(webPage: ApiWebPageFull) {
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): Complete<StateProps> => {
-    const tabState = selectTabState(global);
     const noWebPage = selectNoWebPage(global, chatId, threadId);
     const {
       attachmentSettings,
     } = global;
 
-    const webPagePreview = tabState.webPagePreviewId ? selectWebPage(global, tabState.webPagePreviewId) : undefined;
+    const webPagePreview = selectWebPagePreview(global, chatId, threadId);
 
     return {
       webPagePreview: webPagePreview?.webpageType === 'empty' ? undefined : webPagePreview,

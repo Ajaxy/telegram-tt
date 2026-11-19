@@ -176,6 +176,7 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
 
   const {
     chatId,
+    threadId,
     currentUserId,
     theme,
     onClear,
@@ -219,9 +220,9 @@ const ComposerEmbeddedMessage = (props: OwnProps & StateProps) => {
       exitForwardMode();
     } else if (isShowingSuggestedPostRendering) {
       resetDraftSuggestedPostInfo();
-      resetDraftReplyInfo();
+      resetDraftReplyInfo({ chatId, threadId });
     } else if (frozenReplyInfo && !frozenShouldForceShowEditing) {
-      resetDraftReplyInfo();
+      resetDraftReplyInfo({ chatId, threadId });
     }
     onClear?.();
   });

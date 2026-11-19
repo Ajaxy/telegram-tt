@@ -124,7 +124,7 @@ import {
   selectTopicFromMessage,
   selectUser,
   selectUserFullInfo,
-  selectWebPage,
+  selectWebPagePreview,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import { selectSharedSettings } from '../../global/selectors/sharedState';
@@ -3322,6 +3322,8 @@ const Composer = ({
           {isInMessageList && botCommands && (
             <BotCommandMenu
               isOpen={isBotCommandMenuOpen}
+              chatId={chatId}
+              threadId={threadId}
               botCommands={botCommands}
               onClose={closeBotCommandMenu}
             />
@@ -3564,7 +3566,7 @@ export default memo(withGlobal<OwnProps>(
     const isAppConfigLoaded = global.isAppConfigLoaded;
     const insertingPeerIdMention = tabState.insertingPeerIdMention;
 
-    const webPagePreview = tabState.webPagePreviewId ? selectWebPage(global, tabState.webPagePreviewId) : undefined;
+    const webPagePreview = selectWebPagePreview(global, chatId, threadId);
 
     const canManageAutoDelete = type === 'messageList' && messageListType === 'thread' && threadId === MAIN_THREAD_ID
       && selectCanManageAutoDelete(global, chatId);

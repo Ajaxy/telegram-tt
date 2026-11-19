@@ -753,6 +753,7 @@ export interface ThreadLocalState {
   draft?: ApiDraft;
 
   noWebPage?: boolean;
+  webPagePreviewId?: string;
 
   typingStatusByPeerId?: Record<string, ApiTypingStatus>;
 

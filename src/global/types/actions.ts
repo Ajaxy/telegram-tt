@@ -345,13 +345,18 @@ export interface ActionPayloads {
 
   // misc
   loadWebPagePreview: {
+    chatId: string;
+    threadId: ThreadId;
     text: ApiFormattedText;
-  } & WithTabId;
+  };
   loadWebPage: {
     url: string;
     hash?: number;
   };
-  clearWebPagePreview: WithTabId | undefined;
+  clearWebPagePreview: {
+    chatId: string;
+    threadId: ThreadId;
+  };
   loadWallpapers: undefined;
   uploadWallpaper: File;
   loadChatThemes: undefined;
@@ -1187,7 +1192,10 @@ export interface ActionPayloads {
   scrollMessageListToBottom: WithTabId | undefined;
 
   updateDraftReplyInfo: (Partial<ApiInputMessageReplyInfo> | ApiInputEphemeralReplyInfo) & WithTabId;
-  resetDraftReplyInfo: WithTabId | undefined;
+  resetDraftReplyInfo: {
+    chatId: string;
+    threadId: ThreadId;
+  };
   updateDraftSuggestedPostInfo: Partial<ApiInputSuggestedPostInfo> & WithTabId;
   resetDraftSuggestedPostInfo: WithTabId | undefined;
   initDraftFromSuggestedMessage: {
@@ -2548,7 +2556,8 @@ export interface ActionPayloads {
   // Bots
   sendBotCommand: {
     command: string;
-    chatId?: string;
+    chatId: string;
+    threadId: ThreadId;
     botId?: string;
   } & WithTabId;
   loadTopPeers: {
@@ -2639,6 +2648,7 @@ export interface ActionPayloads {
     url?: string;
     botId: string;
     peerId: string;
+    threadId: ThreadId;
     theme?: ApiThemeParameters;
     isSilent?: boolean;
     buttonText: string;

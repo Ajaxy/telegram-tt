@@ -168,6 +168,7 @@ export interface ApiChatFullInfo {
   };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
+  botIds?: string[];
   enabledReactions?: ApiChatReactions;
   reactionsLimit?: number;
   sendAsId?: string;
