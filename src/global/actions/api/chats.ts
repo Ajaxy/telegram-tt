@@ -1775,7 +1775,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
     checkChatInvite,
     openStickerSet,
     openChatWithDraft,
-    joinVoiceChatByLink,
     openInvoice,
     checkChatlistInvite,
     openChatByUsername: openChatByUsernameAction,
@@ -1886,13 +1885,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
 
   const shouldTryOpenChat = (part1 && !part2) || Number.isInteger(Number(part2)) || isWebApp;
 
-  if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
-    joinVoiceChatByLink({
-      username: part1,
-      inviteHash: params.voicechat || params.livestream,
-      tabId,
-    });
-  } else if (part1.startsWith('$')) {
+  if (part1.startsWith('$')) {
     openInvoice({
       type: 'slug',
       slug: part1.substring(1),

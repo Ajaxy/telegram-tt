@@ -3033,7 +3033,7 @@ export interface ActionPayloads {
   } & WithTabId;
   joinVoiceChatByLink: {
     username: string;
-    inviteHash: string;
+    inviteHash?: string;
   } & WithTabId;
   closeJoinGroupCallModal: WithTabId | undefined;
   createGroupCallInviteLink: WithTabId | undefined;

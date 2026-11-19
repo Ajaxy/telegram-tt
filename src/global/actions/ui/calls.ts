@@ -8,6 +8,7 @@ import type {
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { isUserId } from '../../../util/entities/ids';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
 import safePlay from '../../../util/safePlay';
@@ -208,6 +209,9 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promis
     }, tabId });
     return;
   }
+
+  actions.openChat({ id: chat.id, tabId });
+  if (isUserId(chat.id)) return;
 
   global = getGlobal();
   const full = await loadFullChat(global, actions, chat);
