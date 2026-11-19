@@ -62,7 +62,7 @@ const TRANSITION_DURATION_FACTOR = 50;
 const COLLAPSED_RICH_PREVIEW_LINE_COUNT = 3;
 
 const SCROLLER_CLASS = 'input-scroller';
-const CONTENT_EDITABLE_SELECTOR = 'div[contenteditable]';
+const TEXT_FIELD_SELECTOR = 'input, textarea, select, div[contenteditable]';
 
 export type OwnProps = {
   ref?: ElementRef<HTMLDivElement>;
@@ -730,7 +730,7 @@ const MessageInput = ({
 
     function handleTab(e: KeyboardEvent) {
       const target = e.target as HTMLElement | undefined;
-      if (target?.closest?.(CONTENT_EDITABLE_SELECTOR)) {
+      if (target?.closest?.(TEXT_FIELD_SELECTOR)) {
         return false;
       }
 

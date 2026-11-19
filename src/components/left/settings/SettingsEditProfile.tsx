@@ -304,6 +304,13 @@ const SettingsEditProfile = ({
     });
   });
 
+  const handleNameKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.isComposing || !isSaveButtonShown || isLoading) return;
+
+    e.preventDefault();
+    handleProfileSave();
+  });
+
   const personalChannelPickerFooter = useMemo(() => {
     if (!personalChannelId) return undefined;
 
@@ -350,6 +357,7 @@ const SettingsEditProfile = ({
             <InputText
               value={firstName}
               onChange={handleFirstNameChange}
+              onKeyDown={handleNameKeyDown}
               label={lang('FirstName')}
               disabled={isLoading}
               error={error === ERROR_FIRST_NAME_MISSING ? lang(ERROR_FIRST_NAME_MISSING) : undefined}
@@ -357,6 +365,7 @@ const SettingsEditProfile = ({
             <InputText
               value={lastName}
               onChange={handleLastNameChange}
+              onKeyDown={handleNameKeyDown}
               label={lang('LastName')}
               disabled={isLoading}
             />

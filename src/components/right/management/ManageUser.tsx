@@ -22,6 +22,7 @@ import { DEFAULT_MAX_NOTE_LENGTH } from '../../../limits';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -221,6 +222,16 @@ const ManageUser = ({
     openBirthdaySetupModal({ suggestForUserId: userId });
   }, [openBirthdaySetupModal, userId]);
 
+  const handleNameKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.isComposing || !isProfileFieldsTouched
+      || progress === ManagementProgress.InProgress) {
+      return;
+    }
+
+    e.preventDefault();
+    handleProfileSave();
+  });
+
   if (!user) {
     return undefined;
   }
@@ -247,6 +258,7 @@ const ManageUser = ({
               id="user-first-name"
               label={lang('UserInfoFirstNamePlaceholder')}
               onChange={handleFirstNameChange}
+              onKeyDown={handleNameKeyDown}
               value={firstName}
               error={error === ERROR_FIRST_NAME_MISSING ? lang(ERROR_FIRST_NAME_MISSING) : undefined}
             />
@@ -255,6 +267,7 @@ const ManageUser = ({
               id="user-last-name"
               label={lang('UserInfoLastNamePlaceholder')}
               onChange={handleLastNameChange}
+              onKeyDown={handleNameKeyDown}
               value={lastName}
             />
             <TextArea
