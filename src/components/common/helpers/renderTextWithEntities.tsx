@@ -1,4 +1,3 @@
-import type { ElementRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessageEntity } from '../../../api/types';
@@ -42,8 +41,6 @@ export function renderTextWithEntities({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   withTranslucentThumbs,
-  sharedCanvasRef,
-  sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
   noCustomEmojiPlayback,
@@ -63,8 +60,6 @@ export function renderTextWithEntities({
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
@@ -166,8 +161,7 @@ export function renderTextWithEntities({
         observeIntersectionForPlaying,
         withTranslucentThumbs,
         emojiSize,
-        sharedCanvasRef,
-        sharedCanvasHqRef,
+        hasCanvasContent: type === ApiMessageEntityTypes.Blockquote && hasCanvasContent(nestedEntities),
         cacheBuster,
         forcePlayback,
         noCustomEmojiPlayback,
@@ -331,6 +325,14 @@ function organizeEntity(
   };
 }
 
+function hasCanvasContent(entities: IOrganizedEntity[]): boolean {
+  return entities.some(({ entity, nestedEntities }) => (
+    entity.type === ApiMessageEntityTypes.Spoiler
+    || entity.type === ApiMessageEntityTypes.CustomEmoji
+    || hasCanvasContent(nestedEntities)
+  ));
+}
+
 function processEntity({
   entity,
   entityContent,
@@ -342,8 +344,7 @@ function processEntity({
   observeIntersectionForPlaying,
   withTranslucentThumbs,
   emojiSize,
-  sharedCanvasRef,
-  sharedCanvasHqRef,
+  hasCanvasContent: withCanvasContent,
   cacheBuster,
   forcePlayback,
   noCustomEmojiPlayback,
@@ -363,8 +364,7 @@ function processEntity({
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   emojiSize?: number;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
+  hasCanvasContent?: boolean;
   cacheBuster?: string;
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
@@ -404,8 +404,6 @@ function processEntity({
           size={emojiSize}
           isSelectable
           withSharedAnimation
-          sharedCanvasRef={sharedCanvasRef}
-          sharedCanvasHqRef={sharedCanvasHqRef}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}
@@ -429,7 +427,12 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <Blockquote canBeCollapsible={entity.canCollapse} isToggleDisabled={isInSelectMode}>
+        <Blockquote
+          canBeCollapsible={entity.canCollapse}
+          isToggleDisabled={isInSelectMode}
+          hasCanvasContent={withCanvasContent}
+          contentKey={cacheBuster}
+        >
           {renderNestedMessagePart()}
         </Blockquote>
       );
@@ -560,7 +563,9 @@ function processEntity({
         </a>
       );
     case ApiMessageEntityTypes.Spoiler:
-      return <Spoiler containerId={containerId}>{renderNestedMessagePart()}</Spoiler>;
+      return (
+        <Spoiler containerId={containerId}>{renderNestedMessagePart()}</Spoiler>
+      );
     case ApiMessageEntityTypes.CustomEmoji:
       return (
         <CustomEmoji
@@ -570,8 +575,6 @@ function processEntity({
           size={emojiSize}
           isSelectable
           withSharedAnimation
-          sharedCanvasRef={sharedCanvasRef}
-          sharedCanvasHqRef={sharedCanvasHqRef}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}

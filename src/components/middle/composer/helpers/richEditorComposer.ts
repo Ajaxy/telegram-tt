@@ -1,4 +1,5 @@
 import type { Editor, JSONContent as TiptapJsonContent } from '@tiptap/core';
+import type { Mark } from '@tiptap/pm/model';
 
 import type { ApiFormattedText, ApiInputRichMessage, ApiSticker } from '../../../../api/types';
 import type { RichEditorInsertContent } from '../richEditorTypes';
@@ -31,7 +32,8 @@ export function insertEditorContent(
     return;
   }
 
-  const tiptapContent = buildTiptapContent(content);
+  const { storedMarks, selection } = editor.state;
+  const tiptapContent = buildTiptapContent(content, shouldPrepend ? undefined : storedMarks || selection.$from.marks());
   if (!tiptapContent) {
     return;
   }
@@ -53,12 +55,16 @@ export function replaceEditorRange(
     return;
   }
 
-  const tiptapContent = buildTiptapContent(content);
+  const replaceRange = buildEditorReplaceRange(editor, range);
+  const { doc } = editor.state;
+  const $from = doc.resolve(replaceRange.from);
+  // The replaced text carries the marks to keep, and the text before it can lack them, such as a spoiler
+  const marks = (replaceRange.from < replaceRange.to && $from.marksAcross(doc.resolve(replaceRange.to)))
+    || $from.marks();
+  const tiptapContent = buildTiptapContent(content, marks);
   if (!tiptapContent) {
     return;
   }
-
-  const replaceRange = buildEditorReplaceRange(editor, range);
 
   editor.chain()
     .focus()
@@ -163,20 +169,25 @@ function buildTiptapContentFromFormattedText(text: ApiFormattedText) {
   return content;
 }
 
-function buildTiptapContent(content: RichEditorInsertContent | RichEditorInsertContent[]) {
-  const result = (Array.isArray(content) ? content : [content]).flatMap(buildTiptapContentPart);
+// Inserted nodes do not take the formatting at the cursor like typed text, so text and custom emoji get its marks
+function buildTiptapContent(content: RichEditorInsertContent | RichEditorInsertContent[], marks?: readonly Mark[]) {
+  const markJson = marks?.length ? marks.map((mark) => mark.toJSON()) : undefined;
+  const result = (Array.isArray(content) ? content : [content])
+    .flatMap((part) => buildTiptapContentPart(part, markJson));
 
   return result.length ? result : undefined;
 }
 
-function buildTiptapContentPart(content: RichEditorInsertContent): TiptapJsonContent[] {
+function buildTiptapContentPart(
+  content: RichEditorInsertContent, marks?: TiptapJsonContent['marks'],
+): TiptapJsonContent[] {
   switch (content.type) {
     case 'text':
-      return content.text ? [{ type: 'text', text: content.text }] : [];
+      return content.text ? [{ type: 'text', text: content.text, marks }] : [];
     case 'formattedText':
       return content.text.text ? buildTiptapContentFromFormattedText(content.text) : [];
     case 'customEmoji':
-      return [buildCustomEmojiTiptapNode(content.emoji)];
+      return [{ ...buildCustomEmojiTiptapNode(content.emoji), marks }];
     case 'mention':
       return [buildMentionContent(content.userId, content.username, content.text)];
     default:

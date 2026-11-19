@@ -731,10 +731,9 @@ function normalizeCustomEmoji(element: HTMLElement) {
 }
 
 function normalizeRenderedTable(table: HTMLTableElement) {
-  const wrapper = table.parentElement?.matches('[data-rich-block-type="table"]')
-    ? table.parentElement
-    : undefined;
-  const title = wrapper?.querySelector<HTMLElement>(':scope > [data-rich-block-type="tableTitle"]');
+  // A table with a GPU canvas has its content wrapped
+  const wrapper = table.closest<HTMLElement>('[data-rich-block-type="table"]') || undefined;
+  const title = wrapper?.querySelector<HTMLElement>('[data-rich-block-type="tableTitle"]');
   if (title) {
     const caption = document.createElement('caption');
     caption.append(...title.childNodes);

@@ -1,5 +1,7 @@
 import type { PerformanceType } from '../types';
 
+import { setGpuCanvasAnimated } from '../lib/gpuCanvas/gpuCanvas';
+
 export function applyPerformanceSettings(performanceType: PerformanceType) {
   const {
     pageTransitions,
@@ -20,4 +22,6 @@ export function applyPerformanceSettings(performanceType: PerformanceType) {
   root.classList.toggle('no-context-menu-animations', !contextMenuAnimations);
   root.classList.toggle('no-menu-blur', !contextMenuBlur);
   root.classList.toggle('no-right-column-animations', !rightColumnAnimations);
+  // Without animations, spoiler particles keep a single frame
+  setGpuCanvasAnimated(pageTransitions);
 }

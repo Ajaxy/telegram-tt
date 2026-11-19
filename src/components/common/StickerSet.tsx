@@ -1,7 +1,7 @@
 import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiAvailableReaction, ApiEmojiStatusType, ApiReactionWithPaid, ApiSticker,
@@ -22,7 +22,7 @@ import {
   STICKER_SIZE_PICKER,
 } from '../../config';
 import { getIsStickerSetInstalled, getReactionKey } from '../../global/helpers';
-import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
+import { selectIsSetPremium } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -39,6 +39,7 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import GiftEffectWrapper from './gift/GiftEffectWrapper';
 import Icon from './icons/Icon';
 import ReactionEmoji from './reactions/ReactionEmoji';
+import SharedCanvas from './SharedCanvas';
 import StickerButton from './StickerButton';
 
 import grey from '../../assets/icons/forumTopic/grey.svg';
@@ -135,9 +136,6 @@ const StickerSet = ({
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
-
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
 
   const lang = useLang();
   const { width: windowWidth } = useWindowSize();
@@ -328,122 +326,110 @@ const StickerSet = ({
         )}
         style={`${withInstantThumbs ? 'min-height' : 'height'}: ${height}px;`}
       >
-        <canvas
-          ref={sharedCanvasRef}
-          className="shared-canvas"
-          style={canCut ? `height: ${heightWhenCut}px;` : undefined}
-        />
-        {(isRecent || isFavorite || canCut) && <canvas ref={sharedCanvasHqRef} className="shared-canvas" />}
-        {withDefaultTopicIcon && (
-          <Button
-            className="StickerButton custom-emoji"
-            color="translucent"
-            onClick={handleDefaultTopicIconClick}
-            key="default-topic-icon"
-          >
-            <img src={grey} alt={lang('Reset')} className="sticker-media" draggable={false} />
-          </Button>
-        )}
-        {withDefaultStatusIcon && (
-          <Button
-            className="StickerButton custom-emoji status-default"
-            color="translucent"
-            onClick={handleDefaultStatusIconClick}
-            key="default-status-icon"
-            iconName="star"
-          />
-        )}
-        {shouldRender && stickerSet.reactions?.map((reaction) => {
-          const reactionId = getReactionKey(reaction);
-          const selectionIndex = selectedReactionIds?.indexOf(reactionId) ?? -1;
-
-          return (
-            <ReactionEmoji
-              key={`${stickerSet.id}_${reactionId}`}
-              reaction={reaction}
-              isSelected={selectionIndex !== -1}
-              selectionOrder={withSelectionOrder && selectionIndex !== -1 ? selectionIndex + 1 : undefined}
-              loadAndPlay={loadAndPlay}
-              availableReactions={availableReactions}
-              observeIntersection={observeIntersectionForPlayingItems}
-              onClick={onReactionSelect!}
-              onContextMenu={onReactionContext}
-              sharedCanvasRef={sharedCanvasRef}
-              sharedCanvasHqRef={sharedCanvasHqRef}
-              forcePlayback={forcePlayback}
+        <SharedCanvas>
+          {withDefaultTopicIcon && (
+            <Button
+              className="StickerButton custom-emoji"
+              color="translucent"
+              onClick={handleDefaultTopicIconClick}
+              key="default-topic-icon"
+            >
+              <img src={grey} alt={lang('Reset')} className="sticker-media" draggable={false} />
+            </Button>
+          )}
+          {withDefaultStatusIcon && (
+            <Button
+              className="StickerButton custom-emoji status-default"
+              color="translucent"
+              onClick={handleDefaultStatusIconClick}
+              key="default-status-icon"
+              iconName="star"
             />
-          );
-        })}
-        {shouldRender && stickerSet.stickers?.slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
-          .map((sticker, i) => {
-            const isHqEmoji = (isRecent || isFavorite)
-              && selectIsAlwaysHighPriorityEmoji(getGlobal(), sticker.stickerSetInfo);
-            const canvasRef = (canCut && i >= itemsBeforeCutout) || isHqEmoji
-              ? sharedCanvasHqRef
-              : sharedCanvasRef;
-            const reactionId = sticker.isCustomEmoji
-              ? getReactionKey({ type: 'custom', documentId: sticker.id })
-              : sticker.emoji && getReactionKey({ type: 'emoji', emoticon: sticker.emoji });
-            const selectionIndex = reactionId ? selectedReactionIds?.indexOf(reactionId) ?? -1 : -1;
+          )}
+          {shouldRender && stickerSet.reactions?.map((reaction) => {
+            const reactionId = getReactionKey(reaction);
+            const selectionIndex = selectedReactionIds?.indexOf(reactionId) ?? -1;
 
-            const withSparkles = stickerSet.id === COLLECTIBLE_STATUS_SET_ID
-              || collectibleEmojiIdsSet?.has(sticker.id);
-
-            const component = (
-              <StickerButton
-                key={sticker.id}
-                sticker={sticker}
-                size={itemSize}
-                observeIntersection={observeIntersectionForPlayingItems}
-                observeIntersectionForShowing={observeIntersectionForShowingItems}
-                noPlay={!loadAndPlay}
-                isSavedMessages={isSavedMessages}
-                isStatusPicker={isStatusPicker}
-                canViewSet
-                noContextMenu={noContextMenus}
-                isCurrentUserPremium={isCurrentUserPremium}
-                shouldIgnorePremium={isChatEmojiSet}
-                sharedCanvasRef={canvasRef}
-                withTranslucentThumb={isTranslucent}
-                withInstantThumb={withInstantThumbs}
-                onClick={onStickerSelect}
-                clickArg={sticker}
-                noIcons={isEmoji && !isRecent}
+            return (
+              <ReactionEmoji
+                key={`${stickerSet.id}_${reactionId}`}
+                reaction={reaction}
                 isSelected={selectionIndex !== -1}
                 selectionOrder={withSelectionOrder && selectionIndex !== -1 ? selectionIndex + 1 : undefined}
-                onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
-                onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
-                onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
-                onDismiss={onDismiss}
+                loadAndPlay={loadAndPlay}
+                availableReactions={availableReactions}
+                observeIntersection={observeIntersectionForPlayingItems}
+                onClick={onReactionSelect!}
+                onContextMenu={onReactionContext}
                 forcePlayback={forcePlayback}
-                isEffectEmoji={stickerSet.id === EFFECT_EMOJIS_SET_ID}
-                noShowPremium={isCurrentUserPremium
-                  && (stickerSet.id === EFFECT_STICKERS_SET_ID || stickerSet.id === EFFECT_EMOJIS_SET_ID)}
               />
             );
-
-            if (withSparkles) {
-              return (
-                <GiftEffectWrapper className="gift-effect-wrapper" withSparkles>
-                  {component}
-                </GiftEffectWrapper>
-              );
-            }
-
-            return component;
           })}
-        {isCut && totalItemsCount > itemsBeforeCutout && (
-          <Button
-            className="StickerButton custom-emoji set-expand"
-            round
-            color="translucent"
-            onClick={expand}
-            key="more"
-          >
-            +
-            {totalItemsCount - itemsBeforeCutout}
-          </Button>
-        )}
+          {shouldRender && stickerSet.stickers?.slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
+            .map((sticker) => {
+              const reactionId = sticker.isCustomEmoji
+                ? getReactionKey({ type: 'custom', documentId: sticker.id })
+                : sticker.emoji && getReactionKey({ type: 'emoji', emoticon: sticker.emoji });
+              const selectionIndex = reactionId ? selectedReactionIds?.indexOf(reactionId) ?? -1 : -1;
+
+              const withSparkles = stickerSet.id === COLLECTIBLE_STATUS_SET_ID
+                || collectibleEmojiIdsSet?.has(sticker.id);
+
+              const component = (
+                <StickerButton
+                  key={sticker.id}
+                  sticker={sticker}
+                  size={itemSize}
+                  observeIntersection={observeIntersectionForPlayingItems}
+                  observeIntersectionForShowing={observeIntersectionForShowingItems}
+                  noPlay={!loadAndPlay}
+                  isSavedMessages={isSavedMessages}
+                  isStatusPicker={isStatusPicker}
+                  canViewSet
+                  noContextMenu={noContextMenus}
+                  isCurrentUserPremium={isCurrentUserPremium}
+                  shouldIgnorePremium={isChatEmojiSet}
+                  withTranslucentThumb={isTranslucent}
+                  withInstantThumb={withInstantThumbs}
+                  onClick={onStickerSelect}
+                  clickArg={sticker}
+                  noIcons={isEmoji && !isRecent}
+                  isSelected={selectionIndex !== -1}
+                  selectionOrder={withSelectionOrder && selectionIndex !== -1 ? selectionIndex + 1 : undefined}
+                  onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
+                  onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
+                  onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
+                  onDismiss={onDismiss}
+                  forcePlayback={forcePlayback}
+                  isEffectEmoji={stickerSet.id === EFFECT_EMOJIS_SET_ID}
+                  noShowPremium={isCurrentUserPremium
+                    && (stickerSet.id === EFFECT_STICKERS_SET_ID || stickerSet.id === EFFECT_EMOJIS_SET_ID)}
+                />
+              );
+
+              if (withSparkles) {
+                return (
+                  <GiftEffectWrapper className="gift-effect-wrapper" withSparkles>
+                    {component}
+                  </GiftEffectWrapper>
+                );
+              }
+
+              return component;
+            })}
+          {isCut && totalItemsCount > itemsBeforeCutout && (
+            <Button
+              className="StickerButton custom-emoji set-expand"
+              round
+              color="translucent"
+              onClick={expand}
+              key="more"
+            >
+              +
+              {totalItemsCount - itemsBeforeCutout}
+            </Button>
+          )}
+        </SharedCanvas>
       </div>
 
       {isRecent && (

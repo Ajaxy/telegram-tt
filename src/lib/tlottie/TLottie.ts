@@ -1,17 +1,17 @@
 import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
 
 import { animate } from '../../util/animation';
-import {
-  IS_ANDROID, IS_IOS, IS_SAFARI,
-} from '../../util/browser/windowEnvironment';
+import { IS_SAFARI } from '../../util/browser/windowEnvironment';
 import { convertSrgbChannel } from '../../util/colors';
 import cycleRestrict from '../../util/cycleRestrict';
-import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
 import { handleError } from '../../util/handleError';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 import { type Color, convertColor } from '../color';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
+import {
+  clearGpuCanvasFrames, dropGpuCanvasFrame, getGpuCanvas, type GpuCanvas,
+} from '../gpuCanvas/gpuCanvas';
 
 interface Params {
   size: number;
@@ -23,41 +23,48 @@ interface Params {
 }
 
 const WAITING = Symbol('WAITING');
+// A frame kept by the GPU canvas worker
+const GPU_FRAME = Symbol('GPU_FRAME');
 type Frame =
   undefined
   | typeof WAITING
+  | typeof GPU_FRAME
   | ImageBitmap;
+
+type View = {
+  canvas: HTMLCanvasElement;
+  ctx?: CanvasRenderingContext2D;
+  gpuCanvas?: GpuCanvas;
+  isLoaded?: boolean;
+  isPaused?: boolean;
+  isSharedCanvas?: boolean;
+  // Canvas pixels for a 2D canvas, fractions of the canvas size for a GPU canvas
+  coords?: Params['coords'];
+  onLoad?: NoneToVoidFunction;
+  onFrame?: FrameCallback;
+  handleContextChange: NoneToVoidFunction;
+};
 
 type FrameCallback = (index: number) => void;
 
-const HIGH_PRIORITY_QUALITY = (IS_ANDROID || IS_IOS) ? 0.75 : 1;
-const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
-const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
 const CANVAS_CLASS = 'tlottie-canvas';
+const GPU_RENDER_ID_PREFIX = 'gpu_';
 
 const workers = launchMediaWorkers().map(({ connector }) => connector);
 const instancesByRenderId = new Map<string, TLottie>();
 
-const PENDING_CANVAS_RESIZES = new WeakMap<HTMLCanvasElement, Promise<void>>();
-
 let lastWorkerIndex = -1;
+// Shared by all instances, so a new one outranks late frames of a destroyed one with the same render id
+let lastFrameGeneration = 0;
 
 class TLottie {
   // Config
 
-  private views = new Map<string, {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    isLoaded?: boolean;
-    isPaused?: boolean;
-    isSharedCanvas?: boolean;
-    coords?: Params['coords'];
-    onLoad?: NoneToVoidFunction;
-    onFrame?: FrameCallback;
-    handleContextChange: NoneToVoidFunction;
-  }>();
+  private views = new Map<string, View>();
+
+  private isGpu: boolean;
 
   private imgSize!: number;
 
@@ -71,7 +78,7 @@ class TLottie {
 
   private frames: Frame[] = [];
 
-  private frameGeneration = 0;
+  private frameGeneration = ++lastFrameGeneration;
 
   private dataGeneration = 0;
 
@@ -105,23 +112,36 @@ class TLottie {
 
   static init(...args: ConstructorParameters<typeof TLottie>) {
     const [
-      , canvas,
-      renderId,
+      tgsUrl, canvas,
+      sourceRenderId,
       params,
-      viewId = generateUniqueId(),,
-      onLoad,,,
-      onFrame,
+      viewId = generateUniqueId(),
+      ...rest
     ] = args;
+    const [, onLoad,,, onFrame] = rest;
+    // Frames for a GPU canvas do not reach this thread, so its views need their own instance
+    const renderId = canvas instanceof HTMLCanvasElement && getGpuCanvas(canvas)
+      ? `${GPU_RENDER_ID_PREFIX}${sourceRenderId}`
+      : sourceRenderId;
     let instance = instancesByRenderId.get(renderId);
 
     if (!instance) {
-      instance = new TLottie(...args);
+      instance = new TLottie(tgsUrl, canvas, renderId, params, viewId, ...rest);
       instancesByRenderId.set(renderId, instance);
     } else {
       instance.addView(viewId, canvas, onLoad, onFrame, params?.coords);
     }
 
     return instance;
+  }
+
+  // The image of a shared canvas moved by `shift` pixels, so its views draw there until their coords update
+  static shiftSharedCanvasViews(canvas: HTMLCanvasElement, shift: number) {
+    instancesByRenderId.forEach((instance) => {
+      instance.views.forEach((view) => {
+        if (view.canvas === canvas && view.ctx && view.coords) view.coords.y += shift;
+      });
+    });
   }
 
   constructor(
@@ -136,6 +156,7 @@ class TLottie {
     private onLoop?: () => void,
     onFrame?: FrameCallback,
   ) {
+    this.isGpu = renderId.startsWith(GPU_RENDER_ID_PREFIX);
     this.addView(viewId, container, onLoad, onFrame, params.coords);
     this.initConfig();
     this.initRenderer();
@@ -143,14 +164,16 @@ class TLottie {
 
   public removeView(viewId: string) {
     const {
-      canvas, ctx, isSharedCanvas, coords, handleContextChange,
+      canvas, ctx, gpuCanvas, isSharedCanvas, coords, handleContextChange,
     } = this.views.get(viewId)!;
 
     canvas.removeEventListener('contextlost', handleContextChange);
     canvas.removeEventListener('contextrestored', handleContextChange);
 
-    if (isSharedCanvas) {
-      ctx.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
+    if (gpuCanvas) {
+      gpuCanvas.removeEmoji(viewId);
+    } else if (isSharedCanvas) {
+      ctx!.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
     } else {
       canvas.remove();
     }
@@ -167,7 +190,13 @@ class TLottie {
       const view = this.views.get(viewId);
       if (!view) return;
 
-      if (!view.isSharedCanvas && view.ctx.isContextLost?.()) {
+      if (view.gpuCanvas) {
+        const frame = this.getFrame(this.prevFrameIndex);
+        if (frame === GPU_FRAME) view.gpuCanvas.drawEmoji(viewId, this.prevFrameIndex);
+        return;
+      }
+
+      if (!view.isSharedCanvas && view.ctx!.isContextLost?.()) {
         const { canvas, handleContextChange } = view;
         // Document adoption can permanently lose the canvas context
         const replacement = canvas.cloneNode() as HTMLCanvasElement;
@@ -181,11 +210,11 @@ class TLottie {
       }
 
       const frame = this.getFrame(this.prevFrameIndex);
-      if (!frame || frame === WAITING) return;
+      if (!(frame instanceof ImageBitmap)) return;
 
       const { ctx, coords: { x = 0, y = 0 } = {} } = view;
-      ctx.clearRect(x, y, this.imgSize, this.imgSize);
-      ctx.drawImage(frame, x, y);
+      ctx!.clearRect(x, y, this.imgSize, this.imgSize);
+      ctx!.drawImage(frame, x, y);
     });
   }
 
@@ -230,9 +259,7 @@ class TLottie {
         if (i === this.prevFrameIndex) {
           return frame;
         } else {
-          if (frame && frame !== WAITING) {
-            frame.close();
-          }
+          this.releaseFrame(frame, i);
 
           return undefined;
         }
@@ -268,24 +295,24 @@ class TLottie {
     this.params.noLoop = noLoop;
   }
 
-  async setSharedCanvasCoords(viewId: string, newCoords: Params['coords']) {
+  setSharedCanvasCoords(viewId: string, newCoords: Params['coords']) {
     const containerInfo = this.views.get(viewId)!;
     const {
-      canvas, ctx,
+      canvas, ctx, gpuCanvas,
     } = containerInfo;
 
-    const isCanvasDirty = !canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false';
-
-    if (!isCanvasDirty) {
-      await PENDING_CANVAS_RESIZES.get(canvas);
+    if (gpuCanvas) {
+      containerInfo.coords = newCoords;
+      gpuCanvas.setEmoji(viewId, this.renderId, newCoords?.x || 0, newCoords?.y || 0, this.params.size);
+      this.redrawView(viewId);
+      return;
     }
 
-    let [canvasWidth, canvasHeight] = [canvas.width, canvas.height];
+    const isCanvasDirty = !canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false';
+    const { width: canvasWidth, height: canvasHeight } = canvas;
 
     if (isCanvasDirty) {
-      const sizeFactor = this.calcSizeFactor();
-      ([canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor));
-      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx!.clearRect(0, 0, canvasWidth, canvasHeight);
       canvas.dataset.isJustCleaned = 'true';
       requestMeasure(() => {
         canvas.dataset.isJustCleaned = 'false';
@@ -299,8 +326,8 @@ class TLottie {
 
     const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
 
-    if (frame && frame !== WAITING) {
-      ctx.drawImage(frame, containerInfo.coords.x, containerInfo.coords.y);
+    if (frame instanceof ImageBitmap) {
+      ctx!.drawImage(frame, containerInfo.coords.x, containerInfo.coords.y);
     }
   }
 
@@ -311,7 +338,6 @@ class TLottie {
     onFrame?: FrameCallback,
     coords?: Params['coords'],
   ) {
-    const sizeFactor = this.calcSizeFactor();
     const handleContextChange = () => this.redrawView(viewId);
 
     let imgSize: number;
@@ -323,7 +349,7 @@ class TLottie {
 
       const { size } = this.params;
 
-      imgSize = Math.round(size * sizeFactor);
+      imgSize = Math.round(size * window.devicePixelRatio * (this.params.quality ?? 1));
 
       if (!this.imgSize) {
         this.imgSize = imgSize;
@@ -355,23 +381,35 @@ class TLottie {
       }
 
       const canvas = container;
-      const ctx = canvas.getContext('2d')!;
 
-      imgSize = Math.round(this.params.size * sizeFactor);
+      imgSize = Math.round(this.params.size * window.devicePixelRatio);
 
       if (!this.imgSize) {
         this.imgSize = imgSize;
       }
 
-      const [canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor);
+      const gpuCanvas = getGpuCanvas(canvas);
+      if (gpuCanvas) {
+        this.views.set(viewId, {
+          canvas, gpuCanvas, isSharedCanvas: true, coords, onLoad, onFrame, handleContextChange,
+        });
+        gpuCanvas.setEmoji(viewId, this.renderId, coords!.x, coords!.y, this.params.size);
+
+        if (this.isRendererInited) {
+          this.doPlay();
+        }
+        return;
+      }
+
+      const ctx = canvas.getContext('2d')!;
 
       this.views.set(viewId, {
         canvas,
         ctx,
         isSharedCanvas: true,
         coords: {
-          x: Math.round(coords!.x * canvasWidth),
-          y: Math.round(coords!.y * canvasHeight),
+          x: Math.round(coords!.x * canvas.width),
+          y: Math.round(coords!.y * canvas.height),
         },
         onLoad,
         onFrame,
@@ -388,39 +426,36 @@ class TLottie {
     }
   }
 
-  private calcSizeFactor() {
-    const {
-      size,
-      isLowPriority,
-      // Reduced quality only looks acceptable on big enough images
-      quality = isLowPriority && (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
-        ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY,
-    } = this.params;
-
-    // Reduced quality only looks acceptable on high DPR screens
-    return Math.max(window.devicePixelRatio * quality, 1);
-  }
-
   private destroy() {
     this.isDestroyed = true;
     this.pause();
     this.clearFrames();
     this.destroyRenderer();
+    if (this.isGpu) clearGpuCanvasFrames(this.renderId);
 
     instancesByRenderId.delete(this.renderId);
   }
 
   private clearFrames() {
-    this.frameGeneration += 1;
+    this.frameGeneration = ++lastFrameGeneration;
 
     this.frames.forEach((frame) => {
-      if (frame && frame !== WAITING) {
+      if (frame instanceof ImageBitmap) {
         frame.close();
       }
     });
+    if (this.isGpu) clearGpuCanvasFrames(this.renderId, this.frameGeneration);
 
     this.frames = [];
     this.prevFrameIndex = -1;
+  }
+
+  private releaseFrame(frame: Frame, frameIndex: number) {
+    if (frame instanceof ImageBitmap) {
+      frame.close();
+    } else if (frame === GPU_FRAME) {
+      dropGpuCanvasFrame(this.renderId, frameIndex);
+    }
   }
 
   private initConfig() {
@@ -610,14 +645,18 @@ class TLottie {
       }
 
       if (frameIndex !== this.prevFrameIndex) {
-        this.views.forEach((containerData) => {
+        this.views.forEach((containerData, viewId) => {
           const {
-            ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad, onFrame,
+            ctx, gpuCanvas, isLoaded, isPaused, coords: { x, y } = {}, onLoad, onFrame,
           } = containerData;
 
           if (!isLoaded || !isPaused) {
-            ctx.clearRect(x || 0, y || 0, this.imgSize, this.imgSize);
-            ctx.drawImage(frame, x || 0, y || 0);
+            if (gpuCanvas) {
+              gpuCanvas.drawEmoji(viewId, frameIndex);
+            } else {
+              ctx!.clearRect(x || 0, y || 0, this.imgSize, this.imgSize);
+              ctx!.drawImage(frame as ImageBitmap, x || 0, y || 0);
+            }
             onFrame?.(frameIndex);
           }
 
@@ -714,7 +753,12 @@ class TLottie {
 
     workers[this.workerIndex].request({
       name: 'tlottie:renderFrames',
-      args: [this.renderId, frameIndex, this.onFrameLoad.bind(this, frameGeneration)],
+      args: [
+        this.renderId,
+        frameIndex,
+        this.isGpu ? frameGeneration : undefined,
+        this.onFrameLoad.bind(this, frameGeneration),
+      ],
     });
   }
 
@@ -724,38 +768,28 @@ class TLottie {
     }
 
     const prevFrameIndex = cycleRestrict(this.framesCount!, frameIndex - 1);
+    if (this.frames[prevFrameIndex] === GPU_FRAME) dropGpuCanvasFrame(this.renderId, prevFrameIndex);
     this.frames[prevFrameIndex] = undefined;
   }
 
-  private onFrameLoad(frameGeneration: number, frameIndex: number, imageBitmap: ImageBitmap) {
+  // A frame for the GPU canvas comes without a bitmap
+  private onFrameLoad(frameGeneration: number, frameIndex: number, imageBitmap?: ImageBitmap) {
     if (frameGeneration !== this.frameGeneration || this.frames[frameIndex] !== WAITING) {
-      imageBitmap.close();
+      imageBitmap?.close();
+      // A frame of an older generation is dropped by the canvas worker itself.
+      // A duplicate response after a pause and resume must not drop the frame the slot still keeps.
+      if (!imageBitmap && frameGeneration === this.frameGeneration && !this.frames[frameIndex]) {
+        dropGpuCanvasFrame(this.renderId, frameIndex);
+      }
       return;
     }
 
-    this.frames[frameIndex] = imageBitmap;
+    this.frames[frameIndex] = imageBitmap || GPU_FRAME;
 
     if (this.isWaiting) {
       this.doPlay();
     }
   }
-}
-
-function ensureCanvasSize(canvas: HTMLCanvasElement, sizeFactor: number) {
-  const expectedWidth = Math.round(canvas.offsetWidth * sizeFactor);
-  const expectedHeight = Math.round(canvas.offsetHeight * sizeFactor);
-
-  if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-    const deferred = new Deferred<void>();
-    PENDING_CANVAS_RESIZES.set(canvas, deferred.promise);
-    requestMutation(() => {
-      canvas.width = expectedWidth;
-      canvas.height = expectedHeight;
-      deferred.resolve();
-    });
-  }
-
-  return [expectedWidth, expectedHeight];
 }
 
 export default TLottie;

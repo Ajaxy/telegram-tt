@@ -52,6 +52,7 @@ import { useStateRef } from '../../../hooks/useStateRef';
 import AnimatedCounter from '../../common/AnimatedCounter';
 import CalendarModal from '../../common/CalendarModal.async';
 import Icon from '../../common/icons/Icon';
+import SharedCanvas from '../../common/SharedCanvas';
 import { refreshRichEditorTooltips } from '../../common/tooltips/extensions/RichEditorTooltips';
 import Button from '../../ui/Button';
 import FormattedDateModal from './FormattedDateModal';
@@ -161,7 +162,6 @@ const MessageInput = ({
   const cloneRef = useRef<HTMLDivElement>();
   const scrollerCloneRef = useRef<HTMLDivElement>();
   const sharedCanvasRef = useRef<HTMLCanvasElement>();
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
   const scrollerRef = useRef<HTMLDivElement>();
   const updateRafRef = useRef<number>();
 
@@ -432,7 +432,6 @@ const MessageInput = ({
     const unregisterRichEditorRoot = registerRichEditorRoot({
       element: input,
       sharedCanvasRef,
-      sharedCanvasHqRef,
       tooltips: rootTooltips,
       getIsRichInputExpanded,
       onReady: handleEditorReady,
@@ -763,13 +762,7 @@ const MessageInput = ({
       onClick={shouldSuppressFocus ? onSuppressedFocus : undefined}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      <div className="shared-canvas-container">
-        {canRenderRichEditor && (
-          <>
-            <canvas ref={sharedCanvasRef} className="shared-canvas" />
-            <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
-          </>
-        )}
+      <div>
         <div
           ref={scrollerRef}
           className={buildClassName(
@@ -786,6 +779,8 @@ const MessageInput = ({
             data-stricterdom-ignore
             onKeyDownCapture={handleKeyDownCapture}
           >
+            {/* Inside the scrolled content, as custom emoji are placed by layout offsets that ignore scrolling */}
+            {canRenderRichEditor && <SharedCanvas canvasRef={sharedCanvasRef} scrollerRef={scrollerRef} />}
             <div
               ref={inputRef}
               id={editableInputId || EDITABLE_INPUT_ID}

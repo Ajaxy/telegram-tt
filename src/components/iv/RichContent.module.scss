@@ -337,6 +337,16 @@
   white-space: normal;
 }
 
+.tableContent {
+  width: fit-content;
+  min-width: 100%;
+}
+
+// A canvas not yet resized would add to the scrollable width of the table
+.tableCanvasContainer {
+  overflow: clip;
+}
+
 .table {
   border-spacing: 0;
   border-collapse: separate;

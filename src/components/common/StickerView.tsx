@@ -50,7 +50,6 @@ type OwnProps = {
   forceAnimatedStickerOnEnd?: boolean;
   noVideoOnMobile?: boolean;
   withSharedAnimation?: boolean;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
@@ -84,7 +83,6 @@ const StickerView = ({
   forceAnimatedStickerOnEnd,
   withSharedAnimation,
   withTranslucentThumb,
-  sharedCanvasRef,
   onVideoEnded,
   onAnimatedStickerLoop,
   onAnimatedStickerFrame,
@@ -141,6 +139,7 @@ const StickerView = ({
 
   const thumbDataUri = useThumbnail(sticker.thumbnail);
   const thumbData = !skipPreview ? (cachedPreview || previewMediaData || thumbDataUri) : undefined;
+  const { sharedCanvasRef, coords } = useCoordsInSharedCanvas(containerRef);
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
 
   const noCrossTransition = Boolean(isLottie && withPreview);
@@ -152,8 +151,6 @@ const StickerView = ({
     hasMediaData: isFullMediaReady,
     noOpenTransition: noCrossTransition,
   });
-
-  const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview);

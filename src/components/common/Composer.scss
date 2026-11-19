@@ -335,6 +335,11 @@
         .input-scroller-content {
           min-height: 100%;
           padding-top: var(--rich-editor-header-height);
+
+          // Custom emoji stay under the scroll hint, which covers the header
+          > .shared-canvas {
+            z-index: 0;
+          }
         }
 
         .form-control {
@@ -920,6 +925,8 @@
 
   & > .input-scroller-content {
     position: relative;
+    // The custom emoji canvas inside, while resized after the text, must not add to the scrolled height
+    overflow: clip;
   }
 
   body.no-message-composer-animations & {

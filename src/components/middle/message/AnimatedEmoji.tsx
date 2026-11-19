@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
@@ -39,9 +38,7 @@ interface StateProps {
   soundId?: string;
 }
 
-const QUALITY = 1;
-
-const AnimatedEmoji: FC<OwnProps & StateProps> = ({
+const AnimatedEmoji = ({
   emoji,
   isOwn,
   observeIntersection,
@@ -52,7 +49,7 @@ const AnimatedEmoji: FC<OwnProps & StateProps> = ({
   sticker,
   effect,
   soundId,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     ref,
     size,
@@ -68,7 +65,6 @@ const AnimatedEmoji: FC<OwnProps & StateProps> = ({
       sticker={sticker}
       fitzModifier={fitzModifier}
       size={size}
-      quality={QUALITY}
       noLoad={!isIntersecting}
       forcePreview={forceLoadPreview}
       play={isIntersecting}

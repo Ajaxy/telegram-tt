@@ -857,6 +857,7 @@ export function buildTiptapInlineContentFromRichText(
           alt: text.alt,
           className: 'emoji custom-emoji',
         },
+        marks: marks.length ? marks : undefined,
       }];
     case 'math':
       return [{
@@ -1251,7 +1252,10 @@ function buildRichTextFromTiptapNode(node: TiptapJsonContent): ApiRichText {
     const documentId = getTiptapStringAttr(node, 'documentId');
     const alt = getTiptapStringAttr(node, 'alt') || DEFAULT_STRING;
 
-    return documentId ? { type: 'customEmoji', documentId, alt } : { type: 'plain', text: alt };
+    return applyTiptapMarks(
+      documentId ? { type: 'customEmoji', documentId, alt } : { type: 'plain', text: alt },
+      node.marks,
+    );
   }
 
   if (node.type === EMOJI_NODE_NAME) {

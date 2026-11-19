@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import {
   beginHeavyAnimation,
   memo, useEffect, useLayoutEffect, useRef,
@@ -10,7 +9,6 @@ import type { ActiveEmojiInteraction } from '../../types';
 import {
   selectAnimatedEmojiEffect,
 } from '../../global/selectors';
-import { IS_ANDROID } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { getEmojiFitzModifier } from '../../util/emoji/skinTone';
 
@@ -34,10 +32,10 @@ const HIDE_ANIMATION_DURATION = 250;
 const PLAYING_DURATION = 3000;
 const EFFECT_SIZE = 309;
 
-const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
+const EmojiInteractionAnimation = ({
   effectAnimationId,
   activeEmojiInteraction,
-}) => {
+}: OwnProps & StateProps) => {
   const { stopActiveEmojiInteraction } = getActions();
 
   const [isHiding, startHiding] = useFlag(false);
@@ -116,7 +114,6 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
         tgsUrl={effectTgsUrl}
         fitzModifier={fitzModifier}
         play
-        quality={IS_ANDROID ? 0.5 : undefined}
         forceAlways
         noLoop
         onLoad={startPlaying}

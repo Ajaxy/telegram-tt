@@ -100,7 +100,6 @@ export default function useRichEditor(
       const editor = createRichEditor({
         element: currentRoot.element,
         sharedCanvasRef: currentRoot.sharedCanvasRef,
-        sharedCanvasHqRef: currentRoot.sharedCanvasHqRef,
         content: buildTiptapJsonFromRichMessage(valueRef.current),
         tooltips: currentRoot.tooltips,
         getIsRichInputExpanded: currentRoot.getIsRichInputExpanded,

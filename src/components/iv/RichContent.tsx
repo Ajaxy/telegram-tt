@@ -1,4 +1,4 @@
-import type { ElementRef, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import {
   memo, useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -43,6 +43,7 @@ import buildClassName from '../../util/buildClassName';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import { formatDateTime, secondsToDate } from '../../util/localization/dateFormat';
 import { getRichQuoteText, getRichQuoteTexts, type RichQuoteRange } from '../../util/text/richQuote';
+import { forEachPageBlocksRichText, hasSharedCanvasContent } from '../../util/text/richText';
 import {
   EMPTY_RICH_MEDIA_CAPTION,
   getRichMediaRef,
@@ -58,6 +59,7 @@ import {
 } from './helpers/pageMedia';
 
 import useSelector from '../../hooks/data/useSelector';
+import { useSharedCanvas } from '../../hooks/useCoordsInSharedCanvas';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useScrollableHint from '../../hooks/useScrollableHint';
@@ -71,6 +73,7 @@ import PlayableAudio from '../common/PlayableAudio';
 import Blockquote from '../common/quote/Blockquote';
 import Pullquote from '../common/quote/Pullquote';
 import SafeLink from '../common/SafeLink';
+import SharedCanvas from '../common/SharedCanvas';
 import UnsupportedPlate from '../common/UnsupportedPlate';
 import { Breakout } from '../gili/layout/Surface';
 import Photo from '../middle/message/Photo';
@@ -109,8 +112,6 @@ type OwnProps = {
   threadId?: ThreadId;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   onTelegramChannelClick?: (channelUsername: string) => void;
 };
 
@@ -124,8 +125,6 @@ type RichTextContext = {
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
 };
 
 const RELATED_ARTICLE_PHOTO_SIZE = 48;
@@ -153,8 +152,6 @@ const RichContent = ({
   threadId,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-  sharedCanvasRef,
-  sharedCanvasHqRef,
   onTelegramChannelClick,
 }: OwnProps) => {
   const {
@@ -222,8 +219,6 @@ const RichContent = ({
     isProtected,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-    sharedCanvasRef,
-    sharedCanvasHqRef,
   };
 
   const formatPublishedDate = useCallback((date: number) => {
@@ -613,45 +608,76 @@ function TableBlock({
 
   useScrollableHint(ref);
 
+  const sharedCanvas = useSharedCanvas();
+  const withTitleCanvas = useMemo(() => (
+    Boolean(sharedCanvas) && hasSharedCanvasContent(block.title)
+  ), [block, sharedCanvas]);
+  const withTableCanvas = useMemo(() => (
+    Boolean(sharedCanvas) && block.rows.some((row) => row.cells.some((cell) => hasSharedCanvasContent(cell.text)))
+  ), [block, sharedCanvas]);
+
+  const title = hasRichText(block.title) && renderTextBlock(
+    block.title, styles.tableTitle, renderContext, 'tableTitle',
+  );
+  const table = (
+    <table
+      className={buildClassName(styles.table, block.isBordered && styles.bordered, block.isCompact && styles.compact)}
+      data-bordered={String(Boolean(block.isBordered))}
+      data-striped={String(Boolean(block.isStriped))}
+      data-compact={String(Boolean(block.isCompact))}
+    >
+      <tbody>
+        {block.rows.map((row, rowIndex) => {
+          const isFirstRow = rowIndex === 0;
+          const isLastRow = rowIndex === block.rows.length - 1;
+
+          return (
+            <tr className={block.isStriped && rowIndex % 2 === 0 ? styles.stripedRow : undefined}>
+              {row.cells.map((cell, cellIndex) => renderTableCell(
+                cell,
+                renderContext,
+                {
+                  isFirstRow,
+                  isLastRow,
+                  isFirstColumn: cellIndex === 0,
+                  isLastColumn: cellIndex === row.cells.length - 1,
+                },
+              ))}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+
   return (
     <div
       ref={ref}
       data-rich-block-type="table"
       className={buildClassName(styles.tableWrapper, 'custom-scroll-x', SHOULD_HIDE_SCROLLBARS && 'no-scrollbar')}
     >
-      {hasRichText(block.title) && renderTextBlock(
-        block.title, styles.tableTitle, renderContext, 'tableTitle',
-      )}
-      <table
-        className={buildClassName(styles.table, block.isBordered && styles.bordered, block.isCompact && styles.compact)}
-        data-bordered={String(Boolean(block.isBordered))}
-        data-striped={String(Boolean(block.isStriped))}
-        data-compact={String(Boolean(block.isCompact))}
-      >
-        <tbody>
-          {block.rows.map((row, rowIndex) => {
-            const isFirstRow = rowIndex === 0;
-            const isLastRow = rowIndex === block.rows.length - 1;
-
-            return (
-              <tr className={block.isStriped && rowIndex % 2 === 0 ? styles.stripedRow : undefined}>
-                {row.cells.map((cell, cellIndex) => renderTableCell(
-                  cell,
-                  renderContext,
-                  {
-                    isFirstRow,
-                    isLastRow,
-                    isFirstColumn: cellIndex === 0,
-                    isLastColumn: cellIndex === row.cells.length - 1,
-                  },
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {withTitleCanvas ? (
+        <div className={buildClassName(styles.block, styles.tableCanvasContainer, 'shared-canvas-container')}>
+          <SharedCanvas isGpu={sharedCanvas!.isGpu} contentKey={block}>{title}</SharedCanvas>
+        </div>
+      ) : title}
+      {withTableCanvas ? (
+        // The canvas spans the scrolled table to scroll with it
+        <div className={buildClassName(styles.tableContent, styles.tableCanvasContainer, 'shared-canvas-container')}>
+          <SharedCanvas isGpu={sharedCanvas!.isGpu} contentKey={block}>{table}</SharedCanvas>
+        </div>
+      ) : table}
     </div>
   );
+}
+
+function hasCanvasContent(block: ApiPageBlock) {
+  let result = false;
+  forEachPageBlocksRichText([block], (text) => {
+    result ||= hasSharedCanvasContent(text);
+  });
+
+  return result;
 }
 
 function MathBlock({ source, richQuoteIndex }: { source: string; richQuoteIndex?: number }) {
@@ -903,6 +929,8 @@ function renderQuoteBlock(
       className={styles.block}
       contentClassName={styles.blockquote}
       canBeCollapsible={block.canCollapse}
+      hasCanvasContent={block.canCollapse && hasCanvasContent(block)}
+      contentKey={block}
       shouldExpand={isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.text))
         || isInQuoteRange(context.focusedQuoteRange, context.quoteIndexes?.get(block.caption))}
       richQuoteIndex={context.quoteIndexes?.get(block.text)}

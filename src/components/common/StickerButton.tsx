@@ -1,5 +1,3 @@
-import type {
-  ElementRef } from '../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
@@ -43,7 +41,6 @@ type OwnProps<T> = {
   selectionOrder?: number;
   isCurrentUserPremium?: boolean;
   shouldIgnorePremium?: boolean;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   withInstantThumb?: boolean;
   forcePlayback?: boolean;
@@ -83,7 +80,6 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   isCurrentUserPremium,
   shouldIgnorePremium,
   noShowPremium,
-  sharedCanvasRef,
   withTranslucentThumb,
   withInstantThumb,
   forcePlayback,
@@ -302,7 +298,6 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           noPlay={!shouldPlay}
           noVideoOnMobile
           withSharedAnimation
-          sharedCanvasRef={sharedCanvasRef}
           withTranslucentThumb={withTranslucentThumb}
           customColor={customColor}
           forceAlways={forcePlayback}

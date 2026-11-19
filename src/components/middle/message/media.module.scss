@@ -35,6 +35,14 @@
   }
 }
 
+// Media stays loaded under a spoiler for its reveal, but never shows through the spoiler
+.frame.withSpoiler {
+  > :global(.full-media),
+  > :global(.thumbnail) {
+    visibility: hidden;
+  }
+}
+
 .frame:global(.interactive) {
   cursor: var(--custom-cursor, pointer);
 }

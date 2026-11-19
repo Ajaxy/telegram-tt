@@ -1,5 +1,6 @@
 import { Node } from '@tiptap/core';
 import type { ElementRef } from '../../../lib/teact/teact';
+import { useMemo } from '../../../lib/teact/teact';
 
 import type { TeactNodeViewComponentProps } from '../TeactNodeViewRenderer';
 
@@ -12,6 +13,8 @@ import {
   type RichMarkdownLink,
 } from '../richMarkdown';
 
+import { SharedCanvasContext } from '../../../hooks/useCoordsInSharedCanvas';
+
 import CustomEmoji from '../../../components/common/CustomEmoji';
 import TeactNodeViewRenderer from '../TeactNodeViewRenderer';
 
@@ -23,7 +26,6 @@ const RE_DOCUMENT_ID = /^-?\d+$/;
 
 export type CustomEmojiNodeOptions = {
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
 };
 
 export const CustomEmojiNode = Node.create<CustomEmojiNodeOptions>({
@@ -48,7 +50,6 @@ export const CustomEmojiNode = Node.create<CustomEmojiNodeOptions>({
   addOptions() {
     return {
       sharedCanvasRef: undefined,
-      sharedCanvasHqRef: undefined,
     };
   },
 
@@ -131,22 +132,26 @@ export function buildCustomEmojiMarkdownAttrs(markdown: RichMarkdownLink) {
   };
 }
 
+// A node view is rendered on its own, so it gets the canvas of the editor here
 function CustomEmojiView({ extension, node }: TeactNodeViewComponentProps) {
+  const { sharedCanvasRef } = extension.options as CustomEmojiNodeOptions;
+  const sharedCanvas = useMemo(() => (
+    sharedCanvasRef ? { canvasRef: sharedCanvasRef } : undefined
+  ), [sharedCanvasRef]);
+
   const documentId = typeof node.attrs.documentId === 'string' ? node.attrs.documentId : undefined;
   if (!documentId) {
     return undefined;
   }
 
-  const { sharedCanvasRef, sharedCanvasHqRef } = extension.options as CustomEmojiNodeOptions;
-
   return (
-    <CustomEmoji
-      documentId={documentId}
-      className={buildClassName(styles.emoji, styles.customEmoji)}
-      sharedCanvasRef={sharedCanvasRef}
-      sharedCanvasHqRef={sharedCanvasHqRef}
-      isSelectable
-      withSharedAnimation
-    />
+    <SharedCanvasContext.Provider value={sharedCanvas}>
+      <CustomEmoji
+        documentId={documentId}
+        className={buildClassName(styles.emoji, styles.customEmoji)}
+        isSelectable
+        withSharedAnimation
+      />
+    </SharedCanvasContext.Provider>
   );
 }

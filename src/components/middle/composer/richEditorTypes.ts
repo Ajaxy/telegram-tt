@@ -25,7 +25,6 @@ export type RichEditorMediaEditHandler = (uploadId: string) => void;
 export type RichEditorRoot = {
   element: HTMLDivElement;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   tooltips?: RichEditorTooltipsConfig;
   getIsRichInputExpanded: () => boolean;
   onReady: (source: HTMLElement) => void;

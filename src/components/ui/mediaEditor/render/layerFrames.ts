@@ -106,7 +106,7 @@ async function loadLottieFrames(tgsUrl: string, side: number, isFirstFrameOnly: 
       const onFrame: CancellableCallback = (frameIndex: number, bitmap: ImageBitmap) => {
         frames[frameIndex] = bitmap;
       };
-      await requestMediaWorker({ name: 'tlottie:renderFrames', args: [key, i, onFrame] }, 0);
+      await requestMediaWorker({ name: 'tlottie:renderFrames', args: [key, i, undefined, onFrame] }, 0);
     }
   } finally {
     void requestMediaWorker({ name: 'tlottie:destroy', args: [key] }, 0);

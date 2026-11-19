@@ -692,6 +692,11 @@
   color: var(--color-white);
 }
 
+// Anchors the shared canvas of the caption text to the box it is sized and measured by
+.captionText {
+  position: relative;
+}
+
 .captionText :global(.custom-emoji) {
   vertical-align: middle;
 }

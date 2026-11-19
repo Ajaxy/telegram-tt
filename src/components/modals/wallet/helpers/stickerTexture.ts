@@ -114,7 +114,7 @@ async function loadFirstFrame(sticker: ApiSticker) {
     await requestMediaWorker({
       name: 'tlottie:init', args: [key, url, ART_SIDE, false, undefined, undefined, onInit],
     }, 0);
-    await requestMediaWorker({ name: 'tlottie:renderFrames', args: [key, 0, onFrame] }, 0);
+    await requestMediaWorker({ name: 'tlottie:renderFrames', args: [key, 0, undefined, onFrame] }, 0);
   } finally {
     void requestMediaWorker({ name: 'tlottie:destroy', args: [key] }, 0);
   }

@@ -60,6 +60,7 @@ import CollapsibleSection from '../../common/CollapsibleSection';
 import FoundPacksRow from '../../common/FoundPacksRow';
 import Icon from '../../common/icons/Icon';
 import InlineStickerSetView, { StickerSetToggleButton } from '../../common/InlineStickerSetView';
+import SharedCanvas from '../../common/SharedCanvas';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from '../../common/StickerSet';
 import TrendingPacksRow from '../../common/TrendingPacksRow';
@@ -162,7 +163,6 @@ const StickerPicker = ({
 
   const containerRef = useRef<HTMLDivElement>();
   const headerRef = useRef<HTMLDivElement>();
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
   const trendingRef = useRef<HTMLDivElement>();
 
   const {
@@ -513,7 +513,6 @@ const StickerPicker = ({
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
     const buttonClassName = buildClassName(styles.stickerCover, index === activeSetIndex && styles.activated);
-    const withSharedCanvas = index < STICKER_PICKER_MAX_SHARED_COVERS;
 
     if (stickerSet.id === RECENT_SYMBOL_SET_ID
       || stickerSet.id === FAVORITE_SYMBOL_SET_ID
@@ -543,7 +542,6 @@ const StickerPicker = ({
               stickerSet={stickerSet as ApiStickerSet}
               noPlay={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
-              sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
               forcePlayback
             />
           )}
@@ -561,7 +559,6 @@ const StickerPicker = ({
           observeIntersection={observeIntersectionForCovers}
           noContextMenu
           isCurrentUserPremium
-          sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
           withTranslucentThumb={isTranslucent}
           onClick={handleCoverClick}
           clickArg={index}
@@ -799,8 +796,11 @@ const StickerPicker = ({
           {!isForEffects && (
             <div ref={headerRef} className={headerClassName}>
               <div className="shared-canvas-container">
-                <canvas ref={sharedCanvasRef} className="shared-canvas" />
-                {allSets.map(renderCover)}
+                <SharedCanvas>
+                  {allSets.slice(0, STICKER_PICKER_MAX_SHARED_COVERS).map(renderCover)}
+                </SharedCanvas>
+                {allSets.slice(STICKER_PICKER_MAX_SHARED_COVERS)
+                  .map((stickerSet, i) => renderCover(stickerSet, i + STICKER_PICKER_MAX_SHARED_COVERS))}
               </div>
             </div>
           )}

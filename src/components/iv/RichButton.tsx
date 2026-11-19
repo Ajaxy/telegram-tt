@@ -10,11 +10,14 @@ import { isKeyboardButtonUnsupportedForEphemeral } from '../../global/helpers/ep
 import { getRichTextPlainText } from '../../global/helpers/richMessage';
 import { selectChatMessageOrEphemeral } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { hasSharedCanvasContent } from '../../util/text/richText';
 
+import { useSharedCanvas } from '../../hooks/useCoordsInSharedCanvas';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
 import Icon from '../common/icons/Icon';
+import SharedCanvas from '../common/SharedCanvas';
 import RichText from './RichText';
 
 import styles from './RichContent.module.scss';
@@ -64,6 +67,10 @@ const RichButton = ({
     e.preventDefault();
   });
 
+  const isReceiptLabel = button.action.type === 'buy' && isReceipt;
+  const sharedCanvas = useSharedCanvas();
+  const withNestedCanvas = sharedCanvas && !isReceiptLabel && hasSharedCanvasContent(text);
+
   return (
     <button
       type="button"
@@ -82,8 +89,12 @@ const RichButton = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
-      <span className={styles.buttonLabel}>
-        {button.action.type === 'buy' && isReceipt ? lang('PaymentReceipt') : (
+      <span className={buildClassName(styles.buttonLabel, withNestedCanvas && 'shared-canvas-container')}>
+        {isReceiptLabel ? lang('PaymentReceipt') : withNestedCanvas ? (
+          <SharedCanvas isGpu={sharedCanvas.isGpu} contentKey={text}>
+            <RichText text={text} {...context} isButtonLabel />
+          </SharedCanvas>
+        ) : (
           <RichText text={text} {...context} isButtonLabel />
         )}
       </span>

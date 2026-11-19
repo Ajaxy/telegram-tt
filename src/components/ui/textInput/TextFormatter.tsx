@@ -10,7 +10,7 @@ import { formatLinkUrl } from '../../../util/browser/url';
 import buildClassName from '../../../util/buildClassName';
 import stopEvent from '../../../util/stopEvent';
 import { EMPTY_RICH_BUTTON } from '../../../util/tiptap/richButton';
-import { isRichEditorBlockquoteActive } from './richEditorFormatting';
+import { hasCustomEmoji, isRichEditorBlockquoteActive } from './richEditorFormatting';
 import { buildRichTextFromTiptapContent, buildTiptapInlineContentFromRichText } from './richText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -305,6 +305,7 @@ const TextFormatter = ({
           shortcutId="monospace"
           className={getFormatButtonClassName('monospace')}
           iconName="monospace"
+          isDisabled={!selectedTextFormats.monospace && hasCustomEmoji(editor.state.doc, range.from, range.to)}
           onClick={() => handleStructuralText('code')}
         />
         <div className={styles.divider} />

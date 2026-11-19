@@ -126,7 +126,8 @@ function getFormatterRange(editor: Editor, state: EditorState, config: RichEdito
 
   let hasUnsuitableNode = false;
   state.doc.nodesBetween(range.from, range.to, (node) => {
-    hasUnsuitableNode ||= isUnsuitableNode(node.type.name);
+    // Custom emoji take formatting like the text around them
+    hasUnsuitableNode ||= node.type.name !== 'customEmoji' && isUnsuitableNode(node.type.name);
     return !hasUnsuitableNode;
   });
   return hasUnsuitableNode ? undefined : range;

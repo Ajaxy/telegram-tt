@@ -191,11 +191,7 @@ const Photo = <T,>({
       return;
     }
 
-    if (!fullMediaData) {
-      setIsLoadAllowed((isAllowed) => !isAllowed);
-      return;
-    }
-
+    // The spoiler hides loading controls, so the first click only reveals the media
     if (isSpoilerShown) {
       if (isMediaNsfw) {
         if (needsAgeVerification) {
@@ -206,6 +202,11 @@ const Photo = <T,>({
         return;
       }
       hideSpoiler();
+      return;
+    }
+
+    if (!fullMediaData) {
+      setIsLoadAllowed((isAllowed) => !isAllowed);
       return;
     }
 
@@ -241,6 +242,7 @@ const Photo = <T,>({
     size === 'pictogram' && styles.pictogram,
     !isUploading && !nonInteractive && 'interactive',
     (width === height || size === 'pictogram') && 'square-image',
+    isSpoilerShown && styles.withSpoiler,
     className,
   );
 

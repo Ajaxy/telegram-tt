@@ -1,4 +1,4 @@
-import type { ElementRef, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import { memo, useMemo } from '../../lib/teact/teact';
 
 import type { ApiPageBlock, ApiPageBlockEmbedPost } from '../../api/types';
@@ -29,8 +29,6 @@ type RichTextContext = {
   threadId?: ThreadId;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
 };
 
 type OwnProps = {

@@ -1,4 +1,3 @@
-import type { ElementRef, FC } from '../../../lib/teact/teact';
 import { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
@@ -17,6 +16,7 @@ import useCoordsInSharedCanvas from '../../../hooks/useCoordsInSharedCanvas';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 import useCustomEmoji from '../../common/hooks/useCustomEmoji';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -31,17 +31,15 @@ type OwnProps = {
   noPlay?: boolean;
   forcePlayback?: boolean;
   observeIntersection: ObserveFn;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
 };
 
-const StickerSetCover: FC<OwnProps> = ({
+const StickerSetCover = ({
   stickerSet,
   size = STICKER_SIZE_PICKER_HEADER,
   noPlay,
   forcePlayback,
   observeIntersection,
-  sharedCanvasRef,
-}) => {
+}: OwnProps) => {
   const { loadStickers } = getActions();
   const containerRef = useRef<HTMLDivElement>();
 
@@ -70,7 +68,8 @@ const StickerSetCover: FC<OwnProps> = ({
   const thumbDataUri = stickerSet.thumbnail?.dataUri || fallbackSticker?.thumbnail?.dataUri;
   const transitionClassNames = useMediaTransitionDeprecated(isReady);
 
-  const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
+  const { sharedCanvasRef, coords } = useCoordsInSharedCanvas(containerRef);
+  const dpr = useDevicePixelRatio();
 
   useEffect(() => {
     if (isIntersecting && shouldFallbackToSticker && !stickerSet.stickers?.length) {
@@ -96,6 +95,7 @@ const StickerSetCover: FC<OwnProps> = ({
           />
         ) : hasAnimatedThumb ? (
           <AnimatedSticker
+            key={dpr}
             className={transitionClassNames}
             tgsUrl={mediaData}
             size={size}

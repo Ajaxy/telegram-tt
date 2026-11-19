@@ -1,4 +1,3 @@
-import type { ElementRef } from '../../../lib/teact/teact';
 import {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
@@ -16,6 +15,7 @@ import useCoordsInSharedCanvas from '../../../hooks/useCoordsInSharedCanvas';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import AnimatedIconWithPreview from '../AnimatedIconWithPreview';
 import CustomEmoji from '../CustomEmoji';
@@ -31,8 +31,6 @@ type OwnProps = {
   selectionOrder?: number;
   loadAndPlay?: boolean;
   observeIntersection?: ObserveFn;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   forcePlayback?: boolean;
   onClick: (reaction: ApiReactionWithPaid) => void;
   onContextMenu?: (reaction: ApiReactionWithPaid) => void;
@@ -45,8 +43,6 @@ const ReactionEmoji = ({
   selectionOrder,
   loadAndPlay,
   observeIntersection,
-  sharedCanvasRef,
-  sharedCanvasHqRef,
   forcePlayback,
   onClick,
   onContextMenu,
@@ -58,7 +54,8 @@ const ReactionEmoji = ({
   ), [availableReactions, reaction]);
   const thumbDataUri = availableReaction?.staticIcon?.thumbnail?.dataUri;
   const animationId = availableReaction?.selectAnimation?.id;
-  const coords = useCoordsInSharedCanvas(ref, sharedCanvasRef);
+  const { sharedCanvasRef, coords } = useCoordsInSharedCanvas(ref);
+  const dpr = useDevicePixelRatio();
   const mediaData = useMedia(
     availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation, 'full') : undefined,
     !animationId,
@@ -110,13 +107,12 @@ const ReactionEmoji = ({
           size={EMOJI_SIZE_PICKER}
           noPlay={!loadAndPlay}
           observeIntersectionForPlaying={observeIntersection}
-          sharedCanvasRef={sharedCanvasRef}
-          sharedCanvasHqRef={sharedCanvasHqRef}
           withTranslucentThumb
           forceAlways={forcePlayback}
         />
       ) : (
         <AnimatedIconWithPreview
+          key={dpr}
           tgsUrl={tgsUrl}
           thumbDataUri={thumbDataUri}
           play={loadAndPlay}
@@ -124,7 +120,7 @@ const ReactionEmoji = ({
           size={EMOJI_SIZE_PICKER}
           isLowPriority
           className={transitionClassNames}
-          sharedCanvas={sharedCanvasRef!.current || undefined}
+          sharedCanvas={sharedCanvasRef?.current || undefined}
           sharedCanvasCoords={coords}
           forceAlways={forcePlayback}
         />

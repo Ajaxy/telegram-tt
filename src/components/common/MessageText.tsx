@@ -9,15 +9,18 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
+import { getIsGpuCanvasAvailable } from '../../lib/gpuCanvas/gpuCanvas';
 import { extractMessageText, stripCustomEmoji } from '../../global/helpers';
 import trimText from '../../util/text/trimText';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 
+import useDerivedState from '../../hooks/useDerivedState';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useUniqueId from '../../hooks/useUniqueId';
 
+import SharedCanvas from './SharedCanvas';
 import TypingWrapper from './TypingWrapper';
 
 interface OwnProps {
@@ -69,9 +72,6 @@ function MessageText({
   canAnimateTextStreaming,
   onTypingAnimationEnd,
 }: OwnProps) {
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
-
   const textCacheBusterRef = useRef(0);
 
   const lang = useLang();
@@ -86,15 +86,23 @@ function MessageText({
     textCacheBusterRef.current += 1;
   }, [text, entities]);
 
+  // Spoilers in previews cannot be revealed, so they keep static dots
+  const canUseGpuCanvas = useDerivedState(getIsGpuCanvasAvailable) && !asPreview && !shouldRenderAsHtml;
+
   const withSharedCanvas = useMemo(() => {
     if (shouldAnimateTyping) {
       return false;
     }
 
     const customEmojisCount = countCustomEmojis(entities);
+    if (canUseGpuCanvas) {
+      return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS || hasSpoilers(entities);
+    }
+
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS
       && !hasSpoileredCustomEmojis(entities);
-  }, [entities, shouldAnimateTyping]);
+  }, [entities, shouldAnimateTyping, canUseGpuCanvas]);
+  const isGpuCanvas = withSharedCanvas && canUseGpuCanvas;
 
   const renderText = useLastCallback((t: ApiFormattedText) => {
     return renderTextWithEntities({
@@ -108,8 +116,6 @@ function MessageText({
       observeIntersectionForLoading,
       observeIntersectionForPlaying,
       withTranslucentThumbs,
-      sharedCanvasRef: withSharedCanvas ? sharedCanvasRef : undefined,
-      sharedCanvasHqRef: withSharedCanvas ? sharedCanvasHqRef : undefined,
       cacheBuster: textCacheBusterRef.current.toString(),
       forcePlayback,
       isInSelectMode,
@@ -130,30 +136,37 @@ function MessageText({
   };
   const shouldRenderTypingPlaceholder = !('previousLocalId' in messageOrStory) || !messageOrStory.previousLocalId;
 
-  return (
-    <>
-      {[
-        withSharedCanvas && <canvas key="shared-canvas" ref={sharedCanvasRef} className="shared-canvas" />,
-        withSharedCanvas && <canvas key="shared-canvas-hq" ref={sharedCanvasHqRef} className="shared-canvas" />,
-        shouldAnimateTyping ? (
-          <TypingWrapper
-            key="typing-wrapper"
-            formattedText={textToRender}
-            renderText={renderText}
-            shouldAnimateMask={canAnimateTextStreaming}
-            noInitialAnimation={noInitialTypingAnimation}
-            shouldRenderPlaceholder={shouldRenderTypingPlaceholder}
-            onCompleted={onTypingAnimationEnd}
-            completionKey={messageOrStory.id}
-          />
-        ) : renderText(textToRender),
-      ].flat().filter(Boolean)}
-    </>
-  );
+  if (shouldAnimateTyping) {
+    return (
+      <TypingWrapper
+        formattedText={textToRender}
+        renderText={renderText}
+        shouldAnimateMask={canAnimateTextStreaming}
+        noInitialAnimation={noInitialTypingAnimation}
+        shouldRenderPlaceholder={shouldRenderTypingPlaceholder}
+        onCompleted={onTypingAnimationEnd}
+        completionKey={messageOrStory.id}
+      />
+    );
+  }
+
+  if (withSharedCanvas) {
+    return (
+      <SharedCanvas isGpu={isGpuCanvas} contentKey={textCacheBusterRef.current}>
+        {renderText(textToRender)}
+      </SharedCanvas>
+    );
+  }
+
+  return <>{renderText(textToRender)}</>;
 }
 
 function countCustomEmojis(entities?: ApiMessageEntity[]) {
   return entities?.filter((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji).length || 0;
+}
+
+function hasSpoilers(entities?: ApiMessageEntity[]) {
+  return Boolean(entities?.some((entity) => entity.type === ApiMessageEntityTypes.Spoiler));
 }
 
 function hasSpoileredCustomEmojis(entities?: ApiMessageEntity[]) {

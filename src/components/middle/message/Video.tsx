@@ -224,20 +224,11 @@ const Video = <T,>({
       return;
     }
 
-    if (!isPaidPreview && isDownloading) {
-      cancelMediaDownload({ media: video });
-      return;
-    }
-
-    if (!fullMediaData) {
-      setIsLoadAllowed((isAllowed) => !isAllowed);
-      return;
-    }
-
     if (fullMediaData && !isPlayAllowed) {
       setIsPlayAllowed(true);
     }
 
+    // The spoiler hides loading controls, so the first click only reveals the media
     if (isSpoilerShown) {
       if (isMediaNsfw) {
         if (needsAgeVerification) {
@@ -248,6 +239,16 @@ const Video = <T,>({
         return;
       }
       hideSpoiler();
+      return;
+    }
+
+    if (!isPaidPreview && isDownloading) {
+      cancelMediaDownload({ media: video });
+      return;
+    }
+
+    if (!fullMediaData) {
+      setIsLoadAllowed((isAllowed) => !isAllowed);
       return;
     }
 
@@ -271,6 +272,7 @@ const Video = <T,>({
     mediaStyles.frame,
     mediaStyles[layout],
     !isUploading && 'interactive',
+    isSpoilerShown && mediaStyles.withSpoiler,
     className,
   );
 

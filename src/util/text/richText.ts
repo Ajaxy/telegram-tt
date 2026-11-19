@@ -17,6 +17,18 @@ export function hasRichText(text: ApiRichText): boolean {
   }
 }
 
+export function hasSharedCanvasContent(text?: ApiRichText) {
+  let result = false;
+  if (text) {
+    forEachRichTextNode(text, (node) => {
+      result ||= node.type === 'spoiler' || node.type === 'customEmoji';
+      return !result;
+    });
+  }
+
+  return result;
+}
+
 // Visits the node and its descendants; return `false` to skip the node's children
 export function forEachRichTextNode(text: ApiRichText, callback: (node: ApiRichText) => boolean | void) {
   if (callback(text) === false) return;

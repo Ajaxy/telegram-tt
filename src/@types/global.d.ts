@@ -257,6 +257,7 @@ interface HTMLCanvasElement {
 
 declare const GPUBufferUsage: {
   readonly COPY_DST: GPUBufferUsageFlags;
+  readonly STORAGE: GPUBufferUsageFlags;
   readonly VERTEX: GPUBufferUsageFlags;
   readonly UNIFORM: GPUBufferUsageFlags;
 };

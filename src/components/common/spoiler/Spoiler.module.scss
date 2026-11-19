@@ -1,0 +1,87 @@
+@property --spoiler-morph-radius {
+  inherits: false;
+  initial-value: 0px;
+  syntax: "<length>";
+}
+
+.concealed {
+  cursor: var(--custom-cursor, pointer);
+  border-radius: 0.5rem;
+  background-image: url('../../../assets/spoiler-dots-black.webp');
+  background-size: auto min(100%, 1.125rem);
+
+  :global(html.theme-dark) &,
+  :global(html.theme-light .ListItem.selected) &,
+  :global(.ActionMessage) &,
+  :global(.MediaViewerFooter) &,
+  :global(#StoryViewer) & {
+    background-image: url('../../../assets/spoiler-dots-white.webp');
+  }
+
+  :global(.emoji-only) & {
+    background-size: auto 1.125rem;
+  }
+
+  // Particles are drawn by the GPU canvas of the container, also over the white dots of story captions.
+  // The transition lets it notice color changes, such as of the theme, to repaint particles.
+  :global(html) &.gpu,
+  :global(#StoryViewer) &.gpu {
+    background-image: none;
+    transition: color 50ms linear;
+  }
+}
+
+.animated {
+  animation: pulse-opacity-light 1.75s linear infinite;
+
+  :global(body.in-background) & {
+    animation-play-state: paused;
+  }
+
+  :global(html) &.gpu {
+    animation: none;
+  }
+}
+
+.content {
+  opacity: 1;
+  transition: opacity 250ms ease;
+
+  :global(body.no-page-transitions) & {
+    transition: none;
+  }
+}
+
+.concealed .content {
+  user-select: none;
+  opacity: 0;
+}
+
+// Timings follow `SPOILER_MORPH`, so the text appears where particles arrive to their glyphs
+.revealing .content {
+  mask-repeat: no-repeat;
+  transition: none;
+  animation: spoiler-reveal var(--spoiler-morph-duration) linear var(--spoiler-morph-delay) both;
+}
+
+@keyframes pulse-opacity-light {
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  75% {
+    opacity: 1;
+  }
+}
+
+@keyframes spoiler-reveal {
+  from {
+    --spoiler-morph-radius: 0px;
+  }
+
+  to {
+    --spoiler-morph-radius: var(--spoiler-morph-max-radius);
+  }
+}

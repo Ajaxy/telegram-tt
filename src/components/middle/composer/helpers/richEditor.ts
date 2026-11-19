@@ -121,7 +121,6 @@ type RichEditorOrderedListUpdate = {
 type CreateRichEditorParams = {
   element: HTMLDivElement;
   sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   content: TiptapJsonContent;
   getIsRichInputExpanded: () => boolean;
   getCanInsertMedia: (type: RichEditorMediaItem['type']) => boolean;
@@ -193,7 +192,6 @@ const RichEditorHistory = Extension.create({
 export function __createRichEditor({
   element,
   sharedCanvasRef,
-  sharedCanvasHqRef,
   content,
   getIsRichInputExpanded,
   getCanInsertMedia,
@@ -211,7 +209,7 @@ export function __createRichEditor({
       getIsRichInputExpanded,
       onMediaEdit,
       onMediaFiles,
-      { sharedCanvasRef, sharedCanvasHqRef },
+      { sharedCanvasRef },
     ),
     editorProps: {
       // Undo a just-applied input rule before structural `Backspace` handlers, since opener-last
@@ -230,7 +228,7 @@ export function __createRichEditor({
     },
     onUpdate: ({ editor }) => {
       onUpdate(editor);
-      requestSharedCanvasCoordsRecalculation(sharedCanvasRef, sharedCanvasHqRef);
+      requestSharedCanvasCoordsRecalculation(sharedCanvasRef);
     },
     onDestroy: () => removeRichEditorDropIndicator(richEditor.view),
   });

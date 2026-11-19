@@ -1,5 +1,6 @@
 import type { EmojiFitzModifier } from '../../util/emoji/skinTone';
 import type { CancellableCallback } from '../../util/PostMessageConnector';
+import type { GpuCanvasFrame } from '../gpuCanvas/types';
 
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import simdWasmUrl from './tlottie.wasm?url';
@@ -66,6 +67,7 @@ const renderers = new Map<string, {
   customColor?: [number, number, number];
 }>();
 const rendererOperations = new Map<string, Promise<unknown>>();
+let gpuCanvasPort: MessagePort | undefined;
 
 async function init(
   key: string,
@@ -180,8 +182,9 @@ function calcParams(instance: number, isLowPriority: boolean) {
   };
 }
 
+// A frame for the GPU canvas goes to its worker, and the origin only learns that it is ready
 async function renderFrames(
-  key: string, frameIndex: number, onProgress: CancellableCallback,
+  key: string, frameIndex: number, gpuGeneration: number | undefined, onProgress: CancellableCallback,
 ) {
   if (!tlottie) {
     await tlottiePromise;
@@ -200,7 +203,18 @@ async function renderFrames(
     return;
   }
 
-  imageData.data.set(new Uint8Array(tlottie!.memory.buffer, pixelsPtr, imgSize * imgSize * RGBA_BYTES_PER_PIXEL));
+  const pixels = new Uint8Array(tlottie!.memory.buffer, pixelsPtr, imgSize * imgSize * RGBA_BYTES_PER_PIXEL);
+
+  if (gpuGeneration !== undefined) {
+    const { buffer } = pixels.slice();
+    gpuCanvasPort!.postMessage({
+      renderId: key, generation: gpuGeneration, frameIndex, size: imgSize, pixels: buffer,
+    } satisfies GpuCanvasFrame, [buffer]);
+    onProgress(frameIndex);
+    return;
+  }
+
+  imageData.data.set(pixels);
 
   const imageBitmap = await createImageBitmap(imageData);
 
@@ -209,6 +223,10 @@ async function renderFrames(
 
 function packColor([r, g, b]: [number, number, number]) {
   return (r << 16) | (g << 8) | b;
+}
+
+function connectGpuCanvas(port: MessagePort) {
+  gpuCanvasPort = port;
 }
 
 function destroy(key: string) {
@@ -249,6 +267,7 @@ const api = {
     enqueueRendererOperation(args[0], () => renderFrames(...args))
   ),
   'tlottie:destroy': (key: string) => enqueueRendererOperation(key, () => destroy(key)),
+  'tlottie:connectGpuCanvas': connectGpuCanvas,
 };
 
 createWorkerInterface(api, 'media');

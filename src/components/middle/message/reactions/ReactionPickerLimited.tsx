@@ -1,7 +1,6 @@
-import type { FC } from '../../../../lib/teact/teact';
 import {
   memo,
-  useMemo, useRef,
+  useMemo,
 } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
@@ -22,6 +21,7 @@ import useAppLayout from '../../../../hooks/useAppLayout';
 import useWindowSize from '../../../../hooks/window/useWindowSize';
 
 import ReactionEmoji from '../../../common/reactions/ReactionEmoji';
+import SharedCanvas from '../../../common/SharedCanvas';
 
 import styles from './ReactionPickerLimited.module.scss';
 
@@ -50,7 +50,7 @@ const MODAL_MAX_WIDTH_REM = 26.25;
 const GRID_GAP_DESKTOP_REM = 0.625;
 const GRID_GAP_MOBILE_REM = 0.5;
 
-const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
+const ReactionPickerLimited = ({
   loadAndPlay,
   enabledReactions,
   availableReactions,
@@ -61,9 +61,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   reactionsLimit,
   onReactionSelect,
   onReactionContext,
-}) => {
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
+}: OwnProps & StateProps) => {
   const { width: windowWidth } = useWindowSize();
   const { isTouchScreen } = useAppLayout();
 
@@ -120,26 +118,24 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
     <div className={styles.root} style={`height: ${pickerHeight}px`}>
       <div className={buildClassName(styles.wrapper, isTouchScreen ? 'no-scrollbar' : 'custom-scroll')}>
         <div className="symbol-set-container shared-canvas-container">
-          <canvas ref={sharedCanvasRef} className="shared-canvas" />
-          <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
-          {allAvailableReactions.map((reaction) => {
-            const reactionId = getReactionKey(reaction);
-            const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
+          <SharedCanvas>
+            {allAvailableReactions.map((reaction) => {
+              const reactionId = getReactionKey(reaction);
+              const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
-            return (
-              <ReactionEmoji
-                key={reactionId}
-                reaction={reaction}
-                isSelected={isSelected}
-                loadAndPlay={loadAndPlay}
-                availableReactions={availableReactions}
-                onClick={onReactionSelect}
-                onContextMenu={onReactionContext}
-                sharedCanvasRef={sharedCanvasRef}
-                sharedCanvasHqRef={sharedCanvasHqRef}
-              />
-            );
-          })}
+              return (
+                <ReactionEmoji
+                  key={reactionId}
+                  reaction={reaction}
+                  isSelected={isSelected}
+                  loadAndPlay={loadAndPlay}
+                  availableReactions={availableReactions}
+                  onClick={onReactionSelect}
+                  onContextMenu={onReactionContext}
+                />
+              );
+            })}
+          </SharedCanvas>
         </div>
       </div>
     </div>

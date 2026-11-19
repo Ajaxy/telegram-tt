@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from '../../lib/teact/teact';
+import { memo, useEffect, useMemo, useState } from '../../lib/teact/teact';
 import { getGlobal, getPromiseActions } from '../../global';
 
 import type {
@@ -11,6 +11,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ThemeKey, ThreadId } from '../../types';
 
 import { RICH_CONTENT_BODY_FONT_SIZE_PX } from '../../config';
+import { getIsGpuCanvasAvailable } from '../../lib/gpuCanvas/gpuCanvas';
 import { isRichMediaMessage } from '../../global/helpers';
 import { selectChatMessage } from '../../global/selectors';
 import { selectMessageTextSize } from '../../global/selectors/sharedState';
@@ -19,11 +20,13 @@ import { findRichQuoteRange, getRichQuoteTexts } from '../../util/text/richQuote
 import { forEachPageBlocksRichText, forEachRichTextNode } from '../../util/text/richText';
 
 import useSelector from '../../hooks/data/useSelector';
+import useDerivedState from '../../hooks/useDerivedState';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
 import RichContent from '../iv/RichContent';
 import Button from '../ui/Button';
+import SharedCanvas from './SharedCanvas';
 
 import styles from './MessageRichText.module.scss';
 
@@ -62,12 +65,11 @@ const MessageRichText = ({
 }: OwnProps) => {
   const { loadRichMessage } = getPromiseActions();
 
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
-  const sharedCanvasHqRef = useRef<HTMLCanvasElement>();
   const [expandedMessageKey, setExpandedMessageKey] = useState<string>();
   const [loadingMessageKey, setLoadingMessageKey] = useState<string>();
   const messageTextSize = useSelector(selectMessageTextSize);
   const lang = useLang();
+  const canUseGpuCanvas = useDerivedState(getIsGpuCanvasAvailable);
 
   const richMessage = forcedRichMessage || message.content.richMessage;
   const messageKey = `${message.chatId}-${message.id}`;
@@ -98,9 +100,12 @@ const MessageRichText = ({
       return false;
     }
 
-    const { count, hasSpoilered } = getCustomEmojisInfo(blocks);
+    const { count, hasSpoilers, hasSpoilered } = getCustomEmojisInfo(blocks);
+    if (canUseGpuCanvas) return count >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS || hasSpoilers;
+
     return count >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS && !hasSpoilered;
-  }, [blocks, message.isTypingDraft]);
+  }, [blocks, message.isTypingDraft, canUseGpuCanvas]);
+  const isGpuCanvas = withSharedCanvas && canUseGpuCanvas;
 
   const handleShowMore = useLastCallback(() => {
     if (!richMessage?.isPart) {
@@ -129,34 +134,36 @@ const MessageRichText = ({
     return undefined;
   }
 
+  const content = (
+    <RichContent
+      blocks={blocks}
+      focusedQuoteRange={quoteRange}
+      noQuoting={Boolean(forcedRichMessage)}
+      isRtl={richMessage.isRtl}
+      isOwn={isOwn}
+      noAvatars={noAvatars}
+      canAutoLoadMedia={canAutoLoadMedia}
+      isProtected={isProtected}
+      noPlaylist={noPlaylist}
+      // Scheduled, ephemeral and draft messages have no media list, a translation can't be mapped to original blocks
+      withMediaNavigation={isRichMediaMessage(message) && !forcedRichMessage
+        && !message.isScheduled && !message.isEphemeral && !message.isTypingDraft}
+      theme={theme}
+      fontSizeAdjust={messageTextSize / RICH_CONTENT_BODY_FONT_SIZE_PX}
+      chatId={message.chatId}
+      messageId={message.id}
+      threadId={threadId}
+      observeIntersectionForLoading={observeIntersectionForLoading}
+      observeIntersectionForPlaying={observeIntersectionForPlaying}
+    />
+  );
+
   return (
     <div className={buildClassName(styles.root, isOwn && styles.own)}>
       <div className={shouldCollapse ? styles.collapsedContent : undefined}>
-        {withSharedCanvas && <canvas key="shared-canvas" ref={sharedCanvasRef} className="shared-canvas" />}
-        {withSharedCanvas && <canvas key="shared-canvas-hq" ref={sharedCanvasHqRef} className="shared-canvas" />}
-        <RichContent
-          blocks={blocks}
-          focusedQuoteRange={quoteRange}
-          noQuoting={Boolean(forcedRichMessage)}
-          isRtl={richMessage.isRtl}
-          isOwn={isOwn}
-          noAvatars={noAvatars}
-          canAutoLoadMedia={canAutoLoadMedia}
-          isProtected={isProtected}
-          noPlaylist={noPlaylist}
-          // Scheduled, ephemeral and draft messages have no media list, a translation can't be mapped to original blocks
-          withMediaNavigation={isRichMediaMessage(message) && !forcedRichMessage
-            && !message.isScheduled && !message.isEphemeral && !message.isTypingDraft}
-          theme={theme}
-          fontSizeAdjust={messageTextSize / RICH_CONTENT_BODY_FONT_SIZE_PX}
-          chatId={message.chatId}
-          messageId={message.id}
-          threadId={threadId}
-          observeIntersectionForLoading={observeIntersectionForLoading}
-          observeIntersectionForPlaying={observeIntersectionForPlaying}
-          sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
-          sharedCanvasHqRef={withSharedCanvas ? sharedCanvasHqRef : undefined}
-        />
+        {withSharedCanvas ? (
+          <SharedCanvas isGpu={isGpuCanvas} contentKey={blocks}>{content}</SharedCanvas>
+        ) : content}
       </div>
       {shouldCollapse && (
         <div className={styles.readMoreWrapper}>
@@ -180,6 +187,7 @@ const MessageRichText = ({
 
 function getCustomEmojisInfo(blocks: ApiPageBlock[]) {
   let count = 0;
+  let hasSpoilers = false;
   let hasSpoilered = false;
 
   const visit = (text: ApiRichText, isInSpoiler?: boolean) => forEachRichTextNode(text, (node) => {
@@ -187,6 +195,7 @@ function getCustomEmojisInfo(blocks: ApiPageBlock[]) {
       count++;
       hasSpoilered ||= Boolean(isInSpoiler);
     } else if (node.type === 'spoiler' && !isInSpoiler) {
+      hasSpoilers = true;
       visit(node.text, true);
       return false;
     }
@@ -195,7 +204,7 @@ function getCustomEmojisInfo(blocks: ApiPageBlock[]) {
   });
   forEachPageBlocksRichText(blocks, (text) => visit(text));
 
-  return { count, hasSpoilered };
+  return { count, hasSpoilers, hasSpoilered };
 }
 
 export default memo(MessageRichText);

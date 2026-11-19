@@ -8,9 +8,11 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 
 import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
+import { useSharedCanvas } from '../../../hooks/useCoordsInSharedCanvas';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Icon from '../icons/Icon';
+import SharedCanvas from '../SharedCanvas';
 
 import styles from './Blockquote.module.scss';
 
@@ -25,6 +27,8 @@ type OwnProps = {
   recalculationKey?: unknown;
   ignoredLines?: number;
   isCollapsed?: boolean;
+  hasCanvasContent?: boolean;
+  contentKey?: unknown;
   children: TeactNode;
   onCollapseChange?: (isCollapsed: boolean) => void;
 };
@@ -42,6 +46,8 @@ const Blockquote = ({
   recalculationKey,
   ignoredLines,
   isCollapsed: isCollapsedControlled,
+  hasCanvasContent,
+  contentKey,
   children,
   onCollapseChange,
 }: OwnProps) => {
@@ -60,6 +66,8 @@ const Blockquote = ({
   const shouldCollapse = Boolean(canBeCollapsible && isCollapsed);
   const hasCollapseIcon = canBeCollapsible && isCollapsible;
   const canExpand = !isToggleDisabled && shouldCollapse;
+  const sharedCanvas = useSharedCanvas();
+  const withNestedCanvas = hasCanvasContent && canBeCollapsible && sharedCanvas;
 
   const handleExpand = useLastCallback(() => {
     setIsCollapsed(false);
@@ -82,8 +90,13 @@ const Blockquote = ({
         data-collapsed={shouldCollapse || undefined}
         contentEditable={shouldCollapse ? false : undefined}
       >
-        <div className={styles.gradientContainer} data-rich-copy-wrapper>
-          {children}
+        <div
+          className={buildClassName(styles.gradientContainer, withNestedCanvas && 'shared-canvas-container')}
+          data-rich-copy-wrapper
+        >
+          {withNestedCanvas ? (
+            <SharedCanvas isGpu={sharedCanvas.isGpu} contentKey={contentKey}>{children}</SharedCanvas>
+          ) : children}
         </div>
         {hasCollapseIcon && (
           <div

@@ -100,7 +100,8 @@ export const EmojiNode = Node.create({
                   continue;
                 }
 
-                transaction.replaceRangeWith(from, from + match[0].length, this.type.create(attrs));
+                const emojiNode = this.type.create(attrs, undefined, node.marks);
+                transaction.replaceRangeWith(from, from + match[0].length, emojiNode);
                 transaction.setStoredMarks(transaction.doc.resolve(from).marks());
               }
             });

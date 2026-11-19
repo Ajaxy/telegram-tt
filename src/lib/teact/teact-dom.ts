@@ -236,7 +236,8 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         renderChildren(
           $current,
           $new as VirtualElementComponent | VirtualElementFragment,
-          currentContext,
+          // A context provider passes its value to the children it adds on update too
+          (isComponent && ($new as VirtualElementComponent).componentInstance.context) || currentContext,
           parentEl,
           nextSibling,
           options.forceMoveToEnd,

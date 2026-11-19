@@ -115,6 +115,24 @@ const MANUAL_BUNDLES: BundleDefinition[] = [
   { key: 'wallet', label: '💎 Wallet' },
 ];
 const MANUAL_BUNDLE_ASSET_EXTENSIONS = ['.js', '.css'];
+const KNOWN_WORKERS = [
+  { pattern: /^service\.worker-[\w-]+\.js$/, key: 'service-worker', label: '🛠️ Service worker' },
+  { pattern: /^worker-[\w-]+\.js$/, key: 'gramjs-worker', label: '⚙️ GramJS worker' },
+  { pattern: /^fasttext\.worker-[\w-]+\.js$/, key: 'fasttext-worker', label: '🌐 FastText worker' },
+  { pattern: /^index\.worker-[\w-]+\.js$/, key: 'media-worker', label: '🎞️ Media worker' },
+  {
+    pattern: /^videoProcessing\.worker-[\w-]+\.js$/,
+    key: 'video-processing-worker',
+    label: '🎬 Video processing worker',
+  },
+  { pattern: /^sharedState\.worker-[\w-]+\.js$/, key: 'shared-state-worker', label: '🔄 Shared state worker' },
+  { pattern: /^latex\.worker-[\w-]+\.js$/, key: 'latex-worker', label: '🧮 LaTeX worker' },
+  { pattern: /^widgetSandbox\.worker-[\w-]+\.js$/, key: 'widget-sandbox-worker', label: '🧩 Widget sandbox worker' },
+];
+// Other workers get entries named after their files, such as `gpuCanvas.worker-<hash>.js`
+// or `assets/encoderWorker.min-<hash>.js` of a dependency
+const OTHER_WORKER_REGEX = /^(?:assets\/)?([\w-]+?)(?:\.worker|Worker(?:\.min)?)-[\w-]+\.js$/;
+const OTHER_WORKER_ICON = '🧵';
 const FILE_TYPES: FileTypeDefinition[] = [
   { key: 'js', label: '🟨 JS', extensions: ['.js', '.mjs', '.cjs'] },
   { key: 'css', label: '🎨 CSS', extensions: ['.css'] },
@@ -216,7 +234,6 @@ function analyzeStats(stats: BundleStats) {
   const entries = new Map<string, EntryStats>();
   const bundles = createManualBundleStatsMap();
   const fileTypes = createFileTypeStatsMap();
-  const chunkFiles = new Set(stats.chunks?.flatMap(({ files = [] }) => files) || []);
   const initialFiles = new Set(
     stats.chunks
       ?.filter(({ entry, initial }) => entry || initial)
@@ -233,7 +250,7 @@ function analyzeStats(stats: BundleStats) {
     addFileTypeSize(fileTypes, name, size);
     addManualBundleSize(bundles, name, size);
 
-    const workerEntry = getWorkerEntry(name, chunkFiles);
+    const workerEntry = getWorkerEntry(name);
     if (workerEntry) {
       const previousSize = entries.get(workerEntry.key)?.size || ZERO_SIZE;
       entries.set(workerEntry.key, {
@@ -434,47 +451,15 @@ function createFileTypeStats({ key, label }: (typeof FILE_TYPES)[number]): FileT
   };
 }
 
-function getWorkerEntry(name: string, chunkFiles: Set<string>) {
-  if (/^service\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'service-worker', label: '🛠️ Service worker' };
-  }
+function getWorkerEntry(name: string) {
+  const knownWorker = KNOWN_WORKERS.find(({ pattern }) => pattern.test(name));
+  if (knownWorker) return { key: knownWorker.key, label: knownWorker.label };
 
-  if (chunkFiles.has(name) && !isWorkerAssetName(name)) return undefined;
+  const workerName = OTHER_WORKER_REGEX.exec(name)?.[1];
+  if (!workerName) return undefined;
 
-  if (/^worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'gramjs-worker', label: '⚙️ GramJS worker' };
-  }
-
-  if (/^fasttext\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'fasttext-worker', label: '🌐 FastText worker' };
-  }
-
-  if (/^index\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'media-worker', label: '🎞️ Media worker' };
-  }
-
-  if (/^videoProcessing\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'video-processing-worker', label: '🎬 Video processing worker' };
-  }
-
-  if (/^sharedState\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'shared-state-worker', label: '🔄 Shared state worker' };
-  }
-
-  if (/^latex\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'latex-worker', label: '🧮 LaTeX worker' };
-  }
-
-  if (/^widgetSandbox\.worker-[\w-]+\.js$/.test(name)) {
-    return { key: 'widget-sandbox-worker', label: '🧩 Widget sandbox worker' };
-  }
-
-  return undefined;
-}
-
-function isWorkerAssetName(name: string) {
-  return /^(?:worker|(?:fasttext|index|videoProcessing|sharedState|latex|widgetSandbox)\.worker)-[\w-]+\.js$/
-    .test(name);
+  const label = `${OTHER_WORKER_ICON} ${workerName} worker`;
+  return { key: getEntryKey(label), label };
 }
 
 function isIgnoredAsset(name: string) {

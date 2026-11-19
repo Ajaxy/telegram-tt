@@ -38,6 +38,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import Loading from '../ui/Loading';
 import MenuItem from '../ui/MenuItem';
 import Modal from '../ui/Modal';
+import SharedCanvas from './SharedCanvas';
 import StickerButton from './StickerButton';
 
 import './StickerSetModal.scss';
@@ -84,7 +85,6 @@ const StickerSetModal = ({
   } = getActions();
 
   const containerRef = useRef<HTMLDivElement>();
-  const sharedCanvasRef = useRef<HTMLCanvasElement>();
 
   const lang = useLang();
 
@@ -224,19 +224,19 @@ const StickerSetModal = ({
         <>
           <div ref={containerRef} className="stickers custom-scroll" onScroll={handleContentScroll}>
             <div className="shared-canvas-container stickers-grid">
-              <canvas ref={sharedCanvasRef} className="shared-canvas" />
-              {renderingStickerSet.stickers.map((sticker) => (
-                <StickerButton
-                  sticker={sticker}
-                  size={isEmoji ? EMOJI_SIZE_MODAL : STICKER_SIZE_MODAL}
-                  observeIntersection={observeIntersection}
-                  onClick={canSendStickers && !isEmoji ? handleSelect : undefined}
-                  clickArg={sticker}
-                  isSavedMessages={isSavedMessages}
-                  isCurrentUserPremium={isCurrentUserPremium}
-                  sharedCanvasRef={sharedCanvasRef}
-                />
-              ))}
+              <SharedCanvas>
+                {renderingStickerSet.stickers.map((sticker) => (
+                  <StickerButton
+                    sticker={sticker}
+                    size={isEmoji ? EMOJI_SIZE_MODAL : STICKER_SIZE_MODAL}
+                    observeIntersection={observeIntersection}
+                    onClick={canSendStickers && !isEmoji ? handleSelect : undefined}
+                    clickArg={sticker}
+                    isSavedMessages={isSavedMessages}
+                    isCurrentUserPremium={isCurrentUserPremium}
+                  />
+                ))}
+              </SharedCanvas>
             </div>
           </div>
           <div className="button-wrapper">

@@ -1,11 +1,9 @@
 import type { ElementRef } from '../../lib/teact/teact';
 import { memo, useRef, useState } from '../../lib/teact/teact';
-import { getGlobal } from '../../global';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes, type ApiSticker } from '../../api/types';
 
-import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
 
@@ -32,8 +30,6 @@ type OwnProps = {
   shouldNotLoop?: boolean;
   isSelectable?: boolean;
   withSharedAnimation?: boolean;
-  sharedCanvasRef?: ElementRef<HTMLCanvasElement>;
-  sharedCanvasHqRef?: ElementRef<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   shouldPreloadPreview?: boolean;
   skipPreview?: boolean;
@@ -70,8 +66,6 @@ const CustomEmoji = ({
   shouldNotLoop,
   isSelectable,
   withSharedAnimation,
-  sharedCanvasRef,
-  sharedCanvasHqRef,
   withTranslucentThumb,
   shouldPreloadPreview,
   skipPreview,
@@ -123,8 +117,6 @@ const CustomEmoji = ({
     }
   });
 
-  const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(getGlobal(), customEmoji.stickerSetInfo);
-
   return (
     <div
       ref={containerRef}
@@ -172,7 +164,6 @@ const CustomEmoji = ({
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withSharedAnimation={withSharedAnimation}
-          sharedCanvasRef={isHq ? sharedCanvasHqRef : sharedCanvasRef}
           withTranslucentThumb={withTranslucentThumb}
           onVideoEnded={handleVideoEnded}
           onAnimatedStickerLoop={handleStickerLoop}

@@ -8,32 +8,52 @@
 
   width: 100%;
   height: 100%;
-
-  background-color: var(--color-text-secondary); // Fallback before canvas is prepared
 }
 
-.mask-animation:global(.closing) {
-  mask-image: url("../../assets/spoilers/mask.svg"), linear-gradient(#ffffff, #ffffff);
-  mask-repeat: no-repeat;
-  mask-position: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)), center center;
-  mask-size: 0%;
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
+@property --reveal-radius {
+  inherits: false;
+  initial-value: 0%;
+  syntax: "<percentage>";
+}
 
-  :global(body:not(.no-page-transitions)) & {
-    animation: 500ms ease-in circle-cut forwards;
+// The cut skips particles, which leave with their own ripple after it.
+// A gradient needs no image to load, so the media does not flash unmasked on the first reveal.
+.mask-animation:global(.closing) {
+  .canvas,
+  .dots {
+    mask-image:
+      radial-gradient(
+        circle at calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)),
+        transparent calc(var(--reveal-radius) - 4%),
+        #000000 var(--reveal-radius)
+      );
+
+    :global(body:not(.no-page-transitions)) & {
+      // A quadratic ease-in, matching the particle ripple of the GPU canvas worker
+      animation: 500ms cubic-bezier(0.3333, 0, 0.6667, 0.3333) circle-cut forwards;
+    }
   }
 
   .dots {
     transform: scale(1.2);
   }
+
+  .nsfw {
+    opacity: 0;
+  }
 }
 
+// Dims the blurred media under both particles and fallback dots, like Telegram Android
 .canvas {
   display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
+  // Fallback before the blurred media is drawn
+  background-color: var(--color-text-secondary);
+  filter: brightness(0.9);
 }
 
 .nsfw {
@@ -52,10 +72,21 @@
   color: white;
 
   background-color: rgba(0, 0, 0, 0.25);
+
+  transition: opacity 250ms ease;
 }
 
 .nsfwIcon {
   font-size: 1.25rem;
+}
+
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
 }
 
 .dots {
@@ -77,7 +108,7 @@
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.25) var(--background-url);
+  background: var(--background-url);
   background-size: var(--background-size) var(--background-size);
 
   transition: transform 500ms ease-in;
@@ -155,11 +186,12 @@
 
 @keyframes circle-cut {
   0% {
-    mask-size: 0%, 100%;
+    --reveal-radius: 0%;
   }
 
+  // Past the farthest corner by the soft edge, so nothing of the spoiler stays
   100% {
-    mask-size: 350%, 100%;
+    --reveal-radius: 104%;
   }
 }
 

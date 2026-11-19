@@ -73,6 +73,11 @@ export function buildRichEditorFormatting(getIsRichInputExpanded: () => boolean)
             return commands.unsetMark(CODE_MARK_TYPE);
           }
 
+          // Code can't hold custom emoji, and the text of the range would turn them into line breaks
+          if (hasCustomEmoji(state.doc, range.from, range.to)) {
+            return false;
+          }
+
           const text = state.doc.textBetween(range.from, range.to, BLOCK_SEPARATOR, BLOCK_SEPARATOR).trim();
           if (!text) {
             return false;
@@ -292,4 +297,14 @@ function restoreMappedSelection(transaction: Transaction, range: EditorRange) {
     transaction.doc.resolve(Math.min(from, to)),
     transaction.doc.resolve(Math.max(from, to)),
   ));
+}
+
+export function hasCustomEmoji(doc: ProseMirrorNode, from: number, to: number) {
+  let result = false;
+  doc.nodesBetween(from, to, (node) => {
+    result ||= node.type.name === 'customEmoji';
+    return !result;
+  });
+
+  return result;
 }
