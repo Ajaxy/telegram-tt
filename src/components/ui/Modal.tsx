@@ -304,6 +304,7 @@ const Modal = (props: OwnProps) => {
                 />
                 <Menu
                   ref={menuRef}
+                  className="with-menu-transitions"
                   isOpen={isContextMenuOpen}
                   anchor={contextMenuAnchor}
                   autoClose

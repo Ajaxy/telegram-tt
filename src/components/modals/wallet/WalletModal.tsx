@@ -715,7 +715,11 @@ const WalletModal = ({
       )}
       {screen === WalletScreen.Transaction && (
         <ModalHeaderAction>
-          <DropdownMenu className={styles.headerMenu} trigger={HeaderMenuButton} positionX="right">
+          <DropdownMenu
+            className={buildClassName(styles.headerMenu, 'with-menu-transitions')}
+            trigger={HeaderMenuButton}
+            positionX="right"
+          >
             {Boolean(selectedTransaction?.txHash) && (
               <MenuItem icon="search" onClick={handleOpenInExplorer}>{lang('WalletViewInExplorer')}</MenuItem>
             )}

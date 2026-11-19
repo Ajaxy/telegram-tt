@@ -167,7 +167,7 @@ function StoryViewModal({
           )}
           {shouldShowSortByReactions && (
             <DropdownMenu
-              className={styles.sort}
+              className={buildClassName(styles.sort, 'with-menu-transitions')}
               trigger={MoreMenuButton}
               positionX="right"
             >

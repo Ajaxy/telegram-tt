@@ -382,6 +382,7 @@ const WalletMainScreen = ({
 
     return (
       <Menu
+        className="with-menu-transitions"
         isOpen={Boolean(editor.menu)}
         anchor={anchor}
         autoClose
