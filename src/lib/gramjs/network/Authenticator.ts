@@ -8,7 +8,7 @@ import type MTProtoPlainSender from './MTProtoPlainSender';
 
 import { compareBuffersConstantTime, concat, copy } from '../../../util/encoding/buffer';
 import { IGE } from '../crypto/IGE';
-import { SERVER_KEYS } from '../crypto/RSA';
+import { PROD_SERVER_KEYS, TEST_SERVER_KEYS } from '../crypto/RSA';
 import { SecurityError } from '../errors';
 import { BinaryReader } from '../extensions';
 import { Api } from '../tl';
@@ -75,10 +75,11 @@ export async function doAuthentication(
   if (pq > MAX_PQ || pq < 15n || pq % 2n === 0n) {
     throw new SecurityError('Step 1 invalid pq value');
   }
+  const serverKeys = isTestServer ? TEST_SERVER_KEYS : PROD_SERVER_KEYS;
   let targetFingerprint;
   let targetKey;
   for (const fingerprint of resPQ.serverPublicKeyFingerprints) {
-    targetKey = SERVER_KEYS.get(fingerprint);
+    targetKey = serverKeys.get(fingerprint);
     if (targetKey !== undefined) {
       targetFingerprint = fingerprint;
       break;
