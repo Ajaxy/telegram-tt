@@ -36,6 +36,8 @@ type OwnProps = {
   fullMediaClassName?: string;
   isSmall?: boolean;
   size?: number;
+  /** Prefer full document media (`document{id}`) over `?size=m` preview when shown large. */
+  preferFullMedia?: boolean;
   customColor?: string;
   loopLimit?: number;
   shouldLoop?: boolean;
@@ -59,6 +61,8 @@ type OwnProps = {
 
 const SHARED_PREFIX = 'shared';
 const STICKER_SIZE = 24;
+/** Below this CSS size, low-res preview is OK for list performance; at/above load full media. */
+const FULL_MEDIA_SIZE_THRESHOLD = 64;
 
 const StickerView = ({
   containerRef,
@@ -68,6 +72,7 @@ const StickerView = ({
   fullMediaClassName,
   isSmall,
   size = STICKER_SIZE,
+  preferFullMedia,
   customColor,
   loopLimit,
   shouldLoop = false,
@@ -122,7 +127,15 @@ const StickerView = ({
   const isReadyToMountFullMedia = forceOnHeavyAnimation
     ? hasIntersectedForPlayingRef.current
     : isMountedAfterHeavyAnimation;
-  const shouldForcePreview = !skipPreview && (isUnsupportedVideo || (isStatic ? isSmall : noPlay));
+  // Large stickers/emoji must not stay on `?size=m` preview (blurry upscale), even if
+  // animation is paused (`noPlay`) or the caller marked the slot `isSmall` at a large size.
+  const shouldPreferFullMedia = Boolean(
+    preferFullMedia || !isSmall || size >= FULL_MEDIA_SIZE_THRESHOLD,
+  );
+  const shouldForcePreview = !skipPreview && (
+    isUnsupportedVideo
+    || (!shouldPreferFullMedia && (isStatic ? isSmall : noPlay))
+  );
   const shouldLoadPreview = !skipPreview && (!customColor || shouldForcePreview) && !cachedPreview
     && (!isReadyToMountFullMedia || shouldForcePreview);
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
