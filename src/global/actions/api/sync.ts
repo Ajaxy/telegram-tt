@@ -19,6 +19,7 @@ import {
 } from '../../index';
 import {
   addChatMessagesById,
+  replaceChatListLoadingParameters,
   replaceChatMessages,
   safeReplaceViewportIds,
   updateChats,
@@ -60,7 +61,18 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
   }
 
   global = getGlobal();
-  global = { ...global, isSyncing: true };
+  global = {
+    ...global,
+    isSyncing: true,
+    chats: {
+      ...global.chats,
+      // Reload the lists from the first page, as after a page load: `loadAllChats` skips a fully loaded list,
+      // so `whenFirstBatchDone` below would never run and the sync would never finish
+      isFullyLoaded: { ...global.chats.isFullyLoaded, active: false, archived: false },
+    },
+  };
+  global = replaceChatListLoadingParameters(global, 'active');
+  global = replaceChatListLoadingParameters(global, 'archived');
   setGlobal(global);
 
   const statusTimeout = window.setTimeout(() => {
