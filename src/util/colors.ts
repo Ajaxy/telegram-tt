@@ -79,7 +79,7 @@ export function convertSrgbChannel(channel: number | null) {
 }
 
 export function buildColorFromHex(hex: string) {
-  return buildColor(hex.startsWith('#') ? hex : `#${hex}`);
+  return buildColor(hex.startsWith('#') || /^(?:rgb|hsl)a?\(/i.test(hex) ? hex : `#${hex}`);
 }
 
 export function buildHexFromColor(color: Color) {
