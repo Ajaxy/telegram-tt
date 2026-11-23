@@ -24,6 +24,7 @@ const WEB_APP_ALLOW_ATTRIBUTES = [
   'publickey-credentials-get',
   'publickey-credentials-create',
   'identity-credentials-get',
+  'xr-spatial-tracking',
 ].map((feature) => `${feature};`).join(' ');
 export const WEB_APP_MEDIA_KINDS: WebAppMediaKind[] = ['camera', 'microphone'];
 
